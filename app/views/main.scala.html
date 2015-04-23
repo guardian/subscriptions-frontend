@@ -61,5 +61,9 @@
                 <div class="really-serious-copyright">© @{new DateTime().year.getAsText} Guardian News and Media Limited or its affiliated companies. All rights reserved.</div>
             </div>
         </div>
+
+        @fragments.analytics.google()
+        @fragments.analytics.omniture()
+        @fragments.analytics.krux()
     </body>
 </html>
