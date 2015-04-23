@@ -471,13 +471,13 @@ h3 {
   width: 52em;
   height: 6em;
   margin: 0 auto 0 auto;
-  background: url(/static/img/signup/logo-subscriptions.png) no-repeat 88% 80%;
+  background: url(/assets/images/signup/logo-subscriptions.png) no-repeat 88% 80%;
   background-size: auto;
 }
 @media (min-width: 10em) {
   /* line 380, ../sass/style.scss */
   .fixed-elements header h1 {
-    background: url(/static/img/signup/logo-subscriptions.png) no-repeat 90% 80%;
+    background: url(/assets/images/signup/logo-subscriptions.png) no-repeat 90% 80%;
     background-size: 15em;
     width: 100%;
     height: 4em;
@@ -486,7 +486,7 @@ h3 {
 @media (min-width: 30em) {
   /* line 380, ../sass/style.scss */
   .fixed-elements header h1 {
-    background: url(/static/img/signup/logo-subscriptions.png) no-repeat 90% 80%;
+    background: url(/assets/images/signup/logo-subscriptions.png) no-repeat 90% 80%;
     background-size: auto;
     width: 100%;
     height: 6em;
@@ -495,7 +495,7 @@ h3 {
 @media (min-width: 52em) {
   /* line 380, ../sass/style.scss */
   .fixed-elements header h1 {
-    background: url(/static/img/signup/logo-subscriptions.png) no-repeat 88% 80%;
+    background: url(/assets/images/signup/logo-subscriptions.png) no-repeat 88% 80%;
     background-size: auto;
     width: 52em;
     height: 6em;
@@ -653,7 +653,7 @@ h3 {
 }
 /* line 521, ../sass/style.scss */
 .fixed-elements section#offer_cta a:after {
-  content: url(/static/img/signup/arrow-black.png);
+  content: url(/assets/images/signup/arrow-black.png);
   display: inline-block;
   width: .6em;
   height: .8em;
@@ -787,7 +787,7 @@ h3 {
 }
 /* line 615, ../sass/style.scss */
 .wrapper .container section a.cta-link:after {
-  content: url(/static/img/signup/arrow-black.png);
+  content: url(/assets/images/signup/arrow-black.png);
   display: inline-block;
   width: .6em;
   height: .8em;
@@ -804,7 +804,7 @@ h3 {
 }
 /* line 631, ../sass/style.scss */
 .wrapper .container section#digital_pack article {
-  background: #ebebeb url(/static/img/signup/digital-pack.png) no-repeat 73% 100%;
+  background: #ebebeb url(/assets/images/signup/digital-pack.png) no-repeat 73% 100%;
   background-size: 80%;
   min-height: 26em;
   height: 26em;
@@ -1078,7 +1078,7 @@ h3 {
 /* line 822, ../sass/style.scss */
 /* Override!
 .wrapper .container section#offer a:after {
-  content: url(/static/img/signup/arrow-white.png);
+  content: url(/assets/images/signup/arrow-white.png);
   width: 1em;
   height: 1em;
   display: inline-block;
@@ -1170,7 +1170,7 @@ h3 {
 /* line 892, ../sass/style.scss */
 /* Override!
 .wrapper .container section#why_subscribe .subscribe-lockup .pack-list a:after {
-  content: url(/static/img/signup/arrow-white.png);
+  content: url(/assets/images/signup/arrow-white.png);
   width: 1em;
   height: 1em;
   display: inline-block;
@@ -1365,7 +1365,7 @@ h3 {
 }
 /* line 1040, ../sass/style.scss */
 .wrapper .container footer article .content a:before {
-  content: url(/static/img/signup/icon-top.png);
+  content: url(/assets/images/signup/icon-top.png);
   width: 2em;
   height: 2em;
   display: inline-block;
