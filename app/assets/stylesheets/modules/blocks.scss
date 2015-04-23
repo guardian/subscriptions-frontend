@@ -1,0 +1,221 @@
+
+/* Blocks */
+.block {
+    background-color: $c-neutral7;
+    @include box-shadow(0 1px $c-brand inset);
+    padding: $gs-baseline/2 $gs-gutter/4 $gs-baseline;
+    position: relative;
+}
+
+.block--grey-border {
+    @include box-shadow(0 1px $c-neutral5 inset);
+}
+
+.block__title {
+    @include font-size(21px, 25px);
+    margin-bottom: $gs-baseline;
+
+    @include mq(tablet) {
+        margin-bottom: $gs-baseline*2;
+    }
+}
+
+.block__icon {
+    position: absolute;
+    top: 5px;
+    right: $gs-gutter/2;
+}
+
+.block__icon + .block__title {
+    padding-right: $gs-gutter*2;
+}
+
+.block__info {
+    @include mq(tablet) {
+        padding-bottom: $gs-baseline*3;
+    }
+}
+
+.block__list {
+    @include font-size(16px, 20px);
+    list-style: none;
+    margin-bottom: $gs-baseline;
+    padding-left: $gs-gutter;
+}
+
+.block__list--margin {
+    .block__list-item {
+        margin-bottom: $gs-baseline/2;
+    }
+}
+
+.block__list-item:before {
+    background-color: $c-neutral3;
+    border-radius: 12px;
+    content: '';
+    display: inline-block;
+    height: 12px;
+    margin-left: -18px;
+    margin-right: 6px;
+    width: 12px;
+}
+
+.block__image {
+    display: block;
+    margin: 0 auto $gs-baseline;
+    max-height: 256px;
+    max-width: 100%;
+
+    @include mq(tablet) {
+        margin: 0 auto $gs-baseline*2;
+    }
+}
+
+.block__footer {
+    @include mq(tablet) {
+        position: absolute;
+        bottom: $gs-baseline;
+    }
+}
+
+.block--primary {
+    @include mq(tablet) {
+        .block__title {
+            @include font-size(28px, 32px);
+        }
+
+        .block__info {
+            padding-bottom: $gs-baseline*24.5;
+        }
+
+        .block__list {
+            @include font-size(18px, 22px);
+        }
+
+        .block__footer {
+            bottom: $gs-baseline*22;
+        }
+    }
+}
+
+.block--paper {
+    @include mq(tablet) {
+        background-image: url(/assets/images/backgrounds/bg-paper-only.png);
+        background-position: bottom right;
+        background-repeat: no-repeat;
+    }
+}
+
+.block--paper-digital {
+    @include mq(tablet) {
+        background-image: url(/assets/images/backgrounds/bg-paper-digital.png);
+        background-position: bottom right;
+        background-repeat: no-repeat;
+    }
+}
+
+.block--digital {
+    @include mq(tablet) {
+        background-image: url(/assets/images/backgrounds/bg-digital-pack.png);
+        background-position: bottom right;
+        background-repeat: no-repeat;
+    }
+}
+
+.block--weekly {
+    @include mq(tablet) {
+        background-image: url(/assets/images/backgrounds/bg-guardian-weekly.png);
+        background-position: bottom right;
+        background-repeat: no-repeat;
+    }
+}
+
+.block--two-col {
+    @include mq(tablet) {
+        .block__icon {
+            left: $gs-gutter/4;
+            top: $gs-baseline*3;
+        }
+
+        .block__title {
+            float: left;
+        }
+
+        .block__info {
+            margin-left: 50%;
+            margin-top: $gs-baseline/4;
+        }
+
+        .block__footer {
+            left: 50%;
+        }
+
+        &.block--primary {
+            .block__info {
+                padding-bottom: $gs-baseline*3;
+            }
+
+            .block__footer {
+                bottom: $gs-baseline;
+            }
+        }
+    }
+}
+
+.membership-promo {
+    background-color: $c-white;
+    margin-top: -10px;
+    margin-bottom: -10px;
+
+    @include mq(tablet) {
+        background-color: $c-membership;
+        margin-top: 0;
+        margin-bottom: 0;
+    }
+
+    .block {
+        background: $c-brand url(/assets/images/backgrounds/bg-membership-small.jpg) no-repeat;
+        @include box-shadow(none);
+        color: $c-white;
+        height: 240px;
+        padding-top: 10px;
+        padding-bottom: 10px;
+
+        @include mq(tablet) {
+            background: $c-brand url(/assets/images/backgrounds/bg-membership.jpg) no-repeat;
+            height: 300px;
+            margin-left: -$gs-gutter;
+            margin-right: -$gs-gutter;
+            padding-left: $gs-gutter;
+            padding-right: $gs-gutter;
+        }
+    }
+
+    .block__title {
+        color: inherit;
+        @include font-size(28px, 32px);
+    }
+
+    .block__info {
+        @include font-size(16px, 20px);
+        font-weight: 900;
+        padding-bottom: $gs-baseline*1.5;
+
+        @include mq(tablet) {
+            @include font-size(21px, 25px);
+        }
+
+        .action {
+            color: $c-membership;
+        }
+    }
+
+    .block__footer  {
+        position: absolute;
+        bottom: 30px;
+    }
+
+    .button {
+        @include button-colour($c-membership-dark, $c-white, $c-membership-darker);
+    }
+}

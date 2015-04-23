@@ -13,9 +13,6 @@ dist
 /.settings
 *.class
 *.log
-*.css.map
-.sass-cache
-node_modules
 
 # sbt specific
 .cache
@@ -31,3 +28,9 @@ project/plugins/project/
 # Scala-IDE specific
 .scala_dependencies
 .worksheet
+
+# frontend
+*.css.map
+.sass-cache
+bower_components
+node_modules
