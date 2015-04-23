@@ -1,13 +1,24 @@
 @(title: String)(content: Html)
 
-<!DOCTYPE html>
+@import play.api.Play
 
-<html>
-    <head>
-        <title>@title</title>
-        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
-        <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
-    </head>
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="utf-8"/>
+    <title>@title</title>
+
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="format-detection" content="telephone=no"/>
+    <meta name="HandheldFriendly" content="True"/>
+
+    @if(Play.isDev(Play.current)) {
+        <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicons/32x32-dev.ico")"/>
+    } else {
+        <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicons/32x32.ico")"/>
+    }
+</head>
     <body>
         @content
     </body>
