@@ -5,12 +5,12 @@
         "VpcId" : {
             "Type" : "String",
             "Description" : "VpcId of your existing Virtual Private Cloud (VPC)",
-            "Default" : "vpc-e6e00183"
+            "Default" : "vpc-e905ae8c"
         },
         "Subnets" : {
             "Type" : "CommaDelimitedList",
             "Description" : "The list of SubnetIds in your Virtual Private Cloud (VPC)",
-            "Default" : "subnet-cb91ae8d, subnet-a7b74ac2, subnet-179e8063"
+            "Default" : "subnet-b3931cc4, subnet-fee4839b, subnet-cde44494"
         },
         "Stack": {
             "Type": "String",
@@ -128,26 +128,15 @@
                 },
                 "Policies": [
                 {
-                    "PolicyName": "SendingEmail",
+                    "PolicyName": "PrivateBucket",
                     "PolicyDocument": {
                         "Version": "2012-10-17",
-                        "Statement":[{
-                            "Effect":"Allow",
-                            "Action":["ses:SendEmail", "ses:SendRawEmail"],
-                            "Resource":"*"
-                        }
-                        ]
-                    }
-                },
-                {
-                    "PolicyName": "PushMetrics",
-                    "PolicyDocument": {
-                        "Version": "2012-10-17",
-                        "Statement":[{
-                            "Effect":"Allow",
-                            "Action":["cloudwatch:PutMetricData"],
-                            "Resource":"*"
-                        }
+                        "Statement": [
+                            {
+                                "Effect": "Allow",
+                                "Action": "s3:GetObject",
+                                "Resource": "arn:aws:s3:::subscriptions-private/*"
+                            }
                         ]
                     }
                 },
@@ -178,10 +167,9 @@
             "Type" : "AWS::ElasticLoadBalancing::LoadBalancer",
             "Properties" : {
                 "Listeners" : [ {
-                    "LoadBalancerPort": "443",
+                    "LoadBalancerPort": "9000",
                     "InstancePort": 9000,
-                    "Protocol": "HTTPS",
-                    "SSLCertificateId" : { "Fn::Join" : [ "", [ "arn:aws:iam::", {"Ref":"AWS::AccountId"}, ":server-certificate/", { "Ref" : "SiteDomain" } ] ] }
+                    "Protocol": "HTTP"
                 }],
                 "SecurityGroups" : [ { "Ref" : "LoadBalancerSecurityGroup" } ],
                 "Subnets" : { "Ref" : "Subnets" },
@@ -231,7 +219,7 @@
             "Properties" : {
                 "HostedZoneId" : "/hostedzone/Z1E4V12LQGXFEC",
                 "Comment" : "CNAME for AWS ELB",
-                "Name" :  { "Fn::Join" : [ ".", [ { "Ref" : "SiteDomain" }, "origin.subscriptions.guardianapis.com." ] ] },
+                "Name" :  { "Fn::Join" : [ ".", [ { "Ref" : "SiteDomain" }, "origin.membership.guardianapis.com." ] ] },
                 "Type" : "CNAME",
                 "TTL" : "120",
                 "ResourceRecords" : [ {"Fn::GetAtt":["FrontendElasticLoadBalancer","DNSName"]} ]
