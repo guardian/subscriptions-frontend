@@ -13,6 +13,14 @@
     <meta name="format-detection" content="telephone=no"/>
     <meta name="HandheldFriendly" content="True"/>
 
+    <link rel="stylesheet" href="@routes.Assets.at("stylesheets/main.min.css")"/>
+    <!--[if (IE 9)]>
+        <link rel="stylesheet" href="@routes.Assets.at("stylesheets/ie9.min.css")"/>
+    <![endif]-->
+    <!--[if (lt IE 9)]>
+        <link rel="stylesheet" href="@routes.Assets.at("stylesheets/ie-old.min.css")"/>
+    <![endif]-->
+
     @if(Play.isDev(Play.current)) {
         <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicons/32x32-dev.ico")"/>
     } else {
