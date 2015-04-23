@@ -167,14 +167,15 @@
             "Type" : "AWS::ElasticLoadBalancing::LoadBalancer",
             "Properties" : {
                 "Listeners" : [ {
-                    "LoadBalancerPort": "9000",
+                    "LoadBalancerPort": "443",
                     "InstancePort": 9000,
-                    "Protocol": "HTTP"
+                    "Protocol": "HTTPS",
+                    "SSLCertificateId" : { "Fn::Join" : [ "", [ "arn:aws:iam::", {"Ref":"AWS::AccountId"}, ":server-certificate/", { "Ref" : "SiteDomain" } ] ] }
                 }],
                 "SecurityGroups" : [ { "Ref" : "LoadBalancerSecurityGroup" } ],
                 "Subnets" : { "Ref" : "Subnets" },
                 "HealthCheck" : {
-                    "Target" : "HTTP:9000",
+                    "Target" : "HTTP:9000/",
                     "HealthyThreshold" : "2",
                     "UnhealthyThreshold" : "2",
                     "Interval" : "10",
