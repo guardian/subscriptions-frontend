@@ -1,6 +1,10 @@
-@()
+@(edition: DigitalEdition)
 
-@main("Digital | Subscriptions | The Guardian") {
+@main(if(edition.id == "uk") {
+    "Digital | Subscriptions | The Guardian"
+} else {
+    s"Digital - ${edition.name} | Subscriptions | The Guardian"
+}) {
 
 <div class="gs-container">
     <div class="page-header">
@@ -9,11 +13,13 @@
     </div>
     <div class="row row--items-2 digital-cta">
         <div class="row__item">
-            <div class="digital-cta__price"><strong class="digital-cta__amount">&pound;11.99</strong>/month</div>
+            <div class="digital-cta__price">
+                <strong class="digital-cta__amount">@edition.price</strong>/month
+            </div>
             <div class="digital-cta__payment">Payment begins after 14 day free trial</div>
         </div>
         <div class="row__item digital-cta__button">
-            <a class="button button--large button--primary" href="https://www.guardiansubscriptions.co.uk/digitalsubscriptions/?prom=DGA01&CMP=dis_2408" data-test-id="digital-pack-uk-trial-header">Start your free trial</a>
+            <a class="button button--large button--primary" href="https://www.guardiansubscriptions.co.uk/digitalsubscriptions/?prom=DGA01&amp;CMP=@edition.cmp" data-test-id="digital-pack-@edition.id-trial-header">Start your free trial</a>
         </div>
     </div>
     <h2 class="page-heading page-heading--border">What do I get?</h2>
@@ -23,7 +29,7 @@
             <img class="block__image" src="@routes.Assets.at("images/tablet-edition.png")">
             <ul class="block__list block__list--margin">
                 <li class="block__list-item"><strong>The full experience</strong> &mdash; everything that appears in the newspaper</li>
-                <li class="block__list-item"><strong>Available offline</strong> &mdash; downloaded automatically by 4am every morning. Perfect for the commute</li>
+                <li class="block__list-item"><strong>Available offline</strong> &mdash; downloaded automatically by 4am @if(edition.id != "uk") { GMT } every morning. Perfect for the commute</li>
                 <li class="block__list-item"><strong>Collated</strong> &mdash; complete supplements including the Guide, Cook, Do Something, Observer Tech and Food Monthly</li>
                 <li class="block__list-item"><strong>Designed</strong> &mdash; specially adapted to your tablet, whether you're using iPad, Android or Kindle Fire</li>
                 <li class="block__list-item"><strong>Enhanced</strong> &mdash; embedded audio, video and image galleries &mdash; plus all our crosswords</li>
@@ -70,11 +76,11 @@
     </div>
     <div class="row row--items-2 digital-cta">
         <div class="row__item">
-            <div class="digital-cta__price"><strong class="digital-cta__amount">&pound;11.99</strong>/month</div>
+            <div class="digital-cta__price"><strong class="digital-cta__amount">@edition.price</strong>/month</div>
             <div class="digital-cta__payment">Payment begins after 14 day free trial</div>
         </div>
         <div class="row__item digital-cta__button">
-            <a class="button button--large button--primary" href="https://www.guardiansubscriptions.co.uk/digitalsubscriptions/?prom=DGA01&CMP=dis_2408" data-test-id="digital-pack-uk-trial-offer">Start your free trial</a>
+            <a class="button button--large button--primary" href="https://www.guardiansubscriptions.co.uk/digitalsubscriptions/?prom=DGA01&amp;CMP=@edition.cmp" data-test-id="digital-pack-@edition.id-trial-offer">Start your free trial</a>
         </div>
     </div>
 </div>
