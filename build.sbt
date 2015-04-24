@@ -9,6 +9,9 @@ lazy val root = (project in file(".")).enablePlugins(
   magentaPackageName := name.value,
   buildInfoKeys := Seq[BuildInfoKey](
     name,
+    BuildInfoKey.constant("gitCommitId", Option(System.getenv("BUILD_VCS_NUMBER")) getOrElse(try {
+      "git rev-parse HEAD".!!.trim
+    } catch { case e: Exception => "unknown" })),
     BuildInfoKey.constant("buildNumber", Option(System.getenv("BUILD_NUMBER")) getOrElse "DEV"),
     BuildInfoKey.constant("buildTime", System.currentTimeMillis)
   ),
