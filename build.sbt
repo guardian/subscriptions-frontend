@@ -6,7 +6,7 @@ lazy val root = (project in file(".")).enablePlugins(
   PlayScala,
   BuildInfoPlugin
 ).settings(
-  magentaPackageName := name.value,
+  magentaPackageName := "frontend",
   buildInfoKeys := Seq[BuildInfoKey](
     name,
     BuildInfoKey.constant("gitCommitId", Option(System.getenv("BUILD_VCS_NUMBER")) getOrElse(try {
