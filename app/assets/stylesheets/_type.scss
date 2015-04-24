@@ -1,0 +1,63 @@
+$guss-webfonts-base-url: '//pasteup.guim.co.uk/fonts/';
+
+@include guss-webfonts(
+    (
+        'Guardian Text Egyptian Web': (
+            (weight: 'regular', style: 'normal'),
+            (weight: 'regular', style: 'italic'),
+            (weight: 'medium', style: 'normal', use-as: (weight: 'bold', style: 'normal')),
+        ),
+        'Guardian Egyptian Web': (
+            (weight: 'light', style: 'normal'),
+            (weight: 'regular', style: 'normal'),
+            (weight: 'medium', style: 'normal'),
+            (weight: 'semibold', style: 'normal', use-as: (weight: 'ultrablack', style: 'normal')),
+        ),
+        'Guardian Text Sans Web': (
+            (weight: 'regular', style: 'normal'),
+            (weight: 'regular', style: 'italic'),
+            (weight: 'medium', style: 'normal', use-as: (weight: 'bold', style: 'normal')),
+        )
+    )
+);
+
+/* Get base font size and line height */
+@include guss-typography-defaults;
+
+html {
+    font-family: $f-serif-headline;
+}
+
+body {
+    color: $c-body;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: $c-body;
+    font-weight: 500;
+}
+
+p {
+    margin-top: 0;
+    margin-bottom: ($gs-baseline/3)*2;
+}
+
+a {
+    color: $c-link;
+    text-decoration: none;
+    border-bottom: 1px solid $c-neutral4;
+
+    &:hover,
+    &:focus {
+        border-color: $c-link-hover
+    }
+
+    &:active {
+        color: $c-link-active;
+        border-color: $c-link-active;
+    }
+}
+
+strong {
+    font-weight: 900;
+}

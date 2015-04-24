@@ -1,0 +1,23 @@
+
+$guss-colours: $pasteup-palette;
+
+$c-brand: guss-colour(guardian-brand);
+$c-brand-mid: #005083;
+$c-brand-dark: guss-colour(guardian-brand-dark);
+$c-membership: guss-colour(news-main-2);
+$c-membership-dark: guss-colour(news-support-2);
+$c-membership-darker: #125c7e;
+
+$c-neutral1: guss-colour('neutral-1');
+$c-neutral2: guss-colour('neutral-2');
+$c-neutral3: guss-colour('neutral-3');
+$c-neutral4: guss-colour('neutral-4');
+$c-neutral5: guss-colour('neutral-5');
+$c-neutral7: guss-colour('neutral-7');
+
+$c-bg: #f4f4f4;
+$c-body: $c-neutral1;
+$c-link: $c-brand;
+$c-link-hover: #6e99b2;
+$c-link-active: $c-membership;
+$c-white: #fff;

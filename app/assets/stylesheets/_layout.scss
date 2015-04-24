@@ -1,0 +1,49 @@
+
+body {
+    margin: 0;
+}
+
+@include grid-system;
+
+/* Update container */
+.gs-container {
+    max-width: gs-span(12) + $gs-gutter*2;
+    padding-left: $gs-gutter/2;
+    padding-right: $gs-gutter/2;
+
+    @include mq(tablet) {
+        padding-left: $gs-gutter;
+        padding-right: $gs-gutter;
+    }
+}
+
+/* Setup rows */
+@include guss-row-utility;
+@include guss-row('.row');
+
+.row {
+    padding-bottom: 10px;
+}
+
+.row--padding-top {
+    padding-top: 10px;
+
+    @include mq(tablet) {
+        padding-top: 20px;
+    }
+}
+
+.row--border {
+    border-top: 1px solid $c-neutral5;
+    padding-top: 8px;
+}
+
+.row__item {
+    margin-bottom: 10px;
+
+    @include mq(tablet) {
+        & + & {
+            border-left: $gs-gutter solid $c-white;
+        }
+    }
+}
