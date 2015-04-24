@@ -1,11 +1,19 @@
-import sbtbuildinfo.Plugin.BuildInfoKey
-import sbtbuildinfo.Plugin._
-
 name := "subscriptions-frontend"
 
 version := "1.0-SNAPSHOT"
 
-lazy val root = (project in file(".")).enablePlugins(PlayScala).settings(magentaPackageName := name.value)
+lazy val root = (project in file(".")).enablePlugins(
+  PlayScala,
+  BuildInfoPlugin
+).settings(
+  magentaPackageName := name.value,
+  buildInfoKeys := Seq[BuildInfoKey](
+    name,
+    BuildInfoKey.constant("buildNumber", Option(System.getenv("BUILD_NUMBER")) getOrElse "DEV"),
+    BuildInfoKey.constant("buildTime", System.currentTimeMillis)
+  ),
+  buildInfoPackage := "app"
+)
 
 scalaVersion := "2.11.6"
 
@@ -20,16 +28,3 @@ resolvers ++= Seq(
 
 
 playArtifactDistSettings
-
-buildInfoSettings
-
-sourceGenerators in Compile <+= buildInfo
-
-buildInfoKeys := Seq[BuildInfoKey](
-  name,
-  BuildInfoKey.constant("buildNumber", Option(System.getenv("BUILD_NUMBER")) getOrElse "DEV"),
-  BuildInfoKey.constant("buildTime", System.currentTimeMillis)
-)
-
-buildInfoPackage := "frontend"
-
