@@ -13,7 +13,8 @@ GET     /digital/country            controllers.DigitalPack.selectCountry
 POST    /digital/country            controllers.DigitalPack.handleCountry
 
 # Checkout
-GET     /checkout                   controllers.Checkout.checkout
+GET     /checkout                   controllers.Checkout.renderCheckout
+POST    /checkout                   controllers.Checkout.handleCheckout
 GET     /checkout/thankyou          controllers.Checkout.thankyou
 
 # Map static resources from the /public folder to the /assets URL path

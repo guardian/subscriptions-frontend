@@ -5,8 +5,16 @@ import play.api.mvc._
 
 object Checkout extends Controller {
 
-  def checkout = TODO
+  def renderCheckout = Action {
+    Ok(views.html.checkout.payment())
+  }
 
-  def thankyou = TODO
+  def handleCheckout = Action {
+    Redirect("/checkout/thankyou")
+  }
+
+  def thankyou = Action {
+    Ok(views.html.checkout.thankyou())
+  }
 
 }
