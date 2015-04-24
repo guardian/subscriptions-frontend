@@ -3,7 +3,7 @@
   "dependencies": {
     "guss": "3.3.0",
     "pasteup-buttons": "0.4.10",
-    "pasteup-forms": "6.0.0",
+    "pasteup-forms": "6.0.1",
     "pasteup-palette": "3.3.1"
   },
   "resolutions": {

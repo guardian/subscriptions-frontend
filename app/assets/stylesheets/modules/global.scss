@@ -92,7 +92,7 @@ body {
 .page-header__title {
     @include f-headline;
     @include font-size(32px, 36px);
-    margin-bottom: $gs-baseline*1.5;
+    margin-bottom: 0;
 
     @include mq(tablet) {
         @include font-size(42px, 46px);
@@ -146,5 +146,15 @@ body {
     &:active {
         background-color: transparent;
         border-color: $c-brand;
+    }
+}
+
+.button--no-arrow {
+    min-width: 0;
+    padding-left: $gs-gutter;
+    padding-right: $gs-gutter;
+
+    &:after {
+        display: none;
     }
 }
