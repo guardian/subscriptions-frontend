@@ -1,13 +1,13 @@
 import sbtbuildinfo.Plugin.BuildInfoKey
 import sbtbuildinfo.Plugin._
 
-name := "frontend"
+name := "subscriptions-frontend"
 
 version := "1.0-SNAPSHOT"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala).settings(magentaPackageName := name.value)
 
-scalaVersion := "2.11.1"
+scalaVersion := "2.11.6"
 
 libraryDependencies ++= Seq(
   cache,
