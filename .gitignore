@@ -29,5 +29,11 @@ project/plugins/project/
 .scala_dependencies
 .worksheet
 
+# frontend
+*.css.map
+.sass-cache
+bower_components
+node_modules
+
 #Apple
 .DS_STORE

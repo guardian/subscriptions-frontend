@@ -1,0 +1,52 @@
+
+/* PNGs for now */
+.icon-logo {
+    background-image: url(/assets/images/icons/icon-logo-small.png);
+    display: inline-block;
+    height: 32px;
+    margin-top: $gs-baseline/2;
+    width: 162px;
+
+    @include mq(tablet) {
+        background-image: url(/assets/images/icons/icon-logo.png);
+        height: 62px;
+        width: 320px;
+        margin-top: $gs-baseline*.75;
+        margin-bottom: $gs-baseline/2;
+    }
+}
+
+.icon-arrow-up {
+    background-image: url(/assets/images/icons/icon-arrow-up.png);
+    background-position: center 10px;
+    background-repeat: no-repeat;
+    border: 1px solid #fff;
+    border-radius: 34px;
+    display: inline-block;
+    height: 34px;
+    width: 34px;
+    margin: $gs-baseline/2 $gs-gutter/2 $gs-baseline/2 0;
+    vertical-align: middle;
+}
+
+.icon-arrow-white {
+    background-image: url(/assets/images/icons/icon-arrow-white.png);
+    background-repeat: no-repeat;
+    content: '';
+    float: right;
+    height: 18px;
+    margin: 8px 0 0 $gs-gutter;
+    width: 20px;
+}
+
+.icon-arrow-blue {
+    @extend .icon-arrow-white;
+    background-image: url(/assets/images/icons/icon-arrow-blue.png);
+}
+
+.icon-email {
+    background-image: url(/assets/images/icons/icon-email.png);
+    display: block;
+    height: 28px;
+    width: 28px;
+}

@@ -1,0 +1,125 @@
+
+/* Packages */
+.package {
+    background-color: $c-neutral7;
+    margin-bottom: $gs-baseline;
+    position: relative;
+}
+
+.package__list {
+    margin-bottom: $gs-baseline*2;
+
+    @include mq(tablet) {
+        margin-top: $gs-baseline*3;
+    }
+}
+
+.package__title {
+    @include font-size(24px, 28px);
+    font-weight: 900;
+}
+
+.package__select {
+    margin-top: $gs-baseline/4;
+    margin-left: $gs-gutter/4;
+    position: absolute;
+    top: $gs-baseline*1.25;
+    left: $gs-gutter/2;
+
+    @include mq(tablet) {
+        left: $gs-gutter;
+    }
+}
+
+.package__select:checked + .package__info {
+    background-color: #84be43;
+    color: $c-white;
+}
+
+.package__info {
+    cursor: pointer;
+    display: block;
+    padding: $gs-baseline $gs-gutter $gs-baseline $gs-gutter*2;
+
+    @include mq(tablet) {
+        padding-left: $gs-gutter*3;
+    }
+}
+
+.package__price {
+    display: block;
+
+    @include mq(tablet) {
+        float: right;
+        @include font-size(20px, 24px);
+    }
+}
+
+.package__description,
+.package__monthly {
+    display: block;
+}
+
+.button--m25 {
+    margin-bottom: $gs-baseline*2;
+
+    @include mq(tablet) {
+        float: right;
+        margin-right: 0;
+        margin-top: 2px;
+    }
+}
+
+/* Steps */
+$step-size: 40px;
+$step-size-tablet: 60px;
+
+.steps {
+    @extend .inline-list;
+    counter-reset: li;
+
+    @include mq(tablet) {
+        margin-bottom: $gs-baseline;
+    }
+}
+
+.steps__item {
+    @extend .inline-list__item;
+    margin-bottom: $gs-baseline/2;
+    min-height: $step-size + $gs-baseline/2;
+    padding-left: $step-size + $gs-gutter/2;
+    padding-right: $gs-gutter/2;
+    position: relative;
+
+    @include mq(tablet) {
+        width: 33%;
+        vertical-align: top;
+        min-height: $step-size-tablet + $gs-baseline/2;
+        padding-left: $step-size-tablet + $gs-gutter/2;
+    }
+
+    &:before {
+        background-color: $c-brand;
+        color: $c-white;
+        content: counter(li);
+        counter-increment: li;
+        display: block;
+        float: left;
+        font-weight: 500;
+        line-height: $step-size;
+        text-align: center;
+        position: absolute;
+        top: 0;
+        left: 0;
+        @include border-radius($step-size);
+        height: $step-size;
+        width: $step-size;
+
+        @include mq(tablet) {
+            @include font-size(32px, $step-size-tablet);
+            @include border-radius($step-size-tablet);
+            height: $step-size-tablet;
+            width: $step-size-tablet;
+        }
+    }
+}

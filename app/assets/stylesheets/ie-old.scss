@@ -1,0 +1,23 @@
+@charset 'UTF-8';
+
+$mq-responsive: false;
+$browser-supports-flexbox: false;
+$browser-supports-columns: false;
+$guss-row-fallback-width: 980px;
+
+/* Styles */
+@import 'main';
+
+// TODO
+.row--items-1 .row__item {
+    width: 100%;
+}
+
+.global-header,
+.global-footer {
+    min-width: $guss-row-fallback-width + $gs-gutter*2;
+}
+
+.gs-container {
+    min-width: $guss-row-fallback-width;
+}
