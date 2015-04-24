@@ -82,7 +82,7 @@
                     "Fn::Join":["\n", [
                         "#!/bin/bash -ev",
 
-                        "CONF_DIR=/subscriptions/frontend-1.0-SNAPSHOT/conf",
+                        "CONF_DIR=/subscriptions/subscriptions-frontend-1.0-SNAPSHOT/conf",
 
                         {"Fn::Join":["", ["wget -N --directory-prefix=/home/ubuntu/.ssh https://s3-eu-west-1.amazonaws.com/subscriptions-dist/", { "Ref" : "Stack" }, "/authorized_keys &"]]},
                         "apt-get -y update",
