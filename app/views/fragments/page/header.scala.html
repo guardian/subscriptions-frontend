@@ -1,0 +1,8 @@
+@(title: String, leadOpt: Option[String] = None)
+
+<div class="page-header">
+    <h1 class="page-header__title">@Html(title)</h1>
+    @for(lead <- leadOpt) {
+        <p class="page-header__lead">@Html(lead)</p>
+    }
+</div>
