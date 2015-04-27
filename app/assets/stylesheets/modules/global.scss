@@ -119,6 +119,16 @@ body {
     padding-top: 8px;
 }
 
+.section-header {
+    @include fs-bodyHeading(2);
+    border-bottom: 1px dotted $c-neutral5;
+    border-top: 1px solid $c-neutral5;
+    margin-bottom: $gs-baseline;
+    margin-top: $gs-baseline;
+    padding-bottom: $gs-baseline;
+    padding-top: 4px;
+}
+
 .button--large {
     cursor: pointer;
     @include font-size(14px, 34px);

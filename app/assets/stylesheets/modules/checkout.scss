@@ -1,7 +1,10 @@
 
 .basket {
-    border-top: 1px solid $c-brand;
     padding-top: 2px;
+
+    @include mq(tablet) {
+        border-top: 1px solid $c-brand;
+    }
 }
 
 .basket__detail {
@@ -18,4 +21,33 @@
 .basket__smallprint {
     @include fs-textSans(2);
     margin-bottom: $gs-baseline;
+}
+
+.review-details--bg {
+    background: $c-neutral8;
+    border-top: 1px solid $c-neutral5;
+    padding: $gs-gutter/2;
+}
+
+.review-details__heading {
+    @include fs-bodyHeading(2);
+
+    @include mq(tablet) {
+        float: left;
+        width: gs-span(2);
+        text-align: right;
+    }
+}
+
+.review-details__list {
+    margin-bottom: $gs-baseline;
+
+    @include mq(tablet) {
+        margin-left: gs-span(2) + $gs-gutter;
+    }
+}
+
+.review-details__detail {
+    display: inline-block;
+    width: gs-span(2);
 }
