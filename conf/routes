@@ -13,10 +13,10 @@ GET     /us/digital                                 controllers.DigitalPack.us
 GET     /au/digital                                 controllers.DigitalPack.au
 
 # collection and delivery
-GET     /collection/paper-digital                   controllers.Application.index
-GET     /collection/paper                           controllers.Application.index
-GET     /delivery/paper-digital                     controllers.Application.index
-GET     /delivery/paper                             controllers.Application.index
+GET     /collection/paper-digital                   controllers.Shipping.collectionPaperDigital
+GET     /collection/paper                           controllers.Shipping.collectionPaper
+GET     /delivery/paper-digital                     controllers.Shipping.deliveryPaperDigital
+GET     /delivery/paper                             controllers.Shipping.deliveryPaper
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file                               controllers.Assets.at(path="/public", file)
