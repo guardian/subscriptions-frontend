@@ -1,0 +1,21 @@
+
+.basket {
+    border-top: 1px solid $c-brand;
+    padding-top: 2px;
+}
+
+.basket__detail {
+    border-top: 1px dotted $c-neutral5;
+    display: block;
+    margin-top: $gs-baseline/2;
+    padding-top: 8px;
+}
+
+.basket__header {
+    font-weight: 900;
+}
+
+.basket__smallprint {
+    @include fs-textSans(2);
+    margin-bottom: $gs-baseline;
+}
