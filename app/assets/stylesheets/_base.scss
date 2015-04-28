@@ -25,9 +25,9 @@ h6 {
 
 ol,
 ul {
-    list-style-position: inside;
+    list-style-position: outside;
     margin: 0;
-    padding: 0;
+    padding: 0 0 0 $gs-gutter;
 }
 
 img {

@@ -26,4 +26,17 @@ object DigitalPack extends Controller {
     Ok(views.html.digitalpack.info(DigitalEdition.AU))
   }
 
+  def selectCountry = Action {
+    Ok(views.html.digitalpack.country())
+  }
+
+  def handleCountry = Action(parse.tolerantFormUrlEncoded) { request =>
+    val country: Option[String] = request.body.get("country").map(_.head)
+    if(country == Some("uk")) {
+      Redirect("/checkout")
+    } else {
+      Redirect("https://www.guardiansubscriptions.co.uk/digitalsubscriptions/?prom=dga38&CMP=FAB_3062")
+    }
+  }
+
 }
