@@ -1,4 +1,4 @@
-// resolvers += "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/"
+resolvers += Resolver.typesafeRepo("releases") // Play seems to require quite a few things from here
 
 addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.4.0-RC1")
 
