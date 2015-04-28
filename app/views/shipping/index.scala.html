@@ -1,6 +1,6 @@
 @(shipping: model.ShippingDetails)
 
-@main(s"${shipping.name} | Choose a Package | Subscriptions | The Guardian") {
+@main(s"${shipping.name} | Choose a Package | Subscriptions | The Guardian", footer = fragments.footer.uk_faq()) {
 
     <div class="gs-container">
         <div class="page-header">
@@ -210,7 +210,4 @@
             </div>
         </div>
     </div>
-}, {
-    <p>For help with Guardian and Observer subscription services please see our <a href="http://www.theguardian.com/subscriber-direct/subscription-frequently-asked-questions" title="Frequently Asked Questions">
-        Frequently Asked Questions</a>.</p>
 }
