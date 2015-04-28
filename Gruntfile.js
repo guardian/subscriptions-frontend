@@ -14,10 +14,12 @@ module.exports = function(grunt) {
         dirs: {
             assets: {
                 root:        'app/assets',
+                javascripts: '<%= dirs.assets.root %>/javascripts',
                 stylesheets: '<%= dirs.assets.root %>/stylesheets'
             },
             public: {
                 root:        'public',
+                javascripts: '<%= dirs.public.root %>/javascripts',
                 stylesheets: '<%= dirs.public.root %>/stylesheets'
             }
         },
@@ -36,6 +38,19 @@ module.exports = function(grunt) {
             }
         },
 
+        requirejs: {
+            compile: {
+                options: {
+                    name: 'main',
+                    baseUrl: '<%= dirs.assets.javascripts %>',
+                    optimize: isDev ? 'none' : 'uglify2',
+                    generateSourceMaps: isDev ? 'true' : 'false',
+                    preserveLicenseComments: false,
+                    out: '<%= dirs.public.javascripts %>/main.min.js'
+                }
+            }
+        },
+
         watch: {
             css: {
                 files: ['<%= dirs.assets.stylesheets %>/**/*.scss'],
@@ -45,8 +60,9 @@ module.exports = function(grunt) {
     });
 
     grunt.loadNpmTasks('grunt-contrib-sass');
+    grunt.loadNpmTasks('grunt-contrib-requirejs');
     grunt.loadNpmTasks('grunt-contrib-watch');
 
-    grunt.registerTask('compile', ['sass']);
+    grunt.registerTask('compile', ['sass', 'requirejs']);
     grunt.registerTask('default', ['compile']);
 };
