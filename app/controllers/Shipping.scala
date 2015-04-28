@@ -10,7 +10,7 @@ object Shipping extends Controller{
       .flatMap(_.get("package").map(_.head))
       .map(_.split("-").last)
       .collect {
-        case "everyday" => shippingDetails.sixday
+        case "everyday" => shippingDetails.everyday
         case "sixday" => shippingDetails.sixday
         case "weekend" => shippingDetails.weekend
         case "sunday" => shippingDetails.sunday
@@ -19,7 +19,7 @@ object Shipping extends Controller{
       .map(Redirect(_))
       .getOrElse(Ok(views.html.shipping.index(shippingDetails)))
 
-  def collectionPaperDigital = Action { request =>
+  val collectionPaperDigital = Action { request =>
     index(request, ShippingDetails(
       name = "Paper + digital voucher subscription",
       method = "collection",
@@ -31,7 +31,7 @@ object Shipping extends Controller{
     ))
   }
 
-  def collectionPaper = Action { request =>
+  val collectionPaper = Action { request =>
     index(request, ShippingDetails(
       name = "Paper voucher subscription",
       method = "collection",
@@ -42,7 +42,7 @@ object Shipping extends Controller{
     ))
   }
 
-  def deliveryPaperDigital = Action { request =>
+  val deliveryPaperDigital = Action { request =>
     index(request, ShippingDetails(
       name = "Paper + digital home delivery subscription",
       method = "delivery",
@@ -54,7 +54,7 @@ object Shipping extends Controller{
     ))
   }
 
-  def deliveryPaper = Action { request =>
+  val deliveryPaper = Action { request =>
     index(request, ShippingDetails(
       name = "Paper home delivery subscription",
       method = "delivery",
