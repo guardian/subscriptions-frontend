@@ -42,7 +42,14 @@ module.exports = function(grunt) {
             compile: {
                 options: {
                     name: 'main',
+                    include: [
+                        'requireLib'
+                    ],
                     baseUrl: '<%= dirs.assets.javascripts %>',
+                    paths: {
+                        'bean': 'bower_components/bean/bean',
+                        'requireLib': 'bower_components/requirejs/require',
+                    },
                     optimize: isDev ? 'none' : 'uglify2',
                     generateSourceMaps: isDev ? 'true' : 'false',
                     preserveLicenseComments: false,
