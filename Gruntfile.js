@@ -47,7 +47,10 @@ module.exports = function(grunt) {
                     ],
                     baseUrl: '<%= dirs.assets.javascripts %>',
                     paths: {
+                        '$': 'utils/$',
                         'bean': 'bower_components/bean/bean',
+                        'bonzo': 'bower_components/bonzo/bonzo',
+                        'qwery': 'bower_components/qwery/qwery',
                         'requireLib': 'bower_components/requirejs/require',
                     },
                     optimize: isDev ? 'none' : 'uglify2',
