@@ -15,15 +15,15 @@
                     <div class="fieldset__fields">
                         <div class="form-field">
                             <label class="label" for="first">First name</label>
-                            <input type="text" class="input-text" name="first" id="first">
+                            <input type="text" class="input-text js-checkout-first" name="first" id="first">
                         </div>
                         <div class="form-field">
                             <label class="label" for="last">Last name</label>
-                            <input type="text" class="input-text" name="last" id="last">
+                            <input type="text" class="input-text js-checkout-last" name="last" id="last">
                         </div>
                         <div class="form-field">
                             <label class="label" for="email">Email address</label>
-                            <input type="email" class="input-text" name="email" id="email">
+                            <input type="email" class="input-text js-checkout-email" name="email" id="email">
                         </div>
                         <div class="form-field">
                             <label class="label" for="confirm">Confirm email address</label>
@@ -65,7 +65,7 @@
                             </div>
                         </div>
                         <div class="actions">
-                            <a href="#" class="button button--primary button--large">Continue</a>
+                            <a href="#" class="button button--primary button--large js-checkout-your-details-submit">Continue</a>
                         </div>
                     </div>
                 </fieldset>
@@ -78,17 +78,17 @@
                     <div class="fieldset__fields">
                         <div class="form-field">
                             <label class="label" for="account">Bank account number</label>
-                            <input type="text" class="input-text" name="account" id="account">
+                            <input type="text" class="input-text js-checkout-account" name="account" id="account">
                         </div>
                         <div class="form-field">
                             <label class="label" for="sortcode">Bank sort code</label>
-                            <input type="text" class="input-text input-text--xsmall" name="sortcode" id="sortcode"> -
-                            <input type="text" class="input-text input-text--xsmall" name="sortcode" id="sortcode"> -
-                            <input type="text" class="input-text input-text--xsmall" name="sortcode" id="sortcode">
+                            <input type="text" class="input-text input-text--xsmall js-checkout-sortcode1" name="sortcode" id="sortcode"> -
+                            <input type="text" class="input-text input-text--xsmall js-checkout-sortcode2" name="sortcode" id="sortcode"> -
+                            <input type="text" class="input-text input-text--xsmall js-checkout-sortcode3" name="sortcode" id="sortcode">
                         </div>
                         <div class="form-field">
                             <label class="label" for="holder">Name of account holder</label>
-                            <input type="text" class="input-text" name="holder" id="holder">
+                            <input type="text" class="input-text js-checkout-holder" name="holder" id="holder">
                         </div>
                         <div class="form-field">
                             <div class="checkbox">
@@ -99,7 +99,7 @@
                             </div>
                         </div>
                         <div class="actions">
-                            <a href="#" class="button button--primary button--large">Continue</a>
+                            <a href="#" class="button button--primary button--large js-checkout-payment-details-submit">Continue</a>
                         </div>
                     </div>
                 </fieldset>
@@ -111,16 +111,16 @@
                         <div class="review-details">
                             <h3 class="review-details__heading">Your details</h3>
                             <ul class="u-unstyled-list review-details__list">
-                                <li>Sam Smith</li>
-                                <li>Flat 14 Bankside House, West Hill, Putney SW15 4TS</li>
-                                <li>Londoner75@@gmail.com</li>
+                                <li class="js-checkout-review-name"></li>
+                                <li class="js-checkout-review-address"></li>
+                                <li class="js-checkout-review-email"></li>
                             </ul>
                             <h3 class="review-details__heading">Payment details</h3>
                             <ul class="u-unstyled-list review-details__list">
                                 <li><span class="review-details__detail">Payment method:</span> Direct Debit</li>
-                                <li><span class="review-details__detail">Bank account:</span> 11226678</li>
-                                <li><span class="review-details__detail">Sort code:</span> 43-61-57</li>
-                                <li><span class="review-details__detail">Account holder:</span> Sam Smith</li>
+                                <li><span class="review-details__detail">Bank account:</span> <span class=" js-checkout-review-account"></span></li>
+                                <li><span class="review-details__detail">Sort code:</span> <span class=" js-checkout-review-sortcode"></span></li>
+                                <li><span class="review-details__detail">Account holder:</span> <span class=" js-checkout-review-holder"></span></li>
                             </ul>
                         </div>
                         <div class="actions review-details__list">
