@@ -1,0 +1,19 @@
+{
+    "defaultStacks": ["subscriptions"],
+    "packages": {
+        "keys": {
+            "type": "aws-s3",
+            "data": {
+                "bucket": "subscriptions-dist",
+                "cacheControl": "private",
+                "prefixPackage": false,
+                "prefixStage": false
+            }
+        }
+    },
+    "recipes": {
+        "default": {
+            "actions": [ "keys.uploadStaticFiles" ]
+        }
+    }
+}

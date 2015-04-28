@@ -34,3 +34,6 @@ project/plugins/project/
 .sass-cache
 bower_components
 node_modules
+
+#Apple
+.DS_STORE
