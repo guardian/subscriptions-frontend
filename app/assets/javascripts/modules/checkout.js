@@ -23,12 +23,14 @@ define(['$', 'bean'], function ($, bean) {
         $REVIEW_ACCOUNT         = $('.js-checkout-review-account'),
         $REVIEW_SORTCODE        = $('.js-checkout-review-sortcode'),
         $REVIEW_HOLDER          = $('.js-checkout-review-holder'),
+        $SMALLPRINT             = $('.js-checkout-smallprint'),
 
         IS_HIDDEN = 'is-hidden';
 
     var findAddress = function () {
         bean.on($FIND_ADDRESS[0], 'click', function (e) {
             e.preventDefault();
+
             if ($POSTCODE.val()) {
                 // TODO: Ajax to lookup service
                 populateAddressFields({
@@ -65,6 +67,7 @@ define(['$', 'bean'], function ($, bean) {
             $REVIEW_NAME.text([$FIRST_NAME.val(), $LAST_NAME.val()].join(' '));
             $REVIEW_ADDRESS.text([$ADDRESS1.val(), $ADDRESS2.val(), $ADDRESS3.val(), $POSTCODE.val()].join(', '));
             $REVIEW_EMAIL.text($EMAIL.val());
+            $SMALLPRINT.removeClass(IS_HIDDEN);
         });
 
         bean.on($PAYMENT_DETAILS_SUBMIT[0], 'click', function (e) {
