@@ -24,9 +24,13 @@ GET     /checkout/thankyou            controllers.Checkout.thankyou
 
 # collection and delivery
 GET     /collection/paper-digital     controllers.Shipping.collectionPaperDigital
+POST    /collection/paper-digital     controllers.Shipping.collectionPaperDigital
 GET     /collection/paper             controllers.Shipping.collectionPaper
+POST    /collection/paper             controllers.Shipping.collectionPaper
 GET     /delivery/paper-digital       controllers.Shipping.deliveryPaperDigital
+POST    /delivery/paper-digital       controllers.Shipping.deliveryPaperDigital
 GET     /delivery/paper               controllers.Shipping.deliveryPaper
+POST    /delivery/paper               controllers.Shipping.deliveryPaper
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file                 controllers.Assets.at(path="/public", file)
