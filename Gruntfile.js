@@ -55,6 +55,10 @@ module.exports = function(grunt) {
             css: {
                 files: ['<%= dirs.assets.stylesheets %>/**/*.scss'],
                 tasks: ['sass']
+            },
+            js: {
+                files: ['<%= dirs.assets.javascripts %>/**/*.js'],
+                tasks: ['requirejs']
             }
         }
     });
