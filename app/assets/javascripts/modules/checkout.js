@@ -73,7 +73,7 @@ define(['$', 'bean'], function ($, bean) {
         bean.on($PAYMENT_DETAILS_SUBMIT[0], 'click', function (e) {
             e.preventDefault();
             $REVIEW_ACCOUNT.text($ACCOUNT.val());
-            $REVIEW_SORTCODE.text([$SORTCODE1.val(), $SORTCODE2.val(), $SORTCODE3.val()].join(', '));
+            $REVIEW_SORTCODE.text([$SORTCODE1.val(), $SORTCODE2.val(), $SORTCODE3.val()].join('-'));
             $REVIEW_HOLDER.text($HOLDER.val());
         });
     };
