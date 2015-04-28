@@ -168,7 +168,7 @@
     margin-bottom: -10px;
 
     @include mq(tablet) {
-        background-color: $c-membership;
+        background-color: $c-neutral5;
         margin-top: 0;
         margin-bottom: 0;
     }
@@ -216,6 +216,6 @@
     }
 
     .button {
-        @include button-colour($c-membership-dark, $c-white, $c-membership-darker);
+        @include button-colour($c-white, $c-brand, $c-neutral7);
     }
 }

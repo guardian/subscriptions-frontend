@@ -1,0 +1,155 @@
+@()
+
+@main("Checkout | Subscriptions | The Guardian") {
+
+<div class="gs-container">
+    @fragments.page.header("Checkout")
+
+    <div class="row row--items-2">
+        <div class="row__item row__item--boost-2">
+            <form class="form" method="POST">
+                <fieldset class="fieldset">
+                    <div class="fieldset__heading">
+                        <h2 class="fieldset__headline"><span class="fieldset__num">1</span> Your details</h2>
+                    </div>
+                    <div class="fieldset__fields">
+                        <div class="form-field">
+                            <label class="label" for="first">First name</label>
+                            <input type="text" class="input-text" name="first" id="first">
+                        </div>
+                        <div class="form-field">
+                            <label class="label" for="last">Last name</label>
+                            <input type="text" class="input-text" name="last" id="last">
+                        </div>
+                        <div class="form-field">
+                            <label class="label" for="email">Email address</label>
+                            <input type="email" class="input-text" name="email" id="email">
+                        </div>
+                        <div class="form-field">
+                            <label class="label" for="confirm">Confirm email address</label>
+                            <input type="email" class="input-text" name="confirm" id="confirm">
+                        </div>
+                        <div class="form-field">
+                            <label class="label" for="postcode">Postcode</label>
+                            <input type="text" class="input-text input-text--small" name="postcode" id="postcode">
+                            <a href="#" class="button button--large button--secondary button--no-arrow">Find your address</a>
+                            <div class="form-note">
+                                <a href="#">Enter billing address manually</a>
+                            </div>
+                        </div>
+                        <div class="form-field">
+                            <div class="checkbox">
+                                I'd like to receive information about offers and developments from Guardian News &amp; Media Limited via:
+                                <label class="label">
+                                    <input type="checkbox">
+                                    Email
+                                </label>
+                                <label class="label">
+                                    <input type="checkbox">
+                                    Post
+                                </label>
+                            </div>
+                        </div>
+                        <div class="actions">
+                            <a href="#" class="button button--primary button--large">Continue</a>
+                        </div>
+                    </div>
+                </fieldset>
+                <fieldset class="fieldset">
+                    <div class="fieldset__heading">
+                        <h2 class="fieldset__headline"><span class="fieldset__num">2</span> Payment details</h2>
+                        <p class="fieldset__note"><i class="icon-secure"></i> This site is secure</p>
+                        <div class="fieldset__note">Payment will be taken by Direct Debit</div>
+                    </div>
+                    <div class="fieldset__fields">
+                        <div class="form-field">
+                            <label class="label" for="account">Bank account number</label>
+                            <input type="text" class="input-text" name="account" id="account">
+                        </div>
+                        <div class="form-field">
+                            <label class="label" for="sortcode">Bank sort code</label>
+                            <input type="text" class="input-text input-text--xsmall" name="sortcode" id="sortcode"> -
+                            <input type="text" class="input-text input-text--xsmall" name="sortcode" id="sortcode"> -
+                            <input type="text" class="input-text input-text--xsmall" name="sortcode" id="sortcode">
+                        </div>
+                        <div class="form-field">
+                            <label class="label" for="holder">Name of account holder</label>
+                            <input type="text" class="input-text" name="holder" id="holder">
+                        </div>
+                        <div class="form-field">
+                            <div class="checkbox">
+                                <label class="label">
+                                    <input type="checkbox">
+                                    I confirm that I am the account holder and I am solely able to authorise debit from the account
+                                </label>
+                            </div>
+                        </div>
+                        <div class="actions">
+                            <a href="#" class="button button--primary button--large">Continue</a>
+                        </div>
+                    </div>
+                </fieldset>
+                <fieldset class="fieldset fieldset--single">
+                    <div class="fieldset__heading">
+                        <h2 class="fieldset__headline"><span class="fieldset__num">3</span> Review and confirm</h2>
+                    </div>
+                    <div class="fieldset__fields">
+                        <div class="review-details">
+                            <h3 class="review-details__heading">Your details</h3>
+                            <ul class="u-unstyled-list review-details__list">
+                                <li>Sam Smith</li>
+                                <li>Flat 14 Bankside House, West Hill, Putney SW15 4TS</li>
+                                <li>Londoner75@@gmail.com</li>
+                            </ul>
+                            <h3 class="review-details__heading">Payment details</h3>
+                            <ul class="u-unstyled-list review-details__list">
+                                <li><span class="review-details__detail">Payment method:</span> Direct Debit</li>
+                                <li><span class="review-details__detail">Bank account:</span> 11226678</li>
+                                <li><span class="review-details__detail">Sort code:</span> 43-61-57</li>
+                                <li><span class="review-details__detail">Account holder:</span> Sam Smith</li>
+                            </ul>
+                        </div>
+                        <div class="actions review-details__list">
+                            <button type="submit" class="button button--primary button--large">Submit payment</button>
+                        </div>
+                    </div>
+                </fieldset>
+            </form>
+        </div>
+        <div class="row__item basket">
+            <h3>You've chosen:</h3>
+            <ul class="u-unstyled-list basket__detail">
+                <li>Digital Pack</li>
+                <li><em>(Digital Edition / Guardian App Premium Tier)</em></li>
+                <li>&pound;11.99/month</li>
+            </ul>
+            <small class="basket__detail basket__smallprint">
+                <h4 class="basket__header">Advanced Notice</h4>
+                <p>The details of your Direct Debit instruction including payment schedule, due date, frequency and amount will be sent to you within three working days. All the normal Direct Debit safeguards and guarantees apply.</p>
+            </small>
+            <small class="basket__detail basket__smallprint">
+                <h4 class="basket__header">Money Back Guarantee</h4>
+                <p>If you wish to cancel your subscription, we will send you a refund of the unexpired part of your subscription.</p>
+            </small>
+            <small class="basket__detail basket__smallprint">
+                <h4 class="basket__header">Direct Debit</h4>
+                <ul class="u-unstyled-list">
+                    <li>The Guardian</li>
+                    <li>Rockwood House</li>
+                    <li>Perrymount Road</li>
+                    <li>Haywards Heath</li>
+                    <li>West Sussex</li>
+                    <li>RH16 3DH</li>
+                    <li>United Kingdom</li>
+                </ul>
+                <br>
+                <ul class="u-unstyled-list">
+                    <li>Tel: 0808 168 5088</li>
+                    <li><a href="mailto:gnmsubs@@quadrantsubs.com">gnmsubs@@quadrantsubs.com</a></li>
+                </ul>
+            </small>
+        </div>
+    </div>
+</div>
+
+}
