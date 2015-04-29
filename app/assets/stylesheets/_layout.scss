@@ -25,14 +25,6 @@ body {
     padding-bottom: 10px;
 }
 
-.row--padding-top {
-    padding-top: 10px;
-
-    @include mq(tablet) {
-        padding-top: 20px;
-    }
-}
-
 .row--border {
     border-top: 1px solid $c-neutral5;
     padding-top: 8px;
