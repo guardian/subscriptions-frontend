@@ -1,0 +1,213 @@
+@(shipping: model.ShippingDetails)
+
+@main(shipping.name, footer = fragments.footer.intl_faq()) {
+
+    <div class="gs-container">
+        <div class="page-header">
+            <h1 class="page-header__title">@shipping.name</h1>
+            @if(shipping.isCollection) {
+                @if(shipping.isPaperDigital) {
+                    <p class="page-header__lead">
+                        Save money on your newspapers and digital content. Plus start using the daily edition and premium live news app immediately.</p>
+                } else {
+                    <p class="page-header__lead">Save money on your newspapers.</p>
+                }
+            } else {
+                @if(shipping.isPaperDigital) {
+                    <p class="page-header__lead">
+                        If you live within the M25 you can have your papers delivered by 7am Monday - Saturday and 8.30am on Sunday. Plus you can start using the daily edition and premium live news app immediately.</p>
+                } else {
+                    <p class="page-header__lead">
+                        If you live within the M25 you can have your papers delivered by 7am Monday - Saturday and 8.30 on Sunday.</p>
+                }
+            }
+        </div>
+        <div class="row row--items-1 row--border">
+            <div class="row__item">
+                @if(shipping.isCollection) {
+                    <h2 class="page-heading">This is how the voucher scheme works</h2>
+                } else {
+                    <h2 class="page-heading">This is how direct delivery works</h2>
+                }
+                <ol class="steps">
+                @if(shipping.isCollection) {
+                    <li class="steps__item">Pick the perfect package for you</li>
+                    <li class="steps__item">We'll post personalised vouchers for the newspapers in your package</li>
+                    <li class="steps__item">Redeem your vouchers at over 1,000 retailers across the UK</li>
+                } else {
+                    <li class="steps__item">Pick the perfect package for you</li>
+                    <li class="steps__item">Confirm your address is within the M25</li>
+                    <li class="steps__item">
+                        Get your papers delivered to your door by 7am Monday - Saturday and 8:30am on Sundays</li>
+                }
+                </ol>
+            </div>
+        </div>
+        <div class="row row--items-1 row--border">
+            <div class="row__item">
+                @if(shipping.isCollection) {
+                    <h3 class="mobile-only">Do you live inside the M25?</h3>
+                    <a href="/delivery/@shipping.packageType" class="button button--large button--secondary button--m25" data-test-id="choose-package-inside-m25"><span class="hidden-mobile">
+                        Do you live inside the M25?</span> Get the paper delivered <span class="hidden-mobile">
+                        to your door</span></a>
+                } else {
+                    <h3 class="mobile-only">Live outside the M25?</h3>
+                    <a href="/collection/@shipping.packageType" class="button button--large button--secondary button--m25" data-test-id="choose-package-outside-m25"><span class="hidden-mobile">
+                        Live outside the M25?</span> Subscribe to <span class="hidden-mobile">our</span>
+                        voucher scheme</a>
+                }
+                <h2 class="page-heading">Choose a package</h2>
+                <form action="" method="post">
+                    <ul class="package__list u-unstyled-list">
+                    @if(shipping.isCollection) {
+                        @if(shipping.isPaperDigital) {
+                            <li class="package">
+                                <input class="package__select" type="radio" name="package" id="everyday" value="collection-paper-digital-everyday" checked>
+                                <label class="package__info" for="everyday">
+                                    <span class="package__title">EVERYDAY+</span> <strong class="package__price">
+                                    £10.99 per week &mdash; save 52%</strong>
+                                    <span class="package__description">
+                                        Guardian and Observer papers, plus tablet editions and Premium mobile access</span>
+                                    <span class="package__monthly">Monthly price <strong>£47.62</strong></span>
+                                </label>
+                            </li>
+                            <li class="package">
+                                <input class="package__select" type="radio" name="package" id="sixday" value="collection-paper-digital-sixday">
+                                <label class="package__info" for="sixday">
+                                    <span class="package__title">SIXDAY+</span> <strong class="package__price">
+                                    £9.99 per week &mdash; save 50%</strong>
+                                    <span class="package__description">
+                                        Guardian papers, plus tablet editions and Premium mobile access</span>
+                                    <span class="package__monthly">Monthly price <strong>£43.29</strong></span>
+                                </label>
+                            </li>
+                            <li class="package">
+                                <input class="package__select" type="radio" name="package" id="weekend" value="collection-paper-digital-weekend">
+                                <label class="package__info" for="weekend">
+                                    <span class="package__title">WEEKEND+</span> <strong class="package__price">
+                                    £5.99 per week &mdash; save 60%</strong>
+                                    <span class="package__description">
+                                        Saturday Guardian and Observer papers, plus tablet editions and Premium mobile access</span>
+                                    <span class="package__monthly">Monthly price <strong>£25.96</strong></span>
+                                </label>
+                            </li>
+                            <li class="package">
+                                <input class="package__select" type="radio" name="package" id="sunday" value="collection-paper-digital-sunday">
+                                <label class="package__info" for="sunday">
+                                    <span class="package__title">SUNDAY+</span> <strong class="package__price">
+                                    £4.99 per week &mdash; save 60%</strong>
+                                    <span class="package__description">
+                                        Observer paper, plus tablet editions and Premium mobile access</span>
+                                    <span class="package__monthly">Monthly price <strong>£21.62</strong></span>
+                                </label>
+                            </li>
+                        } else {
+                            <li class="package">
+                                <input class="package__select" type="radio" name="package" id="everyday" value="collection-paper-everyday" checked>
+                                <label class="package__info" for="everyday">
+                                    <span class="package__title">EVERYDAY</span> <strong class="package__price">
+                                    £9.99 per week &mdash; save 25%</strong>
+                                    <span class="package__description">Guardian and Observer papers</span>
+                                    <span class="package__monthly">Monthly price <strong>£43.29</strong></span>
+                                </label>
+                            </li>
+                            <li class="package">
+                                <input class="package__select" type="radio" name="package" id="sixday" value="collection-paper-sixday">
+                                <label class="package__info" for="sixday">
+                                    <span class="package__title">SIXDAY</span> <strong class="package__price">
+                                    £8.49 per week &mdash; save 19%</strong>
+                                    <span class="package__description">Guardian papers</span>
+                                    <span class="package__monthly">Monthly price <strong>£36.79</strong></span>
+                                </label>
+                            </li>
+                            <li class="package">
+                                <input class="package__select" type="radio" name="package" id="weekend" value="collection-paper-weekend">
+                                <label class="package__info" for="weekend">
+                                    <span class="package__title">WEEKEND</span> <strong class="package__price">
+                                    £4.49 per week &mdash; save 17%</strong>
+                                    <span class="package__description">Saturday Guardian and Observer papers</span>
+                                    <span class="package__monthly">Monthly price <strong>£19.46</strong></span>
+                                </label>
+                            </li>
+                        }
+                    } else {
+                        @if(shipping.isPaperDigital) {
+                            <li class="package">
+                                <input class="package__select" type="radio" name="package" id="everyday" value="delivery-paper-digital-everyday" checked>
+                                <label class="package__info" for="everyday">
+                                    <span class="package__title">EVERYDAY+</span> <strong class="package__price">
+                                    £14.99 per week</strong>
+                                    <span class="package__description">
+                                        Guardian and Observer papers, plus tablet editions and Premium mobile access</span>
+                                    <span class="package__monthly">Monthly price <strong>£64.96</strong></span>
+                                </label>
+                            </li>
+                            <li class="package">
+                                <input class="package__select" type="radio" name="package" id="sixday" value="delivery-paper-digital-sixday">
+                                <label class="package__info" for="sixday">
+                                    <span class="package__title">SIXDAY+</span> <strong class="package__price">
+                                    £12.99 per week</strong>
+                                    <span class="package__description">
+                                        Guardian papers, plus tablet editions and Premium mobile access</span>
+                                    <span class="package__monthly">Monthly price <strong>£56.29</strong></span>
+                                </label>
+                            </li>
+                            <li class="package">
+                                <input class="package__select" type="radio" name="package" id="weekend" value="delivery-paper-digital-weekend">
+                                <label class="package__info" for="weekend">
+                                    <span class="package__title">WEEKEND+</span> <strong class="package__price">
+                                    £7.99 per week</strong>
+                                    <span class="package__description">
+                                        Saturday Guardian and Observer papers, plus tablet editions and Premium mobile access</span>
+                                    <span class="package__monthly">Monthly price <strong>£34.62</strong></span>
+                                </label>
+                            </li>
+                            <li class="package">
+                                <input class="package__select" type="radio" name="package" id="sunday" value="delivery-paper-digital-sunday">
+                                <label class="package__info" for="sunday">
+                                    <span class="package__title">SUNDAY+</span> <strong class="package__price">
+                                    £5.99 per week</strong>
+                                    <span class="package__description">
+                                        Observer paper, plus tablet editions and Premium mobile access</span>
+                                    <span class="package__monthly">Monthly price <strong>£25.96</strong></span>
+                                </label>
+                            </li>
+                        } else {
+                            <li class="package">
+                                <input class="package__select" type="radio" name="package" id="everyday" value="delivery-paper-everyday" checked>
+                                <label class="package__info" for="everyday">
+                                    <span class="package__title">EVERYDAY</span> <strong class="package__price">
+                                    £13.99 per week</strong>
+                                    <span class="package__description">Guardian and Observer papers</span>
+                                    <span class="package__monthly">Monthly price <strong>£60.62</strong></span>
+
+                                </label>
+                            </li>
+                            <li class="package">
+                                <input class="package__select" type="radio" name="package" id="sixday" value="delivery-paper-sixday">
+                                <label class="package__info" for="sixday">
+                                    <span class="package__title">SIXDAY</span> <strong class="package__price">
+                                    £11.49 per week</strong>
+                                    <span class="package__description">Guardian papers</span>
+                                    <span class="package__monthly">Monthly price <strong>£49.79</strong></span>
+                                </label>
+                            </li>
+                            <li class="package">
+                                <input class="package__select" type="radio" name="package" id="weekend" value="delivery-paper-weekend">
+                                <label class="package__info" for="weekend">
+                                    <span class="package__title">WEEKEND</span> <strong class="package__price">
+                                    £6.49 per week</strong>
+                                    <span class="package__description">Saturday Guardian and Observer papers</span>
+                                    <span class="package__monthly">Monthly price <strong>£28.12</strong></span>
+                                </label>
+                            </li>
+                        }
+                    }
+                    </ul>
+                    <button class="button button--large button--primary" data-test-id="choose-package-select">
+                        Continue</button>
+                </form>
+            </div>
+        </div>
+    </div>
+}
