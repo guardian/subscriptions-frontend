@@ -1,0 +1,23 @@
+<script id="gu">
+
+    var guardian = {
+        isModernBrowser: (
+            'querySelector' in document
+            && 'addEventListener' in window
+            && 'localStorage' in window
+            && 'sessionStorage' in window
+            && 'bind' in Function
+            && (('XMLHttpRequest' in window && 'withCredentials' in new XMLHttpRequest())
+              || 'XDomainRequest' in window))
+    };
+
+    (function(isModern) {
+        if (isModern) {
+            // only load JS if the browser cuts the mustard
+            var newElm = document.createElement('script');
+            newElm.src = '@routes.Assets.at("javascripts/main.min.js")';
+            document.getElementsByTagName("head")[0].appendChild(newElm);
+        }
+    })(guardian.isModernBrowser);
+
+</script>

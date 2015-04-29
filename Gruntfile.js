@@ -14,10 +14,12 @@ module.exports = function(grunt) {
         dirs: {
             assets: {
                 root:        'app/assets',
+                javascripts: '<%= dirs.assets.root %>/javascripts',
                 stylesheets: '<%= dirs.assets.root %>/stylesheets'
             },
             public: {
                 root:        'public',
+                javascripts: '<%= dirs.public.root %>/javascripts',
                 stylesheets: '<%= dirs.public.root %>/stylesheets'
             }
         },
@@ -36,17 +38,45 @@ module.exports = function(grunt) {
             }
         },
 
+        requirejs: {
+            compile: {
+                options: {
+                    name: 'main',
+                    include: [
+                        'requireLib'
+                    ],
+                    baseUrl: '<%= dirs.assets.javascripts %>',
+                    paths: {
+                        '$': 'utils/$',
+                        'bean': 'bower_components/bean/bean',
+                        'bonzo': 'bower_components/bonzo/bonzo',
+                        'qwery': 'bower_components/qwery/qwery',
+                        'requireLib': 'bower_components/requirejs/require',
+                    },
+                    optimize: isDev ? 'none' : 'uglify2',
+                    generateSourceMaps: isDev ? 'true' : 'false',
+                    preserveLicenseComments: false,
+                    out: '<%= dirs.public.javascripts %>/main.min.js'
+                }
+            }
+        },
+
         watch: {
             css: {
                 files: ['<%= dirs.assets.stylesheets %>/**/*.scss'],
                 tasks: ['sass']
+            },
+            js: {
+                files: ['<%= dirs.assets.javascripts %>/**/*.js'],
+                tasks: ['requirejs']
             }
         }
     });
 
     grunt.loadNpmTasks('grunt-contrib-sass');
+    grunt.loadNpmTasks('grunt-contrib-requirejs');
     grunt.loadNpmTasks('grunt-contrib-watch');
 
-    grunt.registerTask('compile', ['sass']);
+    grunt.registerTask('compile', ['sass', 'requirejs']);
     grunt.registerTask('default', ['compile']);
 };

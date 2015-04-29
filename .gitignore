@@ -31,6 +31,7 @@ project/plugins/project/
 
 # frontend
 *.css.map
+*.js.map
 .sass-cache
 bower_components
 node_modules

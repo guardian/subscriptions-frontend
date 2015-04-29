@@ -83,6 +83,7 @@ body {
 
 .page-header {
     padding-top: $gs-baseline/2;
+    margin-bottom: $gs-baseline*2;
 
     @include mq(tablet) {
         margin-bottom: $gs-baseline*4;
