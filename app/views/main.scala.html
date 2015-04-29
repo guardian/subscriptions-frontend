@@ -1,4 +1,4 @@
-@(title: String)(content: Html)
+@(title: String, footer: Html = Html(""))(content: Html)
 
 <!DOCTYPE html>
 <html lang="en-GB">
@@ -10,7 +10,7 @@
 
         @content
 
-        @fragments.footer()
+        @fragments.footer.footer(footer)
 
         @fragments.javascript()
 
