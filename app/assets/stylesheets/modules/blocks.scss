@@ -162,60 +162,31 @@
     }
 }
 
-.membership-promo {
-    background-color: $c-white;
-    margin-top: -10px;
-    margin-bottom: -10px;
-
+.block--membership {
     @include mq(tablet) {
-        background-color: $c-neutral5;
-        margin-top: 0;
-        margin-bottom: 0;
-    }
+        height: 370px;
+        overflow: hidden;
 
-    .block {
-        background: $c-brand url(/assets/images/backgrounds/bg-membership-small.jpg) no-repeat;
-        @include box-shadow(none);
-        color: $c-white;
-        height: 240px;
-        padding-top: 10px;
-        padding-bottom: 10px;
-
-        @include mq(tablet) {
-            background: $c-brand url(/assets/images/backgrounds/bg-membership.jpg) no-repeat;
-            height: 300px;
-            margin-left: -$gs-gutter;
-            margin-right: -$gs-gutter;
-            padding-left: $gs-gutter;
-            padding-right: $gs-gutter;
-        }
-    }
-
-    .block__title {
-        color: inherit;
-        @include font-size(28px, 32px);
-    }
-
-    .block__info {
-        @include font-size(16px, 20px);
-        font-weight: 900;
-        padding-bottom: $gs-baseline*1.5;
-
-        @include mq(tablet) {
-            @include font-size(21px, 25px);
+        .block__title {
+            width: 33%;
         }
 
-        .action {
-            color: $c-membership;
+        .block__info {
+            width: 33%;
+            padding-bottom: $gs-baseline*3;
         }
-    }
 
-    .block__footer  {
-        position: absolute;
-        bottom: 30px;
-    }
+        .block__footer {
+            bottom: $gs-baseline;
+        }
 
-    .button {
-        @include button-colour($c-white, $c-brand, $c-neutral7);
+        .block__bg {
+            position: absolute;
+            top: 1px;
+            right: 0;
+            height: 100%;
+            width: 66%;
+            background: transparent url(/assets/images/backgrounds/bg-membership-cards.png) top right no-repeat;
+        }
     }
 }
