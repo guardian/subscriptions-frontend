@@ -1,6 +1,6 @@
 @(shipping: model.ShippingDetails)
 
-@main(shipping.name, footer = fragments.footer.intl_faq()) {
+@main(s"${shipping.name.split("\\s").map(_.capitalize).mkString(" ")} | Choose a Package | Subscriptions | The Guardian", footer = fragments.footer.intl_faq()) {
 
     <div class="gs-container">
         <div class="page-header">
