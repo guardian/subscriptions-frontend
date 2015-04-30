@@ -31,5 +31,6 @@ resolvers ++= Seq(
   "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases",
   Resolver.sonatypeRepo("releases"))
 
+addCommandAlias("devrun", "run 9200 --- -Dconfig.resource=DEV.conf")
 
 playArtifactDistSettings
