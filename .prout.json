@@ -1,5 +1,5 @@
 {
   "checkpoints": {
-    "PROD": { "url": "https://subscribe.theguardian.com.origin.membership.guardianapis.com/", "overdue": "14M", "disableSSLVerification": true }
+    "PROD": { "url": "http://subscribe.theguardian.com/", "overdue": "14M" }
   }
 }
