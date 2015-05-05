@@ -217,9 +217,9 @@
         "FrontendELBDNSrecord" : {
             "Type" : "AWS::Route53::RecordSet",
             "Properties" : {
-                "HostedZoneId" : "/hostedzone/Z1E4V12LQGXFEC",
+                "HostedZoneId" : "/hostedzone/Z2LN31BPOUYL7D",
                 "Comment" : "CNAME for AWS ELB",
-                "Name" :  { "Fn::Join" : [ ".", [ { "Ref" : "SiteDomain" }, "origin.membership.guardianapis.com." ] ] },
+                "Name" :  { "Fn::Join" : [ ".", [ { "Ref" : "SiteDomain" }, "origin.subscriptions.guardianapis.com." ] ] },
                 "Type" : "CNAME",
                 "TTL" : "120",
                 "ResourceRecords" : [ {"Fn::GetAtt":["FrontendElasticLoadBalancer","DNSName"]} ]
