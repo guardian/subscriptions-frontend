@@ -1,20 +1,13 @@
 package controllers
 
-import play.api._
+import actions.OAuthActions
 import play.api.mvc._
 
-object Checkout extends Controller {
+object Checkout extends Controller with OAuthActions {
 
-  def renderCheckout = Action {
-    Ok(views.html.checkout.payment())
-  }
+  def renderCheckout = googleAuthenticatedStaffAction(Ok(views.html.checkout.payment()))
 
-  def handleCheckout = Action {
-    Redirect("/checkout/thankyou")
-  }
+  def handleCheckout = googleAuthenticatedStaffAction(Redirect(routes.Checkout.thankyou()))
 
-  def thankyou = Action {
-    Ok(views.html.checkout.thankyou())
-  }
-
+  def thankyou = googleAuthenticatedStaffAction(Ok(views.html.checkout.thankyou()))
 }

@@ -21,9 +21,9 @@ lazy val root = (project in file(".")).enablePlugins(
 scalaVersion := "2.11.6"
 
 libraryDependencies ++= Seq(
-  specs2 % Test,
   cache,
-  ws
+  ws,
+  "com.gu" %% "play-googleauth" % "0.2.1"
 )
 
 resolvers ++= Seq(
@@ -31,6 +31,6 @@ resolvers ++= Seq(
   "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases",
   Resolver.sonatypeRepo("releases"))
 
-addCommandAlias("devrun", "run 9200 --- -Dconfig.resource=DEV.conf")
+addCommandAlias("devrun", "run -Dconfig.resource=DEV.conf 9200")
 
 playArtifactDistSettings
