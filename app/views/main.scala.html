@@ -1,11 +1,11 @@
-@(title: String, footer: Html = Html(""))(content: Html)
+@(title: String, footer: Html = Html(""), bodyClassName: String = "")(content: Html)
 
 <!DOCTYPE html>
 <html lang="en-GB">
 <head>
     @fragments.head(title)
 </head>
-    <body>
+    <body class="@bodyClassName">
         @fragments.header()
 
         @content

@@ -1,0 +1,13 @@
+@(edition: DigitalEdition)
+
+<div class="row row--items-2 digital-cta">
+    <div class="row__item">
+        <div class="digital-cta__price">
+            <strong class="digital-cta__amount">Free for 14 days</strong>
+        </div>
+        <div class="digital-cta__payment">Then @edition.price/month</div>
+    </div>
+    <div class="row__item digital-cta__button">
+        <a class="button button--large button--primary" href="https://www.guardiansubscriptions.co.uk/digitalsubscriptions/?prom=DGA01&CMP=@edition.cmp" data-test-id="digital-pack-@edition.id-trial-header">Start your free trial</a>
+    </div>
+</div>

@@ -1,25 +1,15 @@
 @(edition: DigitalEdition)
 
-@main(if(edition.id == "uk") {
+@main(title = if(edition.id == "uk") {
     "Digital | Subscriptions | The Guardian"
 } else {
     s"Digital - ${edition.name} | Subscriptions | The Guardian"
-}) {
-
+}, bodyClassName = "digital-pack") {
 <div class="gs-container">
     @fragments.page.header("Digital Pack", Some("Digital access to our Daily Edition and Guardian App Premium Tier"))
 
-    <div class="row row--items-2 digital-cta">
-        <div class="row__item">
-            <div class="digital-cta__price">
-                <strong class="digital-cta__amount">@edition.price</strong>/month
-            </div>
-            <div class="digital-cta__payment">Payment begins after 14 day free trial</div>
-        </div>
-        <div class="row__item digital-cta__button">
-            <a class="button button--large button--primary" href="https://www.guardiansubscriptions.co.uk/digitalsubscriptions/?prom=DGA01&CMP=@edition.cmp" data-test-id="digital-pack-@edition.id-trial-header">Start your free trial</a>
-        </div>
-    </div>
+    @digitalpack.start_trial(edition)
+
     <h2 class="page-heading page-heading--border">What do I get?</h2>
     <div class="row row--items-2">
         <div class="row__item block block--primary block--grey-border">
@@ -47,6 +37,9 @@
             </ul>
         </div>
     </div>
+
+    @digitalpack.start_trial(edition)
+
     <h2 class="page-heading page-heading--border">Why subscribe?</h2>
     <div class="row row--items-3">
         <div class="row__item">
@@ -62,25 +55,21 @@
             <p>The Guardian App Premium Tier brings breaking news to the palm of your hand wherever you are, whilst the Daily Edition brings the newspaper to life in a digital form</p>
         </div>
     </div>
+</div>
+
+<div class="gs-container">
     <h2 class="page-heading page-heading--border">How do I get it?</h2>
-    <div class="row row--items-1">
-        <div class="row__item">
-            <ol class="steps">
-                <li class="steps__item">Checkout in the next step and we will send your subscriber ID</li>
-                <li class="steps__item">Download the Guardian app on your device(s) from your app store</li>
-                <li class="steps__item">Enter your subscriber ID into the app, and enjoy</li>
-            </ol>
-        </div>
+    <div class="row row--items-3">
+        <div class="row__item"><p><strong>1.</strong>
+            Checkout in the next step and we will send your subscriber ID</p></div>
+        <div class="row__item"><p><strong>2.</strong>
+            Download the Guardian app on your device(s) from your app store</p></div>
+        <div class="row__item"><p><strong>3.</strong>Enter your subscriber ID into the app, and enjoy</p></div>
     </div>
-    <div class="row row--items-2 digital-cta">
-        <div class="row__item">
-            <div class="digital-cta__price"><strong class="digital-cta__amount">@edition.price</strong>/month</div>
-            <div class="digital-cta__payment">Payment begins after 14 day free trial</div>
-        </div>
-        <div class="row__item digital-cta__button">
-            <a class="button button--large button--primary" href="https://www.guardiansubscriptions.co.uk/digitalsubscriptions/?prom=DGA01&CMP=@edition.cmp" data-test-id="digital-pack-@edition.id-trial-offer">Start your free trial</a>
-        </div>
-    </div>
+</div>
+
+<div class="gs-container">
+    @digitalpack.start_trial(edition)
 </div>
 
 @fragments.analytics.affectv_digitalpack()
