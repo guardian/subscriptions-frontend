@@ -139,7 +139,7 @@ install_dependencies() {
 }
 
 compile() {
-  grunt compile
+  grunt compile --dev
 }
 
 report() {
