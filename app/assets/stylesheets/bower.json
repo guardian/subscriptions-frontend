@@ -1,5 +1,6 @@
 {
   "name": "subscriptions stylesheets",
+  "version": "0.1",
   "dependencies": {
     "guss": "3.3.0",
     "pasteup-buttons": "0.4.10",
@@ -12,5 +13,12 @@
     "sass-mq": "~3.0.0",
     "guss-typography": "~3",
     "pasteup-palette": "~3.3.0"
-  }
+  },
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
 }
