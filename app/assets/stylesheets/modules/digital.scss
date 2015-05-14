@@ -49,7 +49,7 @@ $left-column: gs-span(2);
 
     @include mq(leftCol) {
         float: left;
-        width: $leftCol-bp - $left-column - 2 * $gs-gutter;
+        width: $leftCol-bp - $left-column - $gs-gutter;
     }
     @include mq($until: leftCol) {
         overflow: hidden;
@@ -61,6 +61,61 @@ $left-column: gs-span(2);
         border-top: 1px solid $c-neutral4;
         padding-top: $gs-row-height / 4;
     }
+}
+
+// ROWS
+
+@include guss-row-utility;
+@include guss-row('.dp-row');
+
+.dp-row {
+    list-style-position: inside;
+    position: relative;
+}
+
+.dp-row--border {
+    border-width: 0px;
+}
+
+.dp-row__item {
+    float: left;
+    width: 90%;
+
+    @include mq(tablet) {
+        & + & {
+            border-left: $gs-gutter solid $c-white;
+        }
+    }
+
+}
+
+.dp-row__item + .dp-row__item {
+    @include mq(tablet) {
+        margin-left: 1rem;
+        padding-left: 1rem;
+        border-left: 1px solid $c-neutral4;
+    }
+}
+
+.dp-row__item__title {
+    padding-bottom: 1rem;
+
+    @include mq($until: leftCol) {
+        border-top: 1px solid $c-neutral4;
+    }
+}
+.dp-row__item--numbered__bullet {
+    float: left;
+    padding: 0;
+    margin: 0;
+    font-weight: bold;
+}
+.dp-row__item--numbered__body {
+    padding-left: 1rem;
+}
+.dp-edition {
+    background: $c-neutral7;
+    padding: $gs-baseline $gs-gutter;
 }
 
 // PRICE
@@ -90,10 +145,6 @@ $left-column: gs-span(2);
 
 .digital-cta__payment {
     color: $c-neutral2;
-
-    @include mq(tablet) {
-        text-align: right;
-    }
 }
 
 .digital-cta__button {
@@ -101,45 +152,4 @@ $left-column: gs-span(2);
         margin: 7px $gs-gutter;
         text-align: left;
     }
-}
-
-// ROWS
-
-.digital-pack {
-    .row {
-        list-style-position: inside;
-        padding: 0;
-        position: relative;
-    }
-
-    .row__item {
-        float: left;
-        width: 90%;
-        margin-bottom: 0;
-    }
-
-    .row__item + .row__item {
-        @include mq(tablet) {
-            margin-left: 1rem;
-            padding-left: 1rem;
-            border-left: 1px solid $c-neutral4;
-        }
-    }
-}
-
-.row__item__title {
-    padding-bottom: 1rem;
-
-    @include mq($until: leftCol) {
-        border-top: 1px solid $c-neutral4;
-    }
-}
-.row__item--numbered__bullet {
-    float: left;
-    padding: 0;
-    margin: 0;
-    font-weight: bold;
-}
-.row__item--numbered__body {
-    padding-left: 1rem;
 }
