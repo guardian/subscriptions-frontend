@@ -11,6 +11,7 @@ $left-column: gs-span(2);
     .dp-container {
         padding-left: 0;
         padding-right: 0;
+        padding-bottom: 2 * $gs-baseline;
 
         @include mq(tablet, $until: desktop) {
             max-width: $tablet-bp;
@@ -76,20 +77,19 @@ $left-column: gs-span(2);
 
 .digital-cta__price {
     @include font-size(21px, 27px);
-    text-align: center;
 
     @include mq(tablet) {
         text-align: right;
     }
 }
 
-.digital-cta__amount {
-    font-size: 42px;
+.digital-cta__promo {
+    @include fs-header(5);
+    color: $c-neutral1;
 }
 
 .digital-cta__payment {
     color: $c-neutral2;
-    text-align: center;
 
     @include mq(tablet) {
         text-align: right;
@@ -97,10 +97,8 @@ $left-column: gs-span(2);
 }
 
 .digital-cta__button {
-    margin-top: 14px;
-    text-align: center;
-
     @include mq(tablet) {
+        margin: 7px $gs-gutter;
         text-align: left;
     }
 }
@@ -117,6 +115,7 @@ $left-column: gs-span(2);
     .row__item {
         float: left;
         width: 90%;
+        margin-bottom: 0;
     }
 
     .row__item + .row__item {

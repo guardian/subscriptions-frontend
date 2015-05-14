@@ -6,12 +6,13 @@
     s"Digital - ${edition.name} | Subscriptions | The Guardian"
 }, bodyClassName = "digital-pack") {
 <div class="gs-container dp-container">
-    <div class="dp-container__header">&nbsp;</div>
+    @fragments.container.container_title(" ")
     <div class="dp-container__body dp-container__body--main">
         @fragments.page.header("Digital Pack", Some("Digital access to our Daily Edition and Guardian App Premium Tier"))
-        @digitalpack.start_trial(edition)
     </div>
 </div>
+
+@digitalpack.start_trial(edition)
 
 <div class="gs-container dp-container">
     @fragments.container.container_title("What do I get?")
@@ -46,9 +47,7 @@
     </div>
 </div>
 
-<div class="gs-container dp-container">
-    @digitalpack.start_trial(edition)
-</div>
+@digitalpack.start_trial(edition)
 
 <div class="gs-container dp-container">
     @fragments.container.container_title("Why subscribe?")
