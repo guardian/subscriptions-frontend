@@ -1,33 +1,35 @@
 /* Digital pack */
+
+// CONTAINERS
+
 $left-column: gs-span(2);
 
 .digital-pack {
     .gs-container {
         max-width: $leftCol-bp;
     }
-}
+    .dp-container {
+        padding-left: 0;
+        padding-right: 0;
 
-.dp-container {
-    padding-left: 0;
-    padding-right: 0;
-
-    @include mq(tablet, $until: desktop) {
-        max-width: $tablet-bp;
-    }
-    @include mq(desktop, $until: leftCol) {
-        max-width: $desktop-bp;
-    }
-    @include mq(leftCol) {
-        max-width: $leftCol-bp;
-        position: relative;
-        overflow: auto;
+        @include mq(tablet, $until: desktop) {
+            max-width: $tablet-bp;
+        }
+        @include mq(desktop, $until: leftCol) {
+            max-width: $desktop-bp;
+        }
+        @include mq(leftCol) {
+            max-width: $leftCol-bp;
+            position: relative;
+            overflow: auto;
+        }
     }
 }
 
 .dp-container__header {
     @include mq(leftCol) {
         float: left;
-        width: $left-column + 2 * $gs-gutter;
+        width: $left-column + $gs-gutter;
     }
 
     @include mq($until: leftCol) {
@@ -38,20 +40,29 @@ $left-column: gs-span(2);
     @include fs-header(3);
     font-size: 1.25rem;
     color: $c-brand;
-    margin: 0 $gs-gutter;
+    margin-left: $gs-gutter;
 }
 
 .dp-container__body {
+    padding: 0 $gs-gutter;
+
     @include mq(leftCol) {
         float: left;
         width: $leftCol-bp - $left-column - 2 * $gs-gutter;
-        padding-right: $gs-gutter;
     }
-
     @include mq($until: leftCol) {
         overflow: hidden;
     }
 }
+
+.dp-container__body--main {
+    @include mq(leftCol) {
+        border-top: 1px solid $c-neutral4;
+        padding-top: $gs-row-height / 4;
+    }
+}
+
+// PRICE
 
 .digital-cta {
     padding-top: $gs-baseline*2;
@@ -92,4 +103,44 @@ $left-column: gs-span(2);
     @include mq(tablet) {
         text-align: left;
     }
+}
+
+// ROWS
+
+.digital-pack {
+    .row {
+        list-style-position: inside;
+        padding: 0;
+        position: relative;
+    }
+
+    .row__item {
+        float: left;
+        width: 90%;
+    }
+
+    .row__item + .row__item {
+        @include mq(tablet) {
+            margin-left: 1rem;
+            padding-left: 1rem;
+            border-left: 1px solid $c-neutral4;
+        }
+    }
+}
+
+.row__item__title {
+    padding-bottom: 1rem;
+
+    @include mq($until: leftCol) {
+        border-top: 1px solid $c-neutral4;
+    }
+}
+.row__item--numbered__bullet {
+    float: left;
+    padding: 0;
+    margin: 0;
+    font-weight: bold;
+}
+.row__item--numbered__body {
+    padding-left: 1rem;
 }

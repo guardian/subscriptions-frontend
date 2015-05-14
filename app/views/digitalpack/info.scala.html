@@ -7,7 +7,7 @@
 }, bodyClassName = "digital-pack") {
 <div class="gs-container dp-container">
     <div class="dp-container__header">&nbsp;</div>
-    <div class="dp-container__body">
+    <div class="dp-container__body dp-container__body--main">
         @fragments.page.header("Digital Pack", Some("Digital access to our Daily Edition and Guardian App Premium Tier"))
         @digitalpack.start_trial(edition)
     </div>
@@ -16,7 +16,7 @@
 <div class="gs-container dp-container">
     @fragments.container.container_title("What do I get?")
 
-    <div class="page-heading--border dp-container__body">
+    <div class="dp-container__body dp-container__body--main">
         <div class="row row--items-2">
             <div class="row__item block block--primary block--grey-border">
                 <h2 class="block__title">Daily Edition</h2>
@@ -53,35 +53,42 @@
 <div class="gs-container dp-container">
     @fragments.container.container_title("Why subscribe?")
 
-    <div class="page-heading--border dp-container__body">
-        <div class="row row--items-3">
-            <div class="row__item">
-                <h3 class="row--border">Support the Guardian's journalism</h3>
+    <div class="dp-container__body dp-container__body--main">
+        <ul class="row row--items-3 no-bullets">
+            <li class="row__item">
+                <h3 class="row__item__title">Support the Guardian's journalism</h3>
                 <p>We invest your money back into funding our open journalism and promoting freedom of speech, making quality news coverage accessible for everyone</p>
-            </div>
-            <div class="row__item">
-                <h3 class="row--border">Share on multiple devices</h3>
+            </li>
+            <li class="row__item">
+                <h3 class="row__item__title">Share on multiple devices</h3>
                 <p>You can download the Digital Pack on up to 10 devices. Share it with your friends and family or give it as a gift.</p>
-            </div>
-            <div class="row__item">
-                <h3 class="row--border">Convenience</h3>
+            </li>
+            <li class="row__item">
+                <h3 class="row__item__title">Convenience</h3>
                 <p>The Guardian App Premium Tier brings breaking news to the palm of your hand wherever you are, whilst the Daily Edition brings the newspaper to life in a digital form</p>
-            </div>
-        </div>
+            </li>
+        </ul>
     </div>
 </div>
 
 <div class="gs-container dp-container">
     @fragments.container.container_title("How do I get it?")
 
-    <div class="page-heading--border dp-container__body">
-        <div class="row row--items-3">
-            <div class="row__item"><p><strong>1.</strong>
-                Checkout in the next step and we will send your subscriber ID</p></div>
-            <div class="row__item"><p><strong>2.</strong>
-                Download the Guardian app on your device(s) from your app store</p></div>
-            <div class="row__item"><p><strong>3.</strong>Enter your subscriber ID into the app, and enjoy</p></div>
-        </div>
+    <div class="dp-container__body dp-container__body--main">
+        <ul class="row row--items-3 no-bullets">
+            <li class="row__item">
+                <p class="row__item--numbered__bullet">1.</p>
+                <p class="row__item--numbered__body">Checkout in the next step and we will send your subscriber ID</p>
+            </li>
+            <li class="row__item">
+                <p class="row__item--numbered__bullet">2.</p>
+                <p class="row__item--numbered__body">Download the Guardian app on your device(s) from your app store</p>
+            </li>
+            <li class="row__item">
+                <p class="row__item--numbered__bullet">3.</p>
+                <p class="row__item--numbered__body">Enter your subscriber ID into the app, and enjoy</p>
+            </li>
+        </ul>
     </div>
 </div>
 
