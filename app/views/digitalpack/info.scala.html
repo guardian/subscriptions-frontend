@@ -5,72 +5,87 @@
 } else {
     s"Digital - ${edition.name} | Subscriptions | The Guardian"
 }, bodyClassName = "digital-pack") {
-<div class="gs-container">
-    @fragments.page.header("Digital Pack", Some("Digital access to our Daily Edition and Guardian App Premium Tier"))
-
-    @digitalpack.start_trial(edition)
-
-    <h2 class="page-heading page-heading--border">What do I get?</h2>
-    <div class="row row--items-2">
-        <div class="row__item block block--primary block--grey-border">
-            <h2 class="block__title">Daily Edition</h2>
-            <img class="block__image" src="@routes.Assets.at("images/tablet-edition.png")">
-            <ul class="block__list block__list--margin">
-                <li class="block__list-item"><strong>The full experience</strong> &mdash; everything that appears in the newspaper</li>
-                <li class="block__list-item"><strong>Available offline</strong> &mdash; downloaded automatically by 4am @if(edition.id != "uk") { GMT } every morning. Perfect for the commute</li>
-                <li class="block__list-item"><strong>Collated</strong> &mdash; complete supplements including the Guide, Cook, Do Something, Observer Tech and Food Monthly</li>
-                <li class="block__list-item"><strong>Designed</strong> &mdash; specially adapted to your tablet, whether you're using iPad, Android or Kindle Fire</li>
-                <li class="block__list-item"><strong>Enhanced</strong> &mdash; embedded audio, video and image galleries &mdash; plus all our crosswords</li>
-                <li class="block__list-item"><strong>Plus&hellip;</strong> There's a free 30-day archive of back issues. Take your time, sit back, and enjoy</li>
-            </ul>
-        </div>
-        <div class="row__item block block--primary block--grey-border">
-            <h2 class="block__title">Guardian App Premium Tier</h2>
-            <img class="block__image" src="@routes.Assets.at("images/premium-tier.png")">
-            <ul class="block__list block__list--margin">
-                <li class="block__list-item"><strong>Advert-free</strong> &mdash; no distractions, just the journalism you love</li>
-                <li class="block__list-item"><strong>Available offline</strong> &mdash; just tap to read content offline. Perfect for the commute</li>
-                <li class="block__list-item"><strong>Premium content</strong> &mdash; crosswords, exclusive articles and new features</li>
-                <li class="block__list-item"><strong>Adjustable text size</strong> &mdash; larger text for ease of reading or smaller text to take in a whole article in one swipe</li>
-                <li class="block__list-item"><strong>Save for later</strong> &mdash; articles stored in your account and available offline</li>
-                <li class="block__list-item"><strong>Plus&hellip;</strong> all the features of the free app including breaking news alerts, customised home screen and commenting</li>
-            </ul>
-        </div>
+<div class="gs-container dp-container">
+    <div class="dp-container__header">&nbsp;</div>
+    <div class="dp-container__body">
+        @fragments.page.header("Digital Pack", Some("Digital access to our Daily Edition and Guardian App Premium Tier"))
+        @digitalpack.start_trial(edition)
     </div>
+</div>
 
-    @digitalpack.start_trial(edition)
+<div class="gs-container dp-container">
+    @fragments.container.container_title("What do I get?")
 
-    <h2 class="page-heading page-heading--border">Why subscribe?</h2>
-    <div class="row row--items-3">
-        <div class="row__item">
-            <h3 class="row--border">Support the Guardian's journalism</h3>
-            <p>We invest your money back into funding our open journalism and promoting freedom of speech, making quality news coverage accessible for everyone</p>
-        </div>
-        <div class="row__item">
-            <h3 class="row--border">Share on multiple devices</h3>
-            <p>You can download the Digital Pack on up to 10 devices. Share it with your friends and family or give it as a gift.</p>
-        </div>
-        <div class="row__item">
-            <h3 class="row--border">Convenience</h3>
-            <p>The Guardian App Premium Tier brings breaking news to the palm of your hand wherever you are, whilst the Daily Edition brings the newspaper to life in a digital form</p>
+    <div class="page-heading--border dp-container__body">
+        <div class="row row--items-2">
+            <div class="row__item block block--primary block--grey-border">
+                <h2 class="block__title">Daily Edition</h2>
+                <img class="block__image" src="@routes.Assets.at("images/tablet-edition.png")">
+                <ul class="block__list block__list--margin">
+                    <li class="block__list-item"><strong>The full experience</strong> &mdash; everything that appears in the newspaper</li>
+                    <li class="block__list-item"><strong>Available offline</strong> &mdash; downloaded automatically by 4am @if(edition.id != "uk") { GMT } every morning. Perfect for the commute</li>
+                    <li class="block__list-item"><strong>Collated</strong> &mdash; complete supplements including the Guide, Cook, Do Something, Observer Tech and Food Monthly</li>
+                    <li class="block__list-item"><strong>Designed</strong> &mdash; specially adapted to your tablet, whether you're using iPad, Android or Kindle Fire</li>
+                    <li class="block__list-item"><strong>Enhanced</strong> &mdash; embedded audio, video and image galleries &mdash; plus all our crosswords</li>
+                    <li class="block__list-item"><strong>Plus&hellip;</strong> There's a free 30-day archive of back issues. Take your time, sit back, and enjoy</li>
+                </ul>
+            </div>
+            <div class="row__item block block--primary block--grey-border">
+                <h2 class="block__title">Guardian App Premium Tier</h2>
+                <img class="block__image" src="@routes.Assets.at("images/premium-tier.png")">
+                <ul class="block__list block__list--margin">
+                    <li class="block__list-item"><strong>Advert-free</strong> &mdash; no distractions, just the journalism you love</li>
+                    <li class="block__list-item"><strong>Available offline</strong> &mdash; just tap to read content offline. Perfect for the commute</li>
+                    <li class="block__list-item"><strong>Premium content</strong> &mdash; crosswords, exclusive articles and new features</li>
+                    <li class="block__list-item"><strong>Adjustable text size</strong> &mdash; larger text for ease of reading or smaller text to take in a whole article in one swipe</li>
+                    <li class="block__list-item"><strong>Save for later</strong> &mdash; articles stored in your account and available offline</li>
+                    <li class="block__list-item"><strong>Plus&hellip;</strong> all the features of the free app including breaking news alerts, customised home screen and commenting</li>
+                </ul>
+            </div>
         </div>
     </div>
 </div>
 
-<div class="gs-container">
-    <h2 class="page-heading page-heading--border">How do I get it?</h2>
-    <div class="row row--items-3">
-        <div class="row__item"><p><strong>1.</strong>
-            Checkout in the next step and we will send your subscriber ID</p></div>
-        <div class="row__item"><p><strong>2.</strong>
-            Download the Guardian app on your device(s) from your app store</p></div>
-        <div class="row__item"><p><strong>3.</strong>Enter your subscriber ID into the app, and enjoy</p></div>
+<div class="gs-container dp-container">
+    @digitalpack.start_trial(edition)
+</div>
+
+<div class="gs-container dp-container">
+    @fragments.container.container_title("Why subscribe?")
+
+    <div class="page-heading--border dp-container__body">
+        <div class="row row--items-3">
+            <div class="row__item">
+                <h3 class="row--border">Support the Guardian's journalism</h3>
+                <p>We invest your money back into funding our open journalism and promoting freedom of speech, making quality news coverage accessible for everyone</p>
+            </div>
+            <div class="row__item">
+                <h3 class="row--border">Share on multiple devices</h3>
+                <p>You can download the Digital Pack on up to 10 devices. Share it with your friends and family or give it as a gift.</p>
+            </div>
+            <div class="row__item">
+                <h3 class="row--border">Convenience</h3>
+                <p>The Guardian App Premium Tier brings breaking news to the palm of your hand wherever you are, whilst the Daily Edition brings the newspaper to life in a digital form</p>
+            </div>
+        </div>
     </div>
 </div>
 
-<div class="gs-container">
-    @digitalpack.start_trial(edition)
+<div class="gs-container dp-container">
+    @fragments.container.container_title("How do I get it?")
+
+    <div class="page-heading--border dp-container__body">
+        <div class="row row--items-3">
+            <div class="row__item"><p><strong>1.</strong>
+                Checkout in the next step and we will send your subscriber ID</p></div>
+            <div class="row__item"><p><strong>2.</strong>
+                Download the Guardian app on your device(s) from your app store</p></div>
+            <div class="row__item"><p><strong>3.</strong>Enter your subscriber ID into the app, and enjoy</p></div>
+        </div>
+    </div>
 </div>
+
+@digitalpack.start_trial(edition)
 
 @fragments.analytics.affectv_digitalpack()
 
