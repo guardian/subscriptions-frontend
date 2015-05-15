@@ -134,6 +134,10 @@ $left-column: gs-span(2);
     margin-bottom: $gs-baseline;
     border-top: 1px solid $c-neutral4;
     vertical-align: top;
+
+    @include mq($until: tablet) {
+        width: 100%;
+    }
 }
 
 // PRICE
