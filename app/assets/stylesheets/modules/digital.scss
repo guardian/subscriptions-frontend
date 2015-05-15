@@ -1,5 +1,11 @@
 /* Digital pack */
 
+.digital-pack {
+    .page-header {
+        margin-bottom: $gs-baseline*2;
+    }
+}
+
 // CONTAINERS
 
 $left-column: gs-span(2);
@@ -65,12 +71,12 @@ $left-column: gs-span(2);
 
 // ROWS
 
-@include guss-row-utility;
 @include guss-row('.dp-row');
 
 .dp-row {
     list-style-position: inside;
     position: relative;
+    padding-left: 0;
 }
 
 .dp-row--border {
@@ -113,22 +119,23 @@ $left-column: gs-span(2);
 .dp-row__item--numbered__body {
     padding-left: 1rem;
 }
+// editions
+@include guss-row('.dp-edition-row');
 .dp-edition {
     background: $c-neutral7;
-    padding: $gs-baseline $gs-gutter;
+    padding: $gs-baseline/2 $gs-gutter/2;
+}
+
+// COLUMNS
+@include guss-columns('.dp-cols');
+.dp-cols__item {
+    width: gs-span(2)+$gs-gutter*2;
+    margin-right: $gs-gutter;
+    margin-bottom: $gs-baseline;
+    border-top: 1px solid $c-neutral4;
 }
 
 // PRICE
-
-.digital-cta {
-    padding-top: $gs-baseline*2;
-    padding-bottom: $gs-baseline*3;
-
-    @include mq(tablet) {
-        padding-top: $gs-baseline;
-        padding-bottom: $gs-baseline*4;
-    }
-}
 
 .digital-cta__price {
     @include font-size(21px, 27px);
