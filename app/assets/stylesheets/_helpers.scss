@@ -35,7 +35,7 @@
     display: none !important;
 }
 
-.hidden-mobile {
+.hide-on-mobile {
     @include mq($until: tablet) {
         display: none !important;
     }
@@ -45,6 +45,10 @@
     @include mq(tablet) {
         display: none !important;
     }
+}
+
+.visible {
+    display: inline-block !important;
 }
 
 .break {

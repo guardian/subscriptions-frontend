@@ -123,7 +123,10 @@ $left-column: gs-span(2);
 @include guss-row('.dp-edition-row');
 .dp-edition {
     background: $c-neutral7;
-    padding: $gs-baseline/2 $gs-gutter/2;
+    padding: $gs-baseline $gs-gutter/2;
+    @include mq($until: tablet) {
+        margin-bottom: $gs-baseline;
+    }
 }
 
 // COLUMNS

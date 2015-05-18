@@ -16,44 +16,51 @@
     @fragments.container.container_title("What do I get?")
 
     <div class="dp-container__body dp-container__body--main">
-        <div class="dp-edition-row dp-edition-row--items-2 dp-edition">
-            <div class="dp-edition-row__item dp-edition-row__item--image"><img class="block__image" src="@routes.Assets.at("images/tablet-edition.png")"></div>
-            <div class="dp-edition-row__item dp-edition-row__item--boost-2">
-                <h2 class="block__title">Daily Edition</h2>
-                <div class="dp-cols">
-                    <div class="dp-cols__item"><strong>The full experience</strong>
-                            &mdash; your daily newspaper re-imagined for tablet</div>
-                    <div class="dp-cols__item"><strong>Available offline</strong>
-                            &mdash; downloaded automatically by 4am @if(edition.id != "uk") { GMT } every morning. Perfect for the commute</div>
-                    <div class="dp-cols__item"><strong>Collated</strong>
-                            &mdash; complete supplements including the Guide, Cook, Do Something, Observer Tech and Food Monthly</div>
-                    <div class="dp-cols__item"><strong>Designed</strong>
-                            &mdash; specially adapted to your tablet, whether you're using iPad, Android or Kindle Fire</div>
-                    <div class="dp-cols__item"><strong>Enhanced</strong>
-                            &mdash; embedded audio, video and image galleries &mdash; plus all our crosswords</div>
-                    <div class="dp-cols__item"><strong>Plus&hellip;</strong>
-                        There's a free 30-day archive of back issues. Take your time, sit back, and enjoy</div>
+        <div class="dp-edition">
+            <div class="dp-edition-row dp-edition-row--items-2">
+                <div class="dp-edition-row__item dp-edition-row__item--image"><img class="block__image" src="@routes.Assets.at("images/tablet-edition.png")"></div>
+                <div class="dp-edition-row__item dp-edition-row__item--boost-2">
+                    <h2 class="block__title">Daily Edition</h2>
+                    <div class="dp-cols">
+                        <div class="dp-cols__item"><strong>The full experience</strong>
+                                &mdash; your daily newspaper re-imagined for tablet</div>
+                        <div class="dp-cols__item"><strong>Available offline</strong>
+                                &mdash; downloaded automatically by 4am @if(edition.id != "uk") { GMT } every morning. Perfect for the commute</div>
+                        <div class="dp-cols__item"><strong>Collated</strong>
+                                &mdash; complete supplements including the Guide, Cook, Do Something, Observer Tech and Food Monthly</div>
+                        <div class="dp-cols__item hide-on-mobile js-more-daily-edition-benefits"><strong>Designed</strong>
+                                &mdash; specially adapted to your tablet, whether you're using iPad, Android or Kindle Fire</div>
+                        <div class="dp-cols__item hide-on-mobile js-more-daily-edition-benefits"><strong>Enhanced</strong>
+                                &mdash; embedded audio, video and image galleries &mdash; plus all our crosswords</div>
+                        <div class="dp-cols__item hide-on-mobile js-more-daily-edition-benefits"><strong>Plus&hellip;</strong>
+                            There's a free 30-day archive of back issues. Take your time, sit back, and enjoy</div>
+                    </div>
                 </div>
             </div>
+            @digitalpack.show_more_btn("more-daily-edition-benefits")
         </div>
-        <div class="dp-edition-row dp-edition-row--items-2 dp-edition">
-            <div class="dp-edition-row__item dp-edition-row__item--image"><img class="block__image" src="@routes.Assets.at("images/premium-tier.png")"></div>
-            <div class="dp-edition-row__item dp-edition-row__item--boost-2">
-                <h2 class="block__title">Guardian App Premium Tier</h2>
-                <div class="dp-cols">
-                    <div class="dp-cols__item"><strong>Advert-free</strong>
-                            &mdash; no distractions, just the journalism you love</div>
-                    <div class="dp-cols__item"><strong>Available offline</strong>
-                            &mdash; just tap to read content offline. Perfect for the commute</div>
-                    <div class="dp-cols__item"><strong>Premium content</strong>
-                            &mdash; crosswords, exclusive articles and new features</div>
-                    <div class="dp-cols__item"><strong>Adjustable text size</strong>
-                            &mdash; larger text for ease of reading or smaller text to take in a whole article in one swipe</div>
-                    <div class="dp-cols__item"><strong>Save for later</strong>
-                            &mdash; articles stored in your account and available offline</div>
-                    <div class="dp-cols__item"><strong>Plus&hellip;</strong>
-                        all the features of the free app including breaking news alerts, customised home screen and commenting</div>
+
+        <div class="dp-edition">
+            <div class="dp-edition-row dp-edition-row--items-2">
+                <div class="dp-edition-row__item dp-edition-row__item--image"><img class="block__image" src="@routes.Assets.at("images/premium-tier.png")"></div>
+                <div class="dp-edition-row__item dp-edition-row__item--boost-2">
+                    <h2 class="block__title">Guardian App Premium Tier</h2>
+                    <div class="dp-cols">
+                        <div class="dp-cols__item"><strong>Advert-free</strong>
+                                &mdash; no distractions, just the journalism you love</div>
+                        <div class="dp-cols__item"><strong>Available offline</strong>
+                                &mdash; just tap to read content offline. Perfect for the commute</div>
+                        <div class="dp-cols__item"><strong>Premium content</strong>
+                                &mdash; crosswords, exclusive articles and new features</div>
+                        <div class="dp-cols__item hide-on-mobile js-more-premium-benefits"><strong>Adjustable text size</strong>
+                                &mdash; larger text for ease of reading or smaller text to take in a whole article in one swipe</div>
+                        <div class="dp-cols__item hide-on-mobile js-more-premium-benefits"><strong>Save for later</strong>
+                                &mdash; articles stored in your account and available offline</div>
+                        <div class="dp-cols__item hide-on-mobile js-more-premium-benefits"><strong>Plus&hellip;</strong>
+                            all the features of the free app including breaking news alerts, customised home screen and commenting</div>
+                    </div>
                 </div>
+                @digitalpack.show_more_btn("more-premium-benefits")
             </div>
         </div>
     </div>
