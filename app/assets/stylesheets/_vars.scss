@@ -20,3 +20,28 @@ $c-link: $c-brand;
 $c-link-hover: #6e99b2;
 $c-link-active: $c-membership;
 $c-white: #fff;
+
+// Breakpoints
+// =============================================================================
+
+// Add breakpoints and tweakpoints here
+// To add custom breakpoints directly inside of a component,
+// see https://github.com/guardian/sass-mq#adding-custom-breakpoints
+
+// Name your breakpoints in a way that creates a ubiquitous language
+// across team members. It will improve communication between
+// stakeholders, designers, developers, and testers.
+
+$mobile-bp:  gs-span(4);
+$tablet-bp:  gs-span(9)  + $gs-gutter * 2;
+$desktop-bp: gs-span(12) + $gs-gutter * 2;
+$leftCol-bp: gs-span(14) + $gs-gutter * 2;
+$wide-bp:    gs-span(16) + $gs-gutter * 2;
+
+$mq-breakpoints: (
+    mobile:    $mobile-bp,  // 300px
+    tablet:    $tablet-bp,  // 740px
+    desktop:   $desktop-bp, // 980px
+    leftCol:   $leftCol-bp, // 1140px
+    wide:      $wide-bp,    // 1300px
+);

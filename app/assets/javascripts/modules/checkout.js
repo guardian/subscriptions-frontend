@@ -35,19 +35,21 @@ define(['$', 'bean'], function ($, bean) {
         IS_HIDDEN = 'is-hidden';
 
     var findAddress = function () {
-        bean.on($FIND_ADDRESS[0], 'click', function (e) {
-            e.preventDefault();
+        if($FIND_ADDRESS.length > 0){
+            bean.on($FIND_ADDRESS[0], 'click', function (e) {
+                e.preventDefault();
 
-            if ($POSTCODE.val()) {
-                // TODO: Ajax to lookup service
-                populateAddressFields({
-                    'house': 'Flat 14 Bankside House',
-                    'street': 'West Hill',
-                    'town': 'Putney'
-                });
-                showFullAddressFields();
-            }
-        });
+                if ($POSTCODE.val()) {
+                    // TODO: Ajax to lookup service
+                    populateAddressFields({
+                        'house': 'Flat 14 Bankside House',
+                        'street': 'West Hill',
+                        'town': 'Putney'
+                    });
+                    showFullAddressFields();
+                }
+            });
+        }
     };
 
     var populateAddressFields = function (address) {
@@ -57,11 +59,13 @@ define(['$', 'bean'], function ($, bean) {
     };
 
     var manualAddress = function () {
-        bean.on($MANUAL_ADDRESS[0], 'click', function (e) {
-            e.preventDefault();
-            showFullAddressFields();
-            $MANUAL_ADDRESS.addClass(IS_HIDDEN);
-        });
+        if($MANUAL_ADDRESS.length > 0){
+            bean.on($MANUAL_ADDRESS[0], 'click', function (e) {
+                e.preventDefault();
+                showFullAddressFields();
+                $MANUAL_ADDRESS.addClass(IS_HIDDEN);
+            });
+        }
     };
 
     var showFullAddressFields = function () {
@@ -69,40 +73,48 @@ define(['$', 'bean'], function ($, bean) {
     };
 
     var toggleFieldsets = function () {
-        bean.on($YOUR_DETAILS_SUBMIT[0], 'click', function (e) {
-            e.preventDefault();
-            $FIELDSET_YOUR_DETAILS.addClass(FIELDSET_COLLAPSED).attr(FIELDSET_COMPLETE, '');
-            $FIELDSET_PAYMENT_DETAILS.removeClass(FIELDSET_COLLAPSED);
-            $EDIT_YOUR_DETAILS.removeClass(IS_HIDDEN);
-            $EDIT_PAYMENT_DETAILS.addClass(IS_HIDDEN);
-        });
-
-        bean.on($PAYMENT_DETAILS_SUBMIT[0], 'click', function (e) {
-            e.preventDefault();
-            $FIELDSET_PAYMENT_DETAILS.addClass(FIELDSET_COLLAPSED).attr(FIELDSET_COMPLETE, '');
-            $FIELDSET_REVIEW.removeClass(FIELDSET_COLLAPSED);
-            $EDIT_PAYMENT_DETAILS.removeClass(IS_HIDDEN);
-        });
-
-        bean.on($EDIT_YOUR_DETAILS[0], 'click', function (e) {
-            e.preventDefault();
-            collapseFieldsets();
-            $FIELDSET_YOUR_DETAILS.removeClass(FIELDSET_COLLAPSED);
-            $EDIT_YOUR_DETAILS.addClass(IS_HIDDEN);
-            if ($FIELDSET_PAYMENT_DETAILS.attr(FIELDSET_COMPLETE) !== null) {
-                $EDIT_PAYMENT_DETAILS.removeClass(IS_HIDDEN);
-            } else {
+        if($YOUR_DETAILS_SUBMIT.length > 0){
+            bean.on($YOUR_DETAILS_SUBMIT[0], 'click', function (e) {
+                e.preventDefault();
+                $FIELDSET_YOUR_DETAILS.addClass(FIELDSET_COLLAPSED).attr(FIELDSET_COMPLETE, '');
+                $FIELDSET_PAYMENT_DETAILS.removeClass(FIELDSET_COLLAPSED);
+                $EDIT_YOUR_DETAILS.removeClass(IS_HIDDEN);
                 $EDIT_PAYMENT_DETAILS.addClass(IS_HIDDEN);
-            }
-        });
+            });
+        }
 
-        bean.on($EDIT_PAYMENT_DETAILS[0], 'click', function (e) {
-            e.preventDefault();
-            collapseFieldsets();
-            $FIELDSET_PAYMENT_DETAILS.removeClass(FIELDSET_COLLAPSED);
-            $EDIT_PAYMENT_DETAILS.addClass(IS_HIDDEN);
-            $EDIT_YOUR_DETAILS.removeClass(IS_HIDDEN);
-        });
+        if($PAYMENT_DETAILS_SUBMIT.length > 0){
+            bean.on($PAYMENT_DETAILS_SUBMIT[0], 'click', function (e) {
+                e.preventDefault();
+                $FIELDSET_PAYMENT_DETAILS.addClass(FIELDSET_COLLAPSED).attr(FIELDSET_COMPLETE, '');
+                $FIELDSET_REVIEW.removeClass(FIELDSET_COLLAPSED);
+                $EDIT_PAYMENT_DETAILS.removeClass(IS_HIDDEN);
+            });
+        }
+
+        if($EDIT_YOUR_DETAILS.length > 0){
+            bean.on($EDIT_YOUR_DETAILS[0], 'click', function (e) {
+                e.preventDefault();
+                collapseFieldsets();
+                $FIELDSET_YOUR_DETAILS.removeClass(FIELDSET_COLLAPSED);
+                $EDIT_YOUR_DETAILS.addClass(IS_HIDDEN);
+                if ($FIELDSET_PAYMENT_DETAILS.attr(FIELDSET_COMPLETE) !== null) {
+                    $EDIT_PAYMENT_DETAILS.removeClass(IS_HIDDEN);
+                } else {
+                    $EDIT_PAYMENT_DETAILS.addClass(IS_HIDDEN);
+                }
+            });
+        }
+
+        if($EDIT_PAYMENT_DETAILS.length > 0){
+            bean.on($EDIT_PAYMENT_DETAILS[0], 'click', function (e) {
+                e.preventDefault();
+                collapseFieldsets();
+                $FIELDSET_PAYMENT_DETAILS.removeClass(FIELDSET_COLLAPSED);
+                $EDIT_PAYMENT_DETAILS.addClass(IS_HIDDEN);
+                $EDIT_YOUR_DETAILS.removeClass(IS_HIDDEN);
+            });
+        }
     };
 
     var collapseFieldsets = function () {
@@ -112,20 +124,24 @@ define(['$', 'bean'], function ($, bean) {
     };
 
     var reviewDetails = function () {
-        bean.on($YOUR_DETAILS_SUBMIT[0], 'click', function (e) {
-            e.preventDefault();
-            $REVIEW_NAME.text([$FIRST_NAME.val(), $LAST_NAME.val()].join(' '));
-            $REVIEW_ADDRESS.text([$ADDRESS1.val(), $ADDRESS2.val(), $ADDRESS3.val(), $POSTCODE.val()].join(', '));
-            $REVIEW_EMAIL.text($EMAIL.val());
-            $SMALLPRINT.removeClass(IS_HIDDEN);
-        });
+        if($YOUR_DETAILS_SUBMIT.length > 0){
+            bean.on($YOUR_DETAILS_SUBMIT[0], 'click', function (e) {
+                e.preventDefault();
+                $REVIEW_NAME.text([$FIRST_NAME.val(), $LAST_NAME.val()].join(' '));
+                $REVIEW_ADDRESS.text([$ADDRESS1.val(), $ADDRESS2.val(), $ADDRESS3.val(), $POSTCODE.val()].join(', '));
+                $REVIEW_EMAIL.text($EMAIL.val());
+                $SMALLPRINT.removeClass(IS_HIDDEN);
+            });
+        }
 
-        bean.on($PAYMENT_DETAILS_SUBMIT[0], 'click', function (e) {
-            e.preventDefault();
-            $REVIEW_ACCOUNT.text($ACCOUNT.val());
-            $REVIEW_SORTCODE.text([$SORTCODE1.val(), $SORTCODE2.val(), $SORTCODE3.val()].join('-'));
-            $REVIEW_HOLDER.text($HOLDER.val());
-        });
+        if($PAYMENT_DETAILS_SUBMIT.length > 0){
+            bean.on($PAYMENT_DETAILS_SUBMIT[0], 'click', function (e) {
+                e.preventDefault();
+                $REVIEW_ACCOUNT.text($ACCOUNT.val());
+                $REVIEW_SORTCODE.text([$SORTCODE1.val(), $SORTCODE2.val(), $SORTCODE3.val()].join('-'));
+                $REVIEW_HOLDER.text($HOLDER.val());
+            });
+        }
     };
 
     function init() {

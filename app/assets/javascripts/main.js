@@ -1,11 +1,14 @@
 require([
-    'modules/checkout'
+    'modules/checkout',
+    'modules/digitalpack'
 ], function(
-    checkout
+    checkout,
+    digitalpack
 ) {
     'use strict';
 
     // Global
     checkout.init();
+    digitalpack.init();
 
 });
