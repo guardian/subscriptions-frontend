@@ -27,6 +27,8 @@ libraryDependencies ++= Seq(
   "com.github.nscala-time" %% "nscala-time" % "2.0.0"
 )
 
+javaOptions in Test += "-Dconfig.file=test/conf/application.conf"
+
 resolvers ++= Seq(
   "Guardian Github Releases" at "https://guardian.github.io/maven/repo-releases",
   "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases",
