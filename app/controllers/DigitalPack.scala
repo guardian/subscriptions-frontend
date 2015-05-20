@@ -1,6 +1,6 @@
 package controllers
 
-import actions.CommonActions.CachedAction
+import actions.CommonActions.{CachedAction, NoCacheAction}
 import play.api.mvc._
 
 case class DigitalEdition(id: String, name: String, price: String, cmp: String)
@@ -31,7 +31,7 @@ object DigitalPack extends Controller {
     Ok(views.html.digitalpack.country())
   }
 
-  def handleCountry = CachedAction(parse.tolerantFormUrlEncoded) { request =>
+  def handleCountry = NoCacheAction(parse.tolerantFormUrlEncoded) { request =>
     val country: Option[String] = request.body.get("country").map(_.head)
     if(country == Some("uk")) {
       Redirect("/checkout")
