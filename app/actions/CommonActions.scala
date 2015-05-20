@@ -1,6 +1,6 @@
 package actions
 
-import controllers.NoCache
+import controllers.{Cached, NoCache}
 import play.api.mvc._
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -9,11 +9,14 @@ import scala.concurrent.Future
 trait CommonActions {
 
   import CommonActions._
+
   val noCacheAction = resultModifier(noCache)
 
   val googleAuthAction = OAuthActions.AuthAction
 
   val googleAuthenticatedStaffAction = noCacheAction andThen googleAuthAction
+
+  val cachedAction = resultModifier(Cached(_))
 }
 
 object CommonActions {
