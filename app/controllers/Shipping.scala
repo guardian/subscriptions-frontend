@@ -1,10 +1,10 @@
 package controllers
 
-import actions.CommonActions
+import actions.CommonActions.CachedAction
 import model.ShippingDetails
 import play.api.mvc.{AnyContent, Request, Action, Controller}
 
-object Shipping extends Controller with CommonActions {
+object Shipping extends Controller {
 
   def index(request: Request[AnyContent], shippingDetails: ShippingDetails) =
     request.body.asFormUrlEncoded
@@ -20,7 +20,7 @@ object Shipping extends Controller with CommonActions {
       .map(Redirect(_))
       .getOrElse(Ok(views.html.shipping.index(shippingDetails)))
 
-  val collectionPaperDigital = cachedAction { request =>
+  val collectionPaperDigital = CachedAction { request =>
     index(request, ShippingDetails(
       name = "Paper + digital voucher subscription",
       method = "collection",
@@ -32,7 +32,7 @@ object Shipping extends Controller with CommonActions {
     ))
   }
 
-  val collectionPaper = cachedAction { request =>
+  val collectionPaper = CachedAction { request =>
     index(request, ShippingDetails(
       name = "Paper voucher subscription",
       method = "collection",
@@ -43,7 +43,7 @@ object Shipping extends Controller with CommonActions {
     ))
   }
 
-  val deliveryPaperDigital = cachedAction { request =>
+  val deliveryPaperDigital = CachedAction { request =>
     index(request, ShippingDetails(
       name = "Paper + digital home delivery subscription",
       method = "delivery",
@@ -55,7 +55,7 @@ object Shipping extends Controller with CommonActions {
     ))
   }
 
-  val deliveryPaper = cachedAction { request =>
+  val deliveryPaper = CachedAction { request =>
     index(request, ShippingDetails(
       name = "Paper home delivery subscription",
       method = "delivery",

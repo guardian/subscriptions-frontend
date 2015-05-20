@@ -1,6 +1,6 @@
 package controllers
 
-import actions.CommonActions
+import actions.CommonActions.CachedAction
 import play.api.mvc._
 
 case class DigitalEdition(id: String, name: String, price: String, cmp: String)
@@ -13,25 +13,25 @@ object DigitalEdition {
 
 }
 
-object DigitalPack extends Controller with CommonActions {
+object DigitalPack extends Controller {
 
-  def uk = cachedAction {
+  def uk = CachedAction {
     Ok(views.html.digitalpack.info(DigitalEdition.UK))
   }
 
-  def us = cachedAction {
+  def us = CachedAction {
     Ok(views.html.digitalpack.info(DigitalEdition.US))
   }
 
-  def au = cachedAction {
+  def au = CachedAction {
     Ok(views.html.digitalpack.info(DigitalEdition.AU))
   }
 
-  def selectCountry = cachedAction {
+  def selectCountry = CachedAction {
     Ok(views.html.digitalpack.country())
   }
 
-  def handleCountry = cachedAction(parse.tolerantFormUrlEncoded) { request =>
+  def handleCountry = CachedAction(parse.tolerantFormUrlEncoded) { request =>
     val country: Option[String] = request.body.get("country").map(_.head)
     if(country == Some("uk")) {
       Redirect("/checkout")

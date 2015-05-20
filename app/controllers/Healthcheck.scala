@@ -1,11 +1,11 @@
 package controllers
 
-import actions.CommonActions
+import actions.CommonActions.NoCacheAction
 import play.api.mvc._
 
-object Healthcheck extends Controller with CommonActions {
+object Healthcheck extends Controller {
 
-  def index = noCacheAction {
+  def index = NoCacheAction {
     Ok("""{"status":"OK"}""").withHeaders(CONTENT_TYPE -> "application/json")
   }
 
