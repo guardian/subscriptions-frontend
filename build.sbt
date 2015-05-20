@@ -23,7 +23,8 @@ scalaVersion := "2.11.6"
 libraryDependencies ++= Seq(
   cache,
   ws,
-  "com.gu" %% "play-googleauth" % "0.2.1"
+  "com.gu" %% "play-googleauth" % "0.2.1",
+  "com.github.nscala-time" %% "nscala-time" % "2.0.0"
 )
 
 resolvers ++= Seq(

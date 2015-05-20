@@ -1,5 +1,6 @@
 package actions
 
+import controllers.NoCache
 import play.api.mvc._
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -20,5 +21,5 @@ object CommonActions {
     def invokeBlock[A](request: Request[A], block: (Request[A]) => Future[Result]) = block(request).map(f)
   }
 
-  def noCache(result: Result): Result = result.withHeaders("Cache-Control" -> "no-cache, private", "Pragma" -> "no-cache")
+  def noCache(result: Result): Result = NoCache(result)
 }
