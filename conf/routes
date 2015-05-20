@@ -23,14 +23,14 @@ POST        /checkout                        controllers.Checkout.handleCheckout
 GET         /checkout/thankyou               controllers.Checkout.thankyou
 
 # collection and delivery
-GET         /collection/paper-digital        controllers.Shipping.collectionPaperDigital
-POST        /collection/paper-digital        controllers.Shipping.collectionPaperDigital
-GET         /collection/paper                controllers.Shipping.collectionPaper
-POST        /collection/paper                controllers.Shipping.collectionPaper
-GET         /delivery/paper-digital          controllers.Shipping.deliveryPaperDigital
-POST        /delivery/paper-digital          controllers.Shipping.deliveryPaperDigital
-GET         /delivery/paper                  controllers.Shipping.deliveryPaper
-POST        /delivery/paper                  controllers.Shipping.deliveryPaper
+GET         /collection/paper-digital        controllers.Shipping.viewCollectionPaperDigital
+POST        /collection/paper-digital        controllers.Shipping.buyCollectionPaperDigital
+GET         /collection/paper                controllers.Shipping.viewCollectionPaper
+POST        /collection/paper                controllers.Shipping.buyCollectionPaper
+GET         /delivery/paper-digital          controllers.Shipping.viewDeliveryPaperDigital
+POST        /delivery/paper-digital          controllers.Shipping.buyDeliveryPaperDigital
+GET         /delivery/paper                  controllers.Shipping.viewDeliveryPaper
+POST        /delivery/paper                  controllers.Shipping.buyDeliveryPaper
 
 # Staff signin (note, done by OAuth, in addition to regular signin)
 GET         /staff/login                       controllers.OAuth.login
@@ -38,4 +38,4 @@ GET         /staff/loginAction                 controllers.OAuth.loginAction
 GET         /oauth2callback                    controllers.OAuth.oauth2Callback
 
 # Map static resources from the /public folder to the /assets URL path
-GET         /assets/*file                    controllers.Assets.at(path="/public", file)
+GET         /assets/*file                    controllers.CachedAssets.at(path="/public", file)

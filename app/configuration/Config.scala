@@ -14,4 +14,9 @@ object Config {
       Some(GuardianGoogleAppsDomain) // Google App domain to restrict login
     )
   }
+
+  val config = ConfigFactory.load()
+
+  val stage = config.getString("stage")
+  val stageProd: Boolean = stage == "PROD"
 }

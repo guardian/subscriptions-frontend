@@ -1,5 +1,6 @@
 package controllers
 
+import actions.CommonActions.{CachedAction, NoCacheAction}
 import play.api.mvc._
 
 case class DigitalEdition(id: String, name: String, price: String, cmp: String)
@@ -14,23 +15,23 @@ object DigitalEdition {
 
 object DigitalPack extends Controller {
 
-  def uk = Action {
+  def uk = CachedAction {
     Ok(views.html.digitalpack.info(DigitalEdition.UK))
   }
 
-  def us = Action {
+  def us = CachedAction {
     Ok(views.html.digitalpack.info(DigitalEdition.US))
   }
 
-  def au = Action {
+  def au = CachedAction {
     Ok(views.html.digitalpack.info(DigitalEdition.AU))
   }
 
-  def selectCountry = Action {
+  def selectCountry = CachedAction {
     Ok(views.html.digitalpack.country())
   }
 
-  def handleCountry = Action(parse.tolerantFormUrlEncoded) { request =>
+  def handleCountry = NoCacheAction(parse.tolerantFormUrlEncoded) { request =>
     val country: Option[String] = request.body.get("country").map(_.head)
     if(country == Some("uk")) {
       Redirect("/checkout")

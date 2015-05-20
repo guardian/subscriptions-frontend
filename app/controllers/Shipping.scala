@@ -1,9 +1,10 @@
 package controllers
 
+import actions.CommonActions._
 import model.ShippingDetails
-import play.api.mvc.{AnyContent, Request, Action, Controller}
+import play.api.mvc._
 
-object Shipping extends Controller{
+object Shipping extends Controller {
 
   def index(request: Request[AnyContent], shippingDetails: ShippingDetails) =
     request.body.asFormUrlEncoded
@@ -19,7 +20,7 @@ object Shipping extends Controller{
       .map(Redirect(_))
       .getOrElse(Ok(views.html.shipping.index(shippingDetails)))
 
-  val collectionPaperDigital = Action { request =>
+  val collectionPaperDigital: Request[AnyContent] => Result = request =>
     index(request, ShippingDetails(
       name = "Paper + digital voucher subscription",
       method = "collection",
@@ -29,9 +30,8 @@ object Shipping extends Controller{
       weekend = Some("https://www.guardiansubscriptions.co.uk/Voucher?prom=faa03&pkgcode=ukx01&title=gv2&skip=1"),
       sunday = Some("https://www.guardiansubscriptions.co.uk/Voucher?prom=faa03&pkgcode=ukx01&title=ov1&skip=1")
     ))
-  }
 
-  val collectionPaper = Action { request =>
+  val collectionPaper: Request[AnyContent] => Result = request =>
     index(request, ShippingDetails(
       name = "Paper voucher subscription",
       method = "collection",
@@ -40,9 +40,8 @@ object Shipping extends Controller{
       sixday = Some("https://www.guardiansubscriptions.co.uk/Voucher?prom=faa03&pkgcode=ukx00&title=gv6&skip=1"),
       weekend = Some("https://www.guardiansubscriptions.co.uk/Voucher?prom=faa03&pkgcode=ukx00&title=gv2&skip=1")
     ))
-  }
 
-  val deliveryPaperDigital = Action { request =>
+  val deliveryPaperDigital: Request[AnyContent] => Result = request =>
     index(request, ShippingDetails(
       name = "Paper + digital home delivery subscription",
       method = "delivery",
@@ -52,9 +51,8 @@ object Shipping extends Controller{
       weekend = Some("https://www.guardiandirectsubs.co.uk/Delivery/details.aspx?package=WEEKEND%2B"),
       sunday = Some("https://www.guardiandirectsubs.co.uk/Delivery/details.aspx?package=SUNDAY%2B")
     ))
-  }
 
-  val deliveryPaper = Action { request =>
+  val deliveryPaper: Request[AnyContent] => Result = request =>
     index(request, ShippingDetails(
       name = "Paper home delivery subscription",
       method = "delivery",
@@ -63,6 +61,20 @@ object Shipping extends Controller{
       sixday = Some("https://www.guardiandirectsubs.co.uk/Delivery/details.aspx?package=SIXDAY"),
       weekend = Some("https://www.guardiandirectsubs.co.uk/Delivery/details.aspx?package=WEEKEND")
     ))
-  }
 
+  def viewCollectionPaperDigital() = CachedAction(collectionPaperDigital)
+
+  def buyCollectionPaperDigital() = NoCacheAction(collectionPaperDigital)
+
+  def viewCollectionPaper() = CachedAction(collectionPaper)
+
+  def buyCollectionPaper() = NoCacheAction(collectionPaper)
+
+  def viewDeliveryPaperDigital() = CachedAction(deliveryPaperDigital)
+
+  def buyDeliveryPaperDigital() = NoCacheAction(deliveryPaperDigital)
+
+  def viewDeliveryPaper() = CachedAction(deliveryPaper)
+
+  def buyDeliveryPaper() = NoCacheAction(deliveryPaper)
 }

@@ -1,6 +1,7 @@
 package controllers
 
-import actions.OAuthActions
+import actions.OAuthActions.LOGIN_ORIGIN_KEY
+import actions.CommonActions.NoCacheAction
 import com.gu.googleauth.{GoogleAuth, UserIdentity}
 import configuration.Config
 import model.FlashMessage
@@ -11,10 +12,10 @@ import play.api.mvc._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-object OAuth extends Controller with OAuthActions {
+object OAuth extends Controller {
   val ANTI_FORGERY_KEY = "antiForgeryToken"
 
-  def login = noCacheAction { request =>
+  def login = NoCacheAction { request =>
     val flashMsgOpt = request.flash.get("error").map(FlashMessage.error)
     Ok(views.html.staff.unauthorised(flashMsgOpt))
   }
