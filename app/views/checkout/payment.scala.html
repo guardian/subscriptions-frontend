@@ -1,4 +1,4 @@
-@()
+@(subsciptionForm: Form[model.SubscriptionData])
 
 @main("Checkout | Subscriptions | The Guardian") {
 
@@ -84,9 +84,9 @@
                         </div>
                         <div class="form-field">
                             <label class="label" for="sortcode">Bank sort code</label>
-                            <input type="text" class="input-text input-text--xsmall js-checkout-sortcode1" name="sortcode" id="sortcode"> -
-                            <input type="text" class="input-text input-text--xsmall js-checkout-sortcode2" name="sortcode" id="sortcode"> -
-                            <input type="text" class="input-text input-text--xsmall js-checkout-sortcode3" name="sortcode" id="sortcode">
+                            <input type="text" class="input-text input-text--xsmall js-checkout-sortcode1" name="sortcode1" id="sortcode"> -
+                            <input type="text" class="input-text input-text--xsmall js-checkout-sortcode2" name="sortcode2" id="sortcode"> -
+                            <input type="text" class="input-text input-text--xsmall js-checkout-sortcode3" name="sortcode3" id="sortcode">
                         </div>
                         <div class="form-field">
                             <label class="label" for="holder">Name of account holder</label>
