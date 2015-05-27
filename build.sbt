@@ -24,6 +24,7 @@ libraryDependencies ++= Seq(
   cache,
   ws,
   "com.gu" %% "play-googleauth" % "0.2.1",
+  "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0",
   "com.github.nscala-time" %% "nscala-time" % "2.0.0"
 )
 
