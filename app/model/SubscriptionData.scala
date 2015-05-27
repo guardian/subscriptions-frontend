@@ -5,6 +5,6 @@ case class PaymentData(account: String, sortCode1: Int, sortCode2: Int, sortCode
 }
 case class AddressData(house: String, street: String, town: String, postcode: String)
 
-case class SubscriptionData(firstName: String, lastName: String, email: String,
-                            address: AddressData,
-                            payment: PaymentData)
+case class PersonalData(firstName: String, lastName: String, email: String, address: AddressData)
+
+case class SubscriptionData(personalData: PersonalData, paymentData: PaymentData)
