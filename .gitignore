@@ -13,6 +13,7 @@ dist
 /.settings
 *.class
 *.log
+Gemfile.lock
 
 # sbt specific
 .cache
@@ -35,6 +36,7 @@ project/plugins/project/
 .sass-cache
 bower_components
 node_modules
+public/
 
 #Apple
 .DS_STORE
