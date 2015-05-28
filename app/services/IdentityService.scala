@@ -4,7 +4,7 @@ import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
 import play.api.Play.current
 import play.api.libs.json.JsValue
-import play.api.libs.ws.{WSRequestHolder, WSResponse, WS}
+import play.api.libs.ws.{WS, WSResponse}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -17,7 +17,7 @@ object IdentityService {
     .map(resp => jsonToIdUser(resp.json))
 
   def userLookupByEmail(email: String): Future[Option[IdUser]] = IdentityApiClient.userLookupByEmail(email)
-    .map(resp => jsonToIdUser(resp.json))
+    .map(resp => jsonToIdUser(resp.json \ "user"))
 
   private def jsonToIdUser(json: JsValue): Option[IdUser] = (json \ "id").asOpt[String].map(IdUser)
 }
@@ -36,9 +36,6 @@ object IdentityApiClient extends LazyLogging {
         case e: Throwable =>
           logger.error("ID API connection error", e)
       }
-      response.onSuccess {
-        case x => println(s"userLookupByEmail: ${x.body}")
-      }
       response
     }
   }
@@ -51,9 +48,6 @@ object IdentityApiClient extends LazyLogging {
       response.onFailure {
         case e: Throwable =>
           logger.error("ID API connection error", e)
-      }
-      response.onSuccess {
-        case x => println(s"userLookupByScGuUCookie: ${x.body}")
       }
       response
     }
