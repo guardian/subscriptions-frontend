@@ -27,30 +27,35 @@ object IdentityApiClient extends LazyLogging {
 
   val identityEndpoint = Config.Identity.baseUri
 
-  val userLookupByEmailWS = WS.url(s"$identityEndpoint/user").withHeaders(("Authorization", s"Bearer ${Config.Identity.apiToken}"))
-  val userLookupByScGuUCookie = WS.url(s"$identityEndpoint/user/me").withHeaders(("Referer", s"$identityEndpoint/"))
+  def userLookupByEmail: String => Future[WSResponse] = {
+    val endpoint = WS.url(s"$identityEndpoint/user").withHeaders(("Authorization", s"Bearer ${Config.Identity.apiToken}"))
 
-  def userLookupByEmail(email: String): Future[WSResponse] = {
-    val response: Future[WSResponse] = userLookupByEmailWS.withQueryString(("emailAddress", email)).execute()
-    response.onFailure {
-      case e: Throwable =>
-        logger.error("ID API connection error", e)
+    email => {
+      val response: Future[WSResponse] = endpoint.withQueryString(("emailAddress", email)).execute()
+      response.onFailure {
+        case e: Throwable =>
+          logger.error("ID API connection error", e)
+      }
+      response.onSuccess {
+        case x => println(s"userLookupByEmail: ${x.body}")
+      }
+      response
     }
-    response.onSuccess {
-      case x => println(s"userLookupByEmail: ${x.body}")
-    }
-    response
   }
 
-  def userLookupByScGuUCookie(cookieValue: String): Future[WSResponse] = {
-    val response: Future[WSResponse] = userLookupByScGuUCookie.withHeaders(("Cookie", s"SC_GU_U=$cookieValue;")).execute()
-    response.onFailure {
-      case e: Throwable =>
-        logger.error("ID API connection error", e)
+  def userLookupByScGuUCookie: String => Future[WSResponse] = {
+    val endpoint = WS.url(s"$identityEndpoint/user/me").withHeaders(("Referer", s"$identityEndpoint/"))
+
+    cookieValue => {
+      val response: Future[WSResponse] = endpoint.withHeaders(("Cookie", s"SC_GU_U=$cookieValue;")).execute()
+      response.onFailure {
+        case e: Throwable =>
+          logger.error("ID API connection error", e)
+      }
+      response.onSuccess {
+        case x => println(s"userLookupByScGuUCookie: ${x.body}")
+      }
+      response
     }
-    response.onSuccess {
-      case x => println(s"userLookupByScGuUCookie: ${x.body}")
-    }
-    response
   }
 }
