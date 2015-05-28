@@ -27,8 +27,7 @@ object IdentityApiClient extends LazyLogging {
 
   val identityEndpoint = Config.Identity.baseUri
 
-  val userLookupByEmailWS = WS.url(s"$identityEndpoint/user").withHeaders(("X-GU-ID-Client-Access-Token", Config.Identity.apiToken))
-
+  val userLookupByEmailWS = WS.url(s"$identityEndpoint/user").withHeaders(("Authorization", s"Bearer ${Config.Identity.apiToken}"))
   val userLookupByScGuUCookie = WS.url(s"$identityEndpoint/user/me").withHeaders(("Referer", s"$identityEndpoint/"))
 
   def userLookupByEmail(email: String): Future[WSResponse] = {
