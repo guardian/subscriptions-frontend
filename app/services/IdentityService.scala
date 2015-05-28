@@ -4,7 +4,7 @@ import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
 import play.api.Play.current
 import play.api.libs.json.JsValue
-import play.api.libs.ws.{WS, WSResponse}
+import play.api.libs.ws.{WS, WSRequestHolder, WSResponse}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -27,29 +27,25 @@ object IdentityApiClient extends LazyLogging {
 
   val identityEndpoint = Config.Identity.baseUri
 
+  implicit class FutureWSLike(f: Future[WSResponse]) {
+    def withWSFailureLogging(endpoint: WSRequestHolder) = {
+      f.onFailure {
+        case e: Throwable =>
+          logger.error("Connection error: " + endpoint.url, e)
+      }
+      f
+    }
+  }
+
   def userLookupByEmail: String => Future[WSResponse] = {
     val endpoint = WS.url(s"$identityEndpoint/user").withHeaders(("Authorization", s"Bearer ${Config.Identity.apiToken}"))
 
-    email => {
-      val response: Future[WSResponse] = endpoint.withQueryString(("emailAddress", email)).execute()
-      response.onFailure {
-        case e: Throwable =>
-          logger.error("ID API connection error", e)
-      }
-      response
-    }
+    email => endpoint.withQueryString(("emailAddress", email)).execute().withWSFailureLogging(endpoint)
   }
 
   def userLookupByScGuUCookie: String => Future[WSResponse] = {
     val endpoint = WS.url(s"$identityEndpoint/user/me").withHeaders(("Referer", s"$identityEndpoint/"))
 
-    cookieValue => {
-      val response: Future[WSResponse] = endpoint.withHeaders(("Cookie", s"SC_GU_U=$cookieValue;")).execute()
-      response.onFailure {
-        case e: Throwable =>
-          logger.error("ID API connection error", e)
-      }
-      response
-    }
+    cookieValue => endpoint.withHeaders(("Cookie", s"SC_GU_U=$cookieValue;")).execute().withWSFailureLogging(endpoint)
   }
 }
