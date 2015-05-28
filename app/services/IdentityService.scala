@@ -2,8 +2,10 @@ package services
 
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
+import model.PersonalData
 import play.api.Play.current
-import play.api.libs.json.JsValue
+import play.api.libs.json.Json._
+import play.api.libs.json.{JsString, JsObject, Json, JsValue}
 import play.api.libs.ws.{WS, WSRequestHolder, WSResponse}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -19,7 +21,21 @@ object IdentityService {
   def userLookupByEmail(email: String): Future[Option[IdUser]] = IdentityApiClient.userLookupByEmail(email)
     .map(resp => jsonToIdUser(resp.json \ "user"))
 
-  private def jsonToIdUser(json: JsValue): Option[IdUser] = (json \ "id").asOpt[String].map(IdUser)
+  def registerGuest(personalData: PersonalData) = IdentityApiClient.createGuest(JsObject(Map(
+    "primaryEmailAddress" -> JsString(personalData.email),
+    "privateFields" -> JsObject(Map(
+      "firstName" -> JsString(personalData.firstName),
+      "secondName" -> JsString(personalData.lastName),
+      "billingAddress1" -> JsString(personalData.address.house),
+      "billingAddress2" -> JsString(personalData.address.street),
+      "billingAddress3" -> JsString(personalData.address.town),
+      "billingPostcode" -> JsString(personalData.address.postcode),
+      "billingCountry" -> JsString("United Kingdom")
+    ).toSeq),
+    "statusFields" -> JsObject(Map("receiveGnmMarketing" -> JsString("true")).toSeq)
+  ).toSeq))
+
+  private def jsonToIdUser = (json: JsValue) => (json \ "id").asOpt[String].map(IdUser)
 }
 
 
@@ -37,8 +53,10 @@ object IdentityApiClient extends LazyLogging {
     }
   }
 
+  private def authoriseCall = (wsHolder: WSRequestHolder) => wsHolder.withHeaders(("Authorization", s"Bearer ${Config.Identity.apiToken}"))
+
   def userLookupByEmail: String => Future[WSResponse] = {
-    val endpoint = WS.url(s"$identityEndpoint/user").withHeaders(("Authorization", s"Bearer ${Config.Identity.apiToken}"))
+    val endpoint = authoriseCall(WS.url(s"$identityEndpoint/user"))
 
     email => endpoint.withQueryString(("emailAddress", email)).execute().withWSFailureLogging(endpoint)
   }
@@ -47,5 +65,11 @@ object IdentityApiClient extends LazyLogging {
     val endpoint = WS.url(s"$identityEndpoint/user/me").withHeaders(("Referer", s"$identityEndpoint/"))
 
     cookieValue => endpoint.withHeaders(("Cookie", s"SC_GU_U=$cookieValue;")).execute().withWSFailureLogging(endpoint)
+  }
+
+  def createGuest: JsValue => Future[WSResponse] = {
+    val endpoint = authoriseCall(WS.url(s"$identityEndpoint/guest"))
+
+    guestJson => endpoint.post(guestJson).withWSFailureLogging(endpoint)
   }
 }
