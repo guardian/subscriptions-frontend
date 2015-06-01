@@ -28,18 +28,11 @@ object CheckoutService extends LazyLogging {
             .map(_.toRight(LoginRequired))))
         .get
 
-    lookupUser.onComplete{case x => println(s">>> lookupUser: $x")}
-
-    def createSFUser = (idUser:Either[CheckoutException, IdUser]) => {
-      println(s">>> createSFUser start")
-      val x = idUser.fold(eventualFailureReason, SalesforceService.createSFUser(subscriptionData.personalData, _))
-      println(s">>> createSFUser end")
-      x
-    }
+    def createSFUser = (idUser:Either[CheckoutException, IdUser]) =>
 
     for {
       idUser <- lookupUser
-      sfUser <- createSFUser(idUser)
+      sfUser <- idUser.fold(eventualFailureReason, SalesforceService.createSFUser(subscriptionData.personalData, _))
     } yield {
       println(s">>>userID:$idUser")
       println(s">>>sfUser:$sfUser")
