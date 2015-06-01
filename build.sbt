@@ -24,7 +24,9 @@ libraryDependencies ++= Seq(
   cache,
   ws,
   "com.gu" %% "play-googleauth" % "0.2.1",
-  "com.github.nscala-time" %% "nscala-time" % "2.0.0"
+  "com.github.nscala-time" %% "nscala-time" % "2.0.0",
+  "net.kencochrane.raven" % "raven-logback" % "6.0.0"
+
 )
 
 javaOptions in Test += "-Dconfig.file=test/conf/application.conf"
