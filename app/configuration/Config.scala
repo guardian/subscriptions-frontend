@@ -23,6 +23,6 @@ object Config {
   val stage = config.getString("stage")
   val stageProd: Boolean = stage == "PROD"
 
-  lazy val sentryDsn = Try(new Dsn(config.getString("sentry.dsn")))
+  val sentryDsn = Try(new Dsn(config.getString("sentry.dsn")))
 
 }
