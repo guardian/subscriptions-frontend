@@ -15,7 +15,8 @@ lazy val root = (project in file(".")).enablePlugins(
     BuildInfoKey.constant("buildNumber", Option(System.getenv("BUILD_NUMBER")) getOrElse "DEV"),
     BuildInfoKey.constant("buildTime", System.currentTimeMillis)
   ),
-  buildInfoPackage := "app"
+  buildInfoPackage := "app",
+  buildInfoOptions += BuildInfoOption.ToMap
 )
 
 scalaVersion := "2.11.6"
