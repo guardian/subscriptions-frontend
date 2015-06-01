@@ -1,6 +1,7 @@
 package configuration
 
 import com.gu.googleauth.GoogleAuthConfig
+import com.gu.membership.salesforce.SalesforceConfig
 import com.typesafe.config.ConfigFactory
 
 object Config {
@@ -25,4 +26,6 @@ object Config {
     val baseUri = idConfig.getString("baseUri")
     val apiToken = idConfig.getString("apiToken")
   }
+
+  val Salesforce =  SalesforceConfig.from(config.getConfig("touchpoint.backend.environments").getConfig(stage), stage)
 }
