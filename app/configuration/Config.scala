@@ -5,6 +5,8 @@ import com.gu.membership.salesforce.SalesforceConfig
 import com.typesafe.config.ConfigFactory
 
 object Config {
+  val appName = "subscriptions-frontend"
+
   val config = ConfigFactory.load()
 
   val googleAuthConfig = {
