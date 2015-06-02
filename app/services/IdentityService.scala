@@ -1,27 +1,27 @@
 package services
 
+import com.amazonaws.regions.{Regions, Region}
+import com.gu.monitoring.{AuthenticationMetrics, RequestMetrics, StatusMetrics, CloudWatch}
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
 import model.PersonalData
 import play.api.Play.current
-import play.api.libs.json.Json._
-import play.api.libs.json.{JsString, JsObject, Json, JsValue}
+import play.api.libs.json.{JsObject, JsString, JsValue}
 import play.api.libs.ws.{WS, WSRequestHolder, WSResponse}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-object IdentityService {
+case class IdUser(id: String)
 
-  case class IdUser(id: String)
-
-  def userLookupByScGuU(cookieValue: String): Future[Option[IdUser]] = IdentityApiClient.userLookupByScGuUCookie(cookieValue)
+class IdentityService(identityApiClient: IdentityApiClient) {
+  def userLookupByScGuU(cookieValue: String): Future[Option[IdUser]] = identityApiClient.userLookupByScGuUCookie(cookieValue)
     .map(resp => jsonToIdUser(resp.json))
 
-  def userLookupByEmail(email: String): Future[Option[IdUser]] = IdentityApiClient.userLookupByEmail(email)
+  def userLookupByEmail(email: String): Future[Option[IdUser]] = identityApiClient.userLookupByEmail(email)
     .map(resp => jsonToIdUser(resp.json \ "user"))
 
-  def registerGuest(personalData: PersonalData) = IdentityApiClient.createGuest(JsObject(Map(
+  def registerGuest(personalData: PersonalData) = identityApiClient.createGuest(JsObject(Map(
     "primaryEmailAddress" -> JsString(personalData.email),
     "privateFields" -> JsObject(Map(
       "firstName" -> JsString(personalData.firstName),
@@ -38,10 +38,20 @@ object IdentityService {
   private def jsonToIdUser = (json: JsValue) => (json \ "id").asOpt[String].map(IdUser)
 }
 
+object IdentityService extends IdentityService(IdentityApiClient)
 
-object IdentityApiClient extends LazyLogging {
+trait IdentityApiClient {
+  def userLookupByScGuUCookie: String => Future[WSResponse]
+
+  def createGuest: JsValue => Future[WSResponse]
+
+  def userLookupByEmail: String => Future[WSResponse]
+}
+
+object IdentityApiClient extends IdentityApiClient with LazyLogging {
 
   val identityEndpoint = Config.Identity.baseUri
+  lazy val metrics = new IdApiMetrics(Config.stage)
 
   implicit class FutureWSLike(f: Future[WSResponse]) {
     def withWSFailureLogging(endpoint: WSRequestHolder) = {
@@ -51,25 +61,62 @@ object IdentityApiClient extends LazyLogging {
       }
       f
     }
+
+    def withCloudwatchMonitoring(method: String) = {
+      f.map(response => metrics.recordResponse(response.status, method))
+      f.map { response =>
+        (response.json \ "status").asOpt[String].filter(_ == "error")
+          .flatMap(_ => (response.json \\ "errors").find(_ \ "message" == "Access Denied"))
+          .foreach(_ => metrics.recordAuthenticationError)
+      }
+      f
+    }
+
+    def withCloudwatchMonitoringOfPost = withCloudwatchMonitoring("POST")
+
+    def withCloudwatchMonitoringOfGet = withCloudwatchMonitoring("GET")
   }
 
-  private def authoriseCall = (wsHolder: WSRequestHolder) => wsHolder.withHeaders(("Authorization", s"Bearer ${Config.Identity.apiToken}"))
+  private def authoriseCall = (wsHolder: WSRequestHolder) =>
+    wsHolder.withHeaders(("Authorization", s"Bearer ${Config.Identity.apiToken}"))
 
   def userLookupByEmail: String => Future[WSResponse] = {
     val endpoint = authoriseCall(WS.url(s"$identityEndpoint/user"))
 
-    email => endpoint.withQueryString(("emailAddress", email)).execute().withWSFailureLogging(endpoint)
+    email => endpoint.withQueryString(("emailAddress", email)).execute()
+      .withWSFailureLogging(endpoint)
+      .withCloudwatchMonitoringOfGet
   }
 
   def userLookupByScGuUCookie: String => Future[WSResponse] = {
     val endpoint = WS.url(s"$identityEndpoint/user/me").withHeaders(("Referer", s"$identityEndpoint/"))
 
-    cookieValue => endpoint.withHeaders(("Cookie", s"SC_GU_U=$cookieValue;")).execute().withWSFailureLogging(endpoint)
+    cookieValue => endpoint.withHeaders(("Cookie", s"SC_GU_U=$cookieValue;")).execute()
+      .withWSFailureLogging(endpoint)
+      .withCloudwatchMonitoringOfGet
   }
 
   def createGuest: JsValue => Future[WSResponse] = {
     val endpoint = authoriseCall(WS.url(s"$identityEndpoint/guest"))
 
-    guestJson => endpoint.post(guestJson).withWSFailureLogging(endpoint)
+    guestJson => endpoint.post(guestJson)
+      .withWSFailureLogging(endpoint)
+      .withCloudwatchMonitoringOfPost
   }
+}
+
+class IdApiMetrics(val stage: String) extends CloudWatch
+  with StatusMetrics
+  with RequestMetrics
+  with AuthenticationMetrics {
+
+  val region = Region.getRegion(Regions.EU_WEST_1)
+  val application = Config.appName
+  val service = "Identity"
+
+  def recordRequest = putRequest
+
+  def recordResponse(status: Int, responseMethod: String) = putResponseCode(status, responseMethod)
+
+  def recordAuthenticationError = putAuthenticationError
 }
