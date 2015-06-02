@@ -2,6 +2,9 @@ package configuration
 
 import com.gu.googleauth.GoogleAuthConfig
 import com.typesafe.config.ConfigFactory
+import net.kencochrane.raven.dsn.Dsn
+
+import scala.util.Try
 
 object Config {
   val googleAuthConfig = {
@@ -19,4 +22,7 @@ object Config {
 
   val stage = config.getString("stage")
   val stageProd: Boolean = stage == "PROD"
+
+  val sentryDsn = Try(new Dsn(config.getString("sentry.dsn")))
+
 }
