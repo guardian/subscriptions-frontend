@@ -9,26 +9,15 @@ import model.PersonalData
 import play.api.Logger
 import play.api.libs.concurrent.Akka
 import play.api.libs.json.{JsObject, Json}
-import services.CheckoutService._
-import services.IdentityService.IdUser
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.{FiniteDuration, _}
 import scala.concurrent.{Await, Future}
-import scala.util.Left
 
 object SalesforceService extends LazyLogging {
 
-  def createSFUser(personalData: PersonalData, idUser: IdUser): Future[Either[CheckoutException, MemberId]] = {
-    val data: JsObject = createSalesforceUserData(personalData)
-    val x = SalesforceRepo.upsert(idUser.id, data)
-      .map(Right(_)).recoverWith {
-        case e: Throwable =>
-          logger.error("Could not create saleforce user", e)
-          Future.successful(Left(SalesforceUserNotCreated))
-      }
-    x
-  }
+  def createSFUser(personalData: PersonalData, idUser: IdUser): Future[MemberId] =
+    SalesforceRepo.upsert(idUser.id, createSalesforceUserData(personalData))
 
   private def createSalesforceUserData(personalData: PersonalData): JsObject = {
     Seq(Json.obj(
@@ -56,7 +45,7 @@ object SalesforceRepo extends MemberRepository {
     override val consumerSecret = Config.Salesforce.consumerSecret
     override val apiToken = Config.Salesforce.apiToken
     override val apiPassword = Config.Salesforce.apiPassword
-    override val application = "subscriptions-frontend"
+    override val application = Config.appName
     override val apiURL = Config.Salesforce.apiURL.toString
     override val stage = Config.Salesforce.envName
 

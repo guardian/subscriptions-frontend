@@ -2,7 +2,6 @@ package services
 
 import com.typesafe.scalalogging.LazyLogging
 import model.SubscriptionData
-import services.IdentityService.IdUser
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -15,9 +14,9 @@ object CheckoutService extends LazyLogging {
   object InvalidLoginCookie extends CheckoutException
   object SalesforceUserNotCreated extends CheckoutException
 
-  def processSubscription(subscriptionData: SubscriptionData, scGuUCookie:Option[String] = None): Future[Either[CheckoutException,String]] = {
+  def processSubscription(subscriptionData: SubscriptionData, scGuUCookie: Option[String] = None): Future[Either[CheckoutException, String]] = {
 
-    def eventualFailureReason = (ex: CheckoutException) => Future.successful(Left(ex))
+    val preserveFailureReason = (ex: CheckoutException) => Future.successful(Left(ex))
 
     val lookupUser: Future[Either[CheckoutException, IdUser]] =
       scGuUCookie.map(
@@ -28,17 +27,22 @@ object CheckoutService extends LazyLogging {
             .map(_.toRight(LoginRequired))))
         .get
 
-    def createSFUser = (idUser:Either[CheckoutException, IdUser]) =>
+    def createSFUser(idUser: Either[CheckoutException, IdUser]) = idUser.fold(preserveFailureReason,
+      SalesforceService.createSFUser(subscriptionData.personalData, _)
+        .map(Right(_)).recoverWith {
+          case e: Throwable =>
+            logger.error("Could not create Salesforce user", e)
+            Future.successful(Left(SalesforceUserNotCreated))
+        })
 
     for {
       idUser <- lookupUser
-      sfUser <- idUser.fold(eventualFailureReason, SalesforceService.createSFUser(subscriptionData.personalData, _))
+      sfUser <- createSFUser(idUser)
     } yield {
       println(s">>>userID:$idUser")
       println(s">>>sfUser:$sfUser")
+      Right("AB123456")
     }
-
-    Future.successful(Right("AB123456"))
   }
 
 }
