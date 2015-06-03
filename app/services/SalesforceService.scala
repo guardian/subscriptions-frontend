@@ -14,10 +14,10 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.{FiniteDuration, _}
 import scala.concurrent.{Await, Future}
 
-object SalesforceService extends LazyLogging {
+class SalesforceService(memberRepository: MemberRepository) extends LazyLogging {
 
   def createSFUser(personalData: PersonalData, idUser: IdUser): Future[MemberId] =
-    SalesforceRepo.upsert(idUser.id, createSalesforceUserData(personalData))
+    memberRepository.upsert(idUser.id, createSalesforceUserData(personalData))
 
   private def createSalesforceUserData(personalData: PersonalData): JsObject = {
     Seq(Json.obj(
@@ -26,7 +26,6 @@ object SalesforceService extends LazyLogging {
       Keys.LAST_NAME -> personalData.lastName,
       Keys.MAILING_STREET -> personalData.address.street,
       Keys.MAILING_CITY -> personalData.address.town,
-      //      Keys.MAILING_STATE -> ???,
       Keys.MAILING_POSTCODE -> personalData.address.postcode,
       Keys.MAILING_COUNTRY -> "United Kingdom",
       Keys.ALLOW_MEMBERSHIP_MAIL -> true
@@ -37,6 +36,8 @@ object SalesforceService extends LazyLogging {
   }.reduce(_ ++ _)
 
 }
+
+object SalesforceService extends SalesforceService(SalesforceRepo)
 
 object SalesforceRepo extends MemberRepository {
   override val salesforce = new Scalaforce {

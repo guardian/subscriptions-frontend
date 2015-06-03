@@ -1,5 +1,7 @@
 package services
 
+import java.util.NoSuchElementException
+
 import com.typesafe.scalalogging.LazyLogging
 import model.SubscriptionData
 
@@ -7,10 +9,10 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.Left
 
-object CheckoutService extends LazyLogging {
+class CheckoutService(identityService: IdentityService, salesforceService: SalesforceService) extends LazyLogging {
 
   sealed class CheckoutException extends RuntimeException
-  object LoginRequired extends CheckoutException
+  object UserLookupProblem extends CheckoutException
   object InvalidLoginCookie extends CheckoutException
   object SalesforceUserNotCreated extends CheckoutException
 
@@ -20,15 +22,17 @@ object CheckoutService extends LazyLogging {
 
     val lookupUser: Future[Either[CheckoutException, IdUser]] =
       scGuUCookie.map(
-        IdentityService.userLookupByScGuU(_)
+        identityService.userLookupByScGuU(_)
           .map(_.toRight(InvalidLoginCookie)))
         .orElse(
-          Some(IdentityService.userLookupByEmail(subscriptionData.personalData.email)
-            .map(_.toRight(LoginRequired))))
+          Some(identityService.userLookupByEmail(subscriptionData.personalData.email)
+            .filter(_.isDefined)
+            .recoverWith { case _: NoSuchElementException => identityService.registerGuest(subscriptionData.personalData) }
+            .map(_.toRight(UserLookupProblem))))
         .get
 
     def createSFUser(idUser: Either[CheckoutException, IdUser]) = idUser.fold(preserveFailureReason,
-      SalesforceService.createSFUser(subscriptionData.personalData, _)
+      salesforceService.createSFUser(subscriptionData.personalData, _)
         .map(Right(_)).recoverWith {
           case e: Throwable =>
             logger.error("Could not create Salesforce user", e)
@@ -46,3 +50,5 @@ object CheckoutService extends LazyLogging {
   }
 
 }
+
+object CheckoutService extends CheckoutService(IdentityService, SalesforceService)

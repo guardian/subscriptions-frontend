@@ -6,7 +6,7 @@ import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
 import model.PersonalData
 import play.api.Play.current
-import play.api.libs.json.{JsObject, JsString, JsValue}
+import play.api.libs.json.{JsArray, JsObject, JsString, JsValue}
 import play.api.libs.ws.{WS, WSRequestHolder, WSResponse}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -34,6 +34,7 @@ class IdentityService(identityApiClient: IdentityApiClient) {
     ).toSeq),
     "statusFields" -> JsObject(Map("receiveGnmMarketing" -> JsString("true")).toSeq)
   ).toSeq))
+  .map(resp => jsonToIdUser(resp.json \ "user"))
 
   private def jsonToIdUser = (json: JsValue) => (json \ "id").asOpt[String].map(IdUser)
 }
@@ -54,21 +55,35 @@ object IdentityApiClient extends IdentityApiClient with LazyLogging {
   lazy val metrics = new IdApiMetrics(Config.stage)
 
   implicit class FutureWSLike(f: Future[WSResponse]) {
+    /**
+     * Example of ID API Response: `{"status":"error","errors":[{"message":"Forbidden","description":"Field access denied","context":"privateFields.billingA ddress1"}]}`
+     * @return
+     */
+    private def applyOnSpecificErrors(reasons: List[String])(block: WSResponse => Unit): Unit = {
+      def errorMessageFilter(error: JsValue): Boolean =
+        (error \ "message").asOpt[JsString].filter(e => reasons.contains(e.value)).isDefined
+
+      f.map(response =>
+        (response.json \ "status").asOpt[String].filter(_ == "error")
+          .foreach(_ => (response.json \ "errors").asOpt[JsArray].flatMap(_.value.headOption)
+            .filter(errorMessageFilter)
+            .foreach(_ => block(response))))
+    }
+
     def withWSFailureLogging(endpoint: WSRequestHolder) = {
       f.onFailure {
         case e: Throwable =>
           logger.error("Connection error: " + endpoint.url, e)
       }
+      applyOnSpecificErrors(List("Access Denied", "Forbidden"))(r => logger.error(r.body))
       f
     }
 
     def withCloudwatchMonitoring(method: String) = {
       f.map(response => metrics.recordResponse(response.status, method))
-      f.map { response =>
-        (response.json \ "status").asOpt[String].filter(_ == "error")
-          .flatMap(_ => (response.json \\ "errors").find(_ \ "message" == "Access Denied"))
-          .foreach(_ => metrics.recordAuthenticationError)
-      }
+
+      applyOnSpecificErrors(List("Access Denied", "Forbidden"))(_ => metrics.recordAuthenticationError)
+
       f
     }
 
