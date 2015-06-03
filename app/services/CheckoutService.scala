@@ -12,7 +12,7 @@ import scala.util.Left
 class CheckoutService(identityService: IdentityService, salesforceService: SalesforceService) extends LazyLogging {
 
   sealed class CheckoutException extends RuntimeException
-  object UserLookupProblem extends CheckoutException
+  object GuestUserNotCreated extends CheckoutException
   object InvalidLoginCookie extends CheckoutException
   object SalesforceUserNotCreated extends CheckoutException
 
@@ -28,7 +28,7 @@ class CheckoutService(identityService: IdentityService, salesforceService: Sales
           Some(identityService.userLookupByEmail(subscriptionData.personalData.email)
             .filter(_.isDefined)
             .recoverWith { case _: NoSuchElementException => identityService.registerGuest(subscriptionData.personalData) }
-            .map(_.toRight(UserLookupProblem))))
+            .map(_.toRight(GuestUserNotCreated))))
         .get
 
     def createSFUser(idUser: Either[CheckoutException, IdUser]) = idUser.fold(preserveFailureReason,
