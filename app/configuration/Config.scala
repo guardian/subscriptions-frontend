@@ -3,6 +3,9 @@ package configuration
 import com.gu.googleauth.GoogleAuthConfig
 import com.gu.membership.salesforce.SalesforceConfig
 import com.typesafe.config.ConfigFactory
+import net.kencochrane.raven.dsn.Dsn
+
+import scala.util.Try
 
 object Config {
   val appName = "subscriptions-frontend"
@@ -30,4 +33,7 @@ object Config {
   }
 
   val Salesforce =  SalesforceConfig.from(config.getConfig("touchpoint.backend.environments").getConfig(stage), stage)
+
+  val sentryDsn = Try(new Dsn(config.getString("sentry.dsn")))
+
 }

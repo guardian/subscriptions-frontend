@@ -15,7 +15,8 @@ lazy val root = (project in file(".")).enablePlugins(
     BuildInfoKey.constant("buildNumber", Option(System.getenv("BUILD_NUMBER")) getOrElse "DEV"),
     BuildInfoKey.constant("buildTime", System.currentTimeMillis)
   ),
-  buildInfoPackage := "app"
+  buildInfoPackage := "app",
+  buildInfoOptions += BuildInfoOption.ToMap
 )
 
 scalaVersion := "2.11.6"
@@ -25,6 +26,9 @@ libraryDependencies ++= Seq(
   cache,
   ws,
   "com.gu" %% "play-googleauth" % "0.2.1",
+  "com.github.nscala-time" %% "nscala-time" % "2.0.0",
+  "net.kencochrane.raven" % "raven-logback" % "6.0.0"
+
   "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0",
   "com.github.nscala-time" %% "nscala-time" % "2.0.0"
 )
