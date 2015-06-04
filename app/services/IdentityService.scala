@@ -6,8 +6,8 @@ import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
 import model.PersonalData
 import play.api.Play.current
-import play.api.libs.json.{JsArray, JsObject, JsString, JsValue}
-import play.api.libs.ws.{WS, WSRequestHolder, WSResponse}
+import play.api.libs.json._
+import play.api.libs.ws.{WSRequest, WS, WSRequestHolder, WSResponse}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -19,7 +19,7 @@ class IdentityService(identityApiClient: IdentityApiClient) {
     .map(resp => jsonToIdUser(resp.json))
 
   def userLookupByEmail(email: String): Future[Option[IdUser]] = identityApiClient.userLookupByEmail(email)
-    .map(resp => jsonToIdUser(resp.json \ "user"))
+    .map(resp => jsonToIdUser(resp.json \ "user" get))
 
   def registerGuest(personalData: PersonalData): Future[Option[IdUser]] = identityApiClient.createGuest(JsObject(Map(
     "primaryEmailAddress" -> JsString(personalData.email),
@@ -34,9 +34,9 @@ class IdentityService(identityApiClient: IdentityApiClient) {
     ).toSeq),
     "statusFields" -> JsObject(Map("receiveGnmMarketing" -> JsString("true")).toSeq)
   ).toSeq))
-  .map(resp => jsonToIdUser(resp.json \ "user"))
+  .map(resp => jsonToIdUser(resp.json \ "user" get))
 
-  private def jsonToIdUser = (json: JsValue) => (json \ "id").asOpt[String].map(IdUser)
+  private val jsonToIdUser = (json: JsValue) => (json \ "id").asOpt[String].map(IdUser)
 }
 
 object IdentityService extends IdentityService(IdentityApiClient)
@@ -70,10 +70,10 @@ object IdentityApiClient extends IdentityApiClient with LazyLogging {
             .foreach(_ => block(response))))
     }
 
-    def withWSFailureLogging(endpoint: WSRequestHolder) = {
+    def withWSFailureLogging(request: WSRequest) = {
       f.onFailure {
         case e: Throwable =>
-          logger.error("Connection error: " + endpoint.url, e)
+          logger.error("Connection error: " + request.url, e)
       }
       applyOnSpecificErrors(List("Access Denied", "Forbidden"))(r => logger.error(r.body))
       f
@@ -92,8 +92,8 @@ object IdentityApiClient extends IdentityApiClient with LazyLogging {
     def withCloudwatchMonitoringOfGet = withCloudwatchMonitoring("GET")
   }
 
-  private def authoriseCall = (wsHolder: WSRequestHolder) =>
-    wsHolder.withHeaders(("Authorization", s"Bearer ${Config.Identity.apiToken}"))
+  private def authoriseCall = (request: WSRequest) =>
+    request.withHeaders(("Authorization", s"Bearer ${Config.Identity.apiToken}"))
 
   def userLookupByEmail: String => Future[WSResponse] = {
     val endpoint = authoriseCall(WS.url(s"$identityEndpoint/user"))

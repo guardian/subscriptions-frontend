@@ -19,4 +19,6 @@ case class FakeWSResponse(allHeaders: Map[String, Seq[String]] = Map(),
   override def header(key: String): Option[String] = header
 
   override def cookie(name: String): Option[WSCookie] = cookie
+
+  override def bodyAsBytes: Array[Byte] = body.getBytes
 }
