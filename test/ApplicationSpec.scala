@@ -10,12 +10,7 @@ class ApplicationSpec extends Specification {
 
 
   "Application" should {
-
-    "send 404 on a bad request" in new WithApplication(app = fakeApplicationWithGlobal) {
-
-      route(FakeRequest(GET, "/boum")) must equalTo(None)
-    }
-
+    
     "render the index page" in new WithApplication(app = fakeApplicationWithGlobal) {
       val home = route(FakeRequest(GET, "/")).get
 

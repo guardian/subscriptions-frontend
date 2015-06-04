@@ -1,3 +1,5 @@
+import play.sbt.PlayImport
+
 name := "subscriptions-frontend"
 
 version := "1.0-SNAPSHOT"
@@ -25,7 +27,8 @@ libraryDependencies ++= Seq(
   "com.gu" %% "membership-common" % "0.65",
   cache,
   ws,
-  "com.gu" %% "play-googleauth" % "0.2.1",
+  PlayImport.specs2,
+  "com.gu" %% "play-googleauth" % "0.3.0",
   "com.github.nscala-time" %% "nscala-time" % "2.0.0",
   "net.kencochrane.raven" % "raven-logback" % "6.0.0",
   "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0",
