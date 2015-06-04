@@ -11,7 +11,7 @@ object TestSalesforceService {
   val futureUser = Future.successful(BasicMember("", ""))
   val futureFailure = Future.failed(new RuntimeException)
 
-  def apply(_createSFUser:Future[MemberId] = futureUser) = new SalesforceService {
+  def apply(_createSFUser: Future[MemberId] = futureUser) = new SalesforceService {
     override def createSFUser(personalData: PersonalData, idUser: IdUser): Future[MemberId] = _createSFUser
   }
 }

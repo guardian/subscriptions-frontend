@@ -9,10 +9,9 @@ import testUtils.services.{TestIdentityService, TestSalesforceService}
 
 class CheckoutServiceTest extends FlatSpec with Matchers {
 
-
   val subscriptionData: SubscriptionData = SubscriptionData(
     PersonalData("", "", "", AddressData("", "", "", "")),
-    PaymentData("", 1, 2, 3, ""))
+    PaymentData("", "", "", "", ""))
 
   "Process subscription" should "succeed when valid SC_GU_U cookie is provided" in {
     val subject = new CheckoutService(TestIdentityService(_userLookupByScGuU = futureUser), TestSalesforceService())

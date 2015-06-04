@@ -37,10 +37,10 @@ object Checkout extends Controller {
     )(PersonalData.apply)(PersonalData.unapply),
 
     "" -> mapping(
-      "account" -> text,
-      "sortcode1" -> number(10, 99),
-      "sortcode2" -> number(10, 99),
-      "sortcode3" -> number(10, 99),
+      "account" -> text(6, 6),
+      "sortcode1" -> text(2, 2),
+      "sortcode2" -> text(2, 2),
+      "sortcode3" -> text(2, 2),
       "holder" -> text
     )(PaymentData.apply)(PaymentData.unapply)
 
