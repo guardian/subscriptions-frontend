@@ -9,12 +9,12 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.Left
 
-class CheckoutService(identityService: IdentityService, salesforceService: SalesforceService) extends LazyLogging {
+sealed class CheckoutException extends RuntimeException
+object GuestUserNotCreated extends CheckoutException
+object InvalidLoginCookie extends CheckoutException
+object SalesforceUserNotCreated extends CheckoutException
 
-  sealed class CheckoutException extends RuntimeException
-  object GuestUserNotCreated extends CheckoutException
-  object InvalidLoginCookie extends CheckoutException
-  object SalesforceUserNotCreated extends CheckoutException
+class CheckoutService(identityService: IdentityService, salesforceService: SalesforceService) extends LazyLogging {
 
   def processSubscription(subscriptionData: SubscriptionData, scGuUCookie: Option[String] = None): Future[Either[CheckoutException, String]] = {
 
@@ -45,7 +45,7 @@ class CheckoutService(identityService: IdentityService, salesforceService: Sales
     } yield {
       println(s">>>userID:$idUser")
       println(s">>>sfUser:$sfUser")
-      Right("AB123456")
+      sfUser.right.map(_ => "AB123456")
     }
   }
 

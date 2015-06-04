@@ -21,7 +21,7 @@ class IdentityService(identityApiClient: IdentityApiClient) {
   def userLookupByEmail(email: String): Future[Option[IdUser]] = identityApiClient.userLookupByEmail(email)
     .map(resp => jsonToIdUser(resp.json \ "user"))
 
-  def registerGuest(personalData: PersonalData) = identityApiClient.createGuest(JsObject(Map(
+  def registerGuest(personalData: PersonalData): Future[Option[IdUser]] = identityApiClient.createGuest(JsObject(Map(
     "primaryEmailAddress" -> JsString(personalData.email),
     "privateFields" -> JsObject(Map(
       "firstName" -> JsString(personalData.firstName),
@@ -51,7 +51,7 @@ trait IdentityApiClient {
 
 object IdentityApiClient extends IdentityApiClient with LazyLogging {
 
-  val identityEndpoint = Config.Identity.baseUri
+  lazy val identityEndpoint = Config.Identity.baseUri
   lazy val metrics = new IdApiMetrics(Config.stage)
 
   implicit class FutureWSLike(f: Future[WSResponse]) {
