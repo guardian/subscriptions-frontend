@@ -24,7 +24,7 @@ lazy val root = (project in file(".")).enablePlugins(
 scalaVersion := "2.11.6"
 
 libraryDependencies ++= Seq(
-  "com.gu" %% "membership-common" % "0.65",
+  "com.gu" %% "membership-common" % "0.66",
   cache,
   ws,
   PlayImport.specs2,
