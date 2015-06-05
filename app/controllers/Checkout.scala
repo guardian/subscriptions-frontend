@@ -52,12 +52,10 @@ object Checkout extends Controller {
     val formWithData = subscriptionForm.bindFromRequest
 
     if (formWithData.hasErrors) {
-      println(s">>>${formWithData.errors}")
       Future.successful(Ok(views.html.checkout.payment(formWithData)))
     }
     else {
       val subscriptionData: SubscriptionData = formWithData.get
-      println(s">>>$subscriptionData")
       CheckoutService.processSubscription(subscriptionData, request.cookies.find(_.name == "SC_GU_U").map(_.value))
         .map(_ => Redirect(routes.Checkout.thankyou()))
     }

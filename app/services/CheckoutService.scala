@@ -43,8 +43,6 @@ class CheckoutService(identityService: IdentityService, salesforceService: Sales
       idUser <- lookupUser
       sfUser <- createSFUser(idUser)
     } yield {
-      println(s">>>userID:$idUser")
-      println(s">>>sfUser:$sfUser")
       sfUser.right.map(_ => "AB123456")
     }
   }
