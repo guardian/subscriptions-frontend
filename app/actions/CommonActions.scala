@@ -8,13 +8,13 @@ import scala.concurrent.Future
 
 object CommonActions {
 
-  val NoCacheAction = resultModifier(noCache)
+  lazy val NoCacheAction = resultModifier(noCache)
 
-  val GoogleAuthAction = OAuthActions.AuthAction
+  lazy val GoogleAuthAction = OAuthActions.AuthAction
 
-  val GoogleAuthenticatedStaffAction = NoCacheAction andThen GoogleAuthAction
+  lazy val GoogleAuthenticatedStaffAction = NoCacheAction andThen GoogleAuthAction
 
-  val CachedAction = resultModifier(Cached(_))
+  lazy val CachedAction = resultModifier(Cached(_))
 
   def resultModifier(f: Result => Result) = new ActionBuilder[Request] {
     def invokeBlock[A](request: Request[A], block: (Request[A]) => Future[Result]) = block(request).map(f)

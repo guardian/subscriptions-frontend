@@ -24,12 +24,15 @@ lazy val root = (project in file(".")).enablePlugins(
 scalaVersion := "2.11.6"
 
 libraryDependencies ++= Seq(
+  "com.gu" %% "membership-common" % "0.66",
   cache,
   ws,
   PlayImport.specs2,
   "com.gu" %% "play-googleauth" % "0.3.0",
   "com.github.nscala-time" %% "nscala-time" % "2.0.0",
-  "net.kencochrane.raven" % "raven-logback" % "6.0.0"
+  "net.kencochrane.raven" % "raven-logback" % "6.0.0",
+  "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0",
+  "org.scalatest" %% "scalatest" % "2.2.4" % "test"
 )
 
 javaOptions in Test += "-Dconfig.file=test/conf/application.conf"
