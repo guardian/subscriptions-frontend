@@ -32,8 +32,7 @@ module.exports = function(grunt) {
                     '<%= dirs.public.stylesheets %>/ie-old.min.css': '<%= dirs.assets.stylesheets %>/ie-old.scss'
                 },
                 options: {
-                    style: 'compressed',
-                    sourcemap: isDev ? 'auto' : 'none'
+                    style: 'compressed'
                 }
             }
         },

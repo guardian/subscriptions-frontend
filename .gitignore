@@ -31,12 +31,14 @@ project/plugins/project/
 .worksheet
 
 # frontend
-*.css.map
-*.js.map
 .sass-cache
 bower_components
 node_modules
-public/
+jspm_packages
+*.min.js
+*.min.css
+*.css.map
+*.js.map
 
 #Apple
 .DS_STORE
