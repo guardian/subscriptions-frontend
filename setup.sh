@@ -98,18 +98,6 @@ install_grunt() {
   fi
 }
 
-install_ruby() {
-  if linux; then
-    sudo apt-get install -y ruby1.9.1-full
-  fi
-}
-
-install_bundler() {
-  if ! installed bundle; then
-    sudo gem install bundler
-  fi
-}
-
 install_dependencies() {
   $BASEDIR/install-dependencies.sh
 }
@@ -136,8 +124,6 @@ main() {
   install_jdk
   install_node
   install_grunt
-  install_ruby
-  install_bundler
   install_dependencies
   compile
   report
