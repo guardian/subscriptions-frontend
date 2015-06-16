@@ -25,15 +25,61 @@ module.exports = function(grunt) {
             assets: {
                 root:        'app/assets',
                 javascripts: '<%= dirs.assets.root %>/javascripts',
-                stylesheets: '<%= dirs.assets.root %>/stylesheets'
+                stylesheets: '<%= dirs.assets.root %>/stylesheets',
+                images:      '<%= dirs.assets.root %>/images'
             },
             public: {
                 root:        'public',
                 javascripts: '<%= dirs.public.root %>/javascripts',
-                stylesheets: '<%= dirs.public.root %>/stylesheets'
+                stylesheets: '<%= dirs.public.root %>/stylesheets',
+                images:      '<%= dirs.public.root %>/images'
             }
         },
 
+        clean: {
+            assets: ['<%= dirs.public.javascripts %>','<%= dirs.public.stylesheets %>', '<%= dirs.public.images %>'],
+            dist: ['<%= dirs.public.root %>/dist/', 'conf/assets.map']
+        },
+
+        copy: {
+            jsVendor: {
+                cwd: '<%= dirs.assets.javascripts %>/vendor',
+                src: ['**'],
+                dest: '<%= dirs.public.javascripts %>/vendor',
+                expand: true
+            },
+            images: {
+                cwd: '<%= dirs.assets.images %>',
+                src: ['**'],
+                dest: '<%= dirs.public.images %>',
+                expand: true
+            }
+        },
+
+        asset_hash: {
+            options: {
+                preserveSourceMaps: true,
+                assetMap: isDev ? false : 'conf/assets.map',
+                hashLength: 8,
+                algorithm: 'md5',
+                srcBasePath: 'public/',
+                destBasePath: 'public/',
+                references: [
+                    '<%= dirs.public.root %>/dist/stylesheets/**/*.css'
+                ]
+            },
+            staticfiles: {
+                files: [{
+                    src: [
+                        '<%= dirs.public.stylesheets %>/**/*.css',
+                        '<%= dirs.public.javascripts %>/**/*.js',
+                        '<%= dirs.public.javascripts %>/**/*.map',
+                        '<%= dirs.public.images %>/**/*'
+                    ],
+                    dest: '<%= dirs.public.root %>/dist/'
+                }]
+            }
+        },
         sass: {
             options: {
                 sourceMap: true,
@@ -83,6 +129,27 @@ module.exports = function(grunt) {
         }
     });
 
-    grunt.registerTask('compile', ['sass', 'requirejs']);
+    grunt.registerTask('compile', function(){
+        grunt.task.run([
+            'clean:assets',
+            'clean:dist',
+            'sass',
+            'requirejs',
+            'copy:images',
+            'copy:jsVendor'
+        ]);
+
+        /**
+         * Only version files for prod builds
+         * Wipe out unused non-versioned assets for good measure
+         */
+        if (!isDev) {
+            grunt.task.run([
+                'asset_hash',
+                'clean:assets'
+            ]);
+        }
+    });
+
     grunt.registerTask('default', ['compile']);
 };

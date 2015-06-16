@@ -12,6 +12,7 @@
 dist
 logs
 tmp
+conf/assets.map
 
 # Scala-IDE specific
 .worksheet
