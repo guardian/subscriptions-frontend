@@ -10,8 +10,8 @@ set -o errexit
 #
 ################################################################################
 
-JS_DIR=app/assets/javascripts
-SCSS_DIR=app/assets/stylesheets
+JS_DIR=assets/javascripts
+SCSS_DIR=assets/stylesheets
 
 npm install
 
