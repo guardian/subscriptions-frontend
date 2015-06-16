@@ -1,19 +1,21 @@
-logs
-project/project
-project/target
-tmp
-dist
-/.idea
-/*.iml
-/out
-/.idea_modules
-/.classpath
-/.project
-/RUNNING_PID
-/.settings
 *.class
 *.log
-Gemfile.lock
+.DS_STORE
+/*.iml
+/.classpath
+/.idea
+/.idea_modules
+/.project
+/.settings
+/RUNNING_PID
+/out
+dist
+logs
+tmp
+
+# Scala-IDE specific
+.worksheet
+.scala_dependencies
 
 # sbt specific
 .cache
@@ -23,22 +25,14 @@ dist/*
 target/
 lib_managed/
 src_managed/
+project/project
+project/target
 project/boot/
 project/plugins/project/
-
-# Scala-IDE specific
-.scala_dependencies
-.worksheet
 
 # frontend
 .sass-cache
 bower_components
 node_modules
-jspm_packages
-*.min.js
-*.min.css
-*.css.map
-*.js.map
-
-#Apple
-.DS_STORE
+public/javascripts
+public/stylesheets
