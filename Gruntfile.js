@@ -23,7 +23,7 @@ module.exports = function(grunt) {
 
         dirs: {
             assets: {
-                root:        'app/assets',
+                root:        'assets',
                 javascripts: '<%= dirs.assets.root %>/javascripts',
                 stylesheets: '<%= dirs.assets.root %>/stylesheets',
                 images:      '<%= dirs.assets.root %>/images'
