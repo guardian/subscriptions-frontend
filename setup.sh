@@ -99,7 +99,9 @@ install_grunt() {
 }
 
 install_dependencies() {
-  $BASEDIR/install-dependencies.sh
+  npm install
+  cd assets/javascripts && bower install && cd ../..
+  cd assets/stylesheets && bower install && cd ../..
 }
 
 compile() {
