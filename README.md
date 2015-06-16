@@ -10,6 +10,7 @@
    ```
 
 1. Run `./nginx/setup.sh`
+1. Compile the required assets with `grunt compile`
 1. Download our private keys from the `subscriptions-private` S3 bucket. You will need an AWS account so ask another dev.
 
     If you have the AWS CLI set up you can run
