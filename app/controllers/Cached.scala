@@ -18,7 +18,7 @@ object Cached {
     if (suitableForCaching(result)) cacheHeaders(seconds, result) else result
   }
 
-  def suitableForCaching(result: Result): Boolean = cacheableStatusCodes.exists(_ == result.header.status)
+  def suitableForCaching(result: Result): Boolean = cacheableStatusCodes.contains(result.header.status)
 
   private def cacheHeaders(maxAge: Int, result: Result) = {
     val now = DateTime.now

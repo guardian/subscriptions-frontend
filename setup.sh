@@ -98,48 +98,14 @@ install_grunt() {
   fi
 }
 
-install_jspm() {
-  if ! installed jspm; then
-    sudo npm -g install jspm
-  fi
-}
-
-install_ruby() {
-  if linux; then
-    sudo apt-get install -y ruby1.9.1-full
-  fi
-}
-
-install_bundler() {
-  if ! installed bundle; then
-    sudo gem install bundler
-  fi
-}
-
-install_gcc() {
-  if ! installed g++; then
-    if linux; then
-      sudo apt-get install -y g++ make
-    elif mac; then
-      EXTRA_STEPS+=("Install Xcode from the App Store")
-    fi
-  fi
-}
-
-install_libpng() {
-  if linux; then
-    sudo apt-get install -y libpng-dev
-  elif mac; then
-    brew install libpng
-  fi
-}
-
 install_dependencies() {
-  $BASEDIR/install-dependencies.sh
+  npm install
+  cd assets/javascripts && bower install && cd ../..
+  cd assets/stylesheets && bower install && cd ../..
 }
 
 compile() {
-  grunt compile --dev
+  grunt compile
 }
 
 report() {
@@ -159,12 +125,7 @@ main() {
   install_homebrew
   install_jdk
   install_node
-#  install_gcc
   install_grunt
-  install_jspm
-  install_ruby
-  install_bundler
-#  install_libpng
   install_dependencies
   compile
   report
