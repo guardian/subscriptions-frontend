@@ -59,7 +59,7 @@ module.exports = function(grunt) {
         asset_hash: {
             options: {
                 preserveSourceMaps: true,
-                assetMap: 'conf/assets.map',
+                assetMap: isDev ? false : 'conf/assets.map',
                 hashLength: 8,
                 algorithm: 'md5',
                 srcBasePath: 'public/',
@@ -136,10 +136,19 @@ module.exports = function(grunt) {
             'sass',
             'requirejs',
             'copy:images',
-            'copy:jsVendor',
-            'asset_hash',
-            'clean:assets'
+            'copy:jsVendor'
         ]);
+
+        /**
+         * Only version files for prod builds
+         * Wipe out unused non-versioned assets for good measure
+         */
+        if (!isDev) {
+            grunt.task.run([
+                'asset_hash',
+                'clean:assets'
+            ]);
+        }
     });
 
     grunt.registerTask('default', ['compile']);
