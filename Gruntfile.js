@@ -71,9 +71,8 @@ module.exports = function(grunt) {
             staticfiles: {
                 files: [{
                     src: [
-                        '<%= dirs.public.stylesheets %>/**/*.css',
-                        '<%= dirs.public.javascripts %>/**/*.js',
-                        '<%= dirs.public.javascripts %>/**/*.map',
+                        '<%= dirs.public.stylesheets %>/**/*',
+                        '<%= dirs.public.javascripts %>/**/*',
                         '<%= dirs.public.images %>/**/*'
                     ],
                     dest: '<%= dirs.public.root %>/dist/'
