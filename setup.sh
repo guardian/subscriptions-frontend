@@ -105,7 +105,7 @@ install_dependencies() {
 }
 
 compile() {
-  grunt compile --dev
+  grunt compile
 }
 
 report() {
