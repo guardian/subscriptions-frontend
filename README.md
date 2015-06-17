@@ -37,3 +37,9 @@
    region = eu-west-1
    ```
 1. Developer builds ``` sbt devrun ``` and navigate to ```sub.thegulocal.com```
+
+## Javascript development
+
+By default, the setup script will hash file assets and generate a `conf/assets.map` file,
+which in turn will cause Play to render assets with their hashed path. Use the `grunt compile --dev`
+task in order to have Play to render assets without hashing them.
