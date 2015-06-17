@@ -8,7 +8,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 object CachedAssets extends Controller {
   private val logger      = Logger(getClass)
-  private val hashedPaths: Map[String, String] =
+  val hashedPaths: Map[String, String] =
     (for {
       resourceIs <- Option(getClass.getClassLoader.getResourceAsStream("assets.map"))
     } yield Json.parse(resourceIs).as[Map[String, String]]).getOrElse {
@@ -17,10 +17,17 @@ object CachedAssets extends Controller {
       Map.empty
     }
 
-  def at(path: String, file: String, aggressiveCaching: Boolean = false) = Action.async { request =>
-    val hashedFile = hashedPaths.getOrElse(file, file)
+  /**
+   * Returns a hashed asset *path* suitable for rending out to the browser - forcing them to fetch new
+   * assets when the hash changes.
+   */
+  def hashedPathFor(path: String): String = "/assets/" + hashedPaths.getOrElse(path, path)
 
-    controllers.Assets.at(path, hashedFile, aggressiveCaching).apply(request).recover {
+  /**
+   * Serves an asset, wrapping it with cache headers if appropriate
+   */
+  def at(path: String, file: String, aggressiveCaching: Boolean = false) = Action.async { request =>
+    controllers.Assets.at(path, file, aggressiveCaching).apply(request).recover {
       case e: RuntimeException => {
         Logger.warn(s"Asset run time exception for path $path $file. Does this file exist?", e)
         Cached(NotFound)

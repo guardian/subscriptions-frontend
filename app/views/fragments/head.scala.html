@@ -10,18 +10,18 @@
 <meta name="format-detection" content="telephone=no"/>
 <meta name="HandheldFriendly" content="True"/>
 
-<link rel="stylesheet" href="@routes.CachedAssets.at("stylesheets/main.min.css")"/>
+<link rel="stylesheet" href="@controllers.CachedAssets.hashedPathFor("stylesheets/main.min.css")"/>
 <!--[if (IE 9)]>
-    <link rel="stylesheet" href="@routes.CachedAssets.at("stylesheets/ie9.min.css")"/>
+    <link rel="stylesheet" href="@controllers.CachedAssets.hashedPathFor("stylesheets/ie9.min.css")"/>
 <![endif]-->
 <!--[if (lt IE 9)]>
-    <link rel="stylesheet" href="@routes.CachedAssets.at("stylesheets/ie-old.min.css")"/>
+    <link rel="stylesheet" href="@controllers.CachedAssets.hashedPathFor("stylesheets/ie-old.min.css")"/>
 <![endif]-->
 
 @if(Play.isDev(Play.current)) {
-    <link rel="shortcut icon" type="image/png" href="@routes.CachedAssets.at("images/favicons/32x32-dev.ico")"/>
+    <link rel="shortcut icon" type="image/png" href="@controllers.CachedAssets.hashedPathFor("images/favicons/32x32-dev.ico")"/>
 } else {
-    <link rel="shortcut icon" type="image/png" href="@routes.CachedAssets.at("images/favicons/32x32.ico")"/>
+    <link rel="shortcut icon" type="image/png" href="@controllers.CachedAssets.hashedPathFor("images/favicons/32x32.ico")"/>
 }
 
 <script src="//cdn.optimizely.com/js/293455139.js"></script>
