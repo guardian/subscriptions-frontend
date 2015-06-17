@@ -1,8 +1,18 @@
 module.exports = function(grunt) {
     'use strict';
 
-    var isDev = (grunt.option('dev') !== undefined) ? Boolean(grunt.option('dev')) : process.env.GRUNT_ISDEV === '1';
+    require('time-grunt')(grunt);
+
+    /**
+     * Setup
+     */
     var pkg = grunt.file.readJSON('package.json');
+    var isDev = (grunt.option('dev') !== undefined) ? Boolean(grunt.option('dev')) : process.env.GRUNT_ISDEV === '1';
+
+    /**
+     * Load all grunt-* tasks
+     */
+    require('load-grunt-tasks')(grunt);
 
     if (isDev) {
         grunt.log.subhead('Running Grunt in DEV mode');
@@ -13,27 +23,73 @@ module.exports = function(grunt) {
 
         dirs: {
             assets: {
-                root:        'app/assets',
+                root:        'assets',
                 javascripts: '<%= dirs.assets.root %>/javascripts',
-                stylesheets: '<%= dirs.assets.root %>/stylesheets'
+                stylesheets: '<%= dirs.assets.root %>/stylesheets',
+                images:      '<%= dirs.assets.root %>/images'
             },
             public: {
                 root:        'public',
                 javascripts: '<%= dirs.public.root %>/javascripts',
-                stylesheets: '<%= dirs.public.root %>/stylesheets'
+                stylesheets: '<%= dirs.public.root %>/stylesheets',
+                images:      '<%= dirs.public.root %>/images'
             }
         },
 
+        clean: {
+            assets: ['<%= dirs.public.javascripts %>','<%= dirs.public.stylesheets %>', '<%= dirs.public.images %>'],
+            dist: ['<%= dirs.public.root %>/dist/', 'conf/assets.map']
+        },
+
+        copy: {
+            jsVendor: {
+                cwd: '<%= dirs.assets.javascripts %>/vendor',
+                src: ['**'],
+                dest: '<%= dirs.public.javascripts %>/vendor',
+                expand: true
+            },
+            images: {
+                cwd: '<%= dirs.assets.images %>',
+                src: ['**'],
+                dest: '<%= dirs.public.images %>',
+                expand: true
+            }
+        },
+
+        asset_hash: {
+            options: {
+                preserveSourceMaps: true,
+                assetMap: isDev ? false : 'conf/assets.map',
+                hashLength: 8,
+                algorithm: 'md5',
+                srcBasePath: 'public/',
+                destBasePath: 'public/',
+                references: [
+                    '<%= dirs.public.root %>/dist/stylesheets/**/*.css'
+                ]
+            },
+            staticfiles: {
+                files: [{
+                    src: [
+                        '<%= dirs.public.stylesheets %>/**/*.css',
+                        '<%= dirs.public.javascripts %>/**/*.js',
+                        '<%= dirs.public.javascripts %>/**/*.map',
+                        '<%= dirs.public.images %>/**/*'
+                    ],
+                    dest: '<%= dirs.public.root %>/dist/'
+                }]
+            }
+        },
         sass: {
-            compile: {
+            options: {
+                sourceMap: true,
+                outputStyle: 'compressed'
+            },
+            dist: {
                 files: {
                     '<%= dirs.public.stylesheets %>/main.min.css': '<%= dirs.assets.stylesheets %>/main.scss',
                     '<%= dirs.public.stylesheets %>/ie9.min.css': '<%= dirs.assets.stylesheets %>/ie9.scss',
                     '<%= dirs.public.stylesheets %>/ie-old.min.css': '<%= dirs.assets.stylesheets %>/ie-old.scss'
-                },
-                options: {
-                    style: 'compressed',
-                    sourcemap: isDev ? 'auto' : 'none'
                 }
             }
         },
@@ -73,10 +129,27 @@ module.exports = function(grunt) {
         }
     });
 
-    grunt.loadNpmTasks('grunt-contrib-sass');
-    grunt.loadNpmTasks('grunt-contrib-requirejs');
-    grunt.loadNpmTasks('grunt-contrib-watch');
+    grunt.registerTask('compile', function(){
+        grunt.task.run([
+            'clean:assets',
+            'clean:dist',
+            'sass',
+            'requirejs',
+            'copy:images',
+            'copy:jsVendor'
+        ]);
 
-    grunt.registerTask('compile', ['sass', 'requirejs']);
+        /**
+         * Only version files for prod builds
+         * Wipe out unused non-versioned assets for good measure
+         */
+        if (!isDev) {
+            grunt.task.run([
+                'asset_hash',
+                'clean:assets'
+            ]);
+        }
+    });
+
     grunt.registerTask('default', ['compile']);
 };
