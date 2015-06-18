@@ -29,7 +29,7 @@ libraryDependencies ++= Seq(
   ws,
   PlayImport.specs2,
   "com.gu" %% "play-googleauth" % "0.3.0",
-  "com.gu.identity" % "identity-play-auth_2.11" % "0.5",
+  "com.gu.identity" %% "identity-play-auth" % "0.5",
   "com.github.nscala-time" %% "nscala-time" % "2.0.0",
   "net.kencochrane.raven" % "raven-logback" % "6.0.0",
   "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0",
