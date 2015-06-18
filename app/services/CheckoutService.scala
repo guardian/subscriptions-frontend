@@ -10,19 +10,16 @@ import scala.concurrent.Future
 
 class CheckoutService(identityService: IdentityService) extends LazyLogging {
 
-  def processSubscription(subscriptionData: SubscriptionData, request: Request[_]): Future[Either[GuestUserNotCreated, IdMinimalUser]] =  {
+  def processSubscription(subscriptionData: SubscriptionData,
+                          request: Request[_]): Future[Either[GuestUserNotCreated, IdMinimalUser]] =
+    AuthenticationService.authenticatedUserFor(request).map(user => Future(Right(user)))
+      .getOrElse {
+        logger.info(s"User does not have an Identity account, creating a Guest one.")
 
-    val lookupUser = AuthenticationService.authenticatedUserFor(request)
-
-    if(lookupUser.isDefined) Future(Right(lookupUser.get))
-    else {
-      logger.info(s"User does not have an Identity account, creating a Guest one.")
-
-      identityService.registerGuest(subscriptionData.personalData).map { guestFuture =>
-        guestFuture.right.map(id => IdMinimalUser(id, None))
+        identityService.registerGuest(subscriptionData.personalData).map { guestFuture =>
+          guestFuture.right.map(id => IdMinimalUser(id, None))
+        }
       }
-    }
-  }
 }
 
 object CheckoutService extends CheckoutService(IdentityService)
