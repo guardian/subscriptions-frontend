@@ -14,7 +14,7 @@ import play.api.libs.ws.{WS, WSRequest, WSResponse}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-case class GuestUserNotCreated(s : String) extends RuntimeException
+case class GuestUserNotCreated(reason : String)
 
 class IdentityService(identityApiClient: IdentityApiClient) extends LazyLogging {
 
