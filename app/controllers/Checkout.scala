@@ -4,7 +4,7 @@ import actions.CommonActions._
 import com.gu.identity.play.PrivateFields
 import model.{AddressData, PaymentData, PersonalData, SubscriptionData}
 import play.api.mvc._
-import services.{CheckoutService, IdentityService}
+import services.{AuthenticationService, CheckoutService, IdentityService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -17,8 +17,9 @@ object Checkout extends Controller {
     }.getOrElse(Future.successful(None))
 
     idUserFutureOpt.map { idUserOpt =>
-      val idUserData: (PrivateFields => Option[String]) => Option[String] =
-        fieldName => idUserOpt.flatMap(_.privateFields.flatMap(fieldName))
+      def idUserData(fieldName: PrivateFields => Option[String]): Option[String] =
+        idUserOpt.flatMap(_.privateFields.flatMap(fieldName))
+
       Ok(
         views.html.checkout.payment(
           idUserData(_.firstName),
@@ -34,7 +35,7 @@ object Checkout extends Controller {
 
   //todo handle error https://www.playframework.com/documentation/2.4.x/ScalaForms
   val handleCheckout = GoogleAuthenticatedStaffAction.async(parse.form(SubscriptionsForm())) { implicit request =>
-    CheckoutService.processSubscription(request.body, request)
+    CheckoutService.processSubscription(request.body, AuthenticationService.authenticatedUserFor(request))
       .map(_ => Redirect(routes.Checkout.thankyou()))
   }
 
