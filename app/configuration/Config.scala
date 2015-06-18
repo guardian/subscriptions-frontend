@@ -2,10 +2,9 @@ package configuration
 
 import com.gu.googleauth.GoogleAuthConfig
 import com.gu.identity.cookie.{PreProductionKeys, ProductionKeys}
-import com.gu.membership.salesforce.SalesforceConfig
+import com.netaporter.uri.dsl._
 import com.typesafe.config.ConfigFactory
 import net.kencochrane.raven.dsn.Dsn
-import com.netaporter.uri.dsl._
 
 import scala.util.Try
 
@@ -41,8 +40,6 @@ object Config {
       (webAppUrl / "signin") ? ("returnUrl" -> s"$subscriptionsUrl$uri") ? ("skipConfirmation" -> "true")
 
   }
-
-  val Salesforce =  SalesforceConfig.from(config.getConfig("touchpoint.backend.environments").getConfig(stage), stage)
 
   val subscriptionsUrl = config.getString("subscriptions.url")
 
