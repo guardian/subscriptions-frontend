@@ -32,9 +32,8 @@ object Checkout extends Controller {
     }
   }
 
-  //todo GoogleAuth the Action
   //todo handle error https://www.playframework.com/documentation/2.4.x/ScalaForms
-  val handleCheckout = NoCacheAction.async(parse.form(SubscriptionsForm())) { implicit request =>
+  val handleCheckout = GoogleAuthenticatedStaffAction.async(parse.form(SubscriptionsForm())) { implicit request =>
     CheckoutService.processSubscription(request.body, request)
       .map(_ => Redirect(routes.Checkout.thankyou()))
   }
