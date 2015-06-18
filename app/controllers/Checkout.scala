@@ -4,13 +4,45 @@ import actions.CommonActions._
 import com.gu.identity.play.PrivateFields
 import model.{AddressData, PaymentData, PersonalData, SubscriptionData}
 import play.api.mvc._
-import services.{IdentityService, CheckoutService}
+import services.{CheckoutService, IdentityService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 object Checkout extends Controller {
+  
+  val renderCheckout = GoogleAuthenticatedStaffAction.async { implicit request =>
+    val idUserFutureOpt = request.cookies.find(_.name == "SC_GU_U").map {cookie =>
+      IdentityService.userLookupByScGuU(cookie.value)
+    }.getOrElse(Future.successful(None))
 
+    idUserFutureOpt.map { idUserOpt =>
+      val idUserData: (PrivateFields => Option[String]) => Option[String] =
+        fieldName => idUserOpt.flatMap(_.privateFields.flatMap(fieldName))
+      Ok(
+        views.html.checkout.payment(
+          idUserData(_.firstName),
+          idUserData(_.secondName),
+          idUserOpt.map(_.primaryEmailAddress),
+          idUserData(_.billingAddress1),
+          idUserData(_.billingAddress2),
+          idUserData(_.billingAddress3),
+          idUserData(_.billingPostcode))
+      )
+    }
+  }
+
+  //todo GoogleAuth the Action
+  //todo handle error https://www.playframework.com/documentation/2.4.x/ScalaForms
+  val handleCheckout = NoCacheAction.async(parse.form(SubscriptionsForm())) { implicit request =>
+    CheckoutService.processSubscription(request.body, request)
+      .map(_ => Redirect(routes.Checkout.thankyou()))
+  }
+
+  def thankyou = GoogleAuthenticatedStaffAction(Ok(views.html.checkout.thankyou()))
+}
+
+object SubscriptionsForm {
   import play.api.data.Forms._
   import play.api.data._
 
@@ -45,38 +77,10 @@ object Checkout extends Controller {
     "holder" -> text
   )(PaymentData.apply)(PaymentData.unapply)
 
-  val subscriptionForm = Form(mapping(
+  private val subsForm = Form(mapping(
     personalDataMapping,
     paymentDataMapping
   )(SubscriptionData.apply)(SubscriptionData.unapply))
 
-  val renderCheckout = GoogleAuthenticatedStaffAction.async { implicit request =>
-    val idUserFutureOpt = request.cookies.find(_.name == "SC_GU_U").map {cookie =>
-      IdentityService.userLookupByScGuU(cookie.value)
-    }.getOrElse(Future.successful(None))
-
-    idUserFutureOpt.map { idUserOpt =>
-      val idUserData: (PrivateFields => Option[String]) => Option[String] =
-        fieldName => idUserOpt.flatMap(_.privateFields.flatMap(fieldName))
-      Ok(
-        views.html.checkout.payment(
-          idUserData(_.firstName),
-          idUserData(_.secondName),
-          idUserOpt.map(_.primaryEmailAddress),
-          idUserData(_.billingAddress1),
-          idUserData(_.billingAddress2),
-          idUserData(_.billingAddress3),
-          idUserData(_.billingPostcode))
-      )
-    }
-  }
-
-  //todo GoogleAuth the Action
-  //todo handle error https://www.playframework.com/documentation/2.4.x/ScalaForms
-  val handleCheckout = NoCacheAction.async(parse.form(subscriptionForm)) { implicit request =>
-    CheckoutService.processSubscription(request.body, request)
-      .map(_ => Redirect(routes.Checkout.thankyou()))
-  }
-
-  def thankyou = GoogleAuthenticatedStaffAction(Ok(views.html.checkout.thankyou()))
+  def apply() = subsForm
 }
