@@ -1,13 +1,12 @@
 package services
 
-import com.gu.identity.play.{IdMinimalUser, IdUser}
-
-import scala.concurrent.Future
-
+import com.gu.identity.play.IdMinimalUser
 import com.typesafe.scalalogging.LazyLogging
 import model.SubscriptionData
 import play.api.mvc.Request
+
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class CheckoutService(identityService: IdentityService) extends LazyLogging {
 
