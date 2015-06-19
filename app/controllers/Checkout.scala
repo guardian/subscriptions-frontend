@@ -1,13 +1,86 @@
 package controllers
 
-import actions.CommonActions.GoogleAuthenticatedStaffAction
+import actions.CommonActions._
+import com.gu.identity.play.PrivateFields
+import model.{AddressData, PaymentData, PersonalData, SubscriptionData}
 import play.api.mvc._
+import services.{AuthenticationService, CheckoutService, IdentityService}
+
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 object Checkout extends Controller {
+  
+  val renderCheckout = GoogleAuthenticatedStaffAction.async { implicit request =>
+    val idUserFutureOpt = request.cookies.find(_.name == "SC_GU_U").map {cookie =>
+      IdentityService.userLookupByScGuU(cookie.value)
+    }.getOrElse(Future.successful(None))
 
-  def renderCheckout = GoogleAuthenticatedStaffAction(Ok(views.html.checkout.payment()))
+    idUserFutureOpt.map { idUserOpt =>
+      def idUserData(fieldName: PrivateFields => Option[String]): Option[String] =
+        idUserOpt.flatMap(_.privateFields.flatMap(fieldName))
 
-  def handleCheckout = GoogleAuthenticatedStaffAction(Redirect(routes.Checkout.thankyou()))
+      Ok(
+        views.html.checkout.payment(
+          idUserData(_.firstName),
+          idUserData(_.secondName),
+          idUserOpt.map(_.primaryEmailAddress),
+          idUserData(_.billingAddress1),
+          idUserData(_.billingAddress2),
+          idUserData(_.billingAddress3),
+          idUserData(_.billingPostcode))
+      )
+    }
+  }
+
+  //todo handle error https://www.playframework.com/documentation/2.4.x/ScalaForms
+  val handleCheckout = GoogleAuthenticatedStaffAction.async(parse.form(SubscriptionsForm())) { implicit request =>
+    CheckoutService.processSubscription(request.body, AuthenticationService.authenticatedUserFor(request))
+      .map(_ => Redirect(routes.Checkout.thankyou()))
+  }
 
   def thankyou = GoogleAuthenticatedStaffAction(Ok(views.html.checkout.thankyou()))
+}
+
+object SubscriptionsForm {
+  import play.api.data.Forms._
+  import play.api.data._
+
+  private val addressDataMapping = "" -> mapping(
+    "house" -> text,
+    "street" -> text,
+    "town" -> text,
+    "postcode" -> text
+  )(AddressData.apply)(AddressData.unapply)
+
+  private val emailMapping = "" -> tuple(
+    "email" -> email,
+    "confirm" -> email)
+    .verifying("Emails don't match", email => email._1 == email._2)
+    .transform[String](
+      email => email._1, // Transform to a single field
+      email => (email, email) // Reverse transform from a single field to multiple
+    )
+
+  private val personalDataMapping = "" -> mapping(
+    "first" -> text,
+    "last" -> text,
+    emailMapping,
+    addressDataMapping
+  )(PersonalData.apply)(PersonalData.unapply)
+
+  private val paymentDataMapping = "" -> mapping(
+    "account" -> text(8, 8),
+    "sortcode1" -> text(2, 2),
+    "sortcode2" -> text(2, 2),
+    "sortcode3" -> text(2, 2),
+    "holder" -> text
+  )(PaymentData.apply)(PaymentData.unapply)
+
+  private val subsForm = Form(mapping(
+    personalDataMapping,
+    paymentDataMapping
+  )(SubscriptionData.apply)(SubscriptionData.unapply))
+
+  def apply() = subsForm
 }
