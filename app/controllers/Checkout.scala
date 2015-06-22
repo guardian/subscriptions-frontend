@@ -18,19 +18,24 @@ object Checkout extends Controller {
     }.getOrElse(Future.successful(None))
 
     for (idUserOpt <- idUserFutureOpt) yield {
-      def idUserData(fieldName: PrivateFields => Option[String]): Option[String] =
-        idUserOpt.flatMap(_.privateFields.flatMap(fieldName))
+      def idUserData(keyName: String, fieldName: PrivateFields => Option[String]): Option[(String, String)] =
+        for {
+          idUser <- idUserOpt
+          fields <- idUser.privateFields
+          field <- fieldName(fields)
+        } yield keyName -> field
+
 
       val form = SubscriptionsForm().copy(
         data =  (
-          idUserData(_.firstName).map("personal.first" -> _) ++
-          idUserData(_.secondName).map("personal.last" -> _) ++
+          idUserData("personal.first", _.firstName) ++
+          idUserData("personal.last", _.secondName) ++
           idUserOpt.map("personal.emailValidation.email" -> _.primaryEmailAddress) ++
           idUserOpt.map("personal.emailValidation.confirm" -> _.primaryEmailAddress) ++
-          idUserData(_.address1).map("personal.address.address1" -> _) ++
-          idUserData(_.address2).map("personal.address.address2" -> _) ++
-          idUserData(_.address3).map("personal.address.town" -> _) ++
-          idUserData(_.postcode).map("personal.address.postcode" -> _)
+          idUserData("personal.address.address1", _.address1) ++
+          idUserData("personal.address.address2", _.address2) ++
+          idUserData("personal.address.town", _.address3) ++
+          idUserData("personal.address.postcode", _.postcode)
           ).toMap
       )
 
