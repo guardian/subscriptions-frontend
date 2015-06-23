@@ -6,13 +6,14 @@ import com.gu.monitoring.{AuthenticationMetrics, CloudWatch, RequestMetrics, Sta
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
 import model.PersonalData
-import play.api.Logger
 import play.api.Play.current
 import play.api.libs.json._
 import play.api.libs.ws.{WS, WSRequest, WSResponse}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+
+case class UserId(id:String)
 
 case class GuestUserNotCreated(reason : String)
 
@@ -23,7 +24,7 @@ class IdentityService(identityApiClient: IdentityApiClient) extends LazyLogging 
       (response.json \ "user").asOpt[IdUser]
     }
 
-  def registerGuest(personalData: PersonalData): Future[Either[GuestUserNotCreated, String]] = {
+  def registerGuest(personalData: PersonalData): Future[Option[UserId]] = {
 
     val json = JsObject(Map(
       "primaryEmailAddress" -> JsString(personalData.email),
@@ -39,16 +40,8 @@ class IdentityService(identityApiClient: IdentityApiClient) extends LazyLogging 
       "statusFields" -> JsObject(Map("receiveGnmMarketing" -> JsString("true")).toSeq)
     ).toSeq)
 
-    for {
-      response <- identityApiClient.createGuest(json)
 
-    } yield {
-      val jsResult = (response.json \ "guestRegistrationRequest" \ "userId").validate[String]
-      if (jsResult.isError) {
-        Logger.error(s"Id API response : $jsResult")
-        Left(GuestUserNotCreated(s"User not created $jsResult"))
-      } else Right(jsResult.get)
-    }
+    identityApiClient.createGuest(json).map(response => (response.json \ "guestRegistrationRequest" \ "userId").asOpt[String].map(UserId))
   }
 }
 
