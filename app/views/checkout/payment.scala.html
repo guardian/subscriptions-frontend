@@ -1,6 +1,7 @@
-@(form: Form[model.SubscriptionData], userIsSignedIn: Boolean)
+@(form: Form[model.SubscriptionData], userIsSignedIn: Boolean)(implicit request: Request[_])
 
-@import configuration.Config
+@import configuration.Config.Identity._
+@import routes.Checkout.renderCheckout
 
 @main("Checkout | Subscriptions | The Guardian") {
 
@@ -10,10 +11,10 @@
     <div class="page-section__content">
     @if(userIsSignedIn) {
         <h3 class="h-section h-section--lead">Not you?</h3>
-        <a class="action" href="@Config.Identity.idWebAppSignOutThenInUrl("/checkout")">Sign out</a>
+        <a class="action" href="@idWebAppSignOutUrl(renderCheckout.toString)">Sign out</a>
     } else {
         <h3 class="h-section h-section--lead">Already have a Guardian account?</h3>
-        <a class="action" href="@Config.Identity.webAppSigninUrl("/checkout")">Sign in</a>
+        <a class="action" href="@webAppSigninUrl(renderCheckout.toString)">Sign in</a>
     }
     </div>
 

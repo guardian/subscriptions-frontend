@@ -11,7 +11,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 object Checkout extends Controller {
-  
+
   val renderCheckout = GoogleAuthenticatedStaffAction.async { implicit request =>
     for (idUserOpt <- getIdentityUserByCookie(request)) yield {
       def idUserData(keyName: String, fieldName: PrivateFields => Option[String]): Option[(String, String)] =
