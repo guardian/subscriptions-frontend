@@ -4,6 +4,7 @@ import actions.CommonActions._
 import com.gu.identity.play.PrivateFields
 import model.{AddressData, PaymentData, PersonalData, SubscriptionData}
 import play.api.data.Form
+import play.api.libs.json._
 import play.api.mvc._
 import services.{AuthenticationService, CheckoutService, IdentityService}
 
@@ -53,6 +54,13 @@ object Checkout extends Controller {
   }
 
   def thankyou = GoogleAuthenticatedStaffAction(Ok(views.html.checkout.thankyou()))
+
+  def checkIdentity(email: String) = GoogleAuthenticatedStaffAction.async { implicit request =>
+    for {
+      userOpt <- IdentityService.userLookupByEmail(email)
+    } yield Ok(Json.obj("emailInUse" -> userOpt.isDefined))
+
+  }
 }
 
 object SubscriptionsForm {
