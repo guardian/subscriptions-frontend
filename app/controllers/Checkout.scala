@@ -58,12 +58,10 @@ object Checkout extends Controller {
     } yield Ok(Json.obj("emailInUse" -> doesUserExist))
   }
 
-  private def getIdentityUserByCookie(request: Request[_]): Future[Option[IdUser]] = {
-    val idUserFutureOpt = request.cookies.find(_.name == "SC_GU_U").map { cookie =>
+  private def getIdentityUserByCookie(request: Request[_]): Future[Option[IdUser]] =
+    request.cookies.find(_.name == "SC_GU_U").fold(Future.successful(None: Option[IdUser])) { cookie =>
       IdentityService.userLookupByScGuU(cookie.value)
-    }.getOrElse(Future.successful(None))
-    idUserFutureOpt
-  }
+    }
 }
 
 object SubscriptionsForm {
