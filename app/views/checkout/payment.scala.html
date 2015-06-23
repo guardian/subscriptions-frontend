@@ -5,10 +5,11 @@
 
 @main("Checkout | Subscriptions | The Guardian") {
 
+
 <div class="gs-container">
     @fragments.page.header("Checkout")
 
-    <div class="page-section__content">
+    <div class="page-section__content" data-user-signedin="@userIsSignedIn">
     @if(userIsSignedIn) {
         <h3 class="h-section h-section--lead">Not you?</h3>
         <a class="action" href="@idWebAppSignOutUrl(renderCheckout.toString)">Sign out</a>

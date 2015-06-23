@@ -1,18 +1,18 @@
 define(['bean',
     'utils/ajax',
     'utils/text',
-    'utils/cookie'
-], function (bean, ajax, textUtils, cookie) {
+], function (bean, ajax, textUtils) {
 
     'use strict';
 
     function init() {
 
-        // do nothing if the user is already signed in
-        if(cookie.getCookie('GU_U')) { return; }
-
         var YOUR_DETAILS_SUBMIT_ELEM = document.querySelector('.js-checkout-your-details-submit');
-        var EMAIL_ID_INPUT_ELEM = document.querySelector('.js-checkout-email');
+        var EMAIL_ID_INPUT_ELEM      = document.querySelector('.js-checkout-email');
+        var USER_SIGNED_IN           = document.querySelector('data-user-signedin="true"]')
+
+        // do nothing if the user is already signed in
+        if (USER_SIGNED_IN) { return; }
 
         ajax.init({page: {ajaxUrl: ''}});
 
