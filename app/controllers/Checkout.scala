@@ -57,9 +57,8 @@ object Checkout extends Controller {
 
   def checkIdentity(email: String) = GoogleAuthenticatedStaffAction.async { implicit request =>
     for {
-      userOpt <- IdentityService.userLookupByEmail(email)
-    } yield Ok(Json.obj("emailInUse" -> userOpt.isDefined))
-
+      doesUserExist <- IdentityService.doesUserExist(email)
+    } yield Ok(Json.obj("emailInUse" -> doesUserExist))
   }
 }
 

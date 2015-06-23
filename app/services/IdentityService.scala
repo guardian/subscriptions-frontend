@@ -18,9 +18,9 @@ case class GuestUserNotCreated(reason : String)
 
 class IdentityService(identityApiClient: IdentityApiClient) extends LazyLogging {
 
-  def userLookupByEmail(email: String): Future[Option[IdUser]] =
+  def doesUserExist(email: String): Future[Boolean] =
     identityApiClient.userLookupByEmail(email).map { response =>
-      (response.json \ "user").asOpt[IdUser]
+      (response.json \ "user" \ "id").asOpt[String].isDefined
     }
 
   def userLookupByScGuU(cookieValue: String): Future[Option[IdUser]] =
