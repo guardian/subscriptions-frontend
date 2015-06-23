@@ -36,9 +36,8 @@ object Config {
 
     val webAppUrl = idConfig.getString("webapp.url")
 
-    def webAppSigninUrl(path: String): String = {
+    def webAppSigninUrl(path: String): String =
       (webAppUrl / "signin") ? ("returnUrl" -> absoluteUrl(path)) ? ("skipConfirmation" -> "true")
-    }
 
     def idWebAppSignOutUrl(path: String): String =
       (webAppUrl / "signout") ? ("returnUrl" -> absoluteUrl(path)) ? ("skipConfirmation" -> "true")
