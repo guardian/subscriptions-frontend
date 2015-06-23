@@ -18,8 +18,7 @@ trait SalesforceService extends LazyLogging {
 
   def createOrUpdateUser(personalData: PersonalData, userId: UserId): Future[Option[MemberId]]
 
-  def createSalesforceUserData(personalData: PersonalData): JsObject = {
-    Seq(Json.obj(
+  def createSalesforceUserData(personalData: PersonalData): JsObject = Json.obj(
       Keys.EMAIL -> personalData.email,
       Keys.FIRST_NAME -> personalData.firstName,
       Keys.LAST_NAME -> personalData.lastName,
@@ -27,12 +26,9 @@ trait SalesforceService extends LazyLogging {
       Keys.MAILING_CITY -> personalData.address.town,
       Keys.MAILING_POSTCODE -> personalData.address.postcode,
       Keys.MAILING_COUNTRY -> "United Kingdom",
-      Keys.ALLOW_MEMBERSHIP_MAIL -> true
-    )) ++ Map(
-      Keys.ALLOW_THIRD_PARTY_EMAIL -> Some(true),
-      Keys.ALLOW_GU_RELATED_MAIL -> Some(true)
-    ).collect { case (k, Some(v)) => Json.obj(k -> v) }
-  }.reduce(_ ++ _)
+      Keys.ALLOW_MEMBERSHIP_MAIL -> true,
+      Keys.ALLOW_THIRD_PARTY_EMAIL -> true,
+      Keys.ALLOW_GU_RELATED_MAIL -> true)
 
 }
 
