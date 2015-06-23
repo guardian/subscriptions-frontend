@@ -107,9 +107,7 @@ module.exports = function(grunt) {
                         'bonzo': 'bower_components/bonzo/bonzo',
                         'qwery': 'bower_components/qwery/qwery',
                         'requireLib': 'bower_components/requirejs/require',
-                        'reqwest': 'bower_components/reqwest/reqwest',
-                        'ajax': 'utils/ajax',
-                        'text': 'utils/text'
+                        'reqwest': 'bower_components/reqwest/reqwest'
                     },
                     optimize: isDev ? 'none' : 'uglify2',
                     generateSourceMaps: isDev ? 'true' : 'false',
