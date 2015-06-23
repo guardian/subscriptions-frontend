@@ -1,4 +1,4 @@
-@(form: Form[model.SubscriptionData])
+@(form: Form[model.SubscriptionData], userIsSignedIn: Boolean)
 
 @import configuration.Config
 
@@ -7,10 +7,14 @@
 <div class="gs-container">
     @fragments.page.header("Checkout")
 
-
     <div class="page-section__content">
+    @if(userIsSignedIn) {
+        <h3 class="h-section h-section--lead">Not you?</h3>
+        <a class="action" href="@Config.Identity.idWebAppSignOutThenInUrl("/checkout")">Sign out</a>
+    } else {
         <h3 class="h-section h-section--lead">Already have a Guardian account?</h3>
         <a class="action" href="@Config.Identity.webAppSigninUrl("/checkout")">Sign in</a>
+    }
     </div>
 
     <div class="row row--items-2">

@@ -1,10 +1,12 @@
 package controllers
 
 import actions.CommonActions._
-import com.gu.identity.play.PrivateFields
+import com.gu.googleauth.UserIdentity
+import com.gu.identity.play.{IdUser, PrivateFields}
 import model.{AddressData, PaymentData, PersonalData, SubscriptionData}
 import play.api.data.Form
 import play.api.libs.json._
+import play.api.mvc.Security.AuthenticatedRequest
 import play.api.mvc._
 import services.{AuthenticationService, CheckoutService, IdentityService}
 
@@ -14,18 +16,14 @@ import scala.concurrent.Future
 object Checkout extends Controller {
   
   val renderCheckout = GoogleAuthenticatedStaffAction.async { implicit request =>
-    val idUserFutureOpt = request.cookies.find(_.name == "SC_GU_U").map {cookie =>
-      IdentityService.userLookupByScGuU(cookie.value)
-    }.getOrElse(Future.successful(None))
 
-    for (idUserOpt <- idUserFutureOpt) yield {
+    for (idUserOpt <- getIdentityUserByCookie(request)) yield {
       def idUserData(keyName: String, fieldName: PrivateFields => Option[String]): Option[(String, String)] =
         for {
           idUser <- idUserOpt
           fields <- idUser.privateFields
           field <- fieldName(fields)
         } yield keyName -> field
-
 
       val form = SubscriptionsForm().copy(
         data =  (
@@ -40,13 +38,14 @@ object Checkout extends Controller {
           ).toMap
       )
 
-      Ok(views.html.checkout.payment(form))
+      Ok(views.html.checkout.payment(form, userIsSignedIn = idUserOpt.isDefined))
     }
   }
 
+
   val handleCheckout = GoogleAuthenticatedStaffAction.async(parse.form(
     form = SubscriptionsForm(),
-    onErrors = (formWithErrors: Form[model.SubscriptionData]) => BadRequest(views.html.checkout.payment(formWithErrors))
+    onErrors = (formWithErrors: Form[model.SubscriptionData]) => BadRequest(views.html.checkout.payment(formWithErrors, userIsSignedIn = false))
   )) { implicit request =>
 
     CheckoutService.processSubscription(request.body, AuthenticationService.authenticatedUserFor(request))
@@ -59,6 +58,14 @@ object Checkout extends Controller {
     for {
       doesUserExist <- IdentityService.doesUserExist(email)
     } yield Ok(Json.obj("emailInUse" -> doesUserExist))
+  }
+
+
+  private def getIdentityUserByCookie(request: Request[_]): Future[Option[IdUser]] = {
+    val idUserFutureOpt = request.cookies.find(_.name == "SC_GU_U").map { cookie =>
+      IdentityService.userLookupByScGuU(cookie.value)
+    }.getOrElse(Future.successful(None))
+    idUserFutureOpt
   }
 }
 

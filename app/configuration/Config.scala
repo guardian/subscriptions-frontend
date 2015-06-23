@@ -39,6 +39,10 @@ object Config {
     def webAppSigninUrl(uri: String): String =
       (webAppUrl / "signin") ? ("returnUrl" -> s"$subscriptionsUrl$uri") ? ("skipConfirmation" -> "true")
 
+    def idWebAppSignOutThenInUrl(uri: String): String =
+      (webAppUrl / "signout") ? ("returnUrl" -> webAppSigninUrl(uri)) ? ("skipConfirmation" -> "true")
+
+
   }
 
   val subscriptionsUrl = config.getString("subscriptions.url")
