@@ -5,7 +5,8 @@
     "bean": "~1.0.6",
     "bonzo": "~2.0.0",
     "qwery": "~4.0.0",
-    "requirejs": "~2.1.17"
+    "requirejs": "~2.1.17",
+    "reqwest": "~1.1.0"
   },
   "ignore": [
     "**/.*",

@@ -1,4 +1,8 @@
-define(['$', 'bean'], function ($, bean) {
+define([
+    '$',
+    'bean',
+    'modules/form/email-check'
+], function ($, bean, emailCheck) {
 
     var $FIRST_NAME                 = $('.js-checkout-first'),
         $LAST_NAME                  = $('.js-checkout-last'),
@@ -149,6 +153,7 @@ define(['$', 'bean'], function ($, bean) {
         manualAddress();
         toggleFieldsets();
         reviewDetails();
+        emailCheck.init();
     }
 
     return {
