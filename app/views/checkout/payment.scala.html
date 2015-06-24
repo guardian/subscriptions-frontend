@@ -24,37 +24,40 @@
                     <div class="fieldset__fields">
                         <div class="form-field">
                             <label class="label" for="first">First name</label>
-                            <input type="text" class="input-text js-checkout-first" name="personal.first" id="first" value="@form.data.get("personal.first")">
+                            <input type="text" class="input-text js-checkout-first" name="personal.first" value="@form.data.get("personal.first")">
+                            @checkout.errorMessage("This field is required")
+
                         </div>
                         <div class="form-field">
                             <label class="label" for="last">Last name</label>
-                            <input type="text" class="input-text js-checkout-last" name="personal.last" id="last" value="@form.data.get("personal.last")">
+                            <input type="text" class="input-text js-checkout-last" name="personal.last" value="@form.data.get("personal.last")">
+                            @checkout.errorMessage("This field is required")
                         </div>
                         <div class="form-field">
                             <label class="label" for="email">Email address</label>
-                            <input type="email" class="input-text js-checkout-email" name="personal.emailValidation.email" id="email" value ="@form.data.get("personal.emailValidation.email")">
+                            <input type="email" class="input-text js-checkout-email" name="personal.emailValidation.email" value ="@form.data.get("personal.emailValidation.email")">
                         </div>
                         <div class="form-field">
                             <label class="label" for="confirm">Confirm email address</label>
-                            <input type="email" class="input-text" name="personal.emailValidation.confirm" id="confirm" value ="@form.data.get("personal.emailValidation.confirm")">
+                            <input type="email" class="input-text" name="personal.emailValidation.confirm" value ="@form.data.get("personal.emailValidation.confirm")">
                         </div>
                         <div class="js-checkout-full-address">
                             <div class="form-field">
                                 <label class="label" for="house">Address line 1</label>
-                                <input type="text" class="input-text js-checkout-house" name="personal.address.address1" id="address1" value="@form.data.get("personal.address.address1")">
+                                <input type="text" class="input-text js-checkout-house" name="personal.address.address1" value="@form.data.get("personal.address.address1")">
                             </div>
                             <div class="form-field">
                                 <label class="label" for="street">Address line 2</label>
-                                <input type="text" class="input-text js-checkout-street" name="personal.address.address2" id="address2" value="@form.data.get("personal.address.address2")">
+                                <input type="text" class="input-text js-checkout-street" name="personal.address.address2" value="@form.data.get("personal.address.address2")">
                             </div>
                             <div class="form-field">
                                 <label class="label" for="town">Town/City</label>
-                                <input type="text" class="input-text js-checkout-town" name="personal.address.town" id="town" value="@form.data.get("personal.address.town")">
+                                <input type="text" class="input-text js-checkout-town" name="personal.address.town" value="@form.data.get("personal.address.town")">
                             </div>
                         </div>
                         <div class="form-field">
                             <label class="label" for="postcode">Postcode</label>
-                            <input type="text" class="input-text input-text--small js-checkout-postcode" name="personal.address.postcode" id="postcode" value="@form.data.get("personal.address.postcode")">
+                            <input type="text" class="input-text input-text--small js-checkout-postcode" name="personal.address.postcode" value="@form.data.get("personal.address.postcode")">
                         </div>
                         <div class="form-field">
                             <div class="checkbox">
@@ -84,17 +87,17 @@
                     <div class="fieldset__fields">
                         <div class="form-field">
                             <label class="label" for="account">Bank account number</label>
-                            <input type="text" class="input-text js-checkout-account" name="payment.account" id="account">
+                            <input type="text" class="input-text js-checkout-account" name="payment.account">
                         </div>
                         <div class="form-field">
                             <label class="label" for="sortcode">Bank sort code</label>
-                            <input type="text" class="input-text input-text--xsmall js-checkout-sortcode1" name="payment.sortcode1" id="sortcode"> -
-                            <input type="text" class="input-text input-text--xsmall js-checkout-sortcode2" name="payment.sortcode2" id="sortcode"> -
-                            <input type="text" class="input-text input-text--xsmall js-checkout-sortcode3" name="payment.sortcode3" id="sortcode">
+                            <input type="text" class="input-text input-text--xsmall js-checkout-sortcode1" name="payment.sortcode1"> -
+                            <input type="text" class="input-text input-text--xsmall js-checkout-sortcode2" name="payment.sortcode2"> -
+                            <input type="text" class="input-text input-text--xsmall js-checkout-sortcode3" name="payment.sortcode3">
                         </div>
                         <div class="form-field">
                             <label class="label" for="holder">Name of account holder</label>
-                            <input type="text" class="input-text js-checkout-holder" name="payment.holder" id="holder">
+                            <input type="text" class="input-text js-checkout-holder" name="payment.holder">
                         </div>
                         <div class="form-field">
                             <div class="checkbox">
