@@ -6,7 +6,8 @@
     "bonzo": "~2.0.0",
     "qwery": "~4.0.0",
     "requirejs": "~2.1.17",
-    "reqwest": "~1.1.0"
+    "reqwest": "~1.1.0",
+    "native-promise-only": "guardian/native-promise-only#master"
   },
   "ignore": [
     "**/.*",

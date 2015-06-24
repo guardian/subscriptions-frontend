@@ -43,7 +43,6 @@ object Config {
       (webAppUrl / "signout") ? ("returnUrl" -> absoluteUrl(path)) ? ("skipConfirmation" -> "true")
 
     private def absoluteUrl(path: String): String = (subscriptionsUrl / path).toString()
-
   }
 
   val subscriptionsUrl = config.getString("subscriptions.url")

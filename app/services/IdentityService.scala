@@ -80,7 +80,7 @@ object IdentityApiClient extends IdentityApiClient with LazyLogging {
      */
     private def applyOnSpecificErrors(reasons: List[String])(block: WSResponse => Unit): Unit = {
       def errorMessageFilter(error: JsValue): Boolean =
-        (error \ "message").asOpt[JsString].filter(e => reasons.contains(e.value)).isDefined
+        (error \ "message").asOpt[JsString].exists(e => reasons.contains(e.value))
 
       f.map(response =>
         (response.json \ "status").asOpt[String].filter(_ == "error")
