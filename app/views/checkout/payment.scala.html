@@ -36,12 +36,12 @@
                         <div class="form-field js-checkout-email">
                             <label class="label" for="email">Email address</label>
                             <input type="email" class="input-text js-input" name="personal.emailValidation.email" value ="@form.data.get("personal.emailValidation.email")">
-                            @checkout.errorMessage("This field is required")
+                            @checkout.errorMessage("Please enter a valid Email address")
                         </div>
                         <div class="form-field  js-checkout-confirm-email">
                             <label class="label" for="confirm">Confirm email address</label>
                             <input type="email" class="input-text js-input" name="personal.emailValidation.confirm" value ="@form.data.get("personal.emailValidation.confirm")">
-                            @checkout.errorMessage("This field is required")
+                            @checkout.errorMessage("The Confirm Email address does not match the Email address")
                         </div>
                         <div class="js-checkout-full-address">
                             <div class="form-field js-checkout-house">
@@ -62,8 +62,8 @@
                         </div>
                         <div class="form-field js-checkout-postcode">
                             <label class="label" for="postcode">Postcode</label>
-                            <input type="text" class="input-text js-input input-text js-input-text--small" name="personal.address.postcode" value="@form.data.get("personal.address.postcode")">
-                            @checkout.errorMessage("This field is required")
+                            <input type="text" class="input-text js-input input-text input-text--small" name="personal.address.postcode" value="@form.data.get("personal.address.postcode")">
+                            @checkout.errorMessage("Please enter a valid postal code")
                         </div>
                         <div class="form-field">
                             <div class="checkbox">
@@ -93,20 +93,20 @@
                     <div class="fieldset__fields">
                         <div class="form-field js-checkout-account">
                             <label class="label" for="account">Bank account number</label>
-                            <input type="text" class="input-text js-input" name="payment.account">
-                            @checkout.errorMessage("This field is required")
+                            <input type="number" class="input-text js-input" name="payment.account">
+                            @checkout.errorMessage("Please enter between 1 and 10 digits for the account number")
                         </div>
                         <div class="form-field js-checkout-sortcode">
                             <label class="label" for="sortcode">Bank sort code</label>
-                            <input type="text" class="input-text js-input input-text js-input-text--xsmall js-checkout-sortcode1" name="payment.sortcode1"> -
-                            <input type="text" class="input-text js-input input-text js-input-text--xsmall js-checkout-sortcode2" name="payment.sortcode2"> -
-                            <input type="text" class="input-text js-input input-text js-input-text--xsmall js-checkout-sortcode3" name="payment.sortcode3">
-                            @checkout.errorMessage("This field is required")
+                            <input type="number" class="input-text js-input input-text input-text--xsmall js-checkout-sortcode1" max="99" name="payment.sortcode1"> -
+                            <input type="number" class="input-text js-input input-text input-text--xsmall js-checkout-sortcode2" max="99" name="payment.sortcode2"> -
+                            <input type="number" class="input-text js-input input-text input-text--xsmall js-checkout-sortcode3" max="99" name="payment.sortcode3">
+                            @checkout.errorMessage("Please enter 2 digits for each sort code field")
                         </div>
                         <div class="form-field js-checkout-holder">
                             <label class="label" for="holder">Name of account holder</label>
                             <input type="text" class="input-text js-input" name="payment.holder">
-                            @checkout.errorMessage("This field is required")
+                            @checkout.errorMessage("Please enter between 1 and 18 characters for the account name")
                         </div>
                         <div class="form-field js-checkout-confirm-payment">
                             <div class="checkbox">
@@ -115,7 +115,7 @@
                                     I confirm that I am the account holder and I am solely able to authorise debit from the account
                                 </label>
                             </div>
-                            @checkout.errorMessage("This field is required")
+                            @checkout.errorMessage("Please confirm that you are the account holder by checking the checkbox above")
                         </div>
                         <div class="actions">
                             <a href="#" class="button button--primary button--large js-checkout-payment-details-submit">Continue</a>
