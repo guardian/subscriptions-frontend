@@ -1,4 +1,11 @@
-define(['$', 'bower_components/bean/bean', 'modules/checkout/selectors'], function ($, bean, form) {
+define(['$',
+        'bower_components/bean/bean',
+        'modules/checkout/formElements',
+        'modules/checkout/validations'],
+    function ($,
+              bean,
+              form,
+              validations) {
 
     var $FIRST_NAME = form.$FIRST_NAME,
         $LAST_NAME = form.$LAST_NAME,
@@ -15,9 +22,9 @@ define(['$', 'bower_components/bean/bean', 'modules/checkout/selectors'], functi
         $FIND_ADDRESS = form.$FIND_ADDRESS,
         $MANUAL_ADDRESS = form.$MANUAL_ADDRESS,
         $FULL_ADDRESS = form.$FULL_ADDRESS,
+        $YOUR_DETAILS_SUBMIT = form.$YOUR_DETAILS_SUBMIT,
+        $PAYMENT_DETAILS_SUBMIT = form.$PAYMENT_DETAILS_SUBMIT,
 
-        $YOUR_DETAILS_SUBMIT = $('.js-checkout-your-details-submit'),
-        $PAYMENT_DETAILS_SUBMIT = $('.js-checkout-payment-details-submit'),
         $REVIEW_NAME = $('.js-checkout-review-name'),
         $REVIEW_ADDRESS = $('.js-checkout-review-address'),
         $REVIEW_EMAIL = $('.js-checkout-review-email'),
@@ -77,19 +84,23 @@ define(['$', 'bower_components/bean/bean', 'modules/checkout/selectors'], functi
         if($YOUR_DETAILS_SUBMIT.length > 0){
             bean.on($YOUR_DETAILS_SUBMIT[0], 'click', function (e) {
                 e.preventDefault();
-                $FIELDSET_YOUR_DETAILS.addClass(FIELDSET_COLLAPSED).attr(FIELDSET_COMPLETE, '');
-                $FIELDSET_PAYMENT_DETAILS.removeClass(FIELDSET_COLLAPSED);
-                $EDIT_YOUR_DETAILS.removeClass(IS_HIDDEN);
-                $EDIT_PAYMENT_DETAILS.addClass(IS_HIDDEN);
+                if(validations.validatePersonalDetails()){
+                    $FIELDSET_YOUR_DETAILS.addClass(FIELDSET_COLLAPSED).attr(FIELDSET_COMPLETE, '');
+                    $FIELDSET_PAYMENT_DETAILS.removeClass(FIELDSET_COLLAPSED);
+                    $EDIT_YOUR_DETAILS.removeClass(IS_HIDDEN);
+                    $EDIT_PAYMENT_DETAILS.addClass(IS_HIDDEN);
+                }
             });
         }
 
         if($PAYMENT_DETAILS_SUBMIT.length > 0){
             bean.on($PAYMENT_DETAILS_SUBMIT[0], 'click', function (e) {
                 e.preventDefault();
-                $FIELDSET_PAYMENT_DETAILS.addClass(FIELDSET_COLLAPSED).attr(FIELDSET_COMPLETE, '');
-                $FIELDSET_REVIEW.removeClass(FIELDSET_COLLAPSED);
-                $EDIT_PAYMENT_DETAILS.removeClass(IS_HIDDEN);
+                if(validations.validatePaymentDetails()){
+                    $FIELDSET_PAYMENT_DETAILS.addClass(FIELDSET_COLLAPSED).attr(FIELDSET_COMPLETE, '');
+                    $FIELDSET_REVIEW.removeClass(FIELDSET_COLLAPSED);
+                    $EDIT_PAYMENT_DETAILS.removeClass(IS_HIDDEN);
+                }
             });
         }
 

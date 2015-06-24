@@ -15,6 +15,8 @@ define(['$'], function ($) {
         $HOLDER: $('.js-checkout-holder'),
         $FIND_ADDRESS: $('.js-checkout-find-address'),
         $MANUAL_ADDRESS: $('.js-checkout-manual-address'),
-        $FULL_ADDRESS: $('.js-checkout-full-address')
+        $FULL_ADDRESS: $('.js-checkout-full-address'),
+        $YOUR_DETAILS_SUBMIT: $('.js-checkout-your-details-submit'),
+        $PAYMENT_DETAILS_SUBMIT: $('.js-checkout-payment-details-submit')
     }
 });
