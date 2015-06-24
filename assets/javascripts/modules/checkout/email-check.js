@@ -7,8 +7,6 @@ define([
 ], function (bean, ajax, textUtils, form) {
     'use strict';
 
-    function init () { }
-
     function warnIfEmailTaken() {
         return new Promise(function (resolve, reject) {
             if (guardian.user.isSignedIn) { resolve(); return; }
@@ -34,7 +32,6 @@ define([
     }
 
     return {
-        init: init,
         warnIfEmailTaken: warnIfEmailTaken
     };
 });

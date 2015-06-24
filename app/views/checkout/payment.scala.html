@@ -12,12 +12,12 @@
 <div class="gs-container">
     @fragments.page.header("Checkout")
 
-    <div class="page-section__content">
+    <div>
     @if(userIsSignedIn) {
-        <h3 class="h-section h-section--lead">Not you?</h3>
+        <h3>Not you?</h3>
         <a class="action" href="@idWebAppSignOutUrl(renderCheckout.toString)">Sign out</a>
     } else {
-        <h3 class="h-section h-section--lead">Already have a Guardian account?</h3>
+        <h3>Already have a Guardian account?</h3>
         <a class="action" href="@webAppSigninUrl(renderCheckout.toString)">Sign in</a>
     }
     </div>

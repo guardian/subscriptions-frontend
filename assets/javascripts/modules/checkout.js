@@ -153,7 +153,6 @@ define([
     };
 
     function init() {
-        emailCheck.init();
         findAddress();
         manualAddress();
         toggleFieldsets();
