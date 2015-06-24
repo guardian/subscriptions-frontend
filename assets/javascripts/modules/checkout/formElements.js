@@ -1,7 +1,7 @@
 define(['$'], function ($) {
 
-    return {
-        $FIRST_NAME: $('.js-checkout-first '),
+    var formElements = {
+        $FIRST_NAME: $('.js-checkout-first'),
         $LAST_NAME: $('.js-checkout-last'),
         $EMAIL: $('.js-checkout-email'),
         $ADDRESS1: $('.js-checkout-house'),
@@ -17,6 +17,20 @@ define(['$'], function ($) {
         $MANUAL_ADDRESS: $('.js-checkout-manual-address'),
         $FULL_ADDRESS: $('.js-checkout-full-address'),
         $YOUR_DETAILS_SUBMIT: $('.js-checkout-your-details-submit'),
-        $PAYMENT_DETAILS_SUBMIT: $('.js-checkout-payment-details-submit')
-    }
+        $PAYMENT_DETAILS_SUBMIT: $('.js-checkout-payment-details-submit'),
+        $REVIEW_NAME : $('.js-checkout-review-name'),
+        $REVIEW_ADDRESS : $('.js-checkout-review-address'),
+        $REVIEW_EMAIL : $('.js-checkout-review-email'),
+        $REVIEW_ACCOUNT : $('.js-checkout-review-account'),
+        $REVIEW_SORTCODE : $('.js-checkout-review-sortcode'),
+        $REVIEW_HOLDER : $('.js-checkout-review-holder'),
+        $SMALLPRINT : $('.js-checkout-smallprint'),
+        $FIELDSET_YOUR_DETAILS : $('.js-fieldset-your-details'),
+        $FIELDSET_PAYMENT_DETAILS : $('.js-fieldset-payment-details'),
+        $FIELDSET_REVIEW : $('.js-fieldset-review'),
+        $EDIT_YOUR_DETAILS : $('.js-edit-your-details'),
+        $EDIT_PAYMENT_DETAILS : $('.js-edit-payment-details')
+    };
+
+    return formElements;
 });
