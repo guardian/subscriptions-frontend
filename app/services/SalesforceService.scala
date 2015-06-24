@@ -32,6 +32,7 @@ trait SalesforceService extends LazyLogging {
 
 object SalesforceService extends SalesforceService {
   override def createOrUpdateUser(personalData: PersonalData, userId: UserId): Future[Option[MemberId]] =
+    //TODO when implementing test-users this requires updating to supply data to correct location
     TouchpointBackend.Normal.salesforceRepo.upsert(userId.id, createSalesforceUserData(personalData)).map(Some(_))
 }
 
