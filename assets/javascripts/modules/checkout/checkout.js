@@ -54,15 +54,10 @@ define(['$',
         $FULL_ADDRESS.removeClass(IS_HIDDEN);
     };
 
-    console.log("init");
-
     var toggleFieldsets = function () {
-        console.log("toggleFieldsets");
         if($YOUR_DETAILS_SUBMIT.length > 0){
-            console.log("binding...");
             bean.on($YOUR_DETAILS_SUBMIT[0], 'click', function (e) {
                 e.preventDefault();
-                console.log("validatePersonalDetails");
                 if(validations.validatePersonalDetails()){
                     $FIELDSET_YOUR_DETAILS.addClass(FIELDSET_COLLAPSED).attr(FIELDSET_COMPLETE, '');
                     $FIELDSET_PAYMENT_DETAILS.removeClass(FIELDSET_COLLAPSED);

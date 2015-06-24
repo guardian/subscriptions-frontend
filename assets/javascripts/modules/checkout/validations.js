@@ -11,6 +11,14 @@ define(['$', 'modules/checkout/formElements'], function ($, form) {
         {input: form.$POSTCODE, container: form.$POSTCODE_CONTAINER}
     ];
 
+    var mandatoryFieldsPaymentDetails = [
+        {input: form.$ACCOUNT, container: form.$ACCOUNT_CONTAINER},
+        {input: form.$SORTCODE1, container: form.$SORTCODE_CONTAINER},
+        {input: form.$SORTCODE2, container: form.$SORTCODE_CONTAINER},
+        {input: form.$SORTCODE3, container: form.$SORTCODE_CONTAINER},
+        {input: form.$HOLDER, container: form.$HOLDER_CONTAINER}
+    ];
+
     function toggleError(container, condition) {
         if (condition) {
             container.addClass(ERROR_CLASS);
@@ -19,7 +27,7 @@ define(['$', 'modules/checkout/formElements'], function ($, form) {
         }
     }
 
-    var validatePersonalDetails = function(){
+    var validatePersonalDetails = function () {
         var emptyFields = mandatoryFieldsPersonalDetails.filter(function (field) {
             var isEmpty = field.input.val() == '';
             toggleError(field.container, isEmpty);
@@ -37,8 +45,19 @@ define(['$', 'modules/checkout/formElements'], function ($, form) {
     };
 
 
-    var validatePaymentDetails = function(){
-        return true;
+    var validatePaymentDetails = function () {
+        var emptyFields = mandatoryFieldsPaymentDetails.filter(function (field) {
+            var isEmpty = field.input.val() == '';
+            toggleError(field.container, isEmpty);
+            return isEmpty;
+        });
+        var noEmptyFields = emptyFields.length == 0;
+
+
+        var detailsConfirmed = form.$CONFIRM_PAYMENT[0].checked;
+        toggleError(form.$CONFIRM_PAYMENT_CONTAINER, !detailsConfirmed);
+
+        return noEmptyFields && detailsConfirmed;
     };
 
     return {
