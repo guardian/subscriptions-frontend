@@ -22,42 +22,48 @@
                         <a href="#" class="fieldset__edit is-hidden js-edit-your-details">Edit</a>
                     </div>
                     <div class="fieldset__fields">
-                        <div class="form-field">
+                        <div class="form-field js-checkout-first">
                             <label class="label" for="first">First name</label>
-                            <input type="text" class="input-text js-checkout-first" name="personal.first" value="@form.data.get("personal.first")">
+                            <input type="text" class="input-text js-input-text" name="personal.first" value="@form.data.get("personal.first")">
                             @checkout.errorMessage("This field is required")
 
                         </div>
-                        <div class="form-field">
+                        <div class="form-field js-checkout-last">
                             <label class="label" for="last">Last name</label>
-                            <input type="text" class="input-text js-checkout-last" name="personal.last" value="@form.data.get("personal.last")">
+                            <input type="text" class="input-text js-input-text" name="personal.last" value="@form.data.get("personal.last")">
                             @checkout.errorMessage("This field is required")
                         </div>
-                        <div class="form-field">
+                        <div class="form-field js-checkout-email">
                             <label class="label" for="email">Email address</label>
-                            <input type="email" class="input-text js-checkout-email" name="personal.emailValidation.email" value ="@form.data.get("personal.emailValidation.email")">
+                            <input type="email" class="input-text js-input-text" name="personal.emailValidation.email" value ="@form.data.get("personal.emailValidation.email")">
+                            @checkout.errorMessage("This field is required")
                         </div>
-                        <div class="form-field">
+                        <div class="form-field  js-checkout-confirm-email">
                             <label class="label" for="confirm">Confirm email address</label>
-                            <input type="email" class="input-text" name="personal.emailValidation.confirm" value ="@form.data.get("personal.emailValidation.confirm")">
+                            <input type="email" class="input-text js-input-text" name="personal.emailValidation.confirm" value ="@form.data.get("personal.emailValidation.confirm")">
+                            @checkout.errorMessage("This field is required")
                         </div>
                         <div class="js-checkout-full-address">
-                            <div class="form-field">
+                            <div class="form-field js-checkout-house">
                                 <label class="label" for="house">Address line 1</label>
-                                <input type="text" class="input-text js-checkout-house" name="personal.address.address1" value="@form.data.get("personal.address.address1")">
+                                <input type="text" class="input-text js-input-text" name="personal.address.address1" value="@form.data.get("personal.address.address1")">
+                                @checkout.errorMessage("This field is required")
                             </div>
-                            <div class="form-field">
+                            <div class="form-field js-checkout-street">
                                 <label class="label" for="street">Address line 2</label>
-                                <input type="text" class="input-text js-checkout-street" name="personal.address.address2" value="@form.data.get("personal.address.address2")">
+                                <input type="text" class="input-text js-input-text" name="personal.address.address2" value="@form.data.get("personal.address.address2")">
+                                @checkout.errorMessage("This field is required")
                             </div>
-                            <div class="form-field">
+                            <div class="form-field js-checkout-town">
                                 <label class="label" for="town">Town/City</label>
-                                <input type="text" class="input-text js-checkout-town" name="personal.address.town" value="@form.data.get("personal.address.town")">
+                                <input type="text" class="input-text js-input-text" name="personal.address.town" value="@form.data.get("personal.address.town")">
+                                @checkout.errorMessage("This field is required")
                             </div>
                         </div>
-                        <div class="form-field">
+                        <div class="form-field js-checkout-postcode">
                             <label class="label" for="postcode">Postcode</label>
-                            <input type="text" class="input-text input-text--small js-checkout-postcode" name="personal.address.postcode" value="@form.data.get("personal.address.postcode")">
+                            <input type="text" class="input-text js-input-text input-text js-input-text--small" name="personal.address.postcode" value="@form.data.get("personal.address.postcode")">
+                            @checkout.errorMessage("This field is required")
                         </div>
                         <div class="form-field">
                             <div class="checkbox">
@@ -87,19 +93,19 @@
                     <div class="fieldset__fields">
                         <div class="form-field">
                             <label class="label" for="account">Bank account number</label>
-                            <input type="text" class="input-text js-checkout-account" name="payment.account">
+                            <input type="text" class="input-text js-input-text js-checkout-account" name="payment.account">
                         </div>
-                        <div class="form-field">
+                        <div class="form-field js-checkout-sortcode">
                             <label class="label" for="sortcode">Bank sort code</label>
-                            <input type="text" class="input-text input-text--xsmall js-checkout-sortcode1" name="payment.sortcode1"> -
-                            <input type="text" class="input-text input-text--xsmall js-checkout-sortcode2" name="payment.sortcode2"> -
-                            <input type="text" class="input-text input-text--xsmall js-checkout-sortcode3" name="payment.sortcode3">
+                            <input type="text" class="input-text js-input-text input-text js-input-text--xsmall js-checkout-sortcode1" name="payment.sortcode1"> -
+                            <input type="text" class="input-text js-input-text input-text js-input-text--xsmall js-checkout-sortcode2" name="payment.sortcode2"> -
+                            <input type="text" class="input-text js-input-text input-text js-input-text--xsmall js-checkout-sortcode3" name="payment.sortcode3">
                         </div>
-                        <div class="form-field">
+                        <div class="form-field js-checkout-holder">
                             <label class="label" for="holder">Name of account holder</label>
-                            <input type="text" class="input-text js-checkout-holder" name="payment.holder">
+                            <input type="text" class="input-text js-input-text" name="payment.holder">
                         </div>
-                        <div class="form-field">
+                        <div class="form-field js-checkout-confirm-payment">
                             <div class="checkbox">
                                 <label class="label">
                                     <input type="checkbox">

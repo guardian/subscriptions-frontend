@@ -1,8 +1,41 @@
-define(['$', 'bower_components/bean/bean', 'modules/checkout/formElements'], function ($, bean, form) {
+define(['$', 'modules/checkout/formElements'], function ($, form) {
+
+    var ERROR_CLASS = 'form-field--error';
+
+    var mandatoryFieldsPersonalDetails = [
+        {input: form.$FIRST_NAME, container: form.$FIRST_NAME_CONTAINER},
+        {input: form.$LAST_NAME, container: form.$LAST_NAME_CONTAINER},
+        {input: form.$ADDRESS1, container: form.$ADDRESS1_CONTAINER},
+        {input: form.$ADDRESS2, container: form.$ADDRESS2_CONTAINER},
+        {input: form.$ADDRESS3, container: form.$ADDRESS3_CONTAINER},
+        {input: form.$POSTCODE, container: form.$POSTCODE_CONTAINER}
+    ];
+
+    function toggleError(container, condition) {
+        if (condition) {
+            container.addClass(ERROR_CLASS);
+        } else {
+            container.removeClass(ERROR_CLASS);
+        }
+    }
 
     var validatePersonalDetails = function(){
-        return false;
+        var emptyFields = mandatoryFieldsPersonalDetails.filter(function (field) {
+            var isEmpty = field.input.val() == '';
+            toggleError(field.container, isEmpty);
+            return isEmpty;
+        });
+        var noEmptyFields = emptyFields.length == 0;
+
+        var validEmail = form.$EMAIL.val().indexOf('@') > 0;
+        toggleError(form.$EMAIL_CONTAINER, !validEmail);
+
+        var emailCorrectTwice = form.$EMAIL.val() == form.$CONFIRM_EMAIL.val();
+        toggleError(form.$CONFIRM_EMAIL_CONTAINER, validEmail && !emailCorrectTwice);
+
+        return noEmptyFields && emailCorrectTwice && validEmail;
     };
+
 
     var validatePaymentDetails = function(){
         return true;

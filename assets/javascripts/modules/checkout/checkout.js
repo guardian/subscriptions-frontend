@@ -19,7 +19,6 @@ define(['$',
         $SORTCODE2 = form.$SORTCODE2,
         $SORTCODE3 = form.$SORTCODE3,
         $HOLDER = form.$HOLDER,
-        $FIND_ADDRESS = form.$FIND_ADDRESS,
         $MANUAL_ADDRESS = form.$MANUAL_ADDRESS,
         $FULL_ADDRESS = form.$FULL_ADDRESS,
         $YOUR_DETAILS_SUBMIT = form.$YOUR_DETAILS_SUBMIT,
@@ -41,30 +40,6 @@ define(['$',
         FIELDSET_COMPLETE = 'data-fieldset-complete',
         IS_HIDDEN = 'is-hidden';
 
-    var findAddress = function () {
-        if($FIND_ADDRESS.length > 0){
-            bean.on($FIND_ADDRESS[0], 'click', function (e) {
-                e.preventDefault();
-
-                if ($POSTCODE.val()) {
-                    // TODO: Ajax to lookup service
-                    populateAddressFields({
-                        'house': 'Flat 14 Bankside House',
-                        'street': 'West Hill',
-                        'town': 'Putney'
-                    });
-                    showFullAddressFields();
-                }
-            });
-        }
-    };
-
-    var populateAddressFields = function (address) {
-        $ADDRESS1.val(address.house);
-        $ADDRESS2.val(address.street);
-        $ADDRESS3.val(address.town);
-    };
-
     var manualAddress = function () {
         if($MANUAL_ADDRESS.length > 0){
             bean.on($MANUAL_ADDRESS[0], 'click', function (e) {
@@ -79,10 +54,15 @@ define(['$',
         $FULL_ADDRESS.removeClass(IS_HIDDEN);
     };
 
+    console.log("init");
+
     var toggleFieldsets = function () {
+        console.log("toggleFieldsets");
         if($YOUR_DETAILS_SUBMIT.length > 0){
+            console.log("binding...");
             bean.on($YOUR_DETAILS_SUBMIT[0], 'click', function (e) {
                 e.preventDefault();
+                console.log("validatePersonalDetails");
                 if(validations.validatePersonalDetails()){
                     $FIELDSET_YOUR_DETAILS.addClass(FIELDSET_COLLAPSED).attr(FIELDSET_COMPLETE, '');
                     $FIELDSET_PAYMENT_DETAILS.removeClass(FIELDSET_COLLAPSED);
@@ -156,7 +136,6 @@ define(['$',
     };
 
     function init() {
-        findAddress();
         manualAddress();
         toggleFieldsets();
         reviewDetails();
