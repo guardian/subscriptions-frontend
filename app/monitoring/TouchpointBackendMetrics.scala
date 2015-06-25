@@ -3,7 +3,6 @@ package monitoring
 import com.amazonaws.services.cloudwatch.model.Dimension
 import configuration.Config
 
-//todo move to mem common
 trait TouchpointBackendMetrics extends Metrics {
   val backendEnv: String
 
