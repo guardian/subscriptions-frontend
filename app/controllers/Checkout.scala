@@ -5,7 +5,7 @@ import com.gu.identity.play.{IdUser, PrivateFields}
 import model.{AddressData, PaymentData, PersonalData, SubscriptionData}
 import play.api.libs.json._
 import play.api.mvc._
-import services.IdentityService
+import services.{AuthenticationService, CheckoutService, IdentityService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -45,6 +45,7 @@ object Checkout extends Controller {
           yield BadRequest(views.html.checkout.payment(formWithErrors, userIsSignedIn = idUserOpt.isDefined))
       },
       userData => {
+        CheckoutService.processSubscription(userData, AuthenticationService.authenticatedUserFor(request))
         Future.successful(Redirect(routes.Checkout.thankyou()))
       }
     )
