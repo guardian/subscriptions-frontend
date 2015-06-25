@@ -2,21 +2,19 @@ package services
 
 import com.gu.membership.util.Timing
 import com.gu.membership.zuora.Zuora._
-import com.gu.membership.zuora.ZuoraReaders._
 import com.gu.membership.zuora.ZuoraDeserializer._
-import com.gu.membership.zuora.ZuoraServiceError
+import com.gu.membership.zuora.ZuoraReaders._
+import com.gu.membership.zuora.{Login, ZuoraAction, ZuoraApiConfig, ZuoraServiceError}
 import com.gu.monitoring.{AuthenticationMetrics, StatusMetrics}
 import monitoring.TouchpointBackendMetrics
 import play.api.Logger
-import play.api.libs.ws.WS
 import play.api.Play.current
-import touchpoint.ZuoraApiConfig
+import play.api.libs.ws.WS
 import utils.ScheduledTask
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
-import services.zuora.{Login, ZuoraAction}
 
 //todo move to mem-common?
 class ZuoraService(val apiConfig: ZuoraApiConfig) {

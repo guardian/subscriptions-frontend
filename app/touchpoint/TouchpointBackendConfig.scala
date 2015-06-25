@@ -1,6 +1,7 @@
 package touchpoint
 
 import com.gu.membership.salesforce.SalesforceConfig
+import com.gu.membership.zuora.ZuoraApiConfig
 import com.typesafe.scalalogging.LazyLogging
 
 case class TouchpointBackendConfig(salesforce: SalesforceConfig, zuora: ZuoraApiConfig)
@@ -33,7 +34,7 @@ object TouchpointBackendConfig extends LazyLogging {
 
     TouchpointBackendConfig(
       SalesforceConfig.from(envBackendConf, environmentName),
-      ZuoraApiConfig.from(envBackendConf, environmentName)
+      ZuoraApiConfig.forSubscriptions(envBackendConf, environmentName)
     )
   }
 }
