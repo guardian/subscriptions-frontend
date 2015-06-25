@@ -13,7 +13,7 @@ import scala.concurrent.Future
 
 object Checkout extends Controller with LazyLogging {
 
-  val renderCheckout = GoogleAuthenticatedStaffAction.async { implicit request =>
+  def renderCheckout = GoogleAuthenticatedStaffAction.async { implicit request =>
     for (idUserOpt <- getIdentityUserByCookie(request)) yield {
       def idUserData(keyName: String, fieldName: PrivateFields => Option[String]): Option[(String, String)] =
         for {
@@ -46,9 +46,11 @@ object Checkout extends Controller with LazyLogging {
           yield BadRequest(views.html.checkout.payment(formWithErrors, userIsSignedIn = idUserOpt.isDefined))
       },
       userData => {
-        CheckoutService.processSubscription(userData, AuthenticationService.authenticatedUserFor(request)).map { memberIdOpts =>
-          logger.debug(s"Checkout service response: $memberIdOpts")
-          Redirect(routes.Checkout.thankyou())
+        CheckoutService.processSubscription(userData, AuthenticationService.authenticatedUserFor(request)).map {
+          case Some(memberId) =>
+            Redirect(routes.Checkout.thankyou())
+          case None =>
+            Redirect(routes.Checkout.renderCheckout())
         }
       }
     )
