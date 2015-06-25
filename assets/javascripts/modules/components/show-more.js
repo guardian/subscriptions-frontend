@@ -1,4 +1,4 @@
-define(['$', 'bonzo', 'bower_components/bean/bean'], function ($, bonzo, bean) {
+define(['$', 'bonzo', 'bean'], function ($, bonzo, bean) {
 
     function init() {
         $('.js-show-more-button').each(function (btn) {

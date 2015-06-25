@@ -18,7 +18,6 @@ define([
                 }).then(function (response) {
                     if (response.emailInUse) {
                         var msg = "Your email is already in use! Please sign in or use another email address";
-                        alert(msg);
                         reject(Error(msg));
                     } else {
                         resolve();

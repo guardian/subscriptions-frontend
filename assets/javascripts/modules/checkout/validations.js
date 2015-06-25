@@ -1,4 +1,4 @@
-define(['$', 'modules/checkout/formElements'], function ($, form) {
+define(['$', 'modules/checkout/form-elements'], function ($, form) {
 
     var ERROR_CLASS = 'form-field--error';
 

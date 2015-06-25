@@ -1,11 +1,15 @@
 define(['$',
-        'bower_components/bean/bean',
-        'modules/checkout/formElements',
-        'modules/checkout/validations'],
+        'bean',
+        'modules/checkout/form-elements',
+        'modules/checkout/validations',
+        'modules/checkout/email-check'
+    ],
     function ($,
               bean,
               form,
-              validations) {
+              validations,
+              emailCheck
+    ) {
 
     var $FIRST_NAME = form.$FIRST_NAME,
         $LAST_NAME = form.$LAST_NAME,
@@ -59,10 +63,14 @@ define(['$',
             bean.on($YOUR_DETAILS_SUBMIT[0], 'click', function (e) {
                 e.preventDefault();
                 if(validations.validatePersonalDetails()){
-                    $FIELDSET_YOUR_DETAILS.addClass(FIELDSET_COLLAPSED).attr(FIELDSET_COMPLETE, '');
-                    $FIELDSET_PAYMENT_DETAILS.removeClass(FIELDSET_COLLAPSED);
-                    $EDIT_YOUR_DETAILS.removeClass(IS_HIDDEN);
-                    $EDIT_PAYMENT_DETAILS.addClass(IS_HIDDEN);
+                    emailCheck.warnIfEmailTaken().then(function () {
+                        $FIELDSET_YOUR_DETAILS.addClass(FIELDSET_COLLAPSED).attr(FIELDSET_COMPLETE, '');
+                        $FIELDSET_PAYMENT_DETAILS.removeClass(FIELDSET_COLLAPSED);
+                        $EDIT_YOUR_DETAILS.removeClass(IS_HIDDEN);
+                        $EDIT_PAYMENT_DETAILS.addClass(IS_HIDDEN);
+                    }).catch(function (e) {
+                        console.error("failed email check:", e);
+                    });
                 }
             });
         }
