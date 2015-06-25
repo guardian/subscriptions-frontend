@@ -1,30 +1,25 @@
 package controllers
 
 import actions.CommonActions._
-import com.gu.identity.play.PrivateFields
+import com.gu.identity.play.{IdUser, PrivateFields}
 import model.{AddressData, PaymentData, PersonalData, SubscriptionData}
-import play.api.data.Form
+import play.api.libs.json._
 import play.api.mvc._
-import services.{AuthenticationService, CheckoutService, IdentityService}
+import services.IdentityService
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 object Checkout extends Controller {
-  
-  val renderCheckout = GoogleAuthenticatedStaffAction.async { implicit request =>
-    val idUserFutureOpt = request.cookies.find(_.name == "SC_GU_U").map {cookie =>
-      IdentityService.userLookupByScGuU(cookie.value)
-    }.getOrElse(Future.successful(None))
 
-    for (idUserOpt <- idUserFutureOpt) yield {
+  val renderCheckout = GoogleAuthenticatedStaffAction.async { implicit request =>
+    for (idUserOpt <- getIdentityUserByCookie(request)) yield {
       def idUserData(keyName: String, fieldName: PrivateFields => Option[String]): Option[(String, String)] =
         for {
           idUser <- idUserOpt
           fields <- idUser.privateFields
           field <- fieldName(fields)
         } yield keyName -> field
-
 
       val form = SubscriptionsForm().copy(
         data =  (
@@ -39,20 +34,34 @@ object Checkout extends Controller {
           ).toMap
       )
 
-      Ok(views.html.checkout.payment(form))
+      Ok(views.html.checkout.payment(form, userIsSignedIn = idUserOpt.isDefined))
     }
   }
 
-  val handleCheckout = GoogleAuthenticatedStaffAction.async(parse.form(
-    form = SubscriptionsForm(),
-    onErrors = (formWithErrors: Form[model.SubscriptionData]) => BadRequest(views.html.checkout.payment(formWithErrors))
-  )) { implicit request =>
-
-    CheckoutService.processSubscription(request.body, AuthenticationService.authenticatedUserFor(request))
-      .map(_ => Redirect(routes.Checkout.thankyou()))
+  def handleCheckout = GoogleAuthenticatedStaffAction.async { implicit request =>
+    SubscriptionsForm().bindFromRequest.fold(
+      formWithErrors => {
+        for (idUserOpt <- getIdentityUserByCookie(request))
+          yield BadRequest(views.html.checkout.payment(formWithErrors, userIsSignedIn = idUserOpt.isDefined))
+      },
+      userData => {
+        Future.successful(Redirect(routes.Checkout.thankyou()))
+      }
+    )
   }
 
   def thankyou = GoogleAuthenticatedStaffAction(Ok(views.html.checkout.thankyou()))
+
+  def checkIdentity(email: String) = GoogleAuthenticatedStaffAction.async { implicit request =>
+    for {
+      doesUserExist <- IdentityService.doesUserExist(email)
+    } yield Ok(Json.obj("emailInUse" -> doesUserExist))
+  }
+
+  private def getIdentityUserByCookie(request: Request[_]): Future[Option[IdUser]] =
+    request.cookies.find(_.name == "SC_GU_U").fold(Future.successful(None: Option[IdUser])) { cookie =>
+      IdentityService.userLookupByScGuU(cookie.value)
+    }
 }
 
 object SubscriptionsForm {

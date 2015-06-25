@@ -1,16 +1,25 @@
-@(form: Form[model.SubscriptionData])
+@(form: Form[model.SubscriptionData], userIsSignedIn: Boolean)
 
-@import configuration.Config
+@import routes.Checkout.renderCheckout
+@import model.JsVars
+@import configuration.Config.Identity._
 
-@main("Checkout | Subscriptions | The Guardian") {
+@disabled = @{ if (userIsSignedIn) "disabled" else "" }
+
+@main(title = "Checkout | Subscriptions | The Guardian",
+      jsVars = JsVars.default.copy(userIsSignedIn = userIsSignedIn)) {
 
 <div class="gs-container">
     @fragments.page.header("Checkout")
 
-
-    <div class="page-section__content">
-        <h3 class="h-section h-section--lead">Already have a Guardian account?</h3>
-        <a class="action" href="@Config.Identity.webAppSigninUrl("/checkout")">Sign in</a>
+    <div>
+    @if(userIsSignedIn) {
+        <h3>Not you?</h3>
+        <a class="action" href="@idWebAppSignOutUrl(renderCheckout.toString)">Sign out</a>
+    } else {
+        <h3>Already have a Guardian account?</h3>
+        <a class="action" href="@webAppSigninUrl(renderCheckout.toString)">Sign in</a>
+    }
     </div>
 
     <div class="row row--items-2">
@@ -24,23 +33,23 @@
                     <div class="fieldset__fields">
                         <div class="form-field js-checkout-first">
                             <label class="label" for="first">First name</label>
-                            <input type="text" class="input-text js-input" name="personal.first" value="@form.data.get("personal.first")">
+                            <input type="text" class="input-text js-input" name="personal.first" value="@form.data.get("personal.first")" @disabled>
                             @checkout.errorMessage("This field is required")
 
                         </div>
                         <div class="form-field js-checkout-last">
                             <label class="label" for="last">Last name</label>
-                            <input type="text" class="input-text js-input" name="personal.last" value="@form.data.get("personal.last")">
+                            <input type="text" class="input-text js-input" name="personal.last" value="@form.data.get("personal.last")" @disabled>
                             @checkout.errorMessage("This field is required")
                         </div>
                         <div class="form-field js-checkout-email">
                             <label class="label" for="email">Email address</label>
-                            <input type="email" class="input-text js-input" name="personal.emailValidation.email" value ="@form.data.get("personal.emailValidation.email")">
+                            <input type="email" class="input-text js-input" name="personal.emailValidation.email" value ="@form.data.get("personal.emailValidation.email")" @disabled>
                             @checkout.errorMessage("Please enter a valid Email address")
                         </div>
                         <div class="form-field  js-checkout-confirm-email">
                             <label class="label" for="confirm">Confirm email address</label>
-                            <input type="email" class="input-text js-input" name="personal.emailValidation.confirm" value ="@form.data.get("personal.emailValidation.confirm")">
+                            <input type="email" class="input-text js-input" name="personal.emailValidation.confirm" value ="@form.data.get("personal.emailValidation.confirm")" @disabled>
                             @checkout.errorMessage("The Confirm Email address does not match the Email address")
                         </div>
                         <div class="js-checkout-full-address">

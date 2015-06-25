@@ -1,4 +1,6 @@
-@(title: String, footer: Html = Html(""), bodyClassName: String = "")(content: Html)
+@import model.JsVars
+
+@(title: String, jsVars: JsVars = JsVars.default, footer: Html = Html(""), bodyClassName: String = "")(content: Html)
 
 <!DOCTYPE html>
 <html lang="en-GB">
@@ -12,7 +14,7 @@
 
         @fragments.footer.footer(footer)
 
-        @fragments.javascript()
+        @fragments.javascript(jsVars)
 
         @fragments.analytics.google()
         @fragments.analytics.omniture()
