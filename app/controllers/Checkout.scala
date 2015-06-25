@@ -3,10 +3,12 @@ package controllers
 import actions.CommonActions._
 import com.gu.identity.play.{IdUser, PrivateFields}
 import com.typesafe.scalalogging.LazyLogging
-import model.{AddressData, PaymentData, PersonalData, SubscriptionData}
+import forms.{FinishAccountForm, SubscriptionsForm}
 import play.api.libs.json._
 import play.api.mvc._
-import services.{AuthenticationService, CheckoutService, IdentityService}
+import services.CheckoutService
+import services.CheckoutService.CheckoutResult
+import services._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -46,13 +48,29 @@ object Checkout extends Controller with LazyLogging {
           yield BadRequest(views.html.checkout.payment(formWithErrors, userIsSignedIn = idUserOpt.isDefined))
       },
       userData => {
-        for (_ <- CheckoutService.processSubscription(userData, AuthenticationService.authenticatedUserFor(request)))
-        yield  Redirect(routes.Checkout.thankyou())
+        val idUserOpt = AuthenticationService.authenticatedUserFor(request)
+        CheckoutService.processSubscription(userData, idUserOpt).map {
+          case CheckoutResult(_, guestUser: GuestUser, _) =>
+            Some(FinishAccountForm().bind(guestUser.toFormParams))
+          case CheckoutResult(_, _:MinimalIdUser, _) =>
+            None
+        }.map(formOpt => Ok(views.html.checkout.thankyou(formOpt)))
       }
     )
   }
 
   def thankyou = GoogleAuthenticatedStaffAction(Ok(views.html.checkout.thankyou()))
+
+  def processFinishAccount = GoogleAuthenticatedStaffAction.async { implicit request =>
+    FinishAccountForm().bindFromRequest.fold( formWithErrors => {
+      Future {
+        BadRequest(views.html.checkout.thankyou(Some(formWithErrors)))
+      }
+    }, guestAccountData => {
+      IdentityService.convertGuest(guestAccountData.guestUser, guestAccountData.password)
+        .map(_ => Ok(views.html.checkout.alldone()))
+    })
+  }
 
   def checkIdentity(email: String) = GoogleAuthenticatedStaffAction.async { implicit request =>
     for {
@@ -66,45 +84,3 @@ object Checkout extends Controller with LazyLogging {
     }
 }
 
-object SubscriptionsForm {
-  import play.api.data.Forms._
-  import play.api.data._
-
-  private val addressDataMapping = mapping(
-    "address1" -> text,
-    "address2" -> text,
-    "town" -> text,
-    "postcode" -> text
-  )(AddressData.apply)(AddressData.unapply)
-
-  private val emailMapping = tuple(
-    "email" -> email,
-    "confirm" -> email)
-    .verifying("Emails don't match", email => email._1 == email._2)
-    .transform[String](
-      email => email._1, // Transform to a single field
-      email => (email, email) // Reverse transform from a single field to multiple
-    )
-
-  private val personalDataMapping = mapping(
-    "first" -> text,
-    "last" -> text,
-    "emailValidation" -> emailMapping,
-    "address" -> addressDataMapping
-  )(PersonalData.apply)(PersonalData.unapply)
-
-  private val paymentDataMapping = mapping(
-    "account" -> text(8, 8),
-    "sortcode1" -> text(2, 2),
-    "sortcode2" -> text(2, 2),
-    "sortcode3" -> text(2, 2),
-    "holder" -> text
-  )(PaymentData.apply)(PaymentData.unapply)
-
-  private val subsForm = Form(mapping(
-    "personal" -> personalDataMapping,
-    "payment" -> paymentDataMapping
-  )(SubscriptionData.apply)(SubscriptionData.unapply))
-
-  def apply() = subsForm
-}

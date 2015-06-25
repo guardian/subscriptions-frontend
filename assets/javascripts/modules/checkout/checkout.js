@@ -39,7 +39,7 @@ define(['$',
         $FIELDSET_REVIEW = form.$FIELDSET_REVIEW,
         $EDIT_YOUR_DETAILS = form.$EDIT_YOUR_DETAILS,
         $EDIT_PAYMENT_DETAILS = form.$EDIT_PAYMENT_DETAILS,
-
+        $FINISH_ACCOUNT_SUBMIT = form.$FINISH_ACCOUNT_SUBMIT,
         FIELDSET_COLLAPSED = 'fieldset--collapsed',
         FIELDSET_COMPLETE = 'data-fieldset-complete',
         IS_HIDDEN = 'is-hidden';
@@ -134,10 +134,26 @@ define(['$',
         }
     };
 
+    var finishAccount = function () {
+        if ($FINISH_ACCOUNT_SUBMIT.length) {
+            console.info("finishAccount()", $FINISH_ACCOUNT_SUBMIT);
+            bean.on($FINISH_ACCOUNT_SUBMIT[0], 'click', function (e) {
+                e.preventDefault();
+
+                if (validations.validateFinishAccount()) {
+                    bean.off($FINISH_ACCOUNT_SUBMIT[0], 'click');
+                    bean.fire($FINISH_ACCOUNT_SUBMIT[0], 'click');
+                }
+            });
+
+        }
+    };
+
     function init() {
         manualAddress();
         toggleFieldsets();
         reviewDetails();
+        finishAccount();
     }
 
     return {

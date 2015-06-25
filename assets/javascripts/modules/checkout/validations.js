@@ -23,6 +23,10 @@ define([
         {input: form.$POSTCODE, container: form.$POSTCODE_CONTAINER}
     ];
 
+    function isNumber (n) {
+        return !isNaN(parseFloat(n)) && isFinite(n);
+    }
+
     function toggleError(container, condition) {
         if (condition) {
             container.addClass(ERROR_CLASS);
@@ -108,7 +112,14 @@ define([
         return accountNumberValid && sortCodeValid && holderNameValid && detailsConfirmed;
     };
 
+    var validateFinishAccount = function () {
+        var passwordValid = form.$FINISH_ACCOUNT_PASSWORD.val().length >= 6;
+        toggleError(form.$FINISH_ACCOUNT_PASSWORD_CONTAINER, !passwordValid);
+        return passwordValid;
+    };
+
     return {
+        validateFinishAccount: validateFinishAccount,
         validatePersonalDetails: validatePersonalDetails,
         validatePaymentDetails: validatePaymentDetails
     };
