@@ -11,20 +11,16 @@ define(['$', 'modules/checkout/formElements'], function ($, form) {
         {input: form.$POSTCODE, container: form.$POSTCODE_CONTAINER}
     ];
 
-    var mandatoryFieldsPaymentDetails = [
-        {input: form.$ACCOUNT, container: form.$ACCOUNT_CONTAINER},
-        {input: form.$SORTCODE1, container: form.$SORTCODE_CONTAINER},
-        {input: form.$SORTCODE2, container: form.$SORTCODE_CONTAINER},
-        {input: form.$SORTCODE3, container: form.$SORTCODE_CONTAINER},
-        {input: form.$HOLDER, container: form.$HOLDER_CONTAINER}
-    ];
-
     function toggleError(container, condition) {
         if (condition) {
             container.addClass(ERROR_CLASS);
         } else {
             container.removeClass(ERROR_CLASS);
         }
+    }
+
+    function isNumber(s){
+        return /[^\d]+/.exec(s) == null;
     }
 
     var validatePersonalDetails = function () {
@@ -46,18 +42,26 @@ define(['$', 'modules/checkout/formElements'], function ($, form) {
 
 
     var validatePaymentDetails = function () {
-        var emptyFields = mandatoryFieldsPaymentDetails.filter(function (field) {
-            var isEmpty = field.input.val() == '';
-            toggleError(field.container, isEmpty);
-            return isEmpty;
-        });
-        var noEmptyFields = emptyFields.length == 0;
+        var accountNumberValid = form.$ACCOUNT.val() != ''
+            && form.$ACCOUNT.val().length <= 10
+            && isNumber(form.$ACCOUNT.val());
+        toggleError(form.$ACCOUNT_CONTAINER, !accountNumberValid);
 
+        var holderNameValid = form.$HOLDER.val() != ''
+            && form.$HOLDER.val().length <= 18;
+        toggleError(form.$HOLDER_CONTAINER, !holderNameValid);
+
+        var sortCodeValid = [form.$SORTCODE1, form.$SORTCODE2, form.$SORTCODE3].filter(function (field) {
+            var codeAsNumber = parseInt(field.val(), 10);
+            var isValid = codeAsNumber >= 10 && codeAsNumber <= 99;
+            return isValid;
+        }).length == 3;
+        toggleError(form.$SORTCODE_CONTAINER, !sortCodeValid);
 
         var detailsConfirmed = form.$CONFIRM_PAYMENT[0].checked;
         toggleError(form.$CONFIRM_PAYMENT_CONTAINER, !detailsConfirmed);
 
-        return noEmptyFields && detailsConfirmed;
+        return accountNumberValid && sortCodeValid && holderNameValid && detailsConfirmed;
     };
 
     return {
