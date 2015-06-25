@@ -11,11 +11,11 @@ object TouchpointBackend {
 
   def apply(touchpointBackendConfig: TouchpointBackendConfig): TouchpointBackend = {
 
-    val zuoraService = new ZuoraService(touchpointBackendConfig.zuora)
+    val zuoraRepo = new ZuoraRepo(touchpointBackendConfig.zuora)
 
     val salesforceRepo = new SalesforceRepo(touchpointBackendConfig.salesforce)
 
-    TouchpointBackend(salesforceRepo, zuoraService)
+    TouchpointBackend(salesforceRepo, zuoraRepo)
   }
 
   val Normal = TouchpointBackend(BackendType.Default)
@@ -25,10 +25,10 @@ object TouchpointBackend {
 
 case class TouchpointBackend(
   salesforceRepo: SalesforceRepo,
-  zuoraService : ZuoraService) {
+  zuoraRepo : ZuoraRepo) {
 
   def start() = {
     salesforceRepo.salesforce.authTask.start()
-    zuoraService.start()
+    zuoraRepo.authTask.start()
   }
 }
