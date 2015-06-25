@@ -1,15 +1,19 @@
-<script id="gu">
+@import play.api.libs.json.Json
+@import model.JsVars
 
-    var guardian = {
-        isModernBrowser: (
+@(jsVars: JsVars)
+
+<script id="gu">
+    var guardian = JSON.parse('@Html(Json.stringify(Json.toJson(jsVars)))');
+
+    guardian.isModernBrowser =  (
             'querySelector' in document
             && 'addEventListener' in window
             && 'localStorage' in window
             && 'sessionStorage' in window
             && 'bind' in Function
             && (('XMLHttpRequest' in window && 'withCredentials' in new XMLHttpRequest())
-              || 'XDomainRequest' in window))
-    };
+              || 'XDomainRequest' in window));
 
     (function(isModern) {
         if (isModern) {

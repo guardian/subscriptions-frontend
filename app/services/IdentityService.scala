@@ -19,6 +19,11 @@ case class GuestUserNotCreated(reason : String)
 
 class IdentityService(identityApiClient: IdentityApiClient) extends LazyLogging {
 
+  def doesUserExist(email: String): Future[Boolean] =
+    identityApiClient.userLookupByEmail(email).map { response =>
+      (response.json \ "user" \ "id").asOpt[String].isDefined
+    }
+
   def userLookupByScGuU(cookieValue: String): Future[Option[IdUser]] =
     identityApiClient.userLookupByScGuUCookie(cookieValue).map { response =>
       (response.json \ "user").asOpt[IdUser]
@@ -68,7 +73,7 @@ object IdentityApiClient extends IdentityApiClient with LazyLogging {
      */
     private def applyOnSpecificErrors(reasons: List[String])(block: WSResponse => Unit): Unit = {
       def errorMessageFilter(error: JsValue): Boolean =
-        (error \ "message").asOpt[JsString].filter(e => reasons.contains(e.value)).isDefined
+        (error \ "message").asOpt[JsString].exists(e => reasons.contains(e.value))
 
       f.map(response =>
         (response.json \ "status").asOpt[String].filter(_ == "error")

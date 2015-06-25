@@ -1,16 +1,25 @@
-@(form: Form[model.SubscriptionData])
+@(form: Form[model.SubscriptionData], userIsSignedIn: Boolean)
 
-@import configuration.Config
+@import routes.Checkout.renderCheckout
+@import model.JsVars
+@import configuration.Config.Identity._
 
-@main("Checkout | Subscriptions | The Guardian") {
+@disabled = @{ if (userIsSignedIn) "disabled" else "" }
+
+@main(title = "Checkout | Subscriptions | The Guardian",
+      jsVars = JsVars.default.copy(userIsSignedIn = userIsSignedIn)) {
 
 <div class="gs-container">
     @fragments.page.header("Checkout")
 
-
-    <div class="page-section__content">
-        <h3 class="h-section h-section--lead">Already have a Guardian account?</h3>
-        <a class="action" href="@Config.Identity.webAppSigninUrl("/checkout")">Sign in</a>
+    <div>
+    @if(userIsSignedIn) {
+        <h3>Not you?</h3>
+        <a class="action" href="@idWebAppSignOutUrl(renderCheckout.toString)">Sign out</a>
+    } else {
+        <h3>Already have a Guardian account?</h3>
+        <a class="action" href="@webAppSigninUrl(renderCheckout.toString)">Sign in</a>
+    }
     </div>
 
     <div class="row row--items-2">
@@ -24,19 +33,19 @@
                     <div class="fieldset__fields">
                         <div class="form-field">
                             <label class="label" for="first">First name</label>
-                            <input type="text" class="input-text js-checkout-first" name="personal.first" id="first" value="@form.data.get("personal.first")">
+                            <input type="text" class="input-text js-checkout-first" name="personal.first" id="first" value="@form.data.get("personal.first")" @disabled>
                         </div>
                         <div class="form-field">
                             <label class="label" for="last">Last name</label>
-                            <input type="text" class="input-text js-checkout-last" name="personal.last" id="last" value="@form.data.get("personal.last")">
+                            <input type="text" class="input-text js-checkout-last" name="personal.last" id="last" value="@form.data.get("personal.last")" @disabled>
                         </div>
                         <div class="form-field">
                             <label class="label" for="email">Email address</label>
-                            <input type="email" class="input-text js-checkout-email" name="personal.emailValidation.email" id="email" value ="@form.data.get("personal.emailValidation.email")">
+                            <input type="email" class="input-text js-checkout-email" name="personal.emailValidation.email" id="email" value ="@form.data.get("personal.emailValidation.email")" @disabled>
                         </div>
                         <div class="form-field">
                             <label class="label" for="confirm">Confirm email address</label>
-                            <input type="email" class="input-text" name="personal.emailValidation.confirm" id="confirm" value ="@form.data.get("personal.emailValidation.confirm")">
+                            <input type="email" class="input-text" name="personal.emailValidation.confirm" id="confirm" value ="@form.data.get("personal.emailValidation.confirm")" @disabled>
                         </div>
                         <div class="js-checkout-full-address">
                             <div class="form-field">

@@ -1,38 +1,42 @@
-define(['$', 'bean'], function ($, bean) {
+define([
+    '$',
+    'bean',
+    'modules/checkout/form-elements',
+    'modules/checkout/email-check'
+], function ($, bean, form, emailCheck) {
 
-    var $FIRST_NAME                 = $('.js-checkout-first'),
-        $LAST_NAME                  = $('.js-checkout-last'),
-        $EMAIL                      = $('.js-checkout-email'),
-        $ADDRESS1                   = $('.js-checkout-house'),
-        $ADDRESS2                   = $('.js-checkout-street'),
-        $ADDRESS3                   = $('.js-checkout-town'),
-        $POSTCODE                   = $('.js-checkout-postcode'),
-        $ACCOUNT                    = $('.js-checkout-account'),
-        $SORTCODE1                  = $('.js-checkout-sortcode1'),
-        $SORTCODE2                  = $('.js-checkout-sortcode2'),
-        $SORTCODE3                  = $('.js-checkout-sortcode3'),
-        $HOLDER                     = $('.js-checkout-holder'),
-        $FIND_ADDRESS               = $('.js-checkout-find-address'),
-        $MANUAL_ADDRESS             = $('.js-checkout-manual-address'),
-        $FULL_ADDRESS               = $('.js-checkout-full-address'),
-        $YOUR_DETAILS_SUBMIT        = $('.js-checkout-your-details-submit'),
-        $PAYMENT_DETAILS_SUBMIT     = $('.js-checkout-payment-details-submit'),
-        $REVIEW_NAME                = $('.js-checkout-review-name'),
-        $REVIEW_ADDRESS             = $('.js-checkout-review-address'),
-        $REVIEW_EMAIL               = $('.js-checkout-review-email'),
-        $REVIEW_ACCOUNT             = $('.js-checkout-review-account'),
-        $REVIEW_SORTCODE            = $('.js-checkout-review-sortcode'),
-        $REVIEW_HOLDER              = $('.js-checkout-review-holder'),
-        $SMALLPRINT                 = $('.js-checkout-smallprint'),
-        $FIELDSET_YOUR_DETAILS      = $('.js-fieldset-your-details'),
-        $FIELDSET_PAYMENT_DETAILS   = $('.js-fieldset-payment-details'),
-        $FIELDSET_REVIEW            = $('.js-fieldset-review'),
-        $EDIT_YOUR_DETAILS          = $('.js-edit-your-details'),
-        $EDIT_PAYMENT_DETAILS       = $('.js-edit-payment-details'),
-
-        FIELDSET_COLLAPSED = 'fieldset--collapsed',
-        FIELDSET_COMPLETE = 'data-fieldset-complete',
-        IS_HIDDEN = 'is-hidden';
+    var $FIRST_NAME                 = form.$FIRST_NAME,
+        $LAST_NAME                  = form.$LAST_NAME,
+        $EMAIL                      = form.$EMAIL,
+        $ADDRESS1                   = form.$ADDRESS1,
+        $ADDRESS2                   = form.$ADDRESS2,
+        $ADDRESS3                   = form.$ADDRESS3,
+        $POSTCODE                   = form.$POSTCODE,
+        $ACCOUNT                    = form.$ACCOUNT,
+        $SORTCODE1                  = form.$SORTCODE1,
+        $SORTCODE2                  = form.$SORTCODE2,
+        $SORTCODE3                  = form.$SORTCODE3,
+        $HOLDER                     = form.$HOLDER,
+        $FIND_ADDRESS               = form.$FIND_ADDRESS,
+        $MANUAL_ADDRESS             = form.$MANUAL_ADDRESS,
+        $FULL_ADDRESS               = form.$FULL_ADDRESS,
+        $YOUR_DETAILS_SUBMIT        = form.$YOUR_DETAILS_SUBMIT,
+        $PAYMENT_DETAILS_SUBMIT     = form.$PAYMENT_DETAILS_SUBMIT,
+        $REVIEW_NAME                = form.$REVIEW_NAME,
+        $REVIEW_ADDRESS             = form.$REVIEW_ADDRESS,
+        $REVIEW_EMAIL               = form.$REVIEW_EMAIL,
+        $REVIEW_ACCOUNT             = form.$REVIEW_ACCOUNT,
+        $REVIEW_SORTCODE            = form.$REVIEW_SORTCODE,
+        $REVIEW_HOLDER              = form.$REVIEW_HOLDER,
+        $SMALLPRINT                 = form.$SMALLPRINT,
+        $FIELDSET_YOUR_DETAILS      = form.$FIELDSET_YOUR_DETAILS,
+        $FIELDSET_PAYMENT_DETAILS   = form.$FIELDSET_PAYMENT_DETAILS,
+        $FIELDSET_REVIEW            = form.$FIELDSET_REVIEW,
+        $EDIT_YOUR_DETAILS          = form.$EDIT_YOUR_DETAILS,
+        $EDIT_PAYMENT_DETAILS       = form.$EDIT_PAYMENT_DETAILS,
+        FIELDSET_COLLAPSED          = 'fieldset--collapsed',
+        FIELDSET_COMPLETE           = 'data-fieldset-complete',
+        IS_HIDDEN                   = 'is-hidden';
 
     var findAddress = function () {
         if($FIND_ADDRESS.length > 0){
@@ -76,11 +80,15 @@ define(['$', 'bean'], function ($, bean) {
         if($YOUR_DETAILS_SUBMIT.length > 0){
             bean.on($YOUR_DETAILS_SUBMIT[0], 'click', function (e) {
                 e.preventDefault();
-                $FIELDSET_YOUR_DETAILS.addClass(FIELDSET_COLLAPSED).attr(FIELDSET_COMPLETE, '');
-                $FIELDSET_PAYMENT_DETAILS.removeClass(FIELDSET_COLLAPSED);
-                $EDIT_YOUR_DETAILS.removeClass(IS_HIDDEN);
-                $EDIT_PAYMENT_DETAILS.addClass(IS_HIDDEN);
-            });
+                emailCheck.warnIfEmailTaken().then(function () {
+                    $FIELDSET_YOUR_DETAILS.addClass(FIELDSET_COLLAPSED).attr(FIELDSET_COMPLETE, '');
+                    $FIELDSET_PAYMENT_DETAILS.removeClass(FIELDSET_COLLAPSED);
+                    $EDIT_YOUR_DETAILS.removeClass(IS_HIDDEN);
+                    $EDIT_PAYMENT_DETAILS.addClass(IS_HIDDEN);
+                }).catch(function (e) {
+                    console.error("failed email check:", e);
+                });
+            })
         }
 
         if($PAYMENT_DETAILS_SUBMIT.length > 0){

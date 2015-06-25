@@ -36,10 +36,14 @@ object Config {
     val keys = if (idConfig.getBoolean("production.keys")) new ProductionKeys else new PreProductionKeys
 
     val webAppUrl = idConfig.getString("webapp.url")
-    
-    def webAppSigninUrl(uri: String): String =
-      (webAppUrl / "signin") ? ("returnUrl" -> s"$subscriptionsUrl$uri") ? ("skipConfirmation" -> "true")
 
+    def webAppSigninUrl(path: String): String =
+      (webAppUrl / "signin") ? ("returnUrl" -> absoluteUrl(path)) ? ("skipConfirmation" -> "true")
+
+    def idWebAppSignOutUrl(path: String): String =
+      (webAppUrl / "signout") ? ("returnUrl" -> absoluteUrl(path)) ? ("skipConfirmation" -> "true")
+
+    private def absoluteUrl(path: String): String = (subscriptionsUrl / path).toString()
   }
 
   val subscriptionsUrl = config.getString("subscriptions.url")

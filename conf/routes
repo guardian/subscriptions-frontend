@@ -21,6 +21,7 @@ POST        /digital/country                 controllers.DigitalPack.handleCount
 GET         /checkout                        controllers.Checkout.renderCheckout
 POST        /checkout                        controllers.Checkout.handleCheckout
 GET         /checkout/thankyou               controllers.Checkout.thankyou
+GET         /checkout/check-identity         controllers.Checkout.checkIdentity(email: String)
 
 # collection and delivery
 GET         /collection/paper-digital        controllers.Shipping.viewCollectionPaperDigital
