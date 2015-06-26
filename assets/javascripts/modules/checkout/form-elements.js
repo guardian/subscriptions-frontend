@@ -1,4 +1,5 @@
 define(['$'], function ($) {
+    'use strict';
 
     return {
         $FIRST_NAME: $('.js-checkout-first .js-input'),
