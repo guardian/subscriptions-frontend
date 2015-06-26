@@ -1,4 +1,4 @@
-define(['$', 'modules/checkout/form-elements'], function ($, form) {
+define(['$', 'modules/checkout/form-elements', 'modules/checkout/regex'], function ($, form, regex) {
 
     var ERROR_CLASS = 'form-field--error',
         EMAIL_ERROR_DEFAULT = 'Please enter a valid Email address';
@@ -20,8 +20,10 @@ define(['$', 'modules/checkout/form-elements'], function ($, form) {
         }
     }
 
-    function isNumber(s){
-        return /[^\d]+/.exec(s) == null;
+    function renderEmailError(condition, message){
+        if(condition){
+            form.$EMAIL_ERROR.text(message || EMAIL_ERROR_DEFAULT);
+        }
     }
 
     var validatePersonalDetails = function () {
@@ -32,10 +34,8 @@ define(['$', 'modules/checkout/form-elements'], function ($, form) {
         });
         var noEmptyFields = emptyFields.length == 0;
 
-        var validEmail = form.$EMAIL.val().indexOf('@') > 0;
-        if(!validEmail){
-            form.$EMAIL_ERROR.text(EMAIL_ERROR_DEFAULT);
-        }
+        var validEmail = regex.isValidEmail(form.$EMAIL.val());
+        renderEmailError(!validEmail);
         toggleError(form.$EMAIL_CONTAINER, !validEmail);
 
         var emailCorrectTwice = form.$EMAIL.val() == form.$CONFIRM_EMAIL.val();
