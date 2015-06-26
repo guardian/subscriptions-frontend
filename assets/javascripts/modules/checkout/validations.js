@@ -1,6 +1,7 @@
 define(['$', 'modules/checkout/form-elements'], function ($, form) {
 
-    var ERROR_CLASS = 'form-field--error';
+    var ERROR_CLASS = 'form-field--error',
+        EMAIL_ERROR_DEFAULT = 'Please enter a valid Email address';
 
     var mandatoryFieldsPersonalDetails = [
         {input: form.$FIRST_NAME, container: form.$FIRST_NAME_CONTAINER},
@@ -32,6 +33,9 @@ define(['$', 'modules/checkout/form-elements'], function ($, form) {
         var noEmptyFields = emptyFields.length == 0;
 
         var validEmail = form.$EMAIL.val().indexOf('@') > 0;
+        if(!validEmail){
+            form.$EMAIL_ERROR.text(EMAIL_ERROR_DEFAULT);
+        }
         toggleError(form.$EMAIL_CONTAINER, !validEmail);
 
         var emailCorrectTwice = form.$EMAIL.val() == form.$CONFIRM_EMAIL.val();

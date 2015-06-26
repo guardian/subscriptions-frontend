@@ -5,6 +5,7 @@ define(['$'], function ($) {
         $LAST_NAME: $('.js-checkout-last .js-input'),
         $EMAIL: $('.js-checkout-email .js-input'),
         $CONFIRM_EMAIL: $('.js-checkout-confirm-email .js-input'),
+        $EMAIL_ERROR: $('.js-checkout-email .js-error-message'),
         $ADDRESS1: $('.js-checkout-house .js-input'),
         $ADDRESS2: $('.js-checkout-street .js-input'),
         $ADDRESS3: $('.js-checkout-town .js-input'),
