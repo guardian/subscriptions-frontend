@@ -71,3 +71,12 @@
         display: none;
     }
 }
+
+.form-field__error-message {
+    display: none;
+}
+.form-field--error {
+    .form-field__error-message {
+        display: block;
+    }
+}

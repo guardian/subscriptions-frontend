@@ -1,5 +1,5 @@
 require([
-    'modules/checkout',
+    'modules/checkout/checkout',
     'modules/digitalpack',
     'utils/ajax'
 ], function(

@@ -8,6 +8,7 @@ module.exports = function(grunt) {
      */
     var pkg = grunt.file.readJSON('package.json');
     var isDev = (grunt.option('dev') !== undefined) ? Boolean(grunt.option('dev')) : process.env.GRUNT_ISDEV === '1';
+    var singleRun = grunt.option('single-run') !== false;
 
     /**
      * Load all grunt-* tasks
@@ -127,6 +128,18 @@ module.exports = function(grunt) {
                 files: ['<%= dirs.assets.javascripts %>/**/*.js'],
                 tasks: ['requirejs']
             }
+        },
+
+        karma: {
+            options: {
+                reporters: isDev ? ['dots', 'coverage'] : ['progress'],
+                singleRun: singleRun
+            },
+
+            unit: {
+                configFile: 'karma.conf.js',
+                browsers: ['PhantomJS']
+            }
         }
     });
 
@@ -153,6 +166,18 @@ module.exports = function(grunt) {
     });
 
     grunt.registerTask('default', ['compile']);
+
+    /***********************************************************************
+     * Test
+     ***********************************************************************/
+
+    grunt.registerTask('test', function(){
+        grunt.task.run(['test:unit']);
+    });
+    grunt.registerTask('test:unit', function() {
+        grunt.config.set('karma.options.singleRun', (singleRun === false) ? false : true);
+        grunt.task.run(['karma:unit']);
+    });
 };
 
 
