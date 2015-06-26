@@ -1,16 +1,18 @@
 package services
 
+import akka.agent.Agent
 import com.gu.membership.salesforce.Member.Keys
-import com.gu.membership.salesforce._
+import com.gu.membership.salesforce.{Authentication, MemberId, MemberRepository, Scalaforce}
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
 import model.PersonalData
+import play.api.Logger
+import play.api.libs.concurrent.Akka
 import play.api.libs.json.{JsObject, Json}
-import utils.ScheduledTask
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-import scala.concurrent.duration._
+import scala.concurrent.duration.{FiniteDuration, _}
+import scala.concurrent.{Await, Future}
 
 trait SalesforceService extends LazyLogging {
 
@@ -32,23 +34,62 @@ trait SalesforceService extends LazyLogging {
 
 object SalesforceService extends SalesforceService {
   override def createOrUpdateUser(personalData: PersonalData, userId: UserId): Future[Option[MemberId]] =
-    //TODO when implementing test-users this requires updating to supply data to correct location
-    TouchpointBackend.Normal.salesforceRepo.upsert(userId.id, createSalesforceUserData(personalData)).map(Some(_))
+    SalesforceRepo.upsert(userId.id, createSalesforceUserData(personalData)).map(Some(_))
 }
 
-class SalesforceRepo(salesforceConfig: SalesforceConfig) extends MemberRepository {
+object SalesforceRepo extends MemberRepository {
   override val salesforce = new Scalaforce {
-    override val consumerKey = salesforceConfig.consumerKey
-    override val apiUsername = salesforceConfig.apiUsername
-    override val consumerSecret = salesforceConfig.consumerSecret
-    override val apiToken = salesforceConfig.apiToken
-    override val apiPassword = salesforceConfig.apiPassword
+    override val consumerKey = Config.Salesforce.consumerKey
+    override val apiUsername = Config.Salesforce.apiUsername
+    override val consumerSecret = Config.Salesforce.consumerSecret
+    override val apiToken = Config.Salesforce.apiToken
+    override val apiPassword = Config.Salesforce.apiPassword
     override val application = Config.appName
-    override val apiURL =salesforceConfig.apiURL.toString
-    override val stage = salesforceConfig.envName
+    override val apiURL = Config.Salesforce.apiURL.toString
+    override val stage = Config.Salesforce.envName
 
     val authTask = ScheduledTask("", Authentication("", ""), 0.seconds, 30.minutes)(getAuthentication)
 
     def authentication: Authentication = authTask.get()
   }
+}
+
+trait ScheduledTask[T] {
+  import play.api.Play.current
+
+  val initialValue: T
+  val initialDelay: FiniteDuration
+  val interval: FiniteDuration
+
+  val name = getClass.getSimpleName
+
+  private implicit val system = Akka.system
+  lazy val agent = Agent[T](initialValue)
+
+  def refresh(): Future[T]
+
+  def start() {
+    Logger.debug(s"Starting $name scheduled task")
+    system.scheduler.schedule(initialDelay, interval) {
+      agent.sendOff { _ =>
+        Logger.debug(s"Refreshing $name scheduled task")
+        Await.result(refresh(), 25.seconds)
+      }
+    }
+  }
+
+  def get() = agent.get()
+}
+
+object ScheduledTask {
+  def apply[T](taskName: String, initValue: T, initDelay: FiniteDuration, intervalPeriod: FiniteDuration)(refresher: => Future[T]) =
+    new ScheduledTask[T] {
+      val initialValue = initValue
+      val initialDelay = initDelay
+      val interval = intervalPeriod
+
+      override val name = taskName
+
+      def refresh(): Future[T] = refresher
+    }
 }
