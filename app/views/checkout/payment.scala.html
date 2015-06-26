@@ -4,7 +4,7 @@
 @import model.JsVars
 @import configuration.Config.Identity._
 
-@disabled = @{ if (userIsSignedIn) "disabled" else "" }
+@readonly = @{ if (userIsSignedIn) "readonly" else "" }
 
 @main(title = "Checkout | Subscriptions | The Guardian",
       jsVars = JsVars.default.copy(userIsSignedIn = userIsSignedIn)) {
@@ -33,24 +33,19 @@
                     <div class="fieldset__fields">
                         <div class="form-field js-checkout-first">
                             <label class="label" for="first">First name</label>
-                            <input type="text" class="input-text js-input" name="personal.first" value="@form.data.get("personal.first")" @disabled>
-                            @checkout.errorMessage("This field is required")
-
+                            <input type="text" class="input-text js-checkout-first" name="personal.first" id="first" value="@form.data.get("personal.first")" @readonly>
                         </div>
                         <div class="form-field js-checkout-last">
                             <label class="label" for="last">Last name</label>
-                            <input type="text" class="input-text js-input" name="personal.last" value="@form.data.get("personal.last")" @disabled>
-                            @checkout.errorMessage("This field is required")
+                            <input type="text" class="input-text js-checkout-last" name="personal.last" id="last" value="@form.data.get("personal.last")" @readonly>
                         </div>
                         <div class="form-field js-checkout-email">
                             <label class="label" for="email">Email address</label>
-                            <input type="email" class="input-text js-input" name="personal.emailValidation.email" value ="@form.data.get("personal.emailValidation.email")" @disabled>
-                            @checkout.errorMessage("")
+                            <input type="email" class="input-text js-checkout-email" name="personal.emailValidation.email" id="email" value ="@form.data.get("personal.emailValidation.email")" @readonly>
                         </div>
                         <div class="form-field  js-checkout-confirm-email">
                             <label class="label" for="confirm">Confirm email address</label>
-                            <input type="email" class="input-text js-input" name="personal.emailValidation.confirm" value ="@form.data.get("personal.emailValidation.confirm")" @disabled>
-                            @checkout.errorMessage("The Confirm Email address does not match the Email address")
+                            <input type="email" class="input-text" name="personal.emailValidation.confirm" id="confirm" value ="@form.data.get("personal.emailValidation.confirm")" @readonly>
                         </div>
                         <div class="js-checkout-full-address">
                             <div class="form-field js-checkout-house">

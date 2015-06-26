@@ -2,17 +2,18 @@ package controllers
 
 import actions.CommonActions._
 import com.gu.identity.play.{IdUser, PrivateFields}
+import com.typesafe.scalalogging.LazyLogging
 import model.{AddressData, PaymentData, PersonalData, SubscriptionData}
 import play.api.libs.json._
 import play.api.mvc._
-import services.IdentityService
+import services.{AuthenticationService, CheckoutService, IdentityService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-object Checkout extends Controller {
+object Checkout extends Controller with LazyLogging {
 
-  val renderCheckout = GoogleAuthenticatedStaffAction.async { implicit request =>
+  def renderCheckout = GoogleAuthenticatedStaffAction.async { implicit request =>
     for (idUserOpt <- getIdentityUserByCookie(request)) yield {
       def idUserData(keyName: String, fieldName: PrivateFields => Option[String]): Option[(String, String)] =
         for {
@@ -45,7 +46,12 @@ object Checkout extends Controller {
           yield BadRequest(views.html.checkout.payment(formWithErrors, userIsSignedIn = idUserOpt.isDefined))
       },
       userData => {
-        Future.successful(Redirect(routes.Checkout.thankyou()))
+        CheckoutService.processSubscription(userData, AuthenticationService.authenticatedUserFor(request)).map {
+          case Some(memberId) =>
+            Redirect(routes.Checkout.thankyou())
+          case None =>
+            Redirect(routes.Checkout.renderCheckout())
+        }
       }
     )
   }
