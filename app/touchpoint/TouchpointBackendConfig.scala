@@ -18,7 +18,7 @@ object TouchpointBackendConfig extends LazyLogging {
 
   }
 
-  def byType(typ: BackendType = BackendType.Default, config: com.typesafe.config.Config) = {
+  def backendType(typ: BackendType = BackendType.Default, config: com.typesafe.config.Config) = {
     val backendsConfig = config.getConfig("touchpoint.backend")
     val environmentName = backendsConfig.getString(typ.name)
 

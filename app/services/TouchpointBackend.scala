@@ -7,7 +7,7 @@ object TouchpointBackend {
   import TouchpointBackendConfig.BackendType
 
   def apply(backendType: TouchpointBackendConfig.BackendType): TouchpointBackend =
-    TouchpointBackend(TouchpointBackendConfig.byType(backendType, Config.config))
+    TouchpointBackend(TouchpointBackendConfig.backendType(backendType, Config.config))
 
   def apply(touchpointBackendConfig: TouchpointBackendConfig): TouchpointBackend = {
 
