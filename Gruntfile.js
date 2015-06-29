@@ -191,12 +191,23 @@ module.exports = function(grunt) {
 
     grunt.registerTask('validate', ['eslint']);
 
+    grunt.registerTask('compile:css', ['sass']);
+
+    grunt.registerTask('compile:js', function(){
+        if (!isDev) {
+            grunt.task.run(['validate']);
+        }
+        grunt.task.run([
+            'requirejs'
+        ]);
+    });
+
     grunt.registerTask('compile', function(){
         grunt.task.run([
             'clean:assets',
             'clean:dist',
-            'sass',
-            'requirejs',
+            'compile:css',
+            'compile:js',
             'copy:images',
             'copy:jsVendor'
         ]);
