@@ -1,0 +1,19 @@
+{
+  "env": {
+    "browser": true,
+    "node": true
+  },
+
+  "globals"   : {
+    "require": false,
+    "define": false,
+    "guardian": false
+  },
+
+  "rules": {
+    "curly": [2, "all"],
+    "no-unused-vars": 2,
+    "quotes": [2, "single"],
+    "wrap-iife": 2
+  }
+}

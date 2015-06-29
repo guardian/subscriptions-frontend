@@ -37,6 +37,10 @@ module.exports = function(grunt) {
             }
         },
 
+        /***********************************************************************
+         * Copy & Clean
+         ***********************************************************************/
+
         clean: {
             assets: ['<%= dirs.public.javascripts %>','<%= dirs.public.stylesheets %>', '<%= dirs.public.images %>'],
             dist: ['<%= dirs.public.root %>/dist/', 'conf/assets.map']
@@ -56,6 +60,10 @@ module.exports = function(grunt) {
                 expand: true
             }
         },
+
+        /***********************************************************************
+         * Assets
+         ***********************************************************************/
 
         asset_hash: {
             options: {
@@ -80,6 +88,7 @@ module.exports = function(grunt) {
                 }]
             }
         },
+
         sass: {
             options: {
                 sourceMap: true,
@@ -119,6 +128,10 @@ module.exports = function(grunt) {
             }
         },
 
+        /***********************************************************************
+         * Watch
+         ***********************************************************************/
+
         watch: {
             css: {
                 files: ['<%= dirs.assets.stylesheets %>/**/*.scss'],
@@ -130,6 +143,13 @@ module.exports = function(grunt) {
             }
         },
 
+        /***********************************************************************
+         * Test & Validate
+         ***********************************************************************/
+
+         /**
+          * Javascript unit tests
+          */
         karma: {
             options: {
                 reporters: isDev ? ['dots', 'coverage'] : ['progress'],
@@ -140,15 +160,54 @@ module.exports = function(grunt) {
                 configFile: 'karma.conf.js',
                 browsers: ['PhantomJS']
             }
+        },
+
+        /**
+         * Lint Javascript sources
+         */
+        eslint: {
+            options: {
+                configFile: '.eslintrc'
+            },
+            app: {
+                files: [{
+                    expand: true,
+                    cwd: '<%= dirs.assets.javascripts %>/',
+                    src: [
+                        'modules/**/*.js',
+                        'utils/**/*.js',
+                        'main.js'
+                    ]
+                }]
+            }
+        },
+
+
+    });
+
+    /***********************************************************************
+     * Compile & Validate
+     ***********************************************************************/
+
+    grunt.registerTask('validate', ['eslint']);
+
+    grunt.registerTask('compile:css', ['sass']);
+
+    grunt.registerTask('compile:js', function(){
+        if (!isDev) {
+            grunt.task.run(['validate']);
         }
+        grunt.task.run([
+            'requirejs'
+        ]);
     });
 
     grunt.registerTask('compile', function(){
         grunt.task.run([
             'clean:assets',
             'clean:dist',
-            'sass',
-            'requirejs',
+            'compile:css',
+            'compile:js',
             'copy:images',
             'copy:jsVendor'
         ]);

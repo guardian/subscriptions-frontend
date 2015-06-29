@@ -11,6 +11,8 @@ define(['$',
               emailCheck
     ) {
 
+    'use strict';
+
     var $FIRST_NAME = form.$FIRST_NAME,
         $LAST_NAME = form.$LAST_NAME,
         $EMAIL = form.$EMAIL,
@@ -44,6 +46,16 @@ define(['$',
         FIELDSET_COMPLETE = 'data-fieldset-complete',
         IS_HIDDEN = 'is-hidden';
 
+    var showFullAddressFields = function () {
+        $FULL_ADDRESS.removeClass(IS_HIDDEN);
+    };
+
+    var collapseFieldsets = function () {
+        $FIELDSET_YOUR_DETAILS.addClass(FIELDSET_COLLAPSED);
+        $FIELDSET_PAYMENT_DETAILS.addClass(FIELDSET_COLLAPSED);
+        $FIELDSET_REVIEW.addClass(FIELDSET_COLLAPSED);
+    };
+
     var manualAddress = function () {
         if($MANUAL_ADDRESS.length > 0){
             bean.on($MANUAL_ADDRESS[0], 'click', function (e) {
@@ -54,22 +66,18 @@ define(['$',
         }
     };
 
-    var showFullAddressFields = function () {
-        $FULL_ADDRESS.removeClass(IS_HIDDEN);
-    };
-
     var toggleFieldsets = function () {
         if($YOUR_DETAILS_SUBMIT.length > 0){
-            bean.on($YOUR_DETAILS_SUBMIT[0], 'click', function (e) {
-                e.preventDefault();
+            bean.on($YOUR_DETAILS_SUBMIT[0], 'click', function (evt) {
+                evt.preventDefault();
                 if(validations.validatePersonalDetails()){
                     emailCheck.warnIfEmailTaken().then(function () {
                         $FIELDSET_YOUR_DETAILS.addClass(FIELDSET_COLLAPSED).attr(FIELDSET_COMPLETE, '');
                         $FIELDSET_PAYMENT_DETAILS.removeClass(FIELDSET_COLLAPSED);
                         $EDIT_YOUR_DETAILS.removeClass(IS_HIDDEN);
                         $EDIT_PAYMENT_DETAILS.addClass(IS_HIDDEN);
-                    }).catch(function (e) {
-                        console.error("failed email check:", e);
+                    }).catch(function (err) {
+                        console.error('failed email check:', err);
                     });
                 }
             });
@@ -109,12 +117,6 @@ define(['$',
                 $EDIT_YOUR_DETAILS.removeClass(IS_HIDDEN);
             });
         }
-    };
-
-    var collapseFieldsets = function () {
-        $FIELDSET_YOUR_DETAILS.addClass(FIELDSET_COLLAPSED);
-        $FIELDSET_PAYMENT_DETAILS.addClass(FIELDSET_COLLAPSED);
-        $FIELDSET_REVIEW.addClass(FIELDSET_COLLAPSED);
     };
 
     var reviewDetails = function () {
