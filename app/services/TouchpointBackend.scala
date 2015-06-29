@@ -1,5 +1,6 @@
 package services
 
+import com.gu.identity.play.IdMinimalUser
 import configuration.Config
 import touchpoint.TouchpointBackendConfig
 
@@ -11,24 +12,27 @@ object TouchpointBackend {
 
   def apply(touchpointBackendConfig: TouchpointBackendConfig): TouchpointBackend = {
 
-    val zuoraRepo = new ZuoraRepo(touchpointBackendConfig.zuora)
-
+    val zuoraService = new ZuoraService(touchpointBackendConfig.zuora)
+    
     val salesforceRepo = new SalesforceRepo(touchpointBackendConfig.salesforce)
 
-    TouchpointBackend(salesforceRepo, zuoraRepo)
+    TouchpointBackend(salesforceRepo, zuoraService)
   }
 
   val Normal = TouchpointBackend(BackendType.Default)
 
   val All = Seq(Normal)
+
+  //TODO when implementing test-users this requires updating to supply data to correct location
+  def forUser(user: IdMinimalUser) = Normal
 }
 
 case class TouchpointBackend(
   salesforceRepo: SalesforceRepo,
-  zuoraRepo : ZuoraRepo) {
+  zuoraService : ZuoraService) {
 
   def start() = {
     salesforceRepo.salesforce.authTask.start()
-    zuoraRepo.authTask.start()
+    zuoraService.authTask.start()
   }
 }

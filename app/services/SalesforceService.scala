@@ -14,13 +14,13 @@ import scala.concurrent.duration._
 
 trait SalesforceService extends LazyLogging {
 
-  def createOrUpdateUser(personalData: PersonalData, userId: UserId): Future[Option[MemberId]]
+  def createOrUpdateUser(personalData: PersonalData, userId: UserId): Future[MemberId]
 
   def createSalesforceUserData(personalData: PersonalData): JsObject = Json.obj(
       Keys.EMAIL -> personalData.email,
       Keys.FIRST_NAME -> personalData.firstName,
       Keys.LAST_NAME -> personalData.lastName,
-      Keys.MAILING_STREET -> personalData.address.street,
+      Keys.MAILING_STREET -> personalData.address.address2,
       Keys.MAILING_CITY -> personalData.address.town,
       Keys.MAILING_POSTCODE -> personalData.address.postcode,
       Keys.MAILING_COUNTRY -> "United Kingdom",
@@ -31,9 +31,9 @@ trait SalesforceService extends LazyLogging {
 }
 
 object SalesforceService extends SalesforceService {
-  override def createOrUpdateUser(personalData: PersonalData, userId: UserId): Future[Option[MemberId]] =
+  override def createOrUpdateUser(personalData: PersonalData, userId: UserId): Future[MemberId] =
     //TODO when implementing test-users this requires updating to supply data to correct location
-    TouchpointBackend.Normal.salesforceRepo.upsert(userId.id, createSalesforceUserData(personalData)).map(Some(_))
+    TouchpointBackend.Normal.salesforceRepo.upsert(userId.id, createSalesforceUserData(personalData))
 }
 
 class SalesforceRepo(salesforceConfig: SalesforceConfig) extends MemberRepository {
@@ -51,4 +51,8 @@ class SalesforceRepo(salesforceConfig: SalesforceConfig) extends MemberRepositor
 
     def authentication: Authentication = authTask.get()
   }
+}
+
+case class SalesforceServiceError(s: String) extends Throwable {
+  override def getMessage: String = s
 }

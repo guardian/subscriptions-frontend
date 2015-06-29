@@ -46,12 +46,8 @@ object Checkout extends Controller with LazyLogging {
           yield BadRequest(views.html.checkout.payment(formWithErrors, userIsSignedIn = idUserOpt.isDefined))
       },
       userData => {
-        CheckoutService.processSubscription(userData, AuthenticationService.authenticatedUserFor(request)).map {
-          case Some(memberId) =>
-            Redirect(routes.Checkout.thankyou())
-          case None =>
-            Redirect(routes.Checkout.renderCheckout())
-        }
+        for (_ <- CheckoutService.processSubscription(userData, AuthenticationService.authenticatedUserFor(request)))
+        yield  Redirect(routes.Checkout.thankyou())
       }
     )
   }
