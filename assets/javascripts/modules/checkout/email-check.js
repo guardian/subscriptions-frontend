@@ -17,16 +17,16 @@ define([
                     url: '/checkout/check-identity?email=' + email
                 }).then(function (response) {
                     if (response.emailInUse) {
-                        var msg = "Your email is already in use! Please sign in or use another email address";
-                        reject(Error(msg));
+                        reject(Error('EMAIL_IN_USE'));
                     } else {
                         resolve();
                     }
                 }).fail(function (_, msg) {
-                    reject(Error("Error reaching endpoint /checkout/check-identity:" + msg))
+                    console.error('Error reaching endpoint /checkout/check-identity:' + msg);
+                    reject(new Error('NETWORK_FAILURE'));
                 });
 
-            } else { return reject(Error("Email is blank")) }
+            } else { return reject(Error('Email is blank')) }
         });
     }
 

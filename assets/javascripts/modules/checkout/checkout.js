@@ -62,16 +62,12 @@ define(['$',
         if($YOUR_DETAILS_SUBMIT.length > 0){
             bean.on($YOUR_DETAILS_SUBMIT[0], 'click', function (e) {
                 e.preventDefault();
-                if(validations.validatePersonalDetails()){
-                    emailCheck.warnIfEmailTaken().then(function () {
-                        $FIELDSET_YOUR_DETAILS.addClass(FIELDSET_COLLAPSED).attr(FIELDSET_COMPLETE, '');
-                        $FIELDSET_PAYMENT_DETAILS.removeClass(FIELDSET_COLLAPSED);
-                        $EDIT_YOUR_DETAILS.removeClass(IS_HIDDEN);
-                        $EDIT_PAYMENT_DETAILS.addClass(IS_HIDDEN);
-                    }).catch(function (e) {
-                        console.error("failed email check:", e);
-                    });
-                }
+                validations.validatePersonalDetails().then(function () {
+                    $FIELDSET_YOUR_DETAILS.addClass(FIELDSET_COLLAPSED).attr(FIELDSET_COMPLETE, '');
+                    $FIELDSET_PAYMENT_DETAILS.removeClass(FIELDSET_COLLAPSED);
+                    $EDIT_YOUR_DETAILS.removeClass(IS_HIDDEN);
+                    $EDIT_PAYMENT_DETAILS.addClass(IS_HIDDEN);
+                });
             });
         }
 
