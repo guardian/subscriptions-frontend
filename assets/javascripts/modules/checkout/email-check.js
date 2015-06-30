@@ -9,7 +9,10 @@ define([
 
     function warnIfEmailTaken() {
         return new Promise(function (resolve, reject) {
-            if (guardian.user.isSignedIn) { resolve(); return; }
+            if (guardian.user.isSignedIn) {
+                resolve();
+                return;
+            }
 
             var email = form.$EMAIL && textUtils.removeWhitespace(form.$EMAIL.val());
             if (email) {
@@ -26,7 +29,9 @@ define([
                     reject(new Error('NETWORK_FAILURE'));
                 });
 
-            } else { return reject(Error('Email is blank')) }
+            } else {
+                reject(Error('Email is blank'));
+            }
         });
     }
 

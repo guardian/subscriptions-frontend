@@ -1,14 +1,12 @@
 define(['$',
         'bean',
         'modules/checkout/form-elements',
-        'modules/checkout/validations',
-        'modules/checkout/email-check'
+        'modules/checkout/validations'
     ],
     function ($,
               bean,
               form,
-              validations,
-              emailCheck
+              validations
     ) {
 
     'use strict';
@@ -68,8 +66,8 @@ define(['$',
 
     var toggleFieldsets = function () {
         if($YOUR_DETAILS_SUBMIT.length > 0){
-            bean.on($YOUR_DETAILS_SUBMIT[0], 'click', function (e) {
-                e.preventDefault();
+            bean.on($YOUR_DETAILS_SUBMIT[0], 'click', function (evt) {
+                evt.preventDefault();
                 validations.validatePersonalDetails().then(function () {
                     $FIELDSET_YOUR_DETAILS.addClass(FIELDSET_COLLAPSED).attr(FIELDSET_COMPLETE, '');
                     $FIELDSET_PAYMENT_DETAILS.removeClass(FIELDSET_COLLAPSED);

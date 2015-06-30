@@ -11,8 +11,8 @@ define([
 
     var ERROR_CLASS = 'form-field--error',
         EMAIL_ERROR_DEFAULT = 'Please enter a valid Email address',
-        EMAIL_ERROR_TAKEN = 'Your email is already in use! Please sign in or use another email address',
-        EMAIL_ERROR_NETWORK = 'Your email could not be validated, please check your Internet connection and try again later.';
+        EMAIL_ERROR_TAKEN = 'Your email is already in use! Please sign in or use another email address.',
+        EMAIL_ERROR_NETWORK = 'Your email could not be verified, please check your Internet connection and try again later.';
 
     var mandatoryFieldsPersonalDetails = [
         {input: form.$FIRST_NAME, container: form.$FIRST_NAME_CONTAINER},
@@ -41,24 +41,24 @@ define([
 
         var staticValidations = new Promise(function (onSuccess, onFailure){
             var emptyFields = mandatoryFieldsPersonalDetails.filter(function (field) {
-                var isEmpty = field.input.val() == '';
+                var isEmpty = field.input.val() === '';
                 toggleError(field.container, isEmpty);
                 return isEmpty;
             });
-            var noEmptyFields = emptyFields.length == 0;
+            var noEmptyFields = emptyFields.length === 0;
 
             var validEmail = regex.isValidEmail(form.$EMAIL.val());
             renderEmailError(!validEmail);
             toggleError(form.$EMAIL_CONTAINER, !validEmail);
 
-            var emailCorrectTwice = form.$EMAIL.val() == form.$CONFIRM_EMAIL.val();
+            var emailCorrectTwice = form.$EMAIL.val() === form.$CONFIRM_EMAIL.val();
             toggleError(form.$CONFIRM_EMAIL_CONTAINER, validEmail && !emailCorrectTwice);
 
             if(noEmptyFields && emailCorrectTwice && validEmail){
                 onSuccess();
             }
             else {
-                onFailure(new Error("Personal details incorrect."));
+                onFailure(new Error('Personal details incorrect.'));
             }
         });
 
