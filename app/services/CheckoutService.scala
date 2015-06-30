@@ -9,7 +9,7 @@ import model.SubscriptionData
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-case class Subscription(memberId: MemberId, zuoraId: SubscribeResult)
+case class Subscription(memberId: MemberId, zuoraSubscription: SubscribeResult)
 
 class CheckoutService(identityService: IdentityService, salesforceService: SalesforceService) extends LazyLogging {
 
@@ -25,7 +25,7 @@ class CheckoutService(identityService: IdentityService, salesforceService: Sales
     for {
       idUser <- idUserF
       memberId <- salesforceService.createOrUpdateUser(subscriptionData.personalData, idUser)
-      subscription <- TouchpointBackend.Normal.zuoraService.createSubscription(memberId, subscriptionData)
+      subscription <- TouchpointBackend.Normal.zuoraService.createSubscription(memberId, subscriptionData)   //TODO when implementing test-users this requires updating to supply data to correct location
     } yield Subscription(memberId, subscription)
 
   }

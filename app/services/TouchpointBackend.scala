@@ -22,9 +22,6 @@ object TouchpointBackend {
   val Normal = TouchpointBackend(BackendType.Default)
 
   val All = Seq(Normal)
-
-  //TODO when implementing test-users this requires updating to supply data to correct location
-  def forUser(user: IdMinimalUser) = Normal
 }
 
 case class TouchpointBackend(
