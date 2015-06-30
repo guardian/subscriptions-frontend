@@ -4,7 +4,7 @@
 
 @import routes.Checkout.processFinishAccount
 
-@(formOpt: Option[Form[GuestAccountData]] = None)
+@(guestAccountForm: Option[Form[GuestAccountData]] = None)
 
 @main("Thank you | Subscriptions | The Guardian") {
 
@@ -48,7 +48,7 @@
                 <li>Enter your subscription code (shown above and also in your confirmation email) and your postcode</li>
             </ol>
 
-        @formOpt.map { form =>
+        @guestAccountForm.map { form =>
             <h3 class="section-header">Register for an account</h3>
             <p>Some features of your subscription require you to be signed in before you can make use of them.</p>
             <p>Enter a password to finish creating your account:</p>
