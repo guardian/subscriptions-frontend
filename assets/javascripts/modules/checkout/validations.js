@@ -12,7 +12,7 @@ define([
     var ERROR_CLASS = 'form-field--error',
         EMAIL_ERROR_DEFAULT = 'Please enter a valid Email address',
         EMAIL_ERROR_TAKEN = 'Your email is already in use! Please sign in or use another email address.',
-        EMAIL_ERROR_NETWORK = 'Your email could not be verified, please check your Internet connection and try again later.';
+        EMAIL_ERROR_NETWORK = 'There\'s been a problem. Please try again later.';
 
     var mandatoryFieldsPersonalDetails = [
         {input: form.$FIRST_NAME, container: form.$FIRST_NAME_CONTAINER},
