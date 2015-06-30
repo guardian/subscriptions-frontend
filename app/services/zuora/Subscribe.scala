@@ -18,16 +18,14 @@ case class Subscribe(memberId: MemberId, data: SubscriptionData) extends ZuoraAc
     val effectiveDate = formatDateTime(now)
     val contractAcceptanceDate = formatDateTime(now)
 
-    //TODO sub out the rate plan, bank account details
-
     val payment =
       <ns1:PaymentMethod xsi:type="ns2:PaymentMethod">
         <ns2:Type>BankTransfer</ns2:Type>
         <ns2:BankTransferType>DirectDebitUK</ns2:BankTransferType>
         <ns2:Country>{Countries.UK.alpha2}</ns2:Country>
         <ns2:BankTransferAccountName>{data.paymentData.holder}</ns2:BankTransferAccountName>
-        <ns2:BankTransferAccountNumber>55779911</ns2:BankTransferAccountNumber>
-        <ns2:BankCode>20-00-00</ns2:BankCode>
+        <ns2:BankTransferAccountNumber>{data.paymentData.account}</ns2:BankTransferAccountNumber>
+        <ns2:BankCode>{data.paymentData.sortCode}</ns2:BankCode>
         <ns2:FirstName>{data.personalData.firstName}</ns2:FirstName>
         <ns2:LastName>{data.personalData.lastName}</ns2:LastName>
       </ns1:PaymentMethod>
@@ -75,7 +73,7 @@ case class Subscribe(memberId: MemberId, data: SubscriptionData) extends ZuoraAc
           </ns1:Subscription>
           <ns1:RatePlanData>
             <ns1:RatePlan xsi:type="ns2:RatePlan">
-              <ns2:ProductRatePlanId>todo</ns2:ProductRatePlanId>
+              <ns2:ProductRatePlanId>2c92c0f84bbfec8b014bc655f4852d9d</ns2:ProductRatePlanId>
             </ns1:RatePlan>
           </ns1:RatePlanData>
         </ns1:SubscriptionData>
