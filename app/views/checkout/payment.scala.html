@@ -1,6 +1,7 @@
-@(form: Form[model.SubscriptionData], userIsSignedIn: Boolean)
+@(form: Form[model.SubscriptionData], userIsSignedIn: Boolean)(implicit request: RequestHeader)
 
 @import routes.Checkout.renderCheckout
+
 @import model.JsVars
 @import configuration.Config.Identity._
 
@@ -26,6 +27,7 @@
         <div class="row__item row__item--boost-2">
             <form class="form js-checkout-form" method="POST">
                 <fieldset class="fieldset js-fieldset-your-details">
+                    @helper.CSRF.formField
                     <div class="fieldset__heading">
                         <h2 class="fieldset__headline"><span class="fieldset__num">1</span> Your details</h2>
                         <a href="#" class="fieldset__edit is-hidden js-edit-your-details">Edit</a>
