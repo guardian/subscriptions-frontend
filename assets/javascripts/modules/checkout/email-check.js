@@ -9,7 +9,10 @@ define([
 
     function warnIfEmailTaken() {
         return new Promise(function (resolve, reject) {
-            if (guardian.user.isSignedIn) { resolve(); return; }
+            if (guardian.user.isSignedIn) {
+                resolve();
+                return;
+            }
 
             var email = form.$EMAIL && textUtils.removeWhitespace(form.$EMAIL.val());
             if (email) {
@@ -17,13 +20,15 @@ define([
                     url: '/checkout/check-identity?email=' + email
                 }).then(function (response) {
                     if (response.emailInUse) {
-                        var msg = 'Your email is already in use! Please sign in or use another email address';
-                        reject(new Error(msg));
+                        reject('EMAIL_IN_USE');
                     } else {
                         resolve();
                     }
                 }).fail(function (_, msg) {
-                    reject(new Error('Error reaching endpoint /checkout/check-identity:' + msg));
+                    if(console){
+                        console.error('Error reaching endpoint /checkout/check-identity:' + msg);
+                    }
+                    reject(new Error('NETWORK_FAILURE'));
                 });
 
             } else {
