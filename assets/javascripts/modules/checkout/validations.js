@@ -77,7 +77,7 @@ define([
 
             });
 
-            return warnIfEmailTaken
+            return warnIfEmailTaken;
     });
 
         return validationResult;
@@ -96,7 +96,8 @@ define([
 
         var sortCodeValid = [form.$SORTCODE1, form.$SORTCODE2, form.$SORTCODE3].filter(function (field) {
             var codeAsNumber = parseInt(field.val(), 10);
-            var isValid = codeAsNumber >= 10 && codeAsNumber <= 99;
+            var isValid = field.val().length === 2
+                && codeAsNumber >= 0 && codeAsNumber <= 99;
             return isValid;
         }).length === 3;
         toggleError(form.$SORTCODE_CONTAINER, !sortCodeValid);
