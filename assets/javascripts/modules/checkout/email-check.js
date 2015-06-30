@@ -20,7 +20,7 @@ define([
                     url: '/checkout/check-identity?email=' + email
                 }).then(function (response) {
                     if (response.emailInUse) {
-                        reject(Error('EMAIL_IN_USE'));
+                        reject(new Error('EMAIL_IN_USE'));
                     } else {
                         resolve();
                     }
@@ -30,7 +30,7 @@ define([
                 });
 
             } else {
-                reject(Error('Email is blank'));
+                reject(new Error('Email is blank'));
             }
         });
     }
