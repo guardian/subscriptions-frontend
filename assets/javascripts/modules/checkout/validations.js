@@ -67,7 +67,7 @@ define([
             var warnIfEmailTaken = emailCheck.warnIfEmailTaken();
 
             warnIfEmailTaken.catch(function (error) {
-                if(error.message === 'EMAIL_IN_USE'){
+                if(error === 'EMAIL_IN_USE'){
                     renderEmailError(true, EMAIL_ERROR_TAKEN);
                 }
                 else {

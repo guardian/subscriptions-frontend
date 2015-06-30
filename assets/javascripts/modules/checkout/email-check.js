@@ -20,12 +20,14 @@ define([
                     url: '/checkout/check-identity?email=' + email
                 }).then(function (response) {
                     if (response.emailInUse) {
-                        reject(new Error('EMAIL_IN_USE'));
+                        reject('EMAIL_IN_USE');
                     } else {
                         resolve();
                     }
                 }).fail(function (_, msg) {
-                    console.error('Error reaching endpoint /checkout/check-identity:' + msg);
+                    if(console){
+                        console.error('Error reaching endpoint /checkout/check-identity:' + msg);
+                    }
                     reject(new Error('NETWORK_FAILURE'));
                 });
 
