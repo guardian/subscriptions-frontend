@@ -1,7 +1,9 @@
 define([], function () {
+    'use strict';
+
     return {
         isNumber: function isNumber(s) {
-            return ! /[^\d]+/.test(s);
+            return !/[^\d]+/.test(s);
         },
         isValidEmail: function isValidEmail(s) {
             return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(s);
@@ -9,5 +11,5 @@ define([], function () {
         isPostcode: function isPostcode(s) {
             return /^[\sA-Z\d]{5,}$/i.test(s);
         }
-    }
+    };
 });

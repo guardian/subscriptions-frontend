@@ -10,16 +10,17 @@
     "grunt-contrib-copy": "^0.8.0",
     "grunt-contrib-requirejs": "^0.4.4",
     "grunt-contrib-watch": "^0.6.1",
-    "grunt-sass": "^1.0.0",
-    "load-grunt-tasks": "^3.2.0",
-    "time-grunt": "^1.2.1",
+    "grunt-eslint": "^15.0.0",
     "grunt-karma": "~0.10.1",
-    "phantomjs": "~1.9.15",
+    "grunt-sass": "^1.0.0",
     "karma": "~0.12.31",
     "karma-chrome-launcher": "^0.1.7",
     "karma-coverage": "^0.2.7",
     "karma-jasmine": "^0.3.5",
     "karma-phantomjs-launcher": "^0.1.4",
-    "karma-requirejs": "~0.2.2"
+    "karma-requirejs": "~0.2.2",
+    "load-grunt-tasks": "^3.2.0",
+    "phantomjs": "~1.9.15",
+    "time-grunt": "^1.2.1"
   }
 }

@@ -11,6 +11,8 @@ define(['$',
               emailCheck
     ) {
 
+    'use strict';
+
     var $FIRST_NAME = form.$FIRST_NAME,
         $LAST_NAME = form.$LAST_NAME,
         $EMAIL = form.$EMAIL,
@@ -44,6 +46,16 @@ define(['$',
         FIELDSET_COMPLETE = 'data-fieldset-complete',
         IS_HIDDEN = 'is-hidden';
 
+    var showFullAddressFields = function () {
+        $FULL_ADDRESS.removeClass(IS_HIDDEN);
+    };
+
+    var collapseFieldsets = function () {
+        $FIELDSET_YOUR_DETAILS.addClass(FIELDSET_COLLAPSED);
+        $FIELDSET_PAYMENT_DETAILS.addClass(FIELDSET_COLLAPSED);
+        $FIELDSET_REVIEW.addClass(FIELDSET_COLLAPSED);
+    };
+
     var manualAddress = function () {
         if($MANUAL_ADDRESS.length > 0){
             bean.on($MANUAL_ADDRESS[0], 'click', function (e) {
@@ -52,10 +64,6 @@ define(['$',
                 $MANUAL_ADDRESS.addClass(IS_HIDDEN);
             });
         }
-    };
-
-    var showFullAddressFields = function () {
-        $FULL_ADDRESS.removeClass(IS_HIDDEN);
     };
 
     var toggleFieldsets = function () {
@@ -105,12 +113,6 @@ define(['$',
                 $EDIT_YOUR_DETAILS.removeClass(IS_HIDDEN);
             });
         }
-    };
-
-    var collapseFieldsets = function () {
-        $FIELDSET_YOUR_DETAILS.addClass(FIELDSET_COLLAPSED);
-        $FIELDSET_PAYMENT_DETAILS.addClass(FIELDSET_COLLAPSED);
-        $FIELDSET_REVIEW.addClass(FIELDSET_COLLAPSED);
     };
 
     var reviewDetails = function () {

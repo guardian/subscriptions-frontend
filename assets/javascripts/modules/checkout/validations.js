@@ -7,6 +7,7 @@ define([
              form,
              emailCheck,
              regex) {
+    'use strict';
 
     var ERROR_CLASS = 'form-field--error',
         EMAIL_ERROR_DEFAULT = 'Please enter a valid Email address',
@@ -84,12 +85,12 @@ define([
 
 
     var validatePaymentDetails = function () {
-        var accountNumberValid = form.$ACCOUNT.val() != ''
+        var accountNumberValid = form.$ACCOUNT.val() !== ''
             && form.$ACCOUNT.val().length <= 10
-            && isNumber(form.$ACCOUNT.val());
+            && regex.isNumber(form.$ACCOUNT.val());
         toggleError(form.$ACCOUNT_CONTAINER, !accountNumberValid);
 
-        var holderNameValid = form.$HOLDER.val() != ''
+        var holderNameValid = form.$HOLDER.val() !== ''
             && form.$HOLDER.val().length <= 18;
         toggleError(form.$HOLDER_CONTAINER, !holderNameValid);
 
@@ -97,7 +98,7 @@ define([
             var codeAsNumber = parseInt(field.val(), 10);
             var isValid = codeAsNumber >= 10 && codeAsNumber <= 99;
             return isValid;
-        }).length == 3;
+        }).length === 3;
         toggleError(form.$SORTCODE_CONTAINER, !sortCodeValid);
 
         var detailsConfirmed = form.$CONFIRM_PAYMENT[0].checked;
@@ -109,6 +110,6 @@ define([
     return {
         validatePersonalDetails: validatePersonalDetails,
         validatePaymentDetails: validatePaymentDetails
-    }
+    };
 
 });
