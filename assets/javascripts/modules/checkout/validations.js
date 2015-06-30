@@ -1,8 +1,18 @@
-define(['$', 'modules/checkout/form-elements', 'modules/checkout/regex'], function ($, form, regex) {
+define([
+    '$',
+    'modules/checkout/form-elements',
+    'modules/checkout/email-check',
+    'modules/checkout/regex'
+], function ($,
+             form,
+             emailCheck,
+             regex) {
     'use strict';
 
     var ERROR_CLASS = 'form-field--error',
-        EMAIL_ERROR_DEFAULT = 'Please enter a valid Email address';
+        EMAIL_ERROR_DEFAULT = 'Please enter a valid Email address',
+        EMAIL_ERROR_TAKEN = 'Your email is already in use! Please sign in or use another email address.',
+        EMAIL_ERROR_NETWORK = 'There\'s been a problem. Please try again later.';
 
     var mandatoryFieldsPersonalDetails = [
         {input: form.$FIRST_NAME, container: form.$FIRST_NAME_CONTAINER},
@@ -28,21 +38,49 @@ define(['$', 'modules/checkout/form-elements', 'modules/checkout/regex'], functi
     }
 
     var validatePersonalDetails = function () {
-        var emptyFields = mandatoryFieldsPersonalDetails.filter(function (field) {
-            var isEmpty = field.input.val() === '';
-            toggleError(field.container, isEmpty);
-            return isEmpty;
+
+        var staticValidations = new Promise(function (onSuccess, onFailure){
+            var emptyFields = mandatoryFieldsPersonalDetails.filter(function (field) {
+                var isEmpty = field.input.val() === '';
+                toggleError(field.container, isEmpty);
+                return isEmpty;
+            });
+            var noEmptyFields = emptyFields.length === 0;
+
+            var validEmail = regex.isValidEmail(form.$EMAIL.val());
+            renderEmailError(!validEmail);
+            toggleError(form.$EMAIL_CONTAINER, !validEmail);
+
+            var emailCorrectTwice = form.$EMAIL.val() === form.$CONFIRM_EMAIL.val();
+            toggleError(form.$CONFIRM_EMAIL_CONTAINER, validEmail && !emailCorrectTwice);
+
+            if(noEmptyFields && emailCorrectTwice && validEmail){
+                onSuccess();
+            }
+            else {
+                onFailure(new Error('Personal details incorrect.'));
+            }
         });
-        var noEmptyFields = emptyFields.length === 0;
 
-        var validEmail = regex.isValidEmail(form.$EMAIL.val());
-        renderEmailError(!validEmail);
-        toggleError(form.$EMAIL_CONTAINER, !validEmail);
+        var validationResult = staticValidations.then(function(){
 
-        var emailCorrectTwice = form.$EMAIL.val() === form.$CONFIRM_EMAIL.val();
-        toggleError(form.$CONFIRM_EMAIL_CONTAINER, validEmail && !emailCorrectTwice);
+            var warnIfEmailTaken = emailCheck.warnIfEmailTaken();
 
-        return noEmptyFields && emailCorrectTwice && validEmail;
+            warnIfEmailTaken.catch(function (failure) {
+                if(failure === 'EMAIL_IN_USE'){
+                    renderEmailError(true, EMAIL_ERROR_TAKEN);
+                }
+                else {
+                    renderEmailError(true, EMAIL_ERROR_NETWORK);
+                }
+                toggleError(form.$EMAIL_CONTAINER, true);
+
+            });
+
+            return warnIfEmailTaken;
+    });
+
+        return validationResult;
     };
 
 
@@ -58,7 +96,8 @@ define(['$', 'modules/checkout/form-elements', 'modules/checkout/regex'], functi
 
         var sortCodeValid = [form.$SORTCODE1, form.$SORTCODE2, form.$SORTCODE3].filter(function (field) {
             var codeAsNumber = parseInt(field.val(), 10);
-            var isValid = codeAsNumber >= 10 && codeAsNumber <= 99;
+            var isValid = field.val().length === 2
+                && codeAsNumber >= 0 && codeAsNumber <= 99;
             return isValid;
         }).length === 3;
         toggleError(form.$SORTCODE_CONTAINER, !sortCodeValid);
