@@ -23,10 +23,6 @@ define([
         {input: form.$POSTCODE, container: form.$POSTCODE_CONTAINER}
     ];
 
-    function isNumber (n) {
-        return !isNaN(parseFloat(n)) && isFinite(n);
-    }
-
     function toggleError(container, condition) {
         if (condition) {
             container.addClass(ERROR_CLASS);

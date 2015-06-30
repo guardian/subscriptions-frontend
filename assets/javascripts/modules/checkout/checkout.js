@@ -136,7 +136,6 @@ define(['$',
 
     var finishAccount = function () {
         if ($FINISH_ACCOUNT_SUBMIT.length) {
-            console.info("finishAccount()", $FINISH_ACCOUNT_SUBMIT);
             bean.on($FINISH_ACCOUNT_SUBMIT[0], 'click', function (e) {
                 e.preventDefault();
 
