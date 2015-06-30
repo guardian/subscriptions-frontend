@@ -142,11 +142,10 @@ object IdentityApiClient extends IdentityApiClient with LazyLogging {
   override def convertGuest: (JsValue, GuestUser) => Future[WSResponse] = (json, gu) => {
     val endpoint = authoriseCall(WS.url(s"$identityEndpoint/guest/${gu.id}"))
 
-    val ep = endpoint
+    endpoint
       .withHeaders("X-Guest-Registration-Token" -> gu.token.toString)
       .put(json)
-
-    ep.withWSFailureLogging(endpoint)
+      .withWSFailureLogging(endpoint)
       .withCloudwatchMonitoringOfPut
   }
 }
