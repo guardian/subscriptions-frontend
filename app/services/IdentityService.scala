@@ -42,7 +42,7 @@ class IdentityService(identityApiClient: IdentityApiClient) extends LazyLogging 
         "billingPostcode" -> JsString(personalData.address.postcode),
         "billingCountry" -> JsString("United Kingdom")
       ).toSeq),
-      "statusFields" -> JsObject(Map("receiveGnmMarketing" -> JsString("true")).toSeq)
+      "statusFields" -> JsObject(Map("receiveGnmMarketing" -> JsBoolean(true)).toSeq)
     ).toSeq)
 
 
