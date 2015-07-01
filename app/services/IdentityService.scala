@@ -6,6 +6,7 @@ import com.gu.monitoring.{AuthenticationMetrics, CloudWatch, RequestMetrics, Sta
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
 import model.PersonalData
+import play.api.http.Status
 import play.api.Play.current
 import play.api.libs.json._
 import play.api.libs.ws.{WS, WSRequest, WSResponse}
@@ -44,10 +45,10 @@ class IdentityService(identityApiClient: IdentityApiClient) extends LazyLogging 
     identityApiClient.createGuest(json).map(response => response.json.as[GuestUser])
   }
 
-  def convertGuest(gu: GuestUser, password: String): Future[Unit] = {
+  def convertGuest(password: String, token: IdentityToken): Future[Unit] = {
     val json = JsObject(Map("password" -> JsString(password)))
-    identityApiClient.convertGuest(json, gu).map { response =>
-      if (!response.status.toString.matches("""2\d\d""")) {
+    identityApiClient.convertGuest(json, token).map { response =>
+      if (response.status != Status.CREATED) {
         throw new IdentityGuestPasswordError(response.body)
       }
     }
@@ -64,7 +65,7 @@ trait IdentityApiClient {
 
   def createGuest: JsValue => Future[WSResponse]
 
-  def convertGuest: (JsValue, GuestUser) => Future[WSResponse]
+  def convertGuest: (JsValue, IdentityToken) => Future[WSResponse]
 
   def userLookupByEmail: String => Future[WSResponse]
 }
@@ -139,11 +140,11 @@ object IdentityApiClient extends IdentityApiClient with LazyLogging {
       .withCloudwatchMonitoringOfPost
   }
 
-  override def convertGuest: (JsValue, GuestUser) => Future[WSResponse] = (json, gu) => {
-    val endpoint = authoriseCall(WS.url(s"$identityEndpoint/guest/${gu.id}"))
+  override def convertGuest: (JsValue, IdentityToken) => Future[WSResponse] = (json, token) => {
+    val endpoint = authoriseCall(WS.url(s"$identityEndpoint/password"))
 
     endpoint
-      .withHeaders("X-Guest-Registration-Token" -> gu.token.toString)
+      .withHeaders("X-Guest-Registration-Token" -> token.toString)
       .put(json)
       .withWSFailureLogging(endpoint)
       .withCloudwatchMonitoringOfPut

@@ -67,7 +67,7 @@ object Checkout extends Controller with LazyLogging {
         BadRequest(views.html.checkout.thankyou(Some(formWithErrors)))
       }
     }, guestAccountData => {
-      IdentityService.convertGuest(guestAccountData.guestUser, guestAccountData.password)
+      IdentityService.convertGuest(guestAccountData.password, IdentityToken(guestAccountData.token))
         .map(_ => Ok(views.html.checkout.alldone()))
     })
   }
