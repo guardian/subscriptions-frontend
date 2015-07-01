@@ -40,7 +40,6 @@ object Config {
 
     val webAppUrl = idConfig.getString("webapp.url")
 
-
     val webAppProfileUrl = webAppUrl / "account" / "edit"
 
     def webAppSigninUrl(path: String): String =
