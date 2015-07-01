@@ -1,16 +1,20 @@
 package services
 
+import com.gu.membership.salesforce.MemberId
 import com.gu.membership.zuora.ZuoraApiConfig
-import com.gu.membership.zuora.soap.Zuora.Authentication
+import com.gu.membership.zuora.soap.Zuora._
 import com.gu.membership.zuora.soap.ZuoraDeserializer._
 import com.gu.membership.zuora.soap.{Login, ZuoraApi}
 import com.gu.monitoring.ZuoraMetrics
 import configuration.Config
+import model.SubscriptionData
+import services.zuora.Subscribe
 import utils.ScheduledTask
 
+import scala.concurrent.Future
 import scala.concurrent.duration._
 
-class ZuoraRepo(zuoraApiConfig: ZuoraApiConfig) extends ZuoraApi {
+class ZuoraService(zuoraApiConfig: ZuoraApiConfig) extends ZuoraApi {
 
   override val apiConfig: ZuoraApiConfig = zuoraApiConfig
 
@@ -21,5 +25,9 @@ class ZuoraRepo(zuoraApiConfig: ZuoraApiConfig) extends ZuoraApi {
 
   override val metrics = new ZuoraMetrics(stage, application)
   val authTask = ScheduledTask(s"Zuora ${apiConfig.envName} auth", Authentication("", ""), 0.seconds, 30.minutes)(request(Login(apiConfig)))
+
+  def createSubscription(memberId: MemberId, data: SubscriptionData): Future[SubscribeResult] = {
+    request(Subscribe(memberId, data))
+  }
 }
 
