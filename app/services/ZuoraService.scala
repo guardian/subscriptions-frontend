@@ -26,8 +26,8 @@ class ZuoraService(zuoraApiConfig: ZuoraApiConfig) extends ZuoraApi {
   override val metrics = new ZuoraMetrics(stage, application)
   val authTask = ScheduledTask(s"Zuora ${apiConfig.envName} auth", Authentication("", ""), 0.seconds, 30.minutes)(request(Login(apiConfig)))
 
-  def createSubscription(memberId: MemberId, data: SubscriptionData): Future[SubscribeResult] = {
-    request(Subscribe(memberId, data))
+  def createSubscription(memberId: MemberId, data: SubscriptionData, ratePlanId: String): Future[SubscribeResult] = {
+    request(Subscribe(memberId, data, ratePlanId))
   }
 }
 
