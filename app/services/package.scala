@@ -53,7 +53,7 @@ package object services {
     implicit val guestUserTokenReads: Reads[GuestUser] = (
       (JsPath \  "guestRegistrationRequest" \ "userId").read[UserId] and
       (JsPath \  "guestRegistrationRequest" \ "token").read[IdentityToken]
-      )(GuestUser.apply _)
+    )(GuestUser.apply _)
     class UnparsableGuestUserError extends RuntimeException("Cannot de-serialise GuestUser data from session")
   }
 }
