@@ -60,8 +60,26 @@
                             <label class="label" for="last">Password</label>
                             <input name="@userIdParam" type="hidden" value="@form.data.get(userIdParam)">
                             <input name="@identityTokenParam" type="hidden" value="@form.data.get(identityTokenParam)">
-                            <input name="password" type="password" class="input-text js-input">
-                            @checkout.errorMessage("Password is too short")
+                    <div class="fieldset__fields">
+                        <div class="form-field js-checkout-finish-account-password">
+                            <label class="label" for="last">Password</label>
+                            <input class="input-text js-input js-password-strength"
+                                   name="password"
+                                   type="password"
+                                   autocapitalize="off"
+                                   autocorrect="off"
+                                   spellcheck="false"
+                                   minlength="6"
+                                   maxlength="20"
+                                   value=""
+                                   required />
+
+                            @checkout.errorMessage("Please enter a password")
+                        </div>
+                        <div class="password-strength-indicator score-null is-off is-hidden js-on js-password-strength-indicator">
+                            <div class="form-note form-note--right form-note--underneath js-password-strength-label">
+                                Password strength
+                            </div>
                         </div>
                         <div class="actions">
                             <button class="button button--primary button--large js-checkout-finish-account-submit">Confirm</button>

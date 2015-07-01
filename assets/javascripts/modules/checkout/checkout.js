@@ -1,12 +1,14 @@
 define(['$',
         'bean',
         'modules/checkout/form-elements',
-        'modules/checkout/validations'
+        'modules/checkout/validations',
+        'modules/components/password'
     ],
     function ($,
               bean,
               form,
-              validations
+              validations,
+              password
     ) {
 
     'use strict';
@@ -144,8 +146,8 @@ define(['$',
                     bean.fire($FINISH_ACCOUNT_SUBMIT[0], 'click');
                 }
             });
-
         }
+        password.init();
     };
 
     function init() {

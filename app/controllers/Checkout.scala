@@ -61,7 +61,8 @@ object Checkout extends Controller with LazyLogging {
 
   def thankyou = GoogleAuthenticatedStaffAction.async { implicit request =>
     Future {
-      Ok(views.html.checkout.thankyou())
+      val form = FinishAccountForm().bindFromRequest()
+      Ok(views.html.checkout.thankyou(Some(form)))
     }
   }
 
@@ -87,4 +88,3 @@ object Checkout extends Controller with LazyLogging {
       IdentityService.userLookupByScGuU(cookie.value)
     }
 }
-

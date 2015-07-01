@@ -1,5 +1,6 @@
 @import play.api.libs.json.Json
 @import model.JsVars
+@import controllers.CachedAssets.hashedPathFor
 
 @(jsVars: JsVars)
 
@@ -19,8 +20,18 @@
         if (isModern) {
             // only load JS if the browser cuts the mustard
             var newElm = document.createElement('script');
-            newElm.src = '@controllers.CachedAssets.hashedPathFor("javascripts/main.min.js")';
+            newElm.src = '@hashedPathFor("javascripts/main.min.js")';
             document.getElementsByTagName("head")[0].appendChild(newElm);
         }
     })(guardian.isModernBrowser);
+
+    // Initialise requireJS loader module Curl
+    var curl = {
+        apiName: "require",
+        paths: {
+            zxcvbn: '@hashedPathFor("javascripts/vendor/zxcvbn-2014-08-04.js")'
+        }
+    };
 </script>
+
+<script src='@hashedPathFor("javascripts/vendor/curl-2014-04-02.js")'></script>

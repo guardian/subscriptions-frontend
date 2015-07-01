@@ -1,13 +1,13 @@
 package controllers
 
+import com.typesafe.scalalogging.LazyLogging
 import play.api.Logger
 import play.api.libs.json.Json
 import play.api.mvc.{Action, Controller}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-object CachedAssets extends Controller {
-  private val logger      = Logger(getClass)
+object CachedAssets extends Controller with LazyLogging {
   val hashedPaths: Map[String, String] =
     (for {
       resourceIs <- Option(getClass.getClassLoader.getResourceAsStream("assets.map"))
