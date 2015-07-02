@@ -35,12 +35,12 @@
                     <div class="fieldset__fields">
                         <div class="form-field js-checkout-first">
                             <label class="label" for="first">First name</label>
-                            <input type="text" class="input-text js-input" name="personal.first" id="first" value="@form.data.get("personal.first")" @readonly>
+                            <input type="text" class="input-text js-input" name="personal.first" id="first" value="@form.data.get("personal.first")">
                             @checkout.errorMessage("This field is required")
                         </div>
                         <div class="form-field js-checkout-last">
                             <label class="label" for="last">Last name</label>
-                            <input type="text" class="input-text js-input" name="personal.last" id="last" value="@form.data.get("personal.last")" @readonly>
+                            <input type="text" class="input-text js-input" name="personal.last" id="last" value="@form.data.get("personal.last")">
                             @checkout.errorMessage("This field is required")
                         </div>
                         <div class="form-field js-checkout-email">
@@ -48,10 +48,15 @@
                             <input type="email" class="input-text js-input" name="personal.emailValidation.email" id="email" value ="@form.data.get("personal.emailValidation.email")" @readonly>
                             @checkout.errorMessage("")
                         </div>
-                        <div class="form-field  js-checkout-confirm-email">
+
+                        <div class="form-field js-checkout-confirm-email">
+                        @if(!userIsSignedIn) {
                             <label class="label" for="confirm">Confirm email address</label>
-                            <input type="email" class="input-text js-input" name="personal.emailValidation.confirm" id="confirm" value ="@form.data.get("personal.emailValidation.confirm")" @readonly>
+                            <input type="email" class="input-text js-input" name="personal.emailValidation.confirm" id="confirm" value ="@form.data.get("personal.emailValidation.confirm")">
                             @checkout.errorMessage("The Confirm Email address does not match the Email address")
+                        } else {
+                            <input type="hidden" class="js-input" name="personal.emailValidation.confirm" id="confirm" value ="@form.data.get("personal.emailValidation.confirm")">
+                        }
                         </div>
                         <div class="js-checkout-full-address">
                             <div class="form-field js-checkout-house">
@@ -196,5 +201,4 @@
         </div>
     </div>
 </div>
-
 }
