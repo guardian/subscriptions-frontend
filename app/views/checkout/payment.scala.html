@@ -49,13 +49,15 @@
                             @checkout.errorMessage("")
                         </div>
 
-                     @if(!userIsSignedIn) {
-                        <div class="form-field  js-checkout-confirm-email">
+                        <div class="form-field js-checkout-confirm-email">
+                        @if(!userIsSignedIn) {
                             <label class="label" for="confirm">Confirm email address</label>
                             <input type="email" class="input-text js-input" name="personal.emailValidation.confirm" id="confirm" value ="@form.data.get("personal.emailValidation.confirm")">
                             @checkout.errorMessage("The Confirm Email address does not match the Email address")
+                        } else {
+                            <input type="hidden" class="js-input" name="personal.emailValidation.confirm" id="confirm" value ="@form.data.get("personal.emailValidation.confirm")">
+                        }
                         </div>
-                     }
                         <div class="js-checkout-full-address">
                             <div class="form-field js-checkout-house">
                                 <label class="label" for="house">Address line 1</label>
