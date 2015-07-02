@@ -31,7 +31,9 @@ class IdentityService(identityApiClient: IdentityApiClient) extends LazyLogging 
  def registerGuest(personalData: PersonalData): Future[GuestUser] = {
     val json = JsObject(Map(
       "primaryEmailAddress" -> JsString(personalData.email),
-      "statusFields" -> JsObject(Map("receiveGnmMarketing" -> JsBoolean(true))),
+      "publicFields" -> JsObject(Map(
+        "displayName" -> JsString(s"${personalData.firstName} ${personalData.lastName}")
+      )),
       "privateFields" -> JsObject(Map(
         "firstName" ->  JsString(personalData.firstName),
         "secondName" -> JsString(personalData.lastName),
@@ -40,7 +42,8 @@ class IdentityService(identityApiClient: IdentityApiClient) extends LazyLogging 
         "billingAddress3" -> JsString(personalData.address.town),
         "billingPostcode" -> JsString(personalData.address.postcode),
         "billingCountry" -> JsString("United Kingdom")
-    ))))
+      )),
+      "statusFields" -> JsObject(Map("receiveGnmMarketing" -> JsBoolean(true)))))
 
     identityApiClient.createGuest(json).map(response => response.json.as[GuestUser])
   }

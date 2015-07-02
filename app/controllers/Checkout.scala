@@ -25,7 +25,7 @@ object Checkout extends Controller with LazyLogging {
         } yield keyName -> field
 
       val form = SubscriptionsForm().copy(
-        data =  (
+        data = (
           idUserData("personal.first", _.firstName) ++
           idUserData("personal.last", _.secondName) ++
           idUserOpt.map("personal.emailValidation.email" -> _.primaryEmailAddress) ++
@@ -34,7 +34,7 @@ object Checkout extends Controller with LazyLogging {
           idUserData("personal.address.address2", _.address2) ++
           idUserData("personal.address.town", _.address3) ++
           idUserData("personal.address.postcode", _.postcode)
-          ).toMap
+        ).toMap
       )
 
       Ok(views.html.checkout.payment(form, userIsSignedIn = idUserOpt.isDefined))
