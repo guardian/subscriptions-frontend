@@ -6,6 +6,7 @@ import com.gu.membership.salesforce.SalesforceConfig
 import com.netaporter.uri.dsl._
 import com.typesafe.config.ConfigFactory
 import net.kencochrane.raven.dsn.Dsn
+import com.github.nscala_time.time.Imports._
 
 import scala.util.Try
 
@@ -44,6 +45,11 @@ object Config {
       (webAppUrl / "signout") ? ("returnUrl" -> absoluteUrl(path)) ? ("skipConfirmation" -> "true")
 
     private def absoluteUrl(path: String): String = (subscriptionsUrl / path).toString()
+  }
+
+  object Zuora {
+    val paymentDelay = config.getConfig("touchpoint.backend.environments").getConfig(stage)
+      .getInt("zuora.paymentDelayInDays").days
   }
 
   val subscriptionsUrl = config.getString("subscriptions.url")
