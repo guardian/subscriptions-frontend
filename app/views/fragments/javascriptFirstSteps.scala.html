@@ -5,7 +5,7 @@
 
 <script id="gu">
     var guardian = JSON.parse('@Html(Json.stringify(Json.toJson(jsVars)))');
-
+    guardian.buildNumber = '@app.BuildInfo.buildNumber';
     guardian.isModernBrowser =  (
             'querySelector' in document
             && 'addEventListener' in window
@@ -23,5 +23,4 @@
             document.getElementsByTagName("head")[0].appendChild(newElm);
         }
     })(guardian.isModernBrowser);
-
 </script>

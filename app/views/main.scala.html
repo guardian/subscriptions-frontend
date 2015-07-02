@@ -6,6 +6,8 @@
 <html lang="en-GB">
 <head>
     @fragments.head(title)
+    @fragments.javascriptFirstSteps(jsVars)
+    <script src="//cdn.optimizely.com/js/293455139.js"></script>
 </head>
     <body class="@bodyClassName">
         @fragments.header()
@@ -13,8 +15,6 @@
         @content
 
         @fragments.footer.footer(footer)
-
-        @fragments.javascript(jsVars)
 
         @fragments.analytics.google()
         @fragments.analytics.omniture()

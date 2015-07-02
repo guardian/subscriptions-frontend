@@ -118,7 +118,8 @@ module.exports = function(grunt) {
                         'qwery': 'bower_components/qwery/qwery',
                         'requireLib': 'bower_components/requirejs/require',
                         'reqwest': 'bower_components/reqwest/reqwest',
-                        Promise: 'bower_components/native-promise-only/lib/npo.src'
+                        'Promise': 'bower_components/native-promise-only/lib/npo.src',
+                        'raven': 'bower_components/raven-js/dist/raven'
                     },
                     optimize: isDev ? 'none' : 'uglify2',
                     generateSourceMaps: isDev ? 'true' : 'false',
