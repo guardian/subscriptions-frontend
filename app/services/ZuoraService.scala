@@ -8,6 +8,7 @@ import com.gu.membership.zuora.soap.{Login, ZuoraApi}
 import com.gu.monitoring.ZuoraMetrics
 import configuration.Config
 import model.SubscriptionData
+import org.joda.time.Period
 import services.zuora.Subscribe
 import utils.ScheduledTask
 
@@ -26,8 +27,8 @@ class ZuoraService(zuoraApiConfig: ZuoraApiConfig) extends ZuoraApi {
   override val metrics = new ZuoraMetrics(stage, application)
   val authTask = ScheduledTask(s"Zuora ${apiConfig.envName} auth", Authentication("", ""), 0.seconds, 30.minutes)(request(Login(apiConfig)))
 
-  def createSubscription(memberId: MemberId, data: SubscriptionData, ratePlanId: String): Future[SubscribeResult] = {
-    request(Subscribe(memberId, data, ratePlanId))
+  def createSubscription(memberId: MemberId, data: SubscriptionData, ratePlanId: String, paymentDelay: Option[Period]): Future[SubscribeResult] = {
+    request(Subscribe(memberId, data, ratePlanId, paymentDelay))
   }
 }
 
