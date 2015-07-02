@@ -31,6 +31,7 @@ class IdentityService(identityApiClient: IdentityApiClient) extends LazyLogging 
  def registerGuest(personalData: PersonalData): Future[GuestUser] = {
     val json = JsObject(Map(
       "primaryEmailAddress" -> JsString(personalData.email),
+      "statusFields" -> JsObject(Map("receiveGnmMarketing" -> JsBoolean(true))),
       "privateFields" -> JsObject(Map(
         "firstName" ->  JsString(personalData.firstName),
         "secondName" -> JsString(personalData.lastName),
@@ -38,8 +39,7 @@ class IdentityService(identityApiClient: IdentityApiClient) extends LazyLogging 
         "billingAddress2" -> JsString(personalData.address.address2),
         "billingAddress3" -> JsString(personalData.address.town),
         "billingPostcode" -> JsString(personalData.address.postcode),
-        "billingCountry" -> JsString("United Kingdom"),
-        "statusFields" -> JsObject(Map("receiveGnmMarketing" -> JsBoolean(true)))
+        "billingCountry" -> JsString("United Kingdom")
     ))))
 
     identityApiClient.createGuest(json).map(response => response.json.as[GuestUser])
@@ -48,7 +48,7 @@ class IdentityService(identityApiClient: IdentityApiClient) extends LazyLogging 
   def convertGuest(password: String, token: IdentityToken): Future[Unit] = {
     val json = JsObject(Map("password" -> JsString(password)))
     identityApiClient.convertGuest(json, token).map { response =>
-      if (response.status != Status.CREATED) {
+      if (response.status != Status.OK) {
         throw new IdentityGuestPasswordError(response.body)
       }
     }
@@ -141,7 +141,7 @@ object IdentityApiClient extends IdentityApiClient with LazyLogging {
   }
 
   override def convertGuest: (JsValue, IdentityToken) => Future[WSResponse] = (json, token) => {
-    val endpoint = authoriseCall(WS.url(s"$identityEndpoint/password"))
+    val endpoint = authoriseCall(WS.url(s"$identityEndpoint/guest/password"))
 
     endpoint
       .withHeaders("X-Guest-Registration-Token" -> token.toString)
