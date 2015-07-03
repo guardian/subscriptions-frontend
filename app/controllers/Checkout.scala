@@ -59,7 +59,11 @@ object Checkout extends Controller with LazyLogging {
     )
   }
 
-  def thankyou = GoogleAuthenticatedStaffAction(Ok(views.html.checkout.thankyou()))
+  def thankyou = GoogleAuthenticatedStaffAction.async { implicit request =>
+    Future {
+      Ok(views.html.checkout.thankyou())
+    }
+  }
 
   def processFinishAccount = GoogleAuthenticatedStaffAction.async { implicit request =>
     FinishAccountForm().bindFromRequest.fold( formWithErrors => {
