@@ -4,6 +4,10 @@
 
 @(jsVars: JsVars)
 
+<!--[if IE 9]>
+<script src="@hashedPathFor("javascripts/vendor/polyfills.min.js")"></script>
+<![endif]-->
+
 <script id="gu">
     var guardian = JSON.parse('@Html(Json.stringify(Json.toJson(jsVars)))');
     guardian.buildNumber = '@app.BuildInfo.buildNumber';
@@ -34,4 +38,4 @@
     };
 </script>
 
-<script src='@hashedPathFor("javascripts/vendor/curl-2014-04-02.js")'></script>
+<script src='@hashedPathFor("javascripts/vendor/curl.js")'></script>
