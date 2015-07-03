@@ -53,8 +53,24 @@ $password-strength-score-4: #33a22b;
     top: 0;
   }
 
-  &.score-0:after { width: 20%; background-color: $password-strength-score-0; }
-  &.score-1:after { width: 40%; background-color: $password-strength-score-1; }
-  &.score-2:after { width: 60%; background-color: $password-strength-score-2; }
-  &.score-3:after { width: 80%; background-color: $password-strength-score-3; }
-  &.score-4:after { width: 100%; background-color: $password-strength-score-4; }
+  &.score-0:after {
+    width: 20%;
+    background-color: $password-strength-score-0;
+  }
+  &.score-1:after {
+    width: 40%;
+    background-color: $password-strength-score-1;
+  }
+  &.score-2:after {
+    width: 60%;
+    background-color: $password-strength-score-2;
+  }
+  &.score-3:after {
+    width: 80%;
+    background-color: $password-strength-score-3;
+  }
+  &.score-4:after {
+    width: 100%;
+    background-color: $password-strength-score-4;
+  }
+}
