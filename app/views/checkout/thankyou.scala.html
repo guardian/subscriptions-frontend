@@ -53,6 +53,7 @@
             <p>Some features of your subscription require you to be signed in before you can make use of them.</p>
             <p>Enter a password to finish creating your account:</p>
             <form action="@processFinishAccount" method="POST" class="form">
+                @helper.CSRF.formField
                 <fieldset class="fieldset">
                     <div class="fieldset__fields">
                         <div class="form-field js-checkout-finish-account-password">
