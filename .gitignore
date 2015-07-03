@@ -9,10 +9,8 @@
 /.settings
 /RUNNING_PID
 /out
-dist
 logs
 tmp
-conf/assets.map
 
 # Scala-IDE specific
 .worksheet
@@ -31,9 +29,13 @@ project/target
 project/boot/
 project/plugins/project/
 
-# frontend
+# Frontend
 .sass-cache
 bower_components
 node_modules
+conf/assets.map
+
+public/dist
+public/images
 public/javascripts
 public/stylesheets

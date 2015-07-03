@@ -6,6 +6,7 @@
 <html lang="en-GB">
 <head>
     @fragments.head(title)
+    @fragments.javascriptFirstSteps(jsVars)
 </head>
     <body class="@bodyClassName">
         @fragments.header()
@@ -13,8 +14,6 @@
         @content
 
         @fragments.footer.footer(footer)
-
-        @fragments.javascript(jsVars)
 
         @fragments.analytics.google()
         @fragments.analytics.omniture()
