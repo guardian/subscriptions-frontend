@@ -18,7 +18,7 @@ object Shipping extends Controller {
       }
       .flatten
       .map(Redirect(_))
-      .getOrElse(Ok(views.html.shipping.index(shippingDetails)))
+      .getOrElse(Ok(views.html.shipping.index(shippingDetails)(request)))
 
   val collectionPaperDigital: Request[AnyContent] => Result = request =>
     index(request, ShippingDetails(
@@ -62,19 +62,19 @@ object Shipping extends Controller {
       weekend = Some("https://www.guardiandirectsubs.co.uk/Delivery/details.aspx?package=WEEKEND")
     ))
 
-  def viewCollectionPaperDigital() = CachedAction(collectionPaperDigital)
+  def viewCollectionPaperDigital() = NoCacheAction(collectionPaperDigital)
 
   def buyCollectionPaperDigital() = NoCacheAction(collectionPaperDigital)
 
-  def viewCollectionPaper() = CachedAction(collectionPaper)
+  def viewCollectionPaper() = NoCacheAction(collectionPaper)
 
   def buyCollectionPaper() = NoCacheAction(collectionPaper)
 
-  def viewDeliveryPaperDigital() = CachedAction(deliveryPaperDigital)
+  def viewDeliveryPaperDigital() = NoCacheAction(deliveryPaperDigital)
 
   def buyDeliveryPaperDigital() = NoCacheAction(deliveryPaperDigital)
 
-  def viewDeliveryPaper() = CachedAction(deliveryPaper)
+  def viewDeliveryPaper() = NoCacheAction(deliveryPaper)
 
   def buyDeliveryPaper() = NoCacheAction(deliveryPaper)
 }

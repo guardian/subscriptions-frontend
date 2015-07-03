@@ -1,4 +1,10 @@
-@()
+@import model.GuestAccountData
+@import services.UserId.{paramName => userIdParam}
+@import services.IdentityToken.{paramName => identityTokenParam}
+
+@import routes.Checkout.processFinishAccount
+
+@(guestAccountForm: Option[Form[GuestAccountData]] = None)(implicit request: RequestHeader)
 
 @main("Thank you | Subscriptions | The Guardian") {
 
@@ -41,9 +47,30 @@
                 <li>Open the app and tap the 'Settings' icon</li>
                 <li>Enter your subscription code (shown above and also in your confirmation email) and your postcode</li>
             </ol>
+
+        @guestAccountForm.map { form =>
             <h3 class="section-header">Register for an account</h3>
             <p>Some features of your subscription require you to be signed in before you can make use of them.</p>
-            <a href="#" class="button button--primary button--large">Register now</a>
+            <p>Enter a password to finish creating your account:</p>
+            <form action="@processFinishAccount" method="POST" class="form">
+                @helper.CSRF.formField
+                <fieldset class="fieldset">
+                    <div class="fieldset__fields">
+                        <div class="form-field js-checkout-finish-account-password">
+                            <label class="label" for="last">Password</label>
+                            <input name="@userIdParam" type="hidden" value="@form.data.get(userIdParam)">
+                            <input name="@identityTokenParam" type="hidden" value="@form.data.get(identityTokenParam)">
+                            <input name="password" type="password" class="input-text js-input">
+                            @checkout.errorMessage("Password is too short")
+                        </div>
+                        <div class="actions">
+                            <button class="button button--primary button--large js-checkout-finish-account-submit">Confirm</button>
+                        </div>
+                    </div>
+                </fieldset>
+            </form>
+        }
+
         </div>
         <div class="row__item">
         </div>

@@ -6,6 +6,7 @@ import com.gu.monitoring.{AuthenticationMetrics, CloudWatch, RequestMetrics, Sta
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
 import model.PersonalData
+import play.api.http.Status
 import play.api.Play.current
 import play.api.libs.json._
 import play.api.libs.ws.{WS, WSRequest, WSResponse}
@@ -13,11 +14,9 @@ import play.api.libs.ws.{WS, WSRequest, WSResponse}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-case class UserId(id:String)
-
-case class GuestUserNotCreated(reason : String)
 
 class IdentityService(identityApiClient: IdentityApiClient) extends LazyLogging {
+  import IdentityService.IdentityGuestPasswordError
 
   def doesUserExist(email: String): Future[Boolean] =
     identityApiClient.userLookupByEmail(email).map { response =>
@@ -29,37 +28,47 @@ class IdentityService(identityApiClient: IdentityApiClient) extends LazyLogging 
       (response.json \ "user").asOpt[IdUser]
     }
 
-  def registerGuest(personalData: PersonalData): Future[UserId] = {
-
+ def registerGuest(personalData: PersonalData): Future[GuestUser] = {
     val json = JsObject(Map(
       "primaryEmailAddress" -> JsString(personalData.email),
+      "publicFields" -> JsObject(Map(
+        "displayName" -> JsString(s"${personalData.firstName} ${personalData.lastName}")
+      )),
       "privateFields" -> JsObject(Map(
-        "firstName" -> JsString(personalData.firstName),
+        "firstName" ->  JsString(personalData.firstName),
         "secondName" -> JsString(personalData.lastName),
         "billingAddress1" -> JsString(personalData.address.address1),
         "billingAddress2" -> JsString(personalData.address.address2),
         "billingAddress3" -> JsString(personalData.address.town),
         "billingPostcode" -> JsString(personalData.address.postcode),
         "billingCountry" -> JsString("United Kingdom")
-      ).toSeq),
-      "statusFields" -> JsObject(Map("receiveGnmMarketing" -> JsBoolean(true)).toSeq)
-    ).toSeq)
+      )),
+      "statusFields" -> JsObject(Map("receiveGnmMarketing" -> JsBoolean(true)))))
 
+    identityApiClient.createGuest(json).map(response => response.json.as[GuestUser])
+  }
 
-    identityApiClient.createGuest(json).map { response =>
-      UserId((response.json \ "guestRegistrationRequest" \ "userId").as[String])
+  def convertGuest(password: String, token: IdentityToken): Future[Unit] = {
+    val json = JsObject(Map("password" -> JsString(password)))
+    identityApiClient.convertGuest(json, token).map { response =>
+      if (response.status != Status.OK) {
+        throw new IdentityGuestPasswordError(response.body)
+      }
     }
-
   }
 }
 
-object IdentityService extends IdentityService(IdentityApiClient)
+object IdentityService extends IdentityService(IdentityApiClient) {
+  class IdentityGuestPasswordError(jsonMsg: String) extends RuntimeException(s"Cannot set password for Identity guest user. Json response form service: $jsonMsg")
+}
 
 trait IdentityApiClient {
 
   def userLookupByScGuUCookie: String => Future[WSResponse]
 
   def createGuest: JsValue => Future[WSResponse]
+
+  def convertGuest: (JsValue, IdentityToken) => Future[WSResponse]
 
   def userLookupByEmail: String => Future[WSResponse]
 }
@@ -71,7 +80,7 @@ object IdentityApiClient extends IdentityApiClient with LazyLogging {
 
   implicit class FutureWSLike(f: Future[WSResponse]) {
     /**
-     * Example of ID API Response: `{"status":"error","errors":[{"message":"Forbidden","description":"Field access denied","context":"privateFields.billingA ddress1"}]}`
+     * Example of ID API Response: `{"status":"error","errors":[{"message":"Forbidden","description":"Field access denied","context":"privateFields.billingAddress1"}]}`
      * @return
      */
     private def applyOnSpecificErrors(reasons: List[String])(block: WSResponse => Unit): Unit = {
@@ -96,15 +105,15 @@ object IdentityApiClient extends IdentityApiClient with LazyLogging {
 
     def withCloudwatchMonitoring(method: String) = {
       f.map(response => metrics.recordResponse(response.status, method))
-
       applyOnSpecificErrors(List("Access Denied", "Forbidden"))(_ => metrics.recordAuthenticationError)
-
       f
     }
 
     def withCloudwatchMonitoringOfPost = withCloudwatchMonitoring("POST")
 
     def withCloudwatchMonitoringOfGet = withCloudwatchMonitoring("GET")
+
+    def withCloudwatchMonitoringOfPut = withCloudwatchMonitoring("PUT")
   }
 
   private def authoriseCall = (request: WSRequest) =>
@@ -132,6 +141,16 @@ object IdentityApiClient extends IdentityApiClient with LazyLogging {
     guestJson => endpoint.post(guestJson)
       .withWSFailureLogging(endpoint)
       .withCloudwatchMonitoringOfPost
+  }
+
+  override def convertGuest: (JsValue, IdentityToken) => Future[WSResponse] = (json, token) => {
+    val endpoint = authoriseCall(WS.url(s"$identityEndpoint/guest/password"))
+
+    endpoint
+      .withHeaders("X-Guest-Registration-Token" -> token.toString)
+      .put(json)
+      .withWSFailureLogging(endpoint)
+      .withCloudwatchMonitoringOfPut
   }
 }
 

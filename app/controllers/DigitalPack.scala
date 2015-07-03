@@ -27,13 +27,13 @@ object DigitalPack extends Controller {
     Ok(views.html.digitalpack.info(DigitalEdition.AU))
   }
 
-  def selectCountry = CachedAction {
+  def selectCountry = CachedAction { implicit request =>
     Ok(views.html.digitalpack.country())
   }
 
   def handleCountry = NoCacheAction(parse.tolerantFormUrlEncoded) { request =>
-    val country: Option[String] = request.body.get("country").map(_.head)
-    if(country == Some("uk")) {
+    val country = request.body.get("country").map(_.head)
+    if(country.contains("uk")) {
       Redirect("/checkout")
     } else {
       Redirect("https://www.guardiansubscriptions.co.uk/digitalsubscriptions/?prom=dga38&CMP=FAB_3062")

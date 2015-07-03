@@ -5,18 +5,18 @@ import com.gu.membership.zuora.Countries
 import com.gu.membership.zuora.soap.Zuora.SubscribeResult
 import com.gu.membership.zuora.soap.ZuoraAction
 import model.SubscriptionData
-import org.joda.time.DateTime
+import org.joda.time.{Period, DateTime}
 
 import com.gu.membership.zuora.soap.ZuoraServiceHelpers._
 import scala.xml.Elem
 
-case class Subscribe(memberId: MemberId, data: SubscriptionData) extends ZuoraAction[SubscribeResult] {
+case class Subscribe(memberId: MemberId, data: SubscriptionData, productRatePlanId: String, paymentDelay: Option[Period]) extends ZuoraAction[SubscribeResult] {
 
   override protected val body: Elem = {
 
     val now = DateTime.now
     val effectiveDate = formatDateTime(now)
-    val contractAcceptanceDate = formatDateTime(now)
+    val contractAcceptanceDate = paymentDelay.map(delay => formatDateTime(now.plus(delay))).getOrElse(effectiveDate)
 
     val payment =
       <ns1:PaymentMethod xsi:type="ns2:PaymentMethod">
@@ -73,7 +73,7 @@ case class Subscribe(memberId: MemberId, data: SubscriptionData) extends ZuoraAc
           </ns1:Subscription>
           <ns1:RatePlanData>
             <ns1:RatePlan xsi:type="ns2:RatePlan">
-              <ns2:ProductRatePlanId>2c92c0f84bbfec8b014bc655f4852d9d</ns2:ProductRatePlanId>
+              <ns2:ProductRatePlanId>{productRatePlanId}</ns2:ProductRatePlanId>
             </ns1:RatePlan>
           </ns1:RatePlanData>
         </ns1:SubscriptionData>

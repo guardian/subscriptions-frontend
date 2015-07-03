@@ -1,4 +1,4 @@
-@()
+@()(implicit rh: RequestHeader)
 
 @main("Select your country | Digital | Subscriptions | The Guardian") {
 
@@ -8,6 +8,7 @@
     <div class="row row--items-1">
         <div class="row__item">
             <form class="form" method="POST">
+                @helper.CSRF.formField
                 <fieldset class="fieldset fieldset--single">
                     <div class="fieldset__heading">
                         <h2 class="fieldset__headline">The Digital Pack is available throughout the world</h2>
