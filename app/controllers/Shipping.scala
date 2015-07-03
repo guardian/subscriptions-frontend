@@ -18,7 +18,7 @@ object Shipping extends Controller {
       }
       .flatten
       .map(Redirect(_))
-      .getOrElse(Ok(views.html.shipping.index(shippingDetails)))
+      .getOrElse(Ok(views.html.shipping.index(shippingDetails)(request)))
 
   val collectionPaperDigital: Request[AnyContent] => Result = request =>
     index(request, ShippingDetails(
