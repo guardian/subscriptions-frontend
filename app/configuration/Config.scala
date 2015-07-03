@@ -15,6 +15,8 @@ object Config {
 
   val config = ConfigFactory.load()
 
+  val playSecret = config.getString("play.crypto.secret")
+
   val googleAuthConfig = {
     val con = ConfigFactory.load().getConfig("google.oauth")
     GoogleAuthConfig(
@@ -37,6 +39,8 @@ object Config {
     val keys = if (idConfig.getBoolean("production.keys")) new ProductionKeys else new PreProductionKeys
 
     val webAppUrl = idConfig.getString("webapp.url")
+
+    val webAppProfileUrl = webAppUrl / "account" / "edit"
 
     def webAppSigninUrl(path: String): String =
       (webAppUrl / "signin") ? ("returnUrl" -> absoluteUrl(path)) ? ("skipConfirmation" -> "true")
