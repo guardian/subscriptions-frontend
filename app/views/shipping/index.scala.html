@@ -1,6 +1,8 @@
-@(shipping: model.ShippingDetails)
+@(shipping: model.ShippingDetails)(implicit rh: RequestHeader)
 
-@main(s"${shipping.name.split("\\s").map(_.capitalize).mkString(" ")} | Choose a Package | Subscriptions | The Guardian", footer = fragments.footer.intl_faq()) {
+@capitalizedName=@{shipping.name.split("\\s").map(_.capitalize).mkString(" ")}
+
+@main(s"$capitalizedName | Choose a Package | Subscriptions | The Guardian", footer = fragments.footer.intl_faq()) {
 
     <div class="gs-container">
         <div class="page-header">
@@ -58,6 +60,7 @@
                 }
                 <h2 class="page-heading">Choose a package</h2>
                 <form action="" method="post">
+                    @helper.CSRF.formField
                     <ul class="package__list u-unstyled-list">
                     @if(shipping.isCollection) {
                         @if(shipping.isPaperDigital) {
