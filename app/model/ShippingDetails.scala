@@ -9,4 +9,5 @@ case class ShippingDetails(name: String,
                            sunday: Option[String] = None) {
   val isCollection = method == "collection"
   val isPaperDigital = packageType == "paper-digital"
+  val capitalizedName = name.split("\\s").map(_.capitalize).mkString(" ")
 }

@@ -1,8 +1,6 @@
 @(shipping: model.ShippingDetails)(implicit rh: RequestHeader)
 
-@capitalizedName=@{shipping.name.split("\\s").map(_.capitalize).mkString(" ")}
-
-@main(s"$capitalizedName | Choose a Package | Subscriptions | The Guardian", footer = fragments.footer.intl_faq()) {
+@main(s"${shipping.capitalizedName} | Choose a Package | Subscriptions | The Guardian", footer = fragments.footer.intl_faq()) {
 
     <div class="gs-container">
         <div class="page-header">
