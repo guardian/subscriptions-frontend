@@ -1,0 +1,82 @@
+/* ==========================================================================
+   Buttons
+   ========================================================================== */
+
+/**
+ * Inherits from pasteup buttons
+ */
+@import '../bower_components/pasteup-buttons/src/_buttons';
+
+.button--large {
+    cursor: pointer;
+    @include font-size(14px, 34px);
+    min-width: 160px;
+    padding-left: $gs-gutter;
+    padding-right: $gs-gutter/4;
+    text-align: left;
+
+    &:after {
+        @extend .icon-arrow-white;
+    }
+}
+
+.button--secondary {
+    background-color: transparent;
+    border: 1px solid rgba($c-brand, 0.3);
+    color: $c-brand;
+
+    &:after {
+        @extend .icon-arrow-blue;
+    }
+
+    &:hover,
+    &:focus,
+    &:active {
+        background-color: transparent;
+        border-color: $c-brand;
+    }
+}
+
+.button--no-arrow {
+    min-width: 0;
+    padding-left: $gs-gutter;
+    padding-right: $gs-gutter;
+
+    &:after {
+        display: none;
+    }
+}
+
+/* Toggle
+   ========================================================================== */
+
+.button--show-more, .button--show-less {
+    @include button-colour(
+        guss-colour(neutral-8, $pasteup-palette),
+        guss-colour(neutral-1, $pasteup-palette),
+        guss-colour(neutral-8, $pasteup-palette),
+        darken(guss-colour(neutral-3, $pasteup-palette), 10%),
+        guss-colour(c-brand, $pasteup-palette)
+    );
+
+    padding-left: 4px;
+    padding-top: 2px;
+    position: relative;
+    color: $c-brand;
+
+    svg {
+        width: 25px;
+        height: 25px;
+        fill: $c-brand;
+    }
+}
+.button--show-less {
+    .inline-plus {
+        display: none;
+    }
+}
+.button--show-more {
+    .inline-minus {
+        display: none;
+    }
+}
