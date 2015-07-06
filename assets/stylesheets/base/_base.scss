@@ -1,12 +1,15 @@
+/* ==========================================================================
+   Base
+   ========================================================================== */
 
 html {
   box-sizing: border-box;
 }
-
 *, *:before, *:after {
   box-sizing: inherit;
 }
 
+// TODO: Only add to headings, perf implications?
 html,
 body {
     -webkit-font-feature-settings: normal;
