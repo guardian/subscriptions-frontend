@@ -5,7 +5,7 @@ define(['utils/ajax'], function (ajax) {
         return ajax({ url: '/checkout/check-identity?email=' + email }).then(function (response) {
             return response.emailInUse;
         }).fail(function (err) {
-            Raven.captureExeption(err);
+            Raven.captureException(err);
         });
     };
 
