@@ -144,7 +144,6 @@ define(['$',
                     bean.fire($FINISH_ACCOUNT_SUBMIT[0], 'click');
                 }
             });
-
         }
     };
 

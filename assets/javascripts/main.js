@@ -2,12 +2,14 @@ require([
     'utils/ajax',
     'modules/checkout/checkout',
     'modules/digitalpack',
+    'modules/components/password',
     // Add new dependencies ABOVE this
     'raven'
 ], function(
     ajax,
     checkout,
-    digitalpack
+    digitalpack,
+    password
 ) {
     'use strict';
 
@@ -24,5 +26,5 @@ require([
 
     checkout.init();
     digitalpack.init();
-
+    password.init();
 });

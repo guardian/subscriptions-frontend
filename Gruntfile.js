@@ -53,6 +53,12 @@ module.exports = function(grunt) {
                 dest: '<%= dirs.public.javascripts %>/vendor',
                 expand: true
             },
+            zxcvbn: {
+              cwd: '<%= dirs.assets.javascripts %>/bower_components/zxcvbn',
+              src: ['zxcvbn.js'],
+              dest: '<%= dirs.public.javascripts %>/vendor',
+              expand: true
+            },
             images: {
                 cwd: '<%= dirs.assets.images %>',
                 src: ['**'],
@@ -210,7 +216,8 @@ module.exports = function(grunt) {
             'compile:css',
             'compile:js',
             'copy:images',
-            'copy:jsVendor'
+            'copy:jsVendor',
+            'copy:zxcvbn'
         ]);
 
         /**
