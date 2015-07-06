@@ -1,3 +1,16 @@
+// =============================================================================
+// Global variables
+// =============================================================================
+
+// Be careful of Sass variable scope
+// Note: Sass 3.3.0 adds global and local vars
+// http://sass-lang.com/documentation/file.SASS_REFERENCE.html#variables_
+
+// Colours
+// =============================================================================
+
+@import 'bower_components/guss-colours/_colours';
+@import 'bower_components/pasteup-palette/src/_palette';
 
 $guss-colours: $pasteup-palette;
 
@@ -21,7 +34,7 @@ $c-link-hover: #6e99b2;
 $c-link-active: $c-membership;
 $c-white: #fff;
 
-// Breakpoints
+// Layout
 // =============================================================================
 
 // Add breakpoints and tweakpoints here
@@ -31,6 +44,9 @@ $c-white: #fff;
 // Name your breakpoints in a way that creates a ubiquitous language
 // across team members. It will improve communication between
 // stakeholders, designers, developers, and testers.
+
+@import 'bower_components/sass-mq/_mq';
+@import 'bower_components/guss-grid-system/_grid-system';
 
 $mobile-bp:  gs-span(4);
 $tablet-bp:  gs-span(9)  + $gs-gutter * 2;
@@ -45,3 +61,4 @@ $mq-breakpoints: (
     leftCol:   $leftCol-bp, // 1140px
     wide:      $wide-bp,    // 1300px
 );
+
