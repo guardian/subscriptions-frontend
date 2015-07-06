@@ -84,6 +84,8 @@ define([
                         resolve(validity);
                     }
                 }).fail(function(err, msg) {
+                    // TODO: Handle DOM/view code outside of promise
+                    renderEmailError(true, MESSAGES.emailFailure);
                     reject(err, msg);
                 });
             } else {
