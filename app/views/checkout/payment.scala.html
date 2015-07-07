@@ -56,57 +56,76 @@
             <form class="form js-checkout-form" method="POST">
                 <fieldset class="fieldset js-fieldset-your-details">
                     @helper.CSRF.formField
-                    <div class="fieldset__heading">
-                        <h2 class="fieldset__headline"><span class="fieldset__num">1</span> Your details</h2>
-                        <div class="fieldset__note fieldset__note--offset">
-                        @if(userIsSignedIn) { Not you?
-                            <br/>
-                            <a href="@idWebAppSignOutUrl(renderCheckout().toString())">Sign out</a> } else { Already have a Guardian account?
-                            <br/>
-                            <a href="@webAppSigninUrl(renderCheckout().toString())">Sign in</a> }
 
+                    <div class="fieldset__heading">
+                        <h2 class="fieldset__headline">
+                            <span class="fieldset__num">1</span> Your details
+                        </h2>
+                        <div class="fieldset__note fieldset__note--offset">
+                            @if(userIsSignedIn) {
+                                <span class="fieldset__note__label">Not you?</span>
+                                <a href="@idWebAppSignOutUrl(renderCheckout().toString())">Sign out</a>
+                            } else {
+                                <span class="fieldset__note__label">Already have a Guardian account?</span>
+                                <a href="@webAppSigninUrl(renderCheckout().toString())">Sign in</a>
+                            }
                         </div>
-                        <a href="#" class="fieldset__edit is-hidden js-edit-your-details">Edit</a>
+                        <div class="fieldset__edit is-hidden">
+                            <button class="u-button-reset js-edit-your-details">Edit</button>
+                        </div>
                     </div>
                     <div class="fieldset__fields">
                         <div class="form-field js-checkout-first">
                             <label class="label" for="first">First name</label>
-                            <input type="text" class="input-text js-input" name="personal.first" id="first" value="@form.data.get(" personal.first ")"> @checkout.errorMessage("This field is required")
+                            <input type="text" class="input-text js-input" name="personal.first" id="first" value="@form.data.get("personal.first")">
+                            @checkout.errorMessage("This field is required")
                         </div>
                         <div class="form-field js-checkout-last">
                             <label class="label" for="last">Last name</label>
-                            <input type="text" class="input-text js-input" name="personal.last" id="last" value="@form.data.get(" personal.last ")"> @checkout.errorMessage("This field is required")
+                            <input type="text" class="input-text js-input" name="personal.last" id="last" value="@form.data.get("personal.last ")">
+                            @checkout.errorMessage("This field is required")
                         </div>
                         <div class="form-field js-checkout-email">
                             <label class="label" for="email">Email address</label>
-                            <input type="email" class="input-text js-input" name="personal.emailValidation.email" id="email" value="@form.data.get(" personal.emailValidation.email ")" @readonly> @checkout.errorMessage("")
+                            <input type="email" class="input-text js-input" name="personal.emailValidation.email" id="email" value="@form.data.get("personal.emailValidation.email")" @readonly>
+                            @checkout.errorMessage("")
                         </div>
-
                         <div class="form-field js-checkout-confirm-email">
-                        @if(!userIsSignedIn) {
-                            <label class="label" for="confirm">Confirm email address</label>
-                            <input type="email" class="input-text js-input" name="personal.emailValidation.confirm" id="confirm" value="@form.data.get(" personal.emailValidation.confirm ")"> @checkout.errorMessage("The Confirm Email address does not match the Email address") } else {
-                            <input type="hidden" class="js-input" name="personal.emailValidation.confirm" id="confirm" value="@form.data.get(" personal.emailValidation.confirm ")"> }
+                            @if(userIsSignedIn) {
+                                <input type="hidden" class="js-input" name="personal.emailValidation.confirm" id="confirm" value="@form.data.get("personal.emailValidation.confirm")">
+                            } else {
+                                <label class="label" for="confirm">Confirm email address</label>
+                                <input type="email" class="input-text js-input" name="personal.emailValidation.confirm" id="confirm" value="@form.data.get("personal.emailValidation.confirm")">
+                                @checkout.errorMessage("The confirmation email must match your email address")
+                            }
                         </div>
                         <div class="js-checkout-full-address">
                             <div class="form-field js-checkout-house">
                                 <label class="label" for="house">Address line 1</label>
-                                <input type="text" class="input-text js-input" name="personal.address.address1" value="@form.data.get(" personal.address.address1 ")"> @checkout.errorMessage("This field is required")
+                                <input type="text" class="input-text js-input" name="personal.address.address1" value="@form.data.get("personal.address.address1")">
+                                @checkout.errorMessage("This field is required")
                             </div>
                             <div class="form-field js-checkout-street">
                                 <label class="label" for="street">Address line 2</label>
-                                <input type="text" class="input-text js-input" name="personal.address.address2" value="@form.data.get(" personal.address.address2 ")"> @checkout.errorMessage("This field is required")
+                                <input type="text" class="input-text js-input" name="personal.address.address2" value="@form.data.get("personal.address.address2")">
+                                @checkout.errorMessage("This field is required")
                             </div>
                             <div class="form-field js-checkout-town">
                                 <label class="label" for="town">Town/City</label>
-                                <input type="text" class="input-text js-input" name="personal.address.town" value="@form.data.get(" personal.address.town ")"> @checkout.errorMessage("This field is required")
+                                <input type="text" class="input-text js-input" name="personal.address.town" value="@form.data.get("personal.address.town")">
+                                @checkout.errorMessage("This field is required")
                             </div>
                         </div>
                         <div class="form-field js-checkout-postcode">
                             <label class="label" for="postcode">Postcode</label>
-                            <input type="text" class="input-text js-input input-text input-text--small" name="personal.address.postcode" value="@form.data.get(" personal.address.postcode ")"> @checkout.errorMessage("Please enter a valid postal code")
+                            <input type="text" class="input-text js-input input-text input-text--small" name="personal.address.postcode" value="@form.data.get("personal.address.postcode")">
+                            @checkout.errorMessage("Please enter a valid postal code")
                         </div>
                         <div class="form-field">
+                            @*
+                                TODO: Clean up this markup, nested .checkbox
+                                Also, no values on checkboxes? Is this used yet?
+                            *@
                             <div class="checkbox">
                                 I'd like to receive information about offers and developments from Guardian News &amp; Media Limited via:
                                 <label class="label">
@@ -124,42 +143,53 @@
                 </fieldset>
                 <fieldset class="fieldset fieldset--collapsed js-fieldset-payment-details">
                     <div class="fieldset__heading">
-                        <h2 class="fieldset__headline"><span class="fieldset__num">2</span> Payment details</h2>
+                        <h2 class="fieldset__headline">
+                            <span class="fieldset__num">2</span> Payment details
+                        </h2>
                         <p class="fieldset__note"><i class="icon-secure"></i> This site is secure</p>
                         <div class="fieldset__note">Payment will be taken by Direct Debit</div>
-                        <a href="#" class="fieldset__edit is-hidden js-edit-payment-details">Edit</a>
+                        <div class="fieldset__edit is-hidden">
+                            <button class="u-button-reset js-edit-payment-details">Edit</button>
+                        </div>
                     </div>
                     <div class="fieldset__fields">
                         <div class="form-field js-checkout-account">
                             <label class="label" for="account">Bank account number</label>
-                            <input type="number" class="input-text js-input" name="payment.account"> @checkout.errorMessage("Please enter between 1 and 10 digits for the account number")
+                            <input type="number" class="input-text js-input" name="payment.account">
+                            @checkout.errorMessage("Please enter between 1 and 10 digits for the account number")
                         </div>
                         <div class="form-field js-checkout-sortcode">
                             <label class="label" for="sortcode">Bank sort code</label>
                             <input type="number" class="input-text js-input input-text input-text--xsmall js-checkout-sortcode1" max="99" name="payment.sortcode1"> -
                             <input type="number" class="input-text js-input input-text input-text--xsmall js-checkout-sortcode2" max="99" name="payment.sortcode2"> -
-                            <input type="number" class="input-text js-input input-text input-text--xsmall js-checkout-sortcode3" max="99" name="payment.sortcode3"> @checkout.errorMessage("Please enter 2 digits for each sort code field")
+                            <input type="number" class="input-text js-input input-text input-text--xsmall js-checkout-sortcode3" max="99" name="payment.sortcode3">
+                            @checkout.errorMessage("Please enter 2 digits for each sort code field")
                         </div>
                         <div class="form-field js-checkout-holder">
                             <label class="label" for="holder">Name of account holder</label>
-                            <input type="text" class="input-text js-input" name="payment.holder"> @checkout.errorMessage("Please enter between 1 and 18 characters for the account holder name")
+                            <input type="text" class="input-text js-input" name="payment.holder">
+                            @* TODO: Why limited to 18 characters? *@
+                            @checkout.errorMessage("Please enter between 1 and 18 characters for the account holder name")
                         </div>
                         <div class="form-field js-checkout-confirm-payment">
                             <div class="checkbox">
                                 <label class="label">
-                                    <input type="checkbox" class="js-input"> I confirm that I am the account holder and I am solely able to authorise debit from the account
+                                    <input type="checkbox" class="js-input">
+                                    I confirm that I am the account holder and I am solely able to authorise debit from the account
                                 </label>
                             </div>
                             @checkout.errorMessage("Please confirm that you are the account holder by checking the checkbox above")
                         </div>
                         <div class="actions">
-                            <a href="#" class="button button--primary button--large js-checkout-payment-details-submit">Continue</a>
+                            <button class="button button--primary button--large js-checkout-payment-details-submit">Continue</button>
                         </div>
                     </div>
                 </fieldset>
                 <fieldset class="fieldset fieldset--single fieldset--collapsed js-fieldset-review">
                     <div class="fieldset__heading">
-                        <h2 class="fieldset__headline"><span class="fieldset__num">3</span> Review and confirm</h2>
+                        <h2 class="fieldset__headline">
+                            <span class="fieldset__num">3</span> Review and confirm
+                        </h2>
                     </div>
                     <div class="fieldset__fields">
                         <div class="review-details">

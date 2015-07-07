@@ -71,6 +71,14 @@
     @include fs-textSans(2);
     color: guss-colour(neutral-2);
 }
+.fieldset__note__label {
+    margin-left: .2em;
+    @include mq(desktop) {
+        display: block;
+        margin-left: 0;
+    }
+}
+
 .fieldset__edit {
     position: absolute;
     top: $gs-baseline;
