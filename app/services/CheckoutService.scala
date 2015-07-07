@@ -30,11 +30,16 @@ class CheckoutService(identityService: IdentityService, salesforceService: Sales
       }
 
     //TODO when implementing test-users this requires updating to supply data to correct location
-    for {
+    val eventualCheckoutResult = for {
       userData <- userOrElseRegisterGuest
       memberId <- salesforceService.createOrUpdateUser(subscriptionData.personalData, userData.id)
       subscribeResult <- touchpointBackend.zuoraService.createSubscription(memberId, subscriptionData, ratePlan, paymentDelay)
     } yield CheckoutResult(memberId, userData, subscribeResult)
+
+    eventualCheckoutResult.foreach(checkoutResult =>
+      identityService.updateUserDetails(subscriptionData.personalData, checkoutResult.userIdData.id))
+
+    eventualCheckoutResult
   }
 }
 
