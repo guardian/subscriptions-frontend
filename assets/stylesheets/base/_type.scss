@@ -1,5 +1,7 @@
 $guss-webfonts-base-url: '//pasteup.guim.co.uk/fonts/';
 
+@import '../bower_components/guss-webfonts/_webfonts.scss';
+
 @include guss-webfonts(
     (
         'Guardian Text Egyptian Web': (
