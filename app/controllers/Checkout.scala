@@ -7,9 +7,9 @@ import forms.{FinishAccountForm, SubscriptionsForm}
 import model.PersonalData
 import play.api.libs.json._
 import play.api.mvc._
-import services.CheckoutService
 import services.CheckoutService.CheckoutResult
-import services._
+import services.{CheckoutService, _}
+import views.html.{checkout => view}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -46,36 +46,27 @@ object Checkout extends Controller with LazyLogging {
     SubscriptionsForm().bindFromRequest.fold(
       formWithErrors => {
         for (idUserOpt <- getIdentityUserByCookie(request))
-          yield BadRequest(views.html.checkout.payment(formWithErrors, userIsSignedIn = idUserOpt.isDefined))
+          yield BadRequest(view.payment(formWithErrors, userIsSignedIn = idUserOpt.isDefined))
       },
-      subscriptionData => {
+
+      formData => {
         val idUserOpt = AuthenticationService.authenticatedUserFor(request)
         val authCookie = request.cookies.find(_.name == "SC_GU_U").map(cookie => AuthCookie(cookie.value))
-        CheckoutService.processSubscription(subscriptionData, idUserOpt, authCookie).map {
-          case CheckoutResult(_, guestUser: GuestUser, _) =>
-            Some(FinishAccountForm().bind(guestUser.toFormParams))
-          case CheckoutResult(_, registeredUser:MinimalIdUser, _) =>
-            None
-        }.map(formOpt => Ok(views.html.checkout.thankyou(formOpt)))
+
+        CheckoutService.processSubscription(formData, idUserOpt, authCookie).map { case CheckoutResult(_, userIdData, subscription) =>
+          val passwordForm = userIdData.toGuestAccountForm
+          Ok(view.thankyou(subscription.id, formData.personalData, passwordForm))
+        }
       }
     )
   }
 
-  def thankyou = GoogleAuthenticatedStaffAction.async { implicit request =>
-    Future {
-      val form = FinishAccountForm().bindFromRequest()
-      Ok(views.html.checkout.thankyou(Some(form)))
-    }
-  }
-
   def processFinishAccount = GoogleAuthenticatedStaffAction.async { implicit request =>
-    FinishAccountForm().bindFromRequest.fold( formWithErrors => {
-      Future {
-        BadRequest(views.html.checkout.thankyou(Some(formWithErrors)))
-      }
+    FinishAccountForm().bindFromRequest.fold({ _ =>
+      throw new RuntimeException("Could not set a password for guest account. Validation should happen on the client side!")
     }, guestAccountData => {
       IdentityService.convertGuest(guestAccountData.password, IdentityToken(guestAccountData.token))
-        .map(_ => Ok(views.html.checkout.alldone()))
+        .map(_ => Ok(view.alldone()))
     })
   }
 

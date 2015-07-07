@@ -1,10 +1,10 @@
-@()
+@(subscriptionId: String, personalData: model.PersonalData)
 
 <div class="review-panel">
     <div class="review-panel__item">
         <h4 class="review-panel__label">Subscription code:</h4>
         <div class="review-panel__details">
-            ZXY987654321
+            @subscriptionId
         </div>
     </div>
     <div class="review-panel__item">
@@ -17,9 +17,9 @@
         <h4 class="review-panel__label">Your details:</h4>
         <div class="review-panel__details">
             <address>
-                Sam Smith<br/>
-                Flat 14 Bankside House, West Hill, Putney SW15 4TS<br/>
-                Londoner75@@gmail.com
+                @personalData.fullName<br/>
+                @personalData.address.asString<br/>
+                @personalData.email
             </address>
         </div>
     </div>

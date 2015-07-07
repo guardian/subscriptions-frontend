@@ -1,10 +1,10 @@
-@import model.GuestAccountData
+@import model.{GuestAccountData,PersonalData}
 @import services.UserId.{paramName => userIdParam}
 @import services.IdentityToken.{paramName => identityTokenParam}
 
 @import routes.Checkout.processFinishAccount
 
-@(guestAccountForm: Option[Form[GuestAccountData]] = None)(implicit request: RequestHeader)
+@(subscriptionId: String, personalData: PersonalData, guestAccountForm: Option[Form[GuestAccountData]] = None)(implicit request: RequestHeader)
 
 @main("Thank you | Subscriptions | The Guardian", bodyClasses=List("is-wide")) {
 
@@ -14,7 +14,7 @@
 
     <section class="section-slice section-slice--limited">
         <div class="section-slice__content">
-            <h2 class="section-title">Order ref: ABCD123456</h2>
+            <h2 class="section-title">Order ref: @subscriptionId</h2>
             <div class="prose">
                 <p>
                     We have received your request and are now processing your subscription,
@@ -26,7 +26,7 @@
                     <a href="mailto:subscriptions@@theguardian.com">subscriptions@@theguardian.com</a>
                 </p>
             </div>
-            @fragments.checkout.reviewPanel()
+            @fragments.checkout.reviewPanel(subscriptionId, personalData)
         </div>
     </section>
 
