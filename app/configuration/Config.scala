@@ -12,8 +12,8 @@ import scala.util.Try
 
 object Config {
   val appName = "subscriptions-frontend"
-
   val config = ConfigFactory.load()
+  val appUrl = config.getString("subscriptions.url")
 
   val playSecret = config.getString("play.crypto.secret")
 
