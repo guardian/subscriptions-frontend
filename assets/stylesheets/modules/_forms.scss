@@ -20,25 +20,6 @@
     border-top: 1px solid $c-neutral5;
 }
 
-/* Form Header
-   ========================================================================== */
-
-.form-header {
-    padding: ($gs-gutter / 2) 0 ($gs-baseline * 3);
-
-    @include mq(tablet) {
-        padding-left: 23%;
-        padding-bottom: $gs-gutter * 2;
-    }
-}
-.form-header__title {
-    @include fs-headline(6);
-
-    @include mq(tablet) {
-        @include fs-headline(8, true);
-    }
-}
-
 // Form Fieldset
 // ============================================================================
 
