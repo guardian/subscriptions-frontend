@@ -55,7 +55,7 @@ object IdentityService extends IdentityService(IdentityApiClient) {
   class IdentityGuestPasswordError(jsonMsg: String) extends RuntimeException(s"Cannot set password for Identity guest user. Json response form service: $jsonMsg")
 
   implicit class PersonalDataJsonSerialiser(personalData: PersonalData) {
-    implicit def convertToPrivateFields(): JsObject = JsObject(Map(
+    def convertToPrivateFields(): JsObject = JsObject(Map(
       "firstName" -> JsString(personalData.firstName),
       "secondName" -> JsString(personalData.lastName),
       "billingAddress1" -> JsString(personalData.address.address1),
@@ -65,7 +65,7 @@ object IdentityService extends IdentityService(IdentityApiClient) {
       "billingCountry" -> JsString("United Kingdom")
     ))
 
-    implicit def convertToUser(): JsObject = JsObject(Map(
+    def convertToUser(): JsObject = JsObject(Map(
       "primaryEmailAddress" -> JsString(personalData.email),
       "publicFields" -> JsObject(Map(
         "displayName" -> JsString(s"${personalData.firstName} ${personalData.lastName}")
