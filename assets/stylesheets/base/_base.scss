@@ -1,33 +1,67 @@
+/* ==========================================================================
+   Base
+   ========================================================================== */
 
 html {
-  box-sizing: border-box;
+    box-sizing: border-box;
 }
 
 *, *:before, *:after {
-  box-sizing: inherit;
+    box-sizing: inherit;
 }
 
-html,
+html {
+    font-family: $f-serif-headline;
+    @include font-smoothing();
+}
+
 body {
+    margin: 0;
+    color: $c-body;
+}
+
+h1, h2, h3 {
     -webkit-font-feature-settings: normal;
     -moz-font-feature-settings: "kern" 1, "liga" 1;
     font-feature-settings: "kern" 1, "liga" 1;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
+h1, h2, h3, h4, h5, h6 {
     margin: 0;
+    color: $c-body;
+    font-weight: 500;
+}
+
+p {
+    margin-top: 0;
+    margin-bottom: ($gs-baseline/3)*2;
+}
+
+a {
+    color: $c-link;
+    text-decoration: none;
+    border-bottom: 1px solid $c-neutral4;
+
+    &:hover,
+    &:focus {
+        border-color: $c-link-hover
+    }
+
+    &:active {
+        color: $c-link-active;
+        border-color: $c-link-active;
+    }
+}
+
+strong {
+    font-weight: 900;
 }
 
 ol,
 ul {
-    list-style-position: outside;
     margin: 0;
     padding: 0 0 0 $gs-gutter;
+    list-style-position: outside;
 }
 
 img {
