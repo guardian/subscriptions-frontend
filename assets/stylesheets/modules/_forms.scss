@@ -1,0 +1,286 @@
+/* ==========================================================================
+   Forms
+   ========================================================================== */
+
+/**
+ * Fix a bug Internet Explorer 8 where text in password fields
+ * would become invisible when `font-family` references a webfont.
+ *
+ * @group forms
+ */
+[type=password] {
+    font-family: sans-serif !important;
+}
+
+// Form
+// ============================================================================
+
+.form {
+    margin-bottom: 0;
+    border-top: 1px solid $c-neutral5;
+}
+
+/* Form Header
+   ========================================================================== */
+
+.form-header {
+    padding: ($gs-gutter / 2) 0 ($gs-baseline * 3);
+
+    @include mq(tablet) {
+        padding-left: 23%;
+        padding-bottom: $gs-gutter * 2;
+    }
+}
+.form-header__title {
+    @include fs-headline(6);
+
+    @include mq(tablet) {
+        @include fs-headline(8, true);
+    }
+}
+
+// Form Fieldset
+// ============================================================================
+
+.fieldset {
+    border: 0;
+    padding: 0;
+    margin: 0;
+    border-bottom: 1px solid $c-neutral5;
+    background-color: $c-neutral7;
+    position: relative;
+
+    @include mq(tablet) {
+        display: table;
+        width: 100%;
+    }
+}
+.fieldset__heading,
+.fieldset__fields {
+    @include mq(tablet) {
+        display: table-cell;
+        vertical-align: top;
+    }
+}
+
+.fieldset__heading {
+    padding: ($gs-baseline / 2) ($gs-baseline);
+
+    @include mq(tablet) {
+        width: 35%;
+        padding-right: ($gs-gutter * 2);
+    }
+}
+.fieldset__fields {
+    padding: ($gs-gutter / 2) ($gs-gutter / 2) ($gs-baseline * 2);
+
+    @include mq(tablet) {
+        padding-left: 0;
+    }
+}
+.fieldset__headline {
+    @include fs-header(3);
+    margin-bottom: $gs-baseline / 2;
+}
+.fieldset__num {
+    margin-right: $gs-gutter/4;
+    color: guss-colour(news-main-2);
+}
+.fieldset__note {
+    @include fs-textSans(2);
+    color: guss-colour(neutral-2);
+}
+.fieldset__edit {
+    position: absolute;
+    top: $gs-baseline;
+    right: $gs-gutter;
+    text-transform: lowercase;
+    @include fs-textSans(1);
+}
+
+.fieldset--single {
+    .fieldset__heading {
+        display: block;
+        padding-right: $gs-gutter / 2;
+        width: auto;
+    }
+
+    .fieldset__fields {
+        padding-left: $gs-gutter / 2;
+        width: auto;
+    }
+}
+.fieldset--collapsed {
+    .fieldset__note,
+    .fieldset__fields {
+        display: none;
+    }
+}
+
+// Form labels and inputs
+// ============================================================================
+
+.label {
+    @include fs-bodyCopy(2);
+    display: block;
+    cursor: pointer;
+    margin-bottom: 2px;
+}
+
+.input-text,
+.input-textarea {
+    @include f-textSans();
+    font-size: inherit;
+    line-height: inherit;
+    color: inherit;
+    border: 1px solid $c-neutral4;
+    padding: ($gs-baseline / 2) $gs-baseline;
+    outline: none;
+    width: 100%;
+    -webkit-appearance: none;
+    border-radius: 20px;
+
+    &:focus {
+        border-color: $c-neutral3;
+    }
+
+    &[readonly] {
+        background-color: $c-neutral7;
+        color: $c-neutral2;
+    }
+    &[readonly]:focus {
+        border-color: $c-neutral4;
+    }
+}
+.input-text--small {
+    width: 30%;
+}
+.input-text--xsmall {
+    width: 15%;
+}
+
+.input-textarea {
+    resize: vertical;
+}
+
+.select {
+    font: inherit;
+}
+.select--wide {
+    width: 100%;
+}
+
+// Checkbox
+// ============================================================================
+
+.checkbox {
+    @include fs-textSans(3);
+
+    .label {
+        font: inherit;
+    }
+}
+
+// Form field
+// ============================================================================
+
+.form-field {
+    margin-bottom: ($gs-baseline);
+}
+.form-field__error-message {
+    @include fs-data(3);
+    color: guss-colour(error);
+    margin-top: 2px;
+    margin-bottom: ($gs-baseline / 2);
+    display: none;
+}
+.form-field--no-margin {
+    margin-bottom: 0;
+}
+.form-field--error {
+    .label {
+        color: guss-colour(error);
+    }
+
+    .form-field__error-message {
+        display: block;
+    }
+
+    .input-text,
+    .input-text:focus,
+    .input-textarea,
+    .input-textarea:focus {
+        border-color: guss-colour(error);
+    }
+}
+
+/* Form Notes
+   ========================================================================== */
+
+.form-note {
+    @include fs-textSans(1);
+    color: $c-neutral2;
+    padding-top: ($gs-baseline / 2);
+    margin-bottom: ($gs-baseline / 2);
+}
+.form-note--left {
+    @include mq(mobile) {
+        float: left;
+    }
+}
+.form-note--right {
+    @include mq(mobile) {
+        text-align: right;
+        margin-left: $gs-gutter;
+    }
+}
+.form-note--underneath {
+    margin-top: ($gs-baseline / 2);
+}
+
+/* ==========================================================================
+   Password Strength indicator
+   ========================================================================== */
+
+$password-strength-score-0: #e31f26;
+$password-strength-score-1: #e6711b;
+$password-strength-score-2: #ffbb00;
+$password-strength-score-3: #aad801;
+$password-strength-score-4: #33a22b;
+
+.password-strength-indicator {
+    background-color: $c-neutral5;
+    height: 8px;
+    margin-top: 4px;
+    margin-bottom: ($gs-baseline * 2);
+    position: relative;
+
+    &:after {
+        bottom: 0;
+        content: '';
+        display: block;
+        left: 0;
+        position: absolute;
+        top: 0;
+    }
+    &.score-0:after {
+        width: 20%;
+        background-color: $password-strength-score-0;
+    }
+    &.score-1:after {
+        width: 40%;
+        background-color: $password-strength-score-1;
+    }
+    &.score-2:after {
+        width: 60%;
+        background-color: $password-strength-score-2;
+    }
+    &.score-3:after {
+        width: 80%;
+        background-color: $password-strength-score-3;
+    }
+    &.score-4:after {
+        width: 100%;
+        background-color: $password-strength-score-4;
+    }
+}

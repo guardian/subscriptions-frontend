@@ -22,9 +22,8 @@
    ========================================================================== */
 
 @import 'base/base';
-@import 'base/layout';
-@import 'base/form';
 @import 'base/type';
+@import 'base/layout';
 @import 'base/helpers';
 
 /* ==========================================================================
@@ -33,6 +32,7 @@
 
 @import 'modules/global';
 @import 'modules/icons';
+@import 'modules/forms';
 @import 'modules/blocks';
 @import 'modules/buttons';
 @import 'modules/packages';
