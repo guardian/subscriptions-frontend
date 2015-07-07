@@ -120,7 +120,7 @@ module.exports = function(grunt) {
                 files: [{
                     expand: true,
                     cwd: '<%= dirs.public.stylesheets %>',
-                    src: ['*.css'],
+                    src: ['*.css', '!ie-old*'],
                     dest: '<%= dirs.public.stylesheets %>'
                 }]
             }
