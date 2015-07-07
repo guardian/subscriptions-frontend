@@ -12,7 +12,7 @@ $left-column: gs-span(2);
 
 .digital-pack {
     .gs-container {
-        max-width: $leftCol-bp;
+        max-width: mq-get-breakpoint-width('leftCol');
     }
     .dp-container {
         padding-left: 0;
@@ -20,13 +20,13 @@ $left-column: gs-span(2);
         padding-bottom: 2 * $gs-baseline;
 
         @include mq(tablet, $until: desktop) {
-            max-width: $tablet-bp;
+            max-width: mq-get-breakpoint-width('tablet');
         }
         @include mq(desktop, $until: leftCol) {
-            max-width: $desktop-bp;
+            max-width: mq-get-breakpoint-width('desktop');
         }
         @include mq(leftCol) {
-            max-width: $leftCol-bp;
+            max-width: mq-get-breakpoint-width('leftCol');
             position: relative;
             overflow: auto;
         }
@@ -55,7 +55,7 @@ $left-column: gs-span(2);
 
     @include mq(leftCol) {
         float: left;
-        width: $leftCol-bp - $left-column - $gs-gutter;
+        width: mq-get-breakpoint-width('leftCol') - $left-column - $gs-gutter;
     }
     @include mq($until: leftCol) {
         overflow: hidden;

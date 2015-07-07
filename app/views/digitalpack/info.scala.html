@@ -2,7 +2,7 @@
 
 @main(
     title = if(edition.id == "uk") "Digital | Subscriptions | The Guardian" else s"Digital - ${edition.name} | Subscriptions | The Guardian",
-    bodyClassName = "digital-pack") {
+    bodyClasses = List("digital-pack")) {
 <div class="gs-container dp-container">
     @fragments.container.container_title(" ")
     <div class="dp-container__body dp-container__body--main">

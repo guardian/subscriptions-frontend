@@ -1,14 +1,16 @@
 @(form: Form[model.SubscriptionData], userIsSignedIn: Boolean)(implicit request: RequestHeader)
 
 @import routes.Checkout.renderCheckout
-
 @import model.JsVars
 @import configuration.Config.Identity._
 
 @readonly = @{ if (userIsSignedIn) "readonly" else "" }
 
-@main(title = "Checkout | Subscriptions | The Guardian",
-      jsVars = JsVars.default.copy(userIsSignedIn = userIsSignedIn)) {
+@main(
+    title = "Checkout | Subscriptions | The Guardian",
+    jsVars = JsVars.default.copy(userIsSignedIn = userIsSignedIn),
+    bodyClasses = List("is-wide")
+) {
 
 <div class="gs-container">
     @fragments.page.header("Checkout")
