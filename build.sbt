@@ -50,6 +50,7 @@ resolvers ++= Seq(
   Resolver.sonatypeRepo("releases"))
 
 addCommandAlias("devrun", "run -Dconfig.resource=DEV.conf 9200")
-addCommandAlias("run-tests", "testOnly -- -l Acceptance")
+addCommandAlias("fast-test", "testOnly -- -l Acceptance")
+addCommandAlias("acceptance-test", "testOnly -- -r Acceptance")
 
 playArtifactDistSettings

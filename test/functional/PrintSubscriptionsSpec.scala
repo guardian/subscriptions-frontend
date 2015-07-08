@@ -2,11 +2,12 @@ package functional
 
 import java.net.URL
 
-import configuration.Config.appUrl
+import controllers.routes.Shipping.{viewCollectionPaper, viewCollectionPaperDigital, viewDeliveryPaperDigital, viewDeliveryPaper}
 import functional.pages.{Home, SubscriptionPlan}
 import org.openqa.selenium.WebDriver
 import org.scalatest._
 import org.scalatest.selenium.WebBrowser
+import Config.appUrl
 
 case class SubscriptionTest(url: String, name: String, landingHost: String)
 
@@ -18,7 +19,7 @@ object SubscriptionTest {
 }
 
 class PrintSubscriptionsSpec extends FreeSpec with ShouldMatchers with WebBrowser with BeforeAndAfterAll {
-  implicit lazy val driver: WebDriver = Driver.fromConfig
+  implicit lazy val driver: WebDriver = Config.driver
 
   val testData = Seq(
     SubscriptionTest.collection(viewCollectionPaper.toString, "Paper voucher subscription"),

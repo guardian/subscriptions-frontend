@@ -10,9 +10,11 @@ import org.openqa.selenium.{Platform, WebDriver}
 import scala.util.Try
 
 
-object Driver {
-  def fromConfig: WebDriver = {
-    val conf = ConfigFactory.load()
+object Config {
+  private val conf = ConfigFactory.load()
+  val appUrl = conf.getString("subscriptions.url")
+
+  lazy val driver: WebDriver = {
     Try { conf.getString("webDriverRemoteUrl") }.toOption.map { urlS =>
       new RemoteWebDriver(new URL(urlS), defaultCapabilities)
     }.getOrElse {

@@ -6,6 +6,7 @@
             <Pattern>%d [%thread] %level %logger - %m%n</Pattern>
         </layout>
     </appender>
+
     <appender name="FILE" class="ch.qos.logback.core.FileAppender">
         <File>logs/${application-name}-functional-test.log</File>
         <layout class="ch.qos.logback.classic.PatternLayout">
@@ -17,4 +18,5 @@
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="FILE"/>
     </root>
+    
 </configuration>
