@@ -1,6 +1,6 @@
 @(shipping: model.ShippingDetails)(implicit rh: RequestHeader)
 
-@main(s"${shipping.capitalizedName} | Choose a Package | Subscriptions | The Guardian", footer = fragments.footer.intl_faq()) {
+@main(s"${shipping.capitalizedName} | Choose a Package | Subscriptions | The Guardian", isInternational=true) {
 
     <div class="gs-container">
         <div class="page-header">

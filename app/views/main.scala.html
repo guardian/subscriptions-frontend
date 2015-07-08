@@ -6,7 +6,12 @@
     Currently being used for digital pack page and to help transition to a consistent
     body width throughout the site. The extra classes will be removed when this is the case.
 *@
-@(title: String, jsVars: JsVars = JsVars.default, footer: Html = Html(""), bodyClasses: Seq[String] = Nil)(content: Html)
+@(
+    title: String,
+    jsVars: JsVars = JsVars.default,
+    isInternational: Boolean = false,
+    bodyClasses: Seq[String] = Nil
+)(content: Html)
 
 <!DOCTYPE html>
 <html lang="en-GB">
@@ -19,7 +24,7 @@
 
         @content
 
-        @fragments.footer.footer(footer)
+        @fragments.footer.footer(isInternational)
 
         @fragments.analytics.google()
         @fragments.analytics.omniture()
