@@ -14,8 +14,7 @@ object Driver {
   def fromConfig: WebDriver = {
     val conf = ConfigFactory.load()
     Try { conf.getString("webDriverRemoteUrl") }.toOption.map { urlS =>
-      val url = new URL(urlS)
-      new RemoteWebDriver(url, defaultCapabilities)
+      new RemoteWebDriver(new URL(urlS), defaultCapabilities)
     }.getOrElse {
       new ChromeDriver()
     }

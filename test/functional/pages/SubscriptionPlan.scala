@@ -8,10 +8,6 @@ object SubscriptionPlan extends  WebBrowser {
   def selectSixdayPackage()(implicit d: WebDriver) = selectPackage("sixday")
   def selectWeekendPackage()(implicit d: WebDriver) = selectPackage("weekend")
 
-  def pageHasText(text: String)(implicit d: WebDriver): Boolean = {
-    find(tagName("body")).get.text.contains(text)
-  }
-
   private def selectPackage(id: String)(implicit d: WebDriver) = {
     clickOn(cssSelector(s"""label[for="$id"]"""))
     clickOn(cssSelector("""*[data-test-id="choose-package-select"]"""))

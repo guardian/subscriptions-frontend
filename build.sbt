@@ -38,7 +38,9 @@ libraryDependencies ++= Seq(
   "org.seleniumhq.selenium" % "selenium-java" % "2.44.0" % "test"
 )
 
-testOptions in Test += Tests.Argument("-oF")
+testOptions in Test ++= Seq(
+  Tests.Argument("-oFD") // display full stack errors and execution times in Scalatest output
+)
 
 javaOptions in Test += "-Dconfig.file=test/conf/application.conf"
 
@@ -48,5 +50,6 @@ resolvers ++= Seq(
   Resolver.sonatypeRepo("releases"))
 
 addCommandAlias("devrun", "run -Dconfig.resource=DEV.conf 9200")
+addCommandAlias("run-tests", "testOnly -- -l Acceptance")
 
 playArtifactDistSettings
