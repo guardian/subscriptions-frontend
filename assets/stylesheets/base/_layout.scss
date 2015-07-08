@@ -1,13 +1,12 @@
-
-body {
-    margin: 0;
-}
+/* ==========================================================================
+   Layout
+   ========================================================================== */
 
 @include grid-system;
 
-/* Update container */
+// TODO: Should this be done with config, not just overriding??
 .gs-container {
-    max-width: gs-span(12) + $gs-gutter*2;
+    max-width: mq-get-breakpoint-width('desktop');
     padding-left: $gs-gutter/2;
     padding-right: $gs-gutter/2;
 
@@ -17,7 +16,17 @@ body {
     }
 }
 
-/* Setup rows */
+/**
+ * TODO: Combine with
+ * All pages should be wide
+ */
+body.is-wide {
+    .gs-container {
+        max-width: mq-get-breakpoint-width('wide');
+    }
+}
+
+// Setup rows
 @include guss-row-utility;
 @include guss-row('.row');
 

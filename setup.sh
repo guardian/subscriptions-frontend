@@ -98,10 +98,36 @@ install_grunt() {
   fi
 }
 
+bower_javascripts() {
+  if ! installed bower; then
+    printf "\nYou need to install bower first:\n"
+    printf "\nnpm install -g bower\n"
+    exit 1
+  else
+    pushd assets/javascripts
+    rm -rf bower_components
+    bower install
+  fi
+  popd
+}
+
+bower_stylesheets() {
+  if ! installed bower; then
+    printf "\nYou need to install bower first:\n"
+    printf "\nnpm install -g bower\n"
+    exit 1
+  else
+    pushd assets/stylesheets
+    rm -rf bower_components
+    bower install
+  fi
+  popd
+}
+
 install_dependencies() {
   npm install
-  cd assets/javascripts && bower install && cd ../..
-  cd assets/stylesheets && bower install && cd ../..
+  bower_javascripts
+  bower_stylesheets
 }
 
 compile() {

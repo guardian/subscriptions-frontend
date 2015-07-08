@@ -13,6 +13,13 @@
     list-style: none;
 }
 
+.u-button-reset {
+    padding: 0;
+    border: 0;
+    outline: none;
+    background: transparent;
+}
+
 .inline-list {
     @extend .u-unstyled-list;
 }

@@ -91,12 +91,11 @@ body {
 }
 
 .page-header__title {
-    @include f-headline;
-    @include font-size(32px, 36px);
+    @include fs-headline(6);
     margin-bottom: 0;
 
     @include mq(tablet) {
-        @include font-size(42px, 46px);
+        @include fs-headline(8, true);
     }
 }
 
