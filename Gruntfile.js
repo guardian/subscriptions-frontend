@@ -109,6 +109,33 @@ module.exports = function(grunt) {
             }
         },
 
+        px_to_rem: {
+            dist: {
+                options: {
+                    map: isDev,
+                    base: 16,
+                    fallback: false,
+                    max_decimals: 5
+                },
+                files: [{
+                    expand: true,
+                    cwd: '<%= dirs.public.stylesheets %>',
+                    src: ['*.css', '!ie-old*'],
+                    dest: '<%= dirs.public.stylesheets %>'
+                }]
+            }
+        },
+
+        postcss: {
+            options: {
+                map: isDev ? true : false,
+                processors: [
+                    require('autoprefixer-core')({browsers: ['> 5%', 'last 2 versions', 'IE 8', 'IE 9', 'Safari 6']})
+                ]
+            },
+            dist: { src: '<%= dirs.public.stylesheets %>/*.css' }
+        },
+
         requirejs: {
             compile: {
                 options: {
@@ -142,11 +169,11 @@ module.exports = function(grunt) {
         watch: {
             css: {
                 files: ['<%= dirs.assets.stylesheets %>/**/*.scss'],
-                tasks: ['sass']
+                tasks: ['compile:css']
             },
             js: {
                 files: ['<%= dirs.assets.javascripts %>/**/*.js'],
-                tasks: ['requirejs']
+                tasks: ['compile:js']
             }
         },
 
@@ -198,7 +225,7 @@ module.exports = function(grunt) {
 
     grunt.registerTask('validate', ['eslint']);
 
-    grunt.registerTask('compile:css', ['sass']);
+    grunt.registerTask('compile:css', ['sass', 'px_to_rem', 'postcss']);
 
     grunt.registerTask('compile:js', function(){
         if (!isDev) {
@@ -246,5 +273,3 @@ module.exports = function(grunt) {
         grunt.task.run(['karma:unit']);
     });
 };
-
-

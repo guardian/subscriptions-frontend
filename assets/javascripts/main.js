@@ -1,14 +1,14 @@
 require([
     'utils/ajax',
+    'modules/toggle',
     'modules/checkout/checkout',
-    'modules/digitalpack',
     'modules/components/password',
     // Add new dependencies ABOVE this
     'raven'
 ], function(
     ajax,
+    toggle,
     checkout,
-    digitalpack,
     password
 ) {
     'use strict';
@@ -24,7 +24,7 @@ require([
 
     ajax.init({page: {ajaxUrl: ''}});
 
+    toggle.init();
     checkout.init();
-    digitalpack.init();
     password.init();
 });

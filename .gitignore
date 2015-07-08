@@ -12,9 +12,11 @@
 logs
 tmp
 
-# Scala-IDE specific
+# IDE specific
 .worksheet
 .scala_dependencies
+*.sublime-project
+*.sublime-workspace
 
 # sbt specific
 .cache

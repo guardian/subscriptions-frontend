@@ -1,0 +1,34 @@
+// =============================================================================
+// Mixins
+// =============================================================================
+
+// Guss - https://github.com/guardian/guss
+// =============================================================================
+
+ // TODO: Deprecated in favour of autoprefixer
+@import 'bower_components/guss-css3/_css3';
+
+// TOOD: Deprecated in favour of px_to_rem
+$guss-rem-baseline: 16px;
+@import 'bower_components/guss-rem/_rem';
+
+@import 'bower_components/guss-layout/_row';
+@import 'bower_components/guss-layout/_columns';
+@import 'bower_components/guss-typography/_typography';
+
+// Hide content visually, still readable by screen readers
+@mixin u-h {
+    border: 0 !important;
+    clip: rect(0 0 0 0) !important;
+    height: 1px !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+    position: absolute !important;
+    width: 1px !important;
+}
+
+@mixin font-smoothing() {
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-font-smoothing: antialiased;
+}

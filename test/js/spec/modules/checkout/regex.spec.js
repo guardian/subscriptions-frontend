@@ -1,4 +1,3 @@
-console.log('start');
 define(['src/modules/checkout/regex'], function (regex) {
 
     describe('Checkout form validation regex', function () {

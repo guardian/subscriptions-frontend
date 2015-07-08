@@ -1,3 +1,12 @@
+/* ==========================================================================
+   Forms
+   ========================================================================== */
+
+/**
+ * Inherits from pasteup forms
+ */
+@import '../bower_components/pasteup-forms/src/_forms';
+
 input[readonly] {
   background-color: $c-neutral7;
   color: $c-neutral2;
@@ -25,6 +34,34 @@ input[readonly] {
 
 .form-note--underneath {
   margin-top: rem($gs-baseline / 2);
+}
+
+.fieldset {
+    position: relative;
+}
+
+.fieldset__edit {
+    position: absolute;
+    top: $gs-baseline;
+    right: $gs-gutter;
+    text-transform: lowercase;
+    @include fs-textSans(1);
+}
+
+.fieldset--collapsed {
+    .fieldset__note,
+    .fieldset__fields {
+        display: none;
+    }
+}
+
+.form-field__error-message {
+    display: none;
+}
+.form-field--error {
+    .form-field__error-message {
+        display: block;
+    }
 }
 
 /* ==========================================================================
