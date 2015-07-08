@@ -1,5 +1,7 @@
 $guss-webfonts-base-url: '//pasteup.guim.co.uk/fonts/';
 
+@import '../bower_components/guss-webfonts/_webfonts.scss';
+
 @include guss-webfonts(
     (
         'Guardian Text Egyptian Web': (
@@ -20,44 +22,3 @@ $guss-webfonts-base-url: '//pasteup.guim.co.uk/fonts/';
         )
     )
 );
-
-/* Get base font size and line height */
-@include guss-typography-defaults;
-
-html {
-    font-family: $f-serif-headline;
-}
-
-body {
-    color: $c-body;
-}
-
-h1, h2, h3, h4, h5, h6 {
-    color: $c-body;
-    font-weight: 500;
-}
-
-p {
-    margin-top: 0;
-    margin-bottom: ($gs-baseline/3)*2;
-}
-
-a {
-    color: $c-link;
-    text-decoration: none;
-    border-bottom: 1px solid $c-neutral4;
-
-    &:hover,
-    &:focus {
-        border-color: $c-link-hover
-    }
-
-    &:active {
-        color: $c-link-active;
-        border-color: $c-link-active;
-    }
-}
-
-strong {
-    font-weight: 900;
-}
