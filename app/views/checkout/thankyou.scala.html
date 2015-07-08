@@ -54,35 +54,27 @@
             <p>Enter a password to finish creating your account:</p>
             <form action="@processFinishAccount" method="POST" class="form">
                 @helper.CSRF.formField
-                <fieldset class="fieldset">
-                    <div class="fieldset__fields">
-                        <div class="form-field js-checkout-finish-account-password">
-                            <input name="@userIdParam" type="hidden" value="@form.data.get(userIdParam)">
-                            <input name="@identityTokenParam" type="hidden" value="@form.data.get(identityTokenParam)">
-                            <label class="label" for="last">Password</label>
-                            <input class="input-text js-input js-password-strength"
-                                   name="password"
-                                   type="password"
-                                   autocapitalize="off"
-                                   autocorrect="off"
-                                   spellcheck="false"
-                                   minlength="6"
-                                   maxlength="20"
-                                   value=""
-                                   required />
+                <div class="form-field js-checkout-finish-account-password">
+                    <input name="@userIdParam" type="hidden" value="@form.data.get(userIdParam)">
+                    <input name="@identityTokenParam" type="hidden" value="@form.data.get(identityTokenParam)">
+                    <label class="label" for="last">Password</label>
+                    <input class="input-text js-input js-password-strength"
+                           name="password"
+                           type="password"
+                           autocapitalize="off"
+                           autocorrect="off"
+                           spellcheck="false"
+                           minlength="6"
+                           maxlength="20"
+                           value=""
+                           required />
 
-                            @checkout.errorMessage("Password too short")
-                        </div>
-                        <div class="password-strength-indicator score-null is-off is-hidden js-on js-password-strength-indicator">
-                            <div class="form-note form-note--right form-note--underneath js-password-strength-label">
-                                Password strength
-                            </div>
-                        </div>
-                        <div class="actions">
-                            <button class="button button--primary button--large js-checkout-finish-account-submit">Confirm</button>
-                        </div>
-                    </div>
-                </fieldset>
+                    @checkout.errorMessage("Password too short")
+                </div>
+                @fragments.forms.passwordStrengthIndicator()
+                <div class="actions">
+                    <button class="button button--primary button--large js-checkout-finish-account-submit">Confirm</button>
+                </div>
             </form>
         }
 
