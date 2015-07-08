@@ -23,8 +23,8 @@ class IdentityService(identityApiClient: IdentityApiClient) extends LazyLogging 
       (response.json \ "user" \ "id").asOpt[String].isDefined
     }
 
-  def userLookupByScGuU(cookieValue: String): Future[Option[IdUser]] =
-    identityApiClient.userLookupByScGuUCookie(cookieValue).map { response =>
+  def userLookupByScGuU(authCookie: AuthCookie): Future[Option[IdUser]] =
+    identityApiClient.userLookupByScGuUCookie(authCookie.value).map { response =>
       (response.json \ "user").asOpt[IdUser]
     }
 

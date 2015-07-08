@@ -90,6 +90,6 @@ object Checkout extends Controller with LazyLogging {
 
   private def getIdentityUserByCookie(request: Request[_]): Future[Option[IdUser]] =
     request.cookies.find(_.name == "SC_GU_U").fold(Future.successful(None: Option[IdUser])) { cookie =>
-      IdentityService.userLookupByScGuU(cookie.value)
+      IdentityService.userLookupByScGuU(AuthCookie(cookie.value))
     }
 }
