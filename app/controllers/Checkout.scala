@@ -4,6 +4,7 @@ import actions.CommonActions._
 import com.gu.identity.play.{IdUser, PrivateFields}
 import com.typesafe.scalalogging.LazyLogging
 import forms.{FinishAccountForm, SubscriptionsForm}
+import model.PersonalData
 import play.api.libs.json._
 import play.api.mvc._
 import services.CheckoutService
@@ -30,10 +31,10 @@ object Checkout extends Controller with LazyLogging {
           idUserData("personal.last", _.secondName) ++
           idUserOpt.map("personal.emailValidation.email" -> _.primaryEmailAddress) ++
           idUserOpt.map("personal.emailValidation.confirm" -> _.primaryEmailAddress) ++
-          idUserData("personal.address.address1", _.address1) ++
-          idUserData("personal.address.address2", _.address2) ++
-          idUserData("personal.address.town", _.address3) ++
-          idUserData("personal.address.postcode", _.postcode)
+          idUserData("personal.address.address1", _.billingAddress1) ++
+          idUserData("personal.address.address2", _.billingAddress2) ++
+          idUserData("personal.address.town", _.billingAddress3) ++
+          idUserData("personal.address.postcode", _.billingPostcode)
         ).toMap
       )
 
@@ -47,12 +48,13 @@ object Checkout extends Controller with LazyLogging {
         for (idUserOpt <- getIdentityUserByCookie(request))
           yield BadRequest(views.html.checkout.payment(formWithErrors, userIsSignedIn = idUserOpt.isDefined))
       },
-      userData => {
+      subscriptionData => {
         val idUserOpt = AuthenticationService.authenticatedUserFor(request)
-        CheckoutService.processSubscription(userData, idUserOpt).map {
+        CheckoutService.processSubscription(subscriptionData, idUserOpt).map {
           case CheckoutResult(_, guestUser: GuestUser, _) =>
             Some(FinishAccountForm().bind(guestUser.toFormParams))
-          case CheckoutResult(_, _:MinimalIdUser, _) =>
+          case CheckoutResult(_, registeredUser:MinimalIdUser, _) =>
+            updateStoredRegisteredUserDetails(subscriptionData.personalData, registeredUser.id, request.cookies.find(_.name == "SC_GU_U"))
             None
         }.map(formOpt => Ok(views.html.checkout.thankyou(formOpt)))
       }
@@ -82,6 +84,9 @@ object Checkout extends Controller with LazyLogging {
       doesUserExist <- IdentityService.doesUserExist(email)
     } yield Ok(Json.obj("emailInUse" -> doesUserExist))
   }
+
+  def updateStoredRegisteredUserDetails(personalData: PersonalData, userId: UserId, authCookie: Option[Cookie]): Unit =
+    authCookie.foreach(cookie => IdentityService.updateUserDetails(personalData, userId, AuthCookie(cookie.value)))
 
   private def getIdentityUserByCookie(request: Request[_]): Future[Option[IdUser]] =
     request.cookies.find(_.name == "SC_GU_U").fold(Future.successful(None: Option[IdUser])) { cookie =>

@@ -43,12 +43,12 @@ class IdentityService(identityApiClient: IdentityApiClient) extends LazyLogging 
     }
   }
 
-  def updateUserDetails(personalData: PersonalData, userId: UserId): Future[Unit] = 
+  def updateUserDetails(personalData: PersonalData, userId: UserId, authCookie: AuthCookie): Future[Unit] =
     identityApiClient.updateUserDetails(
       JsObject(Map("privateFields" -> personalData.convertToPrivateFields())), 
-      userId.id)
+      userId,
+      authCookie)
     .map(_ => Unit)
-
 }
 
 object IdentityService extends IdentityService(IdentityApiClient) {
@@ -85,7 +85,7 @@ trait IdentityApiClient {
 
   def userLookupByEmail: String => Future[WSResponse]
 
-  def updateUserDetails: (JsValue, String) => Future[WSResponse]
+  def updateUserDetails: (JsValue, UserId, AuthCookie) => Future[WSResponse]
 }
 
 object IdentityApiClient extends IdentityApiClient with LazyLogging {
@@ -170,10 +170,10 @@ object IdentityApiClient extends IdentityApiClient with LazyLogging {
       .withCloudwatchMonitoringOfPut
   }
 
-  override val updateUserDetails: (JsValue, String) => Future[WSResponse] = { (userJson, userId) =>
-    val endpoint = authoriseCall(WS.url(s"$identityEndpoint/user/$userId"))
+  override val updateUserDetails: (JsValue, UserId, AuthCookie) => Future[WSResponse] = { (userJson, userId, authCookie) =>
+    val endpoint = authoriseCall(WS.url(s"$identityEndpoint/user/${userId.id}"))
 
-    endpoint.post(userJson)
+    endpoint.withHeaders(("X-GU-ID-FOWARDED-SC-GU-U", authCookie.value)).post(userJson)
       .withWSFailureLogging(endpoint)
       .withCloudwatchMonitoringOfPost
   }
