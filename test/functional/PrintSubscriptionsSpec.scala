@@ -2,7 +2,6 @@ package functional
 
 import java.net.URL
 
-import controllers.routes.Shipping.{viewCollectionPaper, viewCollectionPaperDigital, viewDeliveryPaperDigital, viewDeliveryPaper}
 import functional.pages.{Home, SubscriptionPlan}
 import org.openqa.selenium.WebDriver
 import org.scalatest._
@@ -22,10 +21,10 @@ class PrintSubscriptionsSpec extends FreeSpec with ShouldMatchers with WebBrowse
   implicit lazy val driver: WebDriver = Config.driver
 
   val testData = Seq(
-    SubscriptionTest.collection(viewCollectionPaper.toString, "Paper voucher subscription"),
-    SubscriptionTest.collection(viewCollectionPaperDigital.toString, "Paper + digital voucher subscription"),
-    SubscriptionTest.delivery(viewDeliveryPaper.toString, "Paper home delivery subscription"),
-    SubscriptionTest.delivery(viewDeliveryPaperDigital.toString, "Paper + digital home delivery subscription")
+    SubscriptionTest.collection("/collection/paper", "Paper voucher subscription"),
+    SubscriptionTest.collection("/collection/paper-digital", "Paper + digital voucher subscription"),
+    SubscriptionTest.delivery("/delivery/paper", "Paper home delivery subscription"),
+    SubscriptionTest.delivery("/delivery/paper-digital", "Paper + digital home delivery subscription")
   )
 
   "Lucrative subscriptions" - {
