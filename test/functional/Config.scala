@@ -15,8 +15,8 @@ object Config {
   val appUrl = conf.getString("subscriptions.url")
 
   lazy val driver: WebDriver = {
-    Try { conf.getString("webDriverRemoteUrl") }.toOption.map { urlS =>
-      new RemoteWebDriver(new URL(urlS), defaultCapabilities)
+    Try { new URL(conf.getString("webDriverRemoteUrl")) }.toOption.map { url =>
+      new RemoteWebDriver(url, defaultCapabilities)
     }.getOrElse {
       new ChromeDriver()
     }
