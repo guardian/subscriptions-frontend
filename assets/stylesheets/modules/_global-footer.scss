@@ -1,0 +1,39 @@
+/* ==========================================================================
+   Footer
+   ========================================================================== */
+
+.global-brandbar {
+    background-color: $c-brand;
+
+    > .gs-container {
+        background-color: $c-brand-dark;
+    }
+
+    .action {
+        border: none;
+        color: $c-white;
+        @include font-size(14px, 36px);
+        text-decoration: none;
+        text-transform: lowercase;
+    }
+}
+
+.global-footer {
+    @include fs-textSans(3);
+    background-color: $c-neutral5;
+    color: $c-body;
+    padding: $gs-baseline*2 $gs-gutter;
+
+    a {
+        color: inherit;
+        border: none;
+        text-decoration: underline;
+    }
+
+    .really-serious-copyright {
+        @include fs-textSans(1);
+        border-top: 1px solid $c-neutral3;
+        margin-top: $gs-baseline*1.5;
+        padding-top: $gs-baseline;
+    }
+}

@@ -80,14 +80,12 @@
     font-weight: 900;
 }
 
-
 /* Review Details
    ========================================================================== */
+// TODO: Refactor
 
-.review-details--bg {
-    background: $c-neutral8;
-    border-top: 1px solid $c-neutral5;
-    padding: $gs-gutter/2;
+.review-details {
+    // Root element
 }
 .review-details__heading {
     @include fs-bodyHeading(2);
@@ -108,4 +106,39 @@
 .review-details__detail {
     display: inline-block;
     width: gs-span(2);
+}
+
+/* ==========================================================================
+   Review Panel
+   ========================================================================== */
+
+.review-panel {
+    @include fs-bodyCopy(2);
+    background: $c-neutral7;
+    border-top: 1px solid $c-border;
+    padding: $gs-gutter / 2;
+}
+.review-panel__item {
+    padding-bottom: $gs-baseline;
+
+    @include mq(tablet) {
+        display: table;
+        width: 100%
+    }
+}
+.review-panel__label,
+.review-panel__details {
+    @include mq(tablet) {
+        display: table-cell;
+        vertical-align: top;
+    }
+}
+.review-panel__label {
+    font-weight: bold;
+
+    @include mq(tablet) {
+        text-align: right;
+        padding-right: $gs-gutter;
+        width: gs-span(3);
+    }
 }

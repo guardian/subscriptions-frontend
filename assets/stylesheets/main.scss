@@ -31,11 +31,17 @@
    MODULES
    ========================================================================== */
 
-@import 'modules/global';
+@import 'modules/global-header';
+@import 'modules/global-navigation';
+@import 'modules/global-footer';
+@import 'modules/prose';
+@import 'modules/page';
+@import 'modules/blocks';
+@import 'modules/sections';
 @import 'modules/icons';
 @import 'modules/forms';
-@import 'modules/blocks';
 @import 'modules/buttons';
 @import 'modules/packages';
 @import 'modules/digital';
 @import 'modules/checkout';
+@import 'modules/membership';

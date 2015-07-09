@@ -1,0 +1,28 @@
+/* ==========================================================================
+   Global Navigation
+   ========================================================================== */
+
+.global-nav {
+    @include fs-headline(2);
+    font-weight: guss-font-weight('medium');
+    background-color: $c-brand-mid;
+}
+.global-nav__inner {
+    background-color: $c-brand-dark;
+}
+// [1] Reset default link border
+// [2] Semi-magic numbers, optical rather than uniform alignment
+.global-nav__link {
+    color: $c-white;
+    display: inline-block;
+    border: none; // [1]
+    padding: 8px 0 6px; // [2]
+    margin-right: $gs-gutter;
+    text-transform: lowercase;
+
+    &:hover,
+    &:focus,
+    &:active {
+        text-decoration: underline;
+    }
+}

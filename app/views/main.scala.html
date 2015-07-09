@@ -20,7 +20,8 @@
     @fragments.javascriptFirstSteps(jsVars)
 </head>
     <body class="@bodyClasses.mkString(" ")">
-        @fragments.header()
+        @fragments.global.header()
+        @fragments.global.navigation()
 
         @content
 
