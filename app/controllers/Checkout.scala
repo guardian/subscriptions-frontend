@@ -55,8 +55,6 @@ object Checkout extends Controller with LazyLogging {
             //TODO when implementing test-users this requires updating to supply data to correct location
             val touchpointBackend = TouchpointBackend.Normal
             val ratePlans = touchpointBackend.ratePlans.filter(_.product == ProductPlan.Digital)
-            println("form with errors")
-            println(formWithErrors)
             BadRequest(views.html.checkout.payment(formWithErrors, userIsSignedIn = idUserOpt.isDefined, ratePlans))
           }
       },
