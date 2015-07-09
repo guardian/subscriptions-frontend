@@ -10,14 +10,15 @@
 .global-nav__inner {
     background-color: $c-brand-dark;
 }
-// [1] Optical rather than uniform alignment
-// [2] Reset default link border
+// [1] Reset default link border
+// [2] Semi-magic numbers, optical rather than uniform alignment
 .global-nav__link {
     color: $c-white;
     display: inline-block;
-    margin: 0 $gs-gutter 0 0;
-    padding: 8px 0 6px; // [1]
-    border: none; // [2]
+    border: none; // [1]
+    padding: 8px 0 6px; // [2]
+    margin-right: $gs-gutter;
+    text-transform: lowercase;
 
     &:hover,
     &:focus,
