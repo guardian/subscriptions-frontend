@@ -101,24 +101,24 @@
                         </div>
                         <div class="js-checkout-full-address">
                             <div class="form-field js-checkout-house">
-                                <label class="label" for="house">Address line 1</label>
-                                <input type="text" class="input-text js-input" name="personal.address.address1" value="@form.data.get("personal.address.address1")">
+                                <label class="label" for="address-line-1">Address line 1</label>
+                                <input type="text" class="input-text js-input" id="address-line-1" name="personal.address.address1" value="@form.data.get("personal.address.address1")">
                                 @checkout.errorMessage("This field is required")
                             </div>
                             <div class="form-field js-checkout-street">
-                                <label class="label" for="street">Address line 2</label>
-                                <input type="text" class="input-text js-input" name="personal.address.address2" value="@form.data.get("personal.address.address2")">
+                                <label class="label optional-marker" for="address-line-2">Address line 2</label>
+                                <input type="text" class="input-text js-input" id="address-line-2" name="personal.address.address2" value="@form.data.get("personal.address.address2")">
                                 @checkout.errorMessage("This field is required")
                             </div>
                             <div class="form-field js-checkout-town">
-                                <label class="label" for="town">Town/City</label>
-                                <input type="text" class="input-text js-input" name="personal.address.town" value="@form.data.get("personal.address.town")">
+                                <label class="label" for="address-town">Town/City</label>
+                                <input type="text" class="input-text js-input" id="address-town" name="personal.address.town" value="@form.data.get("personal.address.town")">
                                 @checkout.errorMessage("This field is required")
                             </div>
                         </div>
                         <div class="form-field js-checkout-postcode">
-                            <label class="label" for="postcode">Postcode</label>
-                            <input type="text" class="input-text js-input input-text input-text--small" name="personal.address.postcode" value="@form.data.get("personal.address.postcode")">
+                            <label class="label" for="address-postcode">Postcode</label>
+                            <input type="text" class="input-text js-input input-text input-text--small" id="address-postcode" name="personal.address.postcode" value="@form.data.get("personal.address.postcode")">
                             @checkout.errorMessage("Please enter a valid postal code")
                         </div>
                         <div class="form-field">
