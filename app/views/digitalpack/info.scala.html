@@ -1,19 +1,55 @@
 @(edition: DigitalEdition)
 
+@containerTitle(title: String) = {
+    <div class="page-heading page-heading--border dp-container__header">
+        <h2 class="dp-container__header__title">@title</h2>
+    </div>
+}
+
+@startTrial(edition: DigitalEdition) = {
+    <div class="gs-container dp-container">
+        <div class="dp-container__header">&nbsp;</div>
+        <div class="dp-container__body">
+            <div class="row digital-cta">
+                <div>
+                    <div class="digital-cta__price">
+                        <strong class="digital-cta__promo">Free for 14 days</strong>
+                    </div>
+                    <div class="digital-cta__payment">Then @edition.price/month</div>
+                </div>
+                <div class="digital-cta__button">
+                    <a class="button button--large button--primary" href="https://www.guardiansubscriptions.co.uk/digitalsubscriptions/?prom=DGA38&CMP=@edition.cmp" data-test-id="digital-pack-@edition.id-trial-header">Start your free trial</a>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@showMoreBtn(setName: String) = {
+    <button class="mobile-only button button--show-more js-show-more-button" data-toggle-set="@setName">
+        <span class="inline-plus inline-icon"><svg width="24" height="24" viewBox="-0.5 0.5 24 24"><path d="M10.682 3.5h1.636l.41 7.773 7.772.408v1.638l-7.77.41-.413 7.772H10.68l-.407-7.77-7.773-.412V11.68l7.773-.407.41-7.773z"></path></svg></span>
+        <span class="inline-minus inline-icon"><svg width="24" height="24" viewBox="0 0 32 32"><path d="M5 15h22v3H5z"></path></svg></span>
+        <span class="inline-plus inline-text">More</span>
+        <span class="inline-minus inline-text">Less</span>
+    </button>
+}
+
 @main(
     title = if(edition.id == "uk") "Digital | Subscriptions | The Guardian" else s"Digital - ${edition.name} | Subscriptions | The Guardian",
-    bodyClasses = List("digital-pack")) {
+    bodyClasses = List("digital-pack")
+) {
+
 <div class="gs-container dp-container">
-    @fragments.container.container_title(" ")
+    @containerTitle(" ")
     <div class="dp-container__body dp-container__body--main">
         @fragments.page.header("Digital Pack", Some("Digital access to our Daily Edition and Guardian App Premium Tier"))
     </div>
 </div>
 
-@digitalpack.start_trial(edition)
+@startTrial(edition)
 
 <div class="gs-container dp-container">
-    @fragments.container.container_title("What do I get?")
+    @containerTitle("What do I get?")
 
     <div class="dp-container__body dp-container__body--main">
         <div class="dp-edition">
@@ -37,7 +73,7 @@
                     </div>
                 </div>
             </div>
-            @digitalpack.show_more_btn("more-daily-edition-benefits")
+            @showMoreBtn("more-daily-edition-benefits")
         </div>
 
         <div class="dp-edition">
@@ -60,16 +96,16 @@
                             <div>Breaking news alerts, customised home screen and commenting</div></div>
                     </div>
                 </div>
-                @digitalpack.show_more_btn("more-premium-benefits")
+                @showMoreBtn("more-premium-benefits")
             </div>
         </div>
     </div>
 </div>
 
-@digitalpack.start_trial(edition)
+@startTrial(edition)
 
 <div class="gs-container dp-container">
-    @fragments.container.container_title("Why subscribe?")
+    @containerTitle("Why subscribe?")
 
     <div class="dp-container__body dp-container__body--main">
         <ul class="dp-row dp-row--items-3 no-bullets">
@@ -90,7 +126,7 @@
 </div>
 
 <div class="gs-container dp-container">
-    @fragments.container.container_title("How do I get it?")
+    @containerTitle("How do I get it?")
 
     <div class="dp-container__body dp-container__body--main">
         <ul class="dp-row dp-row--items-3 no-bullets">
@@ -110,7 +146,7 @@
     </div>
 </div>
 
-@digitalpack.start_trial(edition)
+@startTrial(edition)
 
 @fragments.analytics.affectv_digitalpack()
 
