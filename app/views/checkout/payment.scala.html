@@ -1,8 +1,10 @@
-@(form: Form[model.SubscriptionData], userIsSignedIn: Boolean)(implicit request: RequestHeader)
+@(form: Form[model.SubscriptionData], userIsSignedIn: Boolean, digitalProductRatePlans: Seq[touchpoint.ProductRatePlan])(implicit request: RequestHeader)
 
 @import model.JsVars
 @import routes.Checkout.renderCheckout
 @import configuration.Config.Identity._
+@import touchpoint.BillingFrequency
+
 
 @readonly = @{ if (userIsSignedIn) "readonly" else "" }
 
@@ -56,6 +58,21 @@
             <form class="form js-checkout-form" method="POST">
                 <fieldset class="fieldset js-fieldset-your-details">
                     @helper.CSRF.formField
+
+                    <div class="basket-select-payment__option">
+                        <select name="ratePlanId" id="payment-option" >
+
+                            @digitalProductRatePlans.find(_.frequency == BillingFrequency.Monthly).map { p =>
+                                <option value="@{p.ratePlanId}" selected>£@{p.price} every month</option>
+                            }
+                            @digitalProductRatePlans.find(_.frequency == BillingFrequency.Quarterly).map { p =>
+                                <option value="@{p.ratePlanId}">£@{p.price} every 3 months</option>
+                            }
+                            @digitalProductRatePlans.find(_.frequency == BillingFrequency.Annual).map { p =>
+                                <option value="@{p.ratePlanId}">£@{p.price} every 12 months. Save £23.98</option>
+                            }
+                        </select>
+                    </div>
 
                     <div class="fieldset__heading">
                         <h2 class="fieldset__headline">

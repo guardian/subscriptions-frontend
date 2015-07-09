@@ -7,4 +7,4 @@ case class AddressData(address1: String, address2: String, town: String, postcod
 
 case class PersonalData(firstName: String, lastName: String, email: String, address: AddressData)
 
-case class SubscriptionData(personalData: PersonalData, paymentData: PaymentData)
+case class SubscriptionData(personalData: PersonalData, paymentData: PaymentData, ratePlanId: String)

@@ -8,7 +8,9 @@ import play.api.libs.json._
 import play.api.mvc._
 import services.CheckoutService
 import services.CheckoutService.CheckoutResult
+import services.TouchpointBackend._
 import services._
+import touchpoint.ProductPlan
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -37,7 +39,11 @@ object Checkout extends Controller with LazyLogging {
         ).toMap
       )
 
-      Ok(views.html.checkout.payment(form, userIsSignedIn = idUserOpt.isDefined))
+      //TODO when implementing test-users this requires updating to supply data to correct location
+      val touchpointBackend = TouchpointBackend.Normal
+      val ratePlans = touchpointBackend.ratePlans.filter(_.product == ProductPlan.Digital)
+
+      Ok(views.html.checkout.payment(form, userIsSignedIn = idUserOpt.isDefined, ratePlans))
     }
   }
 
@@ -45,7 +51,14 @@ object Checkout extends Controller with LazyLogging {
     SubscriptionsForm().bindFromRequest.fold(
       formWithErrors => {
         for (idUserOpt <- getIdentityUserByCookie(request))
-          yield BadRequest(views.html.checkout.payment(formWithErrors, userIsSignedIn = idUserOpt.isDefined))
+          yield {
+            //TODO when implementing test-users this requires updating to supply data to correct location
+            val touchpointBackend = TouchpointBackend.Normal
+            val ratePlans = touchpointBackend.ratePlans.filter(_.product == ProductPlan.Digital)
+            println("form with errors")
+            println(formWithErrors)
+            BadRequest(views.html.checkout.payment(formWithErrors, userIsSignedIn = idUserOpt.isDefined, ratePlans))
+          }
       },
       userData => {
         val idUserOpt = AuthenticationService.authenticatedUserFor(request)

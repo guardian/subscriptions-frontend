@@ -58,16 +58,17 @@ object BillingFrequency {
 case class ProductRatePlan(
   product: ProductPlan,
   frequency: BillingFrequency,
-  ratePlanId: String
+  ratePlanId: String,
+  price: Double
 )
 
 object ProductRatePlan {
   def apply(config: com.typesafe.config.Config): Seq[ProductRatePlan] = {
     val digitalConfig = config.getConfig("zuora.digital")
     Seq(
-      ProductRatePlan(Digital, Monthly , digitalConfig.getString("monthly")),
-      ProductRatePlan(Digital, Quarterly, digitalConfig.getString("quarterly")),
-      ProductRatePlan(Digital, Annual, digitalConfig.getString("annual"))
+      ProductRatePlan(Digital, Monthly , digitalConfig.getString("monthly.id"), digitalConfig.getDouble("monthly.price")),
+      ProductRatePlan(Digital, Quarterly, digitalConfig.getString("quarterly.id"), digitalConfig.getDouble("quarterly.price")),
+      ProductRatePlan(Digital, Annual, digitalConfig.getString("annual.id"), digitalConfig.getDouble("annual.price"))
     )
   }
 }
