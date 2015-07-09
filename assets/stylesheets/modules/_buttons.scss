@@ -10,10 +10,11 @@
 .button--large {
     cursor: pointer;
     @include font-size(14px, 34px);
-    min-width: 160px;
     padding-left: $gs-gutter;
     padding-right: $gs-gutter/4;
     text-align: left;
+    // TODO: Remove
+    min-width: 160px;
 
     &:after {
         @extend .icon-arrow-white;
@@ -34,6 +35,19 @@
     &:active {
         background-color: transparent;
         border-color: $c-brand;
+    }
+}
+
+.button--reversed {
+    @include button-colour(
+        $c-white,
+        guss-colour(news-main-1),
+        $c-neutral8
+    );
+
+    // TODO: Use SVG icons
+    &:after {
+        @extend .icon-arrow-blue;
     }
 }
 

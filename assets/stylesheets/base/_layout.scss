@@ -6,24 +6,32 @@
 
 // TODO: Should this be done with config, not just overriding??
 .gs-container {
+    @include clearfix();
+    @include container-padding();
     max-width: mq-get-breakpoint-width('desktop');
-    padding-left: $gs-gutter/2;
-    padding-right: $gs-gutter/2;
-
-    @include mq(tablet) {
-        padding-left: $gs-gutter;
-        padding-right: $gs-gutter;
-    }
 }
 
 /**
- * TODO: Combine with
+ * TODO: Combine with .gs-container
  * All pages should be wide
  */
 body.is-wide {
     .gs-container {
         max-width: mq-get-breakpoint-width('wide');
     }
+}
+/**
+ * TODO: Combine with .gs-container
+ * Container should not have padding,
+ * only width / layout.
+ */
+.gs-container--slim {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.l-padded {
+    @include container-padding();
 }
 
 // Setup rows
