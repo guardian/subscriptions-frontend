@@ -4,8 +4,11 @@
 
 @(jsVars: JsVars)
 
-<!--[if IE 9]>
-<script src="@hashedPathFor("javascripts/vendor/polyfills.min.js")"></script>
+<!--[if lte IE 9]>
+<script src="@hashedPathFor("javascripts/vendor/polyfills.js")"></script>
+<![endif]-->
+<!--[if lt IE 9]>
+<script src="@hashedPathFor("javascripts/vendor/html5shiv.js")"></script>
 <![endif]-->
 
 <script id="gu">
