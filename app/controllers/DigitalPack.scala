@@ -27,7 +27,7 @@ object DigitalPack extends Controller {
     Ok(views.html.digitalpack.info(DigitalEdition.AU))
   }
 
-  def selectCountry = CachedAction { implicit request =>
+  def selectCountry = NoCacheAction { implicit request =>
     Ok(views.html.digitalpack.country())
   }
 
