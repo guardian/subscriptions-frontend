@@ -1,43 +1,32 @@
 package controllers
 
 import actions.CommonActions._
-import com.gu.identity.play.{IdUser, PrivateFields}
+import com.gu.identity.play.IdUser
 import com.typesafe.scalalogging.LazyLogging
 import forms.{FinishAccountForm, SubscriptionsForm}
-import model.PersonalData
+import model.SubscriptionData
 import play.api.libs.json._
 import play.api.mvc._
 import services.CheckoutService.CheckoutResult
 import services.{CheckoutService, _}
 import views.html.{checkout => view}
 import configuration.Config.Identity.webAppProfileUrl
-
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 object Checkout extends Controller with LazyLogging {
+  def identityCookieOpt(implicit request: Request[_]): Option[Cookie] =
+    request.cookies.find(_.name == "SC_GU_U")
 
   def renderCheckout = GoogleAuthenticatedStaffAction.async { implicit request =>
-    for (idUserOpt <- getIdentityUserByCookie(request)) yield {
-      def idUserData(keyName: String, fieldName: PrivateFields => Option[String]): Option[(String, String)] =
-        for {
-          idUser <- idUserOpt
-          fields <- idUser.privateFields
-          field <- fieldName(fields)
-        } yield keyName -> field
-
-      val form = SubscriptionsForm().copy(
-        data = (
-          idUserData("personal.first", _.firstName) ++
-          idUserData("personal.last", _.secondName) ++
-          idUserOpt.map("personal.emailValidation.email" -> _.primaryEmailAddress) ++
-          idUserOpt.map("personal.emailValidation.confirm" -> _.primaryEmailAddress) ++
-          idUserData("personal.address.address1", _.billingAddress1) ++
-          idUserData("personal.address.address2", _.billingAddress2) ++
-          idUserData("personal.address.town", _.billingAddress3) ++
-          idUserData("personal.address.postcode", _.billingPostcode)
-        ).toMap
-      )
+    getIdentityUserByCookie.map { idUserOpt =>
+      val form = idUserOpt.map { idUser =>
+        val data = SubscriptionData.fromIdUser(idUser)
+        logger.debug(s"validation failed. Rendering data: $data")
+        SubscriptionsForm().fill(data)
+      } getOrElse {
+        SubscriptionsForm()
+      }
 
       Ok(views.html.checkout.payment(form, userIsSignedIn = idUserOpt.isDefined))
     }
@@ -46,13 +35,14 @@ object Checkout extends Controller with LazyLogging {
   def handleCheckout = GoogleAuthenticatedStaffAction.async { implicit request =>
     SubscriptionsForm().bindFromRequest.fold(
       formWithErrors => {
-        for (idUserOpt <- getIdentityUserByCookie(request))
-          yield BadRequest(view.payment(formWithErrors, userIsSignedIn = idUserOpt.isDefined))
+        getIdentityUserByCookie.map { idUserOpt =>
+          BadRequest(view.payment(formWithErrors, userIsSignedIn = idUserOpt.isDefined))
+        }
       },
 
       formData => {
         val idUserOpt = AuthenticationService.authenticatedUserFor(request)
-        val authCookie = request.cookies.find(_.name == "SC_GU_U").map(cookie => AuthCookie(cookie.value))
+        val authCookie = identityCookieOpt.map(cookie => AuthCookie(cookie.value))
 
         CheckoutService.processSubscription(formData, idUserOpt, authCookie).map { case CheckoutResult(_, userIdData, subscription) =>
           val passwordForm = userIdData.toGuestAccountForm
@@ -84,8 +74,8 @@ object Checkout extends Controller with LazyLogging {
     } yield Ok(Json.obj("emailInUse" -> doesUserExist))
   }
 
-  private def getIdentityUserByCookie(request: Request[_]): Future[Option[IdUser]] =
-    request.cookies.find(_.name == "SC_GU_U").fold(Future.successful(None: Option[IdUser])) { cookie =>
+  private def getIdentityUserByCookie(implicit request: Request[_]): Future[Option[IdUser]] =
+    identityCookieOpt.fold(Future.successful(None: Option[IdUser])) { cookie =>
       IdentityService.userLookupByScGuU(AuthCookie(cookie.value))
     }
 }
