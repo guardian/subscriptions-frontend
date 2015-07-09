@@ -14,7 +14,7 @@ object Home extends Page with WebBrowser {
     selectPlan( """*[data-test-id="subscriptions-uk-paper"]""")
 
   private def selectPlan(selector: String)(implicit d: WebDriver) = {
-    go.to(this)
+    if (currentUrl != url) go.to(this)
     clickOn(cssSelector(selector))
   }
 }

@@ -2,7 +2,7 @@ package functional
 
 import java.net.URL
 
-import functional.pages.{Home, SubscriptionPlan}
+import functional.pages.{DigitalPack, Home, SubscriptionPlan}
 import org.openqa.selenium.WebDriver
 import org.scalatest._
 import org.scalatest.selenium.WebBrowser
@@ -48,6 +48,21 @@ class PrintSubscriptionsSpec extends FreeSpec with ShouldMatchers with WebBrowse
       assert(pageHasText("You have chosen\nWEEKEND"), "document contains selected plan")
       assertResult("www.guardiansubscriptions.co.uk")(currentHost)
     }
+  }
+
+  "Digital Pack" - {
+    "selecting UK" taggedAs Acceptance in {
+      pending
+      DigitalPack.selectUK
+      assert(pageHasText("You have chosen:\nDigital pack"))
+    }
+
+    "selecting not UK" taggedAs Acceptance in {
+      pending
+      DigitalPack.selectNonUK
+      assertResult("www.guardiansubscriptions.co.uk")(currentHost)
+    }
+
   }
 
   private def currentHost: String = new URL(currentUrl).getHost
