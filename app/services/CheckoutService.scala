@@ -4,7 +4,8 @@ import com.gu.identity.play.IdMinimalUser
 import com.gu.membership.salesforce.MemberId
 import com.gu.membership.zuora.soap.Zuora.SubscribeResult
 import TouchpointBackend.{Normal => touchpointBackend}
-import touchpointBackend.ratePlan.{ratePlanId => ratePlan}
+import touchpoint.{ProductPlan, BillingFrequency}
+import touchpointBackend.ratePlans
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
 import model.SubscriptionData
@@ -29,11 +30,14 @@ class CheckoutService(identityService: IdentityService, salesforceService: Sales
         identityService.registerGuest(subscriptionData.personalData)
       }
 
+    val digitialMonthlyRatePlan = ratePlans.find( r => r.frequency == BillingFrequency.Monthly && r.product == ProductPlan.Digital)
+
     //TODO when implementing test-users this requires updating to supply data to correct location
     for {
       userData <- userOrElseRegisterGuest
       memberId <- salesforceService.createOrUpdateUser(subscriptionData.personalData, userData.id)
-      subscribeResult <- touchpointBackend.zuoraService.createSubscription(memberId, subscriptionData, ratePlan, paymentDelay)
+      subscribeResult <- touchpointBackend.zuoraService.createSubscription(memberId, subscriptionData,
+        digitialMonthlyRatePlan.get.ratePlanId, paymentDelay)
     } yield CheckoutResult(memberId, userData, subscribeResult)
   }
 }

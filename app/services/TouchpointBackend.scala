@@ -13,7 +13,7 @@ object TouchpointBackend {
   def apply(touchpointBackendConfig: TouchpointBackendConfig): TouchpointBackend = {
 
     val zuoraService = new ZuoraService(touchpointBackendConfig.zuora)
-    
+
     val salesforceRepo = new SalesforceRepo(touchpointBackendConfig.salesforce)
 
     val ratePlan = touchpointBackendConfig.productRatePlan
@@ -29,7 +29,7 @@ object TouchpointBackend {
 case class TouchpointBackend(
   salesforceRepo: SalesforceRepo,
   zuoraService : ZuoraService,
-  ratePlan: ProductRatePlan) {
+  ratePlans: Seq[ProductRatePlan]) {
 
   def start() = {
     salesforceRepo.salesforce.authTask.start()

@@ -3,9 +3,10 @@ package touchpoint
 import com.gu.membership.salesforce.SalesforceConfig
 import com.gu.membership.zuora.ZuoraApiConfig
 import com.typesafe.scalalogging.LazyLogging
-import touchpoint.Product.Digital
+import touchpoint.BillingFrequency.{Annual, Quarterly, Monthly}
+import touchpoint.ProductPlan.Digital
 
-case class TouchpointBackendConfig(salesforce: SalesforceConfig, zuora: ZuoraApiConfig, productRatePlan: ProductRatePlan)
+case class TouchpointBackendConfig(salesforce: SalesforceConfig, zuora: ZuoraApiConfig, productRatePlan: Seq[ProductRatePlan])
 
 object TouchpointBackendConfig extends LazyLogging {
 
@@ -41,17 +42,33 @@ object TouchpointBackendConfig extends LazyLogging {
   }
 }
 
-object Product {
-  case object Digital
+sealed abstract class ProductPlan
+object ProductPlan {
+  case object Digital extends ProductPlan
 }
 
+sealed abstract class BillingFrequency
+object BillingFrequency {
+  case object Monthly extends BillingFrequency
+  case object Quarterly extends BillingFrequency
+  case object Annual extends BillingFrequency
+}
+
+
 case class ProductRatePlan(
-  product: Product,
+  product: ProductPlan,
+  frequency: BillingFrequency,
   ratePlanId: String
 )
 
 object ProductRatePlan {
-  def apply(config: com.typesafe.config.Config): ProductRatePlan = {
-    ProductRatePlan(Digital , config.getString("zuora.digital.monthly"))
+  def apply(config: com.typesafe.config.Config): Seq[ProductRatePlan] = {
+    val digitalConfig = config.getConfig("zuora.digital")
+    Seq(
+      ProductRatePlan(Digital, Monthly , digitalConfig.getString("monthly")),
+      ProductRatePlan(Digital, Quarterly, digitalConfig.getString("quarterly")),
+      ProductRatePlan(Digital, Annual, digitalConfig.getString("annual"))
+    )
   }
 }
+
