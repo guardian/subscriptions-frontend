@@ -18,6 +18,7 @@ $c-brand: guss-colour(guardian-brand);
 $c-brand-mid: #005083;
 $c-brand-dark: guss-colour(guardian-brand-dark);
 $c-membership: guss-colour(news-main-2);
+$c-membership-higlight: #fcbb2d;
 
 $c-neutral1: guss-colour('neutral-1');
 $c-neutral2: guss-colour('neutral-2');
@@ -29,6 +30,7 @@ $c-neutral8: guss-colour('neutral-8');
 
 $c-bg: #f4f4f4;
 $c-body: $c-neutral1;
+$c-border: $c-neutral4;
 $c-link: $c-brand;
 $c-link-hover: #6e99b2;
 $c-link-active: $c-membership;

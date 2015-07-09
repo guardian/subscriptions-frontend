@@ -34,7 +34,12 @@ libraryDependencies ++= Seq(
   "com.github.nscala-time" %% "nscala-time" % "2.0.0",
   "net.kencochrane.raven" % "raven-logback" % "6.0.0",
   "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0",
-  "org.scalatest" %% "scalatest" % "2.2.4" % "test"
+  "org.scalatest" %% "scalatest" % "2.2.4" % "test",
+  "org.seleniumhq.selenium" % "selenium-java" % "2.44.0" % "test"
+)
+
+testOptions in Test ++= Seq(
+  Tests.Argument("-oFD") // display full stack errors and execution times in Scalatest output
 )
 
 javaOptions in Test += "-Dconfig.file=test/conf/application.conf"
@@ -45,5 +50,7 @@ resolvers ++= Seq(
   Resolver.sonatypeRepo("releases"))
 
 addCommandAlias("devrun", "run -Dconfig.resource=DEV.conf 9200")
+addCommandAlias("fast-test", "testOnly -- -l Acceptance")
+addCommandAlias("acceptance-test", "testOnly -- -n Acceptance")
 
 playArtifactDistSettings

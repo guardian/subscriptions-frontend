@@ -18,7 +18,6 @@ define([
         {input: form.$FIRST_NAME, container: form.$FIRST_NAME_CONTAINER},
         {input: form.$LAST_NAME, container: form.$LAST_NAME_CONTAINER},
         {input: form.$ADDRESS1, container: form.$ADDRESS1_CONTAINER},
-        {input: form.$ADDRESS2, container: form.$ADDRESS2_CONTAINER},
         {input: form.$ADDRESS3, container: form.$ADDRESS3_CONTAINER},
         {input: form.$POSTCODE, container: form.$POSTCODE_CONTAINER}
     ];

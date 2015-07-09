@@ -49,10 +49,6 @@
     display: inline-block !important;
 }
 
-.break {
-    display: block;
-}
-
 .break-tablet {
     @include mq(tablet) {
         display: block;

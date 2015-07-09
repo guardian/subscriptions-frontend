@@ -1,0 +1,46 @@
+/* ==========================================================================
+   Page Modules
+   ========================================================================== */
+
+/* Page Header
+   ========================================================================== */
+
+.page-header {
+    padding-top: $gs-baseline/2;
+    margin-bottom: $gs-baseline*2;
+
+    @include mq(tablet) {
+        margin-bottom: $gs-baseline*4;
+    }
+}
+.page-header__title {
+    @include fs-headline(6);
+    margin-bottom: 0;
+
+    @include mq(tablet) {
+        @include fs-headline(8, true);
+    }
+}
+.page-header__lead {
+    @include font-size(18px, 22px);
+    margin-bottom: $gs-baseline*1.5;
+
+    @include mq(tablet) {
+        @include font-size(22px, 26px);
+        max-width: gs-span(10);
+    }
+}
+
+/* Page Heading
+   ========================================================================== */
+
+// TOOD: Refactor
+.page-heading {
+    @include font-size(24px, 28px);
+    margin-bottom: $gs-baseline*2;
+}
+.page-heading--border {
+    border-top: 1px solid $c-neutral4;
+    padding-top: 8px;
+}
+
