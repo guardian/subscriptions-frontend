@@ -59,7 +59,7 @@
 
                     <div class="fieldset__heading">
                         <h2 class="fieldset__headline">
-                            <span class="fieldset__num">1</span> Your details
+                            <span class="fieldset__headline__num">1</span> Your details
                         </h2>
                         <div class="fieldset__note fieldset__note--offset">
                             @if(userIsSignedIn) {
@@ -123,18 +123,23 @@
                         </div>
                         <div class="form-field">
                             @*
-                                TODO: Clean up this markup, nested .checkbox
-                                Also, no values on checkboxes? Is this used yet?
+                                TODO: No values on checkboxes? Is this used yet?
                             *@
-                            <div class="checkbox">
+                            <h5 class="checkbox-title">
                                 I'd like to receive information about offers and developments from Guardian News &amp; Media Limited via:
-                                <label class="label">
-                                    <input type="checkbox"> Email
-                                </label>
-                                <label class="label">
-                                    <input type="checkbox"> Post
-                                </label>
-                            </div>
+                            </h5>
+                            <label class="checkbox">
+                                <span class="checkbox__input">
+                                    <input type="checkbox" class="js-input">
+                                </span>
+                                <span class="checkbox__label">Email</span>
+                            </label>
+                            <label class="checkbox">
+                                <span class="checkbox__input">
+                                    <input type="checkbox" class="js-input">
+                                </span>
+                                <span class="checkbox__label">Post</span>
+                            </label>
                         </div>
                         <div class="actions">
                             <button class="button button--primary button--large js-checkout-your-details-submit">Continue</button>
@@ -144,12 +149,14 @@
                 <fieldset class="fieldset fieldset--collapsed js-fieldset-payment-details">
                     <div class="fieldset__heading">
                         <h2 class="fieldset__headline">
-                            <span class="fieldset__num">2</span> Payment details
+                            <span class="fieldset__headline__num">2</span> Payment details
                         </h2>
-                        <p class="fieldset__note"><i class="icon-secure"></i> This site is secure</p>
-                        <div class="fieldset__note">Payment will be taken by Direct Debit</div>
+                        <div class="fieldset__note fieldset__note--offset">
+                            @fragments.forms.securityNote()
+                            Payment will be taken by Direct Debit
+                        </div>
                         <div class="fieldset__edit">
-                            <button class="text-button u-button-reset js-edit-payment-details is-hidden">Edit</button>
+                            <button class="button u-button-reset js-edit-payment-details is-hidden">Edit</button>
                         </div>
                     </div>
                     <div class="fieldset__fields">
@@ -160,9 +167,18 @@
                         </div>
                         <div class="form-field js-checkout-sortcode">
                             <label class="label" for="sortcode">Bank sort code</label>
-                            <input type="number" class="input-text js-input input-text input-text--xsmall js-checkout-sortcode1" max="99" name="payment.sortcode1"> -
-                            <input type="number" class="input-text js-input input-text input-text--xsmall js-checkout-sortcode2" max="99" name="payment.sortcode2"> -
-                            <input type="number" class="input-text js-input input-text input-text--xsmall js-checkout-sortcode3" max="99" name="payment.sortcode3">
+                            <input type="number"
+                                class="input-text input-text--xsmall js-input js-checkout-sortcode1"
+                                max="99" name="payment.sortcode1"
+                            > -
+                            <input type="number"
+                                class="input-text input-text--xsmall js-input js-checkout-sortcode2"
+                                max="99" name="payment.sortcode2"
+                            > -
+                            <input type="number"
+                                class="input-text input-text--xsmall js-input js-checkout-sortcode3"
+                                max="99" name="payment.sortcode3"
+                            >
                             @checkout.errorMessage("Please enter 2 digits for each sort code field")
                         </div>
                         <div class="form-field js-checkout-holder">
@@ -172,13 +188,15 @@
                             @checkout.errorMessage("Please enter between 1 and 18 characters for the account holder name")
                         </div>
                         <div class="form-field js-checkout-confirm-payment">
-                            <div class="checkbox">
-                                <label class="label">
+                            <label class="checkbox">
+                                <span class="checkbox__input">
                                     <input type="checkbox" class="js-input">
+                                </span>
+                                <span class="checkbox__label">
                                     I confirm that I am the account holder and I am solely able to authorise debit from the account
-                                </label>
-                            </div>
-                            @checkout.errorMessage("Please confirm that you are the account holder by checking the checkbox above")
+                                </span>
+                            </label>
+                            @checkout.errorMessage("Please confirm that you are the account holder")
                         </div>
                         <div class="actions">
                             <button class="button button--primary button--large js-checkout-payment-details-submit">Continue</button>
@@ -188,7 +206,7 @@
                 <fieldset class="fieldset fieldset--single fieldset--collapsed js-fieldset-review">
                     <div class="fieldset__heading">
                         <h2 class="fieldset__headline">
-                            <span class="fieldset__num">3</span> Review and confirm
+                            <span class="fieldset__headline__num">3</span> Review and confirm
                         </h2>
                     </div>
                     <div class="fieldset__fields">

@@ -11,25 +11,32 @@
 [type=password] {
     font-family: sans-serif !important;
 }
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+input[type=number] {
+    -moz-appearance:textfield;
+}
 
 // Form
 // ============================================================================
 
 .form {
     margin-bottom: 0;
-    border-top: 1px solid $c-neutral5;
 }
 
 // Form Fieldset
 // ============================================================================
 
 .fieldset {
-    border: 0;
-    padding: 0;
-    margin: 0;
-    border-bottom: 1px solid $c-neutral5;
-    background-color: $c-neutral7;
     position: relative;
+    background-color: $c-neutral7;
+    margin: 0;
+    border: 0;
+    border-top: 1px solid $c-neutral5;
+    padding: ($gs-gutter / 2);
 
     @include mq(tablet) {
         display: table;
@@ -43,42 +50,41 @@
         vertical-align: top;
     }
 }
-
+.fieldset__fields {
+    padding-bottom: ($gs-baseline * 2);
+}
 .fieldset__heading {
-    padding: ($gs-baseline / 2) ($gs-baseline);
-
     @include mq(tablet) {
         width: 35%;
         padding-right: ($gs-gutter * 2);
-    }
-}
-.fieldset__fields {
-    padding: ($gs-gutter / 2) ($gs-gutter / 2) ($gs-baseline * 2);
-
-    @include mq(tablet) {
-        padding-left: 0;
     }
 }
 .fieldset__headline {
     @include fs-header(3);
     margin-bottom: $gs-baseline / 2;
 }
-.fieldset__num {
-    margin-right: $gs-gutter/4;
+.fieldset__headline__num {
     color: guss-colour(news-main-2);
+    display: inline-block;
+    width: $gs-gutter;
 }
 .fieldset__note {
     @include fs-textSans(2);
-    color: guss-colour(neutral-2);
+    color: $c-neutral2;
 }
 .fieldset__note__label {
     margin-left: .2em;
+
     @include mq(desktop) {
         display: block;
         margin-left: 0;
     }
 }
-
+.fieldset__note--offset {
+    // Semi-magic number
+    // Optical alignment with field headlins
+    padding-left: $gs-gutter + 3px;
+}
 .fieldset__edit {
     position: absolute;
     top: $gs-baseline;
@@ -104,6 +110,12 @@
     .fieldset__fields {
         display: none;
     }
+}
+
+.security-note {
+    @include fs-textSans(2);
+    color: $c-neutral2;
+    margin-bottom: $gs-baseline / 2;
 }
 
 // Form labels and inputs
@@ -152,22 +164,34 @@
     resize: vertical;
 }
 
+.checkbox,
+.checkbox-title {
+    @include fs-textSans(3);
+}
+.checkbox-title {
+    font-weight: guss-font-weight('regular');
+    margin-bottom: $gs-baseline / 2;
+}
+.checkbox {
+    cursor: pointer;
+    display: table;
+    width: 100%;
+}
+.checkbox__input,
+.checkbox__label {
+    display: table-cell;
+    vertical-align: top;
+}
+.checkbox__input {
+    width: 1em;
+    padding-right: .3em;
+}
+
 .select {
     font: inherit;
 }
 .select--wide {
     width: 100%;
-}
-
-// Checkbox
-// ============================================================================
-
-.checkbox {
-    @include fs-textSans(3);
-
-    .label {
-        font: inherit;
-    }
 }
 
 // Form field
