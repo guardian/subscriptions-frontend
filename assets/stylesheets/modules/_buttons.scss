@@ -80,3 +80,13 @@
         display: none;
     }
 }
+
+.text-button {
+    @include fs-data(3);
+    line-height: 1;
+    cursor: pointer;
+
+    &:hover {
+        text-decoration: underline;
+    }
+}
