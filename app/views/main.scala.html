@@ -10,7 +10,9 @@
 <head>
     @fragments.head(title, jsVars)
 </head>
-    <body class="@bodyClasses.mkString(" ")">
+    <body class="js-off @bodyClasses.mkString(" ")">
+
+        @fragments.global.warnings()
         @fragments.global.header()
         @fragments.global.navigation()
 
