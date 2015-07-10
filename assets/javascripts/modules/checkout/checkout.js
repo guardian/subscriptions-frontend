@@ -73,6 +73,7 @@ define(['$',
                     $FIELDSET_PAYMENT_DETAILS.removeClass(FIELDSET_COLLAPSED);
                     $EDIT_YOUR_DETAILS.removeClass(IS_HIDDEN);
                     $EDIT_PAYMENT_DETAILS.addClass(IS_HIDDEN);
+                    $SMALLPRINT.removeClass(IS_HIDDEN);
                 });
             });
         }
@@ -120,7 +121,6 @@ define(['$',
                 $REVIEW_NAME.text([$FIRST_NAME.val(), $LAST_NAME.val()].join(' '));
                 $REVIEW_ADDRESS.text([$ADDRESS1.val(), $ADDRESS2.val(), $ADDRESS3.val(), $POSTCODE.val()].join(', '));
                 $REVIEW_EMAIL.text($EMAIL.val());
-                $SMALLPRINT.removeClass(IS_HIDDEN);
             });
         }
 
