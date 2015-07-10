@@ -12,13 +12,11 @@
     bodyClasses = List("is-wide")
 ) {
 
-<div class="gs-container">
+<main class="gs-container">
 
-    <div class="checkout-container">
+    <section class="checkout-container">
 
-        <div class="checkout-header">
-            <h1 class="checkout-header__title">Checkout</h1>
-        </div>
+        @fragments.checkout.checkoutHeader("Checkout")
 
         <div class="checkout-container__sidebar">
             @fragments.checkout.basketPreview()
@@ -234,7 +232,7 @@
 
         </div>
 
-    </div>
+    </section>
 
-</div>
+</main>
 }

@@ -39,6 +39,37 @@
     }
 }
 
+/* Country Select
+   ========================================================================== */
+
+.country-select {
+    border-top: 1px solid $c-border;
+    padding-top: $gs-baseline / 2;
+    margin-bottom: $gs-baseline;
+
+    @include mq(desktop) {
+        display: table;
+        width: 100%
+    }
+}
+.country-select__title,
+.country-select__content {
+    @include mq(desktop) {
+        display: table-cell;
+        vertical-align: top;
+    }
+}
+.country-select__title {
+    @include fs-header(3);
+    color: $c-brand;
+    margin-bottom: $gs-gutter;
+
+    @include mq(desktop) {
+        width: 35%;
+        padding-right: ($gs-gutter * 2);
+    }
+}
+
 /* Basket Preview
    ========================================================================== */
 
