@@ -7,7 +7,7 @@ import TouchpointBackend.{Normal => touchpointBackend}
 import touchpointBackend.ratePlan.{ratePlanId => ratePlan}
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
-import model.SubscriptionData
+import model.{PersonalData, SubscriptionData}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -19,7 +19,8 @@ class CheckoutService(identityService: IdentityService, salesforceService: Sales
   lazy val paymentDelay = Some(Config.Zuora.paymentDelay)
 
   def processSubscription(subscriptionData: SubscriptionData,
-                          idUserOpt: Option[IdMinimalUser]): Future[CheckoutResult] = {
+                          idUserOpt: Option[IdMinimalUser],
+                          authCookieOpt: Option[AuthCookie]): Future[CheckoutResult] = {
 
     val userOrElseRegisterGuest: Future[UserIdData] =
       idUserOpt.map(user => Future {
@@ -34,7 +35,19 @@ class CheckoutService(identityService: IdentityService, salesforceService: Sales
       userData <- userOrElseRegisterGuest
       memberId <- salesforceService.createOrUpdateUser(subscriptionData.personalData, userData.id)
       subscribeResult <- touchpointBackend.zuoraService.createSubscription(memberId, subscriptionData, ratePlan, paymentDelay)
-    } yield CheckoutResult(memberId, userData, subscribeResult)
+    } yield {
+      updateAuthenticatedUserDetails(subscriptionData.personalData, idUserOpt, authCookieOpt)
+      CheckoutResult(memberId, userData, subscribeResult)
+    }
+  }
+
+  def updateAuthenticatedUserDetails(personalData: PersonalData, idUserOpt: Option[IdMinimalUser], authCookieOpt: Option[AuthCookie]): Unit = {
+    for {
+      user <- idUserOpt
+      authCookie <- authCookieOpt
+    } yield {
+      identityService.updateUserDetails(personalData, UserId(user.id), authCookie)
+    }
   }
 }
 
