@@ -47,10 +47,12 @@ define(['$'], function ($) {
         $REVIEW_HOLDER: $('.js-checkout-review-holder'),
         $SMALLPRINT: $('.js-checkout-smallprint'),
         $FINISH_ACCOUNT_SUBMIT: $('.js-checkout-finish-account-submit'),
+        $FINISH_ACCOUNT_FORM: $('.js-finish-account'),
         $FIELDSET_YOUR_DETAILS: $('.js-fieldset-your-details'),
         $FIELDSET_PAYMENT_DETAILS: $('.js-fieldset-payment-details'),
         $FIELDSET_REVIEW: $('.js-fieldset-review'),
         $EDIT_YOUR_DETAILS: $('.js-edit-your-details'),
-        $EDIT_PAYMENT_DETAILS: $('.js-edit-payment-details')
+        $EDIT_PAYMENT_DETAILS: $('.js-edit-payment-details'),
+        $ALL_DONE: $('.js-all-done')
     };
 });

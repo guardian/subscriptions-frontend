@@ -1,6 +1,7 @@
 @import model.{GuestAccountData,PersonalData}
 @import services.UserId.{paramName => userIdParam}
 @import services.IdentityToken.{paramName => identityTokenParam}
+@import configuration.Config.Identity.webAppProfileUrl
 
 @import routes.Checkout.processFinishAccount
 
@@ -52,7 +53,7 @@
                     <p>Some features of your subscription require you to be signed in before you can make use of them.</p>
                 </div>
 
-                <form action="@processFinishAccount" method="POST" class="form">
+                <form action="@processFinishAccount" method="POST" class="form js-finish-account">
                     @helper.CSRF.formField
 
                     <div class="form-field js-checkout-finish-account-password">
@@ -81,9 +82,15 @@
                     <div class="actions">
                         <button class="button button--primary button--large js-checkout-finish-account-submit">Confirm</button>
                     </div>
-
                 </form>
-            }
+                <div class="js-all-done" style="display: none">
+                    <p>All done!</p>
+                    <p>You can edit your details as well as manage your subscription in your Profile area</p>
+                    <div class="actions">
+                        <a href="@webAppProfileUrl" class="button button--primary button--large">My profile</a>
+                    </div>
+                </div>
+        }
         </div>
     </section>
 

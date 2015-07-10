@@ -1,12 +1,13 @@
 define(['$',
         'bean',
         'modules/checkout/form-elements',
-        'modules/checkout/validations'
-    ],
+        'modules/checkout/validations',
+        'utils/ajax'],
     function ($,
               bean,
               form,
-              validations
+              validations,
+              ajax
     ) {
 
     'use strict';
@@ -40,6 +41,8 @@ define(['$',
         $EDIT_YOUR_DETAILS = form.$EDIT_YOUR_DETAILS,
         $EDIT_PAYMENT_DETAILS = form.$EDIT_PAYMENT_DETAILS,
         $FINISH_ACCOUNT_SUBMIT = form.$FINISH_ACCOUNT_SUBMIT,
+        $FINISH_ACCOUNT_FORM = form.$FINISH_ACCOUNT_FORM,
+        $ALL_DONE = form.$ALL_DONE,
         FIELDSET_COLLAPSED = 'fieldset--collapsed',
         FIELDSET_COMPLETE = 'data-fieldset-complete',
         IS_HIDDEN = 'is-hidden';
@@ -135,13 +138,25 @@ define(['$',
     };
 
     var finishAccount = function () {
-        if ($FINISH_ACCOUNT_SUBMIT.length) {
+        if ($FINISH_ACCOUNT_FORM.length) {
             bean.on($FINISH_ACCOUNT_SUBMIT[0], 'click', function (e) {
                 e.preventDefault();
 
                 if (validations.validateFinishAccount()) {
-                    bean.off($FINISH_ACCOUNT_SUBMIT[0], 'click');
-                    bean.fire($FINISH_ACCOUNT_SUBMIT[0], 'click');
+                    var action = $FINISH_ACCOUNT_FORM.attr('action');
+                    var formData = ajax.reqwest.serialize($FINISH_ACCOUNT_FORM[0]);
+
+                    ajax({
+                        url: action,
+                        method: 'POST',
+                        data: formData
+                    }).then(function () {
+                        $FINISH_ACCOUNT_FORM.hide();
+                        $ALL_DONE.show();
+
+                    }).catch(function (jsonError) {
+                        console && console.error("Error while submitting guest user password form:", jsonError);
+                    });
                 }
             });
         }

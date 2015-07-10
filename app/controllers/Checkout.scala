@@ -10,6 +10,7 @@ import play.api.mvc._
 import services.CheckoutService.CheckoutResult
 import services.{CheckoutService, _}
 import views.html.{checkout => view}
+import configuration.Config.Identity.webAppProfileUrl
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -62,11 +63,18 @@ object Checkout extends Controller with LazyLogging {
   }
 
   def processFinishAccount = GoogleAuthenticatedStaffAction.async { implicit request =>
-    FinishAccountForm().bindFromRequest.fold({ _ =>
-      throw new RuntimeException("Could not set a password for guest account. Validation should happen on the client side!")
+    FinishAccountForm().bindFromRequest.fold({ formWithErrors =>
+      Future {
+        BadRequest(Json.obj(
+          "error" -> "Invalid form submissions",
+          "invalidFields" -> formWithErrors.errors.map(_.key)
+        ))
+      }
     }, guestAccountData => {
       IdentityService.convertGuest(guestAccountData.password, IdentityToken(guestAccountData.token))
-        .map(_ => Ok(view.alldone()))
+        .map { _ =>
+          Ok(Json.obj("profileUrl" -> webAppProfileUrl.toString()))
+        }
     })
   }
 
