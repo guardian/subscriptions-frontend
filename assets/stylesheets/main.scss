@@ -21,20 +21,27 @@
    BASE
    ========================================================================== */
 
+@import 'base/normalize';
 @import 'base/base';
-@import 'base/layout';
-@import 'base/form';
 @import 'base/type';
+@import 'base/layout';
 @import 'base/helpers';
 
 /* ==========================================================================
    MODULES
    ========================================================================== */
 
-@import 'modules/global';
-@import 'modules/icons';
+@import 'modules/global-header';
+@import 'modules/global-navigation';
+@import 'modules/global-footer';
+@import 'modules/prose';
+@import 'modules/page';
 @import 'modules/blocks';
+@import 'modules/sections';
+@import 'modules/icons';
+@import 'modules/forms';
 @import 'modules/buttons';
 @import 'modules/packages';
 @import 'modules/digital';
 @import 'modules/checkout';
+@import 'modules/membership';

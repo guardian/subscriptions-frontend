@@ -1,4 +1,6 @@
-@(additionalMarkup: Html)
+@(showInternationalMessage: Boolean = false)
+
+@import configuration.Links
 @import org.joda.time.DateTime
 
 <div class="global-brandbar">
@@ -6,10 +8,33 @@
         <a href="#top" class="action"><i class="icon-arrow-up"></i>Back to top</a>
     </div>
 </div>
-<div class="global-footer">
+<footer class="global-footer" role="contentinfo">
     <div class="gs-container">
-        @additionalMarkup
-        <div class="really-serious-copyright">© @{new DateTime().year.getAsText} Guardian News and Media Limited or its affiliated companies. All rights reserved. Build #@app.BuildInfo.buildNumber</div>
+        @if(showInternationalMessage) {
+            <p>
+                For help with Guardian and Observer subscription services please see our
+                <a href="@Links.guardianSubscriptionFaqs.href"
+                   title="@Links.guardianSubscriptionFaqs.title">
+                   @Links.guardianSubscriptionFaqs.title
+                </a>.
+            </p>
+        } else {
+            <p>
+                For help with Guardian and Observer subscription services please call 0330 333 6767.
+                Open 8am to 8pm, Monday to Sunday.
+            </p>
+            <p>
+                You may also find help in our
+                <a href="@Links.guardianSubscriptionFaqs.href"
+                   title="@Links.guardianSubscriptionFaqs.title">
+                   @Links.guardianSubscriptionFaqs.title
+                </a>.
+            </p>
+        }
+        <div class="really-serious-copyright">
+            © @{new DateTime().year.getAsText} Guardian News and Media Limited or its affiliated companies.
+            All rights reserved. Build #@app.BuildInfo.buildNumber
+        </div>
         <!-- build-commit-id: @app.BuildInfo.gitCommitId -->
     </div>
-</div>
+</footer>

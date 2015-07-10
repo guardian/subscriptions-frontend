@@ -1,0 +1,31 @@
+/* ==========================================================================
+   Global Header
+   ========================================================================== */
+
+.global-header {
+    background-color: $c-brand;
+    text-align: right;
+
+    a {
+        border: none;
+    }
+}
+.global-header__nav {
+    font-family: $f-serif-text;
+    font-weight: bold;
+    @include font-size(14px, 36px);
+    text-transform: lowercase;
+    padding-top: $gs-baseline/2;
+
+    .action {
+        color: $c-white;
+        margin-left: $gs-gutter*.75;
+        text-decoration: none;
+
+        &:hover,
+        &:focus,
+        &:active {
+            text-decoration: underline;
+        }
+    }
+}

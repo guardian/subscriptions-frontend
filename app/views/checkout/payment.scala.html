@@ -1,36 +1,78 @@
 @(form: Form[model.SubscriptionData], userIsSignedIn: Boolean)(implicit request: RequestHeader)
 
-@import routes.Checkout.renderCheckout
-
 @import model.JsVars
+@import routes.Checkout.renderCheckout
 @import configuration.Config.Identity._
 
 @readonly = @{ if (userIsSignedIn) "readonly" else "" }
 
-@main(title = "Checkout | Subscriptions | The Guardian",
-      jsVars = JsVars.default.copy(userIsSignedIn = userIsSignedIn)) {
+@main(
+    title = "Checkout | Subscriptions | The Guardian",
+    jsVars = JsVars.default.copy(userIsSignedIn = userIsSignedIn),
+    bodyClasses = List("is-wide")
+) {
 
 <div class="gs-container">
-    @fragments.page.header("Checkout")
 
-    <div>
-    @if(userIsSignedIn) {
-        <h3>Not you?</h3>
-        <a class="action" href="@idWebAppSignOutUrl(renderCheckout.toString)">Sign out</a>
-    } else {
-        <h3>Already have a Guardian account?</h3>
-        <a class="action" href="@webAppSigninUrl(renderCheckout.toString)">Sign in</a>
-    }
-    </div>
+    <div class="checkout-container">
 
-    <div class="row row--items-2">
-        <div class="row__item row__item--boost-2">
+        <div class="checkout-header">
+            <h1 class="checkout-header__title">Checkout</h1>
+        </div>
+
+        <div class="checkout-container__sidebar">
+            @fragments.checkout.basketPreview()
+
+            <div class="js-checkout-smallprint is-hidden">
+                @fragments.checkout.notice("Advanced Notice") {
+                    <p>The details of your Direct Debit instruction including payment schedule, due date, frequency and amount will be sent to you within three working days. All the normal Direct Debit safeguards and guarantees apply.</p>
+                }
+                @fragments.checkout.notice("Money Back Guarantee") {
+                    <p>If you wish to cancel your subscription, we will send you a refund of the unexpired part of your subscription.</p>
+                }
+                @fragments.checkout.notice("Direct Debit") {
+                    @* TODO: Refactor this markup *@
+                    <ul class="u-unstyled-list">
+                        <li>The Guardian</li>
+                        <li>Rockwood House</li>
+                        <li>Perrymount Road</li>
+                        <li>Haywards Heath</li>
+                        <li>West Sussex</li>
+                        <li>RH16 3DH</li>
+                        <li>United Kingdom</li>
+                    </ul>
+                    <br>
+                    <ul class="u-unstyled-list">
+                        <li>Tel: 0808 168 5088</li>
+                        <li><a href="mailto:gnmsubs@@quadrantsubs.com">gnmsubs@@quadrantsubs.com</a></li>
+                    </ul>
+                }
+
+            </div>
+        </div>
+
+        <div class="checkout-container__form">
+
             <form class="form js-checkout-form" method="POST">
                 <fieldset class="fieldset js-fieldset-your-details">
                     @helper.CSRF.formField
+
                     <div class="fieldset__heading">
-                        <h2 class="fieldset__headline"><span class="fieldset__num">1</span> Your details</h2>
-                        <a href="#" class="fieldset__edit is-hidden js-edit-your-details">Edit</a>
+                        <h2 class="fieldset__headline">
+                            <span class="fieldset__num">1</span> Your details
+                        </h2>
+                        <div class="fieldset__note fieldset__note--offset">
+                            @if(userIsSignedIn) {
+                                <span class="fieldset__note__label">Not you?</span>
+                                <a href="@idWebAppSignOutUrl(renderCheckout().toString())">Sign out</a>
+                            } else {
+                                <span class="fieldset__note__label">Already have a Guardian account?</span>
+                                <a href="@webAppSigninUrl(renderCheckout().toString())">Sign in</a>
+                            }
+                        </div>
+                        <div class="fieldset__edit">
+                            <button class="text-button u-button-reset js-edit-your-details is-hidden">Edit</button>
+                        </div>
                     </div>
                     <div class="fieldset__fields">
                         <div class="form-field js-checkout-first">
@@ -40,56 +82,57 @@
                         </div>
                         <div class="form-field js-checkout-last">
                             <label class="label" for="last">Last name</label>
-                            <input type="text" class="input-text js-input" name="personal.last" id="last" value="@form.data.get("personal.last")">
+                            <input type="text" class="input-text js-input" name="personal.last" id="last" value="@form.data.get("personal.last ")">
                             @checkout.errorMessage("This field is required")
                         </div>
                         <div class="form-field js-checkout-email">
                             <label class="label" for="email">Email address</label>
-                            <input type="email" class="input-text js-input" name="personal.emailValidation.email" id="email" value ="@form.data.get("personal.emailValidation.email")" @readonly>
+                            <input type="email" class="input-text js-input" name="personal.emailValidation.email" id="email" value="@form.data.get("personal.emailValidation.email")" @readonly>
                             @checkout.errorMessage("")
                         </div>
-
                         <div class="form-field js-checkout-confirm-email">
-                        @if(!userIsSignedIn) {
-                            <label class="label" for="confirm">Confirm email address</label>
-                            <input type="email" class="input-text js-input" name="personal.emailValidation.confirm" id="confirm" value ="@form.data.get("personal.emailValidation.confirm")">
-                            @checkout.errorMessage("The Confirm Email address does not match the Email address")
-                        } else {
-                            <input type="hidden" class="js-input" name="personal.emailValidation.confirm" id="confirm" value ="@form.data.get("personal.emailValidation.confirm")">
-                        }
+                            @if(userIsSignedIn) {
+                                <input type="hidden" class="js-input" name="personal.emailValidation.confirm" id="confirm" value="@form.data.get("personal.emailValidation.confirm")">
+                            } else {
+                                <label class="label" for="confirm">Confirm email address</label>
+                                <input type="email" class="input-text js-input" name="personal.emailValidation.confirm" id="confirm" value="@form.data.get("personal.emailValidation.confirm")">
+                                @checkout.errorMessage("The confirmation email must match your email address")
+                            }
                         </div>
                         <div class="js-checkout-full-address">
                             <div class="form-field js-checkout-house">
-                                <label class="label" for="house">Address line 1</label>
-                                <input type="text" class="input-text js-input" name="personal.address.address1" value="@form.data.get("personal.address.address1")">
+                                <label class="label" for="address-line-1">Address line 1</label>
+                                <input type="text" class="input-text js-input" id="address-line-1" name="personal.address.address1" value="@form.data.get("personal.address.address1")">
                                 @checkout.errorMessage("This field is required")
                             </div>
                             <div class="form-field js-checkout-street">
-                                <label class="label" for="street">Address line 2</label>
-                                <input type="text" class="input-text js-input" name="personal.address.address2" value="@form.data.get("personal.address.address2")">
+                                <label class="label optional-marker" for="address-line-2">Address line 2</label>
+                                <input type="text" class="input-text js-input" id="address-line-2" name="personal.address.address2" value="@form.data.get("personal.address.address2")">
                                 @checkout.errorMessage("This field is required")
                             </div>
                             <div class="form-field js-checkout-town">
-                                <label class="label" for="town">Town/City</label>
-                                <input type="text" class="input-text js-input" name="personal.address.town" value="@form.data.get("personal.address.town")">
+                                <label class="label" for="address-town">Town/City</label>
+                                <input type="text" class="input-text js-input" id="address-town" name="personal.address.town" value="@form.data.get("personal.address.town")">
                                 @checkout.errorMessage("This field is required")
                             </div>
                         </div>
                         <div class="form-field js-checkout-postcode">
-                            <label class="label" for="postcode">Postcode</label>
-                            <input type="text" class="input-text js-input input-text input-text--small" name="personal.address.postcode" value="@form.data.get("personal.address.postcode")">
+                            <label class="label" for="address-postcode">Postcode</label>
+                            <input type="text" class="input-text js-input input-text input-text--small" id="address-postcode" name="personal.address.postcode" value="@form.data.get("personal.address.postcode")">
                             @checkout.errorMessage("Please enter a valid postal code")
                         </div>
                         <div class="form-field">
+                            @*
+                                TODO: Clean up this markup, nested .checkbox
+                                Also, no values on checkboxes? Is this used yet?
+                            *@
                             <div class="checkbox">
                                 I'd like to receive information about offers and developments from Guardian News &amp; Media Limited via:
                                 <label class="label">
-                                    <input type="checkbox">
-                                    Email
+                                    <input type="checkbox"> Email
                                 </label>
                                 <label class="label">
-                                    <input type="checkbox">
-                                    Post
+                                    <input type="checkbox"> Post
                                 </label>
                             </div>
                         </div>
@@ -100,10 +143,14 @@
                 </fieldset>
                 <fieldset class="fieldset fieldset--collapsed js-fieldset-payment-details">
                     <div class="fieldset__heading">
-                        <h2 class="fieldset__headline"><span class="fieldset__num">2</span> Payment details</h2>
+                        <h2 class="fieldset__headline">
+                            <span class="fieldset__num">2</span> Payment details
+                        </h2>
                         <p class="fieldset__note"><i class="icon-secure"></i> This site is secure</p>
                         <div class="fieldset__note">Payment will be taken by Direct Debit</div>
-                        <a href="#" class="fieldset__edit is-hidden js-edit-payment-details">Edit</a>
+                        <div class="fieldset__edit">
+                            <button class="text-button u-button-reset js-edit-payment-details is-hidden">Edit</button>
+                        </div>
                     </div>
                     <div class="fieldset__fields">
                         <div class="form-field js-checkout-account">
@@ -121,6 +168,7 @@
                         <div class="form-field js-checkout-holder">
                             <label class="label" for="holder">Name of account holder</label>
                             <input type="text" class="input-text js-input" name="payment.holder">
+                            @* TODO: Why limited to 18 characters? *@
                             @checkout.errorMessage("Please enter between 1 and 18 characters for the account holder name")
                         </div>
                         <div class="form-field js-checkout-confirm-payment">
@@ -133,13 +181,15 @@
                             @checkout.errorMessage("Please confirm that you are the account holder by checking the checkbox above")
                         </div>
                         <div class="actions">
-                            <a href="#" class="button button--primary button--large js-checkout-payment-details-submit">Continue</a>
+                            <button class="button button--primary button--large js-checkout-payment-details-submit">Continue</button>
                         </div>
                     </div>
                 </fieldset>
                 <fieldset class="fieldset fieldset--single fieldset--collapsed js-fieldset-review">
                     <div class="fieldset__heading">
-                        <h2 class="fieldset__headline"><span class="fieldset__num">3</span> Review and confirm</h2>
+                        <h2 class="fieldset__headline">
+                            <span class="fieldset__num">3</span> Review and confirm
+                        </h2>
                     </div>
                     <div class="fieldset__fields">
                         <div class="review-details">
@@ -163,42 +213,10 @@
                     </div>
                 </fieldset>
             </form>
+
         </div>
-        <div class="row__item basket">
-            <h3>You've chosen:</h3>
-            <ul class="u-unstyled-list basket__detail">
-                <li>Digital Pack</li>
-                <li><em>(Digital Edition / Guardian App Premium Tier)</em></li>
-                <li>&pound;11.99/month</li>
-            </ul>
-            <div class="js-checkout-smallprint is-hidden">
-                <small class="basket__detail basket__smallprint">
-                    <h4 class="basket__header">Advanced Notice</h4>
-                    <p>The details of your Direct Debit instruction including payment schedule, due date, frequency and amount will be sent to you within three working days. All the normal Direct Debit safeguards and guarantees apply.</p>
-                </small>
-                <small class="basket__detail basket__smallprint">
-                    <h4 class="basket__header">Money Back Guarantee</h4>
-                    <p>If you wish to cancel your subscription, we will send you a refund of the unexpired part of your subscription.</p>
-                </small>
-                <small class="basket__detail basket__smallprint">
-                    <h4 class="basket__header">Direct Debit</h4>
-                    <ul class="u-unstyled-list">
-                        <li>The Guardian</li>
-                        <li>Rockwood House</li>
-                        <li>Perrymount Road</li>
-                        <li>Haywards Heath</li>
-                        <li>West Sussex</li>
-                        <li>RH16 3DH</li>
-                        <li>United Kingdom</li>
-                    </ul>
-                    <br>
-                    <ul class="u-unstyled-list">
-                        <li>Tel: 0808 168 5088</li>
-                        <li><a href="mailto:gnmsubs@@quadrantsubs.com">gnmsubs@@quadrantsubs.com</a></li>
-                    </ul>
-                </small>
-            </div>
-        </div>
+
     </div>
+
 </div>
 }

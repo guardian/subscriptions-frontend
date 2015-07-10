@@ -1,0 +1,87 @@
+/* ==========================================================================
+   Opt-in typographic styles
+   ========================================================================== */
+// These are for styling HTML that we get from external sources
+// and may contain more specific selectors than we would usually like.
+// Similar in goal to _from-content-api.scss from next-gen.
+//
+// Opt-in typography
+// Particularly useful when copy come from a third-party (e.g., eventbrite/evently)
+// See:
+//     http://css-tricks.com/opt-in-typography/
+//     http://dbushell.com/2012/04/18/scoping-typography-css/
+//     http://anthonyshort.me/global-typographic-styles-suck/
+//
+.prose {
+
+    // TODO: Resolve global font-stacks
+    font-family: $f-serif-text;
+
+    > p,
+    ul,
+    ol,
+    address {
+        padding: 0;
+        margin: 0 0 $gs-baseline;
+
+        @include mq(tablet) {
+            margin-bottom: $gs-baseline * 1.3333;
+        }
+    }
+
+    a {
+        color: $c-brand;
+        text-decoration: none;
+        border-bottom: 1px solid $c-neutral3;
+
+        &:hover,
+        &:focus {
+            text-decoration: none;
+            border-color: $c-neutral2;
+        }
+    }
+
+    li > ol,
+    li > ul {
+        margin-bottom: 0;
+    }
+
+    ol {
+        list-style: none;
+        margin-left: $gs-gutter;
+    }
+
+    ol {
+        counter-reset: li;
+    }
+    ol > ol,
+    ol > ul {
+        margin-left: $gs-gutter * 2;
+    }
+    ol > li {
+        list-style-position: outside;
+        text-indent: -($gs-gutter);
+    }
+    ol > li:before {
+        content: counter(li)'.';
+        counter-increment: li;
+        @include fs-header(1);
+        margin-right: $gs-baseline / 2;
+
+        @include mq(tablet) {
+            @include fs-header(2, true);
+        }
+    }
+
+    blockquote {
+        padding-left: 14px;
+        border-left: 2px solid #cfcfcd;
+        font-style: italic;
+        margin: 0 0 16px;
+    }
+
+    blockquote p {
+        margin: 0;
+    }
+
+}

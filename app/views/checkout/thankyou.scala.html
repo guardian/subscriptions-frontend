@@ -6,105 +6,87 @@
 
 @(guestAccountForm: Option[Form[GuestAccountData]] = None)(implicit request: RequestHeader)
 
-@main("Thank you | Subscriptions | The Guardian") {
+@main("Thank you | Subscriptions | The Guardian", bodyClasses=List("is-wide")) {
 
-<div class="gs-container">
-    @fragments.page.header("Thank you for your order")
+<main class="gs-container gs-container--slim" role="main">
 
-    <h2 class="page-heading page-heading--border">Order ref: ABCD123456</h2>
-    <div class="row row--items-2">
-        <div class="row__item row__item--boost-2">
-            <p>We have received your request and are now processing your subscription, you'll receive email confirmation of this shortly.</p>
-            <p>Here are the details of your order, if any of these are incorrect please get in touch with us straight away on 0800 123 456 or <a href="mailto:subscriptions@@theguardian.com">subscriptions@@theguardian.com</a></p>
+    @fragments.page.header("Thank you for your order", classes=List("l-padded"))
 
-            <div class="review-details review-details--bg">
-                <h3 class="review-details__heading">Subscription code</h3>
-                <ul class="u-unstyled-list review-details__list">
-                    <li>ZXY987654321</li>
-                </ul>
-                <h3 class="review-details__heading">Your subscription</h3>
-                <ul class="u-unstyled-list review-details__list">
-                    <li>Digital Pack</li>
-                    <li><em>(Digital Edition / Guardian App Premium Tier)</em></li>
-                </ul>
-                <h3 class="review-details__heading">Your details</h3>
-                <ul class="u-unstyled-list review-details__list">
-                    <li>Sam Smith</li>
-                    <li>Flat 14 Bankside House, West Hill, Putney SW15 4TS</li>
-                    <li>Londoner75@@gmail.com</li>
-                </ul>
+    <section class="section-slice section-slice--limited">
+        <div class="section-slice__content">
+            <h2 class="section-title">Order ref: ABCD123456</h2>
+            <div class="prose">
+                <p>
+                    We have received your request and are now processing your subscription,
+                    you'll receive email confirmation of this shortly.
+                </p>
+                <p>
+                    Here are the details of your order, if any of these are incorrect
+                    please get in touch with us straight away on 0800 123 456 or
+                    <a href="mailto:subscriptions@@theguardian.com">subscriptions@@theguardian.com</a>
+                </p>
             </div>
+            @fragments.checkout.reviewPanel()
         </div>
-        <div class="row__item">
-        </div>
-    </div>
-    <h2 class="page-heading page-heading--border">What happens now?</h2>
-    <div class="row row--items-2">
-        <div class="row__item row__item--boost-2">
-            <h3 class="section-header">Download your apps</h3>
-            <ol>
-                <li>Go to each device you want your subscription on and download the Guardian app</li>
-                <li>Open the app and tap the 'Settings' icon</li>
-                <li>Enter your subscription code (shown above and also in your confirmation email) and your postcode</li>
-            </ol>
+    </section>
 
-        @guestAccountForm.map { form =>
-            <h3 class="section-header">Register for an account</h3>
-            <p>Some features of your subscription require you to be signed in before you can make use of them.</p>
-            <p>Enter a password to finish creating your account:</p>
-            <form action="@processFinishAccount" method="POST" class="form">
-                @helper.CSRF.formField
-                <fieldset class="fieldset">
-                    <div class="fieldset__fields">
-                        <div class="form-field js-checkout-finish-account-password">
-                            <input name="@userIdParam" type="hidden" value="@form.data.get(userIdParam)">
-                            <input name="@identityTokenParam" type="hidden" value="@form.data.get(identityTokenParam)">
-                            <label class="label" for="last">Password</label>
-                            <input class="input-text js-input js-password-strength"
-                                   name="password"
-                                   type="password"
-                                   autocapitalize="off"
-                                   autocorrect="off"
-                                   spellcheck="false"
-                                   minlength="6"
-                                   maxlength="20"
-                                   value=""
-                                   required />
+    <section class="section-slice section-slice--limited">
+        <div class="section-slice__content">
 
-                            @checkout.errorMessage("Password too short")
-                        </div>
-                        <div class="password-strength-indicator score-null is-off is-hidden js-on js-password-strength-indicator">
-                            <div class="form-note form-note--right form-note--underneath js-password-strength-label">
-                                Password strength
-                            </div>
-                        </div>
-                        <div class="actions">
-                            <button class="button button--primary button--large js-checkout-finish-account-submit">Confirm</button>
-                        </div>
-                    </div>
-                </fieldset>
-            </form>
-        }
+            <h2 class="section-title">What happens now?</h2>
 
-        </div>
-        <div class="row__item">
-        </div>
-    </div>
-</div>
+            <h3 class="section-divider">Download your apps</h3>
 
-<div class="membership-promo">
-    <div class="gs-container">
-        <div class="block">
-            <h2 class="block__title">Get even closer to the Guardian <span class="break">by becoming a member</span></h2>
-            <div class="block__footer">
-                <div class="block__info">
-                    <div>We're bringing the Guardian to life <span class="break">through live events and meet-ups</span></div>
-                    <div class="action">Join and be part of the <span class="break">conversations that matter</span></div>
+            <div class="prose">
+                <ol>
+                    <li>Go to each device you want your subscription on and download the Guardian app</li>
+                    <li>Open the app and tap the 'Settings' icon</li>
+                    <li>Enter your subscription code (shown above and also in your confirmation email) and your postcode</li>
+                </ol>
+            </div>
+
+            @guestAccountForm.map { form =>
+
+                <h3 class="section-divider">Register for an account</h3>
+                <div class="prose">
+                    <p>Some features of your subscription require you to be signed in before you can make use of them.</p>
                 </div>
-                <a class="button button--secondary button--large" href="https://membership.theguardian.com/join?INTCMP=GU_SUBSCRIPTIONS_UK_PROMO" data-test-id="subscriptions-uk-membership">Join now</a>
-            </div>
-        </div>
-    </div>
-</div>
 
+                <form action="@processFinishAccount" method="POST" class="form">
+                    @helper.CSRF.formField
+
+                    <div class="form-field js-checkout-finish-account-password">
+
+                        <input name="@userIdParam" type="hidden" value="@form.data.get(userIdParam)">
+                        <input name="@identityTokenParam" type="hidden" value="@form.data.get(identityTokenParam)">
+
+                        <label class="label" for="password">
+                            Enter a password to finish creating your account:
+                        </label>
+                        <input
+                            class="input-text js-input js-password-strength"
+                            id="password"
+                            name="password"
+                            type="password"
+                            minlength="6"
+                            maxlength="20"
+                            value=""
+                           required
+                        />
+                        @checkout.errorMessage("Password too short")
+
+                    </div>
+                    @fragments.forms.passwordStrengthIndicator()
+
+                    <div class="actions">
+                        <button class="button button--primary button--large js-checkout-finish-account-submit">Confirm</button>
+                    </div>
+
+                </form>
+            }
+        </div>
+    </section>
+
+    @fragments.promos.membershipPromo()
+</main>
 }

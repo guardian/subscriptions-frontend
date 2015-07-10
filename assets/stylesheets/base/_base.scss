@@ -2,10 +2,13 @@
    Base
    ========================================================================== */
 
+/**
+ * Use border-box model
+ * for all elements.
+ */
 html {
     box-sizing: border-box;
 }
-
 *, *:before, *:after {
     box-sizing: inherit;
 }
@@ -16,8 +19,15 @@ html {
 }
 
 body {
-    margin: 0;
     color: $c-body;
+    background-color: $c-bg;
+    margin: 0;
+    line-height: 1.5;
+
+    // TODO: Refactor this code-smell
+    > .gs-container {
+        background-color: $c-white;
+    }
 }
 
 h1, h2, h3 {
@@ -28,15 +38,17 @@ h1, h2, h3 {
 
 h1, h2, h3, h4, h5, h6 {
     margin: 0;
-    color: $c-body;
-    font-weight: 500;
+    color: inherit;
+    font-weight: guss-font-weight('medium');
 }
 
 p {
     margin-top: 0;
-    margin-bottom: ($gs-baseline/3)*2;
+    margin-bottom: $gs-baseline * 1.33;
 }
 
+// TODO: Don't set borders globally.
+// Scope to .prose
 a {
     color: $c-link;
     text-decoration: none;
@@ -54,7 +66,7 @@ a {
 }
 
 strong {
-    font-weight: 900;
+    font-weight: guss-font-weight('ultrablack');
 }
 
 ol,
@@ -68,4 +80,11 @@ img {
     border: none;
     display: block;
     max-width: 100%;
+}
+
+/**
+ * Reset address element defaults
+ */
+address {
+    font-style: normal;
 }

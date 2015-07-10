@@ -1,6 +1,7 @@
 @(title: String)
 
 @import play.api.Play
+@import controllers.CachedAssets.hashedPathFor
 
 <meta charset="utf-8"/>
 <title>@title</title>
@@ -10,16 +11,16 @@
 <meta name="format-detection" content="telephone=no"/>
 <meta name="HandheldFriendly" content="True"/>
 
-<link rel="stylesheet" href="@controllers.CachedAssets.hashedPathFor("stylesheets/main.min.css")"/>
+<link rel="stylesheet" href="@hashedPathFor("stylesheets/main.min.css")"/>
 <!--[if (IE 9)]>
-    <link rel="stylesheet" href="@controllers.CachedAssets.hashedPathFor("stylesheets/ie9.min.css")"/>
+    <link rel="stylesheet" href="@hashedPathFor("stylesheets/ie9.min.css")"/>
 <![endif]-->
 <!--[if (lt IE 9)]>
-    <link rel="stylesheet" href="@controllers.CachedAssets.hashedPathFor("stylesheets/ie-old.min.css")"/>
+    <link rel="stylesheet" href="@hashedPathFor("stylesheets/ie-old.min.css")"/>
 <![endif]-->
 
 @if(Play.isDev(Play.current)) {
-    <link rel="shortcut icon" type="image/png" href="@controllers.CachedAssets.hashedPathFor("images/favicons/32x32-dev.ico")"/>
+    <link rel="shortcut icon" type="image/png" href="@hashedPathFor("images/favicons/32x32-dev.ico")"/>
 } else {
-    <link rel="shortcut icon" type="image/png" href="@controllers.CachedAssets.hashedPathFor("images/favicons/32x32.ico")"/>
+    <link rel="shortcut icon" type="image/png" href="@hashedPathFor("images/favicons/32x32.ico")"/>
 }
