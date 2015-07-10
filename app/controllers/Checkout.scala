@@ -50,11 +50,11 @@ object Checkout extends Controller with LazyLogging {
       },
       subscriptionData => {
         val idUserOpt = AuthenticationService.authenticatedUserFor(request)
-        CheckoutService.processSubscription(subscriptionData, idUserOpt).map {
+        val authCookie = request.cookies.find(_.name == "SC_GU_U").map(cookie => AuthCookie(cookie.value))
+        CheckoutService.processSubscription(subscriptionData, idUserOpt, authCookie).map {
           case CheckoutResult(_, guestUser: GuestUser, _) =>
             Some(FinishAccountForm().bind(guestUser.toFormParams))
           case CheckoutResult(_, registeredUser:MinimalIdUser, _) =>
-            updateStoredRegisteredUserDetails(subscriptionData.personalData, registeredUser.id, request.cookies.find(_.name == "SC_GU_U"))
             None
         }.map(formOpt => Ok(views.html.checkout.thankyou(formOpt)))
       }
@@ -84,9 +84,6 @@ object Checkout extends Controller with LazyLogging {
       doesUserExist <- IdentityService.doesUserExist(email)
     } yield Ok(Json.obj("emailInUse" -> doesUserExist))
   }
-
-  def updateStoredRegisteredUserDetails(personalData: PersonalData, userId: UserId, authCookie: Option[Cookie]): Unit =
-    authCookie.foreach(cookie => IdentityService.updateUserDetails(personalData, userId, AuthCookie(cookie.value)))
 
   private def getIdentityUserByCookie(request: Request[_]): Future[Option[IdUser]] =
     request.cookies.find(_.name == "SC_GU_U").fold(Future.successful(None: Option[IdUser])) { cookie =>
