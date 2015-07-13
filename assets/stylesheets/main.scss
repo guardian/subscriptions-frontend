@@ -16,6 +16,7 @@
 
 @import 'vars';
 @import 'mixins';
+@import 'webfonts';
 
 /* ==========================================================================
    BASE
@@ -23,7 +24,6 @@
 
 @import 'base/normalize';
 @import 'base/base';
-@import 'base/type';
 @import 'base/layout';
 @import 'base/helpers';
 
@@ -46,4 +46,5 @@
 @import 'modules/packages';
 @import 'modules/digital';
 @import 'modules/checkout';
+@import 'modules/checkout-basket';
 @import 'modules/membership';
