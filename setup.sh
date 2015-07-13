@@ -130,6 +130,16 @@ install_dependencies() {
   bower_stylesheets
 }
 
+install_chromedriver() {
+  if ! installed chromedriver; then
+    if linux; then
+      EXTRA_STEPS+=("Download Google Chrome driver for the integration tests from https://code.google.com/p/selenium/wiki/ChromeDriver")
+    elif mac; then
+      brew install chromedriver
+    fi
+  fi
+}
+
 compile() {
   grunt compile
 }
@@ -153,6 +163,7 @@ main() {
   install_node
   install_grunt
   install_dependencies
+  install_chromedriver
   compile
   report
 }
