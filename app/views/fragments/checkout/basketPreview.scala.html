@@ -1,3 +1,7 @@
+@(subscriptionProductsOpt: Option[Seq[model.zuora.SubscriptionProduct]] = None)
+
+@import model.zuora.BillingFrequency
+
 <div class="basket-preview">
     <h3 class="basket-preview__title">You've chosen:</h3>
     <div class="basket-preview__image">
@@ -10,8 +14,54 @@
         <span class="basket-preview__product__caption">
             (Digital Edition / Guardian App Premium Tier)
         </span>
-        <span class="basket-preview__product__payment">
+        <span class="basket-preview__product__payment js-option-mirror-value">
             £11.99 every month
         </span>
     </div>
+
+    @for(subscriptionProducts <- subscriptionProductsOpt) {
+        <div class="basket-preview__toggle">
+            <button class="text-button u-button-reset js-toggle" data-toggle="change-payment-frequency">
+                Change payment frequency
+            </button>
+        </div>
+
+        <fieldset class="basket-preview__options is-hidden js-option-mirror-group" id="change-payment-frequency">
+            @subscriptionProducts.find(_.frequency == BillingFrequency.Month).map { p =>
+                <label class="option">
+                    <input
+                        class="option__input"
+                        type="radio" name="payment-option"
+                        data-option-mirror-label="£@{p.price} every month"
+                        value="value="@{p.ratePlanId}" checked
+                    >
+                    <span class="option__label">£@{p.price} every month</span>
+                </label>
+            }
+            @subscriptionProducts.find(_.frequency == BillingFrequency.Quarter).map { p =>
+                <label class="option">
+                    <input
+                        class="option__input"
+                        type="radio" name="payment-option"
+                        data-option-mirror-label="£@{p.price} every 3 months"
+                        value="value="@{p.ratePlanId}"
+                    >
+                    <span class="option__label">£@{p.price} every 3 months</span>
+                </label>
+            }
+            @subscriptionProducts.find(_.frequency == BillingFrequency.Annual).map { p =>
+                <label class="option">
+                    <input
+                        class="option__input"
+                        type="radio" name="payment-option"
+                        data-option-mirror-label="£@{p.price} every 12 months. Save £23.98"
+                        value="value="@{p.ratePlanId}"
+                    >
+                    <span class="option__label" >£@{p.price} every 12 months. Save £23.98</span>
+                </label>
+            }
+            </fieldset>
+
+    }
+
 </div>

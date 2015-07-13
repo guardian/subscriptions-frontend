@@ -3,7 +3,6 @@
 @import model.JsVars
 @import routes.Checkout.renderCheckout
 @import configuration.Config.Identity._
-@import model.zuora.BillingFrequency
 
 @readonly = @{ if (userIsSignedIn) "readonly" else "" }
 
@@ -15,61 +14,47 @@
 
 <main class="gs-container">
 
-    <section class="checkout-container">
+    <form class="form" action="" method="POST">
 
-        @fragments.checkout.checkoutHeader("Checkout")
+        <section class="checkout-container">
 
-        <div class="checkout-container__sidebar">
-            @fragments.checkout.basketPreview()
+            @fragments.checkout.checkoutHeader("Checkout")
 
-            <div class="js-checkout-smallprint is-hidden">
-                @fragments.checkout.notice("Advanced Notice") {
-                    <p>The details of your Direct Debit instruction including payment schedule, due date, frequency and amount will be sent to you within three working days. All the normal Direct Debit safeguards and guarantees apply.</p>
-                }
-                @fragments.checkout.notice("Money Back Guarantee") {
-                    <p>If you wish to cancel your subscription, we will send you a refund of the unexpired part of your subscription.</p>
-                }
-                @fragments.checkout.notice("Direct Debit") {
-                    @* TODO: Refactor this markup *@
-                    <ul class="u-unstyled-list">
-                        <li>The Guardian</li>
-                        <li>Rockwood House</li>
-                        <li>Perrymount Road</li>
-                        <li>Haywards Heath</li>
-                        <li>West Sussex</li>
-                        <li>RH16 3DH</li>
-                        <li>United Kingdom</li>
-                    </ul>
-                    <br>
-                    <ul class="u-unstyled-list">
-                        <li>Tel: 0808 168 5088</li>
-                        <li><a href="mailto:gnmsubs@@quadrantsubs.com">gnmsubs@@quadrantsubs.com</a></li>
-                    </ul>
-                }
+            <div class="checkout-container__sidebar">
+                @fragments.checkout.basketPreview(Some(subscriptionProducts))
 
+                <div class="js-checkout-smallprint is-hidden">
+                    @fragments.checkout.notice("Advanced Notice") {
+                        <p>The details of your Direct Debit instruction including payment schedule, due date, frequency and amount will be sent to you within three working days. All the normal Direct Debit safeguards and guarantees apply.</p>
+                    }
+                    @fragments.checkout.notice("Money Back Guarantee") {
+                        <p>If you wish to cancel your subscription, we will send you a refund of the unexpired part of your subscription.</p>
+                    }
+                    @fragments.checkout.notice("Direct Debit") {
+                        @* TODO: Refactor this markup *@
+                        <ul class="u-unstyled-list">
+                            <li>The Guardian</li>
+                            <li>Rockwood House</li>
+                            <li>Perrymount Road</li>
+                            <li>Haywards Heath</li>
+                            <li>West Sussex</li>
+                            <li>RH16 3DH</li>
+                            <li>United Kingdom</li>
+                        </ul>
+                        <br>
+                        <ul class="u-unstyled-list">
+                            <li>Tel: 0808 168 5088</li>
+                            <li><a href="mailto:gnmsubs@@quadrantsubs.com">gnmsubs@@quadrantsubs.com</a></li>
+                        </ul>
+                    }
+
+                </div>
             </div>
-        </div>
 
-        <div class="checkout-container__form">
+            <div class="checkout-container__form js-checkout-form">
 
-            <form class="form js-checkout-form" method="POST">
                 <fieldset class="fieldset js-fieldset-your-details">
                     @helper.CSRF.formField
-
-                    <div class="basket-select-payment__option">
-                        <select name="ratePlanId" id="payment-option" >
-
-                            @subscriptionProducts.find(_.frequency == BillingFrequency.Month).map { p =>
-                                <option value="@{p.ratePlanId}" selected>£@{p.price} every month</option>
-                            }
-                            @subscriptionProducts.find(_.frequency == BillingFrequency.Quarter).map { p =>
-                                <option value="@{p.ratePlanId}">£@{p.price} every 3 months</option>
-                            }
-                            @subscriptionProducts.find(_.frequency == BillingFrequency.Annual).map { p =>
-                                <option value="@{p.ratePlanId}">£@{p.price} every 12 months. Save £23.98</option>
-                            }
-                        </select>
-                    </div>
 
                     <div class="fieldset__heading">
                         <h2 class="fieldset__headline">
@@ -139,20 +124,20 @@
                             @*
                                 TODO: No values on checkboxes? Is this used yet?
                             *@
-                            <h5 class="checkbox-title">
+                            <h5 class="option-title">
                                 I'd like to receive information about offers and developments from Guardian News &amp; Media Limited via:
                             </h5>
-                            <label class="checkbox">
-                                <span class="checkbox__input">
+                            <label class="option">
+                                <span class="option__input">
                                     <input type="checkbox" class="js-input">
                                 </span>
-                                <span class="checkbox__label">Email</span>
+                                <span class="option__label">Email</span>
                             </label>
-                            <label class="checkbox">
-                                <span class="checkbox__input">
+                            <label class="option">
+                                <span class="option__input">
                                     <input type="checkbox" class="js-input">
                                 </span>
-                                <span class="checkbox__label">Post</span>
+                                <span class="option__label">Post</span>
                             </label>
                         </div>
                         <div class="actions">
@@ -202,11 +187,11 @@
                             @checkout.errorMessage("Please enter between 1 and 18 characters for the account holder name")
                         </div>
                         <div class="form-field js-checkout-confirm-payment">
-                            <label class="checkbox">
-                                <span class="checkbox__input">
+                            <label class="option">
+                                <span class="option__input">
                                     <input type="checkbox" class="js-input">
                                 </span>
-                                <span class="checkbox__label">
+                                <span class="option__label">
                                     I confirm that I am the account holder and I am solely able to authorise debit from the account
                                 </span>
                             </label>
@@ -244,11 +229,12 @@
                         </div>
                     </div>
                 </fieldset>
-            </form>
 
-        </div>
+            </div>
 
-    </section>
+        </section>
+
+    </form>
 
 </main>
 }
