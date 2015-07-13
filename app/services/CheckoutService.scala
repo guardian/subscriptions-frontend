@@ -3,7 +3,6 @@ package services
 import com.gu.identity.play.IdMinimalUser
 import com.gu.membership.salesforce.MemberId
 import com.gu.membership.zuora.soap.Zuora.SubscribeResult
-import touchpoint.{ProductPlan, BillingFrequency}
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
 import model.SubscriptionData

@@ -1,10 +1,9 @@
-@(form: Form[model.SubscriptionData], userIsSignedIn: Boolean, digitalProductRatePlans: Seq[touchpoint.ProductRatePlan])(implicit request: RequestHeader)
+@(form: Form[model.SubscriptionData], userIsSignedIn: Boolean, subscriptionProducts: Seq[model.zuora.SubscriptionProduct])(implicit request: RequestHeader)
 
 @import model.JsVars
 @import routes.Checkout.renderCheckout
 @import configuration.Config.Identity._
-@import touchpoint.BillingFrequency
-
+@import model.zuora.BillingFrequency
 
 @readonly = @{ if (userIsSignedIn) "readonly" else "" }
 
@@ -62,13 +61,13 @@
                     <div class="basket-select-payment__option">
                         <select name="ratePlanId" id="payment-option" >
 
-                            @digitalProductRatePlans.find(_.frequency == BillingFrequency.Monthly).map { p =>
+                            @subscriptionProducts.find(_.frequency == BillingFrequency.Month).map { p =>
                                 <option value="@{p.ratePlanId}" selected>£@{p.price} every month</option>
                             }
-                            @digitalProductRatePlans.find(_.frequency == BillingFrequency.Quarterly).map { p =>
+                            @subscriptionProducts.find(_.frequency == BillingFrequency.Quarter).map { p =>
                                 <option value="@{p.ratePlanId}">£@{p.price} every 3 months</option>
                             }
-                            @digitalProductRatePlans.find(_.frequency == BillingFrequency.Annual).map { p =>
+                            @subscriptionProducts.find(_.frequency == BillingFrequency.Annual).map { p =>
                                 <option value="@{p.ratePlanId}">£@{p.price} every 12 months. Save £23.98</option>
                             }
                         </select>

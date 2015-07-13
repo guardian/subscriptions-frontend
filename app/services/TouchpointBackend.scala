@@ -1,8 +1,7 @@
 package services
 
-import com.gu.identity.play.IdMinimalUser
 import configuration.Config
-import touchpoint.{ProductRatePlan, TouchpointBackendConfig}
+import touchpoint.TouchpointBackendConfig
 
 object TouchpointBackend {
   import TouchpointBackendConfig.BackendType
@@ -11,14 +10,10 @@ object TouchpointBackend {
     TouchpointBackend(TouchpointBackendConfig.backendType(backendType, Config.config))
 
   def apply(touchpointBackendConfig: TouchpointBackendConfig): TouchpointBackend = {
-
-    val zuoraService = new ZuoraService(touchpointBackendConfig.zuora)
-
     val salesforceRepo = new SalesforceRepo(touchpointBackendConfig.salesforce)
+    val zuoraService = new ZuoraService(touchpointBackendConfig.zuora, touchpointBackendConfig.digitalProductId)
 
-    val ratePlan = touchpointBackendConfig.productRatePlan
-
-    TouchpointBackend(salesforceRepo, zuoraService, ratePlan)
+    TouchpointBackend(salesforceRepo, zuoraService)
   }
 
   val Normal = TouchpointBackend(BackendType.Default)
@@ -28,11 +23,12 @@ object TouchpointBackend {
 
 case class TouchpointBackend(
   salesforceRepo: SalesforceRepo,
-  zuoraService : ZuoraService,
-  ratePlans: Seq[ProductRatePlan]) {
+  zuoraService : ZuoraService
+) {
 
   def start() = {
     salesforceRepo.salesforce.authTask.start()
     zuoraService.authTask.start()
+    zuoraService.productsTask.start()
   }
 }

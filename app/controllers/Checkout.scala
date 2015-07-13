@@ -6,11 +6,8 @@ import com.typesafe.scalalogging.LazyLogging
 import forms.{FinishAccountForm, SubscriptionsForm}
 import play.api.libs.json._
 import play.api.mvc._
-import services.CheckoutService
 import services.CheckoutService.CheckoutResult
-import services.TouchpointBackend._
-import services._
-import touchpoint.ProductPlan
+import services.{CheckoutService, _}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -41,9 +38,8 @@ object Checkout extends Controller with LazyLogging {
 
       //TODO when implementing test-users this requires updating to supply data to correct location
       val touchpointBackend = TouchpointBackend.Normal
-      val ratePlans = touchpointBackend.ratePlans.filter(_.product == ProductPlan.Digital)
 
-      Ok(views.html.checkout.payment(form, userIsSignedIn = idUserOpt.isDefined, ratePlans))
+      Ok(views.html.checkout.payment(form, userIsSignedIn = idUserOpt.isDefined, touchpointBackend.zuoraService.products))
     }
   }
 
@@ -54,8 +50,8 @@ object Checkout extends Controller with LazyLogging {
           yield {
             //TODO when implementing test-users this requires updating to supply data to correct location
             val touchpointBackend = TouchpointBackend.Normal
-            val ratePlans = touchpointBackend.ratePlans.filter(_.product == ProductPlan.Digital)
-            BadRequest(views.html.checkout.payment(formWithErrors, userIsSignedIn = idUserOpt.isDefined, ratePlans))
+
+            BadRequest(views.html.checkout.payment(formWithErrors, userIsSignedIn = idUserOpt.isDefined, touchpointBackend.zuoraService.products))
           }
       },
       userData => {
