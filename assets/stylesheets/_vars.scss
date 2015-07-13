@@ -50,10 +50,13 @@ $c-white: #fff;
 @import 'bower_components/sass-mq/_mq';
 @import 'bower_components/guss-grid-system/_grid-system';
 
+
 $mq-breakpoints: (
-    mobile:    gs-span(4), // 300px
-    tablet:    gs-span(9) + $gs-gutter * 2, // 740px
-    desktop:   gs-span(12) + $gs-gutter * 2, // 980px
-    leftCol:   gs-span(14) + $gs-gutter * 2, // 1140px
-    wide:      gs-span(16) + $gs-gutter * 2, // 1300px
+    mobile:          gs-span(4)  + $gs-gutter,   // 320px
+    mobileLandscape: gs-span(6)  + $gs-gutter,   // 480px
+    phablet:         gs-span(8)  + $gs-gutter,   // 640px
+    tablet:          gs-span(9)  + $gs-gutter*2, // 740px
+    desktop:         gs-span(12) + $gs-gutter*2, // 980px
+    leftCol:         gs-span(14) + $gs-gutter*2, // 1140px
+    wide:            gs-span(16) + $gs-gutter*2, // 1300px
 );
