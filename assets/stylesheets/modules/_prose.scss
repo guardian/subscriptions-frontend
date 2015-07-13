@@ -14,20 +14,6 @@
 //
 .prose {
 
-    // TODO: Resolve global font-stacks
-    font-family: $f-serif-text;
-
-    > p,
-    ul,
-    ol,
-    address {
-        padding: 0;
-        margin: 0 0 $gs-baseline;
-
-        @include mq(tablet) {
-            margin-bottom: $gs-baseline * 1.3333;
-        }
-    }
 
     a {
         color: $c-brand;
@@ -41,22 +27,30 @@
         }
     }
 
+    > p,
+    ul,
+    ol {
+        padding: 0;
+        margin: 0 0 $gs-baseline;
+
+        @include mq(tablet) {
+            margin-bottom: $gs-baseline * 1.3333;
+        }
+    }
+
     li > ol,
     li > ul {
         margin-bottom: 0;
+    }
+    li > ul,
+    li > ol {
+        margin-left: $gs-gutter;
     }
 
     ol {
         list-style: none;
         margin-left: $gs-gutter;
-    }
-
-    ol {
         counter-reset: li;
-    }
-    ol > ol,
-    ol > ul {
-        margin-left: $gs-gutter * 2;
     }
     ol > li {
         list-style-position: outside;
@@ -84,4 +78,9 @@
         margin: 0;
     }
 
+}
+
+// TODO: Resolve global font-stacks
+.prose--full {
+    font-family: $f-serif-text;
 }
