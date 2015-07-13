@@ -5,7 +5,7 @@
 .global-nav {
     @include fs-headline(2);
     font-weight: guss-font-weight('medium');
-    background-color: $c-brand-mid;
+    background-color: $c-brand-tint;
 }
 .global-nav__inner {
     background-color: $c-brand-dark;
