@@ -15,30 +15,21 @@
     var guardian = JSON.parse('@Html(Json.stringify(Json.toJson(jsVars)))');
     guardian.buildNumber = '@app.BuildInfo.buildNumber';
     guardian.isModernBrowser =  (
-            'querySelector' in document
-            && 'addEventListener' in window
-            && 'localStorage' in window
-            && 'sessionStorage' in window
-            && 'bind' in Function
-            && (('XMLHttpRequest' in window && 'withCredentials' in new XMLHttpRequest())
-              || 'XDomainRequest' in window));
+        'querySelector' in document
+        && 'addEventListener' in window
+        && 'localStorage' in window
+        && 'sessionStorage' in window
+        && 'bind' in Function
+        && (('XMLHttpRequest' in window && 'withCredentials' in new XMLHttpRequest()) || 'XDomainRequest' in window)
+    );
 
     (function(isModern) {
-        if (isModern) {
-            // only load JS if the browser cuts the mustard
-            var newElm = document.createElement('script');
-            newElm.src = '@hashedPathFor("javascripts/main.min.js")';
-            document.getElementsByTagName("head")[0].appendChild(newElm);
+        // We want to add/remove classes to HTML ASAP to avoid FOUC
+        var htmlClassNames = ['js-on'];
+        document.documentElement.className = document.documentElement.className.replace(/\bjs-off\b/g, '') + ' ' + htmlClassNames.join(' ');
+
+        if (!isModern) {
+            document.documentElement.className += ' js-ancient-browser';
         }
     })(guardian.isModernBrowser);
-
-    // Initialise requireJS loader module Curl
-    var curl = {
-        apiName: "require",
-        paths: {
-            zxcvbn: '@hashedPathFor("javascripts/vendor/zxcvbn.js")'
-        }
-    };
 </script>
-
-<script src='@hashedPathFor("javascripts/vendor/curl.js")'></script>
