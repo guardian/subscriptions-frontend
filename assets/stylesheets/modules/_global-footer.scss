@@ -2,12 +2,38 @@
    Footer
    ========================================================================== */
 
-.global-brandbar {
-    background-color: $c-brand;
+.global-footer {
+    // background-color: $c-brand-mid;
+}
+.global-footer__info {
+    @include fs-textSans(3);
+    color: $c-neutral4;
+    background-color: guss-colour(multimedia-support-4);
+    padding: ($gs-baseline * 2) 0;
 
-    > .gs-container {
-        background-color: $c-brand-dark;
+    @include mq(tablet) {
+        padding: ($gs-baseline * 2) $gs-gutter;
     }
+
+    p {
+        margin-bottom: 0;
+    }
+
+    a {
+        color: inherit;
+        border-bottom: 1px solid $c-neutral2;
+    }
+}
+.global-footer__copyright {
+    @include fs-textSans(1);
+    border-top: 1px solid $c-neutral2;
+    margin-top: $gs-gutter;
+    padding-top: $gs-baseline / 2;
+    display: block;
+}
+
+.global-brandbar {
+    background-color: $c-brand-tint;
 
     .action {
         border: none;
@@ -17,23 +43,6 @@
         text-transform: lowercase;
     }
 }
-
-.global-footer {
-    @include fs-textSans(3);
-    background-color: $c-neutral5;
-    color: $c-body;
-    padding: $gs-baseline*2 $gs-gutter;
-
-    a {
-        color: inherit;
-        border: none;
-        text-decoration: underline;
-    }
-
-    .really-serious-copyright {
-        @include fs-textSans(1);
-        border-top: 1px solid $c-neutral3;
-        margin-top: $gs-baseline*1.5;
-        padding-top: $gs-baseline;
-    }
+.global-brandbar__inner {
+    background-color: $c-brand;
 }

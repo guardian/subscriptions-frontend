@@ -1,0 +1,42 @@
+@(showInternationalMessage: Boolean = false)
+
+@import configuration.Links
+@import org.joda.time.DateTime
+
+<footer class="global-footer" role="contentinfo">
+
+    @fragments.global.brandbar()
+    @fragments.global.navigation()
+
+    <div class="global-footer__info">
+        <div class="gs-container">
+            @if(showInternationalMessage) {
+                <p>
+                    For help with Guardian and Observer subscription services please see our
+                    <a href="@Links.guardianSubscriptionFaqs.href"
+                       title="@Links.guardianSubscriptionFaqs.title">
+                       @Links.guardianSubscriptionFaqs.title
+                    </a>.
+                </p>
+            } else {
+                <p>
+                    For help with Guardian and Observer subscription services please call 0330 333 6767.
+                    Open 8am to 8pm, Monday to Sunday.
+                </p>
+                <p>
+                    You may also find help in our
+                    <a href="@Links.guardianSubscriptionFaqs.href"
+                       title="@Links.guardianSubscriptionFaqs.title">
+                       @Links.guardianSubscriptionFaqs.title
+                    </a>.
+                </p>
+            }
+            <small class="global-footer__copyright">
+                &copy; @{new DateTime().year.getAsText} Guardian News and Media Limited or its affiliated companies.
+                All rights reserved. Build #@app.BuildInfo.buildNumber
+            </small>
+            <!-- build-commit-id: @app.BuildInfo.gitCommitId -->
+        </div>
+    </div>
+
+</footer>

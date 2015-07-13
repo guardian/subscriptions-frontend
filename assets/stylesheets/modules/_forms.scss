@@ -11,25 +11,38 @@
 [type=password] {
     font-family: sans-serif !important;
 }
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+input[type=number] {
+    -moz-appearance:textfield;
+}
 
 // Form
 // ============================================================================
 
 .form {
     margin-bottom: 0;
-    border-top: 1px solid $c-neutral5;
+}
+
+.form-panel {
+    background-color: $c-neutral7;
+    padding: ($gs-gutter / 2);
+    padding-bottom: $gs-baseline * 2;
 }
 
 // Form Fieldset
 // ============================================================================
 
 .fieldset {
-    border: 0;
-    padding: 0;
-    margin: 0;
-    border-bottom: 1px solid $c-neutral5;
-    background-color: $c-neutral7;
     position: relative;
+    background-color: $c-neutral7;
+    margin: 0;
+    border: 0;
+    border-top: 1px solid $c-neutral5;
+    padding: ($gs-gutter / 2);
 
     @include mq(tablet) {
         display: table;
@@ -43,42 +56,46 @@
         vertical-align: top;
     }
 }
-
+.fieldset__fields {
+    padding-bottom: $gs-baseline * 2;
+}
 .fieldset__heading {
-    padding: ($gs-baseline / 2) ($gs-baseline);
-
     @include mq(tablet) {
         width: 35%;
-        padding-right: ($gs-gutter * 2);
+        padding-right: $gs-gutter / 2;
     }
-}
-.fieldset__fields {
-    padding: ($gs-gutter / 2) ($gs-gutter / 2) ($gs-baseline * 2);
-
-    @include mq(tablet) {
-        padding-left: 0;
+    @include mq(desktop) {
+        padding-right: $gs-gutter * 2;
     }
 }
 .fieldset__headline {
     @include fs-header(3);
     margin-bottom: $gs-baseline / 2;
 }
-.fieldset__num {
-    margin-right: $gs-gutter/4;
+.fieldset__headline__num {
     color: guss-colour(news-main-2);
+    display: inline-block;
+    width: $gs-gutter;
 }
 .fieldset__note {
     @include fs-textSans(2);
-    color: guss-colour(neutral-2);
+    color: $c-neutral2;
 }
 .fieldset__note__label {
     margin-left: .2em;
+
     @include mq(desktop) {
         display: block;
         margin-left: 0;
     }
 }
-
+.fieldset__note--offset {
+    @include mq(desktop) {
+        // Semi-magic number
+        // Optical alignment with field headlins
+        padding-left: $gs-gutter + 3px;
+    }
+}
 .fieldset__edit {
     position: absolute;
     top: $gs-baseline;
@@ -106,6 +123,12 @@
     }
 }
 
+.security-note {
+    @include fs-textSans(2);
+    color: $c-neutral2;
+    margin-bottom: $gs-baseline / 2;
+}
+
 // Form labels and inputs
 // ============================================================================
 
@@ -127,6 +150,7 @@
     outline: none;
     width: 100%;
     -webkit-appearance: none;
+    appearance: none;
     border-radius: 20px;
 
     &:focus {
@@ -152,22 +176,34 @@
     resize: vertical;
 }
 
+.checkbox,
+.checkbox-title {
+    @include fs-textSans(3);
+}
+.checkbox-title {
+    font-weight: guss-font-weight('regular');
+    margin-bottom: $gs-baseline / 2;
+}
+.checkbox {
+    cursor: pointer;
+    display: table;
+    width: 100%;
+}
+.checkbox__input,
+.checkbox__label {
+    display: table-cell;
+    vertical-align: top;
+}
+.checkbox__input {
+    width: 1em;
+    padding-right: .3em;
+}
+
 .select {
     font: inherit;
 }
 .select--wide {
     width: 100%;
-}
-
-// Checkbox
-// ============================================================================
-
-.checkbox {
-    @include fs-textSans(3);
-
-    .label {
-        font: inherit;
-    }
 }
 
 // Form field
@@ -236,61 +272,4 @@
     vertical-align: middle;
     margin-left: .25em;
     content: '(optional)';
-}
-
-/* ==========================================================================
-   Password Strength indicator
-   ========================================================================== */
-
-$password-strength-score-0: #e31f26;
-$password-strength-score-1: #e6711b;
-$password-strength-score-2: #ffbb00;
-$password-strength-score-3: #aad801;
-$password-strength-score-4: #33a22b;
-
-.password-strength {
-    margin-bottom: $gs-baseline / 2;
-}
-.password-strength__indicator {
-    height: 8px;
-    position: relative;
-    background-color: $c-neutral5;
-
-    &:after {
-        bottom: 0;
-        content: '';
-        display: block;
-        left: 0;
-        position: absolute;
-        top: 0;
-    }
-    &.score-0:after {
-        width: 20%;
-        background-color: $password-strength-score-0;
-    }
-    &.score-1:after {
-        width: 40%;
-        background-color: $password-strength-score-1;
-    }
-    &.score-2:after {
-        width: 60%;
-        background-color: $password-strength-score-2;
-    }
-    &.score-3:after {
-        width: 80%;
-        background-color: $password-strength-score-3;
-    }
-    &.score-4:after {
-        width: 100%;
-        background-color: $password-strength-score-4;
-    }
-}
-.password-strength__note {
-    @include fs-textSans(1);
-    color: $c-neutral2;
-    margin: ($gs-baseline / 2) 0;
-
-    @include mq(mobile) {
-        text-align: right;
-    }
 }

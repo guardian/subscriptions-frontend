@@ -1,13 +1,13 @@
 define(['$',
         'bean',
+        'utils/ajax',
         'modules/checkout/form-elements',
-        'modules/checkout/validations'
-    ],
+        'modules/checkout/validations'],
     function ($,
               bean,
+              ajax,
               form,
-              validations
-    ) {
+              validations) {
 
     'use strict';
 
@@ -40,6 +40,9 @@ define(['$',
         $EDIT_YOUR_DETAILS = form.$EDIT_YOUR_DETAILS,
         $EDIT_PAYMENT_DETAILS = form.$EDIT_PAYMENT_DETAILS,
         $FINISH_ACCOUNT_SUBMIT = form.$FINISH_ACCOUNT_SUBMIT,
+        $FINISH_ACCOUNT_FORM = form.$FINISH_ACCOUNT_FORM,
+        $FINISH_ACCOUNT_SUCCESS = form.$FINISH_ACCOUNT_SUCCESS,
+        $FINISH_ACCOUNT_ERROR = form.$FINISH_ACCOUNT_ERROR,
         FIELDSET_COLLAPSED = 'fieldset--collapsed',
         FIELDSET_COMPLETE = 'data-fieldset-complete',
         IS_HIDDEN = 'is-hidden';
@@ -73,6 +76,7 @@ define(['$',
                     $FIELDSET_PAYMENT_DETAILS.removeClass(FIELDSET_COLLAPSED);
                     $EDIT_YOUR_DETAILS.removeClass(IS_HIDDEN);
                     $EDIT_PAYMENT_DETAILS.addClass(IS_HIDDEN);
+                    $SMALLPRINT.removeClass(IS_HIDDEN);
                 });
             });
         }
@@ -120,7 +124,6 @@ define(['$',
                 $REVIEW_NAME.text([$FIRST_NAME.val(), $LAST_NAME.val()].join(' '));
                 $REVIEW_ADDRESS.text([$ADDRESS1.val(), $ADDRESS2.val(), $ADDRESS3.val(), $POSTCODE.val()].join(', '));
                 $REVIEW_EMAIL.text($EMAIL.val());
-                $SMALLPRINT.removeClass(IS_HIDDEN);
             });
         }
 
@@ -135,13 +138,26 @@ define(['$',
     };
 
     var finishAccount = function () {
-        if ($FINISH_ACCOUNT_SUBMIT.length) {
+        if ($FINISH_ACCOUNT_FORM.length) {
             bean.on($FINISH_ACCOUNT_SUBMIT[0], 'click', function (e) {
                 e.preventDefault();
 
                 if (validations.validateFinishAccount()) {
-                    bean.off($FINISH_ACCOUNT_SUBMIT[0], 'click');
-                    bean.fire($FINISH_ACCOUNT_SUBMIT[0], 'click');
+                    var action = $FINISH_ACCOUNT_FORM.attr('action');
+                    var formData = ajax.reqwest.serialize($FINISH_ACCOUNT_FORM[0]);
+
+                    ajax({
+                        url: action,
+                        method: 'POST',
+                        data: formData
+                    }).then(function () {
+                        $FINISH_ACCOUNT_FORM.addClass(IS_HIDDEN);
+                        $FINISH_ACCOUNT_SUCCESS.removeClass(IS_HIDDEN);
+                    }).catch(function (jsonError) {
+                        $FINISH_ACCOUNT_FORM.addClass(IS_HIDDEN);
+                        Raven.captureException(jsonError);
+                        $FINISH_ACCOUNT_ERROR.removeClass(IS_HIDDEN);
+                    });
                 }
             });
         }

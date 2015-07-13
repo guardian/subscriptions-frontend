@@ -1,10 +1,11 @@
-@import model.GuestAccountData
+@import model.{GuestAccountData,PersonalData}
 @import services.UserId.{paramName => userIdParam}
 @import services.IdentityToken.{paramName => identityTokenParam}
+@import configuration.Config.Identity.webAppProfileUrl
 
 @import routes.Checkout.processFinishAccount
 
-@(guestAccountForm: Option[Form[GuestAccountData]] = None)(implicit request: RequestHeader)
+@(subscriptionId: String, personalData: PersonalData, guestAccountForm: Option[Form[GuestAccountData]] = None)(implicit request: RequestHeader)
 
 @main("Thank you | Subscriptions | The Guardian", bodyClasses=List("is-wide")) {
 
@@ -14,7 +15,7 @@
 
     <section class="section-slice section-slice--limited">
         <div class="section-slice__content">
-            <h2 class="section-title">Order ref: ABCD123456</h2>
+            <h2 class="section-title">Order ref: @subscriptionId</h2>
             <div class="prose">
                 <p>
                     We have received your request and are now processing your subscription,
@@ -26,7 +27,7 @@
                     <a href="mailto:subscriptions@@theguardian.com">subscriptions@@theguardian.com</a>
                 </p>
             </div>
-            @fragments.checkout.reviewPanel()
+            @fragments.checkout.reviewPanel(subscriptionId, personalData)
         </div>
     </section>
 
@@ -52,7 +53,7 @@
                     <p>Some features of your subscription require you to be signed in before you can make use of them.</p>
                 </div>
 
-                <form action="@processFinishAccount" method="POST" class="form">
+                <form action="@processFinishAccount" method="POST" class="form js-finish-account">
                     @helper.CSRF.formField
 
                     <div class="form-field js-checkout-finish-account-password">
@@ -81,9 +82,19 @@
                     <div class="actions">
                         <button class="button button--primary button--large js-checkout-finish-account-submit">Confirm</button>
                     </div>
-
                 </form>
-            }
+
+                <div class="js-finish-account-success is-hidden">
+                    <p>All done!</p>
+                    <p>You can edit your details as well as manage your subscription in your Profile area</p>
+                    <div class="actions">
+                        <a href="@webAppProfileUrl" class="button button--primary button--large">My profile</a>
+                    </div>
+                </div>
+                <div class="js-finish-account-error is-hidden finish-account-error">
+                    <p>An internal server error occurred while trying to set a password for your account. Please try again later.</p>
+                </div>
+        }
         </div>
     </section>
 

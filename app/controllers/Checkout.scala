@@ -4,10 +4,14 @@ import actions.CommonActions._
 import com.gu.identity.play.{IdUser, PrivateFields}
 import com.typesafe.scalalogging.LazyLogging
 import forms.{FinishAccountForm, SubscriptionsForm}
+import model.PersonalData
 import play.api.libs.json._
 import play.api.mvc._
 import services.CheckoutService.CheckoutResult
 import services.{CheckoutService, _}
+import services.{CheckoutService, _}
+import views.html.{checkout => view}
+import configuration.Config.Identity.webAppProfileUrl
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -29,10 +33,10 @@ object Checkout extends Controller with LazyLogging {
           idUserData("personal.last", _.secondName) ++
           idUserOpt.map("personal.emailValidation.email" -> _.primaryEmailAddress) ++
           idUserOpt.map("personal.emailValidation.confirm" -> _.primaryEmailAddress) ++
-          idUserData("personal.address.address1", _.address1) ++
-          idUserData("personal.address.address2", _.address2) ++
-          idUserData("personal.address.town", _.address3) ++
-          idUserData("personal.address.postcode", _.postcode)
+          idUserData("personal.address.address1", _.billingAddress1) ++
+          idUserData("personal.address.address2", _.billingAddress2) ++
+          idUserData("personal.address.town", _.billingAddress3) ++
+          idUserData("personal.address.postcode", _.billingPostcode)
         ).toMap
       )
 
@@ -54,33 +58,32 @@ object Checkout extends Controller with LazyLogging {
             BadRequest(views.html.checkout.payment(formWithErrors, userIsSignedIn = idUserOpt.isDefined, touchpointBackend.zuoraService.products))
           }
       },
-      userData => {
+
+      formData => {
         val idUserOpt = AuthenticationService.authenticatedUserFor(request)
-        CheckoutService.processSubscription(userData, idUserOpt).map {
-          case CheckoutResult(_, guestUser: GuestUser, _) =>
-            Some(FinishAccountForm().bind(guestUser.toFormParams))
-          case CheckoutResult(_, _:MinimalIdUser, _) =>
-            None
-        }.map(formOpt => Ok(views.html.checkout.thankyou(formOpt)))
+        val authCookie = request.cookies.find(_.name == "SC_GU_U").map(cookie => AuthCookie(cookie.value))
+
+        CheckoutService.processSubscription(formData, idUserOpt, authCookie).map { case CheckoutResult(_, userIdData, subscription) =>
+          val passwordForm = userIdData.toGuestAccountForm
+          Ok(view.thankyou(subscription.id, formData.personalData, passwordForm))
+        }
       }
     )
   }
 
-  def thankyou = GoogleAuthenticatedStaffAction.async { implicit request =>
-    Future {
-      val form = FinishAccountForm().bindFromRequest()
-      Ok(views.html.checkout.thankyou(Some(form)))
-    }
-  }
-
   def processFinishAccount = GoogleAuthenticatedStaffAction.async { implicit request =>
-    FinishAccountForm().bindFromRequest.fold( formWithErrors => {
+    FinishAccountForm().bindFromRequest.fold({ formWithErrors =>
       Future {
-        BadRequest(views.html.checkout.thankyou(Some(formWithErrors)))
+        BadRequest(Json.obj(
+          "error" -> "Invalid form submissions",
+          "invalidFields" -> formWithErrors.errors.map(_.key)
+        ))
       }
     }, guestAccountData => {
       IdentityService.convertGuest(guestAccountData.password, IdentityToken(guestAccountData.token))
-        .map(_ => Ok(views.html.checkout.alldone()))
+        .map { _ =>
+          Ok(Json.obj("profileUrl" -> webAppProfileUrl.toString()))
+        }
     })
   }
 
@@ -92,6 +95,6 @@ object Checkout extends Controller with LazyLogging {
 
   private def getIdentityUserByCookie(request: Request[_]): Future[Option[IdUser]] =
     request.cookies.find(_.name == "SC_GU_U").fold(Future.successful(None: Option[IdUser])) { cookie =>
-      IdentityService.userLookupByScGuU(cookie.value)
+      IdentityService.userLookupByScGuU(AuthCookie(cookie.value))
     }
 }
