@@ -3,7 +3,7 @@
    ========================================================================== */
 
 .checkout-header {
-    padding: ($gs-gutter / 2) 0 ($gs-baseline * 3);
+    padding: ($gs-gutter / 2) 0 ($gs-baseline / 2);
 
     @include mq(desktop) {
         padding-left: 22.5%;
@@ -68,34 +68,6 @@
         width: 35%;
         padding-right: ($gs-gutter * 2);
     }
-}
-
-/* Basket Preview
-   ========================================================================== */
-
-.basket-preview {
-    @include fs-header(2);
-    margin-bottom: $gs-gutter;
-}
-.basket-preview__title {
-    font-weight: bold;
-    border-top: 1px solid $c-neutral5;
-    padding-top: $gs-baseline / 2;
-    margin-bottom: $gs-gutter;
-}
-.basket-preview__image {
-    border-bottom: 1px solid $c-neutral5;
-    margin-bottom: $gs-baseline;
-}
-.basket-preview__product {
-    margin-bottom: $gs-baseline / 4;
-}
-.basket-preview__product__caption {
-    font-weight: normal;
-    font-style: italic;
-}
-.basket-preview__payment {
-    font-weight: normal;
 }
 
 /* Notice

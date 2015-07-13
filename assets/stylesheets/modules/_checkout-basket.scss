@@ -1,0 +1,94 @@
+/* ==========================================================================
+   Checkout / Basket
+   ========================================================================== */
+
+/* Basket Preview
+   ========================================================================== */
+
+.basket-preview {
+    @include clearfix();
+    @include fs-headline(2);
+    margin-bottom: $gs-gutter * 2;
+    position: relative;
+
+    @include mq($until: tablet) {
+        color: $c-neutral2;
+    }
+
+    @include mq($from: phablet, $until: tablet) {
+        margin-bottom: 0;
+        // Magic number
+        min-height: 100px;
+    }
+}
+.basket-preview__title,
+.basket-preview__product {
+    display: inline-block;
+}
+.basket-preview__image {
+    display: none;
+
+    @include mq(phablet) {
+        display: block;
+    }
+
+    @include mq($from: phablet, $until: tablet) {
+        position: absolute;
+        right: 0;
+        // Semi-magic number
+        // Pull image up next to title
+        top: -30px;
+        width: 220px;
+    }
+
+    @include mq(tablet) {
+        border-bottom: 1px solid $c-neutral5;
+        margin-bottom: $gs-baseline;
+    }
+}
+.basket-preview__title {
+    font-weight: normal;
+    font-family: inherit;
+
+    @include mq(tablet) {
+        @include fs-header(2);
+        font-weight: guss-font-weight(bold);
+        border-top: 1px solid $c-neutral5;
+        padding-top: $gs-baseline / 2;
+        margin-bottom: $gs-gutter;
+    }
+}
+.basket-preview__product {
+    margin-bottom: $gs-baseline / 4;
+}
+.basket-preview__product__title {
+    &::after {
+        content: ', ';
+        // Magic-number
+        // Align , with text
+        margin-left: -2px;
+        display: inline-block;
+    }
+
+    @include mq(tablet) {
+        &::after {
+            content: '';
+        }
+        font-weight: guss-font-weight(bold);
+    }
+}
+.basket-preview__product__caption {
+    display: none;
+
+    @include mq(tablet) {
+        display: inline-block;
+        font-weight: normal;
+        font-style: italic;
+    }
+}
+.basket-preview__product__payment {
+    @include mq(tablet) {
+        display: block;
+        margin: ($gs-baseline / 2) 0;
+    }
+}
