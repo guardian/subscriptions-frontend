@@ -9,6 +9,7 @@
  * BASE.................Global / element level rules
  * MODULE...............Individual components. One file per component,
  *                      The majority of all styles should be modules.
+ * STATE................Styles which augment & overrides all other styles
  */
 /* ==========================================================================
    SETTINGS & TOOLS
@@ -49,3 +50,9 @@
 @import 'modules/checkout-basket';
 @import 'modules/membership';
 @import 'modules/warnings';
+
+/* ==========================================================================
+   STATE
+   ========================================================================== */
+
+@import 'state/responsive';
