@@ -33,7 +33,6 @@ define(['$',
         $REVIEW_ACCOUNT = form.$REVIEW_ACCOUNT,
         $REVIEW_SORTCODE = form.$REVIEW_SORTCODE,
         $REVIEW_HOLDER = form.$REVIEW_HOLDER,
-        $SMALLPRINT = form.$SMALLPRINT,
         $FIELDSET_YOUR_DETAILS = form.$FIELDSET_YOUR_DETAILS,
         $FIELDSET_PAYMENT_DETAILS = form.$FIELDSET_PAYMENT_DETAILS,
         $FIELDSET_REVIEW = form.$FIELDSET_REVIEW,
@@ -76,7 +75,6 @@ define(['$',
                     $FIELDSET_PAYMENT_DETAILS.removeClass(FIELDSET_COLLAPSED);
                     $EDIT_YOUR_DETAILS.removeClass(IS_HIDDEN);
                     $EDIT_PAYMENT_DETAILS.addClass(IS_HIDDEN);
-                    $SMALLPRINT.removeClass(IS_HIDDEN);
                 });
             });
         }

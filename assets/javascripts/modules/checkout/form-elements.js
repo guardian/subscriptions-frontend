@@ -45,7 +45,6 @@ define(['$'], function ($) {
         $REVIEW_ACCOUNT: $('.js-checkout-review-account'),
         $REVIEW_SORTCODE: $('.js-checkout-review-sortcode'),
         $REVIEW_HOLDER: $('.js-checkout-review-holder'),
-        $SMALLPRINT: $('.js-checkout-smallprint'),
         $FINISH_ACCOUNT_SUBMIT: $('.js-checkout-finish-account-submit'),
         $FINISH_ACCOUNT_FORM: $('.js-finish-account'),
         $FIELDSET_YOUR_DETAILS: $('.js-fieldset-your-details'),
