@@ -1,4 +1,7 @@
 import com.gu.identity.play.IdMinimalUser
+import forms.FinishAccountForm
+import model.GuestAccountData
+import play.api.data.Form
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
@@ -38,17 +41,20 @@ package object services {
 
   sealed trait UserIdData {
     def id: UserId
+    def toGuestAccountForm: Option[Form[GuestAccountData]]
   }
 
-  case class MinimalIdUser(user: IdMinimalUser) extends UserIdData {
+  case class RegisteredUser(user: IdMinimalUser) extends UserIdData {
     override def id = UserId(user.id)
+    override def toGuestAccountForm = None
   }
 
   case class GuestUser(id: UserId, token: IdentityToken) extends UserIdData {
-    def toFormParams = Map(
-      UserId.paramName -> id.toString,
-      IdentityToken.paramName -> token.toString
-    )
+    override def toGuestAccountForm: Option[Form[GuestAccountData]] =
+      Some(FinishAccountForm().bind(Map(
+        UserId.paramName -> id.toString,
+        IdentityToken.paramName -> token.toString
+      )))
   }
 
   object GuestUser {

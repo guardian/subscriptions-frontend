@@ -24,7 +24,7 @@ class CheckoutService(identityService: IdentityService, salesforceService: Sales
 
     val userOrElseRegisterGuest: Future[UserIdData] =
       idUserOpt.map(user => Future {
-        MinimalIdUser(user)
+        RegisteredUser(user)
       }).getOrElse {
         logger.info(s"User does not have an Identity account. Creating a guest account")
         identityService.registerGuest(subscriptionData.personalData)
