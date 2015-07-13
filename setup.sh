@@ -130,6 +130,16 @@ install_dependencies() {
   bower_stylesheets
 }
 
+install_nginx() {
+  if ! installed nginx; then
+    if linux; then
+      sudo apt-get install -y nginx
+    elif mac; then
+      brew install nginx
+    fi
+  fi
+}
+
 install_chromedriver() {
   if ! installed chromedriver; then
     if linux; then
@@ -163,6 +173,7 @@ main() {
   install_node
   install_grunt
   install_dependencies
+  install_nginx
   install_chromedriver
   compile
   report
