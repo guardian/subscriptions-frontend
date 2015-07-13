@@ -1,6 +1,7 @@
 require([
     'utils/ajax',
     'modules/toggle',
+    'modules/appendAround',
     'modules/checkout/checkout',
     'modules/components/password',
     // Add new dependencies ABOVE this
@@ -8,6 +9,7 @@ require([
 ], function(
     ajax,
     toggle,
+    appendAround,
     checkout,
     password
 ) {
@@ -25,6 +27,7 @@ require([
     ajax.init({page: {ajaxUrl: ''}});
 
     toggle.init();
+    appendAround.init();
     checkout.init();
     password.init();
 });

@@ -146,13 +146,14 @@ module.exports = function(grunt) {
                     baseUrl: '<%= dirs.assets.javascripts %>',
                     paths: {
                         '$': 'utils/$',
+                        'Promise': 'bower_components/native-promise-only/lib/npo.src',
                         'bean': 'bower_components/bean/bean',
                         'bonzo': 'bower_components/bonzo/bonzo',
+                        'lodash': 'bower_components/lodash-amd/modern',
                         'qwery': 'bower_components/qwery/qwery',
+                        'raven': 'bower_components/raven-js/dist/raven',
                         'requireLib': 'bower_components/requirejs/require',
-                        'reqwest': 'bower_components/reqwest/reqwest',
-                        'Promise': 'bower_components/native-promise-only/lib/npo.src',
-                        'raven': 'bower_components/raven-js/dist/raven'
+                        'reqwest': 'bower_components/reqwest/reqwest'
                     },
                     optimize: isDev ? 'none' : 'uglify2',
                     generateSourceMaps: isDev ? 'true' : 'false',
