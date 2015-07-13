@@ -24,7 +24,7 @@ lazy val root = (project in file(".")).enablePlugins(
 scalaVersion := "2.11.6"
 
 libraryDependencies ++= Seq(
-  "com.gu" %% "membership-common" % "0.72-SNAPSHOT",
+  "com.gu" %% "membership-common" % "0.74",
   cache,
   ws,
   filters,
