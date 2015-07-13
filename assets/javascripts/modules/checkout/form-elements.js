@@ -53,6 +53,7 @@ define(['$'], function ($) {
         $FIELDSET_REVIEW: $('.js-fieldset-review'),
         $EDIT_YOUR_DETAILS: $('.js-edit-your-details'),
         $EDIT_PAYMENT_DETAILS: $('.js-edit-payment-details'),
-        $ALL_DONE: $('.js-all-done')
+        $FINISH_ACCOUNT_SUCCESS: $('.js-finish-account-success'),
+        $FINISH_ACCOUNT_ERROR: $('.js-finish-account-error')
     };
 });

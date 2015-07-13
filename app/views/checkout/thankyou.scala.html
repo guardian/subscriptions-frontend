@@ -83,12 +83,16 @@
                         <button class="button button--primary button--large js-checkout-finish-account-submit">Confirm</button>
                     </div>
                 </form>
-                <div class="js-all-done" style="display: none">
+
+                <div class="js-finish-account-success is-hidden">
                     <p>All done!</p>
                     <p>You can edit your details as well as manage your subscription in your Profile area</p>
                     <div class="actions">
                         <a href="@webAppProfileUrl" class="button button--primary button--large">My profile</a>
                     </div>
+                </div>
+                <div class="js-finish-account-error is-hidden finish-account-error">
+                    <p>An internal server error occurred while trying to set a password for your account. Please try again later.</p>
                 </div>
         }
         </div>

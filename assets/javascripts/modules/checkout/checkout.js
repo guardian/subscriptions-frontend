@@ -1,14 +1,13 @@
 define(['$',
         'bean',
+        'utils/ajax',
         'modules/checkout/form-elements',
-        'modules/checkout/validations',
-        'utils/ajax'],
+        'modules/checkout/validations'],
     function ($,
               bean,
+              ajax,
               form,
-              validations,
-              ajax
-    ) {
+              validations) {
 
     'use strict';
 
@@ -42,7 +41,8 @@ define(['$',
         $EDIT_PAYMENT_DETAILS = form.$EDIT_PAYMENT_DETAILS,
         $FINISH_ACCOUNT_SUBMIT = form.$FINISH_ACCOUNT_SUBMIT,
         $FINISH_ACCOUNT_FORM = form.$FINISH_ACCOUNT_FORM,
-        $ALL_DONE = form.$ALL_DONE,
+        $FINISH_ACCOUNT_SUCCESS = form.$FINISH_ACCOUNT_SUCCESS,
+        $FINISH_ACCOUNT_ERROR = form.$FINISH_ACCOUNT_ERROR,
         FIELDSET_COLLAPSED = 'fieldset--collapsed',
         FIELDSET_COMPLETE = 'data-fieldset-complete',
         IS_HIDDEN = 'is-hidden';
@@ -151,11 +151,12 @@ define(['$',
                         method: 'POST',
                         data: formData
                     }).then(function () {
-                        $FINISH_ACCOUNT_FORM.hide();
-                        $ALL_DONE.show();
-
+                        $FINISH_ACCOUNT_FORM.addClass(IS_HIDDEN);
+                        $FINISH_ACCOUNT_SUCCESS.removeClass(IS_HIDDEN);
                     }).catch(function (jsonError) {
-                        console && console.error("Error while submitting guest user password form:", jsonError);
+                        $FINISH_ACCOUNT_FORM.addClass(IS_HIDDEN);
+                        Raven.captureException(jsonError);
+                        $FINISH_ACCOUNT_ERROR.removeClass(IS_HIDDEN);
                     });
                 }
             });
