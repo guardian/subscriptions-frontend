@@ -1,14 +1,16 @@
-define(['$',
-        'bean',
-        'utils/ajax',
-        'modules/checkout/form-elements',
-        'modules/checkout/validations'],
-    function ($,
-              bean,
-              ajax,
-              form,
-              validations) {
-
+define([
+    '$',
+    'bean',
+    'utils/ajax',
+    'modules/checkout/formElements',
+    'modules/checkout/validations'
+], function (
+    $,
+    bean,
+    ajax,
+    form,
+    validations
+) {
     'use strict';
 
     var $FIRST_NAME = form.$FIRST_NAME,
@@ -67,14 +69,17 @@ define(['$',
     };
 
     var toggleFieldsets = function () {
-        if($YOUR_DETAILS_SUBMIT.length > 0){
+        if($YOUR_DETAILS_SUBMIT.length) {
             bean.on($YOUR_DETAILS_SUBMIT[0], 'click', function (evt) {
                 evt.preventDefault();
-                validations.validatePersonalDetails().then(function () {
-                    $FIELDSET_YOUR_DETAILS.addClass(FIELDSET_COLLAPSED).attr(FIELDSET_COMPLETE, '');
-                    $FIELDSET_PAYMENT_DETAILS.removeClass(FIELDSET_COLLAPSED);
-                    $EDIT_YOUR_DETAILS.removeClass(IS_HIDDEN);
-                    $EDIT_PAYMENT_DETAILS.addClass(IS_HIDDEN);
+                validations.validatePersonalDetails()
+                    .then(function (validity) {
+                        if(validity.allValid) {
+                            $FIELDSET_YOUR_DETAILS.addClass(FIELDSET_COLLAPSED).attr(FIELDSET_COMPLETE, '');
+                            $FIELDSET_PAYMENT_DETAILS.removeClass(FIELDSET_COLLAPSED);
+                            $EDIT_YOUR_DETAILS.removeClass(IS_HIDDEN);
+                            $EDIT_PAYMENT_DETAILS.addClass(IS_HIDDEN);
+                        }
                 });
             });
         }
