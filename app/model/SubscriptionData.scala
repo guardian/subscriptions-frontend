@@ -5,9 +5,6 @@ import com.gu.identity.play.IdUser
 case class PaymentData(account: String, sortCode1: String, sortCode2: String, sortCode3: String, holder: String) {
   val sortCode = s"$sortCode1$sortCode2$sortCode3"
 }
-object PaymentData {
-  val blank = PaymentData("", "", "", "", "")
-}
 
 case class AddressData(address1: String, address2: String, town: String, postcode: String) {
   def asString =
@@ -29,7 +26,7 @@ object SubscriptionData {
         } yield fieldValue) getOrElse default
       def getOrBlank(get: A => Option[String]): String = getOrDefault(get, "")
     }
-    
+
     val addressData = AddressData(
       u.privateFields.getOrBlank(_.billingAddress1),
       u.privateFields.getOrBlank(_.billingAddress2),
@@ -45,6 +42,8 @@ object SubscriptionData {
       addressData
     )
 
-    SubscriptionData(personalData, PaymentData.blank)
+    val blankPaymentData = PaymentData("", "", "", "", "")
+
+    SubscriptionData(personalData, blankPaymentData)
   }
 }
