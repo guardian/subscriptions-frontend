@@ -22,7 +22,6 @@ object Checkout extends Controller with LazyLogging {
     getIdentityUserByCookie.map { idUserOpt =>
       val form = idUserOpt.map { idUser =>
         val data = SubscriptionData.fromIdUser(idUser)
-        logger.debug(s"validation failed. Rendering data: $data")
         SubscriptionsForm().fill(data)
       } getOrElse {
         SubscriptionsForm()
@@ -36,6 +35,7 @@ object Checkout extends Controller with LazyLogging {
     SubscriptionsForm().bindFromRequest.fold(
       formWithErrors => {
         getIdentityUserByCookie.map { idUserOpt =>
+          logger.error(s"Backend form validation failed. Please make sure that the front-end and the backend validations are in sync (validation errors: ${formWithErrors.errors}})")
           BadRequest(view.payment(formWithErrors, userIsSignedIn = idUserOpt.isDefined))
         }
       },
