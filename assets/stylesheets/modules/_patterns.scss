@@ -1,0 +1,30 @@
+/* ==========================================================================
+   Patterns
+   ========================================================================== */
+
+.pattern {
+    @include clearfix();
+    margin-top: ($gs-gutter * 2);
+}
+.pattern__header {
+    margin-bottom: ($gs-gutter);
+    border-top: 1px solid $c-border;
+    padding-top: ($gs-baseline / 2);
+}
+.pattern__title {
+    @include fs-data(6);
+}
+.pattern__description {
+    @include fs-data(4);
+    color: $c-neutral2;
+}
+
+.pattern-nav {
+    position: fixed;
+    bottom: 0; right: 0;
+    width: 100%;
+    z-index: 10000;
+    padding: .3em 1em;
+    background: transparentize($c-white, .3);
+    text-align: center;
+}

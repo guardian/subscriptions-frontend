@@ -4,6 +4,7 @@ require([
     'modules/appendAround',
     'modules/checkout/checkout',
     'modules/components/password',
+    'modules/patterns',
     // Add new dependencies ABOVE this
     'raven'
 ], function(
@@ -11,7 +12,8 @@ require([
     toggle,
     appendAround,
     checkout,
-    password
+    password,
+    patterns
 ) {
     'use strict';
 
@@ -30,4 +32,8 @@ require([
     appendAround.init();
     checkout.init();
     password.init();
+
+    // Pattern library
+    patterns.init();
+
 });

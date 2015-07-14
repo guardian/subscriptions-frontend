@@ -38,6 +38,10 @@ GET         /staff/login                     controllers.OAuth.login
 GET         /staff/loginAction               controllers.OAuth.loginAction
 GET         /oauth2callback                  controllers.OAuth.oauth2Callback
 
+# Pattern Library
+GET         /patterns                        controllers.PatternLibrary.patterns
+
 # Map static resources from the /public folder to the /assets URL path
 GET         /assets/*file                    controllers.CachedAssets.at(path="/public", file)
+GET         /robots.txt                      controllers.CachedAssets.at(path="/public", file="robots.txt")
 GET         /favicon.ico                     controllers.CacheBustedAssets.at(path="images/favicons/32x32.ico")
