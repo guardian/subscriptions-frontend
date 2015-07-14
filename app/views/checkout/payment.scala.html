@@ -140,16 +140,19 @@
                             @checkout.errorMessage("Please enter a valid postal code")
                         </div>
                         <div class="form-field">
-                            <label class="label checkbox" for="receive-gnm-marketing">
+                            <label class="checkbox" for="receive-gnm-marketing">
                             @defining(form.data.get("personal.receiveGnmMarketing")) { gnmMarketingOpt =>
-                                <input type="checkbox"
-                                       name="personal.receiveGnmMarketing"
-                                       id="receive-gnm-marketing"
-                                       @if(gnmMarketingOpt.contains("on")) { checked="checked" }
-                                       >
-
+                                <span class="checkbox__input">
+                                    <input type="checkbox"
+                                        name="personal.receiveGnmMarketing"
+                                        id="receive-gnm-marketing"
+                                        @if(gnmMarketingOpt.contains("on")) { checked="checked" }
+                                        >
+                                </span>
                             }
-                                I'd like to be kept up to to date by email with offers and developments from Guardian News &amp; Media Limited
+                                <span class="checkbox__label">
+                                    I'd like to be kept up to to date by email with offers and developments from Guardian News &amp; Media Limited
+                                </span>
                             </label>
                         </div>
                         <div class="actions">
