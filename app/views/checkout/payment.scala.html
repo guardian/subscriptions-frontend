@@ -140,23 +140,19 @@
                             @checkout.errorMessage("Please enter a valid postal code")
                         </div>
                         <div class="form-field">
-                            @*
-                                TODO: No values on checkboxes? Is this used yet?
-                            *@
-                            <h5 class="checkbox-title">
-                                I'd like to receive information about offers and developments from Guardian News &amp; Media Limited via:
-                            </h5>
-                            <label class="checkbox">
+                            <label class="checkbox" for="receive-gnm-marketing">
+                            @defining(form.data.get("personal.receiveGnmMarketing")) { gnmMarketingOpt =>
                                 <span class="checkbox__input">
-                                    <input type="checkbox" class="js-input">
+                                    <input type="checkbox"
+                                        name="personal.receiveGnmMarketing"
+                                        id="receive-gnm-marketing"
+                                        @if(gnmMarketingOpt.contains("on")) { checked="checked" }
+                                        >
                                 </span>
-                                <span class="checkbox__label">Email</span>
-                            </label>
-                            <label class="checkbox">
-                                <span class="checkbox__input">
-                                    <input type="checkbox" class="js-input">
+                            }
+                                <span class="checkbox__label">
+                                    I'd like to be kept up to to date by email with offers and developments from Guardian News &amp; Media Limited
                                 </span>
-                                <span class="checkbox__label">Post</span>
                             </label>
                         </div>
                         <div class="actions">

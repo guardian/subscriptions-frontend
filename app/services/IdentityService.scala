@@ -14,7 +14,6 @@ import play.api.libs.ws.{WS, WSRequest, WSResponse}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-
 class IdentityService(identityApiClient: IdentityApiClient) extends LazyLogging {
   import IdentityService._
 
@@ -30,12 +29,11 @@ class IdentityService(identityApiClient: IdentityApiClient) extends LazyLogging 
 
  def registerGuest(personalData: PersonalData): Future[GuestUser] = {
     val json = personalData.convertToUser()
-
     identityApiClient.createGuest(json).map(response => response.json.as[GuestUser])
   }
 
   def convertGuest(password: String, token: IdentityToken): Future[Unit] = {
-    val json = JsObject(Map("password" -> JsString(password)))
+    val json = Json.obj("password" -> password)
     identityApiClient.convertGuest(json, token).map { response =>
       if (response.status != Status.OK) {
         throw new IdentityGuestPasswordError(response.body)
@@ -43,35 +41,42 @@ class IdentityService(identityApiClient: IdentityApiClient) extends LazyLogging 
     }
   }
 
-  def updateUserDetails(personalData: PersonalData, userId: UserId, authCookie: AuthCookie): Future[Unit] =
-    identityApiClient.updateUserDetails(
-      JsObject(Map("privateFields" -> personalData.convertToPrivateFields())), 
-      userId,
-      authCookie)
-    .map(_ => Unit)
+  def updateUserDetails(personalData: PersonalData, userId: UserId, authCookie: AuthCookie): Future[Unit] = {
+    val updatedFields =
+      createOnlyFields.foldLeft(personalData.convertToUser()) { (map, field) => map - field }
+
+    identityApiClient.updateUserDetails(updatedFields, userId, authCookie).map(_ => Unit)
+  }
 }
 
 object IdentityService extends IdentityService(IdentityApiClient) {
+  val primaryEmailAddress = "primaryEmailAddress"
+  val publicFields = "publicFields"
+  val createOnlyFields = Seq(primaryEmailAddress, publicFields)
+
   class IdentityGuestPasswordError(jsonMsg: String) extends RuntimeException(s"Cannot set password for Identity guest user. Json response form service: $jsonMsg")
 
   implicit class PersonalDataJsonSerialiser(personalData: PersonalData) {
-    def convertToPrivateFields(): JsObject = JsObject(Map(
-      "firstName" -> JsString(personalData.firstName),
-      "secondName" -> JsString(personalData.lastName),
-      "billingAddress1" -> JsString(personalData.address.address1),
-      "billingAddress2" -> JsString(personalData.address.address2),
-      "billingAddress3" -> JsString(personalData.address.town),
-      "billingPostcode" -> JsString(personalData.address.postcode),
-      "billingCountry" -> JsString("United Kingdom")
-    ))
+    private def convertToPrivateFields(): JsObject = Json.obj(
+      "firstName" -> personalData.firstName,
+      "secondName" -> personalData.lastName,
+      "billingAddress1" -> personalData.address.address1,
+      "billingAddress2" -> personalData.address.address2,
+      "billingAddress3" -> personalData.address.town,
+      "billingPostcode" -> personalData.address.postcode,
+      "billingCountry" -> "United Kingdom"
+    )
 
-    def convertToUser(): JsObject = JsObject(Map(
-      "primaryEmailAddress" -> JsString(personalData.email),
-      "publicFields" -> JsObject(Map(
-        "displayName" -> JsString(s"${personalData.firstName} ${personalData.lastName}")
-      )),
-      "privateFields" -> convertToPrivateFields(),
-      "statusFields" -> JsObject(Map("receiveGnmMarketing" -> JsBoolean(true)))))
+    def convertToUser(): JsObject = {
+      Json.obj(
+        primaryEmailAddress -> personalData.email,
+        publicFields -> Json.obj(
+          "displayName" -> s"${personalData.firstName} ${personalData.lastName}"
+        ),
+        "privateFields" -> convertToPrivateFields(),
+        "statusFields" ->
+          Json.obj("receiveGnmMarketing" -> personalData.receiveGnmMarketing))
+    }
   }
 }
 
@@ -114,7 +119,7 @@ object IdentityApiClient extends IdentityApiClient with LazyLogging {
         case e: Throwable =>
           logger.error("Connection error: " + request.url, e)
       }
-      applyOnSpecificErrors(List("Access Denied", "Forbidden")) { r => 
+      applyOnSpecificErrors(List("Access Denied", "Forbidden")) { r =>
         logger.error(s"Call to '${request.url}' completed with the following error: ${r.body}")
       }
       eventualResponse
