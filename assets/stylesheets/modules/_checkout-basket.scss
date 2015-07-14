@@ -20,10 +20,10 @@
         // Magic number
         min-height: 100px;
     }
-}
-.basket-preview__title,
-.basket-preview__product {
-    display: inline-block;
+
+    @include mq(tablet) {
+        margin-bottom: $gs-gutter;
+    }
 }
 .basket-preview__image {
     display: none;
@@ -49,6 +49,7 @@
 .basket-preview__title {
     font-weight: normal;
     font-family: inherit;
+    display: inline-block;
 
     @include mq(tablet) {
         @include fs-header(2);
@@ -56,9 +57,11 @@
         border-top: 1px solid $c-neutral5;
         padding-top: $gs-baseline / 2;
         margin-bottom: $gs-gutter;
+        display: block;
     }
 }
 .basket-preview__product {
+    display: inline-block;
     margin-bottom: $gs-baseline / 4;
 }
 .basket-preview__product__title {
