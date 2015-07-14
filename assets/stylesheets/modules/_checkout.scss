@@ -23,6 +23,8 @@
     padding-bottom: $gs-gutter * 2;
 }
 .checkout-container__form {
+    margin-bottom: $gs-baseline;
+
     @include mq(tablet) {
         float: left;
         width: 65%
@@ -82,6 +84,18 @@
 .notice__header {
     font-weight: 900;
 }
+
+/* Direct Debit
+   ========================================================================== */
+
+.direct-debit {
+    margin: $gs-gutter 0 0;
+}
+.direct-debit__logo,
+.direct-debit__disclaimer {
+    margin-bottom: $gs-baseline / 2;
+}
+
 
 /* Review Details
    ========================================================================== */
