@@ -1,0 +1,29 @@
+/* ==========================================================================
+   Lists
+   ========================================================================== */
+
+.inline-list {
+    @extend .u-unstyled-list;
+}
+.inline-list__item {
+    display: inline-block;
+}
+
+.numbered {
+    display: table;
+    width: 100%;
+}
+.numbered__bullet,
+.numbered__body {
+    display: table-cell;
+    vertical-align: top;
+    text-align: left;
+}
+.numbered__bullet {
+    @include fs-header(2);
+    width: $gs-gutter;
+    padding-right: $gs-baseline / 2;
+}
+.numbered__body {
+    @include fs-headline(2);
+}

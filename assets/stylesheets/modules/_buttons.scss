@@ -83,6 +83,10 @@
         height: 25px;
         fill: $c-brand;
     }
+
+    .inline-text {
+        vertical-align: top;
+    }
 }
 .button--show-less {
     .inline-plus {
