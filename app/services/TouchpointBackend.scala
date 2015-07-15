@@ -1,6 +1,5 @@
 package services
 
-import com.gu.identity.play.IdMinimalUser
 import configuration.Config
 import touchpoint.{ProductRatePlan, TouchpointBackendConfig}
 
@@ -13,7 +12,7 @@ object TouchpointBackend {
   def apply(touchpointBackendConfig: TouchpointBackendConfig): TouchpointBackend = {
 
     val zuoraService = new ZuoraService(touchpointBackendConfig.zuora)
-    
+
     val salesforceRepo = new SalesforceRepo(touchpointBackendConfig.salesforce)
 
     val ratePlan = touchpointBackendConfig.productRatePlan

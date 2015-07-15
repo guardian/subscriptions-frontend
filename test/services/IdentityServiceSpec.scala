@@ -1,10 +1,11 @@
 package services
 
+import model.{AddressData, PersonalData}
 import org.scalatest.FreeSpec
 import play.api.libs.json._
 import play.api.libs.ws.WSResponse
 import utils.TestIdUser._
-import utils.{TestIdUser, TestWSResponse}
+import utils.TestWSResponse
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -12,9 +13,9 @@ import scala.concurrent.Future
 class IdentityServiceSpec extends FreeSpec {
   class TestIdentityApiClient extends IdentityApiClient {
     override def userLookupByScGuUCookie: (String) => Future[WSResponse] = ???
-    override def createGuest: (JsValue) => Future[WSResponse] = ???
-    override def updateUserDetails: (JsValue, UserId, AuthCookie) => Future[WSResponse] = ???
-    override def convertGuest: (JsValue, IdentityToken) => Future[WSResponse] = ???
+    override def createGuest: (PersonalData) => Future[WSResponse] = ???
+    override def updateUserDetails: (PersonalData, UserId, AuthCookie) => Future[WSResponse] = ???
+    override def convertGuest: (String, IdentityToken) => Future[WSResponse] = ???
     override def userLookupByEmail: (String) => Future[WSResponse] = ???
   }
 
@@ -78,5 +79,42 @@ class IdentityServiceSpec extends FreeSpec {
         assertResult(None)(res)
       }
     }
+  }
+
+  "PersonalData serialization for the Identity service" in {
+    val testPersonalData = PersonalData(
+      firstName = "FirstName",
+      lastName = "LastName",
+      email = "email@example.com",
+      receiveGnmMarketing = true,
+      address = AddressData(
+        address1 = "address1",
+        address2 = "address2",
+        town = "Town",
+        postcode = "AAAAAA"
+      )
+    )
+
+    val expectedJson = Json.obj(
+      "primaryEmailAddress" -> "email@example.com",
+      "publicFields" -> Json.obj(
+        "displayName" -> "FirstName LastName"
+      ),
+      "privateFields" -> Json.obj(
+        "firstName" -> "FirstName",
+        "secondName" -> "LastName",
+        "billingAddress1" -> "address1",
+        "billingAddress2" -> "address2",
+        "billingAddress3" -> "Town",
+        "billingPostcode" -> "AAAAAA",
+        "billingCountry" -> "United Kingdom"
+      ),
+      "statusFields" ->
+        Json.obj("receiveGnmMarketing" -> true)
+    )
+
+    assertResult(expectedJson)(
+      PersonalDataJsonSerialiser.convertToUser(testPersonalData)
+    )
   }
 }

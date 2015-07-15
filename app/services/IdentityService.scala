@@ -27,14 +27,12 @@ class IdentityService(identityApiClient: IdentityApiClient) extends LazyLogging 
       (response.json \ "user").asOpt[IdUser]
     }
 
- def registerGuest(personalData: PersonalData): Future[GuestUser] = {
-    val json = personalData.convertToUser()
-    identityApiClient.createGuest(json).map(response => response.json.as[GuestUser])
+  def registerGuest(personalData: PersonalData): Future[GuestUser] = {
+    identityApiClient.createGuest(personalData).map(response => response.json.as[GuestUser])
   }
 
   def convertGuest(password: String, token: IdentityToken): Future[Unit] = {
-    val json = Json.obj("password" -> password)
-    identityApiClient.convertGuest(json, token).map { response =>
+    identityApiClient.convertGuest(password, token).map { response =>
       if (response.status != Status.OK) {
         throw new IdentityGuestPasswordError(response.body)
       }
@@ -42,58 +40,60 @@ class IdentityService(identityApiClient: IdentityApiClient) extends LazyLogging 
   }
 
   def updateUserDetails(personalData: PersonalData, userId: UserId, authCookie: AuthCookie): Future[Unit] = {
-    val updatedFields =
-      createOnlyFields.foldLeft(personalData.convertToUser()) { (map, field) => map - field }
-
-    identityApiClient.updateUserDetails(updatedFields, userId, authCookie).map(_ => Unit)
+    identityApiClient.updateUserDetails(personalData, userId, authCookie).map(_ => Unit)
   }
 }
 
 object IdentityService extends IdentityService(IdentityApiClient) {
+  class IdentityGuestPasswordError(jsonMsg: String) extends RuntimeException(
+    s"Cannot set password for Identity guest user. Json response form service: $jsonMsg")
+}
+
+object PersonalDataJsonSerialiser {
   val primaryEmailAddress = "primaryEmailAddress"
   val publicFields = "publicFields"
-  val createOnlyFields = Seq(primaryEmailAddress, publicFields)
 
-  class IdentityGuestPasswordError(jsonMsg: String) extends RuntimeException(s"Cannot set password for Identity guest user. Json response form service: $jsonMsg")
-
-  implicit class PersonalDataJsonSerialiser(personalData: PersonalData) {
-    private def convertToPrivateFields(): JsObject = Json.obj(
-      "firstName" -> personalData.firstName,
-      "secondName" -> personalData.lastName,
-      "billingAddress1" -> personalData.address.address1,
-      "billingAddress2" -> personalData.address.address2,
-      "billingAddress3" -> personalData.address.town,
-      "billingPostcode" -> personalData.address.postcode,
-      "billingCountry" -> "United Kingdom"
-    )
-
-    def convertToUser(): JsObject = {
-      Json.obj(
-        primaryEmailAddress -> personalData.email,
-        publicFields -> Json.obj(
-          "displayName" -> s"${personalData.firstName} ${personalData.lastName}"
-        ),
-        "privateFields" -> convertToPrivateFields(),
-        "statusFields" ->
-          Json.obj("receiveGnmMarketing" -> personalData.receiveGnmMarketing))
-    }
+  implicit def convertToUser(personalData: PersonalData): JsObject = {
+    Json.obj(
+      primaryEmailAddress -> personalData.email,
+      publicFields -> Json.obj(
+        "displayName" -> s"${personalData.firstName} ${personalData.lastName}"
+      ),
+      "privateFields" -> Json.obj(
+        "firstName" -> personalData.firstName,
+        "secondName" -> personalData.lastName,
+        "billingAddress1" -> personalData.address.address1,
+        "billingAddress2" -> personalData.address.address2,
+        "billingAddress3" -> personalData.address.town,
+        "billingPostcode" -> personalData.address.postcode,
+        "billingCountry" -> "United Kingdom"
+      ),
+      "statusFields" ->
+        Json.obj("receiveGnmMarketing" -> personalData.receiveGnmMarketing))
   }
 }
 
 trait IdentityApiClient {
+  import PersonalDataJsonSerialiser._
+  val createOnlyFields = Seq(primaryEmailAddress, publicFields)
+  type Password = String
+  type Email = String
+  type CookieValue = String
 
-  def userLookupByScGuUCookie: String => Future[WSResponse]
 
-  def createGuest: JsValue => Future[WSResponse]
+  def userLookupByScGuUCookie: CookieValue => Future[WSResponse]
 
-  def convertGuest: (JsValue, IdentityToken) => Future[WSResponse]
+  def createGuest: PersonalData => Future[WSResponse]
 
-  def userLookupByEmail: String => Future[WSResponse]
+  def convertGuest: (Password, IdentityToken) => Future[WSResponse]
 
-  def updateUserDetails: (JsValue, UserId, AuthCookie) => Future[WSResponse]
+  def userLookupByEmail: Email => Future[WSResponse]
+
+  def updateUserDetails: (PersonalData, UserId, AuthCookie) => Future[WSResponse]
 }
 
 object IdentityApiClient extends IdentityApiClient with LazyLogging {
+  import PersonalDataJsonSerialiser._
 
   lazy val identityEndpoint = Config.Identity.baseUri
   lazy val metrics = new IdApiMetrics(Config.stage)
@@ -141,7 +141,7 @@ object IdentityApiClient extends IdentityApiClient with LazyLogging {
   private val authoriseCall = (request: WSRequest) =>
     request.withHeaders(("X-GU-ID-Client-Access-Token", s"Bearer ${Config.Identity.apiToken}"))
 
-  override val userLookupByEmail: String => Future[WSResponse] = {
+  override val userLookupByEmail: Email => Future[WSResponse] = {
     val endpoint = authoriseCall(WS.url(s"$identityEndpoint/user"))
 
     email => endpoint.withQueryString(("emailAddress", email)).execute()
@@ -149,24 +149,25 @@ object IdentityApiClient extends IdentityApiClient with LazyLogging {
       .withCloudwatchMonitoringOfGet
   }
 
-  override val userLookupByScGuUCookie: String => Future[WSResponse] = {
+  override val userLookupByScGuUCookie: CookieValue => Future[WSResponse] = {
     val endpoint = authoriseCall(WS.url(s"$identityEndpoint/user/me").withHeaders(("Referer", s"$identityEndpoint/")))
 
     cookieValue => endpoint.withHeaders(("X-GU-ID-FOWARDED-SC-GU-U", cookieValue)).execute()
-        .withWSFailureLogging(endpoint)
-        .withCloudwatchMonitoringOfGet
+      .withWSFailureLogging(endpoint)
+      .withCloudwatchMonitoringOfGet
   }
 
-  override val createGuest: JsValue => Future[WSResponse] = {
+  override val createGuest: PersonalData => Future[WSResponse] = {
     val endpoint = authoriseCall(WS.url(s"$identityEndpoint/guest"))
 
-    guestJson => endpoint.post(guestJson)
+    guestData => endpoint.post(guestData: JsObject)
       .withWSFailureLogging(endpoint)
       .withCloudwatchMonitoringOfPost
   }
 
-  override val convertGuest: (JsValue, IdentityToken) => Future[WSResponse] = (json, token) => {
+  override val convertGuest: (Password, IdentityToken) => Future[WSResponse] = (password, token) => {
     val endpoint = authoriseCall(WS.url(s"$identityEndpoint/guest/password"))
+    val json = Json.obj("password" -> password)
 
     endpoint
       .withHeaders("X-Guest-Registration-Token" -> token.toString)
@@ -175,10 +176,13 @@ object IdentityApiClient extends IdentityApiClient with LazyLogging {
       .withCloudwatchMonitoringOfPut
   }
 
-  override val updateUserDetails: (JsValue, UserId, AuthCookie) => Future[WSResponse] = { (userJson, userId, authCookie) =>
+  override val updateUserDetails: (PersonalData, UserId, AuthCookie) => Future[WSResponse] = { (user, userId, authCookie) =>
     val endpoint = authoriseCall(WS.url(s"$identityEndpoint/user/${userId.id}"))
+    val userJson: JsObject = user
+    val updatedFields =
+      createOnlyFields.foldLeft(userJson) { (map, field) => map - field }
 
-    endpoint.withHeaders(("X-GU-ID-FOWARDED-SC-GU-U", authCookie.value)).post(userJson)
+    endpoint.withHeaders(("X-GU-ID-FOWARDED-SC-GU-U", authCookie.value)).post(updatedFields)
       .withWSFailureLogging(endpoint)
       .withCloudwatchMonitoringOfPost
   }
