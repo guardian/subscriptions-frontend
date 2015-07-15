@@ -105,17 +105,18 @@ input[type=number] {
 }
 
 .fieldset--single {
-    .fieldset__heading {
+    .fieldset__heading,
+    .fieldset__fields {
         display: block;
-        padding-right: $gs-gutter / 2;
         width: auto;
     }
-
-    .fieldset__fields {
-        padding-left: $gs-gutter / 2;
-        width: auto;
+    @include mq(tablet) {
+        .fieldset__fields {
+            display: block;
+        }
     }
 }
+
 .fieldset--collapsed {
     .fieldset__note,
     .fieldset__fields {
