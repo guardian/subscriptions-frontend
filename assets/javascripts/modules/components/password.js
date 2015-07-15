@@ -1,4 +1,4 @@
-/*global zxcvbn */
+/*global guardian*/
 define(['$', 'bean'], function ($, bean) {
     'use strict';
 
@@ -23,7 +23,7 @@ define(['$', 'bean'], function ($, bean) {
     /**
      * check zxcvbn score and apply relevant className to display strength
      */
-    var checkStrength = function() {
+    var checkStrength = function (zxcvbn) {
         var score = zxcvbn(PASSWORD_STRENGTH_INPUT_ELEM.value).score;
         var label = config.text.passwordLabel + ': ' + config.passwordLabels[score];
 
@@ -46,11 +46,11 @@ define(['$', 'bean'], function ($, bean) {
      * setup listener for zxcvbn.score check
      */
     var addListeners = function () {
-        require(['js!zxcvbn'], function() {
+        require([guardian.resourcePaths.zxcvbn], function(zxcvbn) {
             STRENGTH_INDICATOR_ELEM.classList.toggle('is-hidden');
 
             bean.on(PASSWORD_STRENGTH_INPUT_ELEM, 'keyup', function () {
-                checkStrength();
+                checkStrength(zxcvbn);
             });
         });
     };
