@@ -16,7 +16,9 @@
         @fragments.global.header()
         @fragments.global.navigation()
 
-        @content
+        <div class="global-container">
+            @content
+        </div>
 
         @fragments.global.footer(isInternational)
 
