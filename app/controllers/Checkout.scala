@@ -3,6 +3,7 @@ package controllers
 import actions.CommonActions._
 import com.gu.identity.play.IdUser
 import com.typesafe.scalalogging.LazyLogging
+import configuration.Config.Identity.webAppProfileUrl
 import forms.{FinishAccountForm, SubscriptionsForm}
 import model.SubscriptionData
 import play.api.libs.json._
@@ -10,7 +11,7 @@ import play.api.mvc._
 import services.CheckoutService.CheckoutResult
 import services.{CheckoutService, _}
 import views.html.{checkout => view}
-import configuration.Config.Identity.webAppProfileUrl
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
