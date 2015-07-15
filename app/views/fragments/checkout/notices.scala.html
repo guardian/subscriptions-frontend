@@ -1,0 +1,72 @@
+@()
+
+@import controllers.CachedAssets.hashedPathFor
+
+@notice(title: String)(content: Html) = {
+    <div class="notice">
+        <h4 class="notice__header">@title</h4>
+        <div class="notice__content">@content</div>
+    </div>
+}
+
+@notice("Advanced Notice") {
+    <p>
+        The details of your Direct Debit instruction including payment schedule,
+        due date, frequency and amount will be sent to you within three working days.
+        All the normal Direct Debit safeguards and guarantees apply.
+    </p>
+}
+@notice("Money Back Guarantee") {
+    <p>
+        If you wish to cancel your subscription, we will send
+        you a refund of the unexpired part of your subscription.
+    </p>
+}
+@notice("Direct Debit") {
+
+    <address>
+        The Guardian, Perrymount Road, Perrymount Road,
+        Haywards Heath, West Sussex, RH16 3DH,
+        United Kingdom
+    </address>
+
+    <ul class="u-unstyled-list">
+        <li>Tel: 0808 168 5088</li>
+        <li><a href="mailto:gnmsubs@@quadrantsubs.com">gnmsubs@@quadrantsubs.com</a></li>
+    </ul>
+
+    <aside class="direct-debit">
+        <div class="direct-debit__logo">
+            <img src="@hashedPathFor("images/direct-debit.png")" alt="Direct Debit">
+        </div>
+        <div class="direct-debit__disclaimer prose">
+            Your payments are protected by the
+            <a href="#direct-debit-guarantee" class="js-toggle" data-toggle="direct-debit-guarantee">
+                Direct Debit guarantee.
+            </a>
+        </div>
+        <div id="direct-debit-guarantee" class="prose" data-toggle-hidden>
+            <ul>
+                <li>
+                    The Guarantee is offered by all banks and building societies that accept instructions to pay Direct Debits
+                </li>
+                <li>
+                    If there are any changes to the amount, date or frequency of your Direct Debit Guardian Subscriptions
+                    will notify you (normally 3 working days) in advance of your account being debited or as otherwise agreed.
+                    If you request Guardian Subscriptions to collect a payment, confirmation of the amount and date will be
+                    given to you at the time of the request
+                </li>
+                <li>
+                    If an error is made in the payment of your Direct Debit, by Guardian Subscriptions or your bank or building society,
+                    you are entitled to a full and immediate refund of the amount paid from your bank or building society
+                </li>
+                <li>
+                    If you receive a refund you are not entitled to, you must pay it back when Guardian Subscriptions asks you to.
+                    You can cancel a Direct Debit at any time by simply contacting your bank or building society.
+                    Written confirmation may be required. Please also notify Guardian Subscriptions.
+                </li>
+            </ol>
+        </div>
+    </aside>
+
+}
