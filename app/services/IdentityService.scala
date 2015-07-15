@@ -14,7 +14,7 @@ import play.api.libs.ws.{WS, WSRequest, WSResponse}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class IdentityService(identityApiClient: IdentityApiClient) extends LazyLogging {
+class IdentityService(identityApiClient: => IdentityApiClient) extends LazyLogging {
   import IdentityService._
 
   def doesUserExist(email: String): Future[Boolean] =

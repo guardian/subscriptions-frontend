@@ -4,11 +4,11 @@ import com.gu.membership.salesforce.MemberId
 import com.gu.membership.zuora.Countries
 import com.gu.membership.zuora.soap.Zuora.SubscribeResult
 import com.gu.membership.zuora.soap.ZuoraAction
+import com.gu.membership.zuora.soap.ZuoraServiceHelpers._
 import configuration.Config
 import model.SubscriptionData
-import org.joda.time.{Period, DateTime}
+import org.joda.time.DateTime
 
-import com.gu.membership.zuora.soap.ZuoraServiceHelpers._
 import scala.xml.Elem
 
 case class Subscribe(memberId: MemberId, data: SubscriptionData, productRatePlanId: String) extends ZuoraAction[SubscribeResult] {

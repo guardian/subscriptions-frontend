@@ -11,23 +11,23 @@ object TouchpointBackend {
 
   def apply(touchpointBackendConfig: TouchpointBackendConfig): TouchpointBackend = {
 
-    val zuoraService = new ZuoraService(touchpointBackendConfig.zuora)
+    val ratePlan = touchpointBackendConfig.productRatePlan
+
+    val zuoraService = new ZuoraApiClient(touchpointBackendConfig.zuora, ratePlan)
 
     val salesforceRepo = new SalesforceRepo(touchpointBackendConfig.salesforce)
-
-    val ratePlan = touchpointBackendConfig.productRatePlan
 
     TouchpointBackend(salesforceRepo, zuoraService, ratePlan)
   }
 
-  val Normal = TouchpointBackend(BackendType.Default)
+  lazy val Normal = TouchpointBackend(BackendType.Default)
 
-  val All = Seq(Normal)
+  lazy val All = Seq(Normal)
 }
 
 case class TouchpointBackend(
   salesforceRepo: SalesforceRepo,
-  zuoraService : ZuoraService,
+  zuoraService: ZuoraService,
   ratePlan: ProductRatePlan) {
 
   def start() = {

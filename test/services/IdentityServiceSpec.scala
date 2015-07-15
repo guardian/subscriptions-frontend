@@ -1,10 +1,11 @@
 package services
 
-import model.{AddressData, PersonalData}
+import model.PersonalData
 import org.scalatest.FreeSpec
 import play.api.libs.json._
 import play.api.libs.ws.WSResponse
 import utils.TestIdUser._
+import utils.TestPersonalData.testPersonalData
 import utils.TestWSResponse
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -18,6 +19,8 @@ class IdentityServiceSpec extends FreeSpec {
     override def convertGuest: (String, IdentityToken) => Future[WSResponse] = ???
     override def userLookupByEmail: (String) => Future[WSResponse] = ???
   }
+
+  def makeIdentityService(client: IdentityApiClient) = new IdentityService(client)
 
   "doesUserExists" - {
     val existingEmail = "existing@example.com"
@@ -37,13 +40,13 @@ class IdentityServiceSpec extends FreeSpec {
     }
 
     "returns true if looking up a user by email is successful" in {
-      new IdentityService(client).doesUserExist(existingEmail).map { res =>
+      makeIdentityService(client).doesUserExist(existingEmail).map { res =>
         assert(res)
       }
     }
 
     "returns false if looking up a user by email is unsuccessful" in {
-      new IdentityService(client).doesUserExist("unknown@example.com").map { res =>
+      makeIdentityService(client).doesUserExist("unknown@example.com").map { res =>
         assert(!res)
       }
     }
@@ -69,32 +72,19 @@ class IdentityServiceSpec extends FreeSpec {
     }
 
     "returns true if looking up a user by cookie is successful" in {
-      new IdentityService(client).userLookupByScGuU(validCookie).map { res =>
+      makeIdentityService(client).userLookupByScGuU(validCookie).map { res =>
         assertResult(Some(testUser))(res)
       }
     }
 
     "returns false if looking up a user by cookie is unsuccessful" in {
-      new IdentityService(client).userLookupByScGuU(invalidCookie).map { res =>
+      makeIdentityService(client).userLookupByScGuU(invalidCookie).map { res =>
         assertResult(None)(res)
       }
     }
   }
 
   "PersonalData serialization for the Identity service" in {
-    val testPersonalData = PersonalData(
-      firstName = "FirstName",
-      lastName = "LastName",
-      email = "email@example.com",
-      receiveGnmMarketing = true,
-      address = AddressData(
-        address1 = "address1",
-        address2 = "address2",
-        town = "Town",
-        postcode = "AAAAAA"
-      )
-    )
-
     val expectedJson = Json.obj(
       "primaryEmailAddress" -> "email@example.com",
       "publicFields" -> Json.obj(
