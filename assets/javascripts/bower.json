@@ -1,20 +1,14 @@
 {
-  "name": "Subscriptions JavaScripts",
-  "dependencies": {
-    "bean": "~1.0.6",
-    "bonzo": "~2.0.0",
-    "qwery": "~4.0.0",
-    "raven-js": "~1.1.16",
-    "requirejs": "~2.1.17",
-    "reqwest": "~1.1.0",
-    "zxcvbn": "*",
-    "native-promise-only": "guardian/native-promise-only#master"
-  },
-  "ignore": [
-    "**/.*",
-    "node_modules",
-    "bower_components",
-    "test",
-    "tests"
-  ]
+    "name": "Subscriptions JavaScripts",
+    "dependencies": {
+        "bean": "~1.0.6",
+        "bonzo": "~2.0.0",
+        "lodash-amd": "~3.10.0",
+        "native-promise-only": "guardian/native-promise-only#master",
+        "qwery": "~4.0.0",
+        "raven-js": "~1.1.16",
+        "requirejs": "~2.1.17",
+        "reqwest": "~1.1.0",
+        "zxcvbn": "*"
+    }
 }

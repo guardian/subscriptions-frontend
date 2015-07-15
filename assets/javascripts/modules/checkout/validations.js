@@ -1,18 +1,24 @@
 define([
     '$',
-    'modules/checkout/form-elements',
-    'modules/checkout/email-check',
+    'utils/text',
+    'modules/checkout/formElements',
+    'modules/checkout/emailCheck',
     'modules/checkout/regex'
-], function ($,
-             form,
-             emailCheck,
-             regex) {
+], function (
+    $,
+    textUtils,
+    form,
+    emailCheck,
+    regex
+) {
     'use strict';
 
-    var ERROR_CLASS = 'form-field--error',
-        EMAIL_ERROR_DEFAULT = 'Please enter a valid Email address',
-        EMAIL_ERROR_TAKEN = 'Your email is already in use! Please sign in or use another email address.',
-        EMAIL_ERROR_NETWORK = 'There\'s been a problem. Please try again later.';
+    var ERROR_CLASS = 'form-field--error';
+    var MESSAGES = {
+        emailInvalid: 'Please enter a valid email address.',
+        emailTaken: 'Your email is already in use. Please sign in or use another email address.',
+        emailFailure: 'There has been a problem. Please try again later.'
+    };
 
     var mandatoryFieldsPersonalDetails = [
         {input: form.$FIRST_NAME, container: form.$FIRST_NAME_CONTAINER},
@@ -32,56 +38,61 @@ define([
 
     function renderEmailError(condition, message){
         if(condition){
-            form.$EMAIL_ERROR.text(message || EMAIL_ERROR_DEFAULT);
+            form.$EMAIL_ERROR.text(message || MESSAGES.emailInvalid);
         }
     }
 
-    var validatePersonalDetails = function () {
+    function confirmBasicValidity(validity) {
+        return !validity.emptyFields.length && validity.hasConfirmedEmail && validity.hasValidEmail;
+    }
 
-        var staticValidations = new Promise(function (onSuccess, onFailure){
+    function validatePersonalDetails() {
+
+        return new Promise(function (resolve, reject){
+
+            var emailValue = form.$EMAIL.val();
             var emptyFields = mandatoryFieldsPersonalDetails.filter(function (field) {
                 var isEmpty = field.input.val() === '';
+                // TODO: Handle DOM/view code outside of promise
                 toggleError(field.container, isEmpty);
                 return isEmpty;
             });
-            var noEmptyFields = emptyFields.length === 0;
 
-            var validEmail = regex.isValidEmail(form.$EMAIL.val());
-            renderEmailError(!validEmail);
-            toggleError(form.$EMAIL_CONTAINER, !validEmail);
+            var validity = {
+                allValid: false,
+                emptyFields: emptyFields,
+                hasValidEmail: regex.isValidEmail(emailValue),
+                hasConfirmedEmail: form.$EMAIL.val() === form.$CONFIRM_EMAIL.val(),
+                isEmailInUse: false
+            };
 
-            var emailCorrectTwice = form.$EMAIL.val() === form.$CONFIRM_EMAIL.val();
-            toggleError(form.$CONFIRM_EMAIL_CONTAINER, validEmail && !emailCorrectTwice);
+            // TODO: Handle DOM/view code outside of promise
+            renderEmailError(!validity.hasValidEmail);
+            toggleError(form.$EMAIL_CONTAINER, !validity.hasValidEmail);
+            toggleError(form.$CONFIRM_EMAIL_CONTAINER, validity.hasValidEmail && !validity.hasConfirmedEmail);
 
-            if(noEmptyFields && emailCorrectTwice && validEmail){
-                onSuccess();
-            }
-            else {
-                onFailure(new Error('Personal details incorrect.'));
+            if(confirmBasicValidity(validity) && !guardian.user.isSignedIn) {
+                emailCheck(emailValue).then(function(isEmailInUse) {
+                    if(!isEmailInUse) {
+                        validity.allValid = true;
+                        validity.isEmailInUse = true;
+                        resolve(validity);
+                    } else {
+                        // TODO: Handle DOM/view code outside of promise
+                        renderEmailError(true, MESSAGES.emailTaken);
+                        toggleError(form.$EMAIL_CONTAINER, true);
+                        resolve(validity);
+                    }
+                }).fail(function(err, msg) {
+                    // TODO: Handle DOM/view code outside of promise
+                    renderEmailError(true, MESSAGES.emailFailure);
+                    reject(err, msg);
+                });
+            } else {
+                resolve(validity);
             }
         });
-
-        var validationResult = staticValidations.then(function(){
-
-            var warnIfEmailTaken = emailCheck.warnIfEmailTaken();
-
-            warnIfEmailTaken.catch(function (failure) {
-                if(failure === 'EMAIL_IN_USE'){
-                    renderEmailError(true, EMAIL_ERROR_TAKEN);
-                }
-                else {
-                    renderEmailError(true, EMAIL_ERROR_NETWORK);
-                }
-                toggleError(form.$EMAIL_CONTAINER, true);
-
-            });
-
-            return warnIfEmailTaken;
-    });
-
-        return validationResult;
-    };
-
+    }
 
     var validatePaymentDetails = function () {
         var accountNumberValid = form.$ACCOUNT.val() !== ''

@@ -1,15 +1,18 @@
-@(title: String)
+@(title: String, jsVars: model.JsVars)
 
 @import play.api.Play
 @import controllers.CachedAssets.hashedPathFor
 
-<meta charset="utf-8"/>
+<meta charset="utf-8">
+
 <title>@title</title>
 
-<meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<meta name="format-detection" content="telephone=no"/>
-<meta name="HandheldFriendly" content="True"/>
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="format-detection" content="telephone=no">
+<meta name="HandheldFriendly" content="True">
+
+@fragments.javascriptFirstSteps(jsVars)
 
 <link rel="stylesheet" href="@hashedPathFor("stylesheets/main.min.css")"/>
 <!--[if (IE 9)]>
@@ -24,3 +27,5 @@
 } else {
     <link rel="shortcut icon" type="image/png" href="@hashedPathFor("images/favicons/32x32.ico")"/>
 }
+
+@fragments.javascriptLaterSteps()

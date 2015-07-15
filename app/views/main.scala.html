@@ -1,14 +1,6 @@
-@import model.JsVars
-
-@*
-    TODO:
-    bodyClasses should be avoided and is deprecated.
-    Currently being used for digital pack page and to help transition to a consistent
-    body width throughout the site. The extra classes will be removed when this is the case.
-*@
 @(
     title: String,
-    jsVars: JsVars = JsVars.default,
+    jsVars: model.JsVars = model.JsVars.default,
     isInternational: Boolean = false,
     bodyClasses: Seq[String] = Nil
 )(content: Html)
@@ -16,10 +8,11 @@
 <!DOCTYPE html>
 <html lang="en-GB">
 <head>
-    @fragments.head(title)
-    @fragments.javascriptFirstSteps(jsVars)
+    @fragments.head(title, jsVars)
 </head>
-    <body class="@bodyClasses.mkString(" ")">
+    <body class="js-off @bodyClasses.mkString(" ")">
+
+        @fragments.global.warnings()
         @fragments.global.header()
         @fragments.global.navigation()
 

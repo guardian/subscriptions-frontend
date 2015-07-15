@@ -41,7 +41,7 @@ class CheckoutService(identityService: IdentityService, salesforceService: Sales
     }
   }
 
-  def updateAuthenticatedUserDetails(personalData: PersonalData, idUserOpt: Option[IdMinimalUser], authCookieOpt: Option[AuthCookie]): Unit = {
+  private def updateAuthenticatedUserDetails(personalData: PersonalData, idUserOpt: Option[IdMinimalUser], authCookieOpt: Option[AuthCookie]): Unit = {
     for {
       user <- idUserOpt
       authCookie <- authCookieOpt

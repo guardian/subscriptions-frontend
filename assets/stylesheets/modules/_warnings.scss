@@ -1,0 +1,25 @@
+/* ==========================================================================
+   Warnings
+   ========================================================================== */
+
+.warning-message {
+    @include fs-bodyCopy(1);
+    padding: $gs-baseline;
+    color: $c-white;
+    background-color: guss-colour(error);
+    text-align: center;
+
+    a {
+        color: inherit;
+    }
+    a:hover {
+        border-color: $c-white;
+    }
+}
+
+.warning-message--browser {
+    display: none;
+}
+.js-ancient-browser .warning-message--browser {
+    display: block;
+}

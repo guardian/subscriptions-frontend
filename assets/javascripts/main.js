@@ -2,6 +2,7 @@ require([
     'utils/ajax',
     'modules/toggle',
     'modules/optionMirror',
+    'modules/appendAround',
     'modules/checkout/checkout',
     'modules/components/password',
     // Add new dependencies ABOVE this
@@ -9,6 +10,7 @@ require([
 ], function(
     ajax,
     toggle,
+    appendAround,
     optionMirror,
     checkout,
     password
@@ -28,6 +30,7 @@ require([
 
     toggle.init();
     optionMirror.init();
+    appendAround.init();
     checkout.init();
     password.init();
 });

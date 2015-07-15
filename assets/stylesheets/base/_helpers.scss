@@ -28,23 +28,6 @@
     display: inline-block;
 }
 
-.is-hidden,
-[hidden] {
-    display: none !important;
-}
-
-.hide-on-mobile {
-    @include mq($until: tablet) {
-        display: none !important;
-    }
-}
-
-.mobile-only {
-    @include mq(tablet) {
-        display: none !important;
-    }
-}
-
 .visible {
     display: inline-block !important;
 }

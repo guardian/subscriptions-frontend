@@ -22,8 +22,8 @@
 
             <div class="checkout-container__sidebar">
                 @fragments.checkout.basketPreview(Some(subscriptionProducts))
-
-                <div class="js-checkout-smallprint is-hidden">
+            <div class="u-display-from-tablet" data-set="checkout-notices">
+                <div class="js-append">
                     @fragments.checkout.notice("Advanced Notice") {
                         <p>The details of your Direct Debit instruction including payment schedule, due date, frequency and amount will be sent to you within three working days. All the normal Direct Debit safeguards and guarantees apply.</p>
                     }
@@ -31,28 +31,48 @@
                         <p>If you wish to cancel your subscription, we will send you a refund of the unexpired part of your subscription.</p>
                     }
                     @fragments.checkout.notice("Direct Debit") {
-                        @* TODO: Refactor this markup *@
-                        <ul class="u-unstyled-list">
-                            <li>The Guardian</li>
-                            <li>Rockwood House</li>
-                            <li>Perrymount Road</li>
-                            <li>Haywards Heath</li>
-                            <li>West Sussex</li>
-                            <li>RH16 3DH</li>
-                            <li>United Kingdom</li>
-                        </ul>
-                        <br>
+                        <address>
+                            The Guardian, Perrymount Road, Perrymount Road,
+                            Haywards Heath, West Sussex, RH16 3DH,
+                            United Kingdom
+                        </address>
                         <ul class="u-unstyled-list">
                             <li>Tel: 0808 168 5088</li>
                             <li><a href="mailto:gnmsubs@@quadrantsubs.com">gnmsubs@@quadrantsubs.com</a></li>
                         </ul>
+                        <aside class="direct-debit">
+                            <div class="direct-debit__logo">
+                                <img src="@controllers.CachedAssets.hashedPathFor("images/direct-debit.png")" alt="Direct Debit">
+                            </div>
+                            <div class="direct-debit__disclaimer prose">
+                                Your payments are protected by the
+                                <a href="#direct-debit-guarantee" class="js-toggle" data-toggle="direct-debit-guarantee">
+                                    Direct Debit guarantee.
+                                </a>
+                            </div>
+                            <div id="direct-debit-guarantee" class="prose" data-toggle-hidden>
+                                <ul>
+                                    <li>The Guarantee is offered by all banks and building societies that accept instructions to pay Direct Debits</li>
+                                    <li>If there are any changes to the amount, date or frequency of your Direct Debit Guardian Subscriptions will notify you (normally 3 working days) in advance of your account being debited or as otherwise agreed. If you request Guardian Subscriptions to collect a payment, confirmation of the amount and date will be given to you at the time of the request</li>
+                                    <li>
+                                        If an error is made in the payment of your Direct Debit, by Guardian Subscriptions or your bank or building society, you are entitled to a full and immediate refund of the amount paid from your bank or building society
+                                        <ul>
+                                            <li>If an error is made in the payment of your Direct Debit, by Guardian Subscriptions or your bank or building society, you are entitled to a full and immediate refund of the amount paid from your bank or building society</li>
+                                        </ul>
+                                    </li>
+                                    <li>If you receive a refund you are not entitled to, you must pay it back when Guardian Subscriptions asks you to You can cancel a Direct Debit at any time by simply contacting your bank or building society. Written confirmation may be required. Please also notify Guardian Subscriptions.</li>
+                                </ol>
+                            </div>
+                        </aside>
                     }
-
                 </div>
+
             </div>
+        </div>
 
-            <div class="checkout-container__form js-checkout-form">
+        <div class="checkout-container__form">
 
+            <form class="form js-checkout-form" method="POST">
                 <fieldset class="fieldset js-fieldset-your-details">
                     @helper.CSRF.formField
 
@@ -121,23 +141,19 @@
                             @checkout.errorMessage("Please enter a valid postal code")
                         </div>
                         <div class="form-field">
-                            @*
-                                TODO: No values on checkboxes? Is this used yet?
-                            *@
-                            <h5 class="option-title">
-                                I'd like to receive information about offers and developments from Guardian News &amp; Media Limited via:
-                            </h5>
-                            <label class="option">
-                                <span class="option__input">
-                                    <input type="checkbox" class="js-input">
+                            <label class="checkbox" for="receive-gnm-marketing">
+                            @defining(form.data.get("personal.receiveGnmMarketing")) { gnmMarketingOpt =>
+                                <span class="checkbox__input">
+                                    <input type="checkbox"
+                                        name="personal.receiveGnmMarketing"
+                                        id="receive-gnm-marketing"
+                                        @if(gnmMarketingOpt.contains("on")) { checked="checked" }
+                                        >
                                 </span>
-                                <span class="option__label">Email</span>
-                            </label>
-                            <label class="option">
-                                <span class="option__input">
-                                    <input type="checkbox" class="js-input">
+                            }
+                                <span class="checkbox__label">
+                                    I'd like to be kept up to to date by email with offers and developments from Guardian News &amp; Media Limited
                                 </span>
-                                <span class="option__label">Post</span>
                             </label>
                         </div>
                         <div class="actions">
@@ -155,7 +171,7 @@
                             Payment will be taken by Direct Debit
                         </div>
                         <div class="fieldset__edit">
-                            <button class="button u-button-reset js-edit-payment-details is-hidden">Edit</button>
+                            <button class="text-button u-button-reset js-edit-payment-details is-hidden">Edit</button>
                         </div>
                     </div>
                     <div class="fieldset__fields">
@@ -187,11 +203,11 @@
                             @checkout.errorMessage("Please enter between 1 and 18 characters for the account holder name")
                         </div>
                         <div class="form-field js-checkout-confirm-payment">
-                            <label class="option">
-                                <span class="option__input">
+                            <label class="checkbox">
+                                <span class="checkbox__input">
                                     <input type="checkbox" class="js-input">
                                 </span>
-                                <span class="option__label">
+                                <span class="checkbox__label">
                                     I confirm that I am the account holder and I am solely able to authorise debit from the account
                                 </span>
                             </label>
@@ -229,12 +245,13 @@
                         </div>
                     </div>
                 </fieldset>
+            </form>
 
-            </div>
+        </div>
 
-        </section>
+        <div class="u-display-until-tablet" data-set="checkout-notices"></div>
 
-    </form>
+    </section>
 
 </main>
 }
