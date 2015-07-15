@@ -89,7 +89,7 @@ class ZuoraService(zuoraApiConfig: ZuoraApiConfig, digitalProductId: String) ext
     }
   }
 
-  val productsTask = ScheduledTask[Seq[SubscriptionProduct]]("Loading rate plans", Nil, 5.seconds, 1.day)(getProducts())
+  val productsTask = ScheduledTask[Seq[SubscriptionProduct]]("Loading rate plans", Nil, Config.Zuora.productsTaskInitalDelaySeconds.seconds, Config.Zuora.productsTaskIntervalSeconds.seconds)(getProducts())
 
   def products = productsTask.get()
 }
