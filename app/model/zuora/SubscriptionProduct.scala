@@ -2,15 +2,13 @@ package model.zuora
 
 
 case class SubscriptionProduct(
-  product: ProductPlan,
+  product: DigitalProductPlan,
   frequency: BillingFrequency,
   ratePlanId: String,
   price: Float)
 
-sealed abstract class ProductPlan
-object ProductPlan {
-  case object Digital extends ProductPlan
-}
+
+case class DigitalProductPlan(id: String)
 
 sealed abstract class BillingFrequency {
   val lowercase = toString.toLowerCase

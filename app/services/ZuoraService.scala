@@ -4,12 +4,11 @@ import com.gu.membership.salesforce.MemberId
 import com.gu.membership.zuora.ZuoraApiConfig
 import com.gu.membership.zuora.soap.Zuora._
 import com.gu.membership.zuora.soap.ZuoraDeserializer._
-import com.gu.membership.zuora.soap.{ZuoraServiceError, Login, ZuoraApi}
+import com.gu.membership.zuora.soap.{Login, ZuoraApi, ZuoraServiceError}
 import com.gu.monitoring.ZuoraMetrics
 import configuration.Config
 import model.SubscriptionData
-import model.zuora.ProductPlan.Digital
-import model.zuora.{BillingFrequency, SubscriptionProduct}
+import model.zuora.{BillingFrequency, DigitalProductPlan, SubscriptionProduct}
 import org.joda.time.Period
 import services.zuora.Subscribe
 import utils.ScheduledTask
@@ -18,7 +17,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
-class ZuoraService(zuoraApiConfig: ZuoraApiConfig, digitalProductId: String) extends ZuoraApi {
+class ZuoraService(zuoraApiConfig: ZuoraApiConfig, digitalProductPlan: DigitalProductPlan) extends ZuoraApi {
 
   override val apiConfig: ZuoraApiConfig = zuoraApiConfig
 
@@ -37,7 +36,7 @@ class ZuoraService(zuoraApiConfig: ZuoraApiConfig, digitalProductId: String) ext
   private def getProducts(): Future[Seq[SubscriptionProduct]] = {
 
     def productRatePlans: Future[Seq[ProductRatePlan]] =
-      query[ProductRatePlan](s"ProductId='$digitalProductId'")
+      query[ProductRatePlan](s"ProductId='${digitalProductPlan.id}'")
 
 
     def productRatePlanCharges(productRatePlans: Seq[ProductRatePlan]): Future[Seq[ProductRatePlanCharge]] = {
@@ -82,7 +81,7 @@ class ZuoraService(zuoraApiConfig: ZuoraApiConfig, digitalProductId: String) ext
         val billingFreq = billingFreqProductRatePlan.flatMap(a => BillingFrequency.all.find(a.billingPeriod.toLowerCase == _.lowercase))
 
         if (billingFreq.isDefined && productRatePlanChargeTier.isDefined)
-          SubscriptionProduct(Digital, billingFreq.get, ratePlan.id, productRatePlanChargeTier.get.price)
+          SubscriptionProduct(digitalProductPlan, billingFreq.get, ratePlan.id, productRatePlanChargeTier.get.price)
         else throw new ZuoraServiceError(s"Could not find valid ratePlan details for Digital Pack. Rate plan ID requested ${ratePlan.id}")
       }
       subscriptionProducts
