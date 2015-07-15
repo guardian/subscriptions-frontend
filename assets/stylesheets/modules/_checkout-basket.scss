@@ -20,6 +20,10 @@
         // Magic number
         min-height: 100px;
     }
+
+    @include mq(tablet) {
+        margin-bottom: $gs-gutter;
+    }
 }
 .basket-preview__image {
     display: none;
@@ -47,6 +51,7 @@
     display: inline-block;
     font-weight: normal;
     font-family: inherit;
+    display: inline-block;
 
     @include mq(tablet) {
         @include fs-header(2);
