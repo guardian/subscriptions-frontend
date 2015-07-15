@@ -40,17 +40,15 @@ class ZuoraService(zuoraApiConfig: ZuoraApiConfig, digitalProductPlan: DigitalPr
 
 
     def productRatePlanCharges(productRatePlans: Seq[ProductRatePlan]): Future[Seq[ProductRatePlanCharge]] = {
-      Future.traverse(productRatePlans) {  productRatePlan =>
-          query[ProductRatePlanCharge](s"ProductRatePlanId='${productRatePlan.id}'")
-        }.map(_.flatten)
-      }
+      val queryString = productRatePlans.map(p => s"ProductRatePlanId='${p.id}'").mkString(" OR ")
+      query[ProductRatePlanCharge](queryString)
+    }
+
 
 
     def productRatePlanChargeTiers(productRatePlanCharges: Seq[ProductRatePlanCharge]): Future[Seq[ProductRatePlanChargeTier]] = {
-      Future.traverse(productRatePlanCharges) { productRatePlanCharge =>
-        query[ProductRatePlanChargeTier](s"ProductRatePlanChargeId='${productRatePlanCharge.id}'")
-      }.map(_.flatten)
-
+      val queryString = productRatePlanCharges.map(p => s"ProductRatePlanChargeId='${p.id}'").mkString(" OR ")
+      query[ProductRatePlanChargeTier](queryString)
     }
 
     for {
@@ -88,7 +86,8 @@ class ZuoraService(zuoraApiConfig: ZuoraApiConfig, digitalProductPlan: DigitalPr
     }
   }
 
-  val productsTask = ScheduledTask[Seq[SubscriptionProduct]]("Loading rate plans", Nil, Config.Zuora.productsTaskInitalDelaySeconds.seconds, Config.Zuora.productsTaskIntervalSeconds.seconds)(getProducts())
+  val productsTask = ScheduledTask[Seq[SubscriptionProduct]]("Loading rate plans", Nil, Config.Zuora.productsTaskInitalDelaySeconds.seconds,
+                                                              Config.Zuora.productsTaskIntervalSeconds.seconds)(getProducts())
 
   def products = productsTask.get()
 }
