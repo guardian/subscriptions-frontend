@@ -6,7 +6,6 @@ import com.gu.membership.zuora.soap.Zuora.SubscribeResult
 import TouchpointBackend.{Normal => touchpointBackend}
 import touchpointBackend.ratePlan.{ratePlanId => ratePlan}
 import com.typesafe.scalalogging.LazyLogging
-import configuration.Config
 import model.{PersonalData, SubscriptionData}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -15,8 +14,6 @@ import scala.concurrent.Future
 
 class CheckoutService(identityService: IdentityService, salesforceService: SalesforceService) extends LazyLogging {
   import CheckoutService._
-
-  lazy val paymentDelay = Some(Config.Zuora.paymentDelay)
 
   def processSubscription(subscriptionData: SubscriptionData,
                           idUserOpt: Option[IdMinimalUser],
@@ -34,7 +31,7 @@ class CheckoutService(identityService: IdentityService, salesforceService: Sales
     for {
       userData <- userOrElseRegisterGuest
       memberId <- salesforceService.createOrUpdateUser(subscriptionData.personalData, userData.id)
-      subscribeResult <- touchpointBackend.zuoraService.createSubscription(memberId, subscriptionData, ratePlan, paymentDelay)
+      subscribeResult <- touchpointBackend.zuoraService.createSubscription(memberId, subscriptionData, ratePlan)
     } yield {
       updateAuthenticatedUserDetails(subscriptionData.personalData, idUserOpt, authCookieOpt)
       CheckoutResult(memberId, userData, subscribeResult)
