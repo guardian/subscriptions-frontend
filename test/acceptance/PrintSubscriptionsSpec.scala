@@ -1,12 +1,10 @@
-package functional
+package acceptance
 
-import java.net.URL
-
-import functional.pages.{DigitalPack, Home, SubscriptionPlan}
+import acceptance.Config.appUrl
+import acceptance.pages.{DigitalPack, Home, SubscriptionPlan}
 import org.openqa.selenium.WebDriver
 import org.scalatest._
 import org.scalatest.selenium.WebBrowser
-import Config.appUrl
 
 case class SubscriptionTest(url: String, name: String, landingHost: String)
 
@@ -17,7 +15,7 @@ object SubscriptionTest {
     SubscriptionTest(url, name, "www.guardiandirectsubs.co.uk")
 }
 
-class PrintSubscriptionsSpec extends FreeSpec with ShouldMatchers with WebBrowser with BeforeAndAfterAll {
+class PrintSubscriptionsSpec extends FreeSpec with Util with WebBrowser {
   implicit lazy val driver: WebDriver = Config.driver
 
   val testData = Seq(
@@ -62,15 +60,5 @@ class PrintSubscriptionsSpec extends FreeSpec with ShouldMatchers with WebBrowse
       DigitalPack.selectNonUK
       assertResult("www.guardiansubscriptions.co.uk")(currentHost)
     }
-
-  }
-
-  private def currentHost: String = new URL(currentUrl).getHost
-  private def pageHasText(text: String): Boolean = {
-    find(tagName("body")).get.text.contains(text)
-  }
-
-  override def afterAll() {
-    quit()
   }
 }

@@ -1,4 +1,4 @@
-package functional
+package acceptance
 
 import java.net.URL
 

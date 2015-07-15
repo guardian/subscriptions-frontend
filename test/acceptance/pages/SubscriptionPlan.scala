@@ -1,4 +1,4 @@
-package functional.pages
+package acceptance.pages
 
 import org.openqa.selenium.WebDriver
 import org.scalatest.selenium.WebBrowser
