@@ -1,0 +1,36 @@
+@()
+
+@import configuration.Links
+
+<div class="review-details">
+    <div class="review-details__item">
+        <h3 class="review-details__heading">Your details</h3>
+        <div class="review-details__list">
+            <ul class="u-unstyled-list">
+                <li class="js-checkout-review-name"></li>
+                <li class="js-checkout-review-address"></li>
+                <li class="js-checkout-review-email"></li>
+            </ul>
+        </div>
+    </div>
+    <div class="review-details__item">
+        <h3 class="review-details__heading">Payment details</h3>
+        <div class="review-details__list">
+            <ul class="u-unstyled-list">
+                <li><span class="review-details__detail">Payment method:</span> Direct Debit</li>
+                <li><span class="review-details__detail">Bank account:</span> <span class="js-checkout-review-account"></span></li>
+                <li><span class="review-details__detail">Sort code:</span> <span class=" js-checkout-review-sortcode"></span></li>
+                <li><span class="review-details__detail">Account holder:</span> <span class=" js-checkout-review-holder"></span></li>
+            </ul>
+        </div>
+    </div>
+    <div class="review-details__actions">
+        <p class="u-note">
+            By proceeding you agree to the Guardian's
+            <a href="@Links.termsOfService.href" target="_blank">@Links.termsOfService.title</a> and
+            <a href="@Links.privacyPolicy.href" target="_blank">@Links.privacyPolicy.title</a>
+        </p>
+
+        <button type="submit" class="button button--primary button--large">Submit payment</button>
+    </div>
+</div>

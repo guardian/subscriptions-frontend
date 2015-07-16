@@ -9,6 +9,6 @@
         "raven-js": "~1.1.16",
         "requirejs": "~2.1.17",
         "reqwest": "~1.1.0",
-        "zxcvbn": "*"
+        "zxcvbn": "90b7d2908d1305e0ab9f0fe0d983041e546af760"
     }
 }

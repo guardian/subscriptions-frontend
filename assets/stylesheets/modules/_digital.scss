@@ -1,8 +1,15 @@
 /* Digital pack */
+/**
+ * TODO: Refactor this whole template.
+ */
 
 .digital-pack {
     .page-header {
         margin-bottom: $gs-baseline*2;
+    }
+    .page-container {
+        max-width: mq-get-breakpoint-width('leftCol');
+        margin: 0 auto;
     }
 }
 

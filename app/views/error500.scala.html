@@ -1,6 +1,6 @@
 @(ex: Throwable)
 @main("Internal Server Error") {
-    <div class="gs-container">
+    <main class="page-container gs-container">
         @fragments.page.header("Error 500", Some("There was an error on this page"))
         <p>
             Sorry, there was an error on this page. We're aware of the problem. If this error persists, please contact
@@ -12,5 +12,5 @@
                 <pre>Error code: @err.id</pre>
             }
         }
-    </div>
+    </main>
 }

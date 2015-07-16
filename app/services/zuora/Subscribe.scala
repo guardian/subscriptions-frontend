@@ -4,16 +4,16 @@ import com.gu.membership.salesforce.MemberId
 import com.gu.membership.zuora.Countries
 import com.gu.membership.zuora.soap.Zuora.SubscribeResult
 import com.gu.membership.zuora.soap.ZuoraAction
-import model.SubscriptionData
-import org.joda.time.{Period, DateTime}
-
 import com.gu.membership.zuora.soap.ZuoraServiceHelpers._
+import configuration.Config
+import model.SubscriptionData
+import org.joda.time.DateTime
+
 import scala.xml.Elem
 
-case class Subscribe(memberId: MemberId, data: SubscriptionData, productRatePlanId: String, paymentDelay: Option[Period]) extends ZuoraAction[SubscribeResult] {
-
+case class Subscribe(memberId: MemberId, data: SubscriptionData, productRatePlanId: String) extends ZuoraAction[SubscribeResult] {
   override protected val body: Elem = {
-
+    lazy val paymentDelay = Some(Config.Zuora.paymentDelay)
     val now = DateTime.now
     val effectiveDate = formatDateTime(now)
     val contractAcceptanceDate = paymentDelay.map(delay => formatDateTime(now.plus(delay))).getOrElse(effectiveDate)
