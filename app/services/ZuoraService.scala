@@ -8,7 +8,7 @@ import com.gu.membership.zuora.soap.{Login, ZuoraApi, ZuoraServiceError}
 import com.gu.monitoring.ZuoraMetrics
 import configuration.Config
 import model.SubscriptionData
-import model.zuora.{BillingFrequency, DigitalProductPlan, SubscriptionProduct}
+import model.zuora.{BillingFrequency, SubscriptionProduct, DigitalProductPlan}
 import org.joda.time.Period
 import services.zuora.Subscribe
 import utils.ScheduledTask
@@ -17,21 +17,31 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
-class ZuoraService(zuoraApiConfig: ZuoraApiConfig, digitalProductPlan: DigitalProductPlan) extends ZuoraApi {
+trait ZuoraService {
+  def createSubscription(memberId: MemberId, data: SubscriptionData): Future[SubscribeResult]
+  def authTask: ScheduledTask[Authentication]
+  def productsTask: ScheduledTask[Seq[SubscriptionProduct]]
+  def products: Seq[SubscriptionProduct]
+}
 
-  override val apiConfig: ZuoraApiConfig = zuoraApiConfig
-
+class ZuoraApiClient(zuoraApiConfig: ZuoraApiConfig, digitalProductPlan: DigitalProductPlan) extends ZuoraApi with ZuoraService {
   override implicit def authentication: Authentication = authTask.get()
 
-  override val application: String = Config.appName
-  override val stage: String = Config.stage
+  override val apiConfig = zuoraApiConfig
+  override val application = Config.appName
+  override val stage = Config.stage
 
   override val metrics = new ZuoraMetrics(stage, application)
-  val authTask = ScheduledTask(s"Zuora ${apiConfig.envName} auth", Authentication("", ""), 0.seconds, 30.minutes)(request(Login(apiConfig)))
+  override val authTask = ScheduledTask(s"Zuora ${apiConfig.envName} auth", Authentication("", ""), 0.seconds, 30.minutes)(request(Login(apiConfig)))
 
-  def createSubscription(memberId: MemberId, data: SubscriptionData, paymentDelay: Option[Period]): Future[SubscribeResult] = {
-    request(Subscribe(memberId, data, paymentDelay))
+  override def createSubscription(memberId: MemberId, data: SubscriptionData): Future[SubscribeResult] = {
+    request(Subscribe(memberId, data))
   }
+
+  override val productsTask = ScheduledTask[Seq[SubscriptionProduct]]("Loading rate plans", Nil, Config.Zuora.productsTaskInitalDelaySeconds.seconds,
+    Config.Zuora.productsTaskIntervalSeconds.seconds)(getProducts())
+
+  def products = productsTask.get()
 
   private def getProducts(): Future[Seq[SubscriptionProduct]] = {
 
@@ -85,12 +95,4 @@ class ZuoraService(zuoraApiConfig: ZuoraApiConfig, digitalProductPlan: DigitalPr
       subscriptionProducts
     }
   }
-
-  val productsTask = ScheduledTask[Seq[SubscriptionProduct]]("Loading rate plans", Nil, Config.Zuora.productsTaskInitalDelaySeconds.seconds,
-                                                              Config.Zuora.productsTaskIntervalSeconds.seconds)(getProducts())
-
-  def products = productsTask.get()
 }
-
-
-

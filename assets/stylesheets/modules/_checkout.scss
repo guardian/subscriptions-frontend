@@ -99,30 +99,39 @@
 
 /* Review Details
    ========================================================================== */
-// TODO: Refactor
 
 .review-details {
-    // Root element
+    margin: $gs-baseline 0;
+    @include fs-bodyCopy(2);
+}
+.review-details__item {
+    margin-bottom: $gs-gutter;
+
+    @include mq(tablet) {
+        display: table;
+        width: 100%
+    }
+}
+.review-details__heading,
+.review-details__list {
+    @include mq(tablet) {
+        display: table-cell;
+        vertical-align: top;
+    }
 }
 .review-details__heading {
     @include fs-bodyHeading(2);
 
     @include mq(tablet) {
-        float: left;
-        width: gs-span(2);
+        width: 35%;
+        padding-right: $gs-gutter;
         text-align: right;
     }
 }
-.review-details__list {
-    margin-bottom: $gs-baseline;
-
+.review-details__actions {
     @include mq(tablet) {
-        margin-left: gs-span(2) + $gs-gutter;
+        margin-left: 35%;
     }
-}
-.review-details__detail {
-    display: inline-block;
-    width: gs-span(2);
 }
 
 /* ==========================================================================
@@ -159,6 +168,7 @@
         width: gs-span(3);
     }
 }
+
 /* ==========================================================================
    Thank you page
    ========================================================================== */

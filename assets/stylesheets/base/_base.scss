@@ -23,11 +23,6 @@ body {
     background-color: $c-bg;
     margin: 0;
     line-height: 1.5;
-
-    // TODO: Refactor this code-smell
-    > .gs-container {
-        background-color: $c-white;
-    }
 }
 
 h1, h2, h3 {

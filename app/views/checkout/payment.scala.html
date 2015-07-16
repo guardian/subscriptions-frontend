@@ -12,7 +12,7 @@
     bodyClasses = List("is-wide")
 ) {
 
-<main class="gs-container">
+<main class="page-container gs-container">
 
     <form class="form" action="" method="POST">
 
@@ -32,6 +32,8 @@
         <div class="checkout-container__form">
 
             <form class="form js-checkout-form" method="POST">
+
+                @* ===== Your details ===== *@
                 <fieldset class="fieldset js-fieldset-your-details">
                     @helper.CSRF.formField
 
@@ -120,6 +122,8 @@
                         </div>
                     </div>
                 </fieldset>
+
+                @* ===== Payment ===== *@
                 <fieldset class="fieldset fieldset--collapsed js-fieldset-payment-details">
                     <div class="fieldset__heading">
                         <h2 class="fieldset__headline">
@@ -177,6 +181,8 @@
                         </div>
                     </div>
                 </fieldset>
+
+                @* ===== Review ===== *@
                 <fieldset class="fieldset fieldset--single fieldset--collapsed js-fieldset-review">
                     <div class="fieldset__heading">
                         <h2 class="fieldset__headline">
@@ -184,26 +190,10 @@
                         </h2>
                     </div>
                     <div class="fieldset__fields">
-                        <div class="review-details">
-                            <h3 class="review-details__heading">Your details</h3>
-                            <ul class="u-unstyled-list review-details__list">
-                                <li class="js-checkout-review-name"></li>
-                                <li class="js-checkout-review-address"></li>
-                                <li class="js-checkout-review-email"></li>
-                            </ul>
-                            <h3 class="review-details__heading">Payment details</h3>
-                            <ul class="u-unstyled-list review-details__list">
-                                <li><span class="review-details__detail">Payment method:</span> Direct Debit</li>
-                                <li><span class="review-details__detail">Bank account:</span> <span class=" js-checkout-review-account"></span></li>
-                                <li><span class="review-details__detail">Sort code:</span> <span class=" js-checkout-review-sortcode"></span></li>
-                                <li><span class="review-details__detail">Account holder:</span> <span class=" js-checkout-review-holder"></span></li>
-                            </ul>
-                        </div>
-                        <div class="actions review-details__list">
-                            <button type="submit" class="button button--primary button--large">Submit payment</button>
-                        </div>
+                        @fragments.checkout.reviewDetails()
                     </div>
                 </fieldset>
+
             </form>
 
         </div>

@@ -4,21 +4,30 @@ import com.gu.identity.play.IdMinimalUser
 import com.gu.membership.salesforce.MemberId
 import com.gu.membership.zuora.soap.Zuora.SubscribeResult
 import com.typesafe.scalalogging.LazyLogging
-import configuration.Config
 import model.{PersonalData, SubscriptionData}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
+object CheckoutService {
+  case class CheckoutResult(salesforceMember: MemberId, userIdData: UserIdData, zuoraResult: SubscribeResult)
+}
 
-class CheckoutService(identityService: IdentityService, salesforceService: SalesforceService) extends LazyLogging {
-  import CheckoutService._
-
-  lazy val paymentDelay = Some(Config.Zuora.paymentDelay)
+class CheckoutService(identityService: IdentityService, salesforceService: SalesforceService, zuoraService: ZuoraService) extends LazyLogging {
+  import CheckoutService.CheckoutResult
 
   def processSubscription(subscriptionData: SubscriptionData,
                           idUserOpt: Option[IdMinimalUser],
                           authCookieOpt: Option[AuthCookie]): Future[CheckoutResult] = {
+
+    def updateAuthenticatedUserDetails(personalData: PersonalData): Unit = {
+      for {
+        user <- idUserOpt
+        authCookie <- authCookieOpt
+      } yield {
+        identityService.updateUserDetails(personalData, UserId(user.id), authCookie)
+      }
+    }
 
     val userOrElseRegisterGuest: Future[UserIdData] =
       idUserOpt.map(user => Future {
@@ -34,23 +43,10 @@ class CheckoutService(identityService: IdentityService, salesforceService: Sales
     for {
       userData <- userOrElseRegisterGuest
       memberId <- salesforceService.createOrUpdateUser(subscriptionData.personalData, userData.id)
-      subscribeResult <- touchpointBackend.zuoraService.createSubscription(memberId, subscriptionData, paymentDelay)
+      subscribeResult <- touchpointBackend.zuoraService.createSubscription(memberId, subscriptionData)
     } yield {
-      updateAuthenticatedUserDetails(subscriptionData.personalData, idUserOpt, authCookieOpt)
+      updateAuthenticatedUserDetails(subscriptionData.personalData)
       CheckoutResult(memberId, userData, subscribeResult)
     }
   }
-
-  private def updateAuthenticatedUserDetails(personalData: PersonalData, idUserOpt: Option[IdMinimalUser], authCookieOpt: Option[AuthCookie]): Unit = {
-    for {
-      user <- idUserOpt
-      authCookie <- authCookieOpt
-    } yield {
-      identityService.updateUserDetails(personalData, UserId(user.id), authCookie)
-    }
-  }
-}
-
-object CheckoutService extends CheckoutService(IdentityService, SalesforceService) {
-  case class CheckoutResult(salesforceMember: MemberId, userIdData: UserIdData, zuoraResult: SubscribeResult)
 }

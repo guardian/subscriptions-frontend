@@ -13,23 +13,23 @@
     list-style: none;
 }
 
+.u-note {
+    @include fs-textSans(3);
+    color: $c-neutral2;
+}
+
+.u-pad-top {
+    padding-top: $gs-baseline;
+}
+.u-pad-bottom {
+    padding-bottom: $gs-baseline;
+}
+
 .u-button-reset {
     padding: 0;
     border: 0;
     outline: none;
     background: transparent;
-}
-
-.inline-list {
-    @extend .u-unstyled-list;
-}
-
-.inline-list__item {
-    display: inline-block;
-}
-
-.visible {
-    display: inline-block !important;
 }
 
 .break-tablet {

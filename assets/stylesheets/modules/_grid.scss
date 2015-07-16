@@ -1,0 +1,149 @@
+/* ==========================================================================
+   Grid
+   ========================================================================== */
+
+$gutter-width-fluid: 2%;
+
+@mixin gridLayout($percentage) {
+    float: left;
+    border-style: solid;
+    border-width: 0 0 0 1px;
+    margin-left: $gutter-width-fluid / 2;
+    padding-left: $gutter-width-fluid / 2;
+    margin-bottom: ($gs-baseline);
+    width: $percentage - ($gutter-width-fluid / 2);
+}
+
+/* Grid Shared
+   ========================================================================== */
+
+.grid {
+    @include clearfix;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.grid__item {
+    border-color: transparent;
+    margin-bottom: ($gs-gutter / 2);
+
+    @include mq(mobileLandscape) {
+        margin-bottom: ($gs-baseline);
+    }
+}
+
+.grid--bordered {
+    .grid__item {
+        border-color: $c-neutral5;
+    }
+}
+
+.grid--2up,
+.grid--3up,
+.grid--4up {
+    @include mq(mobileLandscape) {
+        width: 100% + $gutter-width-fluid;
+        margin-left: -$gutter-width-fluid;
+    }
+    .grid__item {
+        @include mq(mobileLandscape) {
+            @include gridLayout(50%);
+        }
+        @include mq(tablet) {
+            border-style: solid;
+            border-width: 0 0 0 1px;
+        }
+    }
+}
+
+/* Grid 2up
+   ========================================================================== */
+
+.grid--2up {
+    .grid__item {
+        @include mq(tablet) {
+            &:nth-of-type(2n+1) { clear: left; border-left: none; }
+        }
+    }
+}
+
+.grid--2up-stacked {
+    @include mq(desktop) {
+        width: 100% + $gutter-width-fluid;
+        margin-left: -$gutter-width-fluid;
+    }
+    .grid__item {
+        @include mq(desktop) {
+            @include gridLayout(50%);
+            &:nth-of-type(2n+1) { clear: left; border-left: none; }
+        }
+    }
+}
+
+/* Grid 3up
+   ========================================================================== */
+
+.grid--3up {
+    .grid__item {
+        @include mq(tablet) {
+            width: 33.3% - ($gutter-width-fluid / 2);
+            &:nth-of-type(2n+1) { clear: none; }
+            &:nth-of-type(3n+1) { clear: left; border-left: none; }
+        }
+    }
+}
+
+/**
+ * 3up stack (3 > 2 > 1)
+ */
+.grid--3up-stack {
+    @include mq($from: phablet, $until: desktop) {
+        width: 100% + $gutter-width-fluid;
+        margin-left: -$gutter-width-fluid;
+    }
+    @include mq(desktop) {
+        width: 100% + $gutter-width-fluid;
+        margin-left: -$gutter-width-fluid;
+    }
+    .grid__item {
+        @include mq($from: phablet, $until: desktop) {
+            @include gridLayout(50%);
+            &:nth-of-type(2n+1) { clear: left; border-left: none; }
+        }
+        @include mq(desktop) {
+            @include gridLayout(33.3%);
+            &:nth-of-type(2n+1) { clear: none; }
+            &:nth-of-type(3n+1) { clear: left; border-left: none; }
+        }
+    }
+}
+
+/**
+ * 3up step (3 > 1)
+ */
+.grid--3up-step {
+    @include mq(tablet) {
+        width: 100% + $gutter-width-fluid;
+        margin-left: -$gutter-width-fluid;
+    }
+    .grid__item {
+        @include mq(tablet) {
+            @include gridLayout(33.3%);
+            &:nth-of-type(2n+1) { clear: none; }
+            &:nth-of-type(3n+1) { clear: left; border-left: none; }
+        }
+    }
+}
+
+/* Grid 4up
+   ========================================================================== */
+
+.grid--4up {
+    .grid__item {
+        @include mq(tablet) {
+            width: 25% - ($gutter-width-fluid / 2);
+            &:nth-of-type(2n+1) { clear: none; }
+            &:nth-of-type(4n+1) { clear: left; border-left: none; }
+        }
+    }
+}

@@ -2,9 +2,29 @@
    Layout
    ========================================================================== */
 
+/**
+ * Use flexbox for sticky footer
+ * @see http://philipwalton.github.io/solved-by-flexbox/demos/sticky-footer/
+ */
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+.global-container {
+    flex: 1 1 auto;
+}
+
+/* Grid System
+   ========================================================================== */
+
 @include grid-system;
 
-// TODO: Should this be done with config, not just overriding??
+/**
+ * TODO:
+ * Container should not have padding,
+ * only width / constraints.
+ */
 .gs-container {
     @include clearfix();
     @include container-padding();
@@ -20,19 +40,19 @@ body.is-wide {
         max-width: mq-get-breakpoint-width('wide');
     }
 }
+
 /**
  * TODO: Combine with .gs-container
  * Container should not have padding,
- * only width / layout.
+ * only width / constraints.
  */
 .gs-container--slim {
     padding-left: 0;
     padding-right: 0;
 }
 
-.l-padded {
-    @include container-padding();
-}
+/* Grid Rows
+   ========================================================================== */
 
 // Setup rows
 @include guss-row-utility;
@@ -55,4 +75,11 @@ body.is-wide {
             border-left: $gs-gutter solid $c-white;
         }
     }
+}
+
+/* Layout Helpers
+   ========================================================================== */
+
+.l-padded {
+    @include container-padding();
 }
