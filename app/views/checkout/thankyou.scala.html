@@ -5,7 +5,7 @@
 
 @import routes.Checkout.processFinishAccount
 
-@(subscriptionId: String, personalData: PersonalData, guestAccountForm: Option[Form[GuestAccountData]] = None)(implicit request: RequestHeader)
+@(subscriptionName: String, personalData: PersonalData, guestAccountForm: Option[Form[GuestAccountData]] = None)(implicit request: RequestHeader)
 
 @main("Thank you | Subscriptions | The Guardian", bodyClasses=List("is-wide")) {
 
@@ -15,7 +15,7 @@
 
     <section class="section-slice section-slice--limited">
         <div class="section-slice__content">
-            <h2 class="section-title">Order ref: @subscriptionId</h2>
+            <h2 class="section-title">Order ref: @subscriptionName</h2>
             <div class="prose prose--full">
                 <p>
                     We have received your request and are now processing your subscription,
@@ -27,7 +27,7 @@
                     <a href="mailto:subscriptions@@theguardian.com">subscriptions@@theguardian.com</a>
                 </p>
             </div>
-            @fragments.checkout.reviewPanel(subscriptionId, personalData)
+            @fragments.checkout.reviewPanel(subscriptionName, personalData)
         </div>
     </section>
 
