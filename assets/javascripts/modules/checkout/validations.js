@@ -46,13 +46,27 @@ define([
         return !validity.emptyFields.length && validity.hasConfirmedEmail && validity.hasValidEmail;
     }
 
+    function displayMandatoryValidityErrors(validity) {
+        renderEmailError(!validity.hasValidEmail);
+        toggleError(form.$EMAIL_CONTAINER, !validity.hasValidEmail);
+        toggleError(form.$CONFIRM_EMAIL_CONTAINER, validity.hasValidEmail && !validity.hasConfirmedEmail);
+    }
+
+
+    /**
+     * TODO:
+     * Rather than querying DOM here, this should take
+     * an object with the field data and then return an
+     * object with validity data, this can then be unit
+     * tested easily.
+     */
     function validatePersonalDetails() {
 
         return new Promise(function (resolve, reject){
 
             var emailValue = form.$EMAIL.val();
             var emptyFields = mandatoryFieldsPersonalDetails.filter(function (field) {
-                var isEmpty = field.input.val() === '';
+                var isEmpty = !field.input.val();
                 // TODO: Handle DOM/view code outside of promise
                 toggleError(field.container, isEmpty);
                 return isEmpty;
@@ -67,27 +81,30 @@ define([
             };
 
             // TODO: Handle DOM/view code outside of promise
-            renderEmailError(!validity.hasValidEmail);
-            toggleError(form.$EMAIL_CONTAINER, !validity.hasValidEmail);
-            toggleError(form.$CONFIRM_EMAIL_CONTAINER, validity.hasValidEmail && !validity.hasConfirmedEmail);
+            displayMandatoryValidityErrors(validity);
 
-            if(confirmBasicValidity(validity) && !guardian.user.isSignedIn) {
-                emailCheck(emailValue).then(function(isEmailInUse) {
-                    if(!isEmailInUse) {
-                        validity.allValid = true;
-                        validity.isEmailInUse = true;
-                        resolve(validity);
-                    } else {
+            if(confirmBasicValidity(validity)) {
+                if( guardian.user.isSignedIn ) {
+                    validity.allValid = true;
+                    resolve(validity);
+                } else {
+                    emailCheck(emailValue).then(function(isEmailInUse) {
+                        if(isEmailInUse) {
+                            validity.isEmailInUse = true;
+                            // TODO: Handle DOM/view code outside of promise
+                            renderEmailError(true, MESSAGES.emailTaken);
+                            toggleError(form.$EMAIL_CONTAINER, true);
+                            resolve(validity);
+                        } else {
+                            validity.allValid = true;
+                            resolve(validity);
+                        }
+                    }).fail(function(err, msg) {
                         // TODO: Handle DOM/view code outside of promise
-                        renderEmailError(true, MESSAGES.emailTaken);
-                        toggleError(form.$EMAIL_CONTAINER, true);
-                        resolve(validity);
-                    }
-                }).fail(function(err, msg) {
-                    // TODO: Handle DOM/view code outside of promise
-                    renderEmailError(true, MESSAGES.emailFailure);
-                    reject(err, msg);
-                });
+                        renderEmailError(true, MESSAGES.emailFailure);
+                        reject(err, msg);
+                    });
+                }
             } else {
                 resolve(validity);
             }
