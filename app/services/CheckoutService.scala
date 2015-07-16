@@ -4,6 +4,7 @@ import com.gu.identity.play.IdMinimalUser
 import com.gu.membership.salesforce.MemberId
 import com.gu.membership.zuora.soap.Zuora.SubscribeResult
 import TouchpointBackend.{Normal => touchpointBackend}
+import play.api.Logger
 import touchpointBackend.ratePlan.{ratePlanId => ratePlan}
 import com.typesafe.scalalogging.LazyLogging
 import model.{PersonalData, SubscriptionData}
@@ -39,12 +40,26 @@ class CheckoutService(identityService: IdentityService, salesforceService: Sales
         identityService.registerGuest(subscriptionData.personalData)
       }
 
+    userOrElseRegisterGuest.onComplete(t => Logger.info("userOrElseRegisterGuest result "+t))
+
+
     //TODO when implementing test-users this requires updating to supply data to correct location
     for {
       userData <- userOrElseRegisterGuest
-      memberId <- salesforceService.createOrUpdateUser(subscriptionData.personalData, userData.id)
-      subscribeResult <- zuoraService.createSubscription(memberId, subscriptionData)
+      memberId <- {
+        val mi = salesforceService.createOrUpdateUser(subscriptionData.personalData, userData.id)
+        mi.onComplete(t => Logger.info("salesforce result "+t))
+        mi
+      }
+      subscribeResult <- {
+        val sr = zuoraService.createSubscription(memberId, subscriptionData)
+        sr.onComplete(t => Logger.info("zuora result " + t))
+        sr
+      }
     } yield {
+      Logger.info(s"Identity user : ${userData.id}")
+      Logger.info(s"Salesforce user: ${memberId.salesforceContactId}")
+      Logger.info(s"Zuora: ${subscribeResult.id}")
       updateAuthenticatedUserDetails(subscriptionData.personalData)
       CheckoutResult(memberId, userData, subscribeResult)
     }
