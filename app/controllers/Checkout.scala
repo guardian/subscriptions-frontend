@@ -3,6 +3,7 @@ package controllers
 import actions.CommonActions._
 import com.gu.identity.play.IdUser
 import com.typesafe.scalalogging.LazyLogging
+import configuration.Config.Identity.webAppProfileUrl
 import forms.{FinishAccountForm, SubscriptionsForm}
 import model.SubscriptionData
 import play.api.libs.json._
@@ -10,11 +11,13 @@ import play.api.mvc._
 import services.CheckoutService.CheckoutResult
 import services.{CheckoutService, _}
 import views.html.{checkout => view}
-import configuration.Config.Identity.webAppProfileUrl
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 object Checkout extends Controller with LazyLogging {
+  lazy val checkoutService = new CheckoutService(IdentityService, SalesforceService, TouchpointBackend.Normal.zuoraService)
+
   def identityCookieOpt(implicit request: Request[_]): Option[Cookie] =
     request.cookies.find(_.name == "SC_GU_U")
 
@@ -44,7 +47,7 @@ object Checkout extends Controller with LazyLogging {
         val idUserOpt = AuthenticationService.authenticatedUserFor(request)
         val authCookie = identityCookieOpt.map(cookie => AuthCookie(cookie.value))
 
-        CheckoutService.processSubscription(formData, idUserOpt, authCookie).map { case CheckoutResult(_, userIdData, subscription) =>
+        checkoutService.processSubscription(formData, idUserOpt, authCookie).map { case CheckoutResult(_, userIdData, subscription) =>
           val passwordForm = userIdData.toGuestAccountForm
           Ok(view.thankyou(subscription.id, formData.personalData, passwordForm))
         }
