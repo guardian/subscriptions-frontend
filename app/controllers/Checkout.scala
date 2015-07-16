@@ -49,7 +49,7 @@ object Checkout extends Controller with LazyLogging {
 
         checkoutService.processSubscription(formData, idUserOpt, authCookie).map { case CheckoutResult(_, userIdData, subscription) =>
           val passwordForm = userIdData.toGuestAccountForm
-          Ok(view.thankyou(subscription.id, formData.personalData, passwordForm))
+          Ok(view.thankyou(subscription.name, formData.personalData, passwordForm))
         }
       }
     )
