@@ -1,0 +1,36 @@
+@(benefitPackage: model.Benefits.BenefitPackage, image: String, setName: String)
+
+<div class="package-preview">
+    <div class="package-preview__header">
+        <img class="package-preview__image" src="@image">
+    </div>
+    <div class="package-preview__content">
+        <h3 class="package-preview__title">@benefitPackage.title</h3>
+
+        <ol class="grid grid--3up-stack">
+            @for(item <- benefitPackage.primaryItems) {
+                <li class="grid__item">
+                    <div class="benefit-item">
+                        <h5 class="benefit-item__title">@item.title</h5>
+                        <p class="benefit-item__description">@item.description</p>
+                    </div>
+                </li>
+            }
+            @for(item <- benefitPackage.secondaryItems) {
+                <li class="grid__item hide-on-mobile js-@setName">
+                    <div class="benefit-item">
+                        <h5 class="benefit-item__title">@item.title</h5>
+                        <p class="benefit-item__description">@item.description</p>
+                    </div>
+                </li>
+            }
+        </ol>
+
+        <button class="mobile-only button button--show-more js-show-more-button" data-toggle-set="@setName">
+            <span class="inline-plus inline-icon"><svg width="24" height="24" viewBox="-0.5 0.5 24 24"><path d="M10.682 3.5h1.636l.41 7.773 7.772.408v1.638l-7.77.41-.413 7.772H10.68l-.407-7.77-7.773-.412V11.68l7.773-.407.41-7.773z"></path></svg></span>
+            <span class="inline-minus inline-icon"><svg width="24" height="24" viewBox="0 0 32 32"><path d="M5 15h22v3H5z"></path></svg></span>
+            <span class="inline-plus inline-text">More</span>
+            <span class="inline-minus inline-text">Less</span>
+        </button>
+    </div>
+</div>

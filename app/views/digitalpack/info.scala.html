@@ -1,154 +1,111 @@
 @(edition: DigitalEdition)
 
-@containerTitle(title: String) = {
-    <div class="page-heading page-heading--border dp-container__header">
-        <h2 class="dp-container__header__title">@title</h2>
-    </div>
-}
+@import model.Benefits
 
 @startTrial(edition: DigitalEdition) = {
-    <div class="gs-container dp-container">
-        <div class="dp-container__header">&nbsp;</div>
-        <div class="dp-container__body">
-            <div class="row digital-cta">
-                <div>
-                    <div class="digital-cta__price">
-                        <strong class="digital-cta__promo">Free for 14 days</strong>
-                    </div>
-                    <div class="digital-cta__payment">Then @edition.price/month</div>
-                </div>
-                <div class="digital-cta__button">
-                    <a class="button button--large button--primary" href="https://www.guardiansubscriptions.co.uk/digitalsubscriptions/?prom=DGA38&CMP=@edition.cmp" data-test-id="digital-pack-@edition.id-trial-header">Start your free trial</a>
-                </div>
-            </div>
+    <div class="pricing-cta">
+        <div class="pricing-cta__pricing">
+            <h4 class="pricing-cta__pricing__title">Free for 14 days</h4>
+            <p class="pricing-cta__pricing__value">Then @edition.price/month</p>
+        </div>
+        <div class="pricing-cta__action">
+            <a class="button button--large button--primary"
+               href="https://www.guardiansubscriptions.co.uk/digitalsubscriptions/?prom=DGA38&CMP=@edition.cmp"
+               data-test-id="digital-pack-@edition.id-trial-header"
+            >Start your free trial</a>
         </div>
     </div>
-}
-
-@showMoreBtn(setName: String) = {
-    <button class="mobile-only button button--show-more js-show-more-button" data-toggle-set="@setName">
-        <span class="inline-plus inline-icon"><svg width="24" height="24" viewBox="-0.5 0.5 24 24"><path d="M10.682 3.5h1.636l.41 7.773 7.772.408v1.638l-7.77.41-.413 7.772H10.68l-.407-7.77-7.773-.412V11.68l7.773-.407.41-7.773z"></path></svg></span>
-        <span class="inline-minus inline-icon"><svg width="24" height="24" viewBox="0 0 32 32"><path d="M5 15h22v3H5z"></path></svg></span>
-        <span class="inline-plus inline-text">More</span>
-        <span class="inline-minus inline-text">Less</span>
-    </button>
 }
 
 @main(
     title = if(edition.id == "uk") "Digital | Subscriptions | The Guardian" else s"Digital - ${edition.name} | Subscriptions | The Guardian",
-    bodyClasses = List("digital-pack")
+    bodyClasses = List("is-wide")
 ) {
 
-<main class="page-container">
+<main class="page-container gs-container gs-container--slim">
 
-    <div class="gs-container dp-container">
-        @containerTitle(" ")
-        <div class="dp-container__body dp-container__body--main">
+    <section class="page-slice">
+        <div class="page-slice__content">
             @fragments.page.header("Digital Pack", Some("Digital access to our Daily Edition and Guardian App Premium Tier"))
+            @startTrial(edition)
         </div>
-    </div>
+    </section>
 
-    @startTrial(edition)
-
-    <div class="gs-container dp-container">
-        @containerTitle("What do I get?")
-
-        <div class="dp-container__body dp-container__body--main">
-            <div class="dp-edition">
-                <div class="dp-edition-row dp-edition-row--items-2">
-                    <div class="dp-edition-row__item dp-edition-row__item--image"><img class="block__image" src="@controllers.CachedAssets.hashedPathFor("images/tablet-edition.png")"></div>
-                    <div class="dp-edition-row__item dp-edition-row__item--boost-2">
-                        <h2 class="block__title">Daily Edition</h2>
-                        <div class="dp-cols">
-                            <div class="dp-cols__item"><strong>The full experience</strong>
-                                <div>Your daily newspaper optimised for tablet</div></div>
-                            <div class="dp-cols__item"><strong>Complete supplements</strong>
-                                <div>Including The Guide, Cook, Do Something, Observer Tech and Food Monthly</div></div>
-                            <div class="dp-cols__item"><strong>Video and audio content</strong>
-                                <div>Embedded audio, video and image galleries &mdash; plus all our crosswords</div></div>
-                            <div class="dp-cols__item hide-on-mobile js-more-daily-edition-benefits"><strong>Available offline</strong>
-                                <div>Downloaded automatically by 4am @if(edition.id != "uk") { GMT } every morning. Perfect for travel</div></div>
-                            <div class="dp-cols__item hide-on-mobile js-more-daily-edition-benefits"><strong>Designed for tablets</strong>
-                                <div>Specially adapted to your device, whether you're using iPad, Android or Kindle Fire</div></div>
-                            <div class="dp-cols__item hide-on-mobile js-more-daily-edition-benefits"><strong>30-day archive</strong>
-                                <div>A month of back issues. Take your time, sit back, and enjoy</div></div>
-                        </div>
-                    </div>
-                </div>
-                @showMoreBtn("more-daily-edition-benefits")
-            </div>
-
-            <div class="dp-edition">
-                <div class="dp-edition-row dp-edition-row--items-2">
-                    <div class="dp-edition-row__item dp-edition-row__item--image"><img class="block__image" src="@controllers.CachedAssets.hashedPathFor("images/premium-tier.png")"></div>
-                    <div class="dp-edition-row__item dp-edition-row__item--boost-2">
-                        <h2 class="block__title">Guardian App Premium Tier</h2>
-                        <div class="dp-cols">
-                            <div class="dp-cols__item"><strong>Advert-free</strong>
-                                <div>No distractions, just the journalism you love</div></div>
-                            <div class="dp-cols__item"><strong>Available offline</strong>
-                                <div>Tap to read content offline. Perfect for travel</div></div>
-                            <div class="dp-cols__item"><strong>Premium content</strong>
-                                <div>Crosswords, exclusive articles and new features</div></div>
-                            <div class="dp-cols__item hide-on-mobile js-more-premium-benefits"><strong>Adjustable text size</strong>
-                                <div>Larger text for ease of reading or smaller text to take in a whole article in one swipe</div></div>
-                            <div class="dp-cols__item hide-on-mobile js-more-premium-benefits"><strong>Save for later</strong>
-                                <div>Articles stored in your account and available offline</div></div>
-                            <div class="dp-cols__item hide-on-mobile js-more-premium-benefits"><strong>Plus&hellip;</strong>
-                                <div>Breaking news alerts, customised home screen and commenting</div></div>
-                        </div>
-                    </div>
-                    @showMoreBtn("more-premium-benefits")
-                </div>
-            </div>
+    @* ===== What ===== *@
+    <section class="page-slice page-slice--bordered">
+        <div class="page-slice__header">
+            <h3 class="page-slice__title">
+                What do I get?
+            </h3>
         </div>
-    </div>
+        <div class="page-slice__content">
+            @fragments.promos.packagePreview(
+                Benefits.digitalPack,
+                controllers.CachedAssets.hashedPathFor("images/tablet-edition.png"),
+                "more-daily-edition-benefits"
+            )
+            @fragments.promos.packagePreview(
+                Benefits.premiumTier,
+                controllers.CachedAssets.hashedPathFor("images/premium-tier.png"),
+                "more-premium-benefits"
+            )
+            @startTrial(edition)
+        </div>
+    </section>
 
-    @startTrial(edition)
-
-    <div class="gs-container dp-container">
-        @containerTitle("Why subscribe?")
-
-        <div class="dp-container__body dp-container__body--main">
-            <ul class="dp-row dp-row--items-3 no-bullets">
-                <li class="dp-row__item">
-                    <h3 class="dp-row__item__title">Support the Guardian's journalism</h3>
+    @* ===== Why ===== *@
+    <section class="page-slice page-slice--bordered">
+        <div class="page-slice__header">
+            <h3 class="page-slice__title">Why subscribe?</h3>
+        </div>
+        <div class="page-slice__content">
+            <ol class="grid grid--3up-step grid--bordered">
+                <li class="grid__item">
+                    <h3 class="u-pad-bottom">Support the Guardian's journalism</h3>
                     <p>We invest your money back into funding our open journalism and promoting freedom of speech, making quality news coverage accessible for everyone</p>
                 </li>
-                <li class="dp-row__item">
-                    <h3 class="dp-row__item__title">Exclusive benefits</h3>
-                    <p> Our subscribers are entitled to a range of exclusive benefits which include regular gifts and offers</p>
+                <li class="grid__item">
+                    <h3 class="u-pad-bottom">Exclusive benefits</h3>
+                    <p>Our subscribers are entitled to a range of exclusive benefits which include regular gifts and offers</p>
                 </li>
-                <li class="dp-row__item">
-                    <h3 class="dp-row__item__title">Share on multiple devices</h3>
+                <li class="grid__item">
+                    <h3 class="u-pad-bottom">Share on multiple devices</h3>
                     <p>You can download the Digital Pack on up to 10 devices. Share it with your friends and family or give it as a gift</p>
                 </li>
-            </ul>
+            </ol>
+            @startTrial(edition)
         </div>
-    </div>
+    </section>
 
-    <div class="gs-container dp-container">
-        @containerTitle("How do I get it?")
-
-        <div class="dp-container__body dp-container__body--main">
-            <ul class="dp-row dp-row--items-3 no-bullets">
-                <li class="dp-row__item">
-                    <p class="dp-row__item--numbered__bullet">1.</p>
-                    <p class="dp-row__item--numbered__body">Order now and we will send you a subscriber ID</p>
-                </li>
-                <li class="dp-row__item">
-                    <p class="dp-row__item--numbered__bullet">2.</p>
-                    <p class="dp-row__item--numbered__body">Download the Guardian app on your device(s) from your app store</p>
-                </li>
-                <li class="dp-row__item">
-                    <p class="dp-row__item--numbered__bullet">3.</p>
-                    <p class="dp-row__item--numbered__body">Enter your subscriber ID into the app, and enjoy</p>
-                </li>
-            </ul>
+    @* ===== How ===== *@
+    <section class="page-slice page-slice--bordered">
+        <div class="page-slice__header">
+            <h3 class="page-slice__title">How do I get it?</h3>
         </div>
-    </div>
-
-    @startTrial(edition)
+        <div class="page-slice__content">
+            <ol class="grid grid--3up-step">
+                <li class="grid__item">
+                    <span class="numbered">
+                        <span class="numbered__bullet">1.</span>
+                        <span class="numbered__body">Order now and we will send you a subscriber ID</span>
+                    </span>
+                </li>
+                <li class="grid__item">
+                    <span class="numbered">
+                        <span class="numbered__bullet">2.</span>
+                        <span class="numbered__body">Download the Guardian app on your device from your app store</span>
+                    </span>
+                </li>
+                <li class="grid__item">
+                    <span class="numbered">
+                        <span class="numbered__bullet">3.</span>
+                        <span class="numbered__body">Enter your subscriber ID into the app, and enjoy</span>
+                    </span>
+                </li>
+            </ol>
+            @startTrial(edition)
+        </div>
+    </section>
 
     @fragments.analytics.affectv_digitalpack()
 

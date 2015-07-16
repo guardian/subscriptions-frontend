@@ -6,6 +6,48 @@
     background-color: $c-white;
 }
 
+/* Page Slice
+   ========================================================================== */
+
+.page-slice {
+    @include clearfix();
+    @include container-padding();
+    padding-top: $gs-baseline;
+    background-color: $c-white;
+}
+.page-slice__header {
+    padding-bottom: $gs-baseline;
+
+    @include mq(leftCol) {
+        float: left;
+        width: gs-span(2);
+    }
+
+    @include mq(wide) {
+        width: gs-span(3);
+    }
+}
+.page-slice__title  {
+    @include fs-header(3);
+    color: $c-brand;
+}
+.page-slice__content {
+    @include mq(leftCol) {
+        float: right;
+        width: gs-span(12);
+    }
+
+    @include mq(wide) {
+        width: gs-span(13);
+    }
+}
+
+.page-slice--bordered {
+    padding-bottom: $gs-baseline;
+    border-top: 1px solid $c-border;
+}
+
+
 /* Page Header
    ========================================================================== */
 
@@ -38,7 +80,7 @@
 /* Page Heading
    ========================================================================== */
 
-// TOOD: Refactor
+// TOOD: Refactor out
 .page-heading {
     @include font-size(24px, 28px);
     margin-bottom: $gs-baseline*2;
@@ -47,4 +89,3 @@
     border-top: 1px solid $c-neutral4;
     padding-top: 8px;
 }
-
