@@ -6,6 +6,10 @@ jdk:
 sudo: false
 cache:
   directories:
-  - $HOME/.sbt
-  - $HOME/.ivy2
-script: sbt ++$TRAVIS_SCALA_VERSION fast-test && find $HOME/.sbt -name "*.lock" -type f -delete && find $HOME/.ivy2/cache -name "*[\[\]\(\)]*.properties" -type f -delete
+  - "$HOME/.sbt"
+  - "$HOME/.ivy2"
+script: sbt ++$TRAVIS_SCALA_VERSION fast-test && find $HOME/.sbt -name "*.lock" -type
+  f -delete && find $HOME/.ivy2/cache -name "*[\[\]\(\)]*.properties" -type f -delete
+env:
+  global:
+    secure: T3r/lhtvtfQFAnZxlwA1a6NfSw/bRU5nS1iRGjNw881SxkR4j0KTCJSgFmqSVzn6EHmmjooD5pp2sN0f3S4hYhmpAW0daHeYYzsRzaB55pSXMhrEpmqydvySlBTfCt8L71khxGHSoe9+KFzUfYFDomGdHzED+Spd9N7655ePyTM=
