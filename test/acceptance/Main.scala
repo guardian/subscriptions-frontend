@@ -13,7 +13,7 @@ object Main {
 
 import acceptance.Main._
 class Main extends Suites(suites: _*) with BeforeAndAfterAll with WebBrowser {
-  implicit val driver: WebDriver = Config.driver
+  implicit lazy val driver: WebDriver = Config.driver
 
   override def afterAll(): Unit = {
     quit()

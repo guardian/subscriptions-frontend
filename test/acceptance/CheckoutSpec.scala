@@ -3,13 +3,14 @@ package acceptance
 import acceptance.pages.Checkout
 import org.openqa.selenium.WebDriver
 import org.scalatest.selenium.WebBrowser
-import org.scalatest.{GivenWhenThen, BeforeAndAfterAll, FeatureSpec}
+import org.scalatest.{FeatureSpec, GivenWhenThen}
 
 class CheckoutSpec extends FeatureSpec with WebBrowser with Util with GivenWhenThen{
+
   implicit lazy val driver: WebDriver = Config.driver
 
   feature("pre-release pages") {
-    scenario("QA access to a pre-release page") {
+    scenario("QA access to a pre-release page", Acceptance) {
       withQACookie {
         Given("The QA cookie is set")
 
@@ -21,7 +22,7 @@ class CheckoutSpec extends FeatureSpec with WebBrowser with Util with GivenWhenT
       }
     }
 
-    scenario("ordinary access to a pre-release page") {
+    scenario("ordinary access to a pre-release page", Acceptance) {
       Given("No QA cookie is set")
       When("I visit the checkout page ")
       go.to(Checkout)
