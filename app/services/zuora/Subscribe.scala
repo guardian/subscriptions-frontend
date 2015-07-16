@@ -9,9 +9,11 @@ import configuration.Config
 import model.SubscriptionData
 import org.joda.time.DateTime
 
+import com.gu.membership.zuora.soap.ZuoraServiceHelpers._
 import scala.xml.Elem
 
-case class Subscribe(memberId: MemberId, data: SubscriptionData, productRatePlanId: String) extends ZuoraAction[SubscribeResult] {
+case class Subscribe(memberId: MemberId, data: SubscriptionData) extends ZuoraAction[SubscribeResult] {
+
   override protected val body: Elem = {
     lazy val paymentDelay = Some(Config.Zuora.paymentDelay)
     val now = DateTime.now
@@ -73,7 +75,7 @@ case class Subscribe(memberId: MemberId, data: SubscriptionData, productRatePlan
           </ns1:Subscription>
           <ns1:RatePlanData>
             <ns1:RatePlan xsi:type="ns2:RatePlan">
-              <ns2:ProductRatePlanId>{productRatePlanId}</ns2:ProductRatePlanId>
+              <ns2:ProductRatePlanId>{data.ratePlanId}</ns2:ProductRatePlanId>
             </ns1:RatePlan>
           </ns1:RatePlanData>
         </ns1:SubscriptionData>

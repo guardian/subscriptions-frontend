@@ -1,6 +1,7 @@
 require([
     'utils/ajax',
     'modules/toggle',
+    'modules/optionMirror',
     'modules/appendAround',
     'modules/checkout/checkout',
     'modules/components/password',
@@ -11,6 +12,7 @@ require([
     ajax,
     toggle,
     appendAround,
+    optionMirror,
     checkout,
     password,
     patterns
@@ -29,6 +31,7 @@ require([
     ajax.init({page: {ajaxUrl: ''}});
 
     toggle.init();
+    optionMirror.init();
     appendAround.init();
     checkout.init();
     password.init();
