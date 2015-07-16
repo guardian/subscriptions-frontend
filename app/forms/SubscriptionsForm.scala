@@ -56,8 +56,7 @@ object SubscriptionsForm {
 
   val subsForm = Form(mapping(
     "personal" -> personalDataMapping,
-    "payment" -> paymentDataMapping,
-    "ratePlanId" -> text
+    "payment" -> paymentDataMapping
   )(SubscriptionData.apply)(SubscriptionData.unapply))
 
   def apply() = subsForm

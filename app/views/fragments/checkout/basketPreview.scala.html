@@ -1,59 +1,17 @@
-@(subscriptionProductsOpt: Option[Seq[model.zuora.SubscriptionProduct]] = None)
-
-@import model.zuora.BillingFrequency
-@import utils.Prices._
-
-@priceOption(product: model.zuora.SubscriptionProduct, descriptionSuffix: String, isChecked: Boolean = false) = {
-    <label class="option">
-        <input
-        class="option__input"
-        type="radio" name="ratePlanId"
-        data-option-mirror-label="@product.price.pretty @descriptionSuffix"
-        value="@product.ratePlanId"@if(isChecked){ checked}>
-        <span class="option__label">@product.price.pretty @descriptionSuffix</span>
-    </label>
-}
-
-
-@for(subscriptionProducts <- subscriptionProductsOpt) {
-
-    <div class="basket-preview">
-        <h3 class="basket-preview__title">You've chosen:</h3>
-        <div class="basket-preview__image">
-            <img src="@controllers.CachedAssets.hashedPathFor("images/digital-pack.png")" alt="Digital Pack">
-        </div>
-
-        <div class="basket-preview__product">
-            <span class="basket-preview__product__title">
-                Digital Pack
-            </span>
-            <span class="basket-preview__product__caption">
-                (Digital Edition / Guardian App Premium Tier)
-            </span>
-            @* Default to monthly price option *@
-            @subscriptionProducts.find(_.frequency == BillingFrequency.Month).map { product =>
-                <span class="basket-preview__product__payment js-option-mirror-value">
-                    @product.price.pretty every month
-                </span>
-            }
-        </div>
-
-        <div class="basket-preview__toggle">
-            <button class="text-button u-button-reset js-toggle" data-toggle="change-payment-frequency">
-                Change payment frequency
-            </button>
-        </div>
-        <fieldset class="basket-preview__options is-hidden js-option-mirror-group" id="change-payment-frequency">
-            @* Default to monthly price option *@
-            @subscriptionProducts.find(_.frequency == BillingFrequency.Month).map { product =>
-                @priceOption(product, "every month", isChecked=true)
-            }
-            @subscriptionProducts.find(_.frequency == BillingFrequency.Quarter).map { product =>
-                @priceOption(product, "every 3 months")
-            }
-            @subscriptionProducts.find(_.frequency == BillingFrequency.Annual).map { product =>
-                @priceOption(product, "every 12 months. Save £23.98")
-            }
-        </fieldset>
+<div class="basket-preview">
+    <h3 class="basket-preview__title">You've chosen:</h3>
+    <div class="basket-preview__image">
+        <img src="@controllers.CachedAssets.hashedPathFor("images/digital-pack.png")" alt="Digital Pack">
     </div>
-}
+    <div class="basket-preview__product">
+        <span class="basket-preview__product__title">
+            Digital Pack
+        </span>
+        <span class="basket-preview__product__caption">
+            (Digital Edition / Guardian App Premium Tier)
+        </span>
+        <span class="basket-preview__product__payment">
+            £11.99 every month
+        </span>
+    </div>
+</div>

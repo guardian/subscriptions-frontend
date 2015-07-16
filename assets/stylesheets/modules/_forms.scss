@@ -2,6 +2,24 @@
    Forms
    ========================================================================== */
 
+/**
+ * Fix a bug Internet Explorer 8 where text in password fields
+ * would become invisible when `font-family` references a webfont.
+ *
+ * @group forms
+ */
+[type=password] {
+    font-family: sans-serif !important;
+}
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+input[type=number] {
+    -moz-appearance:textfield;
+}
+
 // Form
 // ============================================================================
 
@@ -17,12 +35,6 @@
 
 // Form Fieldset
 // ============================================================================
-
-
-fieldset {
-    border: none;
-    padding: 0;
-}
 
 .fieldset {
     position: relative;
@@ -112,6 +124,12 @@ fieldset {
     }
 }
 
+.security-note {
+    @include fs-textSans(2);
+    color: $c-neutral2;
+    margin-bottom: $gs-baseline / 2;
+}
+
 // Form labels and inputs
 // ============================================================================
 
@@ -120,24 +138,6 @@ fieldset {
     display: block;
     cursor: pointer;
     margin-bottom: 2px;
-}
-
-/**
- * Fix a bug Internet Explorer 8 where text in password fields
- * would become invisible when `font-family` references a webfont.
- *
- * @group forms
- */
-[type=password] {
-    font-family: sans-serif !important;
-}
-input[type=number]::-webkit-inner-spin-button,
-input[type=number]::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
-input[type=number] {
-    -moz-appearance:textfield;
 }
 
 .input-text,
@@ -177,38 +177,29 @@ input[type=number] {
     resize: vertical;
 }
 
-/**
- * Option
- * checkbox/radio input
- */
-.option-title {
+.checkbox,
+.checkbox-title {
     @include fs-textSans(3);
-    font-weight: guss-font-weight(regular);
+}
+.checkbox-title {
+    font-weight: guss-font-weight('regular');
     margin-bottom: $gs-baseline / 2;
 }
-.option {
+.checkbox {
     cursor: pointer;
-    display: block;
-    margin-bottom: $gs-baseline / 4;
+    display: table;
+    width: 100%;
 }
-.option__input,
-.option__label {
-    display: inline-block;
-    vertical-align: middle;
+.checkbox__input,
+.checkbox__label {
+    display: table-cell;
+    vertical-align: top;
 }
-.option__input {
-    position: relative;
-    top: -1px; // Optical alignment
+.checkbox__input {
     width: 1em;
-    margin-right: $gs-baseline / 4;
-}
-.option__label {
-    @include fs-textSans(3);
+    padding-right: .3em;
 }
 
-/**
- * Selects
- */
 .select {
     font: inherit;
 }
@@ -271,12 +262,6 @@ input[type=number] {
 }
 .form-note--underneath {
     margin-top: ($gs-baseline / 2);
-}
-
-.security-note {
-    @include fs-textSans(2);
-    color: $c-neutral2;
-    margin-bottom: $gs-baseline / 2;
 }
 
 /* Form Extras

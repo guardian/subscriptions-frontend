@@ -103,12 +103,8 @@
     @include fs-data(3);
     line-height: 1;
     cursor: pointer;
-    color: $c-neutral2;
-    text-decoration: none;
-    padding-bottom: 1px;
-    border-bottom: 1px solid $c-neutral3;
 
     &:hover {
-        border-color: $c-neutral2;
+        text-decoration: underline;
     }
 }
