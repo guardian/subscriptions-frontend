@@ -45,7 +45,7 @@
             <h2 class="page-heading">Choose a package</h2>
 
             @for(option <- subscription.options) {
-                <a href="@option.url" class="package">
+                <a href="@option.url" class="package" data-test-id="subscription-package-@option.id">
                     <div class="package__info">
                         <span class="package__title">@option.title</span>
                         <strong class="package__price">

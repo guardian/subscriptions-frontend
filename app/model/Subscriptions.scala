@@ -3,6 +3,7 @@ package model
 object Subscriptions {
 
   case class SubscriptionOption(
+    id: String,
     title: String,
     weeklyPrice: String,
     weeklySaving: Option[String],
