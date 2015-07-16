@@ -33,7 +33,8 @@ class CheckoutServiceSpec extends FreeSpec {
 
   object TestZuoraService extends ZuoraService {
     override def createSubscription(memberId: MemberId, data: SubscriptionData): Future[SubscribeResult] = {
-      Future { SubscribeResult(s"Subscribed ${memberId.salesforceContactId}") }
+      Future { SubscribeResult(
+        id = s"Subscribed ${memberId.salesforceContactId}", name = "A-Sxxxxx") }
     }
 
     override def authTask: ScheduledTask[Authentication] = ???
@@ -61,7 +62,7 @@ class CheckoutServiceSpec extends FreeSpec {
         }
 
         "containing the Zuora subscription result" in {
-          assertResult(SubscribeResult("Subscribed RegisteredId contactId"))(checkoutResult.zuoraResult)
+          assertResult(SubscribeResult("Subscribed RegisteredId contactId", "A-Sxxxxx"))(checkoutResult.zuoraResult)
         }
       }
 
