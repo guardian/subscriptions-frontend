@@ -3,9 +3,9 @@ package touchpoint
 import com.gu.membership.salesforce.SalesforceConfig
 import com.gu.membership.zuora.ZuoraApiConfig
 import com.typesafe.scalalogging.LazyLogging
-import model.zuora.DigitalProductPlan
+import touchpoint.Product.Digital
 
-case class TouchpointBackendConfig(salesforce: SalesforceConfig, zuora: ZuoraApiConfig, digitalProductPlan: DigitalProductPlan)
+case class TouchpointBackendConfig(salesforce: SalesforceConfig, zuora: ZuoraApiConfig, productRatePlan: ProductRatePlan)
 
 object TouchpointBackendConfig extends LazyLogging {
 
@@ -36,7 +36,22 @@ object TouchpointBackendConfig extends LazyLogging {
     TouchpointBackendConfig(
       SalesforceConfig.from(envBackendConf, environmentName),
       ZuoraApiConfig.from(envBackendConf, environmentName),
-      DigitalProductPlan(envBackendConf.getString("zuora.digital"))
+      ProductRatePlan(envBackendConf)
     )
+  }
+}
+
+object Product {
+  case object Digital
+}
+
+case class ProductRatePlan(
+  product: Product,
+  ratePlanId: String
+)
+
+object ProductRatePlan {
+  def apply(config: com.typesafe.config.Config): ProductRatePlan = {
+    ProductRatePlan(Digital , config.getString("zuora.digital.monthly"))
   }
 }

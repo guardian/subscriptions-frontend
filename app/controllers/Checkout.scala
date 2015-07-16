@@ -16,8 +16,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 object Checkout extends Controller with LazyLogging {
-  private val zuoraService = TouchpointBackend.Normal.zuoraService
-  lazy val checkoutService = new CheckoutService(IdentityService, SalesforceService, zuoraService)
+  lazy val checkoutService = new CheckoutService(IdentityService, SalesforceService, TouchpointBackend.Normal.zuoraService)
 
   def identityCookieOpt(implicit request: Request[_]): Option[Cookie] =
     request.cookies.find(_.name == "SC_GU_U")
@@ -30,9 +29,8 @@ object Checkout extends Controller with LazyLogging {
       } getOrElse {
         SubscriptionsForm()
       }
-      //TODO when implementing test-users this requires updating to supply data to correct location
-      val touchpointBackend = TouchpointBackend.Normal
-      Ok(views.html.checkout.payment(form, userIsSignedIn = idUserOpt.isDefined, zuoraService.products))
+
+      Ok(views.html.checkout.payment(form, userIsSignedIn = idUserOpt.isDefined))
     }
   }
 
@@ -41,9 +39,7 @@ object Checkout extends Controller with LazyLogging {
       formWithErrors => {
         getIdentityUserByCookie.map { idUserOpt =>
           logger.error(s"Backend form validation failed. Please make sure that the front-end and the backend validations are in sync (validation errors: ${formWithErrors.errors}})")
-          //TODO when implementing test-users this requires updating to supply data to correct location
-          val touchpointBackend = TouchpointBackend.Normal
-          BadRequest(view.payment(formWithErrors, userIsSignedIn = idUserOpt.isDefined, zuoraService.products))
+          BadRequest(view.payment(formWithErrors, userIsSignedIn = idUserOpt.isDefined))
         }
       },
 
