@@ -54,9 +54,7 @@ object Config {
   object QA {
     val passthroughCookie = Cookie(
       name = "qa-passthrough",
-      value = config.getString("qa.passthrough-cookie-value"),
-      httpOnly = true,
-      secure = true
+      value = config.getString("qa.passthrough-cookie-value")
     )
   }
 
