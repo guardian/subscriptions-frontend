@@ -1,0 +1,65 @@
+@(subscription: model.Subscriptions.SubscriptionCollection)
+
+@main(s"${subscription.capitalizedTitle} | Choose a Package | Subscriptions | The Guardian", isInternational=true) {
+
+    <main class="page-container gs-container">
+
+        @fragments.page.header(subscription.title, Some(subscription.description), Nil)
+
+
+        <section class="section-slice">
+            @if(subscription.isCollection) {
+                <h2 class="page-heading">This is how the voucher scheme works</h2>
+            } else {
+                <h2 class="page-heading">This is how direct delivery works</h2>
+            }
+            <ol class="steps">
+                @if(subscription.isCollection) {
+                    <li class="steps__item">Pick the perfect package for you</li>
+                    <li class="steps__item">We'll post personalised vouchers for the newspapers in your package</li>
+                    <li class="steps__item">Redeem your vouchers at over 1,000 retailers across the UK</li>
+                } else {
+                    <li class="steps__item">Pick the perfect package for you</li>
+                    <li class="steps__item">Confirm your address is within the M25</li>
+                    <li class="steps__item">Get your papers delivered to your door by 7am Monday - Saturday and 8:30am on Sundays</li>
+                }
+            </ol>
+        </section>
+
+        <section class="section-slice">
+
+            @if(subscription.isCollection) {
+                <h3 class="u-display-only-mobile">Do you live inside the M25?</h3>
+                <a href="/delivery/@subscription.packageType" class="button button--large button--secondary button--m25" data-test-id="choose-package-inside-m25">
+                    <span class="u-hide-until-tablet">Do you live inside the M25?</span>
+                    Get the paper delivered <span class="u-hide-until-tablet">to your door</span>
+                </a>
+            } else {
+                <h3 class="u-display-only-mobile">Live outside the M25?</h3>
+                <a href="/collection/@subscription.packageType" class="button button--large button--secondary button--m25" data-test-id="choose-package-outside-m25">
+                    <span class="u-hide-until-tablet">Live outside the M25?</span>
+                    Subscribe to <span class="u-hide-until-tablet">our</span> voucher scheme
+                </a>
+            }
+
+            <h2 class="page-heading">Choose a package</h2>
+
+            @for(option <- subscription.options) {
+                <a href="@option.url" class="package">
+                    <div class="package__info">
+                        <span class="package__title">@option.title</span>
+                        <strong class="package__price">
+                            @option.weeklyPrice per week
+                            @for(saving <- option.weeklySaving) {
+                                &mdash; save @saving
+                            }
+                        </strong>
+                        <span class="package__description">@option.description</span>
+                        <span class="package__monthly">Monthly price <strong>@option.monthlyPrice</strong></span>
+                    </div>
+                </a>
+            }
+        </section>
+
+    </main>
+}
