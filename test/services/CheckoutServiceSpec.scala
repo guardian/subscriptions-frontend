@@ -6,24 +6,28 @@ import com.gu.membership.zuora.soap.Zuora.{Authentication, SubscribeResult}
 import model.zuora.SubscriptionProduct
 import model.{PaymentData, PersonalData, SubscriptionData}
 import org.scalatest.FreeSpec
-import services.CheckoutService.CheckoutResult
+import org.scalatest.concurrent.{Futures, ScalaFutures}
+import org.scalatest.time.{Millis, Seconds, Span}
 import utils.ScheduledTask
 import utils.TestPersonalData._
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration._
-import scala.concurrent.{Await, Future}
+import scala.concurrent.Future
 
-class CheckoutServiceSpec extends FreeSpec {
+class CheckoutServiceSpec extends FreeSpec with Futures with ScalaFutures {
+  implicit override val patienceConfig =
+    PatienceConfig(timeout = scaled(Span(10, Seconds)), interval = scaled(Span(50, Millis)))
 
-  def makeIdentityService(onUserUpdate: => Unit = {}): IdentityService=
+  class UpdateFlag(var updated: Boolean = false)
+
+  def makeIdentityService(updateFlag: UpdateFlag): IdentityService=
     new IdentityService(???) {
       override def registerGuest(personalData: PersonalData): Future[GuestUser] = {
         Future { GuestUser(UserId(personalData.firstName), IdentityToken("token")) }
       }
 
       override def updateUserDetails(personalData: PersonalData, userId: UserId, authCookie: AuthCookie): Future[Unit] = {
-        Future { onUserUpdate }
+        Future { updateFlag.updated = true }
       }
     }
 
@@ -43,73 +47,44 @@ class CheckoutServiceSpec extends FreeSpec {
     override def products: Seq[SubscriptionProduct] = Seq.empty
   }
 
+
   "processSubscription" - {
     val subscriptionData = SubscriptionData(testPersonalData.copy(firstName = "Registered"), PaymentData("", "", "", "", ""), "")
-    val service = new CheckoutService(makeIdentityService(), TestSalesforceService, TestZuoraService)
+    val updateFlag = new UpdateFlag()
+    val service = new CheckoutService(
+      makeIdentityService(updateFlag), TestSalesforceService, TestZuoraService
+    )
 
     "for a registered user" - {
-      def process(service: CheckoutService): Future[CheckoutResult] =
-        service.processSubscription(
+      val checkoutResult = service.processSubscription(
           subscriptionData,
           Some(IdMinimalUser("RegisteredId", None)),
           Some(AuthCookie("cookie")))
 
-      val checkoutResult = Await.result(
-        process(service),
-        2.seconds
-      )
+      whenReady(checkoutResult) { res =>
+        "returns the checkout result" - {
+          "containing the Salesforce memberId" in {
+            assertResult(BasicMember("RegisteredId contactId", "RegisteredId accountId"))(res.salesforceMember)
+          }
 
-      "returns the checkout result" - {
-        "containing the Salesforce memberId" in {
-          assertResult(BasicMember("RegisteredId contactId", "RegisteredId accountId"))(checkoutResult.salesforceMember)
+          "containing the Zuora subscription result" in {
+            assertResult(SubscribeResult("Subscribed RegisteredId contactId", "A-Sxxxxx"))(res.zuoraResult)
+          }
         }
 
-        "containing the Zuora subscription result" in {
-          assertResult(SubscribeResult("Subscribed RegisteredId contactId", "A-Sxxxxx"))(checkoutResult.zuoraResult)
-        }
       }
-
-      "updates the user details in the Identity service" in {
-        var updated = false
-
-        val service = new CheckoutService(
-          makeIdentityService { updated = true },
-          TestSalesforceService, TestZuoraService
-        )
-
-        val checkoutResult = Await.result(
-          process(service),
-          2.seconds
-        )
-
-        assert(updated)
-      }
-
     }
 
     "for a guest user" - {
-      def process(service: CheckoutService): Future[CheckoutResult] =
-        service.processSubscription(subscriptionData, None, None)
-
-      val checkoutResult = Await.result(
-        process(service),
-        2.seconds
+      val updateFlag = new UpdateFlag()
+      val service = new CheckoutService(
+        makeIdentityService(updateFlag), TestSalesforceService, TestZuoraService
       )
 
-      "does not update the user details in the Identity service" in {
-        var updated = false
-
-        val service = new CheckoutService(
-          makeIdentityService { updated = true },
-          TestSalesforceService, TestZuoraService
-        )
-
-        val checkoutResult = Await.result(
-          process(service),
-          2.seconds
-        )
-
-        assert(!updated)
+      whenReady(service.processSubscription(subscriptionData, None, None)) { _ =>
+        "does not update the user details in the Identity service" in {
+          assert(!updateFlag.updated)
+        }
       }
     }
   }
