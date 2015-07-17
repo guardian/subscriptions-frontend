@@ -20,7 +20,6 @@ import scala.concurrent.duration._
 trait ZuoraService {
   def createSubscription(memberId: MemberId, data: SubscriptionData): Future[SubscribeResult]
   def authTask: ScheduledTask[Authentication]
-  def productsTask: ScheduledTask[Seq[SubscriptionProduct]]
   def products: Seq[SubscriptionProduct]
 }
 
@@ -32,13 +31,17 @@ class ZuoraApiClient(zuoraApiConfig: ZuoraApiConfig, digitalProductPlan: Digital
   override val stage = Config.stage
 
   override val metrics = new ZuoraMetrics(stage, application)
-  override val authTask = ScheduledTask(s"Zuora ${apiConfig.envName} auth", Authentication("", ""), 0.seconds, 30.minutes)(request(Login(apiConfig)))
 
-  override def createSubscription(memberId: MemberId, data: SubscriptionData): Future[SubscribeResult] = {
-    request(Subscribe(memberId, data))
+  lazy val productsSchedule = productsTask.start()
+
+  override val authTask = ScheduledTask(s"Zuora ${apiConfig.envName} auth", Authentication("", ""), 0.seconds, 30.minutes){
+    val authF = request(Login(apiConfig))
+    authF.filter(_.token.nonEmpty)foreach(_ => productsSchedule)
+    authF
   }
 
-  override val productsTask = ScheduledTask[Seq[SubscriptionProduct]]("Loading rate plans", Nil, Config.Zuora.productsTaskInitalDelaySeconds.seconds,
+
+  val productsTask = ScheduledTask[Seq[SubscriptionProduct]]("Loading rate plans", Nil, 0.seconds,
     Config.Zuora.productsTaskIntervalSeconds.seconds)(getProducts())
 
   def products = productsTask.get()
@@ -53,8 +56,6 @@ class ZuoraApiClient(zuoraApiConfig: ZuoraApiConfig, digitalProductPlan: Digital
       val queryString = productRatePlans.map(p => s"ProductRatePlanId='${p.id}'").mkString(" OR ")
       query[ProductRatePlanCharge](queryString)
     }
-
-
 
     def productRatePlanChargeTiers(productRatePlanCharges: Seq[ProductRatePlanCharge]): Future[Seq[ProductRatePlanChargeTier]] = {
       val queryString = productRatePlanCharges.map(p => s"ProductRatePlanChargeId='${p.id}'").mkString(" OR ")
@@ -94,5 +95,9 @@ class ZuoraApiClient(zuoraApiConfig: ZuoraApiConfig, digitalProductPlan: Digital
       }
       subscriptionProducts
     }
+  }
+
+  override def createSubscription(memberId: MemberId, data: SubscriptionData): Future[SubscribeResult] = {
+    request(Subscribe(memberId, data))
   }
 }

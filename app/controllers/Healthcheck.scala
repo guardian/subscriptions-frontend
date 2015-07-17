@@ -7,7 +7,7 @@ object Healthcheck extends Controller {
 
   def index = Action {
     Cached(1) {
-      if(TouchpointBackend.Normal.zuoraService.products.nonEmpty) Ok("OK")
+      if (TouchpointBackend.Normal.zuoraService.products.nonEmpty) Ok("OK")
       else ServiceUnavailable("Service Unavailable")
     }
   }
