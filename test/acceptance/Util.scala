@@ -2,13 +2,12 @@ package acceptance
 
 import java.net.URL
 
-import com.typesafe.scalalogging.LazyLogging
 import org.openqa.selenium.{Cookie, WebDriver}
 import org.scalatest.selenium.WebBrowser
 import acceptance.Config.appUrl
+import configuration.QA.{passthroughCookie => qaCookie}
 
-trait Util extends LazyLogging { this: WebBrowser =>
-  import configuration.Config.QA.{passthroughCookie => qaCookie}
+trait Util { this: WebBrowser =>
 
   protected def withQACookie(block: => Unit)(implicit driver: WebDriver): Unit = {
     val cookie = new Cookie(qaCookie.name, qaCookie.value)
