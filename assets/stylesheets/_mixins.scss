@@ -8,8 +8,11 @@
 @import 'bower_components/guss-layout/_row';
 @import 'bower_components/guss-layout/_columns';
 @import 'bower_components/guss-typography/_typography';
- // TODO: Deprecated in favour of autoprefixer
+ // Deprecated in favour of autoprefixer
 @import 'bower_components/guss-css3/_css3';
+
+/* Project Mixins
+   ========================================================================== */
 
 // Hide content visually, still readable by screen readers
 @mixin u-h {
@@ -48,4 +51,11 @@
         padding-left: $gs-gutter;
         padding-right: $gs-gutter;
     }
+}
+
+@mixin vertically-offset($offset: 50%) {
+    transform: translateY(-($offset));
+    top: $offset;
+    margin: 0 auto;
+    display: block;
 }

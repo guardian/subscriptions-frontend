@@ -1,4 +1,20 @@
+@()
+
+@import model.{ResponsiveImageGroup, ResponsiveImageGenerator}
+
+@promoImage = @{
+    ResponsiveImageGroup(
+        name=Some("intro"),
+        altText=Some("About Membership"),
+        availableImages=ResponsiveImageGenerator(
+            id="bb922fe62efbe24af2df336dd2b621c5799246b4/0_0_1140_683",
+            sizes=List(1000,500)
+        )
+    )
+}
+
 <div class="membership-promo">
+    <img class="membership-promo__image" src="@promoImage.defaultImage" srcset="@promoImage.srcset" sizes="100vw" alt="@promoImage.altText">
     <div class="membership-promo__content">
         <h3 class="membership-promo__title">
             Get even closer to the Guardian by becoming a member

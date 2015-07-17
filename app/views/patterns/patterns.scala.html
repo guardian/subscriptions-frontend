@@ -1,0 +1,53 @@
+@()
+
+@pattern(title: String, description: Option[String] = None)(content: Html) = {
+    <div class="pattern js-pattern-item u-cf" data-pattern-label="@title">
+        <div class="pattern__header">
+            <h2 class="pattern__title">@title</h2>
+            @if(description) {
+                <p class="pattern__description">@description</p>
+            }
+        </div>
+        <div class="pattern__body">
+            @content
+        </div>
+    </div>
+}
+
+@main("Pattern Library") {
+
+    <main class="gs-container">
+
+        <div class="pattern-nav js-pattern-nav"></div>
+        <h1>Pattern Library</h1>
+
+        @pattern("Base - Inline Text Elements") {
+            <div class="prose">
+                <p><a href="#">This is a text link</a></p>
+                <p><strong>Strong is used to indicate strong importance</strong></p>
+                <p><em>This text has added emphasis</em></p>
+                <p><del>This text is deleted</del> and <ins>This text is inserted</ins></p>
+                <p><s>This text has a strikethrough</s></p>
+                <p>Superscript<sup>®</sup></p>
+                <p>Subscript for things like H<sub>2</sub>O</p>
+                <p><small>This small text is small for for fine print, etc.</small></p>
+                <p>Abbreviation: <abbr title="HyperText Markup Language">HTML</abbr></p>
+                <p>Keybord input: <kbd>Cmd</kbd></p>
+                <p><q cite="https://developer.mozilla.org/en-US/docs/HTML/Element/q">This text is a short inline quotation</q></p>
+                <p><cite>This is a citation</cite>
+                </p><p>The <dfn>dfn element</dfn> indicates a definition.</p>
+                <p>The <mark>mark element</mark> indicates a highlight</p>
+            </div>
+        }
+
+        @pattern("Page Header") {
+            @fragments.page.header("This a page header", None)
+        }
+
+        @pattern("Membership Promo") {
+            @fragments.promos.membershipPromo()
+        }
+
+    </main>
+
+}

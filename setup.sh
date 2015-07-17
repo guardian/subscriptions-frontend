@@ -150,6 +150,10 @@ install_chromedriver() {
   fi
 }
 
+copy_githooks() {
+    cp git-hooks/pre-commit .git/hooks/
+}
+
 compile() {
   grunt compile
 }
@@ -175,6 +179,7 @@ main() {
   install_dependencies
   install_nginx
   install_chromedriver
+  copy_githooks
   compile
   report
 }
