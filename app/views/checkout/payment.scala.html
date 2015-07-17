@@ -1,4 +1,4 @@
-@(form: Form[model.SubscriptionData], userIsSignedIn: Boolean)(implicit request: RequestHeader)
+@(form: Form[model.SubscriptionData], userIsSignedIn: Boolean, subscriptionProducts: Seq[model.zuora.SubscriptionProduct])(implicit request: RequestHeader)
 
 @import model.JsVars
 @import routes.Checkout.renderCheckout
@@ -14,13 +14,14 @@
 
 <main class="page-container gs-container">
 
-    <section class="checkout-container">
+    <form class="form" action="" method="POST">
 
-        @fragments.checkout.checkoutHeader("Checkout")
+        <section class="checkout-container">
 
-        <div class="checkout-container__sidebar">
-            @fragments.checkout.basketPreview()
+            @fragments.checkout.checkoutHeader("Checkout")
 
+            <div class="checkout-container__sidebar">
+                @fragments.checkout.basketPreview(Some(subscriptionProducts))
             <div class="u-display-from-tablet" data-set="checkout-notices">
                 <div class="js-append">
                     @fragments.checkout.notices()

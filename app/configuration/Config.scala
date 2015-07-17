@@ -1,5 +1,6 @@
 package configuration
 
+import com.github.nscala_time.time.Imports._
 import com.gu.googleauth.GoogleAuthConfig
 import com.gu.identity.cookie.{PreProductionKeys, ProductionKeys}
 import com.gu.membership.salesforce.SalesforceConfig
@@ -59,8 +60,10 @@ object Config {
   }
 
   object Zuora {
-    val paymentDelay = config.getConfig("touchpoint.backend.environments").getConfig(stage)
-      .getInt("zuora.paymentDelayInDays").days
+    private val stageConfig = config.getConfig("touchpoint.backend.environments").getConfig(stage)
+
+    val paymentDelay = stageConfig.getInt("zuora.paymentDelayInDays").days
+    val productsTaskIntervalSeconds = stageConfig.getInt("zuora.productsTaskIntervalSeconds")
   }
 
   val subscriptionsUrl = config.getString("subscriptions.url")

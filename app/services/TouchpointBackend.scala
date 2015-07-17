@@ -1,7 +1,7 @@
 package services
 
 import configuration.Config
-import touchpoint.{ProductRatePlan, TouchpointBackendConfig}
+import touchpoint.TouchpointBackendConfig
 
 object TouchpointBackend {
   import TouchpointBackendConfig.BackendType
@@ -10,25 +10,21 @@ object TouchpointBackend {
     TouchpointBackend(TouchpointBackendConfig.backendType(backendType, Config.config))
 
   def apply(touchpointBackendConfig: TouchpointBackendConfig): TouchpointBackend = {
-
-    val ratePlan = touchpointBackendConfig.productRatePlan
-
-    val zuoraService = new ZuoraApiClient(touchpointBackendConfig.zuora, ratePlan)
-
     val salesforceRepo = new SalesforceRepo(touchpointBackendConfig.salesforce)
+    val zuoraService = new ZuoraApiClient(touchpointBackendConfig.zuora, touchpointBackendConfig.digitalProductPlan)
 
-    TouchpointBackend(salesforceRepo, zuoraService, ratePlan)
+    TouchpointBackend(salesforceRepo, zuoraService)
   }
 
-  lazy val Normal = TouchpointBackend(BackendType.Default)
+  val Normal = TouchpointBackend(BackendType.Default)
 
-  lazy val All = Seq(Normal)
+  val All = Seq(Normal)
 }
 
 case class TouchpointBackend(
   salesforceRepo: SalesforceRepo,
-  zuoraService: ZuoraService,
-  ratePlan: ProductRatePlan) {
+  zuoraService : ZuoraService
+) {
 
   def start() = {
     salesforceRepo.salesforce.authTask.start()

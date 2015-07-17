@@ -3,8 +3,6 @@ package services
 import com.gu.identity.play.IdMinimalUser
 import com.gu.membership.salesforce.MemberId
 import com.gu.membership.zuora.soap.Zuora.SubscribeResult
-import TouchpointBackend.{Normal => touchpointBackend}
-import touchpointBackend.ratePlan.{ratePlanId => ratePlan}
 import com.typesafe.scalalogging.LazyLogging
 import model.{PersonalData, SubscriptionData}
 
@@ -39,7 +37,8 @@ class CheckoutService(identityService: IdentityService, salesforceService: Sales
         identityService.registerGuest(subscriptionData.personalData)
       }
 
-    //TODO when implementing test-users this requires updating to supply data to correct location
+
+
     for {
       userData <- userOrElseRegisterGuest
       memberId <- salesforceService.createOrUpdateUser(subscriptionData.personalData, userData.id)

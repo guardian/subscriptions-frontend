@@ -15,7 +15,7 @@ case class PersonalData(firstName: String, lastName: String, email: String, rece
   def fullName = s"$firstName $lastName"
 }
 
-case class SubscriptionData(personalData: PersonalData, paymentData: PaymentData)
+case class SubscriptionData(personalData: PersonalData, paymentData: PaymentData, ratePlanId: String)
 object SubscriptionData {
   def fromIdUser(u: IdUser) = {
     implicit class OptField[A](opt: Option[A]) {
@@ -44,6 +44,8 @@ object SubscriptionData {
 
     val blankPaymentData = PaymentData("", "", "", "", "")
 
-    SubscriptionData(personalData, blankPaymentData)
+    val blankRatePlanId = ""
+
+    SubscriptionData(personalData, blankPaymentData, blankRatePlanId)
   }
 }

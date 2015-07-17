@@ -3,6 +3,7 @@ package services
 import com.gu.identity.play.IdMinimalUser
 import com.gu.membership.salesforce.{BasicMember, MemberId}
 import com.gu.membership.zuora.soap.Zuora.{Authentication, SubscribeResult}
+import model.zuora.SubscriptionProduct
 import model.{PaymentData, PersonalData, SubscriptionData}
 import org.scalatest.FreeSpec
 import services.CheckoutService.CheckoutResult
@@ -38,10 +39,12 @@ class CheckoutServiceSpec extends FreeSpec {
     }
 
     override def authTask: ScheduledTask[Authentication] = ???
+
+    override def products: Seq[SubscriptionProduct] = Seq.empty
   }
 
   "processSubscription" - {
-    val subscriptionData = SubscriptionData(testPersonalData.copy(firstName = "Registered"), PaymentData("", "", "", "", ""))
+    val subscriptionData = SubscriptionData(testPersonalData.copy(firstName = "Registered"), PaymentData("", "", "", "", ""), "")
     val service = new CheckoutService(makeIdentityService(), TestSalesforceService, TestZuoraService)
 
     "for a registered user" - {
