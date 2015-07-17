@@ -48,9 +48,5 @@ convenient `watch` task, which will dynamically recompile assets as they get edi
 ## Automated tests
 
 The unit test suite can be run using the `sbt fast-test` task. This is just a convenient alias to execute all
-tests except for those tagged as `acceptance`. Subscripts frontend contains in fact a suite of acceptance tests
-intended to be run directly against the production site. In order to run the acceptance tests against the
-development environment, set the following environment variable `PASSTHROUGH_COOKIE_VALUE=qa-passthrough-dev`,
-override the `subscriptions.url` configuration parameter to point to `http://sub.thegulocal.com/checkout`,
-and finally run `sbt acceptance-test`.
-
+tests except for those tagged as `acceptance`. The acceptance test suite can be instead run by executing
+`sbt acceptance-test`. This assumes that an instance of the application is running locally at `https://sub.thegulocal.com`
