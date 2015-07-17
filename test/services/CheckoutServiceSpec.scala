@@ -40,9 +40,7 @@ class CheckoutServiceSpec extends FreeSpec {
 
     override def authTask: ScheduledTask[Authentication] = ???
 
-    override def productsTask: ScheduledTask[Seq[SubscriptionProduct]] = ???
-
-    override def products: Seq[SubscriptionProduct] = ???
+    override def products: Seq[SubscriptionProduct] = Seq.empty
   }
 
   "processSubscription" - {
