@@ -113,6 +113,7 @@ define([
 
     var validatePaymentDetails = function () {
         var accountNumberValid = form.$ACCOUNT.val() !== ''
+            && form.$ACCOUNT.val().length >= 6
             && form.$ACCOUNT.val().length <= 10
             && regex.isNumber(form.$ACCOUNT.val());
         toggleError(form.$ACCOUNT_CONTAINER, !accountNumberValid);

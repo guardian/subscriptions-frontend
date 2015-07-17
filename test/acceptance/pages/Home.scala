@@ -1,6 +1,6 @@
-package functional.pages
+package acceptance.pages
 
-import functional.Config.appUrl
+import acceptance.Config.appUrl
 import org.openqa.selenium.WebDriver
 import org.scalatest.selenium.{Page, WebBrowser}
 

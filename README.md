@@ -44,3 +44,9 @@ By default, the setup script will hash file assets and generate a `conf/assets.m
 which in turn will cause Play to render assets with their hashed path. Use the `grunt compile --dev`
 task in order to have Play to render assets without hashing them. Finally, the grunt file provides a
 convenient `watch` task, which will dynamically recompile assets as they get edited.
+
+## Automated tests
+
+The unit test suite can be run using the `sbt fast-test` task. This is just a convenient alias to execute all
+tests except for those tagged as `acceptance`. The acceptance test suite can be instead run by executing
+`sbt acceptance-test`. This assumes that an instance of the application is running locally at `https://sub.thegulocal.com`

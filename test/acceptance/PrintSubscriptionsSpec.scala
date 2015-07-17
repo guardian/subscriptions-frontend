@@ -1,12 +1,10 @@
-package functional
+package acceptance
 
-import java.net.URL
-
-import functional.pages.{DigitalPack, Home, SubscriptionPlan}
+import acceptance.Config.appUrl
+import acceptance.pages.{DigitalPack, Home, SubscriptionPlan}
 import org.openqa.selenium.WebDriver
 import org.scalatest._
 import org.scalatest.selenium.WebBrowser
-import Config.appUrl
 
 case class SubscriptionTest(url: String, name: String, landingHost: String)
 
@@ -17,7 +15,7 @@ object SubscriptionTest {
     SubscriptionTest(url, name, "www.guardiandirectsubs.co.uk")
 }
 
-class PrintSubscriptionsSpec extends FreeSpec with ShouldMatchers with WebBrowser with BeforeAndAfterAll {
+class PrintSubscriptionsSpec extends FeatureSpec with Util with WebBrowser with GivenWhenThen {
   implicit lazy val driver: WebDriver = Config.driver
 
   val testData = Seq(
@@ -27,22 +25,22 @@ class PrintSubscriptionsSpec extends FreeSpec with ShouldMatchers with WebBrowse
     SubscriptionTest.delivery("/delivery/paper-digital", "Paper + digital home delivery subscription")
   )
 
-  "Lucrative subscriptions" - {
-    for (test <- testData) yield test.name.taggedAs(Acceptance) in {
+  feature("Lucrative subscriptions") {
+    for (test <- testData) yield scenario(test.name, Acceptance) {
       goTo(s"$appUrl/${test.url}")
       SubscriptionPlan.selectSixdayPackage()
       assert(pageHasText("You have chosen\nSIXDAY"), "document contains selected plan")
       assertResult(test.landingHost)(currentHost)
     }
 
-    "Paper + Digital subscription" taggedAs Acceptance in {
+    scenario("Paper + Digital subscription", Acceptance) {
       Home.selectPaperPlusDigital()
       SubscriptionPlan.selectSixdayPackage()
       assert(pageHasText("You have chosen\nSIXDAY"), "document contains selected plan")
       assertResult("www.guardiansubscriptions.co.uk")(currentHost)
     }
 
-    "Paper only subscription" taggedAs Acceptance in {
+    scenario("Paper only subscription", Acceptance) {
       Home.selectPaper()
       SubscriptionPlan.selectWeekendPackage()
       assert(pageHasText("You have chosen\nWEEKEND"), "document contains selected plan")
@@ -50,27 +48,17 @@ class PrintSubscriptionsSpec extends FreeSpec with ShouldMatchers with WebBrowse
     }
   }
 
-  "Digital Pack" - {
-    "selecting UK" taggedAs Acceptance in {
+  feature("Digital Pack") {
+    scenario("selecting UK", Acceptance){
       pending
       DigitalPack.selectUK
       assert(pageHasText("You have chosen:\nDigital pack"))
     }
 
-    "selecting not UK" taggedAs Acceptance in {
+    scenario("selecting not UK", Acceptance) {
       pending
       DigitalPack.selectNonUK
       assertResult("www.guardiansubscriptions.co.uk")(currentHost)
     }
-
-  }
-
-  private def currentHost: String = new URL(currentUrl).getHost
-  private def pageHasText(text: String): Boolean = {
-    find(tagName("body")).get.text.contains(text)
-  }
-
-  override def afterAll() {
-    quit()
   }
 }

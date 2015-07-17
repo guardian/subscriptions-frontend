@@ -1,8 +1,8 @@
-package functional.pages
+package acceptance.pages
 
 import org.openqa.selenium.WebDriver
 import org.scalatest.selenium.{WebBrowser, Page}
-import functional.Config.appUrl
+import acceptance.Config.appUrl
 
 object DigitalPack extends Page with WebBrowser {
   override val url = s"$appUrl/digital/country"
