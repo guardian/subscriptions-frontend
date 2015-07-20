@@ -7,7 +7,8 @@ import org.scalatest.{BeforeAndAfterAll, Suites}
 object Main {
   val suites = Seq(
     new CheckoutSpec,
-    new PrintSubscriptionsSpec
+    new PrintSubscriptionsSpec,
+    new TestUsersSpec
   )
 }
 
