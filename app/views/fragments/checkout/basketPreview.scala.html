@@ -5,11 +5,13 @@
 
 @priceOption(product: model.zuora.SubscriptionProduct, descriptionSuffix: String, isChecked: Boolean = false) = {
     <label class="option">
-        <input
-        class="option__input"
-        type="radio" name="ratePlanId"
-        data-option-mirror-label="@product.price.pretty @descriptionSuffix"
-        value="@product.ratePlanId"@if(isChecked){ checked}>
+        <span class="option__input">
+            <input
+                type="radio" name="ratePlanId"
+                data-option-mirror-label="@product.price.pretty @descriptionSuffix"
+                value="@product.ratePlanId"@if(isChecked){ checked}
+            >
+        </span>
         <span class="option__label">@product.price.pretty @descriptionSuffix</span>
     </label>
 }

@@ -188,19 +188,19 @@ input[type=number] {
 }
 .option {
     cursor: pointer;
-    display: block;
     margin-bottom: $gs-baseline / 4;
+    display: table;
 }
 .option__input,
 .option__label {
-    display: inline-block;
-    vertical-align: middle;
+    display: table-cell;
+    vertical-align: top;
 }
 .option__input {
     position: relative;
     top: -1px; // Optical alignment
     width: 1em;
-    margin-right: $gs-baseline / 4;
+    padding-right: $gs-baseline / 2;
 }
 .option__label {
     @include fs-textSans(3);
