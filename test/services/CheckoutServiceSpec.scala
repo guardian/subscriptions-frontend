@@ -32,6 +32,7 @@ class CheckoutServiceSpec extends FreeSpec with Futures with ScalaFutures {
     }
 
   object TestSalesforceService extends SalesforceService {
+    override def repo = ???
     override def createOrUpdateUser(personalData: PersonalData, userId: UserId): Future[MemberId] =
       Future { BasicMember(s"${userId.id} contactId", s"${userId.id} accountId") }
   }

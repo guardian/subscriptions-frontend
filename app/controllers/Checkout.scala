@@ -1,45 +1,27 @@
 package controllers
 
 import actions.CommonActions._
-import com.gu.identity.play.IdUser
 import com.typesafe.scalalogging.LazyLogging
-import configuration.Config
 import configuration.Config.Identity.webAppProfileUrl
 import forms.{FinishAccountForm, SubscriptionsForm}
 import model.SubscriptionData
 import play.api.libs.json._
 import play.api.mvc._
 import services.CheckoutService.CheckoutResult
-import services.{CheckoutService, _}
+import services._
 import views.html.{checkout => view}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 object Checkout extends Controller with LazyLogging {
-
-   private def touchpointBackend(implicit request: Request[_]): TouchpointBackend = {
-    val testUserName = request.cookies.find(_.name == Config.Identity.testUserCookieName).map(_.value)
-    testUserName.map(TouchpointBackend.forUser).getOrElse(TouchpointBackend.Normal)
-  }
-
-  private def zuoraService(implicit request: Request[_]): ZuoraService = {
-    touchpointBackend.zuoraService
-  }
-
-  private def salesforceService(implicit request: Request[_]): SalesforceService = {
-    touchpointBackend.salesforceService
-  }
-
-  private def checkoutService(implicit request: Request[_]) = {
-    new CheckoutService(IdentityService, salesforceService, zuoraService)
-  }
-
-  private def identityCookieOpt(implicit request: Request[_]): Option[Cookie] =
-    request.cookies.find(_.name == "SC_GU_U")
+  def zuoraService(implicit r: RequestWithServices[_]) = r.zuoraService
+  def salesforceService(implicit r: RequestWithServices[_]) = r.salesforceService
+  def checkoutService(implicit r: RequestWithServices[_]) = r.checkoutService
+  def identityUser(implicit r: RequestWithServices[_]) = r.identityUser
 
   def renderCheckout = GoogleAuthenticatedStaffAction.async { implicit request =>
-    getIdentityUserByCookie.map { idUserOpt =>
+    identityUser.map { idUserOpt =>
       val form = idUserOpt.map { idUser =>
         val data = SubscriptionData.fromIdUser(idUser)
         SubscriptionsForm().fill(data)
@@ -53,7 +35,7 @@ object Checkout extends Controller with LazyLogging {
   def handleCheckout = GoogleAuthenticatedStaffAction.async { implicit request =>
     SubscriptionsForm().bindFromRequest.fold(
       formWithErrors => {
-        getIdentityUserByCookie.map { idUserOpt =>
+        identityUser.map { idUserOpt =>
           logger.error(s"Backend form validation failed. Please make sure that the front-end and the backend validations are in sync (validation errors: ${formWithErrors.errors}})")
           BadRequest(view.payment(formWithErrors, userIsSignedIn = idUserOpt.isDefined, zuoraService.products))
         }
@@ -61,7 +43,7 @@ object Checkout extends Controller with LazyLogging {
 
       formData => {
         val idUserOpt = AuthenticationService.authenticatedUserFor(request)
-        val authCookie = identityCookieOpt.map(cookie => AuthCookie(cookie.value))
+        val authCookie = request.identityCookie.map(cookie => AuthCookie(cookie.value))
 
         checkoutService.processSubscription(formData, idUserOpt, authCookie).map { case CheckoutResult(_, userIdData, subscription) =>
           val passwordForm = userIdData.toGuestAccountForm
@@ -92,9 +74,4 @@ object Checkout extends Controller with LazyLogging {
       doesUserExist <- IdentityService.doesUserExist(email)
     } yield Ok(Json.obj("emailInUse" -> doesUserExist))
   }
-
-  private def getIdentityUserByCookie(implicit request: Request[_]): Future[Option[IdUser]] =
-    identityCookieOpt.fold(Future.successful(None: Option[IdUser])) { cookie =>
-      IdentityService.userLookupByScGuU(AuthCookie(cookie.value))
-    }
 }

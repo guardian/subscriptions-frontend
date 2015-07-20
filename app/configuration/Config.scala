@@ -39,7 +39,7 @@ object Config {
     val keys = if (idConfig.getBoolean("production.keys")) new ProductionKeys else new PreProductionKeys
 
     val testUsersSecret = idConfig.getString("test.users.secret")
-    val testUserCookieName =  "subscriptions-test-user-name"
+    val testUserCookieName = "subscriptions-test-user-name"
 
     val webAppUrl = idConfig.getString("webapp.url")
 

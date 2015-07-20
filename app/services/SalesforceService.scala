@@ -13,7 +13,7 @@ import scala.concurrent.Future
 import scala.concurrent.duration._
 
 trait SalesforceService extends LazyLogging {
-  val repo: SalesforceRepo
+  def repo: SalesforceRepo
 
   def createOrUpdateUser(personalData: PersonalData, userId: UserId): Future[MemberId]
 
