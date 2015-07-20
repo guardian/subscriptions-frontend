@@ -1,11 +1,10 @@
 package services
 
-import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
 import touchpoint.TouchpointBackendConfig
 import utils.TestUsers._
 
-object TouchpointBackend extends LazyLogging{
+object TouchpointBackend {
   import TouchpointBackendConfig.BackendType
 
   def apply(backendType: TouchpointBackendConfig.BackendType): TouchpointBackend =
@@ -22,7 +21,6 @@ object TouchpointBackend extends LazyLogging{
 
   val Normal = TouchpointBackend(BackendType.Default)
   val TestUser = TouchpointBackend(BackendType.Testing)
-
 
   val All = Seq(Normal, TestUser)
 
