@@ -9,7 +9,6 @@ import configuration.Config
 import model.SubscriptionData
 import org.joda.time.DateTime
 
-import com.gu.membership.zuora.soap.ZuoraServiceHelpers._
 import scala.xml.Elem
 
 case class Subscribe(memberId: MemberId, data: SubscriptionData) extends ZuoraAction[SubscribeResult] {
@@ -70,7 +69,7 @@ case class Subscribe(memberId: MemberId, data: SubscriptionData) extends ZuoraAc
             <ns2:ContractAcceptanceDate>{contractAcceptanceDate}</ns2:ContractAcceptanceDate>
             <ns2:InitialTerm>12</ns2:InitialTerm>
             <ns2:RenewalTerm>12</ns2:RenewalTerm>
-            <ns2:TermStartDate>{effectiveDate}</ns2:TermStartDate>
+            <ns2:TermStartDate>{contractAcceptanceDate}</ns2:TermStartDate>
             <ns2:TermType>TERMED</ns2:TermType>
           </ns1:Subscription>
           <ns1:RatePlanData>
