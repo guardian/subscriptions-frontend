@@ -69,7 +69,4 @@ object Config {
 
   val sentryDsn = Try(new Dsn(config.getString("sentry.dsn")))
 
-  lazy val Salesforce =  SalesforceConfig.from(config.getConfig("touchpoint.backend.environments").getConfig(stage), stage)
-
-
 }
