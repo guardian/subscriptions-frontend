@@ -1,12 +1,11 @@
 package services
 
-import com.gu.identity.play.IdMinimalUser
-import com.gu.membership.touchpoint.TouchpointBackendConfig.BackendType
+import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
 import touchpoint.TouchpointBackendConfig
 import utils.TestUsers._
 
-object TouchpointBackend {
+object TouchpointBackend extends LazyLogging{
   import TouchpointBackendConfig.BackendType
 
   def apply(backendType: TouchpointBackendConfig.BackendType): TouchpointBackend =
@@ -14,9 +13,11 @@ object TouchpointBackend {
 
   def apply(touchpointBackendConfig: TouchpointBackendConfig): TouchpointBackend = {
     val salesforceRepo = new SalesforceRepo(touchpointBackendConfig.salesforce)
+    val salesforceService = new SalesforceServiceImp(salesforceRepo)
     val zuoraService = new ZuoraApiClient(touchpointBackendConfig.zuora, touchpointBackendConfig.digitalProductPlan)
 
-    TouchpointBackend(salesforceRepo, zuoraService)
+
+    TouchpointBackend(salesforceService, zuoraService)
   }
 
   val Normal = TouchpointBackend(BackendType.Default)
@@ -25,18 +26,16 @@ object TouchpointBackend {
 
   val All = Seq(Normal, TestUser)
 
-  //def forUser(user: IdMinimalUser) = if (isTestUser(user)) TestUser else Normal
-
   def forUser(username: String) = if (isTestUser(username)) TestUser else Normal
 }
 
 case class TouchpointBackend(
-  salesforceRepo: SalesforceRepo,
+  salesforceService: SalesforceService,
   zuoraService : ZuoraService
 ) {
 
   def start() = {
-    salesforceRepo.salesforce.authTask.start()
+    salesforceService.repo.salesforce.authTask.start()
     zuoraService.authTask.start()
   }
 }
