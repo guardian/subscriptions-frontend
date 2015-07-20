@@ -1,7 +1,7 @@
 package actions
 
 import com.typesafe.scalalogging.LazyLogging
-import configuration.Config.QA.{passthroughCookie => qaCookie}
+import configuration.QA.{passthroughCookie => qaCookie}
 import controllers.{Cached, NoCache}
 import play.api.mvc._
 
