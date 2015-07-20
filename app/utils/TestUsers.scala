@@ -16,4 +16,7 @@ object TestUsers {
 
   def isTestUser(user: IdMinimalUser): Boolean =
     user.displayName.flatMap(_.split(' ').headOption).exists(TestUsers.testUsers.isValid)
+
+  def isTestUser(username: String): Boolean =
+    TestUsers.testUsers.isValid(username)
 }

@@ -17,7 +17,12 @@ import scala.concurrent.Future
 
 object Checkout extends Controller with LazyLogging {
   private val zuoraService = TouchpointBackend.Normal.zuoraService
-  lazy val checkoutService = new CheckoutService(IdentityService, SalesforceService, zuoraService)
+  private def checkoutService(implicit request: Request) = {
+    val testUserName = request.cookies.find(_.name == "cookie-name").map(_.value)
+    val backend = testUserName.map(TouchpointBackend.forUser).getOrElse(TouchpointBackend.Normal)
+
+    new CheckoutService(IdentityService, SalesforceService(backend.salesforceRepo), backend.zuoraService)
+  }
 
   def identityCookieOpt(implicit request: Request[_]): Option[Cookie] =
     request.cookies.find(_.name == "SC_GU_U")
@@ -30,8 +35,7 @@ object Checkout extends Controller with LazyLogging {
       } getOrElse {
         SubscriptionsForm()
       }
-      //TODO when implementing test-users this requires updating to supply data to correct location
-      val touchpointBackend = TouchpointBackend.Normal
+
       Ok(views.html.checkout.payment(form, userIsSignedIn = idUserOpt.isDefined, zuoraService.products))
     }
   }

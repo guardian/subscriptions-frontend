@@ -50,6 +50,10 @@ object Config {
     def idWebAppSignOutUrl(path: String): String =
       (webAppUrl / "signout") ? ("returnUrl" -> absoluteUrl(path)) ? ("skipConfirmation" -> "true")
 
+    def idWebAppRegisterUrl(path : String): String =
+      (webAppUrl / "register") ? ("returnUrl" -> absoluteUrl(path)) ? ("skipConfirmation" -> "true")
+
+
     private def absoluteUrl(path: String): String = (subscriptionsUrl / path).toString()
   }
 

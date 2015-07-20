@@ -20,12 +20,14 @@ object TouchpointBackend {
   }
 
   val Normal = TouchpointBackend(BackendType.Default)
- // val TestUser = TouchpointBackend(BackendType.Testing)
+  val TestUser = TouchpointBackend(BackendType.Testing)
 
 
-  val All = Seq(Normal)
+  val All = Seq(Normal, TestUser)
 
   //def forUser(user: IdMinimalUser) = if (isTestUser(user)) TestUser else Normal
+
+  def forUser(username: String) = if (isTestUser(username)) TestUser else Normal
 }
 
 case class TouchpointBackend(
