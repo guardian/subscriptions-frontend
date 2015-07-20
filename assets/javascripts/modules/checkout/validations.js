@@ -103,29 +103,40 @@ define([
         });
     }
 
-    var validatePaymentDetails = function () {
-        var accountNumberValid = form.$ACCOUNT.val() !== ''
-            && form.$ACCOUNT.val().length >= 6
-            && form.$ACCOUNT.val().length <= 10
-            && regex.isNumber(form.$ACCOUNT.val());
-        toggleError(form.$ACCOUNT_CONTAINER, !accountNumberValid);
+    var validatePaymentDetails = function (data) {
 
-        var holderNameValid = form.$HOLDER.val() !== ''
-            && form.$HOLDER.val().length <= 18;
-        toggleError(form.$HOLDER_CONTAINER, !holderNameValid);
+        var validity = {};
 
-        var sortCodeValid = [form.$SORTCODE1, form.$SORTCODE2, form.$SORTCODE3].filter(function (field) {
-            var codeAsNumber = parseInt(field.val(), 10);
-            var isValid = field.val().length === 2
-                && codeAsNumber >= 0 && codeAsNumber <= 99;
-            return isValid;
+        validity.accountNumberValid = (
+            data.accountNumber !== '' &&
+            data.accountNumber.length >= 6 &&
+            data.accountNumber.length <= 10 &&
+            regex.isNumber(data.accountNumber)
+        );
+
+        validity.accountHolderNameValid = (
+            data.accountHolderName !== '' &&
+            data.accountHolderName.length <= 18
+        );
+
+        validity.sortCodeValid = data.sortCodeParts.filter(function (code) {
+            var codeAsNumber = parseInt(code, 10);
+            return (
+                code.length === 2 &&
+                codeAsNumber >= 0 && codeAsNumber <= 99
+            );
         }).length === 3;
-        toggleError(form.$SORTCODE_CONTAINER, !sortCodeValid);
 
-        var detailsConfirmed = form.$CONFIRM_PAYMENT[0].checked;
-        toggleError(form.$CONFIRM_PAYMENT_CONTAINER, !detailsConfirmed);
+        validity.detailsConfirmedValid = data.detailsConfirmed;
 
-        return accountNumberValid && sortCodeValid && holderNameValid && detailsConfirmed;
+        validity.allValid = (
+            validity.accountNumberValid &&
+            validity.accountHolderNameValid &&
+            validity.sortCodeValid &&
+            validity.detailsConfirmedValid
+        );
+
+        return validity;
     };
 
     return {

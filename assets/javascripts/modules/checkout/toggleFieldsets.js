@@ -1,11 +1,13 @@
 define([
     'bean',
     'utils/ajax',
+    'modules/forms/toggleError',
     'modules/checkout/formElements',
     'modules/checkout/validations'
 ], function (
     bean,
     ajax,
+    toggleError,
     formEls,
     validations
 ) {
@@ -52,7 +54,24 @@ define([
 
     function toggleFieldsetsPayment() {
         submitHelper(formEls.$PAYMENT_DETAILS_SUBMIT, function() {
-            if(validations.validatePaymentDetails()){
+
+            var validity = validations.validatePaymentDetails({
+                accountNumber: formEls.$ACCOUNT.val(),
+                accountHolderName: formEls.$HOLDER.val(),
+                sortCodeParts: [
+                    formEls.$SORTCODE1.val(),
+                    formEls.$SORTCODE2.val(),
+                    formEls.$SORTCODE3.val()
+                ],
+                detailsConfirmed: formEls.$CONFIRM_PAYMENT[0].checked
+            });
+
+            toggleError(formEls.$ACCOUNT_CONTAINER, !validity.accountNumberValid);
+            toggleError(formEls.$HOLDER_CONTAINER, !validity.accountHolderNameValid);
+            toggleError(formEls.$SORTCODE_CONTAINER, !validity.sortCodeValid);
+            toggleError(formEls.$CONFIRM_PAYMENT_CONTAINER, !validity.detailsConfirmedValid);
+
+            if(validity.allValid) {
                 formEls.$FIELDSET_PAYMENT_DETAILS.addClass(FIELDSET_COLLAPSED).attr(FIELDSET_COMPLETE, '');
                 formEls.$FIELDSET_REVIEW.removeClass(FIELDSET_COLLAPSED);
                 formEls.$EDIT_PAYMENT_DETAILS.removeClass(IS_HIDDEN);
