@@ -38,9 +38,9 @@
                     @helper.CSRF.formField
 
                     <div class="fieldset__heading">
-                        <h2 class="fieldset__headline">
+                        <legend class="fieldset__headline">
                             <span class="fieldset__headline__num">1</span> Your details
-                        </h2>
+                        </legend>
                         <div class="fieldset__note fieldset__note--offset">
                             @if(userIsSignedIn) {
                                 <span class="fieldset__note__label">Not you?</span>
@@ -58,17 +58,17 @@
                         <div class="form-field js-checkout-first">
                             <label class="label" for="first">First name</label>
                             <input type="text" class="input-text js-input" name="personal.first" id="first" value="@form.data.get("personal.first")">
-                            @checkout.errorMessage("This field is required")
+                            @fragments.forms.errorMessage("This field is required")
                         </div>
                         <div class="form-field js-checkout-last">
                             <label class="label" for="last">Last name</label>
                             <input type="text" class="input-text js-input" name="personal.last" id="last" value="@form.data.get("personal.last")">
-                            @checkout.errorMessage("This field is required")
+                            @fragments.forms.errorMessage("This field is required")
                         </div>
                         <div class="form-field js-checkout-email">
                             <label class="label" for="email">Email address</label>
                             <input type="email" class="input-text js-input" name="personal.emailValidation.email" id="email" value="@form.data.get("personal.emailValidation.email")" @readonly>
-                            @checkout.errorMessage("")
+                            @fragments.forms.errorMessage("")
                         </div>
                         <div class="form-field js-checkout-confirm-email">
                             @if(userIsSignedIn) {
@@ -76,35 +76,35 @@
                             } else {
                                 <label class="label" for="confirm">Confirm email address</label>
                                 <input type="email" class="input-text js-input" name="personal.emailValidation.confirm" id="confirm" value="@form.data.get("personal.emailValidation.confirm")">
-                                @checkout.errorMessage("The confirmation email must match your email address")
+                                @fragments.forms.errorMessage("The confirmation email must match your email address")
                             }
                         </div>
                         <div class="js-checkout-full-address">
                             <div class="form-field js-checkout-house">
                                 <label class="label" for="address-line-1">Address line 1</label>
                                 <input type="text" class="input-text js-input" id="address-line-1" name="personal.address.address1" value="@form.data.get("personal.address.address1")">
-                                @checkout.errorMessage("This field is required")
+                                @fragments.forms.errorMessage("This field is required")
                             </div>
                             <div class="form-field js-checkout-street">
                                 <label class="label optional-marker" for="address-line-2">Address line 2</label>
                                 <input type="text" class="input-text js-input" id="address-line-2" name="personal.address.address2" value="@form.data.get("personal.address.address2")">
-                                @checkout.errorMessage("This field is required")
+                                @fragments.forms.errorMessage("This field is required")
                             </div>
                             <div class="form-field js-checkout-town">
                                 <label class="label" for="address-town">Town/City</label>
                                 <input type="text" class="input-text js-input" id="address-town" name="personal.address.town" value="@form.data.get("personal.address.town")">
-                                @checkout.errorMessage("This field is required")
+                                @fragments.forms.errorMessage("This field is required")
                             </div>
                         </div>
                         <div class="form-field js-checkout-postcode">
                             <label class="label" for="address-postcode">Postcode</label>
                             <input type="text" class="input-text js-input input-text input-text--small" id="address-postcode" name="personal.address.postcode" value="@form.data.get("personal.address.postcode")">
-                            @checkout.errorMessage("Please enter a valid postal code")
+                            @fragments.forms.errorMessage("Please enter a valid postal code")
                         </div>
                         <div class="form-field">
-                            <label class="checkbox" for="receive-gnm-marketing">
+                            <label class="option" for="receive-gnm-marketing">
                             @defining(form.data.get("personal.receiveGnmMarketing")) { gnmMarketingOpt =>
-                                <span class="checkbox__input">
+                                <span class="option__input">
                                     <input type="checkbox"
                                         name="personal.receiveGnmMarketing"
                                         id="receive-gnm-marketing"
@@ -112,7 +112,7 @@
                                         >
                                 </span>
                             }
-                                <span class="checkbox__label">
+                                <span class="option__label">
                                     I'd like to be kept up to to date by email with offers and developments from Guardian News &amp; Media Limited
                                 </span>
                             </label>
@@ -126,9 +126,9 @@
                 @* ===== Payment ===== *@
                 <fieldset class="fieldset fieldset--collapsed js-fieldset-payment-details">
                     <div class="fieldset__heading">
-                        <h2 class="fieldset__headline">
+                        <legend class="fieldset__headline">
                             <span class="fieldset__headline__num">2</span> Payment details
-                        </h2>
+                        </legend>
                         <div class="fieldset__note fieldset__note--offset">
                             @fragments.forms.securityNote()
                             Payment will be taken by Direct Debit
@@ -141,7 +141,7 @@
                         <div class="form-field js-checkout-account">
                             <label class="label" for="account">Bank account number</label>
                             <input type="number" class="input-text js-input" name="payment.account">
-                            @checkout.errorMessage("Please enter between 6 and 10 digits for the account number")
+                            @fragments.forms.errorMessage("Please enter between 6 and 10 digits for the account number")
                         </div>
                         <div class="form-field js-checkout-sortcode">
                             <label class="label" for="sortcode">Bank sort code</label>
@@ -157,24 +157,24 @@
                                 class="input-text input-text--xsmall js-input js-checkout-sortcode3"
                                 max="99" name="payment.sortcode3"
                             >
-                            @checkout.errorMessage("Please enter 2 digits for each sort code field")
+                            @fragments.forms.errorMessage("Please enter 2 digits for each sort code field")
                         </div>
                         <div class="form-field js-checkout-holder">
                             <label class="label" for="holder">Name of account holder</label>
                             <input type="text" class="input-text js-input" name="payment.holder">
                             @* TODO: Why limited to 18 characters? *@
-                            @checkout.errorMessage("Please enter between 1 and 18 characters for the account holder name")
+                            @fragments.forms.errorMessage("Please enter between 1 and 18 characters for the account holder name")
                         </div>
                         <div class="form-field js-checkout-confirm-payment">
-                            <label class="checkbox">
-                                <span class="checkbox__input">
+                            <label class="option">
+                                <span class="option__input">
                                     <input type="checkbox" class="js-input">
                                 </span>
-                                <span class="checkbox__label">
+                                <span class="option__label">
                                     I confirm that I am the account holder and I am solely able to authorise debit from the account
                                 </span>
                             </label>
-                            @checkout.errorMessage("Please confirm that you are the account holder")
+                            @fragments.forms.errorMessage("Please confirm that you are the account holder")
                         </div>
                         <div class="actions">
                             <button class="button button--primary button--large js-checkout-payment-details-submit">Continue</button>
@@ -185,9 +185,9 @@
                 @* ===== Review ===== *@
                 <fieldset class="fieldset fieldset--single fieldset--collapsed js-fieldset-review">
                     <div class="fieldset__heading">
-                        <h2 class="fieldset__headline">
+                        <legend class="fieldset__headline">
                             <span class="fieldset__headline__num">3</span> Review and confirm
-                        </h2>
+                        </legend>
                     </div>
                     <div class="fieldset__fields">
                         @fragments.checkout.reviewDetails()
