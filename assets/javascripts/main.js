@@ -4,7 +4,7 @@ require([
     'modules/optionMirror',
     'modules/appendAround',
     'modules/checkout/checkout',
-    'modules/components/password',
+    'modules/password',
     'modules/patterns',
     // Add new dependencies ABOVE this
     'raven'
