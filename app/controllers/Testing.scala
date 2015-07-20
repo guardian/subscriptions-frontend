@@ -19,7 +19,4 @@ object Testing extends Controller with LazyLogging {
     val testUserCookie = new Cookie(Config.Identity.testUserCookieName, testUserString, Some(30 * 60), httpOnly = true)
     Ok(views.html.testing.testUsers(testUserString)).withCookies(testUserCookie)
   }
-
-  //TODO - turn off anayltics
-
 }
