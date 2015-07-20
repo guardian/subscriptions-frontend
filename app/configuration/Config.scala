@@ -38,6 +38,8 @@ object Config {
 
     val keys = if (idConfig.getBoolean("production.keys")) new ProductionKeys else new PreProductionKeys
 
+    val testUsersSecret = idConfig.getString("test.users.secret")
+
     val webAppUrl = idConfig.getString("webapp.url")
 
     val webAppProfileUrl = webAppUrl / "account" / "edit"
@@ -63,4 +65,6 @@ object Config {
   val sentryDsn = Try(new Dsn(config.getString("sentry.dsn")))
 
   lazy val Salesforce =  SalesforceConfig.from(config.getConfig("touchpoint.backend.environments").getConfig(stage), stage)
+
+
 }

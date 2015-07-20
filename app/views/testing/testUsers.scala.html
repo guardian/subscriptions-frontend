@@ -1,0 +1,15 @@
+@(userString: String)
+
+@main(title = "Test users") {
+    <main class="page-container gs-container">
+        @fragments.page.header("Test Users", None, Nil)
+
+        <div class="prose">
+            <ul class="u-unstyled">
+                <li>First Name: <strong>@userString</strong></li>
+                <li>Username: <strong>@userString</strong></li>
+                <li>Email: <strong>@userString@@gu.com</strong></li>
+            </ul>
+        </div>
+    </main>
+}
