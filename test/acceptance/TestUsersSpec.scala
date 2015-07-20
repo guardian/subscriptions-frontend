@@ -27,7 +27,7 @@ class TestUsersSpec extends FeatureSpec with WebBrowser with Util with GivenWhen
       }
     }
 
-    scenario("Accessing the test user page without a QA cookie") {
+    scenario("Accessing the test user page without a QA cookie", Acceptance) {
       Given("The QA cookie is not set")
 
       When("I visit the test user page")
