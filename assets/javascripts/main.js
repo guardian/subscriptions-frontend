@@ -3,8 +3,9 @@ require([
     'modules/toggle',
     'modules/optionMirror',
     'modules/appendAround',
-    'modules/checkout/checkout',
     'modules/password',
+    'modules/checkout',
+    'modules/confirmation',
     'modules/patterns',
     // Add new dependencies ABOVE this
     'raven'
@@ -13,8 +14,9 @@ require([
     toggle,
     appendAround,
     optionMirror,
-    checkout,
     password,
+    checkout,
+    confirmation,
     patterns
 ) {
     'use strict';
@@ -33,8 +35,10 @@ require([
     toggle.init();
     optionMirror.init();
     appendAround.init();
-    checkout.init();
     password.init();
+
+    checkout.init();
+    confirmation.init();
 
     // Pattern library
     patterns.init();

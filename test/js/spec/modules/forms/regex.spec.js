@@ -1,4 +1,4 @@
-define(['src/modules/checkout/regex'], function (regex) {
+define(['modules/checkout/regex'], function (regex) {
 
     describe('Checkout form validation regex', function () {
 
