@@ -1,13 +1,14 @@
 package configuration
 
 import com.github.nscala_time.time.Imports._
+import com.gocardless.GoCardlessClient
+import com.gocardless.GoCardlessClient.Environment
 import com.gu.googleauth.GoogleAuthConfig
 import com.gu.identity.cookie.{PreProductionKeys, ProductionKeys}
 import com.gu.membership.salesforce.SalesforceConfig
 import com.netaporter.uri.dsl._
 import com.typesafe.config.ConfigFactory
 import net.kencochrane.raven.dsn.Dsn
-import com.github.nscala_time.time.Imports._
 
 import scala.util.Try
 
@@ -63,4 +64,9 @@ object Config {
   val sentryDsn = Try(new Dsn(config.getString("sentry.dsn")))
 
   lazy val Salesforce =  SalesforceConfig.from(config.getConfig("touchpoint.backend.environments").getConfig(stage), stage)
+
+  object GoCardless {
+    private val token = config.getString("gocardless.token")
+    val client = GoCardlessClient.create(token, Environment.SANDBOX)
+  }
 }
