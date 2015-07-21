@@ -60,5 +60,7 @@ object SubscriptionsForm {
     "ratePlanId" -> text
   )(SubscriptionData.apply)(SubscriptionData.unapply))
 
+  def paymentDataForm = Form("payment" -> paymentDataMapping)
+
   def apply() = subsForm
 }

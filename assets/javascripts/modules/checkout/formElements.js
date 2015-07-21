@@ -47,6 +47,9 @@ define(['$'], function ($) {
         $FIELDSET_YOUR_DETAILS: $('.js-fieldset-your-details'),
         $FIELDSET_PAYMENT_DETAILS: $('.js-fieldset-payment-details'),
         $FIELDSET_REVIEW: $('.js-fieldset-review'),
+
+        $MANDATE_PDF: $('.js-mandate-pdf'),
+
         $EDIT_YOUR_DETAILS: $('.js-edit-your-details'),
         $EDIT_PAYMENT_DETAILS: $('.js-edit-payment-details')
     };

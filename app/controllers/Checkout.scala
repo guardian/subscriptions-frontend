@@ -5,7 +5,8 @@ import com.gu.identity.play.IdUser
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config.Identity.webAppProfileUrl
 import forms.{FinishAccountForm, SubscriptionsForm}
-import model.SubscriptionData
+import model.{GuestAccountData, SubscriptionData}
+import play.api.data.Form
 import play.api.libs.json._
 import play.api.mvc._
 import services.CheckoutService.CheckoutResult
@@ -17,7 +18,8 @@ import scala.concurrent.Future
 
 object Checkout extends Controller with LazyLogging {
   private val zuoraService = TouchpointBackend.Normal.zuoraService
-  lazy val checkoutService = new CheckoutService(IdentityService, SalesforceService, zuoraService)
+  private lazy val checkoutService = new CheckoutService(IdentityService, SalesforceService, zuoraService)
+  private val goCardlessService = GoCardlessService
 
   def identityCookieOpt(implicit request: Request[_]): Option[Cookie] =
     request.cookies.find(_.name == "SC_GU_U")
@@ -38,15 +40,13 @@ object Checkout extends Controller with LazyLogging {
 
   def handleCheckout = GoogleAuthenticatedStaffAction.async { implicit request =>
     SubscriptionsForm().bindFromRequest.fold(
-      formWithErrors => {
+      formWithErrors =>
         getIdentityUserByCookie.map { idUserOpt =>
           logger.error(s"Backend form validation failed. Please make sure that the front-end and the backend validations are in sync (validation errors: ${formWithErrors.errors}})")
           //TODO when implementing test-users this requires updating to supply data to correct location
           val touchpointBackend = TouchpointBackend.Normal
           BadRequest(view.payment(formWithErrors, userIsSignedIn = idUserOpt.isDefined, zuoraService.products))
-        }
-      },
-
+        },
       formData => {
         val idUserOpt = AuthenticationService.authenticatedUserFor(request)
         val authCookie = identityCookieOpt.map(cookie => AuthCookie(cookie.value))
@@ -59,15 +59,20 @@ object Checkout extends Controller with LazyLogging {
     )
   }
 
+  def mandatePDF = GoogleAuthenticatedStaffAction.async { implicit request =>
+    SubscriptionsForm.paymentDataForm.bindFromRequest.fold(
+      handleWithBadRequest,
+      paymentData =>
+        goCardlessService.mandatePDFUrl(paymentData).map(url =>
+          Ok(Json.obj("mandatePDFUrl" -> url))
+        )
+    )
+  }
+
   def processFinishAccount = GoogleAuthenticatedStaffAction.async { implicit request =>
-    FinishAccountForm().bindFromRequest.fold({ formWithErrors =>
-      Future {
-        BadRequest(Json.obj(
-          "error" -> "Invalid form submissions",
-          "invalidFields" -> formWithErrors.errors.map(_.key)
-        ))
-      }
-    }, guestAccountData => {
+    FinishAccountForm().bindFromRequest.fold(
+      handleWithBadRequest,
+      guestAccountData => {
       IdentityService.convertGuest(guestAccountData.password, IdentityToken(guestAccountData.token))
         .map { _ =>
           Ok(Json.obj("profileUrl" -> webAppProfileUrl.toString()))
@@ -84,5 +89,14 @@ object Checkout extends Controller with LazyLogging {
   private def getIdentityUserByCookie(implicit request: Request[_]): Future[Option[IdUser]] =
     identityCookieOpt.fold(Future.successful(None: Option[IdUser])) { cookie =>
       IdentityService.userLookupByScGuU(AuthCookie(cookie.value))
+    }
+
+  private def handleWithBadRequest[A](formWithErrors: Form[A]): Future[Result] =
+    Future {
+      logger.error(s"Backend form validation failed. Please make sure that the front-end and the backend validations are in sync (validation errors: ${formWithErrors.errors}})")
+      BadRequest(Json.obj(
+        "error" -> "Invalid form submissions",
+        "invalidFields" -> formWithErrors.errors.map(_.key)
+      ))
     }
 }
