@@ -1,17 +1,23 @@
 define([
     'modules/checkout/formElements',
-    'modules/checkout/toggleFieldsets',
+    'modules/checkout/personalDetails',
+    'modules/checkout/paymentDetails',
+    'modules/checkout/editFieldsets',
     'modules/checkout/reviewDetails'
 ], function (
     formElements,
-    toggleFieldsets,
+    personalDetails,
+    paymentDetails,
+    editFieldsets,
     reviewDetails
 ) {
     'use strict';
 
     function init() {
         if(formElements.$CHECKOUT_FORM.length) {
-            toggleFieldsets.init();
+            personalDetails.init();
+            paymentDetails.init();
+            editFieldsets.init();
             reviewDetails.init();
         }
     }
