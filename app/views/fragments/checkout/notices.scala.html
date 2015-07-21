@@ -1,5 +1,6 @@
 @()
 
+@import configuration.Details
 @import controllers.CachedAssets.hashedPathFor
 
 @notice(title: String)(content: Html) = {
@@ -25,14 +26,14 @@
 @notice("Direct Debit") {
 
     <address>
-        The Guardian, Perrymount Road, Perrymount Road,
-        Haywards Heath, West Sussex, RH16 3DH,
+        The Guardian, The Quorum,
+        Bond Street, Bristol, BS1 3AE,
         United Kingdom
     </address>
 
     <ul class="u-unstyled-list">
-        <li>Tel: 0808 168 5088</li>
-        <li><a href="mailto:gnmsubs@@quadrantsubs.com">gnmsubs@@quadrantsubs.com</a></li>
+        <li>Tel: @Details.digitalPackPhone</li>
+        <li><a href="mailto:@Details.digitalPackEmail">@Details.digitalPackEmail</a></li>
     </ul>
 
     <aside class="direct-debit">
