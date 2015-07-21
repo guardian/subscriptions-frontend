@@ -1,6 +1,6 @@
-define(['modules/checkout/validations'], function (validations) {
+define(['modules/checkout/validatePayment'], function (validatePayment) {
 
-    describe('#validatePaymentDetails', function () {
+    describe('#validatePayment', function () {
 
         it('should validate account number', function () {
 
@@ -29,10 +29,10 @@ define(['modules/checkout/validations'], function (validations) {
                 detailsConfirmed: false
             };
 
-            expect((validations.validatePaymentDetails(tooShort)).accountNumberValid).toBe(false);
-            expect((validations.validatePaymentDetails(tooLong)).accountNumberValid).toBe(false);
-            expect((validations.validatePaymentDetails(justRightLow)).accountNumberValid).toBe(true);
-            expect((validations.validatePaymentDetails(justRightHigh)).accountNumberValid).toBe(true);
+            expect((validatePayment(tooShort)).accountNumberValid).toBe(false);
+            expect((validatePayment(tooLong)).accountNumberValid).toBe(false);
+            expect((validatePayment(justRightLow)).accountNumberValid).toBe(true);
+            expect((validatePayment(justRightHigh)).accountNumberValid).toBe(true);
         });
 
         it('should validate account holder name', function () {
@@ -48,8 +48,8 @@ define(['modules/checkout/validations'], function (validations) {
                 sortCodeParts: [],
                 detailsConfirmed: false
             };
-            expect((validations.validatePaymentDetails(tooLong)).accountHolderNameValid).toBe(false);
-            expect((validations.validatePaymentDetails(valid)).accountHolderNameValid).toBe(true);
+            expect((validatePayment(tooLong)).accountHolderNameValid).toBe(false);
+            expect((validatePayment(valid)).accountHolderNameValid).toBe(true);
         });
 
         it('should validate sort code', function () {
@@ -73,22 +73,22 @@ define(['modules/checkout/validations'], function (validations) {
                 detailsConfirmed: false
             };
 
-            expect((validations.validatePaymentDetails(tooShort)).sortCodeValid).toBe(false);
-            expect((validations.validatePaymentDetails(tooLong)).sortCodeValid).toBe(false);
-            expect((validations.validatePaymentDetails(justRight)).sortCodeValid).toBe(true);
+            expect((validatePayment(tooShort)).sortCodeValid).toBe(false);
+            expect((validatePayment(tooLong)).sortCodeValid).toBe(false);
+            expect((validatePayment(justRight)).sortCodeValid).toBe(true);
 
         });
 
         it('should validate all details', function () {
 
-            var valid = validations.validatePaymentDetails({
+            var valid = validatePayment({
                 accountNumber: '12346789',
                 accountHolderName: 'Example Name',
                 sortCodeParts: ['01', '01', '01'],
                 detailsConfirmed: true
             });
 
-            var invalid = validations.validatePaymentDetails({
+            var invalid = validatePayment({
                 accountNumber: '12346789',
                 accountHolderName: 'This name is longer than 18 characters',
                 sortCodeParts: ['01', '01', '100', '10000'],
