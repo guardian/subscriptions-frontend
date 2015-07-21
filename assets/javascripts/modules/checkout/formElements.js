@@ -2,6 +2,8 @@ define(['$'], function ($) {
     'use strict';
 
     return {
+        $CHECKOUT_FORM: $('.js-checkout-form'),
+
         $FIRST_NAME: $('.js-checkout-first .js-input'),
         $LAST_NAME: $('.js-checkout-last .js-input'),
         $EMAIL: $('.js-checkout-email .js-input'),
@@ -16,10 +18,8 @@ define(['$'], function ($) {
         $SORTCODE2: $('.js-checkout-sortcode2'),
         $SORTCODE3: $('.js-checkout-sortcode3'),
         $HOLDER: $('.js-checkout-holder .js-input'),
-        $MANUAL_ADDRESS: $('.js-checkout-manual-address .js-input'),
         $FULL_ADDRESS: $('.js-checkout-full-address .js-input'),
         $CONFIRM_PAYMENT: $('.js-checkout-confirm-payment .js-input'),
-        $FINISH_ACCOUNT_PASSWORD: $('.js-checkout-finish-account-password .js-input'),
 
         $FIRST_NAME_CONTAINER: $('.js-checkout-first'),
         $LAST_NAME_CONTAINER: $('.js-checkout-last'),
@@ -35,7 +35,6 @@ define(['$'], function ($) {
         $MANUAL_ADDRESS_CONTAINER: $('.js-checkout-manual-address'),
         $FULL_ADDRESS_CONTAINER: $('.js-checkout-full-address'),
         $CONFIRM_PAYMENT_CONTAINER: $('.js-checkout-confirm-payment'),
-        $FINISH_ACCOUNT_PASSWORD_CONTAINER: $('.js-checkout-finish-account-password'),
 
         $YOUR_DETAILS_SUBMIT: $('.js-checkout-your-details-submit'),
         $PAYMENT_DETAILS_SUBMIT: $('.js-checkout-payment-details-submit'),
@@ -45,14 +44,10 @@ define(['$'], function ($) {
         $REVIEW_ACCOUNT: $('.js-checkout-review-account'),
         $REVIEW_SORTCODE: $('.js-checkout-review-sortcode'),
         $REVIEW_HOLDER: $('.js-checkout-review-holder'),
-        $FINISH_ACCOUNT_SUBMIT: $('.js-checkout-finish-account-submit'),
-        $FINISH_ACCOUNT_FORM: $('.js-finish-account'),
         $FIELDSET_YOUR_DETAILS: $('.js-fieldset-your-details'),
         $FIELDSET_PAYMENT_DETAILS: $('.js-fieldset-payment-details'),
         $FIELDSET_REVIEW: $('.js-fieldset-review'),
         $EDIT_YOUR_DETAILS: $('.js-edit-your-details'),
-        $EDIT_PAYMENT_DETAILS: $('.js-edit-payment-details'),
-        $FINISH_ACCOUNT_SUCCESS: $('.js-finish-account-success'),
-        $FINISH_ACCOUNT_ERROR: $('.js-finish-account-error')
+        $EDIT_PAYMENT_DETAILS: $('.js-edit-payment-details')
     };
 });

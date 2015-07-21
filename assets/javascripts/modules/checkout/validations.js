@@ -1,19 +1,20 @@
 define([
     '$',
     'utils/text',
+    'modules/forms/regex',
+    'modules/forms/toggleError',
     'modules/checkout/formElements',
-    'modules/checkout/emailCheck',
-    'modules/checkout/regex'
+    'modules/checkout/emailCheck'
 ], function (
     $,
     textUtils,
+    regex,
+    toggleError,
     form,
-    emailCheck,
-    regex
+    emailCheck
 ) {
     'use strict';
 
-    var ERROR_CLASS = 'form-field--error';
     var MESSAGES = {
         emailInvalid: 'Please enter a valid email address.',
         emailTaken: 'Your email is already in use. Please sign in or use another email address.',
@@ -27,14 +28,6 @@ define([
         {input: form.$ADDRESS3, container: form.$ADDRESS3_CONTAINER},
         {input: form.$POSTCODE, container: form.$POSTCODE_CONTAINER}
     ];
-
-    function toggleError(container, condition) {
-        if (condition) {
-            container.addClass(ERROR_CLASS);
-        } else {
-            container.removeClass(ERROR_CLASS);
-        }
-    }
 
     function renderEmailError(condition, message){
         if(condition){
@@ -51,7 +44,6 @@ define([
         toggleError(form.$EMAIL_CONTAINER, !validity.hasValidEmail);
         toggleError(form.$CONFIRM_EMAIL_CONTAINER, validity.hasValidEmail && !validity.hasConfirmedEmail);
     }
-
 
     /**
      * TODO:
@@ -136,14 +128,7 @@ define([
         return accountNumberValid && sortCodeValid && holderNameValid && detailsConfirmed;
     };
 
-    var validateFinishAccount = function () {
-        var passwordValid = form.$FINISH_ACCOUNT_PASSWORD.val().length >= 6;
-        toggleError(form.$FINISH_ACCOUNT_PASSWORD_CONTAINER, !passwordValid);
-        return passwordValid;
-    };
-
     return {
-        validateFinishAccount: validateFinishAccount,
         validatePersonalDetails: validatePersonalDetails,
         validatePaymentDetails: validatePaymentDetails
     };
