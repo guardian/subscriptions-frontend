@@ -35,7 +35,8 @@ libraryDependencies ++= Seq(
   "net.kencochrane.raven" % "raven-logback" % "6.0.0",
   "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0",
   "org.scalatest" %% "scalatest" % "2.2.4" % "test",
-  "org.seleniumhq.selenium" % "selenium-java" % "2.44.0" % "test"
+  "org.seleniumhq.selenium" % "selenium-java" % "2.44.0" % "test",
+  "com.gocardless" % "gocardless-pro" % "1.0.0"
 )
 
 testOptions in Test ++= Seq(

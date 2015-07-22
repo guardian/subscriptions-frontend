@@ -8,7 +8,6 @@ import model.PersonalData
 import play.api.libs.json.{JsObject, Json}
 import utils.ScheduledTask
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
@@ -44,7 +43,7 @@ class SalesforceRepo(salesforceConfig: SalesforceConfig) extends MemberRepositor
     override val apiToken = salesforceConfig.apiToken
     override val apiPassword = salesforceConfig.apiPassword
     override val application = Config.appName
-    override val apiURL =salesforceConfig.apiURL.toString
+    override val apiURL =salesforceConfig.apiURL.toString()
     override val stage = salesforceConfig.envName
 
     val authTask = ScheduledTask("", Authentication("", ""), 0.seconds, 30.minutes)(getAuthentication)
