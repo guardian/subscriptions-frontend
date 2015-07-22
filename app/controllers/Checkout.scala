@@ -80,7 +80,7 @@ object Checkout extends Controller with LazyLogging {
     })
   }
 
-  def checkIdentity(email: String) = GoogleAuthenticatedStaffAction.async { implicit request =>
+  def checkIdentity(email: String) = NoCacheAction.async { implicit request =>
     for {
       doesUserExist <- IdentityService.doesUserExist(email)
     } yield Ok(Json.obj("emailInUse" -> doesUserExist))

@@ -25,7 +25,7 @@ define([
             var emailValue = data.emailAddress;
             var hasValidEmail = regex.isValidEmail(emailValue);
             var confirmationEmailValue = data.emailAddressConfirmed;
-            var hasConfirmedEmail = confirmationEmailValue === confirmationEmailValue;
+            var hasConfirmedEmail = emailValue === confirmationEmailValue;
 
             var emptyFields = data.requiredFieldValues.filter(function (field) {
                 return !field;
