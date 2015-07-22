@@ -16,37 +16,35 @@
     </label>
 }
 
+<div class="basket-preview@if(subscriptionProductsOpt.nonEmpty){ basket-preview--products}">
+    <h3 class="basket-preview__title">You've chosen:</h3>
+    <div class="basket-preview__image">
+        <img src="@controllers.CachedAssets.hashedPathFor("images/digital-pack.png")" alt="Digital Pack">
+    </div>
 
-@for(subscriptionProducts <- subscriptionProductsOpt) {
-
-    <div class="basket-preview">
-        <h3 class="basket-preview__title">You've chosen:</h3>
-        <div class="basket-preview__image">
-            <img src="@controllers.CachedAssets.hashedPathFor("images/digital-pack.png")" alt="Digital Pack">
-        </div>
-
-        <div class="basket-preview__product">
-            <span class="basket-preview__product__title">
-                Digital Pack
-            </span>
-            <span class="basket-preview__product__caption">
-                (Digital Edition / Guardian App Premium Tier)
-            </span>
-            @* Default to monthly price option *@
+    <div class="basket-preview__product">
+        <span class="basket-preview__product__title">
+            Digital Pack
+        </span>
+        <span class="basket-preview__product__caption">
+            (Digital Edition / Guardian App Premium Tier)
+        </span>
+        @for(subscriptionProducts <- subscriptionProductsOpt) {
             @subscriptionProducts.find(_.frequency == BillingFrequency.Month).map { product =>
                 <span class="basket-preview__product__payment js-option-mirror-value">
                     @product.price.pretty every month
                 </span>
             }
-        </div>
+        }
+    </div>
 
+    @for(subscriptionProducts <- subscriptionProductsOpt) {
         <div class="basket-preview__toggle">
             <button class="text-button u-button-reset js-toggle" data-toggle="change-payment-frequency">
                 Change payment frequency
             </button>
         </div>
         <fieldset class="basket-preview__options is-hidden js-option-mirror-group" id="change-payment-frequency">
-            @* Default to monthly price option *@
             @subscriptionProducts.find(_.frequency == BillingFrequency.Month).map { product =>
                 @priceOption(product, "every month", isChecked=true)
             }
@@ -57,5 +55,5 @@
                 @priceOption(product, "every 12 months. Save £23.98")
             }
         </fieldset>
-    </div>
-}
+    }
+</div>

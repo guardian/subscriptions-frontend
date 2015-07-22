@@ -67,18 +67,7 @@
     margin-bottom: $gs-baseline / 4;
 }
 .basket-preview__product__title {
-    &::after {
-        content: ', ';
-        // Magic-number
-        // Align , with text
-        margin-left: -2px;
-        display: inline-block;
-    }
-
     @include mq(tablet) {
-        &::after {
-            content: '';
-        }
         font-weight: guss-font-weight(bold);
     }
 }
@@ -111,3 +100,21 @@
         margin-bottom: $gs-baseline;
     }
 }
+
+.basket-preview--products {
+    .basket-preview__product__title {
+        &::after {
+            content: ', ';
+            // Magic-number
+            // Align , with text
+            margin-left: -2px;
+            display: inline-block;
+        }
+        @include mq(tablet) {
+            &::after {
+                content: '';
+            }
+        }
+    }
+}
+
