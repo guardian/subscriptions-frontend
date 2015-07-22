@@ -7,6 +7,7 @@
     @include u-h;
 }
 
+
 .u-unstyled-list {
     margin: 0;
     padding: 0;
@@ -16,6 +17,10 @@
 .u-note {
     @include fs-textSans(3);
     color: $c-neutral2;
+}
+.u-error {
+    @include fs-data(3);
+    color: guss-colour(error);
 }
 
 .u-pad-top {
@@ -46,6 +51,10 @@
         color: $c-link-active;
         border-color: $c-link-active;
     }
+}
+.u-link[disabled] {
+    color: $c-neutral2;
+    border-bottom: none;
 }
 
 .break-tablet {
