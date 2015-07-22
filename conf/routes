@@ -17,8 +17,7 @@ GET         /healthcheck                     controllers.Healthcheck.index
 GET         /digital                         controllers.DigitalPack.uk
 GET         /us/digital                      controllers.DigitalPack.us
 GET         /au/digital                      controllers.DigitalPack.au
-GET         /digital/country                 controllers.DigitalPack.selectCountry
-POST        /digital/country                 controllers.DigitalPack.handleCountry
+GET         /digital/country                 controllers.DigitalPack.country
 
 # Checkout
 GET         /checkout                        controllers.Checkout.renderCheckout

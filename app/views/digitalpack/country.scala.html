@@ -1,4 +1,4 @@
-@()(implicit rh: RequestHeader)
+@()
 
 @main("Select your country | Digital | Subscriptions | The Guardian", bodyClasses = List("is-wide")) {
 
@@ -9,29 +9,24 @@
         @fragments.checkout.checkoutHeader("Checkout")
 
         <div class="checkout-container__sidebar">
-            @fragments.checkout.basketPreview()
+            @fragments.checkout.basketPreview(None)
         </div>
 
         <div class="checkout-container__form">
-
             <div class="country-select">
                 <h2 class="country-select__title">The Digital Pack is available throughout the world</h2>
                 <div class="country-select__content">
-                    <form class="form-panel" method="POST">
-                        @helper.CSRF.formField
-                        <div class="form-field">
-                            <label class="label" for="country">Please select your country</label>
-                            <div class="custom-select">
-                                <select name="country" id="country">
-                                    <option selected="selected" value="uk">United Kingdom</option>
-                                    <option value="row">Not the United Kingdom</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="actions">
-                            <button type="submit" class="button button--primary button--large">Continue</button>
-                        </div>
-                    </form>
+                    <h3 class="u-pad-bottom">Choose your location</h3>
+                    <div class="button-group">
+                        <a class="button button--primary button--large"
+                           href="@routes.Checkout.renderCheckout()">
+                           United Kingdom
+                        </a>
+                        <a class="button button--secondary button--large"
+                           href="https://www.guardiansubscriptions.co.uk/digitalsubscriptions/?prom=dga38&amp;CMP=FAB_3062">
+                           Rest of the world
+                        </a>
+                    </div>
                 </div>
             </div>
 
