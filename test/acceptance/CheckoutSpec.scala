@@ -13,7 +13,6 @@ class CheckoutSpec extends FeatureSpec with WebBrowser with Util with GivenWhenT
     resetDriver()
   }
 
-
   feature("Checkout page") {
     scenario("Guest user completes a checkout and sets an account password", Acceptance) {
       withQACookie {
@@ -41,12 +40,11 @@ class CheckoutSpec extends FeatureSpec with WebBrowser with Util with GivenWhenT
       }
     }
 
-    scenario("Guest user supplies invalid details", Acceptance) {
-      val checkout = new Checkout()
-
-      import checkout.PersonalDetails
-
+    scenario("Guest user supplies invalid details", Acceptance)
       withQACookie {
+        val checkout = new Checkout()
+        import checkout.PersonalDetails
+
         When("I visit the checkout page")
         go.to(checkout)
 
