@@ -54,7 +54,6 @@ class CheckoutSpec extends FeatureSpec with WebBrowser with Util with GivenWhenT
         PersonalDetails.fillIn()
         PersonalDetails.emailConfirmation.value = "non-matching-email@example.com"
 
-        Thread.sleep(1000)
         PersonalDetails.continue()
 
         Then("The email field should be marked with an error")
