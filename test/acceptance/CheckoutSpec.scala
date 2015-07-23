@@ -3,11 +3,16 @@ package acceptance
 import acceptance.pages.Checkout
 import org.openqa.selenium.WebDriver
 import org.scalatest.selenium.WebBrowser
-import org.scalatest.{FeatureSpec, GivenWhenThen}
+import org.scalatest.{BeforeAndAfter, FeatureSpec, GivenWhenThen}
+import org.specs2.mutable.BeforeAfter
 
-class CheckoutSpec extends FeatureSpec with WebBrowser with Util with GivenWhenThen{
+class CheckoutSpec extends FeatureSpec with WebBrowser with Util with GivenWhenThen with BeforeAndAfter {
 
   implicit lazy val driver: WebDriver = Config.driver
+
+  before {
+    resetDriver()
+  }
 
   feature("pre-release pages") {
     scenario("QA access to a pre-release page", Acceptance) {
