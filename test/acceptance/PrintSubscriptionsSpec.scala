@@ -32,21 +32,21 @@ class PrintSubscriptionsSpec extends FeatureSpec with Util with WebBrowser with 
   feature("Print subscriptions") {
     for (test <- testData) yield scenario(test.name, Acceptance) {
       go.to(s"$appUrl/${test.url}")
-      new SubscriptionPlan().selectSixdayPackage()
+      SubscriptionPlan.selectSixdayPackage()
       assert(pageHasText("You have chosen\nSIXDAY"), "document contains selected plan")
       assertResult(test.landingHost)(currentHost)
     }
 
     scenario("Paper + Digital subscription", Acceptance) {
       Home.selectPaperPlusDigital()
-      new SubscriptionPlan().selectSixdayPackage()
+      SubscriptionPlan.selectSixdayPackage()
       assert(pageHasText("You have chosen\nSIXDAY"), "document contains selected plan")
       assertResult("www.guardiansubscriptions.co.uk")(currentHost)
     }
 
     scenario("Paper only subscription", Acceptance) {
       Home.selectPaper()
-      new SubscriptionPlan().selectWeekendPackage()
+      SubscriptionPlan.selectWeekendPackage()
       assert(pageHasText("You have chosen\nWEEKEND"), "document contains selected plan")
       assertResult("www.guardiansubscriptions.co.uk")(currentHost)
     }
