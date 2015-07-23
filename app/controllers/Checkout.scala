@@ -5,7 +5,7 @@ import com.gu.identity.play.IdUser
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config.Identity.webAppProfileUrl
 import forms.{FinishAccountForm, SubscriptionsForm}
-import model.{GuestAccountData, SubscriptionData}
+import model.SubscriptionData
 import play.api.data.Form
 import play.api.libs.json._
 import play.api.mvc._

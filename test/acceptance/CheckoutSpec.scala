@@ -40,7 +40,7 @@ class CheckoutSpec extends FeatureSpec with WebBrowser with Util with GivenWhenT
       }
     }
 
-    scenario("Guest user supplies invalid details", Acceptance)
+    scenario("Guest user supplies invalid details", Acceptance) {
       withQACookie {
         val checkout = new Checkout()
         import checkout.PersonalDetails
@@ -58,17 +58,17 @@ class CheckoutSpec extends FeatureSpec with WebBrowser with Util with GivenWhenT
         assert(PersonalDetails.emailNotValid(), "email confirmation should not be valid")
       }
     }
+  }
 
-    scenario("ordinary access to a pre-release page", Acceptance) {
-      val checkout = new Checkout
+  scenario("unauthorised access to a pre-release page", Acceptance) {
+    val checkout = new Checkout
 
-      Given("No QA cookie is set")
+    Given("No QA cookie is set")
 
-      When("I visit the checkout page ")
-      go.to(checkout)
+    When("I visit the checkout page ")
+    go.to(checkout)
 
-      Then("I should land on the Google Auth page")
-      assertResult("accounts.google.com")(currentHost)
-    }
+    Then("I should land on the Google Auth page")
+    assertResult("accounts.google.com")(currentHost)
   }
 }
