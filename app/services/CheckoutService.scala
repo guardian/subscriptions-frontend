@@ -13,7 +13,12 @@ object CheckoutService {
   case class CheckoutResult(salesforceMember: MemberId, userIdData: UserIdData, zuoraResult: SubscribeResult)
 }
 
-class CheckoutService(identityService: IdentityService, salesforceService: SalesforceService, zuoraService: ZuoraService) extends LazyLogging {
+class CheckoutService(
+    identityService: IdentityService,
+    salesforceService: SalesforceService,
+    zuoraService: ZuoraService,
+    exactTargetService: ExactTargetService
+    ) extends LazyLogging {
   import CheckoutService.CheckoutResult
 
   def processSubscription(subscriptionData: SubscriptionData,
@@ -29,6 +34,9 @@ class CheckoutService(identityService: IdentityService, salesforceService: Sales
       }
     }
 
+    def sendETDataExtensionRow(subscribeResult: SubscribeResult): Future[Unit] =
+      exactTargetService.sendETDataExtensionRow(subscribeResult, subscriptionData, zuoraService)
+
     val userOrElseRegisterGuest: Future[UserIdData] =
       idUserOpt.map(user => Future {
         RegisteredUser(user)
@@ -37,14 +45,15 @@ class CheckoutService(identityService: IdentityService, salesforceService: Sales
         identityService.registerGuest(subscriptionData.personalData)
       }
 
-
-
     for {
       userData <- userOrElseRegisterGuest
       memberId <- salesforceService.createOrUpdateUser(subscriptionData.personalData, userData.id)
       subscribeResult <- zuoraService.createSubscription(memberId, subscriptionData)
     } yield {
       updateAuthenticatedUserDetails(subscriptionData.personalData)
+      sendETDataExtensionRow(subscribeResult) onFailure { case e: Throwable =>
+        logger.error(s"Error while sending an email during subscription $subscribeResult", e)
+      }
       CheckoutResult(memberId, userData, subscribeResult)
     }
   }

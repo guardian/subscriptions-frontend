@@ -8,8 +8,7 @@ import com.gu.membership.zuora.soap.{Login, ZuoraApi, ZuoraServiceError}
 import com.gu.monitoring.ZuoraMetrics
 import configuration.Config
 import model.SubscriptionData
-import model.zuora.{BillingFrequency, SubscriptionProduct, DigitalProductPlan}
-import org.joda.time.Period
+import model.zuora.{BillingFrequency, DigitalProductPlan, SubscriptionProduct}
 import services.zuora.Subscribe
 import utils.ScheduledTask
 
@@ -18,9 +17,15 @@ import scala.concurrent.Future
 import scala.concurrent.duration._
 
 trait ZuoraService {
+  def subscriptionByName(id: String): Future[Subscription]
+  def paymentMethodById(id: String): Future[PaymentMethod]
   def createSubscription(memberId: MemberId, data: SubscriptionData): Future[SubscribeResult]
   def authTask: ScheduledTask[Authentication]
   def products: Seq[SubscriptionProduct]
+  def ratePlans(subscription: Subscription): Future[Seq[RatePlan]]
+  def defaultPaymentMethod(account: Account): Future[PaymentMethod]
+  def account(subscription: Subscription): Future[Account]
+  def normalRatePlanCharge(subscription: Subscription): Future[RatePlanCharge]
 }
 
 class ZuoraApiClient(zuoraApiConfig: ZuoraApiConfig, digitalProductPlan: DigitalProductPlan) extends ZuoraApi with ZuoraService {
@@ -40,13 +45,48 @@ class ZuoraApiClient(zuoraApiConfig: ZuoraApiConfig, digitalProductPlan: Digital
     authF
   }
 
-
   val productsTask = ScheduledTask[Seq[SubscriptionProduct]]("Loading rate plans", Nil, 0.seconds,
-    Config.Zuora.productsTaskIntervalSeconds.seconds)(getProducts())
+    Config.Zuora.productsTaskIntervalSeconds.seconds)(getProducts)
+
+  override def subscriptionByName(id: String): Future[Subscription] = queryOne[Subscription](s"Name='$id'")
+
+  override def paymentMethodById(id: String): Future[PaymentMethod] = queryOne[PaymentMethod](s"Id='$id'")
+
+  override def ratePlans(subscription: Subscription): Future[Seq[RatePlan]] =
+    query[RatePlan](s"SubscriptionId='${subscription.id}'")
+
+  private def normalRatePlanCharges(ratePlan: RatePlan): Future[Seq[RatePlanCharge]] = {
+    val constraints = Seq(
+      "RatePlanId" -> ratePlan.id,
+      "ChargeModel" -> "Flat Fee Pricing",
+      "ChargeType" -> "Recurring"
+    ).map { case (k, v) => s"$k='$v'"}.mkString(" AND ")
+
+    query[RatePlanCharge](constraints)
+  }
+
+  override def defaultPaymentMethod(account: Account): Future[PaymentMethod] = {
+    val paymentMethodId = account.defaultPaymentMethodId.getOrElse {
+      throw new ZuoraServiceError(s"Could not find an account default payment method for $account")
+    }
+    queryOne[PaymentMethod](s"Id='$paymentMethodId'")
+  }
+
+  override def account(subscription: Subscription): Future[Account] =
+    queryOne[Account](s"Id='${subscription.accountId}'")
+
+  override def normalRatePlanCharge(subscription: Subscription): Future[RatePlanCharge] =
+    for {
+      pr <- ratePlans(subscription)
+      rpcs <- Future.sequence { pr.map(normalRatePlanCharges) }.map(_.flatten)
+    } yield rpcs.headOption.getOrElse {
+      throw new ZuoraServiceError(s"Cannot find default subscription rate plan charge for $subscription")
+    }
+
 
   def products = productsTask.get()
 
-  private def getProducts(): Future[Seq[SubscriptionProduct]] = {
+  private def getProducts: Future[Seq[SubscriptionProduct]] = {
 
     def productRatePlans: Future[Seq[ProductRatePlan]] =
       query[ProductRatePlan](s"ProductId='${digitalProductPlan.id}'")

@@ -5,7 +5,7 @@ import com.gu.identity.play.IdUser
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config.Identity.webAppProfileUrl
 import forms.{FinishAccountForm, SubscriptionsForm}
-import model.{GuestAccountData, SubscriptionData}
+import model.SubscriptionData
 import play.api.data.Form
 import play.api.libs.json._
 import play.api.mvc._
@@ -18,7 +18,8 @@ import scala.concurrent.Future
 
 object Checkout extends Controller with LazyLogging {
   private val zuoraService = TouchpointBackend.Normal.zuoraService
-  private lazy val checkoutService = new CheckoutService(IdentityService, SalesforceService, zuoraService)
+  private val exactTargetService = ExactTargetService
+  private lazy val checkoutService = new CheckoutService(IdentityService, SalesforceService, zuoraService, exactTargetService)
   private val goCardlessService = GoCardlessService
 
   def identityCookieOpt(implicit request: Request[_]): Option[Cookie] =
@@ -33,7 +34,6 @@ object Checkout extends Controller with LazyLogging {
         SubscriptionsForm()
       }
       //TODO when implementing test-users this requires updating to supply data to correct location
-      val touchpointBackend = TouchpointBackend.Normal
       Ok(views.html.checkout.payment(form, userIsSignedIn = idUserOpt.isDefined, zuoraService.products))
     }
   }
@@ -44,7 +44,6 @@ object Checkout extends Controller with LazyLogging {
         getIdentityUserByCookie.map { idUserOpt =>
           logger.error(s"Backend form validation failed. Please make sure that the front-end and the backend validations are in sync (validation errors: ${formWithErrors.errors}})")
           //TODO when implementing test-users this requires updating to supply data to correct location
-          val touchpointBackend = TouchpointBackend.Normal
           BadRequest(view.payment(formWithErrors, userIsSignedIn = idUserOpt.isDefined, zuoraService.products))
         },
       formData => {
