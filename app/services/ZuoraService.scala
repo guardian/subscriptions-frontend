@@ -4,6 +4,7 @@ import com.gu.membership.salesforce.MemberId
 import com.gu.membership.zuora.ZuoraApiConfig
 import com.gu.membership.zuora.soap.Zuora._
 import com.gu.membership.zuora.soap.ZuoraDeserializer._
+import com.gu.membership.zuora.soap.ZuoraReaders.ZuoraQueryReader
 import com.gu.membership.zuora.soap.{Login, ZuoraApi, ZuoraServiceError}
 import com.gu.monitoring.ZuoraMetrics
 import configuration.Config
@@ -16,9 +17,26 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
+sealed trait ZuoraFilter {
+  def toFilterString: String
+}
+
+case class SimpleFilter(key: String, value: String) extends ZuoraFilter {
+  override def toFilterString = s"$key='$value'"
+}
+
+case class AndFilter(clauses: (String, String)*) extends ZuoraFilter {
+  override def toFilterString =
+    clauses.map(p => SimpleFilter.tupled(p).toFilterString).mkString(" AND ")
+}
+
+case class OrFilter(clauses: (String, String)*) extends ZuoraFilter {
+  override def toFilterString =
+    clauses.map(p => SimpleFilter.tupled(p).toFilterString).mkString(" OR ")
+}
+
 trait ZuoraService {
   def subscriptionByName(id: String): Future[Subscription]
-  def paymentMethodById(id: String): Future[PaymentMethod]
   def createSubscription(memberId: MemberId, data: SubscriptionData): Future[SubscribeResult]
   def authTask: ScheduledTask[Authentication]
   def products: Seq[SubscriptionProduct]
@@ -48,32 +66,35 @@ class ZuoraApiClient(zuoraApiConfig: ZuoraApiConfig, digitalProductPlan: Digital
   val productsTask = ScheduledTask[Seq[SubscriptionProduct]]("Loading rate plans", Nil, 0.seconds,
     Config.Zuora.productsTaskIntervalSeconds.seconds)(getProducts)
 
-  override def subscriptionByName(id: String): Future[Subscription] = queryOne[Subscription](s"Name='$id'")
+  private def query[T <: ZuoraQuery](where: ZuoraFilter)(implicit reader: ZuoraQueryReader[T]): Future[Seq[T]] =
+    query(where.toFilterString)(reader)
 
-  override def paymentMethodById(id: String): Future[PaymentMethod] = queryOne[PaymentMethod](s"Id='$id'")
+  private def queryOne[T <: ZuoraQuery](where: ZuoraFilter)(implicit reader: ZuoraQueryReader[T]): Future[T] =
+    queryOne(where.toFilterString)(reader)
+
+  override def subscriptionByName(id: String): Future[Subscription] =
+    queryOne[Subscription](SimpleFilter("Name", id))
 
   override def ratePlans(subscription: Subscription): Future[Seq[RatePlan]] =
-    query[RatePlan](s"SubscriptionId='${subscription.id}'")
+    query[RatePlan](SimpleFilter("SubscriptionId", subscription.id))
 
   private def normalRatePlanCharges(ratePlan: RatePlan): Future[Seq[RatePlanCharge]] = {
-    val constraints = Seq(
+    query[RatePlanCharge](AndFilter(
       "RatePlanId" -> ratePlan.id,
       "ChargeModel" -> "Flat Fee Pricing",
       "ChargeType" -> "Recurring"
-    ).map { case (k, v) => s"$k='$v'"}.mkString(" AND ")
-
-    query[RatePlanCharge](constraints)
+    ))
   }
 
   override def defaultPaymentMethod(account: Account): Future[PaymentMethod] = {
     val paymentMethodId = account.defaultPaymentMethodId.getOrElse {
       throw new ZuoraServiceError(s"Could not find an account default payment method for $account")
     }
-    queryOne[PaymentMethod](s"Id='$paymentMethodId'")
+    queryOne[PaymentMethod](SimpleFilter("Id", paymentMethodId))
   }
 
   override def account(subscription: Subscription): Future[Account] =
-    queryOne[Account](s"Id='${subscription.accountId}'")
+    queryOne[Account](SimpleFilter("Id", subscription.accountId))
 
   override def normalRatePlanCharge(subscription: Subscription): Future[RatePlanCharge] =
     for {
@@ -89,17 +110,16 @@ class ZuoraApiClient(zuoraApiConfig: ZuoraApiConfig, digitalProductPlan: Digital
   private def getProducts: Future[Seq[SubscriptionProduct]] = {
 
     def productRatePlans: Future[Seq[ProductRatePlan]] =
-      query[ProductRatePlan](s"ProductId='${digitalProductPlan.id}'")
-
+      query[ProductRatePlan](SimpleFilter("ProductId", digitalProductPlan.id))
 
     def productRatePlanCharges(productRatePlans: Seq[ProductRatePlan]): Future[Seq[ProductRatePlanCharge]] = {
-      val queryString = productRatePlans.map(p => s"ProductRatePlanId='${p.id}'").mkString(" OR ")
-      query[ProductRatePlanCharge](queryString)
+      val clauses = productRatePlans.map(p => "ProductRatePlanId" -> p.id)
+      query[ProductRatePlanCharge](OrFilter(clauses: _*))
     }
 
     def productRatePlanChargeTiers(productRatePlanCharges: Seq[ProductRatePlanCharge]): Future[Seq[ProductRatePlanChargeTier]] = {
-      val queryString = productRatePlanCharges.map(p => s"ProductRatePlanChargeId='${p.id}'").mkString(" OR ")
-      query[ProductRatePlanChargeTier](queryString)
+      val clauses = productRatePlanCharges.map(p => "ProductRatePlanChargeId" -> p.id)
+      query[ProductRatePlanChargeTier](OrFilter(clauses: _*))
     }
 
     for {
