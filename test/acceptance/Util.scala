@@ -9,6 +9,8 @@ import org.scalatest.selenium.WebBrowser
 import acceptance.Config.appUrl
 import configuration.QA.{passthroughCookie => qaCookie}
 
+import scala.util.Try
+
 trait Util { this: WebBrowser =>
   implicit val driver: WebDriver
 
@@ -28,10 +30,17 @@ trait Util { this: WebBrowser =>
     driver.manage().timeouts().implicitlyWait(60, TimeUnit.SECONDS)
   }
 
-  protected def currentHost: String = new URL(currentUrl).getHost
-
   protected def pageHasText(text: String, timeoutSecs: Int=50): Boolean = {
     val pred = ExpectedConditions.textToBePresentInElementLocated(By.tagName("body"), text)
     new WebDriverWait(driver, timeoutSecs).until(pred)
   }
+
+  protected def pageHasElement(q: Query, timeoutSecs: Int=50): Boolean = {
+    val pred = ExpectedConditions.presenceOfElementLocated(q.by)
+    Try {
+      new WebDriverWait(driver, timeoutSecs).until(pred)
+    }.isSuccess
+  }
+
+  protected def currentHost: String = new URL(currentUrl).getHost
 }

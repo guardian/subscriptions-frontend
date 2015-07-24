@@ -5,7 +5,7 @@ import com.gu.identity.play.IdUser
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config.Identity.webAppProfileUrl
 import forms.{FinishAccountForm, SubscriptionsForm}
-import model.{GuestAccountData, SubscriptionData}
+import model.SubscriptionData
 import play.api.data.Form
 import play.api.libs.json._
 import play.api.mvc._
@@ -80,7 +80,7 @@ object Checkout extends Controller with LazyLogging {
     })
   }
 
-  def checkIdentity(email: String) = GoogleAuthenticatedStaffAction.async { implicit request =>
+  def checkIdentity(email: String) = CachedAction.async { implicit request =>
     for {
       doesUserExist <- IdentityService.doesUserExist(email)
     } yield Ok(Json.obj("emailInUse" -> doesUserExist))
