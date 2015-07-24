@@ -24,7 +24,7 @@ class Checkout(implicit val driver: WebDriver) extends Page with WebBrowser with
 
 
     def fillIn(): Unit = {
-      val emailValue = s"test-${System.currentTimeMillis()}@example.com"
+      val emailValue = s"test-${System.currentTimeMillis()}@gu.com"
       firstName.value = "first"
       lastName.value = "last"
       email.value = emailValue
