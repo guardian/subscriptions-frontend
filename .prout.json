@@ -1,5 +1,15 @@
 {
-  "checkpoints": {
-    "PROD": { "url": "https://subscribe.theguardian.com/", "overdue": "14M" }
-  }
+    "checkpoints": {
+        "PROD": {
+            "url": "https://subscribe.theguardian.com/",
+            "overdue": "14M",
+            "afterSeen": {
+                "travis": {
+                    "config": {
+                        "script": "sbt ++$TRAVIS_SCALA_VERSION acceptance-test && find $HOME/.sbt -name \"*.lock\" -type f -delete && find $HOME/.ivy2/cache -name \"*[\[\]\(\)]*.properties\" -type f -delete"
+                    }
+                }
+            }
+        }
+    }
 }
