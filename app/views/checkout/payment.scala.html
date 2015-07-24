@@ -101,22 +101,7 @@
                             <input type="text" class="input-text js-input input-text input-text--small" id="address-postcode" name="personal.address.postcode" value="@form.data.get("personal.address.postcode")">
                             @fragments.forms.errorMessage("Please enter a valid postal code")
                         </div>
-                        <div class="form-field">
-                            <label class="option" for="receive-gnm-marketing">
-                            @defining(form.data.get("personal.receiveGnmMarketing")) { gnmMarketingOpt =>
-                                <span class="option__input">
-                                    <input type="checkbox"
-                                        name="personal.receiveGnmMarketing"
-                                        id="receive-gnm-marketing"
-                                        @if(gnmMarketingOpt.contains("on")) { checked="checked" }
-                                        >
-                                </span>
-                            }
-                                <span class="option__label">
-                                    I'd like to be kept up to to date by email with offers and developments from Guardian News &amp; Media Limited
-                                </span>
-                            </label>
-                        </div>
+
                         <div class="actions">
                             <button class="button button--primary button--large js-checkout-your-details-submit">Continue</button>
                         </div>
@@ -190,7 +175,7 @@
                         </legend>
                     </div>
                     <div class="fieldset__fields">
-                        @fragments.checkout.reviewDetails()
+                        @fragments.checkout.reviewDetails(form)
                     </div>
                 </fieldset>
 
