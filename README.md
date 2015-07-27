@@ -1,18 +1,17 @@
 # Subscriptions frontend
 
 ## General Setup
+
 1. Go to project root
-2. Run `./setup.sh` to install project-specific client-side dependencies.
-3. Add the following to your `/etc/hosts`
+1. Run `./setup.sh` to install project-specific client-side dependencies.
+1. Add the following to your hosts file in `/etc/hosts`
 
    ```
    127.0.0.1   sub.thegulocal.com
    ```
 
-4. Run `./nginx/setup.sh`
-5. Setup AWS credentials (we use the gu-membership account)
-
-   Ask your teammate to create an account for you and securely send you the access key. For security, you must enable [MFA](http://aws.amazon.com/iam/details/mfa/).
+1. Run `./nginx/setup.sh`
+1. Setup AWS credentials (we use the gu-membership account). Ask your teammate to create an account for you and securely send you the access key. For security, you must enable [MFA](http://aws.amazon.com/iam/details/mfa/).
 
    In `~/.aws/credentials` add the following:
 
@@ -30,13 +29,13 @@
    region = eu-west-1
    ```
 
-6. Download our private keys from the `subscriptions-private` S3 bucket. If you have the AWS CLI set up you can run:
+1. Download our private keys from the `subscriptions-private` S3 bucket. If you have the AWS CLI set up you can run:
 
     ```
     aws s3 cp s3://subscriptions-private/DEV/subscriptions-frontend.conf /etc/gu
     ```
 
-7. Run ``` sbt devrun ``` and navigate to ```sub.thegulocal.com```
+1. Run ``` sbt devrun ``` and navigate to ```sub.thegulocal.com```
 
 ## Client-side Development
 
