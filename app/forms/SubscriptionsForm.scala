@@ -24,6 +24,7 @@ object SubscriptionsForm {
 
   private val nameMaxLength = 50
   private val addressMaxLength = 255
+  private val emailMaxLength = 240
 
   val addressDataMapping = mapping(
     "address1" -> text(0, addressMaxLength),
@@ -33,7 +34,7 @@ object SubscriptionsForm {
   )(AddressData.apply)(AddressData.unapply)
 
   val emailMapping = tuple(
-    "email" -> email,
+    "email" -> email.verifying("This email is too long", _.length < emailMaxLength + 1),
     "confirm" -> email)
     .verifying("Emails don't match", email => email._1 == email._2)
     .transform[String](

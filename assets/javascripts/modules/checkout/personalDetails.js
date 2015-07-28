@@ -16,6 +16,7 @@ define([
     var HIDDEN_CLASS = 'is-hidden';
 
     var MAX_NAME_LENGTH = 50;
+    var MAX_EMAIL_LENGTH = 240;
     var MAX_ADDRESS_LENGTH = 255;
 
     var ERROR_MESSAGES = {
@@ -35,6 +36,7 @@ define([
 
     var firstNameField = new TextField(formEls.$FIRST_NAME_CONTAINER, MAX_NAME_LENGTH);
     var lastNameField = new TextField(formEls.$LAST_NAME_CONTAINER, MAX_NAME_LENGTH);
+    var emailField = new TextField(formEls.$EMAIL_CONTAINER, MAX_EMAIL_LENGTH);
     var address1Field = new TextField(formEls.$ADDRESS1_CONTAINER, MAX_ADDRESS_LENGTH);
     var address2Field = new TextField(formEls.$ADDRESS2_CONTAINER, MAX_ADDRESS_LENGTH);
     var address3Field = new TextField(formEls.$ADDRESS3_CONTAINER, MAX_ADDRESS_LENGTH);
@@ -51,6 +53,7 @@ define([
     var lengthCheckedFields = [
         firstNameField,
         lastNameField,
+        emailField,
         address1Field,
         address2Field,
         address3Field,
@@ -73,10 +76,6 @@ define([
             }
         });
 
-        validity.fieldsTooLong.forEach(function(field) {
-            addError(field, ERROR_MESSAGES.FIELD_TOO_LONG);
-        });
-
         toggleError(formEls.$EMAIL_CONTAINER, !validity.hasValidEmail);
         toggleError(formEls.$CONFIRM_EMAIL_CONTAINER, validity.hasValidEmail && !validity.hasConfirmedEmail);
         toggleError(formEls.$EMAIL_CONTAINER, validity.isEmailInUse);
@@ -85,6 +84,10 @@ define([
             formEls.$EMAIL_ERROR.text(validity.emailMessage);
             toggleError(formEls.$EMAIL_CONTAINER, true);
         }
+
+        validity.fieldsTooLong.forEach(function(field) {
+            addError(field, ERROR_MESSAGES.FIELD_TOO_LONG);
+        });
     }
 
     function nextStep() {
