@@ -1,4 +1,4 @@
-@()
+@(form: Form[model.SubscriptionData])
 
 @import configuration.Links
 
@@ -25,16 +25,38 @@
         </div>
     </div>
     <div class="review-details__actions">
-        <p><input type="submit" class="button button--primary button--large" value="Submit payment" /></p>
+        <p class="u-note">Your subscription includes a range of exclusive benefits. From time to time we’ll send you details. These may include special offers from partners, but will be sent to you from Guardian subscriptions.</p>
+
+        <label class="option u-pad-bottom" for="receive-gnm-marketing">
+        @defining(form.data.get("personal.receiveGnmMarketing")) { gnmMarketingOpt =>
+            <span class="option__input">
+                <input type="checkbox"
+                    name="personal.receiveGnmMarketing"
+                    id="receive-gnm-marketing"
+                    @if(gnmMarketingOpt.contains("on")) { checked="checked" }
+                    >
+            </span>
+        }
+            <span class="option__label">
+                Guardian News &amp; Media would also like your permission to contact you about other services.
+            </span>
+        </label>
+
+        <input type="submit" class="button button--primary button--large u-margin-bottom" value="Submit payment">
 
         <p class="u-note">
             By proceeding you agree to the Guardian's
             <a href="@Links.termsOfService.href" target="_blank">@Links.termsOfService.title</a> and
             <a href="@Links.privacyPolicy.href" target="_blank">@Links.privacyPolicy.title</a>
         </p>
+
         <p class="u-note">
             <strong>GC re: Guardian Media Group</strong> will appear on your bank statement.
-            <button class="u-button-reset u-link js-mandate-pdf">View your Direct Debit instruction</button>
+            <button class="u-button-reset u-link js-mandate-pdf"
+                    data-loading-message="Generating your Direct Debit instruction"
+                    data-error-message="There was a problem generating your Direct Debit instruction, please try again">
+                View your Direct Debit instruction
+            </button>
         </p>
 
     </div>
