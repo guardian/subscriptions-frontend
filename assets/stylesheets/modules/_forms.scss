@@ -78,11 +78,13 @@ fieldset {
     }
 }
 .fieldset__edit {
+    @include fs-textSans(1);
     position: absolute;
     top: $gs-baseline;
     right: $gs-gutter;
     text-transform: lowercase;
-    @include fs-textSans(1);
+
+    display: none;
 }
 
 .fieldset--single {
@@ -98,6 +100,11 @@ fieldset {
     }
 }
 
+.fieldset--complete {
+    .fieldset__edit {
+        display: block;
+    }
+}
 .fieldset--collapsed {
     .fieldset__note,
     .fieldset__fields {
