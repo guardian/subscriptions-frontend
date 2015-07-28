@@ -1,80 +1,110 @@
 package controllers
 
 import actions.CommonActions._
-import model.ShippingDetails
+import model.Subscriptions._
 import play.api.mvc._
 
 object Shipping extends Controller {
 
-  def index(request: Request[AnyContent], shippingDetails: ShippingDetails) =
-    request.body.asFormUrlEncoded
-      .flatMap(_.get("package").map(_.head))
-      .map(_.split("-").last)
-      .collect {
-        case "everyday" => shippingDetails.everyday
-        case "sixday" => shippingDetails.sixday
-        case "weekend" => shippingDetails.weekend
-        case "sunday" => shippingDetails.sunday
-      }
-      .flatten
-      .map(Redirect(_))
-      .getOrElse(Ok(views.html.shipping.index(shippingDetails)(request)))
+  def index(subscriptionCollection: SubscriptionProduct) = {
+    Ok(views.html.shipping.shipping(subscriptionCollection))
+  }
 
-  val collectionPaperDigital: Request[AnyContent] => Result = request =>
-    index(request, ShippingDetails(
-      name = "Paper + digital voucher subscription",
-      method = "collection",
+  def viewCollectionPaperDigital() = CachedAction {
+    index(CollectionSubscriptionProduct(
+      title = "Paper + digital voucher subscription",
+      description = "Save money on your newspapers and digital content. Plus start using the daily edition and premium live news app immediately.",
       packageType = "paper-digital",
-      everyday = Some("https://www.guardiansubscriptions.co.uk/Voucher?prom=faa03&pkgcode=ukx01&title=gv7&skip=1"),
-      sixday = Some("https://www.guardiansubscriptions.co.uk/Voucher?prom=faa03&pkgcode=ukx01&title=gv6&skip=1"),
-      weekend = Some("https://www.guardiansubscriptions.co.uk/Voucher?prom=faa03&pkgcode=ukx01&title=gv2&skip=1"),
-      sunday = Some("https://www.guardiansubscriptions.co.uk/Voucher?prom=faa03&pkgcode=ukx01&title=ov1&skip=1")
+      options = Seq(
+        SubscriptionOption("everyday",
+          "Everyday+", 10.99f, Some("54%"), 47.62f, "Guardian and Observer papers, plus tablet editions and Premium mobile access",
+          "https://www.guardiansubscriptions.co.uk/Voucher?prom=faa03&pkgcode=ukx01&title=gv7&skip=1"
+        ),
+        SubscriptionOption("sixday",
+          "Sixday+", 9.99f, Some("53%"), 43.29f, "Guardian papers, plus tablet editions and Premium mobile access",
+          "https://www.guardiansubscriptions.co.uk/Voucher?prom=faa03&pkgcode=ukx01&title=gv6&skip=1"
+        ),
+        SubscriptionOption("weekend",
+          "Weekend+", 5.99f, Some("60%"), 25.96f, "Saturday Guardian and Observer papers, plus tablet editions and Premium mobile access",
+          "https://www.guardiansubscriptions.co.uk/Voucher?prom=faa03&pkgcode=ukx01&title=gv2&skip=1"
+        ),
+        SubscriptionOption("sunday",
+          "Sunday+", 4.99f, Some("60%"), 21.62f, "Observer paper, plus tablet editions and Premium mobile access",
+          "https://www.guardiansubscriptions.co.uk/Voucher?prom=faa03&pkgcode=ukx01&title=ov1&skip=1"
+        )
+      )
     ))
+  }
 
-  val collectionPaper: Request[AnyContent] => Result = request =>
-    index(request, ShippingDetails(
-      name = "Paper voucher subscription",
-      method = "collection",
+  def viewCollectionPaper() = CachedAction {
+    index(CollectionSubscriptionProduct(
+      title = "Paper voucher subscription",
+      description = "Save money on your newspapers.",
       packageType = "paper",
-      everyday = Some("https://www.guardiansubscriptions.co.uk/Voucher?prom=faa03&pkgcode=ukx00&title=gv7&skip=1"),
-      sixday = Some("https://www.guardiansubscriptions.co.uk/Voucher?prom=faa03&pkgcode=ukx00&title=gv6&skip=1"),
-      weekend = Some("https://www.guardiansubscriptions.co.uk/Voucher?prom=faa03&pkgcode=ukx00&title=gv2&skip=1")
+      options = Seq(
+        SubscriptionOption("everyday",
+          "Everyday", 9.99f, Some("32%"), 43.29f, "Guardian and Observer papers",
+          "https://www.guardiansubscriptions.co.uk/Voucher?prom=faa03&pkgcode=ukx00&title=gv7&skip=1"
+        ),
+        SubscriptionOption("sixday",
+          "Sixday", 8.49f, Some("27%"), 36.79f, "Guardian papers",
+          "https://www.guardiansubscriptions.co.uk/Voucher?prom=faa03&pkgcode=ukx00&title=gv6&skip=1"
+        ),
+        SubscriptionOption("weekend",
+          "Weekend", 4.49f, Some("20%"), 19.46f, "Saturday Guardian and Observer papers",
+          "https://www.guardiansubscriptions.co.uk/Voucher?prom=faa03&pkgcode=ukx00&title=gv2&skip=1"
+        )
+      )
     ))
+  }
 
-  val deliveryPaperDigital: Request[AnyContent] => Result = request =>
-    index(request, ShippingDetails(
-      name = "Paper + digital home delivery subscription",
-      method = "delivery",
+  def viewDeliveryPaperDigital() = CachedAction {
+    index(DeliverySubscriptionProduct(
+      title = "Paper + digital home delivery subscription",
+      description = """|If you live within the M25 you can have your papers delivered by 7am Monday - Saturday and 8.30am on Sunday.
+        |Plus you can start using the daily edition and premium live news app immediately.""".stripMargin,
       packageType = "paper-digital",
-      everyday = Some("https://www.guardiandirectsubs.co.uk/Delivery/details.aspx?package=EVERYDAY%2B"),
-      sixday = Some("https://www.guardiandirectsubs.co.uk/Delivery/details.aspx?package=SIXDAY%2B"),
-      weekend = Some("https://www.guardiandirectsubs.co.uk/Delivery/details.aspx?package=WEEKEND%2B"),
-      sunday = Some("https://www.guardiandirectsubs.co.uk/Delivery/details.aspx?package=SUNDAY%2B")
+      options = Seq(
+        SubscriptionOption("everyday",
+          "Everyday+", 14.99f, None, 64.96f, "Guardian and Observer papers, plus tablet editions and Premium mobile access",
+          "https://www.guardiandirectsubs.co.uk/Delivery/details.aspx?package=EVERYDAY%2B"
+        ),
+        SubscriptionOption("sixday",
+          "Sixday+", 12.99f, None, 56.29f, "Guardian papers, plus tablet editions and Premium mobile access",
+          "https://www.guardiandirectsubs.co.uk/Delivery/details.aspx?package=SIXDAY%2B"
+        ),
+        SubscriptionOption("weekend",
+          "Weekend+", 7.99f, None, 34.62f, "Saturday Guardian and Observer papers, plus tablet editions and Premium mobile access",
+          "https://www.guardiandirectsubs.co.uk/Delivery/details.aspx?package=WEEKEND%2B"
+        ),
+        SubscriptionOption("sunday",
+          "Sunday+", 5.99f, None, 25.96f, "Observer paper, plus tablet editions and Premium mobile access",
+          "https://www.guardiandirectsubs.co.uk/Delivery/details.aspx?package=SUNDAY%2B"
+        )
+      )
     ))
+  }
 
-  val deliveryPaper: Request[AnyContent] => Result = request =>
-    index(request, ShippingDetails(
-      name = "Paper home delivery subscription",
-      method = "delivery",
+  def viewDeliveryPaper() = CachedAction {
+    index(DeliverySubscriptionProduct(
+      title = "Paper home delivery subscription",
+      description = "If you live within the M25 you can have your papers delivered by 7am Monday - Saturday and 8.30 on Sunday.",
       packageType = "paper",
-      everyday = Some("https://www.guardiandirectsubs.co.uk/Delivery/details.aspx?package=EVERYDAY"),
-      sixday = Some("https://www.guardiandirectsubs.co.uk/Delivery/details.aspx?package=SIXDAY"),
-      weekend = Some("https://www.guardiandirectsubs.co.uk/Delivery/details.aspx?package=WEEKEND")
+      options = Seq(
+        SubscriptionOption("everyday",
+          "Everyday", 13.99f, None, 60.62f, "Guardian and Observer papers",
+          "https://www.guardiandirectsubs.co.uk/Delivery/details.aspx?package=EVERYDAY"
+        ),
+        SubscriptionOption("sixday",
+          "Sixday", 11.49f, None, 49.79f, "Guardian papers",
+          "https://www.guardiandirectsubs.co.uk/Delivery/details.aspx?package=SIXDAY"
+        ),
+        SubscriptionOption("weekend",
+          "Weekend", 6.49f, None, 28.12f, "Saturday Guardian and Observer papers",
+          "https://www.guardiandirectsubs.co.uk/Delivery/details.aspx?package=WEEKEND"
+        )
+      )
     ))
+  }
 
-  def viewCollectionPaperDigital() = NoCacheAction(collectionPaperDigital)
-
-  def buyCollectionPaperDigital() = NoCacheAction(collectionPaperDigital)
-
-  def viewCollectionPaper() = NoCacheAction(collectionPaper)
-
-  def buyCollectionPaper() = NoCacheAction(collectionPaper)
-
-  def viewDeliveryPaperDigital() = NoCacheAction(deliveryPaperDigital)
-
-  def buyDeliveryPaperDigital() = NoCacheAction(deliveryPaperDigital)
-
-  def viewDeliveryPaper() = NoCacheAction(deliveryPaper)
-
-  def buyDeliveryPaper() = NoCacheAction(deliveryPaper)
 }

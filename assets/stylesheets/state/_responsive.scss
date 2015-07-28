@@ -28,7 +28,8 @@
     }
 }
 
-.mobile-only {
+.mobile-only,
+.u-display-only-mobile {
     @include mq(tablet) {
         display: none !important;
     }
