@@ -70,7 +70,7 @@ object SubscriptionDataExtensionRow {
 }
 
 trait DataExtensionRow {
-  def fields: Seq[(DataExtensionColumn, String)]
+  def fields: Seq[(String, String)]
 }
 
 case class SubscriptionDataExtensionRow(fields: (String, String)*) extends DataExtensionRow
