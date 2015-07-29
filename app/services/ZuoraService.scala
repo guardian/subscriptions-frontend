@@ -41,8 +41,7 @@ class ZuoraApiClient(zuoraApiConfig: ZuoraApiConfig, digitalProductPlan: Digital
   }
 
 
-  val productsTask = ScheduledTask[Seq[SubscriptionProduct]]("Loading rate plans", Nil, 0.seconds,
-    Config.Zuora.productsTaskIntervalSeconds.seconds)(getProducts())
+  val productsTask = ScheduledTask[Seq[SubscriptionProduct]]("Loading rate plans", Nil, 0.seconds, 2.hours)(getProducts())
 
   def products = productsTask.get()
 

@@ -56,7 +56,6 @@ object Config {
     private val stageConfig = config.getConfig("touchpoint.backend.environments").getConfig(stage)
 
     val paymentDelay = stageConfig.getInt("zuora.paymentDelayInDays").days
-    val productsTaskIntervalSeconds = stageConfig.getInt("zuora.productsTaskIntervalSeconds")
   }
 
   val subscriptionsUrl = config.getString("subscriptions.url")
