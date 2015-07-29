@@ -27,7 +27,9 @@ object SubscriptionDataExtensionRow {
     val paymentData = subscriptionData.paymentData
 
     SubscriptionDataExtensionRow(
+      subscription.id,
       "SubscriberKey" -> subscription.name,
+      "SubscriptionId" -> subscription.id,
       "EmailAddress" -> personalData.email,
       "Subscription term" -> billingPeriod,
       "Payment amount" -> ratePlanCharge.price.toString,
@@ -70,7 +72,7 @@ object SubscriptionDataExtensionRow {
 }
 
 trait DataExtensionRow {
-  def fields: Seq[(DataExtensionColumn, String)]
+  def fields: Seq[(String, String)]
 }
 
-case class SubscriptionDataExtensionRow(fields: (String, String)*) extends DataExtensionRow
+case class SubscriptionDataExtensionRow(subscriptionId: String, fields: (String, String)*) extends DataExtensionRow

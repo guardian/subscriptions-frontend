@@ -1,6 +1,5 @@
 package configuration
 
-import com.exacttarget.fuelsdk.{ETClient, ETConfiguration}
 import com.github.nscala_time.time.Imports._
 import com.gocardless.GoCardlessClient
 import com.gocardless.GoCardlessClient.Environment
@@ -72,14 +71,8 @@ object Config {
   }
 
   object ExactTarget {
-    private val clientId = config.getString("exact-target.client-id")
-    private val clientSecret = config.getString("exact-target.client-secret")
-
-    private val etConfiguration = new ETConfiguration()
-    etConfiguration.set("clientId", clientId)
-    etConfiguration.set("clientSecret", clientSecret)
-
-    val etClient = new ETClient(etConfiguration)
+    val clientId = config.getString("exact-target.client-id")
+    val clientSecret = config.getString("exact-target.client-secret")
     val thankYouDataExtensionKey = config.getString("exact-target.data-extension-keys.thank-you")
   }
 }

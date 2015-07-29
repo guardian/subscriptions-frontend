@@ -23,20 +23,6 @@ lazy val root = (project in file(".")).enablePlugins(
 
 scalaVersion := "2.11.6"
 
-val cxfV = "2.7.5"
-val cxfUtilsV = "2.7.0"
-val exactTargetDeps = Seq(
-  "com.exacttarget" % "fuelsdk" % "1.0.3" from "https://github.com/salesforcefuel/FuelSDK-Java/releases/download/v1.0.3/fuel-java-1.0.3.jar",
-  "commons-beanutils" % "commons-beanutils" % "1.9.2",
-  "log4j" % "log4j" % "1.2.17",
-  "com.google.code.gson" % "gson" % "2.3.1",
-  "org.apache.cxf" % "cxf-bundle-minimal" % cxfV,
-  "org.apache.cxf" % "cxf-tools-common" % cxfV,
-  "org.apache.cxf" % "cxf-tools-common" % cxfV,
-  "org.apache.cxf.xjc-utils" % "xjc-utils" % cxfUtilsV,
-  "org.apache.cxf.xjc-utils" % "cxf-xjc-runtime" % cxfUtilsV
-)
-
 libraryDependencies ++= Seq(
   cache,
   ws,
@@ -50,8 +36,9 @@ libraryDependencies ++= Seq(
   "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0",
   "org.scalatest" %% "scalatest" % "2.2.4" % "test",
   "org.seleniumhq.selenium" % "selenium-java" % "2.44.0" % "test",
-  "com.gocardless" % "gocardless-pro" % "1.0.0"
-) ++ exactTargetDeps
+  "com.gocardless" % "gocardless-pro" % "1.0.0",
+  "com.squareup.okhttp" % "okhttp" % "2.4.0"
+)
 
 testOptions in Test ++= Seq(
   Tests.Argument("-oFD") // display full stack errors and execution times in Scalatest output
