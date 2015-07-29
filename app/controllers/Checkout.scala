@@ -18,8 +18,7 @@ import scala.concurrent.Future
 
 object Checkout extends Controller with LazyLogging {
   private val zuoraService = TouchpointBackend.Normal.zuoraService
-  private val exactTargetService = ExactTargetService
-  private lazy val checkoutService = new CheckoutService(IdentityService, SalesforceService, zuoraService, exactTargetService)
+  private lazy val checkoutService = new CheckoutService(IdentityService, SalesforceService, zuoraService, ExactTargetService)
   private val goCardlessService = GoCardlessService
 
   def identityCookieOpt(implicit request: Request[_]): Option[Cookie] =

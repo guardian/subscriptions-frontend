@@ -27,29 +27,29 @@ object SubscriptionDataExtensionRow {
     val paymentData = subscriptionData.paymentData
 
     SubscriptionDataExtensionRow(
-      `SubscriberKey` -> subscription.name,
-      `EmailAddress` -> personalData.email,
-      `Subscription term` -> billingPeriod,
-      `Payment amount` -> ratePlanCharge.price.toString,
-      `Default payment method` -> paymentMethod.`type`,
-      `First Name` -> personalData.firstName,
-      `Last Name` -> personalData.lastName,
-      `Address 1` -> address.address1,
-      `Address 2` -> address.address2,
-      `City` -> address.town,
-      `Post Code` -> address.postcode,
+      "SubscriberKey" -> subscription.name,
+      "EmailAddress" -> personalData.email,
+      "Subscription term" -> billingPeriod,
+      "Payment amount" -> ratePlanCharge.price.toString,
+      "Default payment method" -> paymentMethod.`type`,
+      "First Name" -> personalData.firstName,
+      "Last Name" -> personalData.lastName,
+      "Address 1" -> address.address1,
+      "Address 2" -> address.address2,
+      "City" -> address.town,
+      "Post Code" -> address.postcode,
       //TODO hardcoded!
-      `Country` -> "UK",
-      `Account Name` -> paymentData.holder,
-      `Sort Code` -> paymentData.sortCode,
-      `Account number` -> paymentData.account,
-      `Date of first payment` -> formatDate(subscription.termStartDate),
-      `Date of second payment` -> secondPaymentDate,
-      `Currency` -> account.currency,
+      "Country" -> "UK",
+      "Account Name" -> paymentData.holder,
+      "Sort Code" -> paymentData.sortCode,
+      "Account number" -> paymentData.account,
+      "Date of first payment" -> formatDate(subscription.termStartDate),
+      "Date of second payment" -> secondPaymentDate,
+      "Currency" -> account.currency,
       //TODO to remove, hardcoded in the template
-      `Trial period` -> "14",
-      `MandateID` -> paymentMethod.mandateId,
-      `Email` -> personalData.email
+      "Trial period" -> "14",
+      "MandateID" -> paymentMethod.mandateId,
+      "Email" -> personalData.email
     )
   }
 
@@ -73,4 +73,4 @@ trait DataExtensionRow {
   def fields: Seq[(DataExtensionColumn, String)]
 }
 
-case class SubscriptionDataExtensionRow(fields: (DataExtensionColumn, String)*) extends DataExtensionRow
+case class SubscriptionDataExtensionRow(fields: (String, String)*) extends DataExtensionRow
