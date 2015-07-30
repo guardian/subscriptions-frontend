@@ -1,0 +1,52 @@
+/* ==========================================================================
+   Apps
+   ========================================================================== */
+
+.steps {
+    counter-reset: steps;
+}
+.steps__title {
+    @include fs-headline(2);
+    counter-increment: steps;
+    margin-bottom: $gs-baseline / 2;
+
+    &:before {
+        content: counter(steps) '.';
+        display: inline-block;
+        font-weight: guss-font-weight(bold);
+        margin-right: $gs-baseline / 2;
+    }
+}
+
+/* App Package
+   ========================================================================== */
+
+.app-package {
+    margin: $gs-baseline 0;
+}
+.app-package__title {
+    @include fs-headline(2);
+    font-weight: guss-font-weight(bold);
+    margin-bottom: $gs-baseline / 2;
+}
+
+/* Badges
+   ========================================================================== */
+
+.badge {
+    display: inline-block;
+    text-decoration: none;
+    border-bottom: none;
+}
+.badge__image {
+    width: auto;
+    height: 45px;
+}
+
+.badge-group > .badge  {
+    margin: 0 ($gs-gutter / 2) ($gs-baseline / 2) 0;
+
+    @include mq(tablet) {
+        margin-bottom: 0;
+    }
+}
