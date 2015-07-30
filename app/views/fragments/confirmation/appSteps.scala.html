@@ -11,17 +11,18 @@
     <div class="app-package">
         <h5 class="app-package__title">Download The Guardian &amp; Observer Daily Edition</h5>
         <div class="badge-group">
-            @fragments.common.appBadge(Apps.DailyEdition.appleAppStore)
-            @fragments.common.appBadge(Apps.DailyEdition.googlePlayStore)
-            @fragments.common.appBadge(Apps.DailyEdition.amazonAppStore)
+            @for(appLink <- Apps.DailyEdition.links) {
+                @fragments.common.appBadge(appLink)
+            }
         </div>
     </div>
 
     <div class="app-package">
         <h5 class="app-package__title">Download The Guardian live news app</h5>
         <div class="badge-group">
-            @fragments.common.appBadge(Apps.LiveNews.appleAppStore)
-            @fragments.common.appBadge(Apps.LiveNews.googlePlayStore)
+            @for(appLink <- Apps.LiveNews.links) {
+                @fragments.common.appBadge(appLink)
+            }
         </div>
     </div>
 

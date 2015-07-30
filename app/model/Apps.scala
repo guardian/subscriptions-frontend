@@ -19,32 +19,36 @@ object Apps {
   )
   val amazonAppStoreBadge = AppBadge(
     "Available at Amazon",
-    "images/logos/amazon-app-store.svg"
+    "images/logos/amazon-app-store.png"
   )
 
   object DailyEdition {
-    val appleAppStore = AppLink(
-      "https://itunes.apple.com/gb/app/guardian-observer-daily-edition/id452707806?mt=8",
-      appleAppStoreBadge
-    )
-    val googlePlayStore = AppLink(
-      "https://play.google.com/store/apps/details?id=com.guardian.android.tabletedition.google",
-      googlePlayStoreBadge
-    )
-    val amazonAppStore = AppLink(
-      "http://www.amazon.co.uk/dp/B00H9I8MBK",
-      amazonAppStoreBadge
+    val links = Seq(
+      AppLink(
+        "https://play.google.com/store/apps/details?id=com.guardian.android.tabletedition.google",
+        googlePlayStoreBadge
+      ),
+      AppLink(
+        "https://itunes.apple.com/gb/app/guardian-observer-daily-edition/id452707806?mt=8&uo=4",
+        appleAppStoreBadge
+      ),
+      AppLink(
+        "http://www.amazon.co.uk/dp/B00H9I8MBK",
+        amazonAppStoreBadge
+      )
     )
   }
 
   object LiveNews {
-    val appleAppStore = AppLink(
-      "https://itunes.apple.com/gb/app/the-guardian/id409128287?mt=8",
-      appleAppStoreBadge
-    )
-    val googlePlayStore = AppLink(
-      "https://play.google.com/store/apps/details?id=com.guardian&hl=en_GB",
-      googlePlayStoreBadge
+    val links = Seq(
+      AppLink(
+        "https://play.google.com/store/apps/details?id=com.guardian",
+        googlePlayStoreBadge
+      ),
+      AppLink(
+        "https://itunes.apple.com/gb/app/the-guardian/id409128287?mt=8&uo=4",
+        appleAppStoreBadge
+      )
     )
   }
 
