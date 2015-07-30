@@ -1,3 +1,75 @@
+/* ==========================================================================
+   Icons
+   ========================================================================== */
+
+.icon {
+   width: 16px;
+   height: 16px;
+   display: inline-block;
+   vertical-align: middle;
+   fill: currentColor;
+}
+.icon--small {
+   width: 13px;
+   height: 13px;
+}
+.icon--medium {
+   width: 28px;
+   height: 28px;
+}
+.icon--large {
+   width: 36px;
+   height: 36px;
+}
+
+/* Icon Holder
+   ========================================================================== */
+
+.icon-holder {
+    display: inline-block;
+    vertical-align: middle;
+    padding: 0; margin: 0;
+    width: 26px; height: 26px;
+    background-color: transparent;
+    border-radius: 1000px;
+    border: 1px solid $c-brand;
+    color: $c-brand;
+
+    .icon {
+        @include vertically-offset();
+        position: relative;
+        width: 16px; height: 16px;
+    }
+}
+.icon-holder--large {
+    width: 36px;
+    height: 36px;
+
+    .icon {
+        width: 20px;
+        height: 20px;
+    }
+}
+.icon-holder--small {
+    width: 20px;
+    height: 20px;
+
+    .icon {
+        width: 12px;
+        height: 12px;
+    }
+}
+.icon-holder--reversed {
+    color: $c-white;
+    border-color: $c-white;
+}
+
+.icon--top {
+    vertical-align: top;
+}
+.icon--bottom {
+    vertical-align: bottom;
+}
 
 /* PNGs for now */
 .icon-logo {
@@ -42,18 +114,4 @@
 .icon-arrow-blue {
     @extend .icon-arrow-white;
     background-image: url(/assets/images/icons/icon-arrow-blue.png);
-}
-.icon-email {
-    background-image: url(/assets/images/icons/icon-email.png);
-    display: block;
-    height: 28px;
-    width: 28px;
-}
-.icon-secure {
-    display: inline-block;
-    vertical-align: middle;
-    background-image: url(/assets/images/icons/icon-secure.png);
-    background-repeat: no-repeat;
-    height: 14px;
-    width: 14px;
 }

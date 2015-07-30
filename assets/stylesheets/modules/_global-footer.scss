@@ -34,15 +34,30 @@
 
 .global-brandbar {
     background-color: $c-brand-tint;
-
-    .action {
-        border: none;
-        color: $c-white;
-        @include font-size(14px, 36px);
-        text-decoration: none;
-        text-transform: lowercase;
-    }
 }
 .global-brandbar__inner {
     background-color: $c-brand;
+    padding: ($gs-gutter / 2);
+
+    @include mq(tablet) {
+        padding: ($gs-gutter / 2) $gs-gutter;
+    }
+}
+
+/**
+ * Back to top
+ */
+.to-top {
+    display: table;
+    border-bottom: none;
+}
+.to-top__item {
+    display: table-cell;
+    vertical-align: middle;
+}
+.to-top__label {
+    @include fs-bodyHeading(1);
+    color: $c-white;
+    padding-left: ($gs-gutter / 4);
+    text-transform: lowercase;
 }

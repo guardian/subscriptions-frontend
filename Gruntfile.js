@@ -43,7 +43,8 @@ module.exports = function(grunt) {
 
         clean: {
             assets: ['<%= dirs.public.javascripts %>','<%= dirs.public.stylesheets %>', '<%= dirs.public.images %>'],
-            dist: ['<%= dirs.public.root %>/dist/', 'conf/assets.map']
+            dist: ['<%= dirs.public.root %>/dist/', 'conf/assets.map'],
+            icons: ['<%= dirs.assets.images %>/inline-svgs/compressed/*.svg'],
         },
 
         copy: {
@@ -164,6 +165,46 @@ module.exports = function(grunt) {
         },
 
         /***********************************************************************
+         * SVGs
+         ***********************************************************************/
+
+        svgmin: {
+            options: {
+                plugins: [
+                    { removeViewBox: false },
+                    { removeUselessStrokeAndFill: false },
+                    { removeEmptyAttrs: false },
+                    { cleanUpIds: false }
+                ]
+            },
+            dist: {
+                expand: true,
+                cwd: '<%= dirs.assets.images %>/inline-svgs/raw',
+                src: ['*.svg'],
+                dest: '<%= dirs.assets.images %>/inline-svgs/compressed'
+            }
+        },
+
+        svgstore: {
+            options: {
+                prefix: 'icon-',
+                symbol: true,
+                inheritviewbox: true,
+                cleanup: ['fill'],
+                svg: {
+                    id: 'svg-sprite',
+                    width: 0,
+                    height: 0
+                }
+            },
+            icons: {
+                files: {
+                    '<%= dirs.assets.images %>/svg-sprite.svg': ['<%= dirs.assets.images %>/inline-svgs/compressed/*.svg']
+                }
+            }
+        },
+
+        /***********************************************************************
          * Watch
          ***********************************************************************/
 
@@ -226,14 +267,16 @@ module.exports = function(grunt) {
 
     grunt.registerTask('validate', ['eslint']);
 
-    grunt.registerTask('compile:css', ['sass', 'px_to_rem', 'postcss']);
-
-    grunt.registerTask('compile:js', function(){
+    grunt.registerTask('build:images', ['svgSprite', 'copy:images']);
+    grunt.registerTask('build:css', ['sass', 'px_to_rem', 'postcss']);
+    grunt.registerTask('build:js', function(){
         if (!isDev) {
             grunt.task.run(['validate']);
         }
         grunt.task.run([
-            'requirejs'
+            'requirejs',
+            'copy:jsVendor',
+            'copy:zxcvbn'
         ]);
     });
 
@@ -241,11 +284,9 @@ module.exports = function(grunt) {
         grunt.task.run([
             'clean:assets',
             'clean:dist',
-            'compile:css',
-            'compile:js',
-            'copy:images',
-            'copy:jsVendor',
-            'copy:zxcvbn'
+            'build:images',
+            'build:css',
+            'build:js'
         ]);
 
         /**
@@ -261,6 +302,13 @@ module.exports = function(grunt) {
     });
 
     grunt.registerTask('default', ['compile']);
+
+    /***********************************************************************
+     * Icons
+     ***********************************************************************/
+
+    grunt.registerTask('svgSprite', ['clean:icons', 'svgmin', 'svgstore']);
+
 
     /***********************************************************************
      * Test

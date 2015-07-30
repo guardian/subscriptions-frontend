@@ -1,0 +1,5 @@
+@(name: String, classes: Seq[String] = Seq.empty)
+
+<svg class="icon @classes.mkString(" ")">
+    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icon-@name"></use>
+</svg>

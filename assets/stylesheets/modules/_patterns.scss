@@ -28,3 +28,8 @@
     background: transparentize($c-white, .3);
     text-align: center;
 }
+
+.pattern-icon-grid > svg {
+    margin-right: rem($gs-gutter / 2);
+    width: 24px; height: 24px;
+}
