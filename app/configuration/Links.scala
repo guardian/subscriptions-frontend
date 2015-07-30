@@ -3,9 +3,9 @@ package configuration
 case class Links(href: String, title: String)
 
 object Links {
-  val termsOfService = Links(
+  val terms = Links(
     "http://www.theguardian.com/info/2014/aug/06/guardian-observer-digital-subscriptions-terms-conditions",
-    "Terms of Service"
+    "Terms and Conditions"
   )
   val privacyPolicy = Links(
     "http://www.theguardian.com/info/2014/aug/06/guardian-observer-digital-subscriptions-terms-conditions",
