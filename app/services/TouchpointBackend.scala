@@ -11,7 +11,7 @@ object TouchpointBackend {
 
   def apply(touchpointBackendConfig: TouchpointBackendConfig): TouchpointBackend = {
     val salesforceRepo = new SalesforceRepo(touchpointBackendConfig.salesforce)
-    val zuoraService = new ZuoraApiClient(touchpointBackendConfig.zuora, touchpointBackendConfig.digitalProductPlan)
+    val zuoraService = new ZuoraApiClient(touchpointBackendConfig.zuora, touchpointBackendConfig.digitalProductPlan, touchpointBackendConfig.zuoraProperties)
 
     TouchpointBackend(salesforceRepo, zuoraService)
   }
