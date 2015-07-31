@@ -9,6 +9,7 @@ require([
     'modules/confirmation',
     'modules/patterns',
     // Add new dependencies ABOVE this
+    'Promise',
     'raven'
 ], function(
     ajax,
