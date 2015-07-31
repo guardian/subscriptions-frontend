@@ -13,25 +13,21 @@
 ) {
 
 <main class="page-container gs-container">
-
     <form class="form js-checkout-form" action="" method="POST">
-
         <section class="checkout-container">
 
             @fragments.checkout.checkoutHeader("Checkout")
 
             <div class="checkout-container__sidebar">
                 @fragments.checkout.basketPreview(Some(subscriptionProducts))
-            <div class="u-display-from-tablet" data-set="checkout-notices">
-                <div class="js-append">
-                    @fragments.checkout.notices()
+                <div class="u-display-from-tablet" data-set="checkout-notices">
+                    <div class="js-append">
+                        @fragments.checkout.notices()
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="checkout-container__form">
-
-            <form class="form js-checkout-form" method="POST">
+            <div class="checkout-container__form">
 
                 @* ===== Your details ===== *@
                 <fieldset class="fieldset js-fieldset-your-details">
@@ -178,14 +174,9 @@
                         @fragments.checkout.reviewDetails(form)
                     </div>
                 </fieldset>
-
-            </form>
-
-        </div>
-
-        <div class="u-display-until-tablet" data-set="checkout-notices"></div>
-
-    </section>
-
+            </div>
+            <div class="u-display-until-tablet" data-set="checkout-notices"></div>
+        </section>
+    </form>
 </main>
 }
