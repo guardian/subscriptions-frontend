@@ -11,6 +11,7 @@ import model.SubscriptionData
 import model.zuora.{BillingFrequency, SubscriptionProduct, DigitalProductPlan}
 import org.joda.time.Period
 import services.zuora.Subscribe
+import touchpoint.ZuoraProperties
 import utils.ScheduledTask
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -23,7 +24,7 @@ trait ZuoraService {
   def products: Seq[SubscriptionProduct]
 }
 
-class ZuoraApiClient(zuoraApiConfig: ZuoraApiConfig, digitalProductPlan: DigitalProductPlan) extends ZuoraApi with ZuoraService {
+class ZuoraApiClient(zuoraApiConfig: ZuoraApiConfig, digitalProductPlan: DigitalProductPlan, zuoraProperties: ZuoraProperties) extends ZuoraApi with ZuoraService {
   override implicit def authentication: Authentication = authTask.get()
 
   override val apiConfig = zuoraApiConfig
@@ -97,6 +98,6 @@ class ZuoraApiClient(zuoraApiConfig: ZuoraApiConfig, digitalProductPlan: Digital
   }
 
   override def createSubscription(memberId: MemberId, data: SubscriptionData): Future[SubscribeResult] = {
-    request(Subscribe(memberId, data))
+    request(Subscribe(memberId, data, Some(zuoraProperties.paymentDelayInDays)))
   }
 }

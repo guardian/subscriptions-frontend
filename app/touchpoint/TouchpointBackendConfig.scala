@@ -1,11 +1,13 @@
 package touchpoint
 
+import com.github.nscala_time.time.Imports._
 import com.gu.membership.salesforce.SalesforceConfig
 import com.gu.membership.zuora.ZuoraApiConfig
 import com.typesafe.scalalogging.LazyLogging
 import model.zuora.DigitalProductPlan
+import org.joda.time.Period
 
-case class TouchpointBackendConfig(salesforce: SalesforceConfig, zuora: ZuoraApiConfig, digitalProductPlan: DigitalProductPlan)
+case class TouchpointBackendConfig(salesforce: SalesforceConfig, zuora: ZuoraApiConfig, zuoraProperties: ZuoraProperties, digitalProductPlan: DigitalProductPlan)
 
 object TouchpointBackendConfig extends LazyLogging {
 
@@ -36,7 +38,19 @@ object TouchpointBackendConfig extends LazyLogging {
     TouchpointBackendConfig(
       SalesforceConfig.from(envBackendConf, environmentName),
       ZuoraApiConfig.from(envBackendConf, environmentName),
+      ZuoraProperties.from(envBackendConf, environmentName),
       DigitalProductPlan(envBackendConf.getString("zuora.digital"))
     )
   }
 }
+
+object ZuoraProperties {
+  def from(config: com.typesafe.config.Config, environmentName: String) = {
+    ZuoraProperties(
+      config.getInt("zuora.paymentDelayInDays").days
+    )
+  }
+}
+case class ZuoraProperties(
+  paymentDelayInDays: Period
+)
