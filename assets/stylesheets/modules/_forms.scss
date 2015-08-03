@@ -26,19 +26,21 @@ fieldset {
     padding: ($gs-gutter / 2);
 
     @include mq(tablet) {
-        display: table;
-        width: 100%;
+        @include clearfix();
     }
 }
 .fieldset__heading,
 .fieldset__fields {
     @include mq(tablet) {
-        display: table-cell;
-        vertical-align: top;
+        float: left;
     }
 }
 .fieldset__fields {
     padding-bottom: $gs-baseline * 2;
+
+    @include mq(tablet) {
+        width: 65%;
+    }
 }
 .fieldset__heading {
     @include mq(tablet) {
@@ -54,13 +56,13 @@ fieldset {
     margin-bottom: $gs-baseline / 2;
 }
 .fieldset__headline__num {
-    color: guss-colour(news-main-2);
+    color: lighten($c-neutral1, 20%);
     display: inline-block;
     width: $gs-gutter;
 }
 .fieldset__note {
     @include fs-textSans(2);
-    color: $c-neutral2;
+    color: lighten($c-neutral1, 15%);
 }
 .fieldset__note__label {
     margin-left: .2em;
@@ -105,7 +107,7 @@ fieldset {
         display: block;
     }
 }
-.fieldset--collapsed {
+.js-on .fieldset--collapsed {
     .fieldset__note,
     .fieldset__fields {
         display: none;
