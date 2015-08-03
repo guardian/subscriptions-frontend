@@ -3,10 +3,12 @@
    ========================================================================== */
 
 .global-header {
+    color: $c-white;
     background-color: $c-brand;
     text-align: right;
 
     a {
+        color: $c-white;
         border: none;
     }
 }
