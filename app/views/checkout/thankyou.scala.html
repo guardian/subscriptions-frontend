@@ -36,16 +36,7 @@
         <div class="section-slice__content">
 
             <h2 class="section-title">What happens now?</h2>
-
-            <h3 class="section-divider">Download your apps</h3>
-
-            <div class="prose prose--full">
-                <ol>
-                    <li>Go to each device you want your subscription on and download the Guardian app</li>
-                    <li>Open the app and tap the 'Settings' icon</li>
-                    <li>Enter your subscription code (shown above and also in your confirmation email) and your postcode</li>
-                </ol>
-            </div>
+            @fragments.confirmation.appSteps()
 
             @guestAccountForm.map { form =>
 
