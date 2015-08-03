@@ -2,22 +2,24 @@
    Forms
    ========================================================================== */
 
-// Form
-// ============================================================================
-
-.form {
-    margin-bottom: 0;
-}
-
-// Form Fieldset
-// ============================================================================
-
-fieldset {
-    border: none;
+legend {
     padding: 0;
+    display: table;
+}
+fieldset {
+    border: 0;
+    padding: 0.01em 0 0 0;
+    margin: 0;
+    min-width: 0;
+}
+body:not(:-moz-handler-blocked) fieldset {
+    display: table-cell;
 }
 
-.fieldset {
+// Field Panel
+// ============================================================================
+
+.field-panel {
     position: relative;
     background-color: $c-neutral7;
     margin: 0;
@@ -29,57 +31,37 @@ fieldset {
         @include clearfix();
     }
 }
-.fieldset__heading,
-.fieldset__fields {
-    @include mq(tablet) {
-        float: left;
-    }
+.field-panel__legend {
+    width: 100%;
+    @include fs-header(3);
+    margin-bottom: $gs-baseline / 2;
 }
-.fieldset__fields {
-    padding-bottom: $gs-baseline * 2;
-
-    @include mq(tablet) {
-        width: 65%;
-    }
+.field-panel__legend__num {
+    color: lighten($c-neutral1, 20%);
+    display: inline-block;
+    width: $gs-gutter;
 }
-.fieldset__heading {
+.field-panel__intro {
     @include mq(tablet) {
         width: 35%;
+        float: left;
+        clear: left;
         padding-right: $gs-gutter / 2;
     }
     @include mq(desktop) {
         padding-right: $gs-gutter * 2;
     }
 }
-.fieldset__headline {
-    @include fs-header(3);
-    margin-bottom: $gs-baseline / 2;
-}
-.fieldset__headline__num {
-    color: lighten($c-neutral1, 20%);
-    display: inline-block;
-    width: $gs-gutter;
-}
-.fieldset__note {
-    @include fs-textSans(2);
-    color: lighten($c-neutral1, 15%);
-}
-.fieldset__note__label {
-    margin-left: .2em;
+.field-panel__fields {
+    padding-bottom: $gs-baseline * 2;
 
-    @include mq(desktop) {
-        display: block;
-        margin-left: 0;
+    @include mq(tablet) {
+        float: right;
+        width: 65%;
     }
 }
-.fieldset__note--offset {
-    @include mq(desktop) {
-        // Semi-magic number
-        // Optical alignment with field headlins
-        padding-left: $gs-gutter + 3px;
-    }
-}
-.fieldset__edit {
+
+.field-panel__edit {
     @include fs-textSans(1);
     position: absolute;
     top: $gs-baseline;
@@ -89,28 +71,51 @@ fieldset {
     display: none;
 }
 
-.fieldset--single {
-    .fieldset__heading,
-    .fieldset__fields {
+.field-panel--single {
+    .field-panel__intro,
+    .field-panel__fields {
         display: block;
         width: auto;
     }
     @include mq(tablet) {
-        .fieldset__fields {
+        .field-panel__fields {
             display: block;
         }
     }
 }
 
-.fieldset--complete {
-    .fieldset__edit {
+.field-panel.is-complete {
+    .field-panel__edit {
         display: block;
     }
 }
-.js-on .fieldset--collapsed {
-    .fieldset__note,
-    .fieldset__fields {
+.js-on .field-panel.is-collapsed {
+    .field-panel__intro,
+    .field-panel__fields {
         display: none;
+    }
+}
+
+// Field Notes
+// ============================================================================
+
+.field-note {
+    @include fs-textSans(2);
+    color: lighten($c-neutral1, 15%);
+}
+.field-note__label {
+    margin-left: .2em;
+
+    @include mq(desktop) {
+        display: block;
+        margin-left: 0;
+    }
+}
+.field-note--offset {
+    @include mq(desktop) {
+        // Semi-magic number
+        // Optical alignment with field headline
+        padding-left: $gs-gutter + 3px;
     }
 }
 
