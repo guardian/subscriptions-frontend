@@ -25,7 +25,7 @@ define([
         INVALID_POSTCODE: 'Please enter a valid postal code'
     };
 
-    function TextField(containerEl, maxLength) {
+    function textField(containerEl, maxLength) {
         return {
             el: containerEl,
             maxLength: maxLength,
@@ -34,28 +34,16 @@ define([
         };
     }
 
-    var firstNameField = new TextField(formEls.$FIRST_NAME_CONTAINER, MAX_NAME_LENGTH);
-    var lastNameField = new TextField(formEls.$LAST_NAME_CONTAINER, MAX_NAME_LENGTH);
-    var emailField = new TextField(formEls.$EMAIL_CONTAINER, MAX_EMAIL_LENGTH);
-    var address1Field = new TextField(formEls.$ADDRESS1_CONTAINER, MAX_ADDRESS_LENGTH);
-    var address2Field = new TextField(formEls.$ADDRESS2_CONTAINER, MAX_ADDRESS_LENGTH);
-    var address3Field = new TextField(formEls.$ADDRESS3_CONTAINER, MAX_ADDRESS_LENGTH);
-    var postcodeField = new TextField(formEls.$POSTCODE_CONTAINER, MAX_ADDRESS_LENGTH);
+    var firstNameField = textField(formEls.$FIRST_NAME_CONTAINER, MAX_NAME_LENGTH);
+    var lastNameField = textField(formEls.$LAST_NAME_CONTAINER, MAX_NAME_LENGTH);
+    var address1Field = textField(formEls.$ADDRESS1_CONTAINER, MAX_ADDRESS_LENGTH);
+    var address3Field = textField(formEls.$ADDRESS3_CONTAINER, MAX_ADDRESS_LENGTH);
+    var postcodeField = textField(formEls.$POSTCODE_CONTAINER, MAX_ADDRESS_LENGTH);
 
     var requiredFields = [
         firstNameField,
         lastNameField,
         address1Field,
-        address3Field,
-        postcodeField
-    ];
-
-    var lengthCheckedFields = [
-        firstNameField,
-        lastNameField,
-        emailField,
-        address1Field,
-        address2Field,
         address3Field,
         postcodeField
     ];
@@ -122,7 +110,15 @@ define([
                     emailAddress: formEls.$EMAIL.val(),
                     emailAddressConfirmed: formEls.$CONFIRM_EMAIL.val(),
                     requiredFields: requiredFields,
-                    lengthCheckedFields: lengthCheckedFields
+                    lengthCheckedFields: [
+                        textField(formEls.$FIRST_NAME_CONTAINER, MAX_NAME_LENGTH),
+                        textField(formEls.$LAST_NAME_CONTAINER, MAX_NAME_LENGTH),
+                        textField(formEls.$EMAIL_CONTAINER, MAX_EMAIL_LENGTH),
+                        textField(formEls.$ADDRESS1_CONTAINER, MAX_ADDRESS_LENGTH),
+                        textField(formEls.$ADDRESS2_CONTAINER, MAX_ADDRESS_LENGTH),
+                        textField(formEls.$ADDRESS3_CONTAINER, MAX_ADDRESS_LENGTH),
+                        textField(formEls.$POSTCODE_CONTAINER, MAX_ADDRESS_LENGTH)
+                    ]
                 });
             });
         }
