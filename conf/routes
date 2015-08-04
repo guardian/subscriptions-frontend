@@ -28,13 +28,9 @@ POST        /checkout/mandate-pdf            controllers.Checkout.mandatePDF
 
 # collection and delivery
 GET         /collection/paper-digital        controllers.Shipping.viewCollectionPaperDigital
-POST        /collection/paper-digital        controllers.Shipping.buyCollectionPaperDigital
 GET         /collection/paper                controllers.Shipping.viewCollectionPaper
-POST        /collection/paper                controllers.Shipping.buyCollectionPaper
 GET         /delivery/paper-digital          controllers.Shipping.viewDeliveryPaperDigital
-POST        /delivery/paper-digital          controllers.Shipping.buyDeliveryPaperDigital
 GET         /delivery/paper                  controllers.Shipping.viewDeliveryPaper
-POST        /delivery/paper                  controllers.Shipping.buyDeliveryPaper
 
 # Staff signin (note, done by OAuth, in addition to regular signin)
 GET         /staff/login                     controllers.OAuth.login

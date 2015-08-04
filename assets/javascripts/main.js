@@ -1,5 +1,6 @@
 require([
     'utils/ajax',
+    'modules/analytics/setup',
     'modules/toggle',
     'modules/optionMirror',
     'modules/appendAround',
@@ -8,9 +9,11 @@ require([
     'modules/confirmation',
     'modules/patterns',
     // Add new dependencies ABOVE this
+    'Promise',
     'raven'
 ], function(
     ajax,
+    analytics,
     toggle,
     appendAround,
     optionMirror,
@@ -31,6 +34,8 @@ require([
     }).install();
 
     ajax.init({page: {ajaxUrl: ''}});
+
+    analytics.init();
 
     toggle.init();
     optionMirror.init();

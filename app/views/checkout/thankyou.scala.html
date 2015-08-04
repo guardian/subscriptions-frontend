@@ -13,7 +13,7 @@
 
     @fragments.page.header("Thank you for your order", classes=List("l-padded"))
 
-    <section class="section-slice section-slice--limited">
+    <section class="section-slice section-slice--bleed section-slice--limited">
         <div class="section-slice__content">
             <h2 class="section-title">Order ref: @subscriptionName</h2>
             <div class="prose prose--full">
@@ -32,20 +32,11 @@
         </div>
     </section>
 
-    <section class="section-slice section-slice--limited">
+    <section class="section-slice section-slice--bleed section-slice--limited">
         <div class="section-slice__content">
 
             <h2 class="section-title">What happens now?</h2>
-
-            <h3 class="section-divider">Download your apps</h3>
-
-            <div class="prose prose--full">
-                <ol>
-                    <li>Go to each device you want your subscription on and download the Guardian app</li>
-                    <li>Open the app and tap the 'Settings' icon</li>
-                    <li>Enter your subscription code (shown above and also in your confirmation email) and your postcode</li>
-                </ol>
-            </div>
+            @fragments.confirmation.appSteps()
 
             @guestAccountForm.map { form =>
 
@@ -54,7 +45,7 @@
                     <p>Some features of your subscription require you to be signed in before you can make use of them.</p>
                 </div>
 
-                <form action="@processFinishAccount" method="POST" class="form js-finish-account">
+                <form action="@processFinishAccount" method="POST" class="form js-finish-account" autocomplete="off">
                     @helper.CSRF.formField
 
                     <div class="form-field js-checkout-finish-account-password">

@@ -13,7 +13,7 @@ object Benefits {
 
   case class BenefitItem(title: String, description: String)
 
-  val digitalPack = BenefitPackage("Digital Pack", Seq(
+  val digitalPack = BenefitPackage("Daily Edition", Seq(
     BenefitItem("The full experience", "Your daily newspaper optimised for tablet"),
     BenefitItem("Complete supplements", "Including The Guide, Cook, Do Something, Observer Tech and Food Monthly"),
     BenefitItem("Video and audio content", "Embedded audio, video and image galleries — plus all our crosswords"),

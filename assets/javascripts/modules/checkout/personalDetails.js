@@ -10,8 +10,8 @@ define([
     'use strict';
 
     var FIELDSET_COLLAPSED = 'fieldset--collapsed';
-    var FIELDSET_COMPLETE = 'data-fieldset-complete';
-    var HIDDEN_CLASS = 'is-hidden';
+    var FIELDSET_COMPLETE = 'fieldset--complete';
+    var FIELDSET_COMPLETE_ATTR = 'data-fieldset-complete';
 
     var requiredFields = [
         {input: formEls.$FIRST_NAME, container: formEls.$FIRST_NAME_CONTAINER},
@@ -45,11 +45,13 @@ define([
     }
 
     function nextStep() {
-        formEls.$FIELDSET_YOUR_DETAILS.addClass(FIELDSET_COLLAPSED).attr(FIELDSET_COMPLETE, '');
-        formEls.$FIELDSET_PAYMENT_DETAILS.removeClass(FIELDSET_COLLAPSED);
+        formEls.$FIELDSET_YOUR_DETAILS
+            .addClass(FIELDSET_COLLAPSED)
+            .addClass(FIELDSET_COMPLETE)
+            .attr(FIELDSET_COMPLETE_ATTR, '');
 
-        formEls.$EDIT_YOUR_DETAILS.addClass(HIDDEN_CLASS);
-        formEls.$EDIT_PAYMENT_DETAILS.removeClass(HIDDEN_CLASS);
+        formEls.$FIELDSET_PAYMENT_DETAILS
+            .removeClass(FIELDSET_COLLAPSED);
     }
 
     function handleValidation(personalDetails) {

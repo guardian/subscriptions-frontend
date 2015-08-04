@@ -146,7 +146,7 @@ module.exports = function(grunt) {
                     baseUrl: '<%= dirs.assets.javascripts %>',
                     paths: {
                         '$': 'utils/$',
-                        'Promise': 'bower_components/native-promise-only/lib/npo.src',
+                        'Promise': 'bower_components/promise-polyfill/Promise',
                         'bean': 'bower_components/bean/bean',
                         'bonzo': 'bower_components/bonzo/bonzo',
                         'lodash': 'bower_components/lodash-amd/modern',

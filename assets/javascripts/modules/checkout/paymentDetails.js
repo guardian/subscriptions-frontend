@@ -13,6 +13,10 @@ define([
 ) {
     'use strict';
 
+    var FIELDSET_COLLAPSED = 'fieldset--collapsed';
+    var FIELDSET_COMPLETE = 'fieldset--complete';
+    var FIELDSET_COMPLETE_ATTR = 'data-fieldset-complete';
+
     function displayErrors(validity) {
         toggleError(formEls.$ACCOUNT_CONTAINER, !validity.accountNumberValid);
         toggleError(formEls.$HOLDER_CONTAINER, !validity.accountHolderNameValid);
@@ -21,13 +25,13 @@ define([
     }
 
     function nextStep() {
-        var FIELDSET_COLLAPSED = 'fieldset--collapsed';
-        var FIELDSET_COMPLETE = 'data-fieldset-complete';
-        var IS_HIDDEN = 'is-hidden';
+        formEls.$FIELDSET_PAYMENT_DETAILS
+            .addClass(FIELDSET_COLLAPSED)
+            .addClass(FIELDSET_COMPLETE)
+            .attr(FIELDSET_COMPLETE_ATTR, '');
 
-        formEls.$FIELDSET_PAYMENT_DETAILS.addClass(FIELDSET_COLLAPSED).attr(FIELDSET_COMPLETE, '');
-        formEls.$FIELDSET_REVIEW.removeClass(FIELDSET_COLLAPSED);
-        formEls.$EDIT_PAYMENT_DETAILS.removeClass(IS_HIDDEN);
+        formEls.$FIELDSET_REVIEW
+            .removeClass(FIELDSET_COLLAPSED);
     }
 
     function handleValidation() {

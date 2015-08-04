@@ -70,6 +70,19 @@
     }
 }
 
+/**
+ * TODO: Less specific
+ */
+.button--m25 {
+    margin-bottom: $gs-baseline*2;
+
+    @include mq(tablet) {
+        float: right;
+        margin-right: 0;
+        margin-top: 2px;
+    }
+}
+
 /* Toggle
    ========================================================================== */
 
