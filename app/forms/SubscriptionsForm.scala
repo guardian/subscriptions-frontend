@@ -22,15 +22,19 @@ object SubscriptionsForm {
   }
   private val booleanCheckbox: Mapping[Boolean] = of[Boolean] as booleanCheckboxFormatter
 
+  private val nameMaxLength = 50
+  private val addressMaxLength = 255
+  private val emailMaxLength = 240
+
   val addressDataMapping = mapping(
-    "address1" -> text,
-    "address2" -> text,
-    "town" -> text,
-    "postcode" -> text
+    "address1" -> text(0, addressMaxLength),
+    "address2" -> text(0, addressMaxLength),
+    "town" -> text(0, addressMaxLength),
+    "postcode" -> text(0, addressMaxLength)
   )(AddressData.apply)(AddressData.unapply)
 
   val emailMapping = tuple(
-    "email" -> email,
+    "email" -> email.verifying("This email is too long", _.length < emailMaxLength + 1),
     "confirm" -> email)
     .verifying("Emails don't match", email => email._1 == email._2)
     .transform[String](
@@ -39,8 +43,8 @@ object SubscriptionsForm {
     )
 
   val personalDataMapping = mapping(
-    "first" -> text,
-    "last" -> text,
+    "first" -> text(0, nameMaxLength),
+    "last" -> text(0, nameMaxLength),
     "emailValidation" -> emailMapping,
     "receiveGnmMarketing" -> booleanCheckbox,
     "address" -> addressDataMapping

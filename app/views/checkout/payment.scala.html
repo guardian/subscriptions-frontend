@@ -58,12 +58,12 @@
                         <div class="form-field js-checkout-first">
                             <label class="label" for="first">First name</label>
                             <input type="text" class="input-text js-input" name="personal.first" id="first" value="@form.data.get("personal.first")">
-                            @fragments.forms.errorMessage("This field is required")
+                            @fragments.forms.errorMessage("")
                         </div>
                         <div class="form-field js-checkout-last">
                             <label class="label" for="last">Last name</label>
                             <input type="text" class="input-text js-input" name="personal.last" id="last" value="@form.data.get("personal.last")">
-                            @fragments.forms.errorMessage("This field is required")
+                            @fragments.forms.errorMessage("")
                         </div>
                         <div class="form-field js-checkout-email">
                             <label class="label" for="email">Email address</label>
@@ -83,23 +83,23 @@
                             <div class="form-field js-checkout-house">
                                 <label class="label" for="address-line-1">Address line 1</label>
                                 <input type="text" class="input-text js-input" id="address-line-1" name="personal.address.address1" value="@form.data.get("personal.address.address1")">
-                                @fragments.forms.errorMessage("This field is required")
+                                @fragments.forms.errorMessage("")
                             </div>
                             <div class="form-field js-checkout-street">
                                 <label class="label optional-marker" for="address-line-2">Address line 2</label>
                                 <input type="text" class="input-text js-input" id="address-line-2" name="personal.address.address2" value="@form.data.get("personal.address.address2")">
-                                @fragments.forms.errorMessage("This field is required")
+                                @fragments.forms.errorMessage("")
                             </div>
                             <div class="form-field js-checkout-town">
                                 <label class="label" for="address-town">Town/City</label>
                                 <input type="text" class="input-text js-input" id="address-town" name="personal.address.town" value="@form.data.get("personal.address.town")">
-                                @fragments.forms.errorMessage("This field is required")
+                                @fragments.forms.errorMessage("")
                             </div>
                         </div>
                         <div class="form-field js-checkout-postcode">
                             <label class="label" for="address-postcode">Postcode</label>
                             <input type="text" class="input-text js-input input-text input-text--small" id="address-postcode" name="personal.address.postcode" value="@form.data.get("personal.address.postcode")">
-                            @fragments.forms.errorMessage("Please enter a valid postal code")
+                            @fragments.forms.errorMessage("")
                         </div>
 
                         <div class="actions">
