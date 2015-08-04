@@ -27,9 +27,8 @@ object SubscriptionDataExtensionRow {
     val paymentData = subscriptionData.paymentData
 
     SubscriptionDataExtensionRow(
-      subscription.id,
-      "SubscriberKey" -> subscription.name,
-      "SubscriptionId" -> subscription.id,
+      subscription.name,
+      "SubscriberKey" -> personalData.email,
       "EmailAddress" -> personalData.email,
       "Subscription term" -> billingPeriod,
       "Payment amount" -> ratePlanCharge.price.toString,
@@ -45,7 +44,7 @@ object SubscriptionDataExtensionRow {
       "Account Name" -> paymentData.holder,
       "Sort Code" -> paymentData.sortCode,
       "Account number" -> paymentData.account,
-      "Date of first payment" -> formatDate(subscription.termStartDate),
+      "Date of first payment" -> formatDate(subscription.contractAcceptanceDate),
       "Date of second payment" -> secondPaymentDate,
       "Currency" -> account.currency,
       //TODO to remove, hardcoded in the template

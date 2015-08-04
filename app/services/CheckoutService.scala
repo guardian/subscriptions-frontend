@@ -51,9 +51,7 @@ class CheckoutService(
       subscribeResult <- zuoraService.createSubscription(memberId, subscriptionData)
     } yield {
       updateAuthenticatedUserDetails(subscriptionData.personalData)
-      sendETDataExtensionRow(subscribeResult) onFailure { case e: Throwable =>
-        logger.error(s"Error while sending an email during subscription $subscribeResult", e)
-      }
+      sendETDataExtensionRow(subscribeResult)
       CheckoutResult(memberId, userData, subscribeResult)
     }
   }

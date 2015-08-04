@@ -3,7 +3,7 @@ package services
 import akka.agent.Agent
 import com.gu.membership.zuora.soap.Zuora.SubscribeResult
 import com.squareup.okhttp.Request.Builder
-import com.squareup.okhttp.{MediaType, OkHttpClient, RequestBody}
+import com.squareup.okhttp.{Response, MediaType, OkHttpClient, RequestBody}
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
 import model.SubscriptionData
@@ -40,10 +40,16 @@ trait ExactTargetService extends LazyLogging {
       )
       response <- etClient.sendSubscriptionRow(row)
     } yield {
-//      if (response.getStatus == ETResult.Status.OK)
-//        logger.info(s"Successfully sent an email to confirm the subscription: $subscribeResult")
-//      else
-//        logger.error(s"Failed to confirm the subscription $subscribeResult. Code: ${response.getResponseCode}, message: ${response.getResponseMessage}")
+      response.code() match {
+        case 200 => {
+          logger.info(s"Successfully sent an email to confirm the subscription: $subscribeResult")
+        }
+        case _ => {
+          val errorMsg = s"Failed to confirm the subscription $subscribeResult. Code: ${response.code()}, Message: ${response.body()}"
+          logger.error(errorMsg)
+          throw new Exception(errorMsg)
+        }
+      }
     }
   }
 }
@@ -53,7 +59,7 @@ object ExactTargetService extends ExactTargetService {
 }
 
 trait ETClient {
-  def sendSubscriptionRow(row: SubscriptionDataExtensionRow): Future[Unit]
+  def sendSubscriptionRow(row: SubscriptionDataExtensionRow): Future[Response]
 }
 
 object ETClient extends ETClient with LazyLogging {
@@ -97,8 +103,8 @@ object ETClient extends ETClient with LazyLogging {
   /**
    * See https://code.exacttarget.com/apis-sdks/rest-api/v1/hub/data-events/putDataExtensionRowByKey.html
    */
-  override def sendSubscriptionRow(row: SubscriptionDataExtensionRow): Future[Unit] = {
-    def endpoint = s"$restEndpoint/dataevents/key:$thankYouDataExtensionKey/rows/SubscriptionId:${row.subscriptionId}"
+  override def sendSubscriptionRow(row: SubscriptionDataExtensionRow): Future[Response] = {
+    def endpoint = s"$restEndpoint/dataevents/key:$thankYouDataExtensionKey/rows/SubscriberId:${row.subscriptionId}"
 
     Future {
       logger.info("Sending data extension row...")
@@ -119,7 +125,9 @@ object ETClient extends ETClient with LazyLogging {
 
       val respBody = response.body().string()
 
-      logger.info(s"Response: $respBody, Code: ${response.code()}")
+      logger.info(s"Response: $respBody, Code: ${response.code()}, Details: ${response.headers()} ${response.toString})")
+
+      response
     }
 
   }
