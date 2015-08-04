@@ -1,6 +1,6 @@
 package services
 
-import com.gu.identity.play.IdMinimalUser
+import com.gu.identity.play.{AuthenticatedIdUser, IdMinimalUser}
 import com.gu.membership.salesforce.{BasicMember, MemberId}
 import com.gu.membership.zuora.soap.Zuora.{Authentication, SubscribeResult}
 import model.zuora.SubscriptionProduct
@@ -26,12 +26,13 @@ class CheckoutServiceSpec extends FreeSpec with Futures with ScalaFutures {
         Future { GuestUser(UserId(personalData.firstName), IdentityToken("token")) }
       }
 
-      override def updateUserDetails(personalData: PersonalData, userId: UserId, authCookie: AuthCookie): Future[Unit] = {
+      override def updateUserDetails(personalData: PersonalData, userId: AuthenticatedIdUser): Future[Unit] = {
         Future { updateFlag.updated = true }
       }
     }
 
   object TestSalesforceService extends SalesforceService {
+    override def repo = ???
     override def createOrUpdateUser(personalData: PersonalData, userId: UserId): Future[MemberId] =
       Future { BasicMember(s"${userId.id} contactId", s"${userId.id} accountId") }
   }
@@ -57,9 +58,9 @@ class CheckoutServiceSpec extends FreeSpec with Futures with ScalaFutures {
 
     "for a registered user" - {
       val checkoutResult = service.processSubscription(
-          subscriptionData,
-          Some(IdMinimalUser("RegisteredId", None)),
-          Some(AuthCookie("cookie")))
+        subscriptionData,
+        Some(AuthenticatedIdUser("cookie", IdMinimalUser("RegisteredId", None)))
+      )
 
       whenReady(checkoutResult) { res =>
         "returns the checkout result" - {
@@ -71,7 +72,6 @@ class CheckoutServiceSpec extends FreeSpec with Futures with ScalaFutures {
             assertResult(SubscribeResult("Subscribed RegisteredId contactId", "A-Sxxxxx"))(res.zuoraResult)
           }
         }
-
       }
     }
 
@@ -81,7 +81,7 @@ class CheckoutServiceSpec extends FreeSpec with Futures with ScalaFutures {
         makeIdentityService(updateFlag), TestSalesforceService, TestZuoraService
       )
 
-      whenReady(service.processSubscription(subscriptionData, None, None)) { _ =>
+      whenReady(service.processSubscription(subscriptionData, None)) { _ =>
         "does not update the user details in the Identity service" in {
           assert(!updateFlag.updated)
         }

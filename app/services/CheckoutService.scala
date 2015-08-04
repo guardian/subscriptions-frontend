@@ -1,6 +1,6 @@
 package services
 
-import com.gu.identity.play.IdMinimalUser
+import com.gu.identity.play.{AuthenticatedIdUser, IdMinimalUser}
 import com.gu.membership.salesforce.MemberId
 import com.gu.membership.zuora.soap.Zuora.SubscribeResult
 import com.typesafe.scalalogging.LazyLogging
@@ -17,27 +17,23 @@ class CheckoutService(identityService: IdentityService, salesforceService: Sales
   import CheckoutService.CheckoutResult
 
   def processSubscription(subscriptionData: SubscriptionData,
-                          idUserOpt: Option[IdMinimalUser],
-                          authCookieOpt: Option[AuthCookie]): Future[CheckoutResult] = {
+                          authenticatedUserOpt: Option[AuthenticatedIdUser]): Future[CheckoutResult] = {
 
     def updateAuthenticatedUserDetails(personalData: PersonalData): Unit = {
       for {
-        user <- idUserOpt
-        authCookie <- authCookieOpt
+        authenticatedUser <- authenticatedUserOpt
       } yield {
-        identityService.updateUserDetails(personalData, UserId(user.id), authCookie)
+        identityService.updateUserDetails(personalData, authenticatedUser)
       }
     }
 
     val userOrElseRegisterGuest: Future[UserIdData] =
-      idUserOpt.map(user => Future {
-        RegisteredUser(user)
+      authenticatedUserOpt.map(authenticatedUser => Future {
+        RegisteredUser(authenticatedUser.user)
       }).getOrElse {
         logger.info(s"User does not have an Identity account. Creating a guest account")
         identityService.registerGuest(subscriptionData.personalData)
       }
-
-
 
     for {
       userData <- userOrElseRegisterGuest

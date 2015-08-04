@@ -39,6 +39,8 @@ object Config {
 
     val keys = if (idConfig.getBoolean("production.keys")) new ProductionKeys else new PreProductionKeys
 
+    val testUsersSecret = idConfig.getString("test.users.secret")
+
     val webAppUrl = idConfig.getString("webapp.url")
 
     val webAppProfileUrl = webAppUrl / "account" / "edit"
@@ -48,6 +50,10 @@ object Config {
 
     def idWebAppSignOutUrl(path: String): String =
       (webAppUrl / "signout") ? ("returnUrl" -> absoluteUrl(path)) ? ("skipConfirmation" -> "true")
+
+    def idWebAppRegisterUrl(path : String): String =
+      (webAppUrl / "register") ? ("returnUrl" -> absoluteUrl(path)) ? ("skipConfirmation" -> "true")
+
 
     private def absoluteUrl(path: String): String = (subscriptionsUrl / path).toString()
   }

@@ -1,7 +1,7 @@
 package actions
 
 import com.typesafe.scalalogging.LazyLogging
-import configuration.QA.{passthroughCookie => qaCookie}
+import configuration.QA.passthroughCookie
 import controllers.{Cached, NoCache}
 import play.api.mvc._
 
@@ -22,12 +22,11 @@ object CommonActions {
 
   object PreReleaseFeature extends ActionBuilder[Request] with LazyLogging {
     override def invokeBlock[A](request: Request[A], block: (Request[A]) => Future[Result]): Future[Result] = {
-      val cookie = request.cookies.get(qaCookie.name)
-
-      if (cookie.exists(_.value == qaCookie.value)) {
+      val qaCookie = request.cookies.get(passthroughCookie.name)
+      if (qaCookie.exists(_.value == passthroughCookie.value)) {
         block(request)
       } else {
-        cookie.foreach(_ => logger.warn("Invalid QA Cookie supplied"))
+        qaCookie.foreach(_ => logger.warn("Invalid QA Cookie supplied"))
         OAuthActions.AuthAction.authenticate(request, block)
       }
     }

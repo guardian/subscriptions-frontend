@@ -1,0 +1,24 @@
+@(userString: String)
+
+@import configuration.Config.Identity.idWebAppRegisterUrl
+@import routes.Checkout.renderCheckout
+
+@main(title = "Test users") {
+    <main class="page-container gs-container">
+        @fragments.page.header("Test Users", None, Nil)
+
+        <div class="prose">
+            <ul class="u-unstyled">
+                <li>First Name: <strong>@userString</strong></li>
+                <li>Username: <strong>@userString</strong></li>
+                <li>Email: <strong>@userString@@gu.com</strong></li>
+            </ul>
+        </div>
+
+        <div class="actions">
+            <a href="@idWebAppRegisterUrl(renderCheckout().toString())" class="button button--primary button--large">Register an Identity user</a>
+            <a href="@renderCheckout" class="button button--primary button--large">Subscribe as a guest user</a>
+        </div>
+
+    </main>
+}
