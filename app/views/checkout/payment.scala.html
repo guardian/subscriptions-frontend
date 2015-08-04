@@ -13,179 +13,93 @@
 ) {
 
 <main class="page-container gs-container">
-
-    <form class="form js-checkout-form" action="" method="POST">
-
-        <section class="checkout-container">
+    <div class="checkout-container">
+        <form class="form js-checkout-form" action="@renderCheckout().toString()" method="POST">
+            @helper.CSRF.formField
 
             @fragments.checkout.checkoutHeader("Checkout")
 
             <div class="checkout-container__sidebar">
                 @fragments.checkout.basketPreview(Some(subscriptionProducts))
-            <div class="u-display-from-tablet" data-set="checkout-notices">
-                <div class="js-append">
-                    @fragments.checkout.notices()
+                <div class="u-display-from-tablet" data-set="checkout-notices">
+                    <div class="js-append">
+                        @fragments.checkout.notices()
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="checkout-container__form">
-
-            <form class="form js-checkout-form" method="POST">
+            <div class="checkout-container__form">
 
                 @* ===== Your details ===== *@
-                <fieldset class="fieldset js-fieldset-your-details">
-                    @helper.CSRF.formField
-
-                    <div class="fieldset__heading">
-                        <legend class="fieldset__headline">
-                            <span class="fieldset__headline__num">1</span> Your details
+                <div class="field-panel js-fieldset-your-details">
+                    <fieldset>
+                        <legend class="field-panel__legend">
+                            <span class="field-panel__legend__num">1</span> Your details
                         </legend>
-                        <div class="fieldset__note fieldset__note--offset">
-                            @if(userIsSignedIn) {
-                                <span class="fieldset__note__label">Not you?</span>
-                                <a href="@idWebAppSignOutUrl(renderCheckout().toString())">Sign out</a>
-                            } else {
-                                <span class="fieldset__note__label">Already have a Guardian account?</span>
-                                <a href="@webAppSigninUrl(renderCheckout().toString())">Sign in</a>
-                            }
+                        <div class="field-panel__intro">
+                            <div class="field-note field-note--offset">
+                                @if(userIsSignedIn) {
+                                    <span class="field-note__label">Not you?</span>
+                                    <a href="@idWebAppSignOutUrl(renderCheckout().toString())">Sign out</a>
+                                } else {
+                                    <span class="field-note__label">Already have a Guardian account?</span>
+                                    <a href="@webAppSigninUrl(renderCheckout().toString())">Sign in</a>
+                                }
+                            </div>
                         </div>
-                        <div class="fieldset__edit">
+                        <div class="field-panel__edit">
                             <button class="text-button u-button-reset js-edit-your-details">Edit</button>
                         </div>
-                    </div>
-                    <div class="fieldset__fields">
-                        <div class="form-field js-checkout-first">
-                            <label class="label" for="first">First name</label>
-                            <input type="text" class="input-text js-input" name="personal.first" id="first" value="@form.data.get("personal.first")">
-                            @fragments.forms.errorMessage("This field is required")
-                        </div>
-                        <div class="form-field js-checkout-last">
-                            <label class="label" for="last">Last name</label>
-                            <input type="text" class="input-text js-input" name="personal.last" id="last" value="@form.data.get("personal.last")">
-                            @fragments.forms.errorMessage("This field is required")
-                        </div>
-                        <div class="form-field js-checkout-email">
-                            <label class="label" for="email">Email address</label>
-                            <input type="email" class="input-text js-input" name="personal.emailValidation.email" id="email" value="@form.data.get("personal.emailValidation.email")" @readonly>
-                            @fragments.forms.errorMessage("")
-                        </div>
-                        <div class="form-field js-checkout-confirm-email">
-                            @if(userIsSignedIn) {
-                                <input type="hidden" class="js-input" name="personal.emailValidation.confirm" id="confirm" value="@form.data.get("personal.emailValidation.confirm")">
-                            } else {
-                                <label class="label" for="confirm">Confirm email address</label>
-                                <input type="email" class="input-text js-input" name="personal.emailValidation.confirm" id="confirm" value="@form.data.get("personal.emailValidation.confirm")">
-                                @fragments.forms.errorMessage("The confirmation email must match your email address")
-                            }
-                        </div>
-                        <div class="js-checkout-full-address">
-                            <div class="form-field js-checkout-house">
-                                <label class="label" for="address-line-1">Address line 1</label>
-                                <input type="text" class="input-text js-input" id="address-line-1" name="personal.address.address1" value="@form.data.get("personal.address.address1")">
-                                @fragments.forms.errorMessage("This field is required")
-                            </div>
-                            <div class="form-field js-checkout-street">
-                                <label class="label optional-marker" for="address-line-2">Address line 2</label>
-                                <input type="text" class="input-text js-input" id="address-line-2" name="personal.address.address2" value="@form.data.get("personal.address.address2")">
-                                @fragments.forms.errorMessage("This field is required")
-                            </div>
-                            <div class="form-field js-checkout-town">
-                                <label class="label" for="address-town">Town/City</label>
-                                <input type="text" class="input-text js-input" id="address-town" name="personal.address.town" value="@form.data.get("personal.address.town")">
-                                @fragments.forms.errorMessage("This field is required")
-                            </div>
-                        </div>
-                        <div class="form-field js-checkout-postcode">
-                            <label class="label" for="address-postcode">Postcode</label>
-                            <input type="text" class="input-text js-input input-text input-text--small" id="address-postcode" name="personal.address.postcode" value="@form.data.get("personal.address.postcode")">
-                            @fragments.forms.errorMessage("Please enter a valid postal code")
-                        </div>
+                        <div class="field-panel__fields">
+                            @fragments.checkout.fieldsPersonal(form, userIsSignedIn)
 
-                        <div class="actions">
-                            <button class="button button--primary button--large js-checkout-your-details-submit">Continue</button>
+                            <div class="actions">
+                                <button class="button button--primary button--large js-checkout-your-details-submit">Continue</button>
+                            </div>
                         </div>
-                    </div>
-                </fieldset>
+                    </fieldset>
+                </div>
 
                 @* ===== Payment ===== *@
-                <fieldset class="fieldset fieldset--collapsed js-fieldset-payment-details">
-                    <div class="fieldset__heading">
-                        <legend class="fieldset__headline">
-                            <span class="fieldset__headline__num">2</span> Payment details
+                <div class="field-panel is-collapsed js-fieldset-payment-details">
+                    <fieldset>
+                        <legend class="field-panel__legend">
+                            <span class="field-panel__legend__num">2</span> Payment details
                         </legend>
-                        <div class="fieldset__note fieldset__note--offset">
-                            @fragments.forms.securityNote()
-                            Payment will be taken by Direct Debit
+                        <div class="field-panel__intro">
+                            <div class="field-note field-note--offset">
+                                @fragments.forms.securityNote()
+                                Payment will be taken by Direct Debit
+                            </div>
                         </div>
-                        <div class="fieldset__edit">
+                        <div class="field-panel__edit">
                             <button class="text-button u-button-reset js-edit-payment-details">Edit</button>
                         </div>
-                    </div>
-                    <div class="fieldset__fields">
-                        <div class="form-field js-checkout-account">
-                            <label class="label" for="account">Bank account number</label>
-                            <input type="number" class="input-text js-input" name="payment.account">
-                            @fragments.forms.errorMessage("Please enter between 6 and 10 digits for the account number")
+                        <div class="field-panel__fields">
+                            @fragments.checkout.fieldsPayment(form)
+
+                            <div class="actions">
+                                <button class="button button--primary button--large js-checkout-payment-details-submit">Continue</button>
+                            </div>
                         </div>
-                        <div class="form-field js-checkout-sortcode">
-                            <label class="label" for="sortcode">Bank sort code</label>
-                            <input type="number"
-                                class="input-text input-text--xsmall js-input js-checkout-sortcode1"
-                                max="99" name="payment.sortcode1"
-                            > -
-                            <input type="number"
-                                class="input-text input-text--xsmall js-input js-checkout-sortcode2"
-                                max="99" name="payment.sortcode2"
-                            > -
-                            <input type="number"
-                                class="input-text input-text--xsmall js-input js-checkout-sortcode3"
-                                max="99" name="payment.sortcode3"
-                            >
-                            @fragments.forms.errorMessage("Please enter 2 digits for each sort code field")
-                        </div>
-                        <div class="form-field js-checkout-holder">
-                            <label class="label" for="holder">Name of account holder</label>
-                            <input type="text" class="input-text js-input" name="payment.holder">
-                            @* TODO: Why limited to 18 characters? *@
-                            @fragments.forms.errorMessage("Please enter between 1 and 18 characters for the account holder name")
-                        </div>
-                        <div class="form-field js-checkout-confirm-payment">
-                            <label class="option">
-                                <span class="option__input">
-                                    <input type="checkbox" class="js-input">
-                                </span>
-                                <span class="option__label">
-                                    I confirm that I am the account holder and I am solely able to authorise debit from the account
-                                </span>
-                            </label>
-                            @fragments.forms.errorMessage("Please confirm that you are the account holder")
-                        </div>
-                        <div class="actions">
-                            <button class="button button--primary button--large js-checkout-payment-details-submit">Continue</button>
-                        </div>
-                    </div>
-                </fieldset>
+                    </fieldset>
+                </div>
 
                 @* ===== Review ===== *@
-                <fieldset class="fieldset fieldset--single fieldset--collapsed js-fieldset-review">
-                    <div class="fieldset__heading">
-                        <legend class="fieldset__headline">
-                            <span class="fieldset__headline__num">3</span> Review and confirm
+                <div class="field-panel field-panel--single is-collapsed js-fieldset-review">
+                    <fieldset>
+                        <legend class="field-panel__legend">
+                            <span class="field-panel__legend__num">3</span> Review and confirm
                         </legend>
-                    </div>
-                    <div class="fieldset__fields">
-                        @fragments.checkout.reviewDetails(form)
-                    </div>
-                </fieldset>
+                        <div class="field-panel__fields">
+                            @fragments.checkout.reviewDetails(form)
+                        </div>
+                    </fieldset>
+                </div>
 
-            </form>
-
-        </div>
-
-        <div class="u-display-until-tablet" data-set="checkout-notices"></div>
-
-    </section>
-
+            </div>
+            <div class="u-display-until-tablet" data-set="checkout-notices"></div>
+        </form>
+    </div>
 </main>
 }
