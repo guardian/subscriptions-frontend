@@ -27,24 +27,31 @@ define([
             var confirmationEmailValue = data.emailAddressConfirmed;
             var hasConfirmedEmail = emailValue === confirmationEmailValue;
 
-            var emptyFields = data.requiredFieldValues.filter(function (field) {
-                return !field;
+            var emptyFields = data.requiredFields.filter(function (field) {
+                return !field.input.value;
             });
+
+            var fieldsTooLong =
+                data.lengthCheckedFields.filter(function (field) {
+                    return field.input.value.length > field.maxLength;
+                });
 
             var hasBasicValidity = (
                 hasValidEmail &&
                 hasConfirmedEmail &&
-                !emptyFields.length
+                !emptyFields.length &&
+                !fieldsTooLong.length
             );
 
             var validity = {
                 allValid: false,
                 emptyFields: emptyFields,
-                requiredFieldValues: data.requiredFieldValues,
+                requiredFields: data.requiredFields,
                 hasValidEmail: hasValidEmail,
                 hasConfirmedEmail: hasConfirmedEmail,
                 emailMessage: (hasValidEmail) ? false : MESSAGES.emailInvalid,
-                isEmailInUse: false
+                isEmailInUse: false,
+                fieldsTooLong: fieldsTooLong
             };
 
             if(hasBasicValidity) {

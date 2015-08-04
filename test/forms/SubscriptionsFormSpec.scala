@@ -1,6 +1,6 @@
 package forms
 
-import forms.SubscriptionsForm.personalDataMapping
+import forms.SubscriptionsForm.{personalDataMapping, addressDataMapping}
 import model.{AddressData, PersonalData}
 import org.scalatest.FreeSpec
 
@@ -48,5 +48,30 @@ class SubscriptionsFormSpec extends FreeSpec {
       assert(data.isLeft)
     }
 
+    Seq("first", "last").foreach { key =>
+      val l = 51
+      val data = personalDataMapping.bind(formData + (key -> "a" * l))
+      s"checks the size of the $key field" in {
+        assert(data.isLeft, s"Personal data's $key should have a max size of ${l - 1}")
+      }
+    }
+
+    Seq("address1", "address2", "town", "postcode").foreach { key =>
+      val l = 256
+      val data = addressDataMapping.bind(formData + (key -> "a" * l))
+      s"checks the size of the $key field" in {
+        assert(data.isLeft, s"Personal data's $key should have a max size of ${l - 1}")
+      }
+    }
+
+    "checks the size of the email field" in {
+      val l = 229 // remove the domain length from 241
+      val email = ("a" * l) + "@example.com"
+      val data = addressDataMapping.bind(
+        formData + ("emailValidation.email" -> email) + ("emailValidation.confirm" -> email)
+      )
+
+      assert(data.isLeft, s"Email should have a max size of 240")
+    }
   }
 }
