@@ -28,7 +28,7 @@ libraryDependencies ++= Seq(
   ws,
   filters,
   PlayImport.specs2,
-  "com.gu" %% "membership-common" % "0.79-SNAPSHOT",
+  "com.gu" %% "membership-common" % "0.79",
   "com.gu" %% "play-googleauth" % "0.3.0",
   "com.gu.identity" %% "identity-play-auth" % "0.5",
   "com.github.nscala-time" %% "nscala-time" % "2.0.0",

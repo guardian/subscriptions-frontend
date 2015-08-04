@@ -9,7 +9,8 @@ import com.gu.membership.zuora.soap.{Login, ZuoraApi, ZuoraServiceError}
 import com.gu.monitoring.ZuoraMetrics
 import configuration.Config
 import model.SubscriptionData
-import model.zuora.{BillingFrequency, DigitalProductPlan, SubscriptionProduct}
+import model.zuora.{BillingFrequency, SubscriptionProduct, DigitalProductPlan}
+import org.joda.time.Period
 import services.zuora.Subscribe
 import touchpoint.ZuoraProperties
 import utils.ScheduledTask
@@ -64,23 +65,63 @@ class ZuoraApiClient(zuoraApiConfig: ZuoraApiConfig, digitalProductPlan: Digital
     authF
   }
 
-  val productsTask = ScheduledTask[Seq[SubscriptionProduct]]("Loading rate plans", Nil, 0.seconds, 2.hours)(getProducts())
+  val productsTask = ScheduledTask[Seq[SubscriptionProduct]]("Loading rate plans", Nil, 0.seconds, 2.hours)(getProducts)
+
+  private def query[T <: ZuoraQuery](where: ZuoraFilter)(implicit reader: ZuoraQueryReader[T]): Future[Seq[T]] =
+    query(where.toFilterString)(reader)
+
+  private def queryOne[T <: ZuoraQuery](where: ZuoraFilter)(implicit reader: ZuoraQueryReader[T]): Future[T] =
+    queryOne(where.toFilterString)(reader)
+
+  override def subscriptionByName(id: String): Future[Subscription] =
+    queryOne[Subscription](SimpleFilter("Name", id))
+
+  override def ratePlans(subscription: Subscription): Future[Seq[RatePlan]] =
+    query[RatePlan](SimpleFilter("SubscriptionId", subscription.id))
+
+  private def normalRatePlanCharges(ratePlan: RatePlan): Future[Seq[RatePlanCharge]] = {
+    query[RatePlanCharge](AndFilter(
+      "RatePlanId" -> ratePlan.id,
+      "ChargeModel" -> "Flat Fee Pricing",
+      "ChargeType" -> "Recurring"
+    ))
+  }
+
+  override def defaultPaymentMethod(account: Account): Future[PaymentMethod] = {
+    val paymentMethodId = account.defaultPaymentMethodId.getOrElse {
+      throw new ZuoraServiceError(s"Could not find an account default payment method for $account")
+    }
+    queryOne[PaymentMethod](SimpleFilter("Id", paymentMethodId))
+  }
+
+  override def account(subscription: Subscription): Future[Account] =
+    queryOne[Account](SimpleFilter("Id", subscription.accountId))
+
+  override def normalRatePlanCharge(subscription: Subscription): Future[RatePlanCharge] =
+    for {
+      pr <- ratePlans(subscription)
+      rpcs <- Future.sequence { pr.map(normalRatePlanCharges) }.map(_.flatten)
+    } yield rpcs.headOption.getOrElse {
+      throw new ZuoraServiceError(s"Cannot find default subscription rate plan charge for $subscription")
+  }
+
 
   def products = productsTask.get()
 
   private def getProducts: Future[Seq[SubscriptionProduct]] = {
 
     def productRatePlans: Future[Seq[ProductRatePlan]] =
-      query[ProductRatePlan](SimpleFilter("ProductId", digitalProductPlan.id))
+      query[ProductRatePlan](SimpleFilter("ProductId", digitalProductPlan.id).toFilterString)
+
 
     def productRatePlanCharges(productRatePlans: Seq[ProductRatePlan]): Future[Seq[ProductRatePlanCharge]] = {
       val clauses = productRatePlans.map(p => "ProductRatePlanId" -> p.id)
-      query[ProductRatePlanCharge](OrFilter(clauses: _*))
+        query[ProductRatePlanCharge](OrFilter(clauses: _*).toFilterString)
     }
 
     def productRatePlanChargeTiers(productRatePlanCharges: Seq[ProductRatePlanCharge]): Future[Seq[ProductRatePlanChargeTier]] = {
       val clauses = productRatePlanCharges.map(p => "ProductRatePlanChargeId" -> p.id)
-      query[ProductRatePlanChargeTier](OrFilter(clauses: _*))
+       query[ProductRatePlanChargeTier](OrFilter(clauses: _*).toFilterString)
     }
 
     for {
