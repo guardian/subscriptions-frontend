@@ -7,7 +7,7 @@ import com.squareup.okhttp.{Response, MediaType, OkHttpClient, RequestBody}
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
 import model.SubscriptionData
-import model.exactTarget.SubscriptionDataExtensionRow
+import model.exactTarget.{ExactTargetException, SubscriptionDataExtensionRow}
 import play.api.libs.concurrent.Akka
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json._
@@ -21,7 +21,7 @@ trait ExactTargetService extends LazyLogging {
   def sendETDataExtensionRow(subscribeResult: SubscribeResult, subscriptionData: SubscriptionData, zs: ZuoraService): Future[Unit] = {
     val subscription = zs.subscriptionByName(subscribeResult.name)
 
-    val  accAndPaymentMethod= for {
+    val accAndPaymentMethod = for {
       subs <- subscription
       acc <- zs.account(subs)
       pm <- zs.defaultPaymentMethod(acc)
@@ -45,9 +45,9 @@ trait ExactTargetService extends LazyLogging {
           logger.info(s"Successfully sent an email to confirm the subscription: $subscribeResult")
         }
         case _ => {
-          val errorMsg = s"Failed to confirm the subscription $subscribeResult. Code: ${response.code()}, Message: ${response.body()}"
+          val errorMsg = s"Failed to send the subscription email $subscribeResult. Code: ${response.code()}, Message: ${response.body()}"
           logger.error(errorMsg)
-          throw new Exception(errorMsg)
+          throw new ExactTargetException(errorMsg)
         }
       }
     }
@@ -118,8 +118,6 @@ object ETClient extends ETClient with LazyLogging {
                           .header("Authorization", s"Bearer ${accessToken.get()}")
                           .build()
       val response = httpClient.newCall(request).execute()
-
-      val respBody = response.body().string()
 
       response
     }
