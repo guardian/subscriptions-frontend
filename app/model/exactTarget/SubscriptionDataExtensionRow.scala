@@ -17,9 +17,6 @@ object SubscriptionDataExtensionRow {
       throw new ExactTargetException(s"Error while processing $subscription: Could not create a SubscriptionDataExtensionRow without a billing period")
     )
 
-    // FIXME bogus payment day while we figure out when to get it properly
-    val secondPaymentDate = formatDate(DateTime.now().plusYears(100))
-
     val personalData = subscriptionData.personalData
 
     val address = personalData.address
@@ -45,7 +42,6 @@ object SubscriptionDataExtensionRow {
       "Sort Code" -> paymentData.sortCode,
       "Account number" -> paymentData.account,
       "Date of first payment" -> formatDate(subscription.contractAcceptanceDate),
-      "Date of second payment" -> secondPaymentDate,
       "Currency" -> account.currency,
       //TODO to remove, hardcoded in the template
       "Trial period" -> "14",
