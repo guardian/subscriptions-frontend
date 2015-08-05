@@ -120,7 +120,7 @@ object ETClient extends ETClient with LazyLogging {
       val response = httpClient.newCall(request).execute()
 
       val respBody = response.body().string()
-      
+
       response
     }
 

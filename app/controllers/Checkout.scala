@@ -21,7 +21,6 @@ import scala.concurrent.Future
 import AuthenticationService.authenticatedUserFor
 
 object Checkout extends Controller with LazyLogging {
-  private val zuoraService = TouchpointBackend.Normal.zuoraService
 
   private val goCardlessService = GoCardlessService
 
@@ -32,7 +31,7 @@ object Checkout extends Controller with LazyLogging {
       TouchpointBackend.forRequest(request.cookies.get(Testing.UnauthenticatedTestUserCookieName).map(_.value))
 
     def fillForm(): Future[Form[SubscriptionData]] = for {
-      fullUserOpt <- authUserOpt.fold[Future[Option[IdUser]]](Future.successful(None))(au => IdentityService.userLookupByScGuU(AuthCookie(au.authCookie)))
+      fullUserOpt <-authUserOpt.fold[Future[Option[IdUser]]](Future.successful(None))(au => IdentityService.userLookupByScGuU(AuthCookie(au.authCookie)))
     } yield {
         fullUserOpt.map { idUser =>
           SubscriptionsForm().fill(SubscriptionData.fromIdUser(idUser))
