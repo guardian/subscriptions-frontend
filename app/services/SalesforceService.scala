@@ -12,6 +12,7 @@ import scala.concurrent.Future
 import scala.concurrent.duration._
 
 trait SalesforceService extends LazyLogging {
+  def repo: SalesforceRepo
 
   def createOrUpdateUser(personalData: PersonalData, userId: UserId): Future[MemberId]
 
@@ -29,10 +30,9 @@ trait SalesforceService extends LazyLogging {
 
 }
 
-object SalesforceService extends SalesforceService {
+class SalesforceServiceImp(val repo: SalesforceRepo) extends SalesforceService {
   override def createOrUpdateUser(personalData: PersonalData, userId: UserId): Future[MemberId] =
-    //TODO when implementing test-users this requires updating to supply data to correct location
-    TouchpointBackend.Normal.salesforceRepo.upsert(userId.id, createSalesforceUserData(personalData))
+    repo.upsert(userId.id, createSalesforceUserData(personalData))
 }
 
 class SalesforceRepo(salesforceConfig: SalesforceConfig) extends MemberRepository {

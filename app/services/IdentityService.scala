@@ -1,7 +1,7 @@
 package services
 
 import com.amazonaws.regions.{Region, Regions}
-import com.gu.identity.play.IdUser
+import com.gu.identity.play.{AuthenticatedIdUser, IdUser}
 import com.gu.monitoring.{AuthenticationMetrics, CloudWatch, RequestMetrics, StatusMetrics}
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
@@ -39,8 +39,12 @@ class IdentityService(identityApiClient: => IdentityApiClient) extends LazyLoggi
     }
   }
 
-  def updateUserDetails(personalData: PersonalData, userId: UserId, authCookie: AuthCookie): Future[Unit] = {
-    identityApiClient.updateUserDetails(personalData, userId, authCookie).map(_ => Unit)
+  def updateUserDetails(personalData: PersonalData, authenticatedUser: AuthenticatedIdUser): Future[Unit] = {
+    identityApiClient.updateUserDetails(
+      personalData,
+      UserId(authenticatedUser.user.id),
+      AuthCookie(authenticatedUser.authCookie)
+    ).map(_ => Unit)
   }
 }
 

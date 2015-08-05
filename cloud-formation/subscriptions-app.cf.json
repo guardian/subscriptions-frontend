@@ -39,7 +39,7 @@
         "InstanceType" : {
             "Type" : "String",
             "Description" : "EC2 instance type",
-            "AllowedValues" : [ "t2.micro","m3.medium" ],
+            "AllowedValues" : [ "t2.micro", "t2.medium", "m3.medium" ],
             "ConstraintDescription" : "must be a valid EC2 instance type."
         },
         "ImageId": {

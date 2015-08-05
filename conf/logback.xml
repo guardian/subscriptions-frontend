@@ -1,8 +1,13 @@
+<!--
+Play expects this file to be at 'conf/logback.xml' - not logger.xml:
+
+https://www.playframework.com/documentation/2.4.x/SettingsLogger#Using-a-configuration-file-from-project-source
+-->
 <configuration>
 
     <contextName>subscriptions-frontend</contextName>
 
-    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <appender name="LOGFILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>logs/subscriptions-frontend.log</file>
 
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
@@ -17,8 +22,10 @@
         </encoder>
     </appender>
 
+    <logger name="com.google.api.client.http" level="WARN" />
+
     <root level="INFO">
-        <appender-ref ref="FILE"/>
+        <appender-ref ref="LOGFILE"/>
     </root>
 
 </configuration>
