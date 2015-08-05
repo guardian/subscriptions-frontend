@@ -107,13 +107,9 @@ object ETClient extends ETClient with LazyLogging {
     def endpoint = s"$restEndpoint/dataevents/key:$thankYouDataExtensionKey/rows/SubscriberId:${row.subscriptionId}"
 
     Future {
-      logger.info("Sending data extension row...")
-
       val payload = Json.obj(
         "values" -> Json.toJsFieldJsValueWrapper(row.fields.toMap)
       ).toString()
-
-      logger.info(s"Payload: $payload, url: $endpoint")
 
       val body = RequestBody.create(jsonMT, payload)
       val request = new Builder()
@@ -124,9 +120,7 @@ object ETClient extends ETClient with LazyLogging {
       val response = httpClient.newCall(request).execute()
 
       val respBody = response.body().string()
-
-      logger.info(s"Response: $respBody, Code: ${response.code()}, Details: ${response.headers()} ${response.toString})")
-
+      
       response
     }
 
