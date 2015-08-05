@@ -13,7 +13,6 @@ import play.api.mvc._
 import services.CheckoutService.CheckoutResult
 import services._
 import utils.TestUsers
-import views.html.helper.form
 import views.html.{checkout => view}
 
 import scala.concurrent.ExecutionContext.Implicits.global
