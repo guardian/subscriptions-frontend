@@ -3,6 +3,7 @@ package model.exactTarget
 import com.gu.membership.zuora.soap.Zuora._
 import model.SubscriptionData
 import org.joda.time.DateTime
+import scala.math.BigDecimal.decimal
 
 object SubscriptionDataExtensionRow {
   def apply(
@@ -27,8 +28,8 @@ object SubscriptionDataExtensionRow {
       subscription.name,
       "SubscriberKey" -> personalData.email,
       "EmailAddress" -> personalData.email,
-      "Subscription term" -> billingPeriod,
-      "Payment amount" -> ratePlanCharge.price.toString,
+      "Subscription term" -> formatSubscriptionTerm(billingPeriod),
+      "Payment amount" -> formatPrice(ratePlanCharge.price),
       "Default payment method" -> paymentMethod.`type`,
       "First Name" -> personalData.firstName,
       "Last Name" -> personalData.lastName,
@@ -63,6 +64,17 @@ object SubscriptionDataExtensionRow {
     val year = dateTime.year.getAsString
 
     s"$day$daySuffix $month $year"
+  }
+
+  private def formatPrice(price: Float): String = {
+    decimal(price).bigDecimal.stripTrailingZeros.toPlainString
+  }
+
+  private def formatSubscriptionTerm(term: String): String = {
+    term match {
+      case "Annual" => "year"
+      case otherTerm => otherTerm.toLowerCase
+    }
   }
 }
 
