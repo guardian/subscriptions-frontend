@@ -46,7 +46,7 @@ class SalesforceRepo(salesforceConfig: SalesforceConfig) extends MemberRepositor
     override val apiURL =salesforceConfig.apiURL.toString()
     override val stage = salesforceConfig.envName
 
-    val authTask = ScheduledTask("", Authentication("", ""), 0.seconds, 30.minutes)(getAuthentication)
+    lazy val authTask = ScheduledTask("", Authentication("", ""), 0.seconds, 30.minutes)(getAuthentication)
 
     def authentication: Authentication = authTask.get()
   }

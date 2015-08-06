@@ -28,7 +28,7 @@ libraryDependencies ++= Seq(
   ws,
   filters,
   PlayImport.specs2,
-  "com.gu" %% "membership-common" % "0.77",
+  "com.gu" %% "membership-common" % "0.79",
   "com.gu" %% "play-googleauth" % "0.3.0",
   "com.gu" %% "identity-test-users" % "0.5",
   "com.gu.identity" %% "identity-play-auth" % "0.7",
@@ -37,7 +37,8 @@ libraryDependencies ++= Seq(
   "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0",
   "org.scalatest" %% "scalatest" % "2.2.4" % "test",
   "org.seleniumhq.selenium" % "selenium-java" % "2.44.0" % "test",
-  "com.gocardless" % "gocardless-pro" % "1.0.0"
+  "com.gocardless" % "gocardless-pro" % "1.0.0",
+  "com.squareup.okhttp" % "okhttp" % "2.4.0"
 )
 
 testOptions in Test ++= Seq(

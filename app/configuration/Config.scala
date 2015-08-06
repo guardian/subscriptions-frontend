@@ -74,4 +74,10 @@ object Config {
     private val token = config.getString("gocardless.token")
     val client = GoCardlessClient.create(token, Environment.SANDBOX)
   }
+
+  object ExactTarget {
+    val clientId = config.getString("exact-target.client-id")
+    val clientSecret = config.getString("exact-target.client-secret")
+    val thankYouDataExtensionKey = config.getString("exact-target.data-extension-keys.thank-you")
+  }
 }

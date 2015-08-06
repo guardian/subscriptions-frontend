@@ -16,7 +16,6 @@ object TouchpointBackend {
     val salesforceService = new SalesforceServiceImp(salesforceRepo)
     val zuoraService = new ZuoraApiClient(touchpointBackendConfig.zuora, touchpointBackendConfig.digitalProductPlan, touchpointBackendConfig.zuoraProperties)
 
-
     TouchpointBackend(salesforceService, zuoraService)
   }
 
@@ -34,7 +33,7 @@ case class TouchpointBackend(
   zuoraService : ZuoraService
 ) {
 
-  val checkoutService = new CheckoutService(IdentityService, salesforceService, zuoraService)
+  val checkoutService = new CheckoutService(IdentityService, salesforceService, zuoraService, ExactTargetService)
 
   def start() = {
     salesforceService.repo.salesforce.authTask.start()

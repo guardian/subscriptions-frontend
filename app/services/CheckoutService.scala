@@ -13,7 +13,12 @@ object CheckoutService {
   case class CheckoutResult(salesforceMember: MemberId, userIdData: UserIdData, zuoraResult: SubscribeResult)
 }
 
-class CheckoutService(identityService: IdentityService, salesforceService: SalesforceService, zuoraService: ZuoraService) extends LazyLogging {
+class CheckoutService(
+    identityService: IdentityService,
+    salesforceService: SalesforceService,
+    zuoraService: ZuoraService,
+    exactTargetService: ExactTargetService
+    ) extends LazyLogging {
   import CheckoutService.CheckoutResult
 
   def processSubscription(subscriptionData: SubscriptionData,
@@ -26,6 +31,9 @@ class CheckoutService(identityService: IdentityService, salesforceService: Sales
         identityService.updateUserDetails(personalData, authenticatedUser)
       }
     }
+
+    def sendETDataExtensionRow(subscribeResult: SubscribeResult): Future[Unit] =
+      exactTargetService.sendETDataExtensionRow(subscribeResult, subscriptionData, zuoraService)
 
     val userOrElseRegisterGuest: Future[UserIdData] =
       authenticatedUserOpt.map(authenticatedUser => Future {
@@ -41,6 +49,7 @@ class CheckoutService(identityService: IdentityService, salesforceService: Sales
       subscribeResult <- zuoraService.createSubscription(memberId, subscriptionData)
     } yield {
       updateAuthenticatedUserDetails(subscriptionData.personalData)
+      sendETDataExtensionRow(subscribeResult)
       CheckoutResult(memberId, userData, subscribeResult)
     }
   }

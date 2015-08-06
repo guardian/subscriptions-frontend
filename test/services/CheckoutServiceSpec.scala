@@ -2,9 +2,12 @@ package services
 
 import com.gu.identity.play.{AuthenticatedIdUser, IdMinimalUser}
 import com.gu.membership.salesforce.{BasicMember, MemberId}
-import com.gu.membership.zuora.soap.Zuora.{Authentication, SubscribeResult}
+import com.gu.membership.zuora.soap.Zuora._
+import com.squareup.okhttp.Response
+import model.exactTarget.SubscriptionDataExtensionRow
 import model.zuora.SubscriptionProduct
 import model.{PaymentData, PersonalData, SubscriptionData}
+import org.joda.time.DateTime
 import org.scalatest.FreeSpec
 import org.scalatest.concurrent.{Futures, ScalaFutures}
 import org.scalatest.time.{Millis, Seconds, Span}
@@ -43,9 +46,32 @@ class CheckoutServiceSpec extends FreeSpec with Futures with ScalaFutures {
         id = s"Subscribed ${memberId.salesforceContactId}", name = "A-Sxxxxx") }
     }
 
+    override def subscriptionByName(id: String): Future[Subscription] = {
+      val date = new DateTime()
+      Future {
+         Subscription("test","test","213",1,date.plusDays(1),date,date)
+      }
+    }
+
+    override  def ratePlans(subscription: Subscription): Future[Seq[RatePlan]] = ???
+    def defaultPaymentMethod(account: Account): Future[PaymentMethod] = ???
+    def account(subscription: Subscription): Future[Account] = ???
+    def normalRatePlanCharge(subscription: Subscription): Future[RatePlanCharge] = ???
+
     override def authTask: ScheduledTask[Authentication] = ???
 
     override def products: Seq[SubscriptionProduct] = Seq.empty
+  }
+
+  object TestExactTargetService extends ExactTargetService {
+    object TestETClient extends ETClient {
+      override def sendSubscriptionRow(row: SubscriptionDataExtensionRow): Future[Response] = {
+        Future.successful {
+          new Response.Builder().build()
+        }
+      }
+    }
+    override def etClient: ETClient = TestETClient
   }
 
 
@@ -53,7 +79,7 @@ class CheckoutServiceSpec extends FreeSpec with Futures with ScalaFutures {
     val subscriptionData = SubscriptionData(testPersonalData.copy(firstName = "Registered"), PaymentData("", "", "", "", ""), "")
     val updateFlag = new UpdateFlag()
     val service = new CheckoutService(
-      makeIdentityService(updateFlag), TestSalesforceService, TestZuoraService
+      makeIdentityService(updateFlag), TestSalesforceService, TestZuoraService, TestExactTargetService
     )
 
     "for a registered user" - {
@@ -78,7 +104,7 @@ class CheckoutServiceSpec extends FreeSpec with Futures with ScalaFutures {
     "for a guest user" - {
       val updateFlag = new UpdateFlag()
       val service = new CheckoutService(
-        makeIdentityService(updateFlag), TestSalesforceService, TestZuoraService
+        makeIdentityService(updateFlag), TestSalesforceService, TestZuoraService, TestExactTargetService
       )
 
       whenReady(service.processSubscription(subscriptionData, None)) { _ =>
