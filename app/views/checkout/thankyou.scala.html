@@ -1,4 +1,8 @@
-@(subscriptionName: String, personalData: model.PersonalData, guestAccountForm: Option[Form[model.GuestAccountData]] = None)(implicit request: RequestHeader)
+@(subscriptionName: String,
+    personalData: model.PersonalData,
+    guestAccountForm: Option[Form[model.GuestAccountData]] = None,
+    touchpointBackendResolution: services.TouchpointBackend.Resolution
+)(implicit request: RequestHeader)
 
 @import configuration.Details
 @import configuration.Config.Identity.webAppProfileUrl
@@ -7,7 +11,7 @@
 @import routes.Checkout.processFinishAccount
 
 
-@main("Thank you | Subscriptions | The Guardian", bodyClasses=List("is-wide")) {
+@main("Thank you | Subscriptions | The Guardian", bodyClasses=List("is-wide"), touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
 
 <main class="page-container gs-container gs-container--slim">
 

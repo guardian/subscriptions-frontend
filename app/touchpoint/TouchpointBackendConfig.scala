@@ -7,7 +7,13 @@ import com.typesafe.scalalogging.LazyLogging
 import model.zuora.DigitalProductPlan
 import org.joda.time.Period
 
-case class TouchpointBackendConfig(salesforce: SalesforceConfig, zuora: ZuoraApiConfig, zuoraProperties: ZuoraProperties, digitalProductPlan: DigitalProductPlan)
+case class TouchpointBackendConfig(
+  environmentName: String,
+  salesforce: SalesforceConfig,
+  zuora: ZuoraApiConfig,
+  zuoraProperties: ZuoraProperties,
+  digitalProductPlan: DigitalProductPlan
+)
 
 object TouchpointBackendConfig extends LazyLogging {
 
@@ -19,6 +25,7 @@ object TouchpointBackendConfig extends LazyLogging {
 
     object Testing extends BackendType("test")
 
+    val All = Seq(Default, Testing)
   }
 
   def backendType(typ: BackendType = BackendType.Default, config: com.typesafe.config.Config) = {
@@ -36,6 +43,7 @@ object TouchpointBackendConfig extends LazyLogging {
     val envBackendConf = backendsConfig.getConfig(s"environments.$environmentName")
 
     TouchpointBackendConfig(
+      environmentName,
       SalesforceConfig.from(envBackendConf, environmentName),
       ZuoraApiConfig.from(envBackendConf, environmentName),
       ZuoraProperties.from(envBackendConf, environmentName),
