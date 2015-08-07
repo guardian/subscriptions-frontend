@@ -30,7 +30,7 @@ object SubscriptionDataExtensionRow {
       "EmailAddress" -> personalData.email,
       "Subscription term" -> formatSubscriptionTerm(billingPeriod),
       "Payment amount" -> formatPrice(ratePlanCharge.price),
-      "Default payment method" -> paymentMethod.`type`,
+      "Default payment method" -> formatPaymentMethod(paymentMethod.`type`),
       "First Name" -> personalData.firstName,
       "Last Name" -> personalData.lastName,
       "Address 1" -> address.address1,
@@ -41,7 +41,7 @@ object SubscriptionDataExtensionRow {
       "Country" -> "UK",
       "Account Name" -> paymentData.holder,
       "Sort Code" -> paymentData.sortCode,
-      "Account number" -> paymentData.account,
+      "Account number" -> formatAccountNumber(paymentData.account),
       "Date of first payment" -> formatDate(subscription.contractAcceptanceDate),
       "Currency" -> account.currency,
       //TODO to remove, hardcoded in the template
@@ -75,6 +75,18 @@ object SubscriptionDataExtensionRow {
       case "Annual" => "year"
       case otherTerm => otherTerm.toLowerCase
     }
+  }
+
+  private def formatPaymentMethod(method: String): String = {
+    method match {
+      case "BankTransfer" => "Direct Debit"
+      case otherMethod => otherMethod
+    }
+  }
+
+  private def formatAccountNumber(AccountNumber: String): String = {
+    val lastFour = AccountNumber takeRight 4
+    s"****$lastFour"
   }
 }
 
