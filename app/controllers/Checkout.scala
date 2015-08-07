@@ -13,6 +13,7 @@ import play.api.mvc._
 import services.CheckoutService.CheckoutResult
 import services._
 import utils.TestUsers
+import utils.TestUsers.{NameEnteredInForm, PreSigninTestCookie}
 import views.html.{checkout => view}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -26,8 +27,7 @@ object Checkout extends Controller with LazyLogging {
   def renderCheckout = GoogleAuthenticatedStaffAction.async { implicit request =>
 
     val authUserOpt = authenticatedUserFor(request)
-    val touchpointBackend =
-      TouchpointBackend.forRequest(request.cookies.get(Testing.UnauthenticatedTestUserCookieName).map(_.value))
+    val touchpointBackendResolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
 
     def fillForm(): Future[Form[SubscriptionData]] = for {
       fullUserOpt <-authUserOpt.fold[Future[Option[IdUser]]](Future.successful(None))(au => IdentityService.userLookupByScGuU(AuthCookie(au.authCookie)))
@@ -42,7 +42,7 @@ object Checkout extends Controller with LazyLogging {
     for {
       filledForm <- fillForm()
     } yield {
-      Ok(views.html.checkout.payment(filledForm, userIsSignedIn = authUserOpt.isDefined, touchpointBackend.zuoraService.products))
+      Ok(views.html.checkout.payment(filledForm, userIsSignedIn = authUserOpt.isDefined, touchpointBackendResolution))
     }
   }
 
@@ -55,11 +55,11 @@ object Checkout extends Controller with LazyLogging {
     val formData = request.body
     val idUserOpt = authenticatedUserFor(request)
 
-    val touchpointBackend = TouchpointBackend.forRequest(Some(formData.personalData.firstName))
+    val touchpointBackendResolution = TouchpointBackend.forRequest(NameEnteredInForm, formData)
 
-    touchpointBackend.checkoutService.processSubscription(formData, idUserOpt).map { case CheckoutResult(_, userIdData, subscription) =>
+    touchpointBackendResolution.backend.checkoutService.processSubscription(formData, idUserOpt).map { case CheckoutResult(_, userIdData, subscription) =>
       val passwordForm = userIdData.toGuestAccountForm
-      Ok(view.thankyou(subscription.name, formData.personalData, passwordForm))
+      Ok(view.thankyou(subscription.name, formData.personalData, passwordForm, touchpointBackendResolution))
     }
   }
 

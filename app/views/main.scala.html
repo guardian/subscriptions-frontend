@@ -2,8 +2,10 @@
     title: String,
     jsVars: model.JsVars = model.JsVars.default,
     isInternational: Boolean = false,
-    bodyClasses: Seq[String] = Nil
+    bodyClasses: Seq[String] = Nil,
+    touchpointBackendResolutionOpt: Option[services.TouchpointBackend.Resolution] = None
 )(content: Html)
+@import utils.TestUsers.{PreSigninTestCookie, NameEnteredInForm, SignedInUsername}
 
 <!DOCTYPE html>
 <html lang="en-GB">
@@ -11,7 +13,20 @@
     @fragments.head(title, jsVars)
 </head>
     <body class="js-off @bodyClasses.mkString(" ")">
-
+        @for(
+            touchpointBackendResolution <- touchpointBackendResolutionOpt;
+            validTestUserCredential <- touchpointBackendResolution.validTestUserCredentialOpt;
+            backend = touchpointBackendResolution.backend
+        ) {
+            <div class="warning-message">
+                Using @touchpointBackendResolution.typ.name backend: <strong><code>@backend.environmentName</code></strong>
+                because you @validTestUserCredential match {
+                case PreSigninTestCookie => { have a valid <code>@Testing.PreSigninTestCookieName</code> cookie - note you still need to create the user with the Test Username }
+                case NameEnteredInForm => { entered a valid Test Username into the form }
+                case SignedInUsername => { are signed in as a user with a valid Test Username }
+            }
+            </div>
+        }
         @fragments.global.warnings()
         @fragments.global.header()
         @fragments.global.navigation()
