@@ -22,7 +22,6 @@ class Checkout(implicit val driver: WebDriver) extends Page with WebBrowser with
     val postcode = textField(name("personal.address.postcode"))
     val receiveGnmMarketing = checkbox(name("personal.receiveGnmMarketing"))
 
-
     def fillIn(): Unit = {
       val emailValue = s"test-${System.currentTimeMillis()}@gu.com"
       firstName.value = "first"
@@ -33,7 +32,6 @@ class Checkout(implicit val driver: WebDriver) extends Page with WebBrowser with
       address2.value = "address 2"
       town.value = "town"
       postcode.value = "E8123"
-      receiveGnmMarketing.select()
     }
 
     def emailNotValid(): Boolean =
@@ -83,6 +81,7 @@ class Checkout(implicit val driver: WebDriver) extends Page with WebBrowser with
   }
 
   def submit(): Unit = {
+    PersonalDetails.receiveGnmMarketing.select()
     click.on(cssSelector("""input[type="submit"]"""))
   }
 }
