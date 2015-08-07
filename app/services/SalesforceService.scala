@@ -24,9 +24,7 @@ trait SalesforceService extends LazyLogging {
       Keys.MAILING_CITY -> personalData.address.town,
       Keys.MAILING_POSTCODE -> personalData.address.postcode,
       Keys.MAILING_COUNTRY -> "United Kingdom",
-      Keys.ALLOW_MEMBERSHIP_MAIL -> true,
-      Keys.ALLOW_THIRD_PARTY_EMAIL -> true,
-      Keys.ALLOW_GU_RELATED_MAIL -> true)
+      Keys.ALLOW_GU_RELATED_MAIL -> personalData.receiveGnmMarketing)
 
 }
 
