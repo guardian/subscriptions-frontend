@@ -9,6 +9,7 @@ import com.gu.membership.salesforce.SalesforceConfig
 import com.netaporter.uri.dsl._
 import com.typesafe.config.ConfigFactory
 import net.kencochrane.raven.dsn.Dsn
+import play.api.mvc.{Call, RequestHeader}
 
 import scala.util.Try
 
@@ -45,17 +46,15 @@ object Config {
 
     val webAppProfileUrl = webAppUrl / "account" / "edit"
 
-    def webAppSigninUrl(path: String): String =
-      (webAppUrl / "signin") ? ("returnUrl" -> absoluteUrl(path)) ? ("skipConfirmation" -> "true")
+    def idWebAppSigninUrl(returnTo: Call)(implicit request: RequestHeader) = idWebAppUrl("signin", returnTo)
 
-    def idWebAppSignOutUrl(path: String): String =
-      (webAppUrl / "signout") ? ("returnUrl" -> absoluteUrl(path)) ? ("skipConfirmation" -> "true")
+    def idWebAppSignOutUrl(returnTo: Call)(implicit request: RequestHeader) = idWebAppUrl("signout", returnTo)
 
-    def idWebAppRegisterUrl(path : String): String =
-      (webAppUrl / "register") ? ("returnUrl" -> absoluteUrl(path)) ? ("skipConfirmation" -> "true")
+    def idWebAppRegisterUrl(returnTo: Call)(implicit request: RequestHeader) = idWebAppUrl("register", returnTo)
 
+    def idWebAppUrl(idPath: String, returnTo : Call)(implicit request: RequestHeader): String =
+      (webAppUrl / idPath) ? ("returnUrl" -> returnTo.absoluteURL(secure = true)) ? ("skipConfirmation" -> "true")
 
-    private def absoluteUrl(path: String): String = (subscriptionsUrl / path).toString()
   }
 
   object Zuora {

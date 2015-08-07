@@ -44,10 +44,10 @@
                         <div class="fieldset__note fieldset__note--offset">
                             @if(userIsSignedIn) {
                                 <span class="fieldset__note__label">Not you?</span>
-                                <a href="@idWebAppSignOutUrl(renderCheckout().toString())">Sign out</a>
+                                <a href="@idWebAppSignOutUrl(renderCheckout())">Sign out</a>
                             } else {
                                 <span class="fieldset__note__label">Already have a Guardian account?</span>
-                                <a href="@webAppSigninUrl(renderCheckout().toString())">Sign in</a>
+                                <a href="@idWebAppSigninUrl(renderCheckout())">Sign in</a>
                             }
                         </div>
                         <div class="fieldset__edit">
