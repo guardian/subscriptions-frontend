@@ -31,14 +31,15 @@ class ErrorHandler @Inject() (env: Environment,
 
   override protected def onDevServerError(request: RequestHeader, exception: UsefulException): Future[Result] = {
     val default: Handler = { case e =>
-      println(s"Got a bloody server error ${e.getClass}")
       super.onDevServerError(request, exception)
     }
     specialHandler.applyOrElse(exception.cause, default)
   }
 
   override protected def onProdServerError(request: RequestHeader, exception: UsefulException): Future[Result] = {
-    val default: Handler = { case _ => Future.successful(NoCache(InternalServerError(views.html.error500(exception)))) }
+    val default: Handler = { case _ =>
+      Future.successful(NoCache(InternalServerError(views.html.error500(exception))))
+    }
     specialHandler.applyOrElse(exception.cause, default)
   }
 
