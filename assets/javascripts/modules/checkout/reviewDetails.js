@@ -49,60 +49,8 @@ define([
         });
     }
 
-    function mandatePDF() {
-
-        var $mandateLink = formEls.$MANDATE_PDF;
-        var mandateLink = $mandateLink[0];
-
-
-        function setLoadingState(link) {
-            link.setAttribute('disabled', 'disabled');
-            link.textContent = link.getAttribute('data-loading-message');
-        }
-
-        function resetMandateLink(link, label) {
-            link.textContent = label;
-            link.removeAttribute('disabled');
-        }
-
-        function displayErrorMessage(link, label) {
-            link.parentNode.insertAdjacentHTML('afterend', [
-                '<p class="u-error">',
-                    link.getAttribute('data-error-message'),
-                '</p>'
-            ].join(''));
-            resetMandateLink(link, label);
-        }
-
-        clickHelper($mandateLink, function() {
-
-            var formData = ajax.reqwest.serialize(formEls.$CHECKOUT_FORM[0]);
-            var originalLabel = mandateLink.textContent;
-
-            setLoadingState(mandateLink);
-
-            ajax({
-                method: 'POST',
-                data: formData,
-                url: '/checkout/mandate-pdf'
-            }).then(function (resp) {
-                if(resp && resp.mandatePDFUrl) {
-                    resetMandateLink(mandateLink, originalLabel);
-                    window.open(resp.mandatePDFUrl);
-                } else {
-                    displayErrorMessage(mandateLink, originalLabel);
-                }
-            }).catch(function (err) {
-                displayErrorMessage(mandateLink, originalLabel);
-                Raven.captureException(err);
-            });
-
-        });
-    }
-
     function init() {
         populateDetails();
-        mandatePDF();
     }
 
     return {
