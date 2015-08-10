@@ -34,8 +34,7 @@
             <form class="form js-checkout-form" method="POST">
 
                 @* ===== Your details ===== *@
-                <a name="yourDetails"></a>
-                <fieldset class="fieldset js-fieldset-your-details">
+                <fieldset id="yourDetails" class="fieldset js-fieldset-your-details">
                     @helper.CSRF.formField
 
                     <div class="fieldset__heading">
@@ -110,8 +109,7 @@
                 </fieldset>
 
                 @* ===== Payment ===== *@
-                <a name="paymentDetails"></a>
-                <fieldset class="fieldset fieldset--collapsed js-fieldset-payment-details">
+                <fieldset id="paymentDetails" class="fieldset fieldset--collapsed js-fieldset-payment-details">
                     <div class="fieldset__heading">
                         <legend class="fieldset__headline">
                             <span class="fieldset__headline__num">2</span> Payment details
@@ -170,8 +168,7 @@
                 </fieldset>
 
                 @* ===== Review ===== *@
-                <a name="formReview"></a>
-                <fieldset class="fieldset fieldset--single fieldset--collapsed js-fieldset-review">
+                <fieldset id="formReview" class="fieldset fieldset--single fieldset--collapsed js-fieldset-review">
                     <div class="fieldset__heading">
                         <legend class="fieldset__headline">
                             <span class="fieldset__headline__num">3</span> Review and confirm
