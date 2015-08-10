@@ -34,6 +34,7 @@
             <form class="form js-checkout-form" method="POST">
 
                 @* ===== Your details ===== *@
+                <a name="yourDetails"></a>
                 <fieldset class="fieldset js-fieldset-your-details">
                     @helper.CSRF.formField
 
@@ -51,7 +52,7 @@
                             }
                         </div>
                         <div class="fieldset__edit">
-                            <button class="text-button u-button-reset js-edit-your-details">Edit</button>
+                            <a href="#yourDetails" class="text-button u-button-reset js-edit-your-details">Edit</a>
                         </div>
                     </div>
                     <div class="fieldset__fields">
@@ -103,12 +104,13 @@
                         </div>
 
                         <div class="actions">
-                            <button class="button button--primary button--large js-checkout-your-details-submit">Continue</button>
+                            <a href="#paymentDetails" class="button button--primary button--large js-checkout-your-details-submit">Continue</a>
                         </div>
                     </div>
                 </fieldset>
 
                 @* ===== Payment ===== *@
+                <a name="paymentDetails"></a>
                 <fieldset class="fieldset fieldset--collapsed js-fieldset-payment-details">
                     <div class="fieldset__heading">
                         <legend class="fieldset__headline">
@@ -119,7 +121,7 @@
                             Payment will be taken by Direct Debit
                         </div>
                         <div class="fieldset__edit">
-                            <button class="text-button u-button-reset js-edit-payment-details">Edit</button>
+                            <a href="#paymentDetails" class="text-button u-button-reset js-edit-payment-details">Edit</a>
                         </div>
                     </div>
                     <div class="fieldset__fields">
@@ -162,12 +164,13 @@
                             @fragments.forms.errorMessage("Please confirm that you are the account holder")
                         </div>
                         <div class="actions">
-                            <button class="button button--primary button--large js-checkout-payment-details-submit">Continue</button>
+                            <a href="#formReview" class="button button--primary button--large js-checkout-payment-details-submit">Continue</a>
                         </div>
                     </div>
                 </fieldset>
 
                 @* ===== Review ===== *@
+                <a name="formReview"></a>
                 <fieldset class="fieldset fieldset--single fieldset--collapsed js-fieldset-review">
                     <div class="fieldset__heading">
                         <legend class="fieldset__headline">
