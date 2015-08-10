@@ -22,8 +22,6 @@ import AuthenticationService.authenticatedUserFor
 
 object Checkout extends Controller with LazyLogging {
 
-  private val goCardlessService = GoCardlessService
-
   def renderCheckout = GoogleAuthenticatedStaffAction.async { implicit request =>
 
     val authUserOpt = authenticatedUserFor(request)
@@ -61,16 +59,6 @@ object Checkout extends Controller with LazyLogging {
       val passwordForm = userIdData.toGuestAccountForm
       Ok(view.thankyou(subscription.name, formData.personalData, passwordForm, touchpointBackendResolution))
     }
-  }
-
-  def mandatePDF = GoogleAuthenticatedStaffAction.async { implicit request =>
-    SubscriptionsForm.paymentDataForm.bindFromRequest.fold(
-      handleWithBadRequest,
-      paymentData =>
-        goCardlessService.mandatePDFUrl(paymentData).map(url =>
-          Ok(Json.obj("mandatePDFUrl" -> url))
-        )
-    )
   }
 
   def processFinishAccount = GoogleAuthenticatedStaffAction.async { implicit request =>
