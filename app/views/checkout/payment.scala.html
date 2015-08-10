@@ -125,28 +125,20 @@
                     <div class="fieldset__fields">
                         <div class="form-field js-checkout-account">
                             <label class="label" for="account">Bank account number</label>
-                            <input type="number" class="input-text js-input" name="payment.account">
+                            <input type="text" pattern="[0-9]*" minlength="6" maxlength="10" class="input-text js-input" name="payment.account">
                             @fragments.forms.errorMessage("Please enter between 6 and 10 digits for the account number")
                         </div>
                         <div class="form-field js-checkout-sortcode">
                             <label class="label" for="sortcode">Bank sort code</label>
-                            <input type="number"
-                                class="input-text input-text--xsmall js-input js-checkout-sortcode1"
-                                max="99" name="payment.sortcode1"
-                            > -
-                            <input type="number"
-                                class="input-text input-text--xsmall js-input js-checkout-sortcode2"
-                                max="99" name="payment.sortcode2"
-                            > -
-                            <input type="number"
-                                class="input-text input-text--xsmall js-input js-checkout-sortcode3"
-                                max="99" name="payment.sortcode3"
-                            >
-                            @fragments.forms.errorMessage("Please enter 2 digits for each sort code field")
+                            <input type="text" class="input-text input-text--small js-input"
+                                name="payment.sortcode" pattern="[0-9]*" maxlength="8"
+                                placeholder="00-00-00" required
+                                data-masker-delim="-" data-masker-length="2">
+                            @fragments.forms.errorMessage("")
                         </div>
                         <div class="form-field js-checkout-holder">
                             <label class="label" for="holder">Name of account holder</label>
-                            <input type="text" class="input-text js-input" name="payment.holder">
+                            <input type="text" maxlength="18" class="input-text js-input" name="payment.holder">
                             @* TODO: Why limited to 18 characters? *@
                             @fragments.forms.errorMessage("Please enter between 1 and 18 characters for the account holder name")
                         </div>

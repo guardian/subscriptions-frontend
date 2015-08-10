@@ -2,8 +2,10 @@ package model
 
 import com.gu.identity.play.IdUser
 
-case class PaymentData(account: String, sortCode1: String, sortCode2: String, sortCode3: String, holder: String) {
-  val sortCode = s"$sortCode1$sortCode2$sortCode3"
+case class PaymentData(account: String, sortCodeValue: String, holder: String) {
+  val sortCode = sortCodeValue
+    .replaceAll(" ", "")
+    .trim.replaceAll("-", "")
 }
 
 case class AddressData(address1: String, address2: String, town: String, postcode: String) {
@@ -42,7 +44,7 @@ object SubscriptionData {
       addressData
     )
 
-    val blankPaymentData = PaymentData("", "", "", "", "")
+    val blankPaymentData = PaymentData("", "", "")
 
     val blankRatePlanId = ""
 

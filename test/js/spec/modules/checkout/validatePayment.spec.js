@@ -7,25 +7,25 @@ define(['modules/checkout/validatePayment'], function (validatePayment) {
             var tooShort = {
                 accountNumber: '123',
                 accountHolderName: '',
-                sortCodeParts: [],
+                sortCode: null,
                 detailsConfirmed: false
             };
             var tooLong = {
                 accountNumber: '123456789101112',
                 accountHolderName: '',
-                sortCodeParts: [],
+                sortCode: null,
                 detailsConfirmed: false
             };
             var justRightLow = {
                 accountNumber: '123456',
                 accountHolderName: '',
-                sortCodeParts: [],
+                sortCode: null,
                 detailsConfirmed: false
             };
             var justRightHigh = {
                 accountNumber: '1234567890',
                 accountHolderName: '',
-                sortCodeParts: [],
+                sortCode: null,
                 detailsConfirmed: false
             };
 
@@ -39,13 +39,13 @@ define(['modules/checkout/validatePayment'], function (validatePayment) {
             var tooLong = {
                 accountNumber: '',
                 accountHolderName: 'This name is longer than 18 characters',
-                sortCodeParts: [],
+                sortCode: null,
                 detailsConfirmed: false
             };
             var valid = {
                 accountNumber: '',
                 accountHolderName: 'Example Name',
-                sortCodeParts: [],
+                sortCode: null,
                 detailsConfirmed: false
             };
             expect((validatePayment(tooLong)).accountHolderNameValid).toBe(false);
@@ -57,19 +57,19 @@ define(['modules/checkout/validatePayment'], function (validatePayment) {
             var tooShort = {
                 accountNumber: '',
                 accountHolderName: '',
-                sortCodeParts: ['01', '01'],
+                sortCode: '00-00',
                 detailsConfirmed: false
             };
             var tooLong = {
                 accountNumber: '',
                 accountHolderName: '',
-                sortCodeParts: ['01', '01', '1000'],
+                sortCode: '01-01-0100',
                 detailsConfirmed: false
             };
             var justRight = {
                 accountNumber: '',
                 accountHolderName: '',
-                sortCodeParts: ['01', '01', '01'],
+                sortCode: '01-01-01',
                 detailsConfirmed: false
             };
 
@@ -84,14 +84,14 @@ define(['modules/checkout/validatePayment'], function (validatePayment) {
             var valid = validatePayment({
                 accountNumber: '12346789',
                 accountHolderName: 'Example Name',
-                sortCodeParts: ['01', '01', '01'],
+                sortCode: '01-01-01',
                 detailsConfirmed: true
             });
 
             var invalid = validatePayment({
                 accountNumber: '12346789',
                 accountHolderName: 'This name is longer than 18 characters',
-                sortCodeParts: ['01', '01', '100', '10000'],
+                sortCode: '01-01-0100',
                 detailsConfirmed: true
             });
 

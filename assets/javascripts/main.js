@@ -5,6 +5,7 @@ require([
     'modules/optionMirror',
     'modules/appendAround',
     'modules/password',
+    'modules/inputMask',
     'modules/checkout',
     'modules/confirmation',
     'modules/patterns',
@@ -18,6 +19,7 @@ require([
     appendAround,
     optionMirror,
     password,
+    inputMask,
     checkout,
     confirmation,
     patterns
@@ -42,6 +44,7 @@ require([
     appendAround.init();
     password.init();
 
+    inputMask.init();
     checkout.init();
     confirmation.init();
 

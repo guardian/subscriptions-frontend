@@ -17,12 +17,9 @@ define(['modules/forms/regex'], function (regex) {
             data.accountHolderName.length <= 18
         );
 
-        validity.sortCodeValid = data.sortCodeParts.filter(function (code) {
+        validity.sortCodeValid = data.sortCode && (data.sortCode.split('-')).filter(function(code) {
             var codeAsNumber = parseInt(code, 10);
-            return (
-                code.length === 2 &&
-                codeAsNumber >= 0 && codeAsNumber <= 99
-            );
+            return codeAsNumber >= 0 && codeAsNumber <= 99;
         }).length === 3;
 
         validity.detailsConfirmedValid = data.detailsConfirmed;
