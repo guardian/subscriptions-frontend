@@ -25,7 +25,10 @@
         </div>
     </div>
     <div class="review-details__actions">
-        <p class="u-note">Your subscription includes a range of exclusive benefits. From time to time we’ll send you details. These may include special offers from partners, but will be sent to you from Guardian subscriptions.</p>
+        <p class="u-note">
+            Your subscription includes a range of exclusive benefits.
+            These may include special offers from other companies, but will be sent to you from Guardian Subscriptions.
+        </p>
 
         <label class="option u-pad-bottom" for="receive-gnm-marketing">
         @defining(form.data.get("personal.receiveGnmMarketing")) { gnmMarketingOpt =>
@@ -42,12 +45,18 @@
             </span>
         </label>
 
+        <p class="u-note">
+            Guardian News &amp; Media will not share your data with any 3rd party companies.
+            Our <a href="@Links.privacyPolicy.href" target="_blank">@Links.privacyPolicy.title</a>
+            explains in further detail how we use your information and you can find out why your data matters to us here.
+        </p>
+
         <input type="submit" class="button button--primary button--large u-margin-bottom" value="Submit payment">
 
         <p class="u-note">
-            By proceeding you agree to the Guardian's
-            <a href="@Links.termsOfService.href" target="_blank">@Links.termsOfService.title</a> and
-            <a href="@Links.privacyPolicy.href" target="_blank">@Links.privacyPolicy.title</a>
+            By proceeding you agree to the
+            <a href="@Links.terms.href" target="_blank">@Links.terms.title</a>
+            for Guardian Digital Pack subscriptions.
         </p>
 
         <p class="u-note">
