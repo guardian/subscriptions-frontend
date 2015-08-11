@@ -13,7 +13,7 @@
 1. Run `npm install -g bower`
    Bower is a command-line utility, a package manager that makes it easy to manage all the application’s front-end dependencies. It works by fetching and installing packages
 1. Change the ownership of the 'gu' directory under 'etc' to current user.
-   subscriptions-frontend$ sudo -i chown -R {username} /etc/gu
+   `$ sudo -i chown -R {username} /etc/gu`
 1. Run `./nginx/setup.sh`
 1. Setup AWS credentials (we use the gu-membership account). Ask your teammate to create an account for you and securely send you the access key. For security, you must enable [MFA](http://aws.amazon.com/iam/details/mfa/).
 
