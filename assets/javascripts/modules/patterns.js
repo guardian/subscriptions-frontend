@@ -41,6 +41,21 @@ define(function() {
         }
     }
 
+    function iconGrid() {
+        var SVG_EMBED = document.getElementById('svg-sprite');
+        var ICON_GRID = document.querySelectorAll('.js-icon-grid');
+        [].forEach.call(ICON_GRID, function(grid) {
+            var iconList = [].map.call(SVG_EMBED.querySelectorAll('symbol'), function(symbol) {
+                return symbol.id;
+            });
+            var html = iconList.map(function(id) {
+                return '<svg class="icon-inline"><use xlink:href="#' + id + '"/></use></svg>';
+            }).join('');
+            grid.innerHTML = html;
+        });
+    }
+
+
     function init() {
 
         var patterns = buildItems('.js-pattern-item'),
@@ -50,6 +65,7 @@ define(function() {
             select = buildSelect(patterns);
             renderPatternNav('.js-pattern-nav', select);
             bindNavEvents('.js-pattern-selector');
+            iconGrid();
         }
 
     }
