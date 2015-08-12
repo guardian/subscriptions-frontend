@@ -65,14 +65,14 @@
                             <input type="text" class="input-text js-input" name="personal.last" id="last" value="@form.data.get("personal.last")">
                             @fragments.forms.errorMessage("This field is required")
                         </div>
-                        <div class="form-field js-checkout-email">
+                        <div class="form-field @if(!userIsSignedIn) {js-checkout-email}">
                             <label class="label" for="email">Email address</label>
                             <input type="email" class="input-text js-input" name="personal.emailValidation.email" id="email" value="@form.data.get("personal.emailValidation.email")" @readonly>
                             @fragments.forms.errorMessage("")
                         </div>
-                        <div class="form-field js-checkout-confirm-email">
+                        <div class="form-field @if(!userIsSignedIn) {js-checkout-confirm-email}">
                             @if(userIsSignedIn) {
-                                <input type="hidden" class="js-input" name="personal.emailValidation.confirm" id="confirm" value="@form.data.get("personal.emailValidation.confirm")">
+                                <input type="hidden" name="personal.emailValidation.confirm" id="confirm" value="@form.data.get("personal.emailValidation.confirm")">
                             } else {
                                 <label class="label" for="confirm">Confirm email address</label>
                                 <input type="email" class="input-text js-input" name="personal.emailValidation.confirm" id="confirm" value="@form.data.get("personal.emailValidation.confirm")">

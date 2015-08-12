@@ -3,9 +3,7 @@ package model
 import com.gu.identity.play.IdUser
 
 case class PaymentData(account: String, sortCodeValue: String, holder: String) {
-  val sortCode = sortCodeValue
-    .replaceAll(" ", "")
-    .trim.replaceAll("-", "")
+  val sortCode = sortCodeValue.filter(_.isDigit)
 }
 
 case class AddressData(address1: String, address2: String, town: String, postcode: String) {
