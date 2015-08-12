@@ -12,9 +12,7 @@ object CommonActions {
 
   val NoCacheAction = resultModifier(noCache)
 
-  val GoogleAuthAction = OAuthActions.AuthAction
-
-  val GoogleAuthenticatedStaffAction = NoCacheAction andThen PreReleaseFeature
+  val GoogleAuthenticatedStaffAction = NoCacheAction andThen OAuthActions.AuthAction
 
   val CachedAction = resultModifier(Cached(_))
 
