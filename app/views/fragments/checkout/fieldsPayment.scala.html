@@ -14,10 +14,16 @@
     @fragments.forms.errorMessage("")
 </div>
 <div class="form-field js-checkout-holder">
+    @*
+        BACS requirement:
+        "The payer’s account name (maximum of 18 characters).
+        This must be the name of the person who is paying the Direct Debit
+        and has signed the Direct Debit Instruction (DDI)."
+        http://www.bacs.co.uk/Bacs/Businesses/Resources/Pages/Glossary.aspx
+    *@
     <label class="label" for="payment-holder">Name of account holder</label>
     <input type="text" maxlength="18" class="input-text js-input" id="payment-holder" name="payment.holder">
-    @* TODO: Why limited to 18 characters? *@
-    @fragments.forms.errorMessage("Please enter between 1 and 18 characters for the account holder name")
+    @fragments.forms.errorMessage("The account holder name must be less that 18 characters")
 </div>
 <div class="form-field js-checkout-confirm-payment">
     <label class="option">
