@@ -22,7 +22,7 @@ import AuthenticationService.authenticatedUserFor
 
 object Checkout extends Controller with LazyLogging {
 
-  def renderCheckout = GoogleAuthenticatedStaffAction.async { implicit request =>
+  def renderCheckout = NoCacheAction.async { implicit request =>
 
     val authUserOpt = authenticatedUserFor(request)
     val touchpointBackendResolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
@@ -49,7 +49,7 @@ object Checkout extends Controller with LazyLogging {
     BadRequest
   })
 
-  def handleCheckout = GoogleAuthenticatedStaffAction.async(parseCheckoutForm) { implicit request =>
+  def handleCheckout = NoCacheAction.async(parseCheckoutForm) { implicit request =>
     val formData = request.body
     val idUserOpt = authenticatedUserFor(request)
 
@@ -61,7 +61,7 @@ object Checkout extends Controller with LazyLogging {
     }
   }
 
-  def processFinishAccount = GoogleAuthenticatedStaffAction.async { implicit request =>
+  def processFinishAccount = NoCacheAction.async { implicit request =>
     FinishAccountForm().bindFromRequest.fold(
       handleWithBadRequest,
       guestAccountData => {
