@@ -1,8 +1,8 @@
 define(['bean', 'modules/checkout/formElements'], function (bean, formEls) {
     'use strict';
 
-    var FIELDSET_COMPLETE = 'fieldset--complete';
-    var FIELDSET_COLLAPSED = 'fieldset--collapsed';
+    var FIELDSET_COMPLETE = 'is-complete';
+    var FIELDSET_COLLAPSED = 'is-collapsed';
 
     function collapseFieldsets(extra) {
         [

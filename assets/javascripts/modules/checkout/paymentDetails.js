@@ -13,9 +13,8 @@ define([
 ) {
     'use strict';
 
-    var FIELDSET_COLLAPSED = 'fieldset--collapsed';
-    var FIELDSET_COMPLETE = 'fieldset--complete';
-    var FIELDSET_COMPLETE_ATTR = 'data-fieldset-complete';
+    var FIELDSET_COMPLETE = 'is-complete';
+    var FIELDSET_COLLAPSED = 'is-collapsed';
 
     function displayErrors(validity) {
         toggleError(formEls.$ACCOUNT_CONTAINER, !validity.accountNumberValid);
@@ -27,8 +26,7 @@ define([
     function nextStep() {
         formEls.$FIELDSET_PAYMENT_DETAILS
             .addClass(FIELDSET_COLLAPSED)
-            .addClass(FIELDSET_COMPLETE)
-            .attr(FIELDSET_COMPLETE_ATTR, '');
+            .addClass(FIELDSET_COMPLETE);
 
         formEls.$FIELDSET_REVIEW
             .removeClass(FIELDSET_COLLAPSED);

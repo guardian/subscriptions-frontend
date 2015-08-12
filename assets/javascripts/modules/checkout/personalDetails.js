@@ -9,9 +9,8 @@ define([
 ) {
     'use strict';
 
-    var FIELDSET_COLLAPSED = 'fieldset--collapsed';
-    var FIELDSET_COMPLETE = 'fieldset--complete';
-    var FIELDSET_COMPLETE_ATTR = 'data-fieldset-complete';
+    var FIELDSET_COMPLETE = 'is-complete';
+    var FIELDSET_COLLAPSED = 'is-collapsed';
 
     var requiredFields = [
         {input: formEls.$FIRST_NAME, container: formEls.$FIRST_NAME_CONTAINER},
@@ -47,8 +46,7 @@ define([
     function nextStep() {
         formEls.$FIELDSET_YOUR_DETAILS
             .addClass(FIELDSET_COLLAPSED)
-            .addClass(FIELDSET_COMPLETE)
-            .attr(FIELDSET_COMPLETE_ATTR, '');
+            .addClass(FIELDSET_COMPLETE);
 
         formEls.$FIELDSET_PAYMENT_DETAILS
             .removeClass(FIELDSET_COLLAPSED);
