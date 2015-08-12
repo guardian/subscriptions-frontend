@@ -1,5 +1,20 @@
 # Subscriptions frontend
 
+### NGinx
+
+   To run standalone you can use the default nginx installation as follows:
+
+   Install nginx:
+
+   Mac OSX: `brew install nginx`
+
+   Make sure you have a sites-enabled folder under your nginx home. This should be
+
+   Mac OSX: `~/Developers/etc/nginx/sites-enabled` or `/usr/local/etc/nginx/`
+   Make sure your nginx.conf (found in your nginx home) contains the following line in the `http{...}` block: `include sites-enabled/*`;
+
+   Run: `./nginx/setup.sh`
+
 ## General Setup
 
 1. Go to project root
@@ -8,6 +23,7 @@
 
    ```
    127.0.0.1   sub.thegulocal.com
+   127.0.0.1   profile.thegulocal.com
    ```
 
 1. Run `npm install -g bower`
