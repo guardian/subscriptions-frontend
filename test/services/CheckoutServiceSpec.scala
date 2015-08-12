@@ -76,7 +76,7 @@ class CheckoutServiceSpec extends FreeSpec with Futures with ScalaFutures {
 
 
   "processSubscription" - {
-    val subscriptionData = SubscriptionData(testPersonalData.copy(firstName = "Registered"), PaymentData("", "", "", "", ""), "")
+    val subscriptionData = SubscriptionData(testPersonalData.copy(firstName = "Registered"), PaymentData("", "", ""), "")
     val updateFlag = new UpdateFlag()
     val service = new CheckoutService(
       makeIdentityService(updateFlag), TestSalesforceService, TestZuoraService, TestExactTargetService

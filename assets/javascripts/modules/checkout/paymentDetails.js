@@ -38,11 +38,7 @@ define([
         var validity = validatePayment({
             accountNumber: formEls.$ACCOUNT.val(),
             accountHolderName: formEls.$HOLDER.val(),
-            sortCodeParts: [
-                formEls.$SORTCODE1.val(),
-                formEls.$SORTCODE2.val(),
-                formEls.$SORTCODE3.val()
-            ],
+            sortCode: formEls.$SORTCODE.val(),
             detailsConfirmed: formEls.$CONFIRM_PAYMENT[0].checked
         });
         displayErrors(validity);

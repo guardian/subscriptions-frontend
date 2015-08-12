@@ -52,9 +52,7 @@ object SubscriptionsForm {
 
   val paymentDataMapping = mapping(
     "account" -> text(6, 10),
-    "sortcode1" -> text(2, 2),
-    "sortcode2" -> text(2, 2),
-    "sortcode3" -> text(2, 2),
+    "sortcode" -> text(6, 8),
     "holder" -> text
   )(PaymentData.apply)(PaymentData.unapply)
 

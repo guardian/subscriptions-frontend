@@ -38,10 +38,8 @@ define([
             ], ''));
 
             formEls.$REVIEW_SORTCODE.text(textUtils.mergeValues([
-                formEls.$SORTCODE1.val(),
-                formEls.$SORTCODE2.val(),
-                formEls.$SORTCODE3.val()
-            ], '-'));
+                formEls.$SORTCODE.val()
+            ], ''));
 
             formEls.$REVIEW_HOLDER.text(textUtils.mergeValues([
                 formEls.$HOLDER.val()

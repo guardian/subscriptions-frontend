@@ -14,9 +14,8 @@ define(['$'], function ($) {
         $ADDRESS3: $('.js-checkout-town .js-input'),
         $POSTCODE: $('.js-checkout-postcode .js-input'),
         $ACCOUNT: $('.js-checkout-account .js-input'),
-        $SORTCODE1: $('.js-checkout-sortcode1'),
-        $SORTCODE2: $('.js-checkout-sortcode2'),
-        $SORTCODE3: $('.js-checkout-sortcode3'),
+        $SORTCODE: $('.js-checkout-sortcode .js-input'),
+
         $HOLDER: $('.js-checkout-holder .js-input'),
         $FULL_ADDRESS: $('.js-checkout-full-address .js-input'),
         $CONFIRM_PAYMENT: $('.js-checkout-confirm-payment .js-input'),
