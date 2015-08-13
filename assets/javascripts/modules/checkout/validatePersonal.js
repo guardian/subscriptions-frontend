@@ -12,7 +12,7 @@ define([
         });
     }
 
-    return function(data) {
+    return function(data, isSignedIn) {
 
         var MESSAGES = {
             emailInvalid: 'Please enter a valid email address.',
@@ -25,8 +25,6 @@ define([
          * validation process can be asyncronous.
          */
         return new Promise(function (resolve) {
-
-            var isSignedIn = guardian.user.isSignedIn;
 
             var emailValue = data.emailAddress;
             var confirmedEmailValue = data.emailAddressConfirmed;
