@@ -104,7 +104,7 @@ object ETClient extends ETClient with LazyLogging {
    * See https://code.exacttarget.com/apis-sdks/rest-api/v1/hub/data-events/putDataExtensionRowByKey.html
    */
   override def sendSubscriptionRow(row: SubscriptionDataExtensionRow): Future[Response] = {
-    def endpoint = s"$restEndpoint/dataevents/key:$thankYouDataExtensionKey/rows/SubscriberId:${row.subscriptionId}"
+    def endpoint = s"$restEndpoint/dataevents/key:$thankYouDataExtensionKey/rows/ZuoraSubscriberId:${row.subscriptionId}"
 
     Future {
       val payload = Json.obj(

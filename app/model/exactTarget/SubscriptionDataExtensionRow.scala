@@ -3,6 +3,7 @@ package model.exactTarget
 import com.gu.membership.zuora.soap.Zuora._
 import model.SubscriptionData
 import org.joda.time.DateTime
+import scala.math.BigDecimal.decimal
 
 object SubscriptionDataExtensionRow {
   def apply(
@@ -27,9 +28,9 @@ object SubscriptionDataExtensionRow {
       subscription.name,
       "SubscriberKey" -> personalData.email,
       "EmailAddress" -> personalData.email,
-      "Subscription term" -> billingPeriod,
-      "Payment amount" -> ratePlanCharge.price.toString,
-      "Default payment method" -> paymentMethod.`type`,
+      "Subscription term" -> formatSubscriptionTerm(billingPeriod),
+      "Payment amount" -> formatPrice(ratePlanCharge.price),
+      "Default payment method" -> formatPaymentMethod(paymentMethod.`type`),
       "First Name" -> personalData.firstName,
       "Last Name" -> personalData.lastName,
       "Address 1" -> address.address1,
@@ -39,10 +40,10 @@ object SubscriptionDataExtensionRow {
       //TODO hardcoded!
       "Country" -> "UK",
       "Account Name" -> paymentData.holder,
-      "Sort Code" -> paymentData.sortCode,
-      "Account number" -> paymentData.account,
+      "Sort Code" -> formatSortCode(paymentData.sortCode),
+      "Account number" -> formatAccountNumber(paymentData.account),
       "Date of first payment" -> formatDate(subscription.contractAcceptanceDate),
-      "Currency" -> account.currency,
+      "Currency" -> formatCurrency(account.currency),
       //TODO to remove, hardcoded in the template
       "Trial period" -> "14",
       "MandateID" -> paymentMethod.mandateId,
@@ -63,6 +64,40 @@ object SubscriptionDataExtensionRow {
     val year = dateTime.year.getAsString
 
     s"$day$daySuffix $month $year"
+  }
+
+  private def formatPrice(price: Float): String = {
+    decimal(price).bigDecimal.stripTrailingZeros.toPlainString
+  }
+
+  private def formatSubscriptionTerm(term: String): String = {
+    term match {
+      case "Annual" => "year"
+      case otherTerm => otherTerm.toLowerCase
+    }
+  }
+
+  private def formatPaymentMethod(method: String): String = {
+    method match {
+      case "BankTransfer" => "Direct Debit"
+      case otherMethod => otherMethod
+    }
+  }
+
+  private def formatAccountNumber(AccountNumber: String): String = {
+    val lastFour = AccountNumber takeRight 4
+    s"****$lastFour"
+  }
+
+  private def formatSortCode(sortCode: String): String = {
+    sortCode.grouped(2).mkString("-")
+  }
+
+  private def formatCurrency(currency: String): String = {
+    currency match {
+      case "GBP" => "£"
+      case other => other
+    }
   }
 }
 
