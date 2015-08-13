@@ -1,5 +1,5 @@
 /*global Raven, s_gi */
-define(function () {
+define(['modules/checkout/omniture'], function (checkoutOmniture) {
     'use strict';
 
     function onSuccess() {
@@ -19,6 +19,8 @@ define(function () {
         s.prop42 = 'Subscriber';
         s.prop47 = 'UK';
         s_code = s.t();
+
+        checkoutOmniture.init(s);
 
         if (s_code) {
             /*jslint evil: true */
