@@ -20,21 +20,29 @@ define([
             emailFailure: 'There has been a problem. Please try again later.'
         };
 
+        /**
+         * Return validity object as a promise as parts of the
+         * validation process can be asyncronous.
+         */
         return new Promise(function (resolve) {
 
+            var isSignedIn = guardian.user.isSignedIn;
+
             var emailValue = data.emailAddress;
+            var confirmedEmailValue = data.emailAddressConfirmed;
+
             var hasValidEmail = regex.isValidEmail(emailValue);
-            var confirmationEmailValue = data.emailAddressConfirmed;
-            var hasConfirmedEmail = emailValue === confirmationEmailValue;
+            var hasConfirmedEmail = emailValue === confirmedEmailValue;
 
             var emptyFields = data.requiredFieldValues.filter(function (field) {
                 return !field;
             });
 
-            var hasBasicValidity = (
+            var hasBasicValidity = !emptyFields.length;
+
+            var hasBasicEmailValidity = (
                 hasValidEmail &&
-                hasConfirmedEmail &&
-                !emptyFields.length
+                hasConfirmedEmail
             );
 
             var validity = {
@@ -48,10 +56,22 @@ define([
             };
 
             if(hasBasicValidity) {
-                if( guardian.user.isSignedIn ) {
+
+                /**
+                 * If the user is signed in we do not need to
+                 * validate their email address
+                 */
+                if(isSignedIn) {
                     validity.allValid = true;
                     resolve(validity);
-                } else {
+                }
+
+                /**
+                 * If the user is anonymous / signed-out we need to:
+                 * a) validate their email address
+                 * b) confirm their email address is not in use
+                 */
+                if(!isSignedIn && hasBasicEmailValidity) {
                     emailCheck(emailValue).then(function(isEmailInUse) {
                         if(isEmailInUse) {
                             validity.isEmailInUse = true;
@@ -62,15 +82,20 @@ define([
                             validity.emailMessage = false;
                             resolve(validity);
                         }
-                    }).fail(function(err) {
-                        Raven.captureException(err);
+                    }).fail(function() {
                         validity.emailMessage = MESSAGES.emailFailure;
                         resolve(validity);
                     });
+                } else {
+                    resolve(validity);
                 }
+
             } else {
                 resolve(validity);
             }
+
+
+
         });
     };
 
