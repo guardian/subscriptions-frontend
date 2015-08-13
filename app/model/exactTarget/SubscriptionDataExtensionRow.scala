@@ -40,10 +40,10 @@ object SubscriptionDataExtensionRow {
       //TODO hardcoded!
       "Country" -> "UK",
       "Account Name" -> paymentData.holder,
-      "Sort Code" -> paymentData.sortCode,
+      "Sort Code" -> formatSortCode(paymentData.sortCode),
       "Account number" -> formatAccountNumber(paymentData.account),
       "Date of first payment" -> formatDate(subscription.contractAcceptanceDate),
-      "Currency" -> account.currency,
+      "Currency" -> formatCurrency(account.currency),
       //TODO to remove, hardcoded in the template
       "Trial period" -> "14",
       "MandateID" -> paymentMethod.mandateId,
@@ -87,6 +87,17 @@ object SubscriptionDataExtensionRow {
   private def formatAccountNumber(AccountNumber: String): String = {
     val lastFour = AccountNumber takeRight 4
     s"****$lastFour"
+  }
+
+  private def formatSortCode(sortCode: String): String = {
+    sortCode.grouped(2).mkString("-")
+  }
+
+  private def formatCurrency(currency: String): String = {
+    currency match {
+      case "GBP" => "£"
+      case other => other
+    }
   }
 }
 
