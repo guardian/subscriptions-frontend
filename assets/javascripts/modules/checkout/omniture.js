@@ -1,46 +1,37 @@
-define(function () {
+define(['$'], function ($) {
     'use strict';
 
     var omniture = {};
 
-    function sendEvent(prop17, products) {
-        if (prop17) {
-            omniture.prop17 = prop17;
+    function getSubscriptionInfo(){
+        var selectedFrequency = $('.js-option-mirror-group input:checked');
+        if (selectedFrequency.length) {
+            var amount = selectedFrequency[0].getAttribute('data-amount'),
+                qty = selectedFrequency[0].getAttribute('data-number-of-months');
+            return 'Subscriptions and Membership;GUARDIAN_DIGIPACK;' + qty + ';' + amount + ';scOpen';
         }
+        return false;
+    }
+
+    function sendEvent(prop17) {
+        var products = getSubscriptionInfo();
         if (products) {
             omniture.products = products;
         }
-        if (prop17 && products) {
-            omniture.t();
-        }
+        omniture.prop17 = prop17;
+        omniture.t();
     }
 
-    function countrySelectTracking(qty, amount){
-        var prop17 = 'GuardianDigiPack:Select Country',
-            products = 'Subscriptions and Membership;GUARDIAN_DIGIPACK;' + qty + ';' + amount + ';scOpen';
-        sendEvent(prop17, products);
-    }
-
-    function personalDetailsTracking(qty, amount){
-        var prop17 = 'GuardianDigiPack:Name and address',
-            products = 'Subscriptions and Membership;GUARDIAN_DIGIPACK;' + qty + ';' + amount + ';scOpen';
-        sendEvent(prop17, products);
+    function personalDetailsTracking(){
+        sendEvent('GuardianDigiPack:Name and address');
     }
 
     function paymentDetailsTracking(){
         sendEvent('GuardianDigiPack:Payment Details');
     }
 
-    function paymentSubmissionTracking(qty, amount){
-        var prop17 = 'GuardianDigiPack:Review and confirm',
-            products = 'Subscriptions and Membership;GUARDIAN_DIGIPACK;' + qty + ';' + amount + ';scCheckout';
-        sendEvent(prop17, products);
-    }
-
-    function subscriptionConfirmationTracking(qty, amount){
-        var prop17 = 'GuardianDigiPack:Order Complete',
-            products = 'Subscriptions and Membership;GUARDIAN_DIGIPACK;' + qty + ';' + amount + ';scCheckout';
-        sendEvent(prop17, products);
+    function paymentSubmissionTracking(){
+        sendEvent('GuardianDigiPack:Review and confirm');
     }
 
     function init(o){
@@ -49,11 +40,9 @@ define(function () {
 
     return {
         init: init,
-        countrySelectTracking: countrySelectTracking,
         personalDetailsTracking: personalDetailsTracking,
         paymentDetailsTracking: paymentDetailsTracking,
-        paymentSubmissionTracking: paymentSubmissionTracking,
-        subscriptionConfirmationTracking: subscriptionConfirmationTracking
+        paymentSubmissionTracking: paymentSubmissionTracking
     };
 
 });
