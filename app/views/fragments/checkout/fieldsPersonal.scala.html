@@ -2,22 +2,26 @@
 
 @readonly = @{ if (userIsSignedIn) "readonly" else "" }
 
-<div class="form-field js-checkout-first">
+@hasError(key: String) = @{
+    if(form(key).hasErrors) { "has-error" }
+}
+
+<div class="form-field js-checkout-first @hasError("personal.first")">
     <label class="label" for="first">First name</label>
     <input type="text" class="input-text js-input" name="personal.first" id="first" value="@form.data.get("personal.first")">
     @fragments.forms.errorMessage("This field is required")
 </div>
-<div class="form-field js-checkout-last">
+<div class="form-field js-checkout-last @hasError("personal.last")">
     <label class="label" for="last">Last name</label>
     <input type="text" class="input-text js-input" name="personal.last" id="last" value="@form.data.get("personal.last")">
     @fragments.forms.errorMessage("This field is required")
 </div>
-<div class="form-field @if(!userIsSignedIn) {js-checkout-email}">
+<div class="form-field @if(!userIsSignedIn) {js-checkout-email} @hasError("personal.emailValidation.email")">
     <label class="label" for="email">Email address</label>
     <input type="email" class="input-text js-input" name="personal.emailValidation.email" id="email" value="@form.data.get("personal.emailValidation.email")" @readonly>
     @fragments.forms.errorMessage("")
 </div>
-<div class="form-field @if(!userIsSignedIn) {js-checkout-confirm-email}">
+<div class="form-field @if(!userIsSignedIn) {js-checkout-confirm-email} @hasError("personal.emailValidation.confirm")">
     @if(userIsSignedIn) {
         <input type="hidden" name="personal.emailValidation.confirm" id="confirm" value="@form.data.get("personal.emailValidation.confirm")">
     } else {
@@ -27,23 +31,23 @@
     }
 </div>
 <div class="js-checkout-full-address">
-    <div class="form-field js-checkout-house">
+    <div class="form-field js-checkout-house @hasError("personal.address.address1")">
         <label class="label" for="address-line-1">Address line 1</label>
         <input type="text" class="input-text js-input" id="address-line-1" name="personal.address.address1" value="@form.data.get("personal.address.address1")">
         @fragments.forms.errorMessage("This field is required")
     </div>
-    <div class="form-field js-checkout-street">
+    <div class="form-field js-checkout-street @hasError("personal.address.address2")">
         <label class="label optional-marker" for="address-line-2">Address line 2</label>
         <input type="text" class="input-text js-input" id="address-line-2" name="personal.address.address2" value="@form.data.get("personal.address.address2")">
         @fragments.forms.errorMessage("This field is required")
     </div>
-    <div class="form-field js-checkout-town">
+    <div class="form-field js-checkout-town @hasError("personal.address.town")">
         <label class="label" for="address-town">Town/City</label>
         <input type="text" class="input-text js-input" id="address-town" name="personal.address.town" value="@form.data.get("personal.address.town")">
         @fragments.forms.errorMessage("This field is required")
     </div>
 </div>
-<div class="form-field js-checkout-postcode">
+<div class="form-field js-checkout-postcode @hasError("personal.address.postcode")">
     <label class="label" for="address-postcode">Postcode</label>
     <input type="text" class="input-text js-input input-text input-text--small" id="address-postcode" name="personal.address.postcode" value="@form.data.get("personal.address.postcode")">
     @fragments.forms.errorMessage("Please enter a valid postal code")

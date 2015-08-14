@@ -239,7 +239,9 @@ input[type=number] {
 .form-field--no-margin {
     margin-bottom: 0;
 }
-.form-field--error {
+.form-field--error,
+.form-field:invalid,
+.form-field.has-error {
     .label {
         color: guss-colour(error);
     }

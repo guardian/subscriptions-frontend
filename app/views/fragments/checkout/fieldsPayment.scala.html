@@ -1,11 +1,15 @@
 @(form: Form[model.SubscriptionData])
 
-<div class="form-field js-checkout-account">
+@hasError(key: String) = @{
+    if(form(key).hasErrors) { "has-error" }
+}
+
+<div class="form-field js-checkout-account @hasError("payment.account")">
     <label class="label" for="payment-account">Bank account number</label>
     <input type="text" pattern="[0-9]*" minlength="6" maxlength="10" class="input-text js-input" id="payment-account" name="payment.account">
     @fragments.forms.errorMessage("Please enter between 6 and 10 digits for the account number")
 </div>
-<div class="form-field js-checkout-sortcode">
+<div class="form-field js-checkout-sortcode @hasError("payment.sortcode")">
     <label class="label" for="payment-sortcode">Bank sort code</label>
     <input type="text" class="input-text input-text--small js-input"
         name="payment.sortcode" id="payment-sortcode" maxlength="8"
@@ -13,7 +17,7 @@
         data-masker-delim="-" data-masker-length="2">
     @fragments.forms.errorMessage("")
 </div>
-<div class="form-field js-checkout-holder">
+<div class="form-field js-checkout-holder @hasError("payment.holder")">
     @*
         BACS requirement:
         "The payer’s account name (maximum of 18 characters).

@@ -13,7 +13,7 @@
 <main class="page-container gs-container">
 
     <section class="checkout-container">
-        <form class="form js-checkout-form" action="@renderCheckout().toString()" method="POST">
+        <form class="form js-checkout-form" action="@renderCheckout().toString()" method="POST" novalidate>
             @helper.CSRF.formField
 
             @fragments.checkout.checkoutHeader("Checkout")
@@ -28,6 +28,12 @@
             </div>
 
             <div class="checkout-container__form">
+
+                @if(form.errors.nonEmpty) {
+                    <div class="flash-message flash-message--error">
+                        This form has errors, please check your details and try again.
+                    </div>
+                }
 
                 @* ===== Your details ===== *@
                 <div id="yourDetails" class="field-panel js-fieldset-your-details">
