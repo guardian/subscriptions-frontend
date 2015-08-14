@@ -33,12 +33,12 @@ trait ExactTargetService extends LazyLogging {
     val accAndPaymentMethod = for {
       subs <- subscription
       acc <- zs.account(subs).withLogging("Account Details")
-      pm <- zs.defaultPaymentMethod(acc).withLogging("DefaultPaymentMethod")
+      pm <- zs.defaultPaymentMethod(acc).withLogging("Default Payment Method lookup")
     } yield (acc, pm)
 
     for {
       subs <- subscription
-      rpc <- zs.normalRatePlanCharge(subs).withLogging("RatePlanCharge")
+      rpc <- zs.normalRatePlanCharge(subs).withLogging("Rate Plan Charge lookup")
       (acc, pm) <- accAndPaymentMethod
       row = SubscriptionDataExtensionRow(
         subscription = subs,
@@ -47,7 +47,7 @@ trait ExactTargetService extends LazyLogging {
         paymentMethod = pm,
         account = acc
       )
-      response <- etClient.sendSubscriptionRow(row).withLogging("SendingEmailData")
+      response <- etClient.sendSubscriptionRow(row).withLogging("Sending Email Data")
     } yield {
       response.code() match {
         case 200 => {
