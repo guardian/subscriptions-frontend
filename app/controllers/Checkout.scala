@@ -20,7 +20,7 @@ import scala.concurrent.Future
 
 object Checkout extends Controller with LazyLogging {
 
-  def fillForm(form: Form[SubscriptionData], authUserOpt: Option[AuthenticatedIdUser]): Future[Form[SubscriptionData]] = {
+  private def fillForm(form: Form[SubscriptionData], authUserOpt: Option[AuthenticatedIdUser]): Future[Form[SubscriptionData]] = {
     for {
       fullUserOpt <- authUserOpt.fold[Future[Option[IdUser]]](Future.successful(None))(au => IdentityService.userLookupByScGuU(AuthCookie(au.authCookie)))
     } yield fullUserOpt.map { idUser =>
