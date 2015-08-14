@@ -1,48 +1,42 @@
 package controllers
 
 import actions.CommonActions._
-import com.gu.identity.play.IdUser
+import com.gu.identity.play.{AuthenticatedIdUser, IdUser}
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config.Identity.webAppProfileUrl
 import forms.{FinishAccountForm, SubscriptionsForm}
 import model.SubscriptionData
-import model.zuora.BillingFrequency
 import play.api.data.Form
 import play.api.libs.json._
-import play.api.mvc
 import play.api.mvc._
+import services.AuthenticationService.authenticatedUserFor
 import services.CheckoutService.CheckoutResult
 import services._
-import utils.TestUsers
 import utils.TestUsers.{NameEnteredInForm, PreSigninTestCookie}
 import views.html.{checkout => view}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import AuthenticationService.authenticatedUserFor
-import utils.Prices._
 
 object Checkout extends Controller with LazyLogging {
+
+  def fillForm(form: Form[SubscriptionData], authUserOpt: Option[AuthenticatedIdUser]): Future[Form[SubscriptionData]] = {
+    for {
+      fullUserOpt <- authUserOpt.fold[Future[Option[IdUser]]](Future.successful(None))(au => IdentityService.userLookupByScGuU(AuthCookie(au.authCookie)))
+    } yield fullUserOpt.map { idUser =>
+      form.fill(SubscriptionData.fromIdUser(idUser))
+    } getOrElse form
+  }
 
   def renderCheckout = NoCacheAction.async { implicit request =>
 
     val authUserOpt = authenticatedUserFor(request)
     val touchpointBackendResolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
 
-    def fillForm(): Future[Form[SubscriptionData]] = for {
-      fullUserOpt <-authUserOpt.fold[Future[Option[IdUser]]](Future.successful(None))(au => IdentityService.userLookupByScGuU(AuthCookie(au.authCookie)))
-    } yield {
-        fullUserOpt.map { idUser =>
-          SubscriptionsForm().fill(SubscriptionData.fromIdUser(idUser))
-        } getOrElse {
-          SubscriptionsForm()
-        }
-      }
-
     for {
-      filledForm <- fillForm()
+      filledForm <- fillForm(SubscriptionsForm(), authUserOpt)
     } yield {
-      Ok(views.html.checkout.payment(filledForm, userIsSignedIn = authUserOpt.isDefined, touchpointBackendResolution))
+      Ok(view.payment(filledForm, userIsSignedIn = authUserOpt.isDefined, touchpointBackendResolution))
     }
   }
 
@@ -51,19 +45,26 @@ object Checkout extends Controller with LazyLogging {
     BadRequest
   })
 
-  def handleCheckout = NoCacheAction.async(parseCheckoutForm) { implicit request =>
-    val formData = request.body
-    val idUserOpt = authenticatedUserFor(request)
-
-    val touchpointBackendResolution = TouchpointBackend.forRequest(NameEnteredInForm, formData)
-
-    touchpointBackendResolution.backend.checkoutService.processSubscription(formData, idUserOpt).map { case CheckoutResult(_, userIdData, subscription) =>
-      val passwordForm = userIdData.toGuestAccountForm
-
-      val subscriptionProduct = touchpointBackendResolution.backend.zuoraService.products.filter(_.ratePlanId == formData.ratePlanId).head
-
-      Ok(view.thankyou(subscription.name, formData.personalData, passwordForm, touchpointBackendResolution, subscriptionProduct))
-    }
+  def handleCheckout = NoCacheAction.async { implicit request =>
+    SubscriptionsForm().bindFromRequest.fold(
+      formWithErrors => {
+        val authUserOpt = authenticatedUserFor(request)
+        val touchpointBackendResolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
+        for {
+          filledForm <- fillForm(formWithErrors, authUserOpt)
+        } yield {
+          Ok(view.payment(filledForm, userIsSignedIn = authUserOpt.isDefined, touchpointBackendResolution))
+        }
+      },
+      userData => {
+        val touchpointBackendResolution = TouchpointBackend.forRequest(NameEnteredInForm, userData)
+        touchpointBackendResolution.backend.checkoutService.processSubscription(userData, authenticatedUserFor(request)).map { case CheckoutResult(_, userIdData, subscription) =>
+          val passwordForm = userIdData.toGuestAccountForm
+          val subscriptionProduct = touchpointBackendResolution.backend.zuoraService.products.filter(_.ratePlanId == formData.ratePlanId).head
+          Ok(view.thankyou(subscription.name, userData.personalData, passwordForm, touchpointBackendResolution, subscriptionProduct))
+        }
+      }
+    )
   }
 
   def processFinishAccount = NoCacheAction.async { implicit request =>
