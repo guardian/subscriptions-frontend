@@ -18,18 +18,27 @@ import scala.concurrent.duration._
 trait ExactTargetService extends LazyLogging {
   def etClient: ETClient
 
+  implicit class FutureWithLogging[T](f: Future[T]) {
+    def withLogging(label: String): Future[T] = {
+      f.onFailure {
+        case e: Throwable => logger.error(s"Future ${label} failed with error : ${e}", e)
+      }
+      f
+    }
+  }
+
   def sendETDataExtensionRow(subscribeResult: SubscribeResult, subscriptionData: SubscriptionData, zs: ZuoraService): Future[Unit] = {
-    val subscription = zs.subscriptionByName(subscribeResult.name)
+    val subscription = zs.subscriptionByName(subscribeResult.name).withLogging("subscriptionByName")
 
     val accAndPaymentMethod = for {
       subs <- subscription
-      acc <- zs.account(subs)
-      pm <- zs.defaultPaymentMethod(acc)
+      acc <- zs.account(subs).withLogging("Account Details")
+      pm <- zs.defaultPaymentMethod(acc).withLogging("DefaultPaymentMethod")
     } yield (acc, pm)
 
     for {
       subs <- subscription
-      rpc <- zs.normalRatePlanCharge(subs)
+      rpc <- zs.normalRatePlanCharge(subs).withLogging("RatePlanCharge")
       (acc, pm) <- accAndPaymentMethod
       row = SubscriptionDataExtensionRow(
         subscription = subs,
@@ -38,7 +47,7 @@ trait ExactTargetService extends LazyLogging {
         paymentMethod = pm,
         account = acc
       )
-      response <- etClient.sendSubscriptionRow(row)
+      response <- etClient.sendSubscriptionRow(row).withLogging("SendingEmailData")
     } yield {
       response.code() match {
         case 200 => {
