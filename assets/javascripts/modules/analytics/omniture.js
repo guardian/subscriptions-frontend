@@ -1,11 +1,49 @@
 /*global Raven, s_gi */
-define(['modules/checkout/omniture'], function (checkoutOmniture) {
+define([
+    '$',
+    'bean',
+    'modules/checkout/omniture'
+], function ($, bean, checkoutOmniture) {
     'use strict';
+
+    var dataTrackingClickableElements = ['a', 'button', 'input'],
+        omniture;
+
+    function sendEvent(prop17, products) {
+        if (!omniture) {
+            Raven.captureException('Omniture client not found');
+            return;
+        }
+        if (prop17) {
+            omniture.prop17 = prop17;
+        }
+        if (products) {
+            omniture.products = products;
+        }
+        if (prop17 || products) {
+            omniture.t();
+        }
+    }
+
+    function bindDataTracking() {
+        dataTrackingClickableElements.forEach(function (elem) {
+            $(elem + '[data-tracking]').each(function (domElem) {
+                var prop17 = domElem.getAttribute('data-tracking-prop17'),
+                    products = domElem.getAttribute('data-tracking-products');
+
+                bean.on(domElem, 'click', function () {
+                    sendEvent(prop17, products);
+                });
+            });
+        });
+    }
 
     function onSuccess() {
         window.s_account = 'guardiangu-subscribe,guardiangu-network';
-        var s = s_gi('guardiangu-network');
-        var s_code;
+        var s = s_gi('guardiangu-network'),
+            s_code;
+
+        omniture = s;
 
         s.pageName = document.title;
         s.channel = 'Subscriber';
@@ -21,6 +59,7 @@ define(['modules/checkout/omniture'], function (checkoutOmniture) {
         s_code = s.t();
 
         checkoutOmniture.init(s);
+        bindDataTracking();
 
         if (s_code) {
             /*jslint evil: true */

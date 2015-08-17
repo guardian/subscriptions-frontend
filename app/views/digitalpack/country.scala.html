@@ -1,4 +1,4 @@
-@()
+@(edition: DigitalEdition, subscriptionNumberOfMonths: Int = 1)
 
 @main("Select your country | Digital | Subscriptions | The Guardian", bodyClasses = List("is-wide")) {
 
@@ -19,6 +19,9 @@
                     <h3 class="u-pad-bottom">Choose your location</h3>
                     <div class="button-group">
                         <a class="button button--primary button--large"
+                           data-tracking
+                           data-tracking-prop17="GuardianDigiPack:Select Country"
+                           data-tracking-products="Subscriptions and Membership;GUARDIAN_DIGIPACK;@subscriptionNumberOfMonths;@edition.price;prodView"
                            href="@routes.Checkout.renderCheckout()">
                            United Kingdom
                         </a>

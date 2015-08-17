@@ -1,6 +1,6 @@
 package controllers
 
-import actions.CommonActions.{CachedAction, NoCacheAction}
+import actions.CommonActions.CachedAction
 import play.api.mvc._
 
 case class DigitalEdition(id: String, name: String, price: String, cmp: String)
@@ -15,20 +15,22 @@ object DigitalEdition {
 
 object DigitalPack extends Controller {
 
-  def uk = CachedAction {
-    Ok(views.html.digitalpack.info(DigitalEdition.UK))
+  import DigitalEdition._
+
+  def uk = landingPage(UK)
+  def us = landingPage(US)
+  def au = landingPage(AU)
+
+  def selectUk = country(UK)
+  def selectUs = country(US)
+  def selectAu = country(AU)
+
+  def landingPage(digitalEdition: DigitalEdition) = CachedAction {
+    Ok(views.html.digitalpack.info(digitalEdition))
   }
 
-  def us = CachedAction {
-    Ok(views.html.digitalpack.info(DigitalEdition.US))
-  }
-
-  def au = CachedAction {
-    Ok(views.html.digitalpack.info(DigitalEdition.AU))
-  }
-
-  def country = CachedAction {
-    Ok(views.html.digitalpack.country())
+  def country(digitalEdition: DigitalEdition) = CachedAction {
+    Ok(views.html.digitalpack.country(digitalEdition))
   }
 
 }
