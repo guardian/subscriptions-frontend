@@ -49,9 +49,11 @@ define([
     }
 
     function paymentSubmissionTracking() {
-        clickHelper(formEls.$CHECKOUT_SUBMIT, function() {
-            omniture.paymentSubmissionTracking();
-        });
+        if(formEls.$CHECKOUT_SUBMIT.length) {
+            bean.on(formEls.$CHECKOUT_SUBMIT[0], 'click', function () {
+                omniture.paymentSubmissionTracking();
+            });
+        }
     }
 
     function init() {
