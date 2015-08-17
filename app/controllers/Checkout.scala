@@ -6,6 +6,7 @@ import com.typesafe.scalalogging.LazyLogging
 import configuration.Config.Identity.webAppProfileUrl
 import forms.{FinishAccountForm, SubscriptionsForm}
 import model.SubscriptionData
+import model.zuora.BillingFrequency
 import play.api.data.Form
 import play.api.libs.json._
 import play.api.mvc
@@ -19,6 +20,7 @@ import views.html.{checkout => view}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import AuthenticationService.authenticatedUserFor
+import utils.Prices._
 
 object Checkout extends Controller with LazyLogging {
 
@@ -44,7 +46,7 @@ object Checkout extends Controller with LazyLogging {
     }
   }
 
-  val parseCheckoutForm = parse.form[SubscriptionData](SubscriptionsForm.subsForm, onErrors = formWithErrors => {
+  val parseCheckoutForm: BodyParser[SubscriptionData] = parse.form[SubscriptionData](SubscriptionsForm.subsForm, onErrors = formWithErrors => {
     logger.error(s"Backend form validation failed. Please make sure that the front-end and the backend validations are in sync (validation errors: ${formWithErrors.errors}})")
     BadRequest
   })
@@ -57,7 +59,16 @@ object Checkout extends Controller with LazyLogging {
 
     touchpointBackendResolution.backend.checkoutService.processSubscription(formData, idUserOpt).map { case CheckoutResult(_, userIdData, subscription) =>
       val passwordForm = userIdData.toGuestAccountForm
-      Ok(view.thankyou(subscription.name, formData.personalData, passwordForm, touchpointBackendResolution))
+
+      val ratePlan = touchpointBackendResolution.backend.zuoraService.products.filter(_.ratePlanId == formData.ratePlanId).head
+
+      val dataNumberOfMonths = ratePlan.frequency match {
+        case BillingFrequency.Month => 1
+        case BillingFrequency.Quarter => 3
+        case BillingFrequency.Annual => 12
+      }
+
+      Ok(view.thankyou(subscription.name, formData.personalData, passwordForm, touchpointBackendResolution, ratePlan.price.pretty, dataNumberOfMonths))
     }
   }
 
@@ -65,11 +76,11 @@ object Checkout extends Controller with LazyLogging {
     FinishAccountForm().bindFromRequest.fold(
       handleWithBadRequest,
       guestAccountData => {
-      IdentityService.convertGuest(guestAccountData.password, IdentityToken(guestAccountData.token))
-        .map { _ =>
+        IdentityService.convertGuest(guestAccountData.password, IdentityToken(guestAccountData.token))
+          .map { _ =>
           Ok(Json.obj("profileUrl" -> webAppProfileUrl.toString()))
         }
-    })
+      })
   }
 
   def checkIdentity(email: String) = CachedAction.async { implicit request =>

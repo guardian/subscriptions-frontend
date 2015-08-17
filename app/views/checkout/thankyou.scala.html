@@ -1,7 +1,9 @@
 @(subscriptionName: String,
     personalData: model.PersonalData,
     guestAccountForm: Option[Form[model.GuestAccountData]] = None,
-    touchpointBackendResolution: services.TouchpointBackend.Resolution
+    touchpointBackendResolution: services.TouchpointBackend.Resolution,
+    dataAmount: String,
+    dataNumberOfMonths: Int
 )(implicit request: RequestHeader)
 
 @import configuration.Details
@@ -31,7 +33,7 @@
                 </p>
                 <p>Open times: Lines are open Monday&ndash;Friday 8.00am&ndash;5.30pm. Saturday &amp; Sunday 8.30am&ndash;12.30pm</p>
             </div>
-            @fragments.checkout.reviewPanel(subscriptionName, personalData)
+            @fragments.checkout.reviewPanel(subscriptionName, personalData, dataAmount, dataNumberOfMonths)
         </div>
     </section>
 

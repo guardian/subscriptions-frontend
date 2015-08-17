@@ -1,6 +1,11 @@
-@(subscriptionId: String, personalData: model.PersonalData)
+@(subscriptionId: String, personalData: model.PersonalData, dataAmount: String,  dataNumberOfMonths: Int)
 
 <div class="review-panel">
+    <input
+    type="hidden" name="subscriptionDetails"
+    data-amount="@dataAmount"
+    data-number-of-months="@dataNumberOfMonths"
+    >
     <div class="review-panel__item">
         <h4 class="review-panel__label">Subscriber ID:</h4>
         <div class="review-panel__details">
