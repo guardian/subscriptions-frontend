@@ -2,7 +2,7 @@ require([
     'utils/ajax',
     'modules/analytics/setup',
     'modules/toggle',
-    'modules/checkout/optionMirror',
+    'modules/optionMirror',
     'modules/appendAround',
     'modules/password',
     'modules/inputMask',

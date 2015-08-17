@@ -2,7 +2,7 @@ define(['$', 'modules/analytics/omniture'], function ($, omniture) {
     'use strict';
 
     function subscriptionProducts(){
-        var selectedFrequency = $('.js-option-mirror-group input:checked');
+        var selectedFrequency = $('.js-payment-frequency input:checked');
         if (selectedFrequency.length) {
             var amount = selectedFrequency[0].getAttribute('data-amount'),
                 qty = selectedFrequency[0].getAttribute('data-number-of-months');
