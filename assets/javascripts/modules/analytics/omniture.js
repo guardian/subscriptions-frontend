@@ -1,9 +1,8 @@
 /*global Raven, s_gi */
 define([
     '$',
-    'bean',
-    'modules/checkout/omniture'
-], function ($, bean, checkoutOmniture) {
+    'bean'
+], function ($, bean) {
     'use strict';
 
     var dataTrackingClickableElements = ['a', 'button', 'input'],
@@ -58,7 +57,6 @@ define([
         s.prop47 = 'UK';
         s_code = s.t();
 
-        checkoutOmniture.init(s);
         bindDataTracking();
 
         if (s_code) {
@@ -74,6 +72,7 @@ define([
     }
 
     return {
-        init: init
+        init: init,
+        sendEvent: sendEvent
     };
 });

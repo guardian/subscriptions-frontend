@@ -1,9 +1,7 @@
-define(['$'], function ($) {
+define(['$', 'modules/analytics/omniture'], function ($, omniture) {
     'use strict';
 
-    var omniture = {};
-
-    function getSubscriptionInfo(){
+    function subscriptionProducts(){
         var selectedFrequency = $('.js-option-mirror-group input:checked');
         if (selectedFrequency.length) {
             var amount = selectedFrequency[0].getAttribute('data-amount'),
@@ -13,33 +11,24 @@ define(['$'], function ($) {
         return false;
     }
 
-    function sendEvent(prop17) {
-        var products = getSubscriptionInfo();
-        if (products) {
-            omniture.products = products;
-        }
-        omniture.prop17 = prop17;
-        omniture.t();
+    function trackEvent(prop17) {
+        var products = subscriptionProducts();
+        omniture.sendEvent(prop17, products);
     }
 
     function personalDetailsTracking(){
-        sendEvent('GuardianDigiPack:Name and address');
+        trackEvent('GuardianDigiPack:Name and address');
     }
 
     function paymentDetailsTracking(){
-        sendEvent('GuardianDigiPack:Payment Details');
+        trackEvent('GuardianDigiPack:Payment Details');
     }
 
     function paymentSubmissionTracking(){
-        sendEvent('GuardianDigiPack:Review and confirm');
-    }
-
-    function init(o){
-        omniture = o;
+        trackEvent('GuardianDigiPack:Review and confirm');
     }
 
     return {
-        init: init,
         personalDetailsTracking: personalDetailsTracking,
         paymentDetailsTracking: paymentDetailsTracking,
         paymentSubmissionTracking: paymentSubmissionTracking
