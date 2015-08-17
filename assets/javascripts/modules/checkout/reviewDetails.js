@@ -2,8 +2,9 @@ define([
     'bean',
     'utils/ajax',
     'utils/text',
-    'modules/checkout/formElements'
-], function (bean, ajax, textUtils, formEls) {
+    'modules/checkout/formElements',
+    'modules/checkout/omniture'
+], function (bean, ajax, textUtils, formEls, omniture) {
     'use strict';
 
     function clickHelper($elem, callback) {
@@ -47,8 +48,15 @@ define([
         });
     }
 
+    function paymentSubmissionTracking() {
+        clickHelper(formEls.$CHECKOUT_SUBMIT, function() {
+            omniture.paymentSubmissionTracking();
+        });
+    }
+
     function init() {
         populateDetails();
+        paymentSubmissionTracking();
     }
 
     return {

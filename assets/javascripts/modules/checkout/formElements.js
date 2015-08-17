@@ -37,6 +37,7 @@ define(['$'], function ($) {
 
         $YOUR_DETAILS_SUBMIT: $('.js-checkout-your-details-submit'),
         $PAYMENT_DETAILS_SUBMIT: $('.js-checkout-payment-details-submit'),
+        $CHECKOUT_SUBMIT: $('.js-checkout-submit'),
         $REVIEW_NAME: $('.js-checkout-review-name'),
         $REVIEW_ADDRESS: $('.js-checkout-review-address'),
         $REVIEW_EMAIL: $('.js-checkout-review-email'),
