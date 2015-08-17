@@ -2,12 +2,12 @@ define([
     'modules/forms/toggleError',
     'modules/checkout/formElements',
     'modules/checkout/validatePersonal',
-    'modules/checkout/omniture'
+    'modules/checkout/tracking'
 ], function (
     toggleError,
     formEls,
     validatePersonal,
-    omniture
+    tracking
 ) {
     'use strict';
 
@@ -53,7 +53,7 @@ define([
         formEls.$FIELDSET_PAYMENT_DETAILS
             .removeClass(FIELDSET_COLLAPSED);
 
-        omniture.personalDetailsTracking(1, '£11.99');
+        tracking.personalDetailsTracking();
     }
 
     function handleValidation(personalDetails) {

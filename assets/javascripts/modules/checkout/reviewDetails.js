@@ -3,8 +3,13 @@ define([
     'utils/ajax',
     'utils/text',
     'modules/checkout/formElements',
-    'modules/checkout/omniture'
-], function (bean, ajax, textUtils, formEls, omniture) {
+    'modules/checkout/tracking'
+], function (
+    bean,
+    ajax,
+    textUtils,
+    formEls,
+    tracking) {
     'use strict';
 
     function clickHelper($elem, callback) {
@@ -51,7 +56,7 @@ define([
     function paymentSubmissionTracking() {
         if(formEls.$CHECKOUT_SUBMIT.length) {
             bean.on(formEls.$CHECKOUT_SUBMIT[0], 'click', function () {
-                omniture.paymentSubmissionTracking();
+                tracking.paymentSubmissionTracking();
             });
         }
     }

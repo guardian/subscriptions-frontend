@@ -4,14 +4,14 @@ define([
     'modules/forms/toggleError',
     'modules/checkout/formElements',
     'modules/checkout/validatePayment',
-    'modules/checkout/omniture'
+    'modules/checkout/tracking'
 ], function (
     bean,
     ajax,
     toggleError,
     formEls,
     validatePayment,
-    omniture
+    tracking
 ) {
     'use strict';
 
@@ -33,7 +33,7 @@ define([
         formEls.$FIELDSET_REVIEW
             .removeClass(FIELDSET_COLLAPSED);
 
-        omniture.paymentDetailsTracking();
+        tracking.paymentDetailsTracking();
     }
 
     function handleValidation() {

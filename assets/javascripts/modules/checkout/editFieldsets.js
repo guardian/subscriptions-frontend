@@ -1,11 +1,11 @@
 define([
     'bean',
     'modules/checkout/formElements',
-    'modules/checkout/omniture'
+    'modules/checkout/tracking'
 ], function (
     bean,
     formEls,
-    omniture) {
+    tracking) {
     'use strict';
 
     var FIELDSET_COMPLETE = 'is-complete';
@@ -35,14 +35,14 @@ define([
                 collapseFieldsets(formEls.$FIELDSET_YOUR_DETAILS);
                 formEls.$FIELDSET_YOUR_DETAILS.removeClass(FIELDSET_COMPLETE);
                 formEls.$FIELDSET_PAYMENT_DETAILS.removeClass(FIELDSET_COMPLETE);
-                omniture.personalDetailsTracking();
+                tracking.personalDetailsTracking();
             });
 
             bean.on($editPayment[0], 'click', function (e) {
                 e.preventDefault();
                 collapseFieldsets(formEls.$FIELDSET_PAYMENT_DETAILS);
                 formEls.$FIELDSET_PAYMENT_DETAILS.removeClass(FIELDSET_COMPLETE);
-                omniture.paymentDetailsTracking();
+                tracking.paymentDetailsTracking();
             });
 
         }
