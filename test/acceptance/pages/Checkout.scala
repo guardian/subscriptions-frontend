@@ -43,8 +43,8 @@ class Checkout(implicit val driver: WebDriver) extends Page with WebBrowser with
   }
 
   object PaymentDetails {
-    val account = numberField(name("payment.account"))
-    val sortcode = numberField(name("payment.sortcode"))
+    val account = textField(name("payment.account"))
+    val sortcode = textField(name("payment.sortcode"))
     val payment = textField(name("payment.holder"))
     val confirm = checkbox(cssSelector(""".js-checkout-confirm-payment input[type="checkbox"]"""))
 
