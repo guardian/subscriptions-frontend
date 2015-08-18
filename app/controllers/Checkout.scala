@@ -60,15 +60,9 @@ object Checkout extends Controller with LazyLogging {
     touchpointBackendResolution.backend.checkoutService.processSubscription(formData, idUserOpt).map { case CheckoutResult(_, userIdData, subscription) =>
       val passwordForm = userIdData.toGuestAccountForm
 
-      val ratePlan = touchpointBackendResolution.backend.zuoraService.products.filter(_.ratePlanId == formData.ratePlanId).head
+      val subscriptionProduct = touchpointBackendResolution.backend.zuoraService.products.filter(_.ratePlanId == formData.ratePlanId).head
 
-      val dataNumberOfMonths = ratePlan.frequency match {
-        case BillingFrequency.Month => 1
-        case BillingFrequency.Quarter => 3
-        case BillingFrequency.Annual => 12
-      }
-
-      Ok(view.thankyou(subscription.name, formData.personalData, passwordForm, touchpointBackendResolution, ratePlan.price.pretty, dataNumberOfMonths))
+      Ok(view.thankyou(subscription.name, formData.personalData, passwordForm, touchpointBackendResolution, subscriptionProduct))
     }
   }
 

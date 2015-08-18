@@ -28,10 +28,15 @@ define(['$', 'modules/analytics/omniture'], function ($, omniture) {
         trackEvent('GuardianDigiPack:Review and confirm');
     }
 
+    function subscriptionCompleteTracking(){
+        trackEvent('GuardianDigiPack:Order Complete');
+    }
+
     return {
         personalDetailsTracking: personalDetailsTracking,
         paymentDetailsTracking: paymentDetailsTracking,
-        paymentSubmissionTracking: paymentSubmissionTracking
+        paymentSubmissionTracking: paymentSubmissionTracking,
+        subscriptionCompleteTracking: subscriptionCompleteTracking
     };
 
 });

@@ -1,10 +1,14 @@
-@(subscriptionId: String, personalData: model.PersonalData, dataAmount: String,  dataNumberOfMonths: Int)
+@import model.zuora.SubscriptionProduct
+@import utils.Prices._
+
+@(subscriptionId: String, personalData: model.PersonalData, subscriptionProduct:SubscriptionProduct)
 
 <div class="review-panel">
     <input
     type="hidden" name="subscriptionDetails"
-    data-amount="@dataAmount"
-    data-number-of-months="@dataNumberOfMonths"
+    class="js-payment-frequency"
+    data-amount="@subscriptionProduct.price.pretty"
+    data-number-of-months="@subscriptionProduct.frequency.numberOfMonths"
     >
     <div class="review-panel__item">
         <h4 class="review-panel__label">Subscriber ID:</h4>

@@ -6,22 +6,24 @@ define([
     'use strict';
 
     var dataTrackingClickableElements = ['a', 'button', 'input'],
-        omniture;
+        omniture, s;
 
     function sendEvent(prop17, products) {
-        if (!omniture) {
-            Raven.captureException('Omniture client not found');
-            return;
-        }
-        if (prop17) {
-            omniture.prop17 = prop17;
-        }
-        if (products) {
-            omniture.products = products;
-        }
-        if (prop17 || products) {
-            omniture.t();
-        }
+        /*eslint-disable no-use-before-define */
+        omniture = omniture || init();
+        /*eslint-enable no-use-before-define */
+
+        omniture.then(function(){
+            if (prop17) {
+                s.prop17 = prop17;
+            }
+            if (products) {
+                s.products = products;
+            }
+            if (prop17 || products) {
+                s.t();
+            }
+        });
     }
 
     function bindDataTracking() {
@@ -38,11 +40,10 @@ define([
     }
 
     function onSuccess() {
-        window.s_account = 'guardiangu-subscribe,guardiangu-network';
-        var s = s_gi('guardiangu-network'),
-            s_code;
+        var s_code;
 
-        omniture = s;
+        window.s_account = 'guardiangu-subscribe,guardiangu-network';
+        s = s_gi('guardiangu-network');
 
         s.pageName = document.title;
         s.channel = 'Subscriber';
@@ -57,18 +58,20 @@ define([
         s.prop47 = 'UK';
         s_code = s.t();
 
-        bindDataTracking();
-
         if (s_code) {
             /*jslint evil: true */
             document.write(s_code);
         }
+
+        bindDataTracking();
     }
 
     function init() {
-        require(['js!omniture']).then(onSuccess, function(err) {
-            Raven.captureException(err);
-        });
+        omniture = omniture || require(['js!omniture'])
+            .then(onSuccess, function (err) {
+                Raven.captureException(err);
+            });
+        return omniture;
     }
 
     return {

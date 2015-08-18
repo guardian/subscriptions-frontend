@@ -48,13 +48,13 @@
         </div>
         <fieldset class="basket-preview__options is-hidden js-option-mirror-group js-payment-frequency" id="change-payment-frequency">
             @subscriptionProducts.find(_.frequency == BillingFrequency.Month).map { product =>
-                @priceOption(product, "every month", 1, isChecked=true)
+                @priceOption(product, "every month", product.frequency.numberOfMonths, isChecked=true)
             }
             @subscriptionProducts.find(_.frequency == BillingFrequency.Quarter).map { product =>
-                @priceOption(product, "every 3 months", 3)
+                @priceOption(product, "every 3 months", product.frequency.numberOfMonths)
             }
             @subscriptionProducts.find(_.frequency == BillingFrequency.Annual).map { product =>
-                @priceOption(product, "every 12 months", 12)
+                @priceOption(product, "every 12 months", product.frequency.numberOfMonths)
             }
         </fieldset>
     }
