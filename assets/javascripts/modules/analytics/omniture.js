@@ -9,9 +9,7 @@ define([
         omniture, s;
 
     function sendEvent(prop17, products) {
-        /*eslint-disable no-use-before-define */
         omniture = omniture || init();
-        /*eslint-enable no-use-before-define */
 
         omniture.then(function(){
             if (prop17) {
