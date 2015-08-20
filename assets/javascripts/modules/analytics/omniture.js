@@ -1,11 +1,47 @@
 /*global Raven, s_gi */
-define(function () {
+define([
+    '$',
+    'bean'
+], function ($, bean) {
     'use strict';
 
+    var dataTrackingClickableElements = ['a', 'button', 'input'],
+        omniture, s;
+
+    function sendEvent(prop17, products) {
+        omniture = omniture || init();
+
+        omniture.then(function(){
+            if (prop17) {
+                s.prop17 = prop17;
+            }
+            if (products) {
+                s.products = products;
+            }
+            if (prop17 || products) {
+                s.t();
+            }
+        });
+    }
+
+    function bindDataTracking() {
+        dataTrackingClickableElements.forEach(function (elem) {
+            $(elem + '[data-tracking]').each(function (domElem) {
+                var prop17 = domElem.getAttribute('data-tracking-prop17'),
+                    products = domElem.getAttribute('data-tracking-products');
+
+                bean.on(domElem, 'click', function () {
+                    sendEvent(prop17, products);
+                });
+            });
+        });
+    }
+
     function onSuccess() {
-        window.s_account = 'guardiangu-subscribe,guardiangu-network';
-        var s = s_gi('guardiangu-network');
         var s_code;
+
+        window.s_account = 'guardiangu-subscribe,guardiangu-network';
+        s = s_gi('guardiangu-network');
 
         s.pageName = document.title;
         s.channel = 'Subscriber';
@@ -24,15 +60,20 @@ define(function () {
             /*jslint evil: true */
             document.write(s_code);
         }
+
+        bindDataTracking();
     }
 
     function init() {
-        require(['js!omniture']).then(onSuccess, function(err) {
-            Raven.captureException(err);
-        });
+        omniture = omniture || require(['js!omniture'])
+            .then(onSuccess, function (err) {
+                Raven.captureException(err);
+            });
+        return omniture;
     }
 
     return {
-        init: init
+        init: init,
+        sendEvent: sendEvent
     };
 });

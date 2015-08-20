@@ -2,12 +2,14 @@ define([
     '$',
     'bean',
     'utils/ajax',
-    'modules/forms/toggleError'
+    'modules/forms/toggleError',
+    'modules/checkout/tracking'
 ], function (
     $,
     bean,
     ajax,
-    toggleError
+    toggleError,
+    tracking
 ) {
     'use strict';
 
@@ -51,6 +53,7 @@ define([
                     });
                 }
             });
+            tracking.subscriptionCompleteTracking();
         }
     }
 

@@ -2,8 +2,14 @@ define([
     'bean',
     'utils/ajax',
     'utils/text',
-    'modules/checkout/formElements'
-], function (bean, ajax, textUtils, formEls) {
+    'modules/checkout/formElements',
+    'modules/checkout/tracking'
+], function (
+    bean,
+    ajax,
+    textUtils,
+    formEls,
+    tracking) {
     'use strict';
 
     function clickHelper($elem, callback) {
@@ -47,8 +53,17 @@ define([
         });
     }
 
+    function paymentSubmissionTracking() {
+        if(formEls.$CHECKOUT_SUBMIT.length) {
+            bean.on(formEls.$CHECKOUT_SUBMIT[0], 'click', function () {
+                tracking.paymentSubmissionTracking();
+            });
+        }
+    }
+
     function init() {
         populateDetails();
+        paymentSubmissionTracking();
     }
 
     return {

@@ -1,11 +1,13 @@
 define([
     'modules/forms/toggleError',
     'modules/checkout/formElements',
-    'modules/checkout/validatePersonal'
+    'modules/checkout/validatePersonal',
+    'modules/checkout/tracking'
 ], function (
     toggleError,
     formEls,
-    validatePersonal
+    validatePersonal,
+    tracking
 ) {
     'use strict';
 
@@ -50,6 +52,8 @@ define([
 
         formEls.$FIELDSET_PAYMENT_DETAILS
             .removeClass(FIELDSET_COLLAPSED);
+
+        tracking.personalDetailsTracking();
     }
 
     function handleValidation(personalDetails) {

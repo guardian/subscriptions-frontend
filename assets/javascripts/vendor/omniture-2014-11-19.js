@@ -86,7 +86,7 @@ function s_doPlugins(s) {
 
     /* External Paid Campaign Tracking Only */
     if (!s.campaign) {
-        s.campaign=s.Util.getQueryParam('CMP');
+        s.campaign=s.Util.getQueryParam('CMP', 'prom');
     }
     s.campaign=s.getValOnce(s.campaign,'s_campaign',0);
     if (s.campaign) {

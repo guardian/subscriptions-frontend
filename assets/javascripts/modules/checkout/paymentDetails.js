@@ -3,13 +3,15 @@ define([
     'utils/ajax',
     'modules/forms/toggleError',
     'modules/checkout/formElements',
-    'modules/checkout/validatePayment'
+    'modules/checkout/validatePayment',
+    'modules/checkout/tracking'
 ], function (
     bean,
     ajax,
     toggleError,
     formEls,
-    validatePayment
+    validatePayment,
+    tracking
 ) {
     'use strict';
 
@@ -30,6 +32,8 @@ define([
 
         formEls.$FIELDSET_REVIEW
             .removeClass(FIELDSET_COLLAPSED);
+
+        tracking.paymentDetailsTracking();
     }
 
     function handleValidation() {
