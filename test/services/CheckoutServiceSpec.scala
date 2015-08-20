@@ -6,7 +6,7 @@ import com.gu.membership.zuora.soap.Zuora._
 import com.squareup.okhttp.Response
 import model.exactTarget.SubscriptionDataExtensionRow
 import model.zuora.SubscriptionProduct
-import model.{PaymentData, PersonalData, SubscriptionData}
+import model.{SubscriptionRequestData, PaymentData, PersonalData, SubscriptionData}
 import org.joda.time.DateTime
 import org.scalatest.FreeSpec
 import org.scalatest.concurrent.{Futures, ScalaFutures}
@@ -41,7 +41,7 @@ class CheckoutServiceSpec extends FreeSpec with Futures with ScalaFutures {
   }
 
   object TestZuoraService extends ZuoraService {
-    override def createSubscription(memberId: MemberId, data: SubscriptionData): Future[SubscribeResult] = {
+    override def createSubscription(memberId: MemberId, data: SubscriptionData, requestData: SubscriptionRequestData): Future[SubscribeResult] = {
       Future { SubscribeResult(
         id = s"Subscribed ${memberId.salesforceContactId}", name = "A-Sxxxxx") }
     }
@@ -85,7 +85,8 @@ class CheckoutServiceSpec extends FreeSpec with Futures with ScalaFutures {
     "for a registered user" - {
       val checkoutResult = service.processSubscription(
         subscriptionData,
-        Some(AuthenticatedIdUser("cookie", IdMinimalUser("RegisteredId", None)))
+        Some(AuthenticatedIdUser("cookie", IdMinimalUser("RegisteredId", None))),
+        SubscriptionRequestData("123.123.123.123")
       )
 
       whenReady(checkoutResult) { res =>
@@ -107,7 +108,7 @@ class CheckoutServiceSpec extends FreeSpec with Futures with ScalaFutures {
         makeIdentityService(updateFlag), TestSalesforceService, TestZuoraService, TestExactTargetService
       )
 
-      whenReady(service.processSubscription(subscriptionData, None)) { _ =>
+      whenReady(service.processSubscription(subscriptionData, None, SubscriptionRequestData("123.123.123.123"))) { _ =>
         "does not update the user details in the Identity service" in {
           assert(!updateFlag.updated)
         }

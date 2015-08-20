@@ -8,7 +8,7 @@ import com.gu.membership.zuora.soap.ZuoraReaders.ZuoraQueryReader
 import com.gu.membership.zuora.soap.{Login, ZuoraApi, ZuoraServiceError}
 import com.gu.monitoring.ZuoraMetrics
 import configuration.Config
-import model.SubscriptionData
+import model.{SubscriptionRequestData, SubscriptionData}
 import model.zuora.{BillingFrequency, SubscriptionProduct, DigitalProductPlan}
 import org.joda.time.Period
 import services.zuora.Subscribe
@@ -39,7 +39,7 @@ case class OrFilter(clauses: (String, String)*) extends ZuoraFilter {
 
 trait ZuoraService {
   def subscriptionByName(id: String): Future[Subscription]
-  def createSubscription(memberId: MemberId, data: SubscriptionData): Future[SubscribeResult]
+  def createSubscription(memberId: MemberId, data: SubscriptionData, requestData: SubscriptionRequestData): Future[SubscribeResult]
   def authTask: ScheduledTask[Authentication]
   def products: Seq[SubscriptionProduct]
   def ratePlans(subscription: Subscription): Future[Seq[RatePlan]]
@@ -79,8 +79,8 @@ class ZuoraApiClient(zuoraApiConfig: ZuoraApiConfig, digitalProductPlan: Digital
   override def ratePlans(subscription: Subscription): Future[Seq[RatePlan]] =
     query[RatePlan](SimpleFilter("SubscriptionId", subscription.id))
 
-  private def normalRatePlanCharges(ratePlan: RatePlan): Future[Seq[RatePlanCharge]] = {
-    query[RatePlanCharge](AndFilter(
+  private def normalRatePlanCharges(ratePlan: RatePlan): Future[RatePlanCharge] = {
+    queryOne[RatePlanCharge](AndFilter(
       "RatePlanId" -> ratePlan.id,
       "ChargeModel" -> "Flat Fee Pricing",
       "ChargeType" -> "Recurring"
@@ -99,9 +99,9 @@ class ZuoraApiClient(zuoraApiConfig: ZuoraApiConfig, digitalProductPlan: Digital
 
   override def normalRatePlanCharge(subscription: Subscription): Future[RatePlanCharge] =
     for {
-      pr <- ratePlans(subscription)
-      rpcs <- Future.sequence { pr.map(normalRatePlanCharges) }.map(_.flatten)
-    } yield rpcs.headOption.getOrElse {
+      plans <- ratePlans(subscription)
+      charges <- Future.sequence { plans.map(normalRatePlanCharges) }
+    } yield charges.headOption.getOrElse {
       throw new ZuoraServiceError(s"Cannot find default subscription rate plan charge for $subscription")
   }
 
@@ -160,7 +160,7 @@ class ZuoraApiClient(zuoraApiConfig: ZuoraApiConfig, digitalProductPlan: Digital
   }
 
 
-  override def createSubscription(memberId: MemberId, data: SubscriptionData): Future[SubscribeResult] = {
-    request(Subscribe(memberId, data, Some(zuoraProperties.paymentDelayInDays)))
+  override def createSubscription(memberId: MemberId, data: SubscriptionData, requestData: SubscriptionRequestData): Future[SubscribeResult] = {
+    request(Subscribe(memberId, data, Some(zuoraProperties.paymentDelayInDays), requestData))
   }
 }
