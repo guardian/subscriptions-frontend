@@ -1,0 +1,23 @@
+/* ==========================================================================
+   Messages
+   ========================================================================== */
+
+.flash-message {
+    @include fs-data(4);
+    padding: 7px (($gs-baseline / 3) * 2);
+    border-top: 1px solid;
+    border-bottom: 1px solid;
+    margin: $gs-baseline 0;
+    background-color: $c-neutral6;
+    border-color: $c-neutral2;
+}
+.flash-message--error {
+    background-color: $c-flash-error-background;
+    border-color: $c-flash-error-border;
+    color: $c-flash-error;
+}
+.flash-message--success {
+    background-color: $c-flash-success-background;
+    border-color: $c-flash-success-border;
+    color: $c-flash-success;
+}
