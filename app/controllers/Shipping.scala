@@ -17,8 +17,8 @@ object Shipping extends Controller {
       packageType = "paper-digital",
       options = Seq(
         SubscriptionOption("everyday",
-          "Everyday+", 10.99f, Some("54%"), 47.62f, "Guardian and Observer papers, plus tablet editions and Premium mobile access",
-          "https://www.guardiansubscriptions.co.uk/Voucher?prom=faa03&pkgcode=ukx01&title=gv7&skip=1"
+          "Everyday+", 10.99f, Some("37%"), 47.62f, "Guardian and Observer papers, plus tablet editions and Premium mobile access",
+          "https://www.guardiansubscriptions.co.uk/Voucher?prom=faa13&pkgcode=ukx01&title=gv7&skip=1"
         ),
         SubscriptionOption("sixday",
           "Sixday+", 9.99f, Some("53%"), 43.29f, "Guardian papers, plus tablet editions and Premium mobile access",
