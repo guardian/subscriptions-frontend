@@ -57,13 +57,15 @@ define([
     }
 
     function handleValidation(personalDetails) {
-        validatePersonal(personalDetails)
-            .then(function (validity) {
-                displayErrors(validity);
-                if(validity.allValid) {
-                    nextStep();
-                }
-            });
+        validatePersonal(
+            personalDetails,
+            guardian.user.isSignedIn
+        ).then(function (validity) {
+            displayErrors(validity);
+            if(validity.allValid) {
+                nextStep();
+            }
+        });
     }
 
     function init() {
