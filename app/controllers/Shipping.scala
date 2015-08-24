@@ -44,11 +44,11 @@ object Shipping extends Controller {
       options = Seq(
         SubscriptionOption("everyday",
           "Everyday", 9.99f, Some("32%"), 43.29f, "Guardian and Observer papers",
-          "https://www.guardiansubscriptions.co.uk/Voucher?prom=faa03&pkgcode=ukx00&title=gv7&skip=1"
+          "https://www.guardiansubscriptions.co.uk/Voucher?prom=faa13&pkgcode=ukx00&title=gv7&skip=1"
         ),
         SubscriptionOption("sixday",
           "Sixday", 8.49f, Some("27%"), 36.79f, "Guardian papers",
-          "https://www.guardiansubscriptions.co.uk/Voucher?prom=faa03&pkgcode=ukx00&title=gv6&skip=1"
+          "https://www.guardiansubscriptions.co.uk/Voucher?prom=faa13&pkgcode=ukx00&title=gv6&skip=1"
         ),
         SubscriptionOption("weekend",
           "Weekend", 4.79f, Some("14%"), 20.76f, "Saturday Guardian and Observer papers",
