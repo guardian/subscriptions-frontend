@@ -51,8 +51,8 @@ object Shipping extends Controller {
           "https://www.guardiansubscriptions.co.uk/Voucher?prom=faa03&pkgcode=ukx00&title=gv6&skip=1"
         ),
         SubscriptionOption("weekend",
-          "Weekend", 4.49f, Some("20%"), 19.46f, "Saturday Guardian and Observer papers",
-          "https://www.guardiansubscriptions.co.uk/Voucher?prom=faa03&pkgcode=ukx00&title=gv2&skip=1"
+          "Weekend", 4.79f, Some("14%"), 20.76f, "Saturday Guardian and Observer papers",
+          "https://www.guardiansubscriptions.co.uk/Voucher?prom=faa13&pkgcode=ukx00&title=gv2&skip=1"
         )
       )
     ))
