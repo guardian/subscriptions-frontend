@@ -49,7 +49,7 @@ class CheckoutServiceSpec extends FreeSpec with Futures with ScalaFutures {
     override def subscriptionByName(id: String): Future[Subscription] = {
       val date = new DateTime()
       Future {
-         Subscription("test","test","213",1,date.plusDays(1),date,date)
+         Subscription("test","test","213",1,date.plusDays(1),date,date, None)
       }
     }
 
@@ -58,9 +58,7 @@ class CheckoutServiceSpec extends FreeSpec with Futures with ScalaFutures {
     def account(subscription: Subscription): Future[Account] = ???
     def normalRatePlanCharge(subscription: Subscription): Future[RatePlanCharge] = ???
 
-    override def authTask: ScheduledTask[Authentication] = ???
-
-    override def products: Seq[SubscriptionProduct] = Seq.empty
+    override def products: Future[Seq[SubscriptionProduct]] = Future { Seq.empty }
   }
 
   object TestExactTargetService extends ExactTargetService {

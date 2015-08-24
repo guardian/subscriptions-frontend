@@ -1,19 +1,20 @@
 package services
 
 import com.gu.membership.salesforce.MemberId
+import com.gu.membership.util.FutureSupplier
 import com.gu.membership.zuora.ZuoraApiConfig
 import com.gu.membership.zuora.soap.Zuora._
 import com.gu.membership.zuora.soap.ZuoraDeserializer._
 import com.gu.membership.zuora.soap.ZuoraReaders.ZuoraQueryReader
-import com.gu.membership.zuora.soap.{Login, ZuoraApi, ZuoraServiceError}
+import com.gu.membership.zuora.soap.{ZuoraApi, ZuoraServiceError}
 import com.gu.monitoring.ZuoraMetrics
 import configuration.Config
-import model.{SubscriptionRequestData, SubscriptionData}
-import model.zuora.{BillingFrequency, SubscriptionProduct, DigitalProductPlan}
-import org.joda.time.Period
+import model.{SubscriptionData, SubscriptionRequestData}
+import model.zuora.{BillingFrequency, DigitalProductPlan, SubscriptionProduct}
+import play.api.Play.current
+import play.api.libs.concurrent.Akka
 import services.zuora.Subscribe
 import touchpoint.ZuoraProperties
-import utils.ScheduledTask
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -40,47 +41,43 @@ case class OrFilter(clauses: (String, String)*) extends ZuoraFilter {
 trait ZuoraService {
   def subscriptionByName(id: String): Future[Subscription]
   def createSubscription(memberId: MemberId, data: SubscriptionData, requestData: SubscriptionRequestData): Future[SubscribeResult]
-  def authTask: ScheduledTask[Authentication]
-  def products: Seq[SubscriptionProduct]
+  def products: Future[Seq[SubscriptionProduct]]
   def ratePlans(subscription: Subscription): Future[Seq[RatePlan]]
   def defaultPaymentMethod(account: Account): Future[PaymentMethod]
   def account(subscription: Subscription): Future[Account]
   def normalRatePlanCharge(subscription: Subscription): Future[RatePlanCharge]
 }
 
-class ZuoraApiClient(zuoraApiConfig: ZuoraApiConfig, digitalProductPlan: DigitalProductPlan, zuoraProperties: ZuoraProperties) extends ZuoraApi with ZuoraService {
-  override implicit def authentication: Authentication = authTask.get()
+class ZuoraApiClient(zuoraApiConfig: ZuoraApiConfig,
+                     digitalProductPlan: DigitalProductPlan,
+                     zuoraProperties: ZuoraProperties) extends ZuoraService {
 
-  override val apiConfig = zuoraApiConfig
-  override val application = Config.appName
-  override val stage = Config.stage
+  val akkaSystem = Akka.system
+  val client = new ZuoraApi(zuoraApiConfig, new ZuoraMetrics(Config.stage, Config.appName), akkaSystem) {
+    def query[T <: ZuoraQuery](where: ZuoraFilter)(implicit reader: ZuoraQueryReader[T]): Future[Seq[T]] =
+      query(where.toFilterString)(reader)
 
-  override val metrics = new ZuoraMetrics(stage, application)
-
-  lazy val productsSchedule = productsTask.start()
-
-  override val authTask = ScheduledTask(s"Zuora ${apiConfig.envName} auth", Authentication("", ""), 0.seconds, 30.minutes){
-    val authF = request(Login(apiConfig))
-    authF.filter(_.token.nonEmpty)foreach(_ => productsSchedule)
-    authF
+    def queryOne[T <: ZuoraQuery](where: ZuoraFilter)(implicit reader: ZuoraQueryReader[T]): Future[T] =
+      queryOne(where.toFilterString)(reader)
   }
 
-  val productsTask = ScheduledTask[Seq[SubscriptionProduct]]("Loading rate plans", Nil, 0.seconds, 2.hours)(getProducts)
+  val productsSupplier = new FutureSupplier[Seq[SubscriptionProduct]](getProducts)
 
-  private def query[T <: ZuoraQuery](where: ZuoraFilter)(implicit reader: ZuoraQueryReader[T]): Future[Seq[T]] =
-    query(where.toFilterString)(reader)
+  List(
+    (2.hours, productsSupplier)
+  ) foreach { case (duration, supplier) =>
+    akkaSystem.scheduler.schedule(duration, duration) { supplier.refresh() }
+  }
 
-  private def queryOne[T <: ZuoraQuery](where: ZuoraFilter)(implicit reader: ZuoraQueryReader[T]): Future[T] =
-    queryOne(where.toFilterString)(reader)
 
   override def subscriptionByName(id: String): Future[Subscription] =
-    queryOne[Subscription](SimpleFilter("Name", id))
+    client.queryOne[Subscription](SimpleFilter("Name", id))
 
   override def ratePlans(subscription: Subscription): Future[Seq[RatePlan]] =
-    query[RatePlan](SimpleFilter("SubscriptionId", subscription.id))
+    client.query[RatePlan](SimpleFilter("SubscriptionId", subscription.id))
 
-  private def normalRatePlanCharges(ratePlan: RatePlan): Future[RatePlanCharge] = {
-    queryOne[RatePlanCharge](AndFilter(
+  private def normalRatePlanCharges(ratePlan: RatePlan): Future[Seq[RatePlanCharge]] = {
+    client.query[RatePlanCharge](AndFilter(
       "RatePlanId" -> ratePlan.id,
       "ChargeModel" -> "Flat Fee Pricing",
       "ChargeType" -> "Recurring"
@@ -91,37 +88,36 @@ class ZuoraApiClient(zuoraApiConfig: ZuoraApiConfig, digitalProductPlan: Digital
     val paymentMethodId = account.defaultPaymentMethodId.getOrElse {
       throw new ZuoraServiceError(s"Could not find an account default payment method for $account")
     }
-    queryOne[PaymentMethod](SimpleFilter("Id", paymentMethodId))
+    client.queryOne[PaymentMethod](SimpleFilter("Id", paymentMethodId))
   }
 
   override def account(subscription: Subscription): Future[Account] =
-    queryOne[Account](SimpleFilter("Id", subscription.accountId))
+    client.queryOne[Account](SimpleFilter("Id", subscription.accountId))
 
   override def normalRatePlanCharge(subscription: Subscription): Future[RatePlanCharge] =
     for {
       plans <- ratePlans(subscription)
-      charges <- Future.sequence { plans.map(normalRatePlanCharges) }
+      charges <- Future.sequence { plans.map(normalRatePlanCharges) }.map(_.flatten)
     } yield charges.headOption.getOrElse {
       throw new ZuoraServiceError(s"Cannot find default subscription rate plan charge for $subscription")
   }
 
-
-  def products = productsTask.get()
+  def products = productsSupplier.get()
 
   private def getProducts: Future[Seq[SubscriptionProduct]] = {
 
     def productRatePlans: Future[Seq[ProductRatePlan]] =
-      query[ProductRatePlan](SimpleFilter("ProductId", digitalProductPlan.id).toFilterString)
+      client.query[ProductRatePlan](SimpleFilter("ProductId", digitalProductPlan.id))
 
 
     def productRatePlanCharges(productRatePlans: Seq[ProductRatePlan]): Future[Seq[ProductRatePlanCharge]] = {
       val clauses = productRatePlans.map(p => "ProductRatePlanId" -> p.id)
-        query[ProductRatePlanCharge](OrFilter(clauses: _*).toFilterString)
+      client.query[ProductRatePlanCharge](OrFilter(clauses: _*))
     }
 
     def productRatePlanChargeTiers(productRatePlanCharges: Seq[ProductRatePlanCharge]): Future[Seq[ProductRatePlanChargeTier]] = {
       val clauses = productRatePlanCharges.map(p => "ProductRatePlanChargeId" -> p.id)
-       query[ProductRatePlanChargeTier](OrFilter(clauses: _*).toFilterString)
+      client.query[ProductRatePlanChargeTier](OrFilter(clauses: _*))
     }
 
     for {
@@ -159,8 +155,6 @@ class ZuoraApiClient(zuoraApiConfig: ZuoraApiConfig, digitalProductPlan: Digital
     }
   }
 
-
-  override def createSubscription(memberId: MemberId, data: SubscriptionData, requestData: SubscriptionRequestData): Future[SubscribeResult] = {
-    request(Subscribe(memberId, data, Some(zuoraProperties.paymentDelayInDays), requestData))
-  }
+  override def createSubscription(memberId: MemberId, data: SubscriptionData, requestData: SubscriptionRequestData): Future[SubscribeResult] =
+    client.authenticatedRequest(Subscribe(memberId, data, Some(zuoraProperties.paymentDelayInDays), requestData))
 }
