@@ -1,10 +1,10 @@
 package services
 
-import com.gu.identity.play.{AuthenticatedIdUser, IdMinimalUser}
+import com.gu.identity.play.AuthenticatedIdUser
 import com.gu.membership.salesforce.MemberId
 import com.gu.membership.zuora.soap.Zuora.SubscribeResult
 import com.typesafe.scalalogging.LazyLogging
-import model.{PersonalData, SubscriptionData}
+import model.{PersonalData, SubscriptionData, SubscriptionRequestData}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -22,7 +22,9 @@ class CheckoutService(
   import CheckoutService.CheckoutResult
 
   def processSubscription(subscriptionData: SubscriptionData,
-                          authenticatedUserOpt: Option[AuthenticatedIdUser]): Future[CheckoutResult] = {
+                          authenticatedUserOpt: Option[AuthenticatedIdUser],
+                          requestData: SubscriptionRequestData
+                         ): Future[CheckoutResult] = {
 
     def updateAuthenticatedUserDetails(personalData: PersonalData): Unit = {
       for {
@@ -46,7 +48,7 @@ class CheckoutService(
     for {
       userData <- userOrElseRegisterGuest
       memberId <- salesforceService.createOrUpdateUser(subscriptionData.personalData, userData.id)
-      subscribeResult <- zuoraService.createSubscription(memberId, subscriptionData)
+      subscribeResult <- zuoraService.createSubscription(memberId, subscriptionData, requestData)
     } yield {
       updateAuthenticatedUserDetails(subscriptionData.personalData)
       sendETDataExtensionRow(subscribeResult)

@@ -5,12 +5,17 @@ import com.gu.membership.zuora.Countries
 import com.gu.membership.zuora.soap.Zuora.SubscribeResult
 import com.gu.membership.zuora.soap.ZuoraAction
 import com.gu.membership.zuora.soap.ZuoraServiceHelpers._
-import model.SubscriptionData
+import model.{SubscriptionRequestData, SubscriptionData}
 import org.joda.time.{DateTime, Period}
 
-import scala.xml.Elem
+import scala.xml.{NodeSeq, Elem}
 
-case class Subscribe(memberId: MemberId, data: SubscriptionData, paymentDelay: Option[Period]) extends ZuoraAction[SubscribeResult] {
+case class Subscribe(
+    memberId: MemberId,
+    data: SubscriptionData,
+    paymentDelay: Option[Period],
+    requestData: SubscriptionRequestData
+  ) extends ZuoraAction[SubscribeResult] {
 
   override protected val body: Elem = {
 
@@ -70,6 +75,7 @@ case class Subscribe(memberId: MemberId, data: SubscriptionData, paymentDelay: O
             <ns2:RenewalTerm>12</ns2:RenewalTerm>
             <ns2:TermStartDate>{contractAcceptanceDate}</ns2:TermStartDate>
             <ns2:TermType>TERMED</ns2:TermType>
+            <ns2:IPaddress__c>{requestData.ipAddress}</ns2:IPaddress__c>
           </ns1:Subscription>
           <ns1:RatePlanData>
             <ns1:RatePlan xsi:type="ns2:RatePlan">

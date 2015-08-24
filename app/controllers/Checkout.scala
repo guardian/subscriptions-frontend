@@ -5,7 +5,7 @@ import com.gu.identity.play.IdUser
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config.Identity.webAppProfileUrl
 import forms.{FinishAccountForm, SubscriptionsForm}
-import model.SubscriptionData
+import model.{SubscriptionRequestData, SubscriptionData}
 import model.zuora.BillingFrequency
 import play.api.data.Form
 import play.api.libs.json._
@@ -56,8 +56,9 @@ object Checkout extends Controller with LazyLogging {
     val idUserOpt = authenticatedUserFor(request)
 
     val touchpointBackendResolution = TouchpointBackend.forRequest(NameEnteredInForm, formData)
+    val requestData = SubscriptionRequestData(request.remoteAddress)
 
-    touchpointBackendResolution.backend.checkoutService.processSubscription(formData, idUserOpt).map { case CheckoutResult(_, userIdData, subscription) =>
+    touchpointBackendResolution.backend.checkoutService.processSubscription(formData, idUserOpt, requestData).map { case CheckoutResult(_, userIdData, subscription) =>
       val passwordForm = userIdData.toGuestAccountForm
 
       val subscriptionProduct = touchpointBackendResolution.backend.zuoraService.products.filter(_.ratePlanId == formData.ratePlanId).head
