@@ -66,7 +66,7 @@ object Shipping extends Controller {
       packageType = "paper-digital",
       options = Seq(
         SubscriptionOption("everyday",
-          "Everyday+", 14.99f, None, 64.96f, "Guardian and Observer papers, plus tablet editions and Premium mobile access",
+          "Everyday+", 14.49f, None, 62.79f, "Guardian and Observer papers, plus tablet editions and Premium mobile access",
           "https://www.guardiandirectsubs.co.uk/Delivery/details.aspx?package=EVERYDAY%2B"
         ),
         SubscriptionOption("sixday",
@@ -74,11 +74,11 @@ object Shipping extends Controller {
           "https://www.guardiandirectsubs.co.uk/Delivery/details.aspx?package=SIXDAY%2B"
         ),
         SubscriptionOption("weekend",
-          "Weekend+", 7.99f, None, 34.62f, "Saturday Guardian and Observer papers, plus tablet editions and Premium mobile access",
+          "Weekend+", 7.79f, None, 33.76f, "Saturday Guardian and Observer papers, plus tablet editions and Premium mobile access",
           "https://www.guardiandirectsubs.co.uk/Delivery/details.aspx?package=WEEKEND%2B"
         ),
         SubscriptionOption("sunday",
-          "Sunday+", 5.99f, None, 25.96f, "Observer paper, plus tablet editions and Premium mobile access",
+          "Sunday+", 6.09f, None, 26.39f, "Observer paper, plus tablet editions and Premium mobile access",
           "https://www.guardiandirectsubs.co.uk/Delivery/details.aspx?package=SUNDAY%2B"
         )
       )
