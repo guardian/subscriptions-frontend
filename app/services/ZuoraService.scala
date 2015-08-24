@@ -1,16 +1,14 @@
 package services
 
 import com.gu.membership.salesforce.MemberId
-import com.gu.membership.util.FutureSupplier
 import com.gu.membership.zuora.ZuoraApiConfig
 import com.gu.membership.zuora.soap.Zuora._
 import com.gu.membership.zuora.soap.ZuoraDeserializer._
-import com.gu.membership.zuora.soap.ZuoraReaders.ZuoraQueryReader
-import com.gu.membership.zuora.soap.{ZuoraApi, ZuoraServiceError}
+import com.gu.membership.zuora.soap.ZuoraServiceError
 import com.gu.monitoring.ZuoraMetrics
 import configuration.Config
+import model.zuora.{DigitalProductPlan, SubscriptionProduct}
 import model.{SubscriptionData, SubscriptionRequestData}
-import model.zuora.{BillingFrequency, DigitalProductPlan, SubscriptionProduct}
 import play.api.Play.current
 import play.api.libs.concurrent.Akka
 import services.zuora.Subscribe
@@ -20,23 +18,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
-sealed trait ZuoraFilter {
-  def toFilterString: String
-}
-
-case class SimpleFilter(key: String, value: String) extends ZuoraFilter {
-  override def toFilterString = s"$key='$value'"
-}
-
-case class AndFilter(clauses: (String, String)*) extends ZuoraFilter {
-  override def toFilterString =
-    clauses.map(p => SimpleFilter.tupled(p).toFilterString).mkString(" AND ")
-}
-
-case class OrFilter(clauses: (String, String)*) extends ZuoraFilter {
-  override def toFilterString =
-    clauses.map(p => SimpleFilter.tupled(p).toFilterString).mkString(" OR ")
-}
 
 trait ZuoraService {
   def subscriptionByName(id: String): Future[Subscription]
@@ -52,23 +33,11 @@ class ZuoraApiClient(zuoraApiConfig: ZuoraApiConfig,
                      digitalProductPlan: DigitalProductPlan,
                      zuoraProperties: ZuoraProperties) extends ZuoraService {
 
-  val akkaSystem = Akka.system
-  val client = new ZuoraApi(zuoraApiConfig, new ZuoraMetrics(Config.stage, Config.appName), akkaSystem) {
-    def query[T <: ZuoraQuery](where: ZuoraFilter)(implicit reader: ZuoraQueryReader[T]): Future[Seq[T]] =
-      query(where.toFilterString)(reader)
+  private val akkaSystem = Akka.system
+  private val client = new FilterableZuoraApi(zuoraApiConfig, new ZuoraMetrics(Config.stage, Config.appName), akkaSystem)
+  private val cache: ProductsCache = new ProductsCache(client, akkaSystem, digitalProductPlan).refreshEvery(2.hour)
 
-    def queryOne[T <: ZuoraQuery](where: ZuoraFilter)(implicit reader: ZuoraQueryReader[T]): Future[T] =
-      queryOne(where.toFilterString)(reader)
-  }
-
-  val productsSupplier = new FutureSupplier[Seq[SubscriptionProduct]](getProducts)
-
-  List(
-    (2.hours, productsSupplier)
-  ) foreach { case (duration, supplier) =>
-    akkaSystem.scheduler.schedule(duration, duration) { supplier.refresh() }
-  }
-
+  def products = cache.items
 
   override def subscriptionByName(id: String): Future[Subscription] =
     client.queryOne[Subscription](SimpleFilter("Name", id))
@@ -100,59 +69,6 @@ class ZuoraApiClient(zuoraApiConfig: ZuoraApiConfig,
       charges <- Future.sequence { plans.map(normalRatePlanCharges) }.map(_.flatten)
     } yield charges.headOption.getOrElse {
       throw new ZuoraServiceError(s"Cannot find default subscription rate plan charge for $subscription")
-  }
-
-  def products = productsSupplier.get()
-
-  private def getProducts: Future[Seq[SubscriptionProduct]] = {
-
-    def productRatePlans: Future[Seq[ProductRatePlan]] =
-      client.query[ProductRatePlan](SimpleFilter("ProductId", digitalProductPlan.id))
-
-
-    def productRatePlanCharges(productRatePlans: Seq[ProductRatePlan]): Future[Seq[ProductRatePlanCharge]] = {
-      val clauses = productRatePlans.map(p => "ProductRatePlanId" -> p.id)
-      client.query[ProductRatePlanCharge](OrFilter(clauses: _*))
-    }
-
-    def productRatePlanChargeTiers(productRatePlanCharges: Seq[ProductRatePlanCharge]): Future[Seq[ProductRatePlanChargeTier]] = {
-      val clauses = productRatePlanCharges.map(p => "ProductRatePlanChargeId" -> p.id)
-      client.query[ProductRatePlanChargeTier](OrFilter(clauses: _*))
-    }
-
-    for {
-      productRatePlan <- productRatePlans
-      productRatePlanCharges <- productRatePlanCharges(productRatePlan)
-      productRatePlanChargesTier <- productRatePlanChargeTiers(productRatePlanCharges)
-    } yield {
-
-      //filter by GBP rate plans
-      val productRatePlanChargesTierPounds = productRatePlanChargesTier.filter(_.currency == "GBP")
-
-      //filter by plans that have a billing frequency we have
-      val validProductRatePlanCharges = productRatePlanCharges.filter(b => BillingFrequency.all.map(_.lowercase).contains(b.billingPeriod.toLowerCase))
-
-      //filter product rate plans by ones that are in date
-      val validRatePlans = productRatePlan.filter { p =>
-        p.effectiveStartDate.isBeforeNow && p.effectiveEndDate.isAfterNow
-      }
-
-      //pull all the queries together to make a SubscriptionProduct
-
-      val subscriptionProducts = for(ratePlan <- validRatePlans) yield {
-        val billingFreqProductRatePlan = validProductRatePlanCharges.find(_.productRatePlanId == ratePlan.id)
-        val productRatePlanChargeTier = billingFreqProductRatePlan.flatMap { p =>
-          productRatePlanChargesTierPounds.find(_.productRatePlanChargeId == p.id)
-        }
-
-        val billingFreq = billingFreqProductRatePlan.flatMap(a => BillingFrequency.all.find(a.billingPeriod.toLowerCase == _.lowercase))
-
-        if (billingFreq.isDefined && productRatePlanChargeTier.isDefined)
-          SubscriptionProduct(digitalProductPlan, billingFreq.get, ratePlan.id, productRatePlanChargeTier.get.price)
-        else throw new ZuoraServiceError(s"Could not find valid ratePlan details for Digital Pack. Rate plan ID requested ${ratePlan.id}")
-      }
-      subscriptionProducts
-    }
   }
 
   override def createSubscription(memberId: MemberId, data: SubscriptionData, requestData: SubscriptionRequestData): Future[SubscribeResult] =
