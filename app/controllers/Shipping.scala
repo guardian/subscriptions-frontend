@@ -92,7 +92,7 @@ object Shipping extends Controller {
       packageType = "paper",
       options = Seq(
         SubscriptionOption("everyday",
-          "Everyday", 13.99f, None, 60.62f, "Guardian and Observer papers",
+          "Everyday", 13.49f, None, 58.46f, "Guardian and Observer papers",
           "https://www.guardiandirectsubs.co.uk/Delivery/details.aspx?package=EVERYDAY"
         ),
         SubscriptionOption("sixday",
@@ -100,7 +100,7 @@ object Shipping extends Controller {
           "https://www.guardiandirectsubs.co.uk/Delivery/details.aspx?package=SIXDAY"
         ),
         SubscriptionOption("weekend",
-          "Weekend", 6.49f, None, 28.12f, "Saturday Guardian and Observer papers",
+          "Weekend", 5.79f, None, 25.09f, "Saturday Guardian and Observer papers",
           "https://www.guardiandirectsubs.co.uk/Delivery/details.aspx?package=WEEKEND"
         )
       )
