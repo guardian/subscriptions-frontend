@@ -50,7 +50,7 @@ case class Subscribe(
           <ns2:Batch>Batch1</ns2:Batch>
           <ns2:CrmId>{memberId.salesforceAccountId}</ns2:CrmId>
           <ns2:sfContactId__c>{memberId.salesforceContactId}</ns2:sfContactId__c>
-          <ns2:PaymentGateway>GoCardless - Zuora Instance</ns2:PaymentGateway>
+          <ns2:PaymentGateway>GoCardless</ns2:PaymentGateway>
         </ns1:Account>
         {payment}
         <ns1:BillToContact xsi:type="ns2:Contact">
