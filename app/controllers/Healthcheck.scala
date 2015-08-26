@@ -9,6 +9,7 @@ object Healthcheck extends Controller with LazyLogging{
 
   def index = Action.async {
       (for {
+       //TODO: Touch salesforce
         products <- TouchpointBackend.Normal.zuoraService.products if products.nonEmpty
       } yield Ok("OK"))
       .recover { case t: Throwable =>

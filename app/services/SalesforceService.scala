@@ -2,14 +2,16 @@ package services
 
 import com.gu.membership.salesforce.Member.Keys
 import com.gu.membership.salesforce._
+import com.gu.membership.util.FutureSupplier
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
 import model.PersonalData
+import play.api.libs.concurrent.Akka
 import play.api.libs.json.{JsObject, Json}
-import utils.ScheduledTask
-
-import scala.concurrent.Future
 import scala.concurrent.duration._
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
+import play.api.Play.current
 
 trait SalesforceService extends LazyLogging {
   def repo: SalesforceRepo
@@ -44,9 +46,11 @@ class SalesforceRepo(salesforceConfig: SalesforceConfig) extends MemberRepositor
     override val apiURL =salesforceConfig.apiURL.toString()
     override val stage = salesforceConfig.envName
 
-    lazy val authTask = ScheduledTask("", Authentication("", ""), 0.seconds, 30.minutes)(getAuthentication)
 
-    def authentication: Authentication = authTask.get()
+    override val authSupplier: FutureSupplier[Authentication] = new FutureSupplier[Authentication](getAuthentication)
+
+    private val actorSystem = Akka.system
+    actorSystem.scheduler.schedule(30.minutes, 30.minutes) { authSupplier.refresh() }
   }
 }
 

@@ -6,12 +6,11 @@ import com.gu.membership.zuora.soap.Zuora._
 import com.squareup.okhttp.Response
 import model.exactTarget.SubscriptionDataExtensionRow
 import model.zuora.SubscriptionProduct
-import model.{SubscriptionRequestData, PaymentData, PersonalData, SubscriptionData}
+import model.{PaymentData, PersonalData, SubscriptionData, SubscriptionRequestData}
 import org.joda.time.DateTime
 import org.scalatest.FreeSpec
 import org.scalatest.concurrent.{Futures, ScalaFutures}
 import org.scalatest.time.{Millis, Seconds, Span}
-import utils.ScheduledTask
 import utils.TestPersonalData._
 
 import scala.concurrent.ExecutionContext.Implicits.global
