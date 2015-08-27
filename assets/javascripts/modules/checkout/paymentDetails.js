@@ -20,6 +20,7 @@ define([
 
     function displayErrors(validity) {
         toggleError(formEls.$ACCOUNT_CONTAINER, !validity.accountNumberValid);
+        toggleError(formEls.$ACCOUNT_CONTAINER, !validity.accountValid);
         toggleError(formEls.$HOLDER_CONTAINER, !validity.accountHolderNameValid);
         toggleError(formEls.$SORTCODE_CONTAINER, !validity.sortCodeValid);
         toggleError(formEls.$CONFIRM_PAYMENT_CONTAINER, !validity.detailsConfirmedValid);
@@ -37,16 +38,19 @@ define([
     }
 
     function handleValidation() {
-        var validity = validatePayment({
+        validatePayment({
             accountNumber: formEls.$ACCOUNT.val(),
             accountHolderName: formEls.$HOLDER.val(),
             sortCode: formEls.$SORTCODE.val(),
             detailsConfirmed: formEls.$CONFIRM_PAYMENT[0].checked
+        }).then(function(validity){
+            if (validity.allValid) {
+                nextStep();
+            } else {
+                console.log(validity);
+                displayErrors(validity);
+            }
         });
-        displayErrors(validity);
-        if(validity.allValid) {
-            nextStep();
-        }
     }
 
     function init() {

@@ -1,5 +1,7 @@
 package services
 
+import com.gocardless.errors.GoCardlessApiException
+import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
 import model.PaymentData
 
@@ -8,9 +10,10 @@ import scala.concurrent.Future
 
 trait GoCardlessService {
   def mandatePDFUrl(paymentData: PaymentData): Future[String]
+  def checkBankDetails(paymentData: PaymentData): Future[Boolean]
 }
 
-object GoCardlessService extends GoCardlessService {
+object GoCardlessService extends GoCardlessService with LazyLogging {
   lazy val client = Config.GoCardless.client
 
   override def mandatePDFUrl(paymentData: PaymentData): Future[String] =
@@ -23,4 +26,19 @@ object GoCardlessService extends GoCardlessService {
         .execute()
         .getUrl
     }
+
+  override def checkBankDetails(paymentData: PaymentData): Future[Boolean] = {
+    val sortCode = paymentData.sortCode.replaceAllLiterally("-", "")
+
+    Future {
+      client.bankDetailsLookups().create()
+        .withAccountNumber(paymentData.account)
+        .withBranchCode(sortCode)
+        .withCountryCode("GB")
+        .execute()
+      true
+    } recover { case e: GoCardlessApiException =>
+      false
+    }
+  }
 }

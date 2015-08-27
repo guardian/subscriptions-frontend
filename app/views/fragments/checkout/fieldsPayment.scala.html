@@ -5,7 +5,7 @@
     <label class="label" for="payment-account">Bank account number</label>
     <input type="text" class="input-text js-input" id="payment-account"
         name="payment.account" pattern="[0-9]*" minlength="6" maxlength="10" required>
-    @fragments.forms.errorMessage("Please enter between 6 and 10 digits for the account number")
+    @fragments.forms.errorMessage("Please enter between 6 and 10 digits for the account number, and make sure the account is valid")
 </div>
 
 @* ===== Sortcode ===== *@

@@ -77,7 +77,9 @@ class Checkout(implicit val driver: WebDriver) extends Page with WebBrowser with
   }
 
   def submit(): Unit = {
+    val selector = cssSelector( """input[type="submit"]""")
+    assert(pageHasElement(selector))
     PersonalDetails.receiveGnmMarketing.select()
-    click.on(cssSelector("""input[type="submit"]"""))
+    click.on(selector)
   }
 }
