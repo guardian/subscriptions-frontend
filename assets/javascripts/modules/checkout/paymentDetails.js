@@ -47,7 +47,6 @@ define([
             if (validity.allValid) {
                 nextStep();
             } else {
-                console.log(validity);
                 displayErrors(validity);
             }
         });
