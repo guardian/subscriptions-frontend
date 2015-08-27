@@ -25,7 +25,8 @@ object SubscriptionDataExtensionRow {
     val paymentData = subscriptionData.paymentData
 
     SubscriptionDataExtensionRow(
-      subscription.name,
+      personalData.email,
+      "ZuoraSubscriberId" -> subscription.name,
       "SubscriberKey" -> personalData.email,
       "EmailAddress" -> personalData.email,
       "Subscription term" -> formatSubscriptionTerm(billingPeriod),
@@ -105,4 +106,4 @@ trait DataExtensionRow {
   def fields: Seq[(String, String)]
 }
 
-case class SubscriptionDataExtensionRow(subscriptionId: String, fields: (String, String)*) extends DataExtensionRow
+case class SubscriptionDataExtensionRow(email: String, fields: (String, String)*) extends DataExtensionRow

@@ -41,7 +41,7 @@ trait ExactTargetService extends LazyLogging {
       response <- etClient.sendSubscriptionRow(row)
     } yield {
       response.code() match {
-        case 200 => {
+        case 202 => {
           logger.info(s"Successfully sent an email to confirm the subscription: $subscribeResult")
         }
         case _ => {
@@ -66,11 +66,11 @@ object ETClient extends ETClient with LazyLogging {
   private val config = Config.ExactTarget
   private val clientId = config.clientId
   private val clientSecret = config.clientSecret
-  lazy val thankYouDataExtensionKey = Config.ExactTarget.thankYouDataExtensionKey
+  lazy val welcomeTriggeredSendKey = Config.ExactTarget.welcomeTriggeredSendKey
   private val jsonMT = MediaType.parse("application/json; charset=utf-8")
   private val httpClient = new OkHttpClient()
   private val authEndpoint = "https://auth.exacttargetapis.com/v1/requestToken"
-  private val restEndpoint = "https://www.exacttargetapis.com/hub/v1"
+  private val restEndpoint = "https://www.exacttargetapis.com/messaging/v1"
 
   private val accessToken = Agent(getAccessToken)
   import play.api.Play.current
@@ -101,20 +101,27 @@ object ETClient extends ETClient with LazyLogging {
   }
 
   /**
-   * See https://code.exacttarget.com/apis-sdks/rest-api/v1/hub/data-events/putDataExtensionRowByKey.html
+   * See https://code.exacttarget.com/apis-sdks/rest-api/v1/messaging/messageDefinitionSends.html
    */
   override def sendSubscriptionRow(row: SubscriptionDataExtensionRow): Future[Response] = {
-    def endpoint = s"$restEndpoint/dataevents/key:$thankYouDataExtensionKey/rows/ZuoraSubscriberId:${row.subscriptionId}"
+
+    def endpoint = s"$restEndpoint/messageDefinitionSends/$welcomeTriggeredSendKey/send"
 
     Future {
       val payload = Json.obj(
-        "values" -> Json.toJsFieldJsValueWrapper(row.fields.toMap)
+        "To" -> Json.obj(
+          "Address" -> row.email,
+          "SubscriberKey" -> row.email,
+          "ContactAttributes" -> Json.obj(
+            "SubscriberAttributes" ->  Json.toJsFieldJsValueWrapper(row.fields.toMap)
+          )
+        )
       ).toString()
 
       val body = RequestBody.create(jsonMT, payload)
       val request = new Builder()
                           .url(endpoint)
-                          .put(body)
+                          .post(body)
                           .header("Authorization", s"Bearer ${accessToken.get()}")
                           .build()
       val response = httpClient.newCall(request).execute()
