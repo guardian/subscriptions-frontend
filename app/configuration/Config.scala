@@ -77,6 +77,6 @@ object Config {
   object ExactTarget {
     val clientId = config.getString("exact-target.client-id")
     val clientSecret = config.getString("exact-target.client-secret")
-    val thankYouDataExtensionKey = config.getString("exact-target.data-extension-keys.thank-you")
+    val welcomeTriggeredSendKey = config.getString("exact-target.triggered-send-keys.welcome")
   }
 }
