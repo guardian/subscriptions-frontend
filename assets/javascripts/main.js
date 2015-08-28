@@ -10,6 +10,7 @@ require([
     'modules/confirmation',
     'modules/patterns',
     // Add new dependencies ABOVE this
+    'domready',
     'Promise',
     'raven'
 ], function(
@@ -22,7 +23,8 @@ require([
     inputMask,
     checkout,
     confirmation,
-    patterns
+    patterns,
+    domready
 ) {
     'use strict';
 
@@ -35,20 +37,23 @@ require([
         tags: { build_number: guardian.buildNumber }
     }).install();
 
-    ajax.init({page: {ajaxUrl: ''}});
 
-    analytics.init();
+    domready(function() {
+        ajax.init({page: {ajaxUrl: ''}});
 
-    toggle.init();
-    optionMirror.init();
-    appendAround.init();
-    password.init();
+        analytics.init();
 
-    inputMask.init();
-    checkout.init();
-    confirmation.init();
+        toggle.init();
+        optionMirror.init();
+        appendAround.init();
+        password.init();
 
-    // Pattern library
-    patterns.init();
+        inputMask.init();
+        checkout.init();
+        confirmation.init();
+
+        // Pattern library
+        patterns.init();
+    });
 
 });

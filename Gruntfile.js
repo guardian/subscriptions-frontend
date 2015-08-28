@@ -154,7 +154,8 @@ module.exports = function(grunt) {
                         'qwery': 'bower_components/qwery/qwery',
                         'raven': 'bower_components/raven-js/dist/raven',
                         'requireLib': 'bower_components/requirejs/require',
-                        'reqwest': 'bower_components/reqwest/reqwest'
+                        'reqwest': 'bower_components/reqwest/reqwest',
+                        'domready': 'bower_components/domready/ready'
                     },
                     optimize: isDev ? 'none' : 'uglify2',
                     generateSourceMaps: isDev ? 'true' : 'false',
