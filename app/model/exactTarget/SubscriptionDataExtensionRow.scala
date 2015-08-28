@@ -4,6 +4,7 @@ import com.gu.membership.zuora.soap.Zuora._
 import model.SubscriptionData
 import org.joda.time.DateTime
 import scala.math.BigDecimal.decimal
+import utils.Dates
 
 object SubscriptionDataExtensionRow {
   def apply(
@@ -53,18 +54,15 @@ object SubscriptionDataExtensionRow {
   }
 
   private def formatDate(dateTime: DateTime) = {
-    val day = dateTime.dayOfMonth.getAsString
-    val daySuffix = day.last match {
-      case '1' => "st"
-      case '2' => "nd"
-      case '3' => "rd"
-      case _   => "th"
-    }
+    val day = dateTime.dayOfMonth.get
+
+    val dayWithSuffix = Dates.getOrdinalDay(day)
+
     val month = dateTime.monthOfYear.getAsText
 
     val year = dateTime.year.getAsString
 
-    s"$day$daySuffix $month $year"
+    s"$dayWithSuffix $month $year"
   }
 
   private def formatPrice(price: Float): String = {
