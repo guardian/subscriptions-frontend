@@ -1,6 +1,6 @@
-define(['modules/checkout/validatePayment'], function (validatePayment) {
+define(['modules/checkout/validatePaymentFormat'], function (validatePaymentFormat) {
 
-    describe('#validatePayment', function () {
+    describe('#validatePaymentFormat', function () {
 
         it('should validate account number', function () {
 
@@ -29,10 +29,10 @@ define(['modules/checkout/validatePayment'], function (validatePayment) {
                 detailsConfirmed: false
             };
 
-            expect((validatePayment(tooShort)).accountNumberValid).toBe(false);
-            expect((validatePayment(tooLong)).accountNumberValid).toBe(false);
-            expect((validatePayment(justRightLow)).accountNumberValid).toBe(true);
-            expect((validatePayment(justRightHigh)).accountNumberValid).toBe(true);
+            expect((validatePaymentFormat(tooShort)).accountNumberValid).toBe(false);
+            expect((validatePaymentFormat(tooLong)).accountNumberValid).toBe(false);
+            expect((validatePaymentFormat(justRightLow)).accountNumberValid).toBe(true);
+            expect((validatePaymentFormat(justRightHigh)).accountNumberValid).toBe(true);
         });
 
         it('should validate account holder name', function () {
@@ -48,8 +48,8 @@ define(['modules/checkout/validatePayment'], function (validatePayment) {
                 sortCode: null,
                 detailsConfirmed: false
             };
-            expect((validatePayment(tooLong)).accountHolderNameValid).toBe(false);
-            expect((validatePayment(valid)).accountHolderNameValid).toBe(true);
+            expect((validatePaymentFormat(tooLong)).accountHolderNameValid).toBe(false);
+            expect((validatePaymentFormat(valid)).accountHolderNameValid).toBe(true);
         });
 
         it('should validate sort code', function () {
@@ -73,22 +73,22 @@ define(['modules/checkout/validatePayment'], function (validatePayment) {
                 detailsConfirmed: false
             };
 
-            expect((validatePayment(tooShort)).sortCodeValid).toBe(false);
-            expect((validatePayment(tooLong)).sortCodeValid).toBe(false);
-            expect((validatePayment(justRight)).sortCodeValid).toBe(true);
+            expect((validatePaymentFormat(tooShort)).sortCodeValid).toBe(false);
+            expect((validatePaymentFormat(tooLong)).sortCodeValid).toBe(false);
+            expect((validatePaymentFormat(justRight)).sortCodeValid).toBe(true);
 
         });
 
         it('should validate all details', function () {
 
-            var valid = validatePayment({
+            var valid = validatePaymentFormat({
                 accountNumber: '12346789',
                 accountHolderName: 'Example Name',
                 sortCode: '01-01-01',
                 detailsConfirmed: true
             });
 
-            var invalid = validatePayment({
+            var invalid = validatePaymentFormat({
                 accountNumber: '12346789',
                 accountHolderName: 'This name is longer than 18 characters',
                 sortCode: '01-01-0100',

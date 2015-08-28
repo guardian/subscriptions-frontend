@@ -5,7 +5,7 @@ import com.gu.identity.play.IdUser
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config.Identity.webAppProfileUrl
 import forms.{FinishAccountForm, SubscriptionsForm}
-import model.{SubscriptionRequestData, SubscriptionData}
+import model.{PaymentData, SubscriptionRequestData, SubscriptionData}
 import model.zuora.BillingFrequency
 import play.api.data.Form
 import play.api.libs.json._
@@ -82,6 +82,14 @@ object Checkout extends Controller with LazyLogging {
     for {
       doesUserExist <- IdentityService.doesUserExist(email)
     } yield Ok(Json.obj("emailInUse" -> doesUserExist))
+  }
+
+  val parsePaymentForm: BodyParser[PaymentData] = parse.form[PaymentData](Form(SubscriptionsForm.paymentDataMapping))
+
+  def checkAccount = CachedAction.async(parsePaymentForm) { implicit request =>
+    for {
+      isAccountValid <- GoCardlessService.checkBankDetails(request.body)
+    } yield Ok(Json.obj("accountValid" -> isAccountValid))
   }
 
   private def handleWithBadRequest[A](formWithErrors: Form[A]): Future[Result] =

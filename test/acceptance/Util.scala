@@ -36,7 +36,7 @@ trait Util { this: WebBrowser =>
   }
 
   protected def pageHasElement(q: Query, timeoutSecs: Int=50): Boolean = {
-    val pred = ExpectedConditions.presenceOfElementLocated(q.by)
+    val pred = ExpectedConditions.visibilityOfElementLocated(q.by)
     Try {
       new WebDriverWait(driver, timeoutSecs).until(pred)
     }.isSuccess

@@ -1,37 +1,44 @@
-define(['modules/forms/regex'], function (regex) {
+define([
+    'utils/ajax',
+    'modules/forms/regex',
+    'modules/checkout/validatePaymentFormat'
+], function (ajax, regex, validatePaymentFormat) {
     'use strict';
 
+    var ACCOUNT_CHECK_ENDPOINT = '/checkout/check-account';
+
+    function accountCheck(accountNumber, sortCode, accountHolderName) {
+        return ajax({
+            url: ACCOUNT_CHECK_ENDPOINT,
+            method: 'post',
+            type: 'json',
+            data: {
+                account: accountNumber,
+                sortcode: sortCode,
+                holder: accountHolderName
+            }
+        }).then(function (response) {
+            return response.accountValid;
+        }).fail(function (err){
+            Raven.captureException(err);
+        });
+    }
+
     return function (data) {
+        var validity = validatePaymentFormat(data);
 
-        var validity = {};
-
-        validity.accountNumberValid = (
-            data.accountNumber !== '' &&
-            data.accountNumber.length >= 6 &&
-            data.accountNumber.length <= 10 &&
-            regex.isNumber(data.accountNumber)
-        );
-
-        validity.accountHolderNameValid = (
-            data.accountHolderName !== '' &&
-            data.accountHolderName.length <= 18
-        );
-
-        validity.sortCodeValid = data.sortCode && (data.sortCode.split('-')).filter(function(code) {
-            var codeAsNumber = parseInt(code, 10);
-            return codeAsNumber >= 0 && codeAsNumber <= 99;
-        }).length === 3;
-
-        validity.detailsConfirmedValid = data.detailsConfirmed;
-
-        validity.allValid = (
-            validity.accountNumberValid &&
-            validity.accountHolderNameValid &&
-            validity.sortCodeValid &&
-            validity.detailsConfirmedValid
-        );
-
-        return validity;
+        return new Promise(function (resolve){
+            if (validity.allValid) {
+                accountCheck(data.accountNumber, data.sortCode, data.accountHolderName).then(function (accountValid) {
+                    validity.accountNumberValid = accountValid;
+                    validity.allValid = accountValid;
+                    resolve(validity);
+                });
+            } else {
+                validity.allValid = false;
+                resolve(validity);
+            }
+        });
     };
 
 });

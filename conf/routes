@@ -25,6 +25,7 @@ GET         /au/digital                      controllers.DigitalPack.au
 GET         /checkout                        controllers.Checkout.renderCheckout
 POST        /checkout                        controllers.Checkout.handleCheckout
 GET         /checkout/check-identity         controllers.Checkout.checkIdentity(email: String)
+POST        /checkout/check-account          controllers.Checkout.checkAccount
 POST        /checkout/register-guest-user    controllers.Checkout.processFinishAccount
 
 # collection and delivery
