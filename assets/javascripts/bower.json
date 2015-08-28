@@ -1,15 +1,15 @@
 {
-    "name": "Subscriptions JavaScript",
-    "dependencies": {
-        "bean": "~1.0.6",
-        "bonzo": "~2.0.0",
-        "lodash-amd": "~3.10.0",
-        "promise-polyfill": "~2.1.0",
-        "qwery": "~4.0.0",
-        "raven-js": "~1.1.16",
-        "requirejs": "~2.1.17",
-        "reqwest": "~1.1.0",
-        "zxcvbn": "90b7d2908d1305e0ab9f0fe0d983041e546af760",
-        "domready": "https://github.com/ded/domready.git"
-    }
+  "name": "Subscriptions JavaScript",
+  "dependencies": {
+    "bean": "~1.0.6",
+    "bonzo": "~2.0.0",
+    "lodash-amd": "~3.10.0",
+    "promise-polyfill": "~2.1.0",
+    "qwery": "~4.0.0",
+    "raven-js": "~1.1.16",
+    "requirejs": "~2.1.17",
+    "reqwest": "~1.1.0",
+    "zxcvbn": "90b7d2908d1305e0ab9f0fe0d983041e546af760",
+    "domready": "~1.0.8"
+  }
 }
