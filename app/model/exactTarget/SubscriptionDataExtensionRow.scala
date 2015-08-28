@@ -52,7 +52,7 @@ object SubscriptionDataExtensionRow {
       "Email" -> personalData.email
     )
   }
-  
+
   private def formatDate(dateTime: DateTime) = {
     val day = dateTime.dayOfMonth.get
 
