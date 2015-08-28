@@ -33,6 +33,9 @@ define([
         formEls.$FIELDSET_REVIEW
             .removeClass(FIELDSET_COLLAPSED);
 
+        formEls.$FIELDSET_YOUR_DETAILS[0]
+            .scrollIntoView();
+
         tracking.paymentDetailsTracking();
     }
 
