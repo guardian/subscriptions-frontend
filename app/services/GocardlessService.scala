@@ -27,6 +27,11 @@ object GoCardlessService extends GoCardlessService with LazyLogging {
         .getUrl
     }
 
+  /**
+   *
+   * @return true if either the bank details are correct, or the rate limit for this enpoint is reached.
+   *         In the latter case an error is logged.
+   */
   override def checkBankDetails(paymentData: PaymentData): Future[Boolean] = {
     val sortCode = paymentData.sortCode.replaceAllLiterally("-", "")
 
@@ -38,7 +43,12 @@ object GoCardlessService extends GoCardlessService with LazyLogging {
         .execute()
       true
     } recover { case e: GoCardlessApiException =>
-      false
+      if (e.getCode == 429) {
+        logger.error("Bypassing preliminary bank account check because the GoCardless rate limit has been reached for this endpoint. Someone might be using our website to proxy to GoCardless")
+        true
+      } else {
+        false
+      }
     }
   }
 }
