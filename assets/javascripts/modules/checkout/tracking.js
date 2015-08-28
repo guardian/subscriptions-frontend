@@ -11,25 +11,25 @@ define(['$', 'modules/analytics/omniture'], function ($, omniture) {
         return false;
     }
 
-    function trackEvent(prop17) {
+    function trackEvent(prop17, pageName) {
         var products = subscriptionProducts();
-        omniture.sendEvent(prop17, products);
+        omniture.sendEvent(prop17, pageName, products);
     }
 
     function personalDetailsTracking(){
-        trackEvent('GuardianDigiPack:Name and address');
+        trackEvent('GuardianDigiPack:Name and address', 'Details - name and address | Digital | Subscriptions | The Guardian');
     }
 
     function paymentDetailsTracking(){
-        trackEvent('GuardianDigiPack:Payment Details');
+        trackEvent('GuardianDigiPack:Payment Details', 'Details - payment details | Digital | Subscriptions | The Guardian');
     }
 
     function paymentSubmissionTracking(){
-        trackEvent('GuardianDigiPack:Review and confirm');
+        trackEvent('GuardianDigiPack:Review and confirm', 'Payment submission/signup | Digital | Subscriptions | The Guardian');
     }
 
     function subscriptionCompleteTracking(){
-        trackEvent('GuardianDigiPack:Order Complete');
+        trackEvent('GuardianDigiPack:Order Complete', 'Confirmation | Digital | Subscriptions | The Guardian');
     }
 
     return {
