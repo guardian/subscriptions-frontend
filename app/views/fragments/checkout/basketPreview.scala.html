@@ -1,4 +1,4 @@
-@(subscriptionProductsOpt: Option[Seq[model.zuora.SubscriptionProduct]] = None)
+@(subscriptionProducts: Seq[model.zuora.SubscriptionProduct] = Nil)
 
 @import model.zuora.BillingFrequency
 @import utils.Prices._
@@ -18,7 +18,7 @@
     </label>
 }
 
-<div class="basket-preview@if(subscriptionProductsOpt.nonEmpty){ basket-preview--products}">
+<div class="basket-preview@if(subscriptionProducts.nonEmpty){ basket-preview--products}">
     <h3 class="basket-preview__title">You've chosen:</h3>
     <div class="basket-preview__image">
         <img src="@controllers.CachedAssets.hashedPathFor("images/digital-pack.png")" alt="Digital Pack">
@@ -31,31 +31,27 @@
         <span class="basket-preview__product__caption">
             (Daily Edition / Guardian App Premium Tier)
         </span>
-        @for(subscriptionProducts <- subscriptionProductsOpt) {
-            @subscriptionProducts.find(_.frequency == BillingFrequency.Month).map { product =>
-                <span class="basket-preview__product__payment js-option-mirror-value">
-                    @product.price.pretty every month
-                </span>
-            }
+        @subscriptionProducts.find(_.frequency == BillingFrequency.Month).map { product =>
+            <span class="basket-preview__product__payment js-option-mirror-value">
+                @product.price.pretty every month
+            </span>
         }
     </div>
 
-    @for(subscriptionProducts <- subscriptionProductsOpt) {
-        <div class="basket-preview__toggle">
-            <button class="text-button u-button-reset js-toggle" data-toggle="change-payment-frequency">
-                Change payment frequency
-            </button>
-        </div>
-        <fieldset class="basket-preview__options is-hidden js-option-mirror-group js-payment-frequency" id="change-payment-frequency">
-            @subscriptionProducts.find(_.frequency == BillingFrequency.Month).map { product =>
-                @priceOption(product, "every month", product.frequency.numberOfMonths, isChecked=true)
-            }
-            @subscriptionProducts.find(_.frequency == BillingFrequency.Quarter).map { product =>
-                @priceOption(product, "every 3 months", product.frequency.numberOfMonths)
-            }
-            @subscriptionProducts.find(_.frequency == BillingFrequency.Annual).map { product =>
-                @priceOption(product, "every 12 months", product.frequency.numberOfMonths)
-            }
-        </fieldset>
-    }
+    <div class="basket-preview__toggle">
+        <button class="text-button u-button-reset js-toggle" data-toggle="change-payment-frequency">
+            Change payment frequency
+        </button>
+    </div>
+    <fieldset class="basket-preview__options is-hidden js-option-mirror-group" id="change-payment-frequency">
+        @subscriptionProducts.find(_.frequency == BillingFrequency.Month).map { product =>
+            @priceOption(product, "every month", product.frequency.numberOfMonths, isChecked=true)
+        }
+        @subscriptionProducts.find(_.frequency == BillingFrequency.Quarter).map { product =>
+            @priceOption(product, "every 3 months", product.frequency.numberOfMonths)
+        }
+        @subscriptionProducts.find(_.frequency == BillingFrequency.Annual).map { product =>
+            @priceOption(product, "every 12 months", product.frequency.numberOfMonths)
+        }
+    </fieldset>
 </div>

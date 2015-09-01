@@ -52,8 +52,4 @@ case class TouchpointBackend(
 
   val checkoutService = new CheckoutService(IdentityService, salesforceService, zuoraService, ExactTargetService)
 
-  def start() = {
-    salesforceService.repo.salesforce.authTask.start()
-    zuoraService.authTask.start()
-  }
 }

@@ -1,8 +1,9 @@
-@(form: Form[model.SubscriptionData], userIsSignedIn: Boolean, touchpointBackendResolution: services.TouchpointBackend.Resolution)(implicit request: RequestHeader)
-
+@import model.zuora.SubscriptionProduct
 @import model.JsVars
 @import routes.Checkout.renderCheckout
 @import configuration.Config.Identity._
+
+@(form: Form[model.SubscriptionData], userIsSignedIn: Boolean, products: Seq[SubscriptionProduct], touchpointBackendResolution: services.TouchpointBackend.Resolution)(implicit request: RequestHeader)
 
 @main(
     title = "Checkout | Subscriptions | The Guardian",
@@ -19,7 +20,7 @@
             @fragments.checkout.checkoutHeader("Checkout")
 
             <div class="checkout-container__sidebar">
-                @fragments.checkout.basketPreview(Some(touchpointBackendResolution.backend.zuoraService.products))
+                @fragments.checkout.basketPreview(products)
                 <div class="u-display-from-tablet" data-set="checkout-notices">
                     <div class="js-append">
                         @fragments.checkout.notices()

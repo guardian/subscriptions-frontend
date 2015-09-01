@@ -6,12 +6,11 @@ import com.gu.membership.zuora.soap.Zuora._
 import com.squareup.okhttp.Response
 import model.exactTarget.SubscriptionDataExtensionRow
 import model.zuora.SubscriptionProduct
-import model.{SubscriptionRequestData, PaymentData, PersonalData, SubscriptionData}
+import model.{PaymentData, PersonalData, SubscriptionData, SubscriptionRequestData}
 import org.joda.time.DateTime
 import org.scalatest.FreeSpec
 import org.scalatest.concurrent.{Futures, ScalaFutures}
 import org.scalatest.time.{Millis, Seconds, Span}
-import utils.ScheduledTask
 import utils.TestPersonalData._
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -49,7 +48,7 @@ class CheckoutServiceSpec extends FreeSpec with Futures with ScalaFutures {
     override def subscriptionByName(id: String): Future[Subscription] = {
       val date = new DateTime()
       Future {
-         Subscription("test","test","213",1,date.plusDays(1),date,date)
+         Subscription("test","test","213",1,date.plusDays(1),date,date, None)
       }
     }
 
@@ -58,9 +57,7 @@ class CheckoutServiceSpec extends FreeSpec with Futures with ScalaFutures {
     def account(subscription: Subscription): Future[Account] = ???
     def normalRatePlanCharge(subscription: Subscription): Future[RatePlanCharge] = ???
 
-    override def authTask: ScheduledTask[Authentication] = ???
-
-    override def products: Seq[SubscriptionProduct] = Seq.empty
+    override def products: Future[Seq[SubscriptionProduct]] = Future { Seq.empty }
   }
 
   object TestExactTargetService extends ExactTargetService {
