@@ -13,7 +13,7 @@ object Healthcheck extends Controller with LazyLogging{
         sfAuth <- TouchpointBackend.Normal.salesforceService.repo.salesforce.getAuthentication
       } yield Ok("OK"))
       .recover { case t: Throwable =>
-        logger.error("Health check failed", t)
+        logger.warn("Health check failed", t)
         ServiceUnavailable("Service Unavailable")
       }
       .map(Cached(1)(_))
