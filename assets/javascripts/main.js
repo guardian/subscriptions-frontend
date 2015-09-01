@@ -7,6 +7,7 @@ require([
     'modules/password',
     'modules/inputMask',
     'modules/checkout',
+    'modules/country',
     'modules/confirmation',
     'modules/patterns',
     // Add new dependencies ABOVE this
@@ -20,6 +21,7 @@ require([
              password,
              inputMask,
              checkout,
+             country,
              confirmation,
              patterns) {
     'use strict';
@@ -43,9 +45,10 @@ require([
     appendAround.init();
     password.init();
 
-    inputMask.init();
-    checkout.init();
-    confirmation.init();
+        inputMask.init();
+        country.init();
+        checkout.init();
+        confirmation.init();
 
     // Pattern library
     patterns.init();
