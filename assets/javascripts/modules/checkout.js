@@ -14,6 +14,7 @@ define([
     'use strict';
 
     function init() {
+
         if(formElements.$CHECKOUT_FORM.length) {
             personalDetails.init();
             paymentDetails.init();
@@ -24,6 +25,6 @@ define([
 
     return {
         init: init
-    };
+};
 
 });
