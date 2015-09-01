@@ -195,6 +195,12 @@
                     "Interval" : "10",
                     "Timeout" : "5"
                 },
+                "AccessLog": {
+                  "Enabled": true,
+                  "S3BucketName" :  { "Fn::Join" : [ "subscriptions-elb-logs/", [ { "Ref" : "Stage" }, "/AWSLogs/", {"Ref":"AWS::AccountId"}, "/elasticloadbalancing/", { "Ref": "AWS::Region" } ] ] },
+                  "EmitInterval": 60,
+                  "S3BucketPrefix": ""
+                },
                 "ConnectionDrainingPolicy": {
                     "Enabled" : "true",
                     "Timeout" : "60"
