@@ -1,5 +1,7 @@
 @import controllers.CachedAssets.hashedPathFor
 
+<script src="@hashedPathFor("javascripts/vendor/ready.js")"></script>
+
 @* Scripts that should be executed after CSS is loaded *@
 <script id="script-curl">
     var curl = {
@@ -16,7 +18,9 @@
     function loadJS(a,b){"use strict";var c=window.document.getElementsByTagName("script")[0],d=window.document.createElement("script");return d.src=a,d.async=!0,c.parentNode.insertBefore(d,c),b&&"function"==typeof b&&(d.onload=b),d}
     (function(isModern) {
         if (isModern) {
-            loadJS('@hashedPathFor("javascripts/main.min.js")');
+            domready(function(){
+                loadJS('@hashedPathFor("javascripts/main.min.js")');
+            });
         }
     })(guardian.isModernBrowser);
 </script>
