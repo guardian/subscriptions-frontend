@@ -8,12 +8,13 @@ define([
     var dataTrackingClickableElements = ['a', 'button', 'input'],
         omniture, s;
 
-    function sendEvent(prop17, products) {
+    function sendEvent(prop17, pageName, products) {
         omniture = omniture || init();
 
         omniture.then(function(){
             if (prop17) {
                 s.prop17 = prop17;
+                s.pageName = pageName;
             }
             if (products) {
                 s.products = products;
