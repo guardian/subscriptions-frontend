@@ -21,10 +21,10 @@ import scala.concurrent.Future
 
 object Checkout extends Controller with LazyLogging {
   object SessionKeys {
-    val subsName = "newSubs_subscriptionName"
-    val ratePlanId = "newSubs_ratePlanId"
-    val userId = "newSubs_userId"
-    val token = "newSubs_token"
+    val SubsName = "newSubs_subscriptionName"
+    val RatePlanId = "newSubs_ratePlanId"
+    val UserId = "newSubs_userId"
+    val IdentityGuestPasswordSettingToken = "newSubs_token"
   }
 
   def zuoraService(implicit res: TouchpointBackend.Resolution): ZuoraService =
@@ -34,7 +34,7 @@ object Checkout extends Controller with LazyLogging {
     res.backend.checkoutService
 
   def renderCheckout = NoCacheAction.async { implicit request =>
-    implicit val resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
+    implicit val touchpointBackend = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
 
     val authUserOpt = authenticatedUserFor(request)
 
@@ -52,7 +52,7 @@ object Checkout extends Controller with LazyLogging {
       filledForm <- fillForm()
       products <- zuoraService.products
     } yield {
-      Ok(views.html.checkout.payment(filledForm, userIsSignedIn = authUserOpt.isDefined, products, resolution))
+      Ok(views.html.checkout.payment(filledForm, userIsSignedIn = authUserOpt.isDefined, products, touchpointBackend))
     }
   }
 
@@ -65,22 +65,22 @@ object Checkout extends Controller with LazyLogging {
     val formData = request.body
     val idUserOpt = authenticatedUserFor(request)
 
-    implicit val touchpointBackendResolution = TouchpointBackend.forRequest(NameEnteredInForm, formData)
+    implicit val touchpointBackend = TouchpointBackend.forRequest(NameEnteredInForm, formData)
     val requestData = SubscriptionRequestData(request.remoteAddress)
 
     checkoutService.processSubscription(formData, idUserOpt, requestData).map { case CheckoutResult(_, userIdData, subscription) =>
       val userSessionFields = userIdData match {
         case GuestUser(UserId(userId), IdentityToken(token)) =>
           Seq(
-            SessionKeys.userId -> userId,
-            SessionKeys.token -> token
+            SessionKeys.UserId -> userId,
+            SessionKeys.IdentityGuestPasswordSettingToken -> token
           )
         case _ => Seq()
       }
 
       val session = (Seq(
-        SessionKeys.subsName -> subscription.name,
-        SessionKeys.ratePlanId -> formData.ratePlanId
+        SessionKeys.SubsName -> subscription.name,
+        SessionKeys.RatePlanId -> formData.ratePlanId
       ) ++ userSessionFields).foldLeft(request.session) { _ + _ }
 
       Redirect(routes.Checkout.thankYou()).withSession(session)
@@ -99,12 +99,12 @@ object Checkout extends Controller with LazyLogging {
   }
 
   def thankYou = NoCacheAction.async { implicit request =>
-    implicit val touchpointBackendResolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
+    implicit val touchpointBackend = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     val session = request.session
 
     val sessionInfo = for {
-      subsName <- session.get(SessionKeys.subsName)
-      ratePlanId <- session.get(SessionKeys.ratePlanId)
+      subsName <- session.get(SessionKeys.SubsName)
+      ratePlanId <- session.get(SessionKeys.RatePlanId)
     } yield (subsName, ratePlanId)
 
     // TODO If some info are missing, redirect to an empty form. Is it the expected behaviour?
@@ -113,8 +113,8 @@ object Checkout extends Controller with LazyLogging {
     sessionInfo.fold(redirectToEmptyForm) { case (subsName, ratePlanId) =>
       val passwordForm = authenticatedUserFor(request).fold {
         for {
-          userId <- session.get(SessionKeys.userId)
-          token  <- session.get(SessionKeys.token)
+          userId <- session.get(SessionKeys.UserId)
+          token  <- session.get(SessionKeys.IdentityGuestPasswordSettingToken)
           form <- GuestUser(UserId(userId), IdentityToken(token)).toGuestAccountForm
         } yield form
       }{ const(None) } // Don't display the user registration form if the user is logged in
@@ -123,7 +123,7 @@ object Checkout extends Controller with LazyLogging {
         val product = products.find(_.ratePlanId == ratePlanId).getOrElse(
           throw new NoSuchElementException(s"Could not find a product with rate plan id $ratePlanId")
         )
-        Ok(view.thankyou(subsName, passwordForm, touchpointBackendResolution, product))
+        Ok(view.thankyou(subsName, passwordForm, touchpointBackend, product))
       }
     }
   }
