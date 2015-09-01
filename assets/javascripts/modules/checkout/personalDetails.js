@@ -46,12 +46,13 @@ define([
     }
 
     function nextStep() {
-        formEls.$FIELDSET_YOUR_DETAILS
-            .addClass(FIELDSET_COLLAPSED)
-            .addClass(FIELDSET_COMPLETE);
-
         formEls.$FIELDSET_PAYMENT_DETAILS
             .removeClass(FIELDSET_COLLAPSED);
+
+        formEls.$FIELDSET_YOUR_DETAILS
+            .addClass(FIELDSET_COLLAPSED)
+            .addClass(FIELDSET_COMPLETE)[0]
+            .scrollIntoView();
 
         tracking.personalDetailsTracking();
     }
