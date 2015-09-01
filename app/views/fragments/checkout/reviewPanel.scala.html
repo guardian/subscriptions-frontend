@@ -1,7 +1,7 @@
+@import utils.Prices.RichFloat
 @import model.zuora.SubscriptionProduct
-@import utils.Prices._
 
-@(subscriptionId: String, personalData: model.PersonalData, subscriptionProduct:SubscriptionProduct)
+@(subscriptionId: String, subscriptionProduct: SubscriptionProduct)
 
 <div class="review-panel">
     <input
@@ -20,16 +20,6 @@
         <h4 class="review-panel__label">Your subscription:</h4>
         <div class="review-panel__details">
             Digital Pack <em>(Daily Edition / Guardian App Premium Tier)</em>
-        </div>
-    </div>
-    <div class="review-panel__item">
-        <h4 class="review-panel__label">Your details:</h4>
-        <div class="review-panel__details">
-            <address>
-                @personalData.fullName<br/>
-                @personalData.address.asString<br/>
-                @personalData.email
-            </address>
         </div>
     </div>
 </div>

@@ -1,24 +1,21 @@
 @import model.zuora.SubscriptionProduct
 
 @(subscriptionName: String,
-    personalData: model.PersonalData,
     guestAccountForm: Option[Form[model.GuestAccountData]] = None,
     touchpointBackendResolution: services.TouchpointBackend.Resolution,
     subscriptionProduct:SubscriptionProduct
 )(implicit request: RequestHeader)
 
-@import configuration.Details
 @import configuration.Config.Identity.webAppProfileUrl
-@import services.UserId.{paramName => userIdParam}
+@import configuration.Details
 @import services.IdentityToken.{paramName => identityTokenParam}
-@import routes.Checkout.processFinishAccount
-
+@import services.UserId.{paramName => userIdParam}
 
 @main("Thank you | Subscriptions | The Guardian", bodyClasses=List("is-wide"), touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
 
 <main class="page-container gs-container gs-container--slim">
 
-    @fragments.page.header("Thank you for your order", classes=List("l-padded"))
+    @fragments.page.header("Thank you for your order", None, List("l-padded"))
 
     <section class="section-slice section-slice--bleed section-slice--limited">
         <div class="section-slice__content">
@@ -34,7 +31,7 @@
                 </p>
                 <p>Open times: Lines are open Monday&ndash;Friday 8.00am&ndash;5.30pm. Saturday &amp; Sunday 8.30am&ndash;12.30pm</p>
             </div>
-            @fragments.checkout.reviewPanel(subscriptionName, personalData, subscriptionProduct)
+            @fragments.checkout.reviewPanel(subscriptionName, subscriptionProduct)
         </div>
     </section>
 
@@ -51,7 +48,7 @@
                     <p>Some features of your subscription require you to be signed in before you can make use of them.</p>
                 </div>
 
-                <form action="@processFinishAccount" method="POST" class="form js-finish-account" autocomplete="off">
+                <form action="@routes.Checkout.processFinishAccount" method="POST" class="form js-finish-account" autocomplete="off">
                     @helper.CSRF.formField
 
                     <div class="form-field js-checkout-finish-account-password">

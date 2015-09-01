@@ -18,10 +18,24 @@ import views.html.{checkout => view}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.Function.const
 
 object Checkout extends Controller with LazyLogging {
+  object SessionKeys {
+    val subsName = "newSubs_subscriptionName"
+    val ratePlanId = "newSubs_ratePlanId"
+    val userId = "newSubs_userId"
+    val token = "newSubs_token"
+  }
+
+  def zuoraService(implicit res: TouchpointBackend.Resolution): ZuoraService =
+    res.backend.zuoraService
+
+  def checkoutService(implicit res: TouchpointBackend.Resolution): CheckoutService =
+    res.backend.checkoutService
 
   def renderCheckout = NoCacheAction.async { implicit request =>
+    implicit val resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
 
     val authUserOpt = authenticatedUserFor(request)
 
@@ -37,8 +51,7 @@ object Checkout extends Controller with LazyLogging {
 
     for {
       filledForm <- fillForm()
-      resolution: Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
-      products <- resolution.backend.zuoraService.products
+      products <- zuoraService.products
     } yield {
       Ok(views.html.checkout.payment(filledForm, userIsSignedIn = authUserOpt.isDefined, products, resolution))
     }
@@ -53,17 +66,26 @@ object Checkout extends Controller with LazyLogging {
     val formData = request.body
     val idUserOpt = authenticatedUserFor(request)
 
-    val touchpointBackendResolution = TouchpointBackend.forRequest(NameEnteredInForm, formData)
+    implicit val touchpointBackendResolution = TouchpointBackend.forRequest(NameEnteredInForm, formData)
     val requestData = SubscriptionRequestData(request.remoteAddress)
 
-    for {
-      CheckoutResult(_, userIdData, subscription) <- touchpointBackendResolution.backend.checkoutService.processSubscription(formData, idUserOpt, requestData)
-      passwordForm = userIdData.toGuestAccountForm
-      products <- touchpointBackendResolution.backend.zuoraService.products
-      subscriptionProduct = products.find(_.ratePlanId == formData.ratePlanId).getOrElse {
-        throw new NoSuchElementException(s"Could not find a product with rate plan id: ${formData.ratePlanId}")
+    checkoutService.processSubscription(formData, idUserOpt, requestData).map { case CheckoutResult(_, userIdData, subscription) =>
+      val userSessionFields = userIdData match {
+        case GuestUser(UserId(userId), IdentityToken(token)) =>
+          Seq(
+            SessionKeys.userId -> userId,
+            SessionKeys.token -> token
+          )
+        case _ => Seq()
       }
-    } yield Ok(view.thankyou(subscription.name, formData.personalData, passwordForm, touchpointBackendResolution, subscriptionProduct))
+
+      val session = (Seq(
+        SessionKeys.subsName -> subscription.name,
+        SessionKeys.ratePlanId -> formData.ratePlanId
+      ) ++ userSessionFields).foldLeft(request.session) { _ + _ }
+
+      Redirect(routes.Checkout.thankYou()).withSession(session)
+    }
   }
 
   def processFinishAccount = NoCacheAction.async { implicit request =>
@@ -75,6 +97,36 @@ object Checkout extends Controller with LazyLogging {
           Ok(Json.obj("profileUrl" -> webAppProfileUrl.toString()))
         }
       })
+  }
+
+  def thankYou = NoCacheAction.async { implicit request =>
+    implicit val touchpointBackendResolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
+    val session = request.session
+
+    val sessionInfo = for {
+      subsName <- session.get(SessionKeys.subsName)
+      ratePlanId <- session.get(SessionKeys.ratePlanId)
+    } yield (subsName, ratePlanId)
+
+    // TODO If some info are missing, redirect to an empty form. Is it the expected behaviour?
+    def redirectToEmptyForm = Future { Redirect(routes.Checkout.renderCheckout()) }
+
+    sessionInfo.fold(redirectToEmptyForm) { case (subsName, ratePlanId) =>
+      val passwordForm = authenticatedUserFor(request).fold {
+        for {
+          userId <- session.get(SessionKeys.userId)
+          token  <- session.get(SessionKeys.token)
+          form <- GuestUser(UserId(userId), IdentityToken(token)).toGuestAccountForm
+        } yield form
+      }{ const(None) } // Don't display the user registration form if the user is logged in
+
+      zuoraService.products.map { products =>
+        val product = products.find(_.ratePlanId == ratePlanId).getOrElse(
+          throw new NoSuchElementException(s"Could not find a product with rate plan id $ratePlanId")
+        )
+        Ok(view.thankyou(subsName, passwordForm, touchpointBackendResolution, product))
+      }
+    }
   }
 
   def checkIdentity(email: String) = CachedAction.async { implicit request =>
