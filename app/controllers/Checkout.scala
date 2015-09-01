@@ -11,14 +11,13 @@ import play.api.libs.json._
 import play.api.mvc._
 import services.AuthenticationService.authenticatedUserFor
 import services.CheckoutService.CheckoutResult
-import services.TouchpointBackend.Resolution
 import services._
 import utils.TestUsers.{NameEnteredInForm, PreSigninTestCookie}
 import views.html.{checkout => view}
 
+import scala.Function.const
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.Function.const
 
 object Checkout extends Controller with LazyLogging {
   object SessionKeys {

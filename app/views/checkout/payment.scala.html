@@ -1,6 +1,5 @@
 @import model.zuora.SubscriptionProduct
 @import model.JsVars
-@import routes.Checkout.renderCheckout
 @import configuration.Config.Identity._
 
 @(form: Form[model.SubscriptionData], userIsSignedIn: Boolean, products: Seq[SubscriptionProduct], touchpointBackendResolution: services.TouchpointBackend.Resolution)(implicit request: RequestHeader)
@@ -14,7 +13,7 @@
 <main class="page-container gs-container">
 
     <section class="checkout-container">
-        <form class="form js-checkout-form" action="@renderCheckout().toString()" method="POST">
+        <form class="form js-checkout-form" action="@routes.Checkout.renderCheckout().toString()" method="POST">
             @helper.CSRF.formField
 
             @fragments.checkout.checkoutHeader("Checkout")
@@ -39,10 +38,10 @@
                         <div class="field-panel__intro">
                             <div class="field-note field-note--offset">
                                 @if(userIsSignedIn) {
-                                    <a href="@idWebAppSignOutUrl(renderCheckout())">Sign out</a>
+                                    <a href="@idWebAppSignOutUrl(routes.Checkout.renderCheckout())">Sign out</a>
                                 } else {
                                     <span class="field-note__label">Already have a Guardian account?</span>
-                                    <a href="@idWebAppSigninUrl(renderCheckout())">Sign in</a>
+                                    <a href="@idWebAppSigninUrl(routes.Checkout.renderCheckout())">Sign in</a>
                                 }
                             </div>
                         </div>
