@@ -10,7 +10,6 @@ import play.api.data.Form
 import play.api.libs.json._
 import play.api.mvc._
 import services.AuthenticationService.authenticatedUserFor
-import services.CheckoutService.CheckoutResult
 import services._
 import utils.TestUsers.{NameEnteredInForm, PreSigninTestCookie}
 import views.html.{checkout => view}
@@ -68,8 +67,10 @@ object Checkout extends Controller with LazyLogging {
     implicit val touchpointBackend = TouchpointBackend.forRequest(NameEnteredInForm, formData)
     val requestData = SubscriptionRequestData(request.remoteAddress)
 
-    checkoutService.processSubscription(formData, idUserOpt, requestData).map { case CheckoutResult(_, userIdData, subscription) =>
-      val userSessionFields = userIdData match {
+    val checkoutResult = checkoutService.processSubscription(formData, idUserOpt, requestData)
+
+    checkoutResult.map { result =>
+      val userSessionFields = result.userIdData match {
         case GuestUser(UserId(userId), IdentityToken(token)) =>
           Seq(
             SessionKeys.UserId -> userId,
@@ -79,7 +80,7 @@ object Checkout extends Controller with LazyLogging {
       }
 
       val session = (Seq(
-        SessionKeys.SubsName -> subscription.name,
+        SessionKeys.SubsName -> result.zuoraResult.name,
         SessionKeys.RatePlanId -> formData.ratePlanId
       ) ++ userSessionFields).foldLeft(request.session) { _ + _ }
 
@@ -107,7 +108,7 @@ object Checkout extends Controller with LazyLogging {
       ratePlanId <- session.get(SessionKeys.RatePlanId)
     } yield (subsName, ratePlanId)
 
-    // TODO If some info are missing, redirect to an empty form. Is it the expected behaviour?
+    // TODO If some pieces of information are missing, redirect to an empty form. Is it the expected behaviour?
     def redirectToEmptyForm = Future { Redirect(routes.Checkout.renderCheckout()) }
 
     sessionInfo.fold(redirectToEmptyForm) { case (subsName, ratePlanId) =>
