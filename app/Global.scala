@@ -8,7 +8,7 @@ import play.filters.headers.{SecurityHeadersConfig, SecurityHeadersFilter}
 object Global extends WithFilters(
   CheckCacheHeadersFilter,
   SecurityHeadersFilter(SecurityHeadersConfig(
-    frameOptions=Some("SAME-ORIGIN"),
+    frameOptions=Some("SAMEORIGIN"),
     permittedCrossDomainPolicies = None,
     contentSecurityPolicy = None
   )),
