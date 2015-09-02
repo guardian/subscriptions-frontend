@@ -27,6 +27,7 @@ POST        /checkout                        controllers.Checkout.handleCheckout
 GET         /checkout/check-identity         controllers.Checkout.checkIdentity(email: String)
 POST        /checkout/check-account          controllers.Checkout.checkAccount
 POST        /checkout/register-guest-user    controllers.Checkout.processFinishAccount
+GET         /checkout/thank-you              controllers.Checkout.thankYou
 
 # collection and delivery
 GET         /collection/paper-digital        controllers.Shipping.viewCollectionPaperDigital
