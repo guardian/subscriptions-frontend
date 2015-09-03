@@ -11,11 +11,11 @@ object Apps {
 
   val appleAppStoreBadge = AppBadge(
     "Download from the App Store",
-    "images/logos/apple-app-store.svg"
+    "images/logos/apple-app-store.png"
   )
   val googlePlayStoreBadge = AppBadge(
     "Get it on Google Play",
-    "images/logos/google-play-store.svg"
+    "images/logos/google-play-store.png"
   )
   val amazonAppStoreBadge = AppBadge(
     "Available at Amazon",
