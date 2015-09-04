@@ -4,7 +4,7 @@ import com.gu.membership.salesforce.MemberId
 import com.gu.membership.zuora.ZuoraApiConfig
 import com.gu.membership.zuora.soap.Zuora._
 import com.gu.membership.zuora.soap.ZuoraDeserializer._
-import com.gu.membership.zuora.soap.ZuoraServiceError
+import com.gu.membership.zuora.soap.{ZuoraApi, SimpleFilter, AndFilter, ZuoraServiceError}
 import com.gu.monitoring.ZuoraMetrics
 import configuration.Config
 import model.zuora.{DigitalProductPlan, SubscriptionProduct}
@@ -34,7 +34,7 @@ class ZuoraApiClient(zuoraApiConfig: ZuoraApiConfig,
                      zuoraProperties: ZuoraProperties) extends ZuoraService {
 
   private val akkaSystem = Akka.system
-  private val client = new FilterableZuoraApi(zuoraApiConfig, new ZuoraMetrics(Config.stage, Config.appName), akkaSystem)
+  private val client = new ZuoraApi(zuoraApiConfig, new ZuoraMetrics(Config.stage, Config.appName), akkaSystem)
   private val cache: ProductsCache = new ProductsCache(client, akkaSystem, digitalProductPlan).refreshEvery(2.hour)
 
   def products = cache.items
