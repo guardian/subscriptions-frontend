@@ -4,14 +4,14 @@ import akka.actor.ActorSystem
 import com.gu.membership.util.FutureSupplier
 import com.gu.membership.zuora.soap.Zuora._
 import com.gu.membership.zuora.soap.ZuoraDeserializer._
-import com.gu.membership.zuora.soap.ZuoraServiceError
+import com.gu.membership.zuora.soap.{ZuoraApi, OrFilter, SimpleFilter, ZuoraServiceError}
 import model.zuora.{BillingFrequency, DigitalProductPlan, SubscriptionProduct}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
-protected class ProductsCache(client: FilterableZuoraApi, akkaSystem: ActorSystem, digitalProductPlan: DigitalProductPlan) {
+protected class ProductsCache(client: ZuoraApi, akkaSystem: ActorSystem, digitalProductPlan: DigitalProductPlan) {
 
   def items = productsSupplier.get()
 
