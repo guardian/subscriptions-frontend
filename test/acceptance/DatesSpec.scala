@@ -5,7 +5,7 @@ import utils.Dates
 
 class DatesSpec extends FeatureSpec {
   feature("Date Formatters") {
-    scenario("Ordinal day formatting", Acceptance) {
+    scenario("Ordinal day formatting") {
       assert(Dates.getOrdinalDay(11) == "11th")
       assert(Dates.getOrdinalDay(12) == "12th")
       assert(Dates.getOrdinalDay(13) == "13th")
