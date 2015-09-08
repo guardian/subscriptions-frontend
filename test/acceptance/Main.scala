@@ -1,5 +1,6 @@
 package acceptance
 
+import acceptance.features.{PrintSubscriptionsSpec, CheckoutSpec}
 import org.openqa.selenium.WebDriver
 import org.scalatest.selenium.WebBrowser
 import org.scalatest.{BeforeAndAfterAll, Suites}

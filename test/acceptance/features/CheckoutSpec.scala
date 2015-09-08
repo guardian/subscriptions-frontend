@@ -1,6 +1,7 @@
-package acceptance
+package acceptance.features
 
 import acceptance.pages.{Checkout, ThankYou}
+import acceptance.{Acceptance, Config, Util, pages}
 import org.openqa.selenium.WebDriver
 import org.scalatest.selenium.WebBrowser
 import org.scalatest.{BeforeAndAfter, FeatureSpec, GivenWhenThen}

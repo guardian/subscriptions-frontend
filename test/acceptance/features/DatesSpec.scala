@@ -1,5 +1,6 @@
-package acceptance
+package acceptance.features
 
+import acceptance.Acceptance
 import org.scalatest.FeatureSpec
 import utils.Dates
 
