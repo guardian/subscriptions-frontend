@@ -86,20 +86,6 @@
         margin: ($gs-baseline / 2) 0;
     }
 }
-.basket-preview__toggle {
-    display: block;
-    margin-bottom: $gs-baseline;
-}
-.basket-preview__options {
-    border: 1px solid $c-border;
-    border-radius: 10px;
-    padding: $gs-gutter;
-
-    @include mq($from: phablet, $until: tablet) {
-        max-width: 60%;
-        margin-bottom: $gs-baseline;
-    }
-}
 
 .basket-preview--products {
     .basket-preview__product__title {
@@ -118,3 +104,17 @@
     }
 }
 
+.basket-options-toggle {
+    display: block;
+    margin-bottom: $gs-baseline;
+}
+.basket-billing-options {
+    border: 1px solid $c-border;
+    border-radius: 10px;
+    padding: $gs-gutter;
+
+    @include mq($from: phablet, $until: tablet) {
+        max-width: 60%;
+        margin-bottom: $gs-baseline;
+    }
+}

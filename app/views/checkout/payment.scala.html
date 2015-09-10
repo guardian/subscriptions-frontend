@@ -4,6 +4,24 @@
 
 @(form: Form[model.SubscriptionData], userIsSignedIn: Boolean, products: Seq[SubscriptionProduct], touchpointBackendResolution: services.TouchpointBackend.Resolution)(implicit request: RequestHeader)
 
+@import model.zuora.BillingFrequency
+@import utils.Prices._
+
+@priceOption(product: model.zuora.SubscriptionProduct, descriptionSuffix: String, numberOfMonths: Int, isChecked: Boolean = false) = {
+    <label class="option">
+        <span class="option__input">
+            <input
+            type="radio" name="ratePlanId"
+            data-option-mirror-label="@product.price.pretty @descriptionSuffix"
+            data-amount="@product.price.pretty"
+            data-number-of-months="@numberOfMonths"
+            value="@product.ratePlanId"@if(isChecked){ checked}
+            >
+        </span>
+        <span class="option__label">@product.price.pretty @descriptionSuffix</span>
+    </label>
+}
+
 @main(
     title = "Checkout | Subscriptions | The Guardian",
     jsVars = JsVars.default.copy(userIsSignedIn = userIsSignedIn),
@@ -20,6 +38,22 @@
 
             <div class="checkout-container__sidebar">
                 @fragments.checkout.basketPreview(products)
+                <div class="basket-options-toggle">
+                    <button class="text-button u-button-reset js-toggle" data-toggle="change-payment-frequency">
+                        Change payment frequency
+                    </button>
+                </div>
+                <fieldset class="basket-billing-options is-hidden js-option-mirror-group" id="change-payment-frequency">
+                    @products.find(_.frequency == BillingFrequency.Month).map { product =>
+                        @priceOption(product, "every month", product.frequency.numberOfMonths, isChecked=true)
+                    }
+                    @products.find(_.frequency == BillingFrequency.Quarter).map { product =>
+                        @priceOption(product, "every 3 months", product.frequency.numberOfMonths)
+                    }
+                    @products.find(_.frequency == BillingFrequency.Annual).map { product =>
+                        @priceOption(product, "every 12 months", product.frequency.numberOfMonths)
+                    }
+                </fieldset>
                 <div class="u-display-from-tablet" data-set="checkout-notices">
                     <div class="js-append">
                         @fragments.checkout.notices()
