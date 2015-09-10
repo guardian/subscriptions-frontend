@@ -38,12 +38,12 @@
 
             <div class="checkout-container__sidebar">
                 @fragments.checkout.basketPreview(products)
-                <div class="basket-preview__toggle">
+                <div class="basket-options-toggle">
                     <button class="text-button u-button-reset js-toggle" data-toggle="change-payment-frequency">
                         Change payment frequency
                     </button>
                 </div>
-                <fieldset class="basket-preview__options is-hidden js-option-mirror-group" id="change-payment-frequency">
+                <fieldset class="basket-billing-options is-hidden js-option-mirror-group" id="change-payment-frequency">
                     @products.find(_.frequency == BillingFrequency.Month).map { product =>
                         @priceOption(product, "every month", product.frequency.numberOfMonths, isChecked=true)
                     }
