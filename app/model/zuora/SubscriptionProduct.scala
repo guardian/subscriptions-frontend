@@ -1,11 +1,10 @@
 package model.zuora
 
 
-case class SubscriptionProduct(
-  product: DigitalProductPlan,
-  frequency: BillingFrequency,
-  ratePlanId: String,
-  price: Float)
+case class SubscriptionProduct(product: DigitalProductPlan,
+                               frequency: BillingFrequency,
+                               ratePlanId: String,
+                               price: Float)
 
 
 case class DigitalProductPlan(id: String)

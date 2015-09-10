@@ -3,21 +3,6 @@
 @import model.zuora.BillingFrequency
 @import utils.Prices._
 
-@priceOption(product: model.zuora.SubscriptionProduct, descriptionSuffix: String, numberOfMonths: Int, isChecked: Boolean = false) = {
-    <label class="option">
-        <span class="option__input">
-            <input
-                type="radio" name="ratePlanId"
-                data-option-mirror-label="@product.price.pretty @descriptionSuffix"
-                data-amount="@product.price.pretty"
-                data-number-of-months="@numberOfMonths"
-                value="@product.ratePlanId"@if(isChecked){ checked}
-            >
-        </span>
-        <span class="option__label">@product.price.pretty @descriptionSuffix</span>
-    </label>
-}
-
 <div class="basket-preview@if(subscriptionProducts.nonEmpty){ basket-preview--products}">
     <h3 class="basket-preview__title">You've chosen:</h3>
     <div class="basket-preview__image">
@@ -38,20 +23,5 @@
         }
     </div>
 
-    <div class="basket-preview__toggle">
-        <button class="text-button u-button-reset js-toggle" data-toggle="change-payment-frequency">
-            Change payment frequency
-        </button>
-    </div>
-    <fieldset class="basket-preview__options is-hidden js-option-mirror-group" id="change-payment-frequency">
-        @subscriptionProducts.find(_.frequency == BillingFrequency.Month).map { product =>
-            @priceOption(product, "every month", product.frequency.numberOfMonths, isChecked=true)
-        }
-        @subscriptionProducts.find(_.frequency == BillingFrequency.Quarter).map { product =>
-            @priceOption(product, "every 3 months", product.frequency.numberOfMonths)
-        }
-        @subscriptionProducts.find(_.frequency == BillingFrequency.Annual).map { product =>
-            @priceOption(product, "every 12 months", product.frequency.numberOfMonths)
-        }
-    </fieldset>
+
 </div>
