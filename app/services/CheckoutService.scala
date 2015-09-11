@@ -2,7 +2,7 @@ package services
 
 import com.gu.identity.play.AuthenticatedIdUser
 import com.gu.membership.salesforce.MemberId
-import com.gu.membership.zuora.soap.Zuora.SubscribeResult
+import com.gu.membership.zuora.soap.models.Result.SubscribeResult
 import com.typesafe.scalalogging.LazyLogging
 import model.{PersonalData, SubscriptionData, SubscriptionRequestData}
 

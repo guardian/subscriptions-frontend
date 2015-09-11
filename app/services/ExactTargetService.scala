@@ -1,9 +1,9 @@
 package services
 
 import akka.agent.Agent
-import com.gu.membership.zuora.soap.Zuora.SubscribeResult
+import com.gu.membership.zuora.soap.models.Result.SubscribeResult
 import com.squareup.okhttp.Request.Builder
-import com.squareup.okhttp.{Response, MediaType, OkHttpClient, RequestBody}
+import com.squareup.okhttp.{MediaType, OkHttpClient, RequestBody, Response}
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
 import model.SubscriptionData

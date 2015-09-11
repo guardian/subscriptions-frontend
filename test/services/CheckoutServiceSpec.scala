@@ -2,7 +2,8 @@ package services
 
 import com.gu.identity.play.{AuthenticatedIdUser, IdMinimalUser}
 import com.gu.membership.salesforce.{BasicMember, MemberId}
-import com.gu.membership.zuora.soap.Zuora._
+import com.gu.membership.zuora.soap.models.Query._
+import com.gu.membership.zuora.soap.models.Result.SubscribeResult
 import com.squareup.okhttp.Response
 import model.exactTarget.SubscriptionDataExtensionRow
 import model.zuora.SubscriptionProduct
