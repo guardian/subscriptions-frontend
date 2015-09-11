@@ -66,10 +66,10 @@ object PersonalDataJsonSerialiser {
       "privateFields" -> Json.obj(
         "firstName" -> personalData.firstName,
         "secondName" -> personalData.lastName,
-        "billingAddress1" -> personalData.address.address1,
-        "billingAddress2" -> personalData.address.address2,
+        "billingAddress1" -> personalData.address.lineOne,
+        "billingAddress2" -> personalData.address.lineTwo,
         "billingAddress3" -> personalData.address.town,
-        "billingPostcode" -> personalData.address.postcode,
+        "billingPostcode" -> personalData.address.postCode,
         "billingCountry" -> "United Kingdom"
       ),
       "statusFields" ->

@@ -1,6 +1,7 @@
 package forms
 
-import model.{AddressData, PaymentData, PersonalData, SubscriptionData}
+import com.gu.membership.zuora.{Countries, Address}
+import model.{PaymentData, PersonalData, SubscriptionData}
 import play.api.data.format.Formatter
 import play.api.data.format.Formats._
 
@@ -26,12 +27,13 @@ object SubscriptionsForm {
   private val addressMaxLength = 255
   private val emailMaxLength = 240
 
+  def unapplyUkAddress(a: Address) = Some((a.lineOne, a.lineTwo, a.town, a.postCode))
   val addressDataMapping = mapping(
     "address1" -> text(0, addressMaxLength),
     "address2" -> text(0, addressMaxLength),
     "town" -> text(0, addressMaxLength),
     "postcode" -> text(0, addressMaxLength)
-  )(AddressData.apply)(AddressData.unapply)
+  )(Address.apply(_:String, _:String, _: String, "United Kingdom", _: String, Countries.UK))(unapplyUkAddress)
 
   val emailMapping = tuple(
     "email" -> email.verifying("This email is too long", _.length < emailMaxLength + 1),

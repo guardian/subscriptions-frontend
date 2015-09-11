@@ -1,7 +1,8 @@
 package forms
 
-import forms.SubscriptionsForm.{personalDataMapping, addressDataMapping}
-import model.{AddressData, PersonalData}
+import com.gu.membership.zuora.{Address, Countries}
+import forms.SubscriptionsForm.{addressDataMapping, personalDataMapping}
+import model.PersonalData
 import org.scalatest.FreeSpec
 
 class SubscriptionsFormSpec extends FreeSpec {
@@ -24,12 +25,7 @@ class SubscriptionsFormSpec extends FreeSpec {
         lastName = "last",
         email = "a@example.com",
         receiveGnmMarketing = true,
-        address = AddressData(
-          address1 = "address1",
-          address2 = "address2",
-          town = "town",
-          postcode = "postcode"
-        )
+        address = Address("address1","address2","town", "United Kingdom", "postcode", Countries.UK)
       )))(personalDataMapping.bind(formData))
     }
 
@@ -73,6 +69,5 @@ class SubscriptionsFormSpec extends FreeSpec {
 
       assert(data.isLeft, s"Email should have a max size of 240")
     }
-
   }
 }

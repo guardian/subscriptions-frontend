@@ -1,21 +1,18 @@
 package model
 
 import com.gu.identity.play.IdUser
+import com.gu.membership.zuora.{Countries, Address}
 
 case class PaymentData(account: String, sortCodeValue: String, holder: String) {
   val sortCode = sortCodeValue.filter(_.isDigit)
 }
 
-case class AddressData(address1: String, address2: String, town: String, postcode: String) {
-  def asString =
-    List(address1, address2, town, postcode).filterNot(_.isEmpty).mkString(", ")
-}
-
-case class PersonalData(firstName: String, lastName: String, email: String, receiveGnmMarketing: Boolean, address: AddressData) {
+case class PersonalData(firstName: String, lastName: String, email: String, receiveGnmMarketing: Boolean, address: Address) {
   def fullName = s"$firstName $lastName"
 }
 
 case class SubscriptionData(personalData: PersonalData, paymentData: PaymentData, ratePlanId: String)
+
 object SubscriptionData {
   def fromIdUser(u: IdUser) = {
     implicit class OptField[A](opt: Option[A]) {
@@ -27,11 +24,13 @@ object SubscriptionData {
       def getOrBlank(get: A => Option[String]): String = getOrDefault(get, "")
     }
 
-    val addressData = AddressData(
-      u.privateFields.getOrBlank(_.billingAddress1),
-      u.privateFields.getOrBlank(_.billingAddress2),
-      u.privateFields.getOrBlank(_.billingAddress3),
-      u.privateFields.getOrBlank(_.billingPostcode)
+    val addressData = Address(
+      lineOne = u.privateFields.getOrBlank(_.billingAddress1),
+      lineTwo = u.privateFields.getOrBlank(_.billingAddress2),
+      town = u.privateFields.getOrBlank(_.billingAddress3),
+      postCode = u.privateFields.getOrBlank(_.billingPostcode),
+      countyOrState = u.privateFields.getOrBlank(_.country),
+      country = Countries.UK
     )
 
     val personalData = PersonalData(

@@ -8,7 +8,7 @@ import play.api.http.DefaultHttpErrorHandler
 import play.api.mvc.Results._
 import play.api.mvc._
 import play.api.routing.Router
-import com.gu.membership.zuora.soap.Zuora
+import com.gu.membership.zuora.soap
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent._
@@ -42,7 +42,7 @@ class ErrorHandler @Inject() (env: Environment,
   }
 
   private val specialHandler: Handler = {
-    case err: Zuora.Error if err.code == "TRANSACTION_FAILED" =>
+    case err: soap.Error if err.code == "TRANSACTION_FAILED" =>
       Future.successful(NoCache(BadRequest(views.html.zuoraTransactionFailed())))
   }
 }
