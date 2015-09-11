@@ -1,11 +1,10 @@
-package acceptance
+package utils
 
-import org.scalatest.FeatureSpec
-import utils.Dates
+import org.scalatest.FreeSpec
 
-class DatesSpec extends FeatureSpec {
-  feature("Date Formatters") {
-    scenario("Ordinal day formatting", Acceptance) {
+class DatesSpec extends FreeSpec {
+  "Date Formatters" - {
+    "Ordinal day formatting" in {
       assert(Dates.getOrdinalDay(11) == "11th")
       assert(Dates.getOrdinalDay(12) == "12th")
       assert(Dates.getOrdinalDay(13) == "13th")
