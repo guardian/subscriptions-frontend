@@ -1,6 +1,7 @@
 package controllers
 
 import actions.CommonActions.CachedAction
+import model.Benefits
 import play.api.mvc._
 
 case class DigitalEdition(id: String, name: String, price: String, cmp: String)
@@ -27,6 +28,11 @@ object DigitalPack extends Controller {
 
   def landingPage(digitalEdition: DigitalEdition) = CachedAction {
     Ok(views.html.digitalpack.info(digitalEdition))
+  }
+
+  def vue = CachedAction {
+    val startUrl = "https://www.guardiansubscriptions.co.uk/digitalsubscriptions/?prom=DGA45&CMP=ema-1501"
+    Ok(views.html.digitalpack.info(UK, Benefits.digitalPackVue, Some(startUrl)))
   }
 
   def country(digitalEdition: DigitalEdition) = CachedAction {

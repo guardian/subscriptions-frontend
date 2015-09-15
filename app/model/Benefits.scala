@@ -22,6 +22,15 @@ object Benefits {
     BenefitItem("30-day archive", "A month of back issues. Take your time, sit back, and enjoy")
   ))
 
+  val digitalPackVue = BenefitPackage("Daily Edition", Seq(
+    BenefitItem("The full experience", "Your newspaper, delivered to your tablet by 4am every morning, ready for offline reading."),
+    BenefitItem("Complete supplements", "Including The Guide, Cook, Do Something, Observer Tech and Food Monthly"),
+    BenefitItem("Video and audio content", "Embedded audio, video and image galleries — plus all our crosswords"),
+    BenefitItem("Free cinema tickets", "Get two free Vue cinema tickets ever month for  12 months when you subscribe. Treat a friend or indulge yourself twice a month, it’s up to you."),
+    BenefitItem("Designed for tablets", "Specially adapted to your device, whether you're using iPad, Android or Kindle Fire"),
+    BenefitItem("30-day archive", "A month of back issues. Take your time, sit back, and enjoy")
+  ))
+
   val premiumTier = BenefitPackage("Guardian App Premium Tier", Seq(
     BenefitItem("Advert-free", "No distractions, just the journalism you love"),
     BenefitItem("Available offline", "Tap to read content offline. Perfect for travel"),
