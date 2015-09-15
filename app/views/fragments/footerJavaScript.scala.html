@@ -1,0 +1,12 @@
+@import controllers.CachedAssets.hashedPathFor
+
+<script id="script-main">
+    /* Only load JS if the browser cuts the mustard */
+    (function(isModern) {
+        if (isModern) {
+            var s = document.createElement('script');
+            s.src = '@hashedPathFor("javascripts/main.min.js")'; s.async = true;
+            document.getElementsByTagName("head")[0].appendChild(s);
+        }
+    })(guardian.isModernBrowser);
+</script>
