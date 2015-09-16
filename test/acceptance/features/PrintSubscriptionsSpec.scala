@@ -1,7 +1,8 @@
-package acceptance
+package acceptance.features
 
 import acceptance.Config.appUrl
 import acceptance.pages.{Home, SubscriptionPlan}
+import acceptance.{Acceptance, Config, Util}
 import org.openqa.selenium.WebDriver
 import org.scalatest._
 import org.scalatest.selenium.WebBrowser
