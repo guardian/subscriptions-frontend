@@ -12,9 +12,10 @@ class ScalaTestWithExitCode extends TestResultLogger {
         val summary = findScalatestSummary(results.summaries)
                         .fold[Map[String, Int]](Map.empty)(parseScalatestSummary)
 
-        if (summary.exists(t => t._1 == "failed" && t._2 > 0))
+        if (summary.exists(t => t._1 == "failed" && t._2 > 0)) {
           logWarnings(log, results)
           sys.exit(1)
+        }
     }
   }
 
