@@ -1,4 +1,3 @@
-/*global zxcvbn */
 define(function () {
     'use strict';
 
@@ -23,7 +22,7 @@ define(function () {
         ]
     };
 
-    var checkStrength = function(strengthIndicator, strengthInput) {
+    var checkStrength = function(zxcvbn, strengthIndicator, strengthInput) {
         var score = zxcvbn(strengthInput.value).score;
         var label = CONFIG.text.passwordLabel + ': ' + CONFIG.passwordLabels[score];
         var strengthLabel = document.querySelector(SELECTORS.strengthLabel);
@@ -42,10 +41,10 @@ define(function () {
         }
     };
 
-    var addListeners = function (strengthIndicator, strengthInput) {
+    var addListeners = function (zxcvbn, strengthIndicator, strengthInput) {
         strengthIndicator.classList.toggle(HIDDEN_CLASS);
         strengthInput.addEventListener('keyup', function() {
-            checkStrength(strengthIndicator, strengthInput);
+            checkStrength(zxcvbn, strengthIndicator, strengthInput);
         });
     };
 
@@ -57,8 +56,12 @@ define(function () {
         var strengthInput = document.querySelector(SELECTORS.strengthInput);
 
         if(strengthIndicator && strengthInput) {
-            require(['js!zxcvbn'], function() {
-                addListeners(strengthIndicator, strengthInput);
+            /**
+             * Async load in zxcvbn lib as it is ~700kb!
+             * Loads as an AMD module as of version ~3.5
+             */
+            require(['zxcvbn'], function(zxcvbn) {
+                addListeners(zxcvbn, strengthIndicator, strengthInput);
             });
         }
     };
