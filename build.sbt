@@ -1,7 +1,5 @@
 import play.sbt.PlayImport
 
-import scala.util.Try
-
 name := "subscriptions-frontend"
 
 version := "1.0-SNAPSHOT"
