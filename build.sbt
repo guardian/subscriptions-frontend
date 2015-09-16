@@ -1,5 +1,7 @@
 import play.sbt.PlayImport
 
+import scala.util.Try
+
 name := "subscriptions-frontend"
 
 version := "1.0-SNAPSHOT"
@@ -45,16 +47,7 @@ testOptions in Test ++= Seq(
   Tests.Argument("-oFD") // display full stack errors and execution times in Scalatest output
 )
 
-testResultLogger in Test := new TestResultLogger {
-  import sbt.Tests._
-
-  def run(log: Logger, results: Output, taskName: String): Unit = {
-    results.overall match {
-      case TestResult.Error | TestResult.Failed => sys.exit(1)
-      case _ =>
-    }
-  }
-}
+testResultLogger in Test := new ScalaTestWithExitCode
 
 javaOptions in Test += "-Dconfig.file=test/conf/application.conf"
 
