@@ -2,14 +2,17 @@ define([
     'bean',
     'utils/ajax',
     'utils/text',
+    'modules/forms/loader',
     'modules/checkout/formElements',
     'modules/checkout/tracking'
 ], function (
     bean,
     ajax,
     textUtils,
+    loader,
     formEls,
-    tracking) {
+    tracking
+) {
     'use strict';
 
     function clickHelper($elem, callback) {
@@ -53,17 +56,26 @@ define([
         });
     }
 
-    function paymentSubmissionTracking() {
+    function submitHandler() {
+        var submitEl;
         if(formEls.$CHECKOUT_SUBMIT.length) {
-            bean.on(formEls.$CHECKOUT_SUBMIT[0], 'click', function () {
+            submitEl = formEls.$CHECKOUT_SUBMIT[0];
+            bean.on(submitEl, 'click', function () {
                 tracking.paymentSubmissionTracking();
             });
+
+            var form = formEls.$CHECKOUT_FORM[0];
+            form.addEventListener('submit', function() {
+                loader.startLoader();
+                submitEl.setAttribute('disabled', 'disabled');
+            }, false);
         }
+
     }
 
     function init() {
         populateDetails();
-        paymentSubmissionTracking();
+        submitHandler();
     }
 
     return {
