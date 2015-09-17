@@ -8,13 +8,12 @@
 @import '../bower_components/pasteup-buttons/src/_buttons';
 
 .button--large {
-    cursor: pointer;
     @include font-size(14px, 34px);
     padding-left: $gs-gutter;
     padding-right: $gs-gutter/4;
-    text-align: left;
-    // TODO: Remove
     min-width: 160px;
+    text-align: left;
+    cursor: pointer;
 
     &:after {
         @extend .icon-arrow-white;
@@ -59,6 +58,17 @@
     &:after {
         display: none;
     }
+}
+
+/* Buttons: Disabled
+   ========================================================================== */
+
+.button.is-disabled,
+.button[disabled],
+.button[disabled]:hover,
+.button[disabled]:active {
+    background-color: $c-neutral5;
+    border-color: $c-neutral5;
 }
 
 /* Button Group
