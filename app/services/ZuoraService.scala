@@ -74,7 +74,7 @@ class ZuoraApiClient(zuoraApiConfig: ZuoraApiConfig,
   }
 
   override def createSubscription(memberId: MemberId, data: SubscriptionData, requestData: SubscriptionRequestData): Future[SubscribeResult] = {
-    val account = subscribe.Account.stripe(memberId, autopay = true)
+    val account = subscribe.Account.goCardless(memberId, autopay = true)
 
     val paymentMethod  = subscribe.BankTransfer(data.paymentData.holder,
                                                 data.paymentData.account,
