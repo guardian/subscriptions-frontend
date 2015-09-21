@@ -1,10 +1,10 @@
 package services
 
 import com.gu.membership.salesforce.MemberId
-import com.gu.membership.zuora.soap.models.Result.SubscribeResult
+import com.gu.membership.zuora.soap.models.Results.SubscribeResult
 import com.gu.membership.zuora.{soap, ZuoraApiConfig}
 import com.gu.membership.zuora.soap._
-import com.gu.membership.zuora.soap.models.Query._
+import com.gu.membership.zuora.soap.models.Queries._
 import com.gu.membership.zuora.soap.Readers._
 import com.gu.membership.zuora.soap.actions.subscribe
 import com.gu.membership.zuora.soap.actions.subscribe.Subscribe
