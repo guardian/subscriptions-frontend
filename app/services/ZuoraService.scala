@@ -77,21 +77,21 @@ class ZuoraApiClient(zuoraApiConfig: ZuoraApiConfig,
     val account = subscribe.Account.goCardless(memberId, autopay = true)
 
     val paymentMethod  = subscribe.BankTransfer(data.paymentData.holder,
-						data.paymentData.account,
-						data.paymentData.sortCode,
-						data.personalData.firstName,
-						data.personalData.lastName)
+                                                data.paymentData.account,
+                                                data.paymentData.sortCode,
+                                                data.personalData.firstName,
+                                                data.personalData.lastName)
 
     client.authenticatedRequest(Subscribe(account = account,
-				paymentMethodOpt = Some(paymentMethod),
-				ratePlanId = data.ratePlanId,
-				firstName = data.personalData.firstName,
-				lastName = data.personalData.lastName,
-				address = data.personalData.address,
-				paymentDelay = Some(zuoraProperties.paymentDelayInDays),
-				casIdOpt = None,
-				ipAddressOpt = Some(requestData.ipAddress),
-				featureIds = Nil))
+                                paymentMethodOpt = Some(paymentMethod),
+                                ratePlanId = data.ratePlanId,
+                                firstName = data.personalData.firstName,
+                                lastName = data.personalData.lastName,
+                                address = data.personalData.address,
+                                paymentDelay = Some(zuoraProperties.paymentDelayInDays),
+                                casIdOpt = None,
+                                ipAddressOpt = Some(requestData.ipAddress),
+                                featureIds = Nil))
   }
 
 }
