@@ -22,7 +22,7 @@ trait SalesforceService extends LazyLogging {
       Keys.EMAIL -> personalData.email,
       Keys.FIRST_NAME -> personalData.firstName,
       Keys.LAST_NAME -> personalData.lastName,
-      Keys.MAILING_STREET -> personalData.address.lineTwo,
+      Keys.MAILING_STREET -> personalData.address.line,
       Keys.MAILING_CITY -> personalData.address.town,
       Keys.MAILING_POSTCODE -> personalData.address.postCode,
       Keys.MAILING_COUNTRY -> "United Kingdom",
