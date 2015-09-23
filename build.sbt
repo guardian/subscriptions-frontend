@@ -5,21 +5,23 @@ name := "subscriptions-frontend"
 version := "1.0-SNAPSHOT"
 
 lazy val root = (project in file(".")).enablePlugins(
-  PlayScala,
-  BuildInfoPlugin
+    PlayScala,
+    BuildInfoPlugin
 ).settings(
-  magentaPackageName := "frontend",
-  buildInfoKeys := Seq[BuildInfoKey](
-    name,
-    BuildInfoKey.constant("gitCommitId", Option(System.getenv("BUILD_VCS_NUMBER")) getOrElse(try {
-      "git rev-parse HEAD".!!.trim
-    } catch { case e: Exception => "unknown" })),
-    BuildInfoKey.constant("buildNumber", Option(System.getenv("BUILD_NUMBER")) getOrElse "DEV"),
-    BuildInfoKey.constant("buildTime", System.currentTimeMillis)
-  ),
-  buildInfoPackage := "app",
-  buildInfoOptions += BuildInfoOption.ToMap
-)
+    magentaPackageName := "frontend",
+    buildInfoKeys := Seq[BuildInfoKey](
+	name,
+	BuildInfoKey.constant("gitCommitId", Option(System.getenv("BUILD_VCS_NUMBER")) getOrElse (try {
+	    "git rev-parse HEAD".!!.trim
+	} catch {
+	    case e: Exception => "unknown"
+	})),
+	BuildInfoKey.constant("buildNumber", Option(System.getenv("BUILD_NUMBER")) getOrElse "DEV"),
+	BuildInfoKey.constant("buildTime", System.currentTimeMillis)
+    ),
+    buildInfoPackage := "app",
+    buildInfoOptions += BuildInfoOption.ToMap
+    )
 
 scalaVersion := "2.11.6"
 
@@ -44,7 +46,6 @@ libraryDependencies ++= Seq(
   "com.squareup.okhttp" % "okhttp" % "2.4.0",
   "com.snowplowanalytics" % "snowplow-java-tracker" % "0.5.2-SNAPSHOT",
   "com.github.t3hnar" %% "scala-bcrypt" % "2.4"
-
 )
 
 testOptions in Test ++= Seq(
@@ -52,6 +53,7 @@ testOptions in Test ++= Seq(
 )
 
 testResultLogger in Test := new ScalaTestWithExitCode
+
 
 javaOptions in Test += "-Dconfig.file=test/conf/application.conf"
 

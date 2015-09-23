@@ -13,7 +13,7 @@ import play.api.mvc._
 import services.AuthenticationService.authenticatedUserFor
 import services._
 import tracking.activities.{MemberData, SubscriptionRegistrationActivity, CheckoutReachedActivity}
-import tracking.{MemberData, ActivityTracking}
+import tracking.{CheckoutReachedActivity, ActivityTracking}
 import utils.TestUsers.{NameEnteredInForm, PreSigninTestCookie}
 import views.html.{checkout => view}
 
@@ -22,6 +22,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 object Checkout extends Controller with LazyLogging with ActivityTracking {
+
   object SessionKeys {
     val SubsName = "newSubs_subscriptionName"
     val RatePlanId = "newSubs_ratePlanId"
@@ -42,7 +43,7 @@ object Checkout extends Controller with LazyLogging with ActivityTracking {
     val authUserOpt = authenticatedUserFor(request)
 
     def fillForm(): Future[Form[SubscriptionData]] = for {
-      fullUserOpt <-authUserOpt.fold[Future[Option[IdUser]]](Future.successful(None))(au => IdentityService.userLookupByScGuU(AuthCookie(au.authCookie)))
+      fullUserOpt <- authUserOpt.fold[Future[Option[IdUser]]](Future.successful(None))(au => IdentityService.userLookupByScGuU(AuthCookie(au.authCookie)))
     } yield {
         fullUserOpt.map { idUser =>
           SubscriptionsForm().fill(SubscriptionData.fromIdUser(idUser))
@@ -54,7 +55,7 @@ object Checkout extends Controller with LazyLogging with ActivityTracking {
     for {
       filledForm <- fillForm()
       products <- zuoraService.products
-      selectedProduct = products.find(p=> p.frequency==BillingFrequency.Month).get
+      selectedProduct = products.find(p => p.frequency == BillingFrequency.Month).get
     } yield {
       Ok(views.html.checkout.payment(filledForm, userIsSignedIn = authUserOpt.isDefined, products, selectedProduct, touchpointBackend))
     }
@@ -85,13 +86,13 @@ object Checkout extends Controller with LazyLogging with ActivityTracking {
       }
 
       val session = (Seq(
-	      SessionKeys.SubsName -> result.subscribeResult.name,
+	SessionKeys.SubsName -> result.subscribeResult.name,
         SessionKeys.RatePlanId -> formData.ratePlanId
-      ) ++ userSessionFields).foldLeft(request.session) { _ + _ }
+      ) ++ userSessionFields).foldLeft(request.session) {_ + _}
 
       for {
 	products <- zuoraService.products
-	product = products.find(p=> p.ratePlanId==formData.ratePlanId)
+	product = products.find(p => p.ratePlanId == formData.ratePlanId)
       } yield {
 	product.map(prod => trackAnon(SubscriptionRegistrationActivity(MemberData(result, formData, prod))))
 
@@ -105,8 +106,8 @@ object Checkout extends Controller with LazyLogging with ActivityTracking {
     val guestAccountData = request.body
     IdentityService.convertGuest(guestAccountData.password, IdentityToken(guestAccountData.token))
       .map { cookies =>
-        Ok(Json.obj("profileUrl" -> webAppProfileUrl.toString())).withCookies(cookies: _*)
-      }
+      Ok(Json.obj("profileUrl" -> webAppProfileUrl.toString())).withCookies(cookies: _*)
+    }
   }
 
   def thankYou = NoCacheAction.async { implicit request =>
@@ -119,16 +120,20 @@ object Checkout extends Controller with LazyLogging with ActivityTracking {
     } yield (subsName, ratePlanId)
 
     // TODO If some pieces of information are missing, redirect to an empty form. Is it the expected behaviour?
-    def redirectToEmptyForm = Future { Redirect(routes.Checkout.renderCheckout()) }
+    def redirectToEmptyForm = Future {
+      Redirect(routes.Checkout.renderCheckout())
+    }
 
     sessionInfo.fold(redirectToEmptyForm) { case (subsName, ratePlanId) =>
       val passwordForm = authenticatedUserFor(request).fold {
         for {
           userId <- session.get(SessionKeys.UserId)
-          token  <- session.get(SessionKeys.IdentityGuestPasswordSettingToken)
+	  token <- session.get(SessionKeys.IdentityGuestPasswordSettingToken)
           form <- GuestUser(UserId(userId), IdentityToken(token)).toGuestAccountForm
         } yield form
-      }{ const(None) } // Don't display the user registration form if the user is logged in
+      } {
+	const(None)
+      } // Don't display the user registration form if the user is logged in
 
       zuoraService.products.map { products =>
         val product = products.find(_.ratePlanId == ratePlanId).getOrElse(

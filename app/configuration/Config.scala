@@ -39,6 +39,8 @@ object Config {
   val bcryptPepper = config.getString("activity.tracking.bcrypt.pepper")
 
 
+
+
   object Identity {
     private val idConfig = config.getConfig("identity")
 
