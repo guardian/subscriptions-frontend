@@ -12,6 +12,7 @@ import play.api.libs.json._
 import play.api.mvc._
 import services.AuthenticationService.authenticatedUserFor
 import services._
+import tracking.{CheckoutReachedActivity, ActivityTracking}
 import utils.TestUsers.{NameEnteredInForm, PreSigninTestCookie}
 import views.html.{checkout => view}
 
@@ -19,7 +20,7 @@ import scala.Function.const
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-object Checkout extends Controller with LazyLogging {
+object Checkout extends Controller with LazyLogging with ActivityTracking {
   object SessionKeys {
     val SubsName = "newSubs_subscriptionName"
     val RatePlanId = "newSubs_ratePlanId"
@@ -35,6 +36,7 @@ object Checkout extends Controller with LazyLogging {
 
   def renderCheckout = NoCacheAction.async { implicit request =>
     implicit val touchpointBackend = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
+    track(PreSigninTestCookie, request.cookies, CheckoutReachedActivity("checkoutReached", "UK"))
 
     val authUserOpt = authenticatedUserFor(request)
 
@@ -53,7 +55,7 @@ object Checkout extends Controller with LazyLogging {
       products <- zuoraService.products
       selectedProduct = products.find(p=> p.frequency==BillingFrequency.Month).get
     } yield {
-      Ok(views.html.checkout.payment(filledForm, userIsSignedIn = authUserOpt.isDefined, products, selectedProduct, touchpointBackend))
+      Ok(views.html.checkout.payment(filledForm, userIsSignedIn = authUserOpt.isDefined, products, touchpointBackend))
     }
   }
 
@@ -82,7 +84,7 @@ object Checkout extends Controller with LazyLogging {
       }
 
       val session = (Seq(
-        SessionKeys.SubsName -> result.zuoraResult.name,
+	SessionKeys.SubsName -> result.subscribeResult.name,
         SessionKeys.RatePlanId -> formData.ratePlanId
       ) ++ userSessionFields).foldLeft(request.session) { _ + _ }
 

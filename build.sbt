@@ -41,11 +41,12 @@ libraryDependencies ++= Seq(
   "org.scalactic" %% "scalactic" % scalatestVersion % "test",
   "org.seleniumhq.selenium" % "selenium-java" % "2.44.0" % "test",
   "com.gocardless" % "gocardless-pro" % "1.0.0",
-  "com.squareup.okhttp" % "okhttp" % "2.4.0"
+  "com.squareup.okhttp" % "okhttp" % "2.4.0",
+  "com.snowplowanalytics" % "snowplow-java-tracker" % "0.5.2-SNAPSHOT"
 )
 
 testOptions in Test ++= Seq(
-  Tests.Argument("-oFD") // display full stack errors and execution times in Scalatest output
+    Tests.Argument("-oFD") // display full stack errors and execution times in Scalatest output
 )
 
 testResultLogger in Test := new ScalaTestWithExitCode
@@ -53,9 +54,10 @@ testResultLogger in Test := new ScalaTestWithExitCode
 javaOptions in Test += "-Dconfig.file=test/conf/application.conf"
 
 resolvers ++= Seq(
-  "Guardian Github Releases" at "https://guardian.github.io/maven/repo-releases",
-  "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases",
-  Resolver.sonatypeRepo("releases"))
+    "Guardian Github Releases" at "https://guardian.github.io/maven/repo-releases",
+    "Guardian Github Snapshots" at "http://guardian.github.com/maven/repo-snapshots",
+    "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases",
+    Resolver.sonatypeRepo("releases"))
 
 addCommandAlias("devrun", "run -Dconfig.resource=DEV.conf 9200")
 addCommandAlias("fast-test", "testOnly -- -l Acceptance")

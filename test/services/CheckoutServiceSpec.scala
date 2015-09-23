@@ -94,7 +94,7 @@ class CheckoutServiceSpec extends FreeSpec with Futures with ScalaFutures {
           }
 
           "containing the Zuora subscription result" in {
-            assertResult(SubscribeResult("Subscribed RegisteredId contactId", "A-Sxxxxx"))(res.zuoraResult)
+	    assertResult(SubscribeResult("Subscribed RegisteredId contactId", "A-Sxxxxx"))(res.subscribeResult)
           }
         }
       }
