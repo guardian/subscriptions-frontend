@@ -28,12 +28,13 @@ object SubscriptionsForm {
   private val emailMaxLength = 240
 
   def unapplyUkAddress(a: Address) = Some((a.lineOne, a.lineTwo, a.town, a.postCode))
+  def applyUkAddress(lineOne: String, lineTwo: String, town: String, postCode: String) = Address(lineOne, lineOne, town, "", postCode, Countries.UK)
   val addressDataMapping = mapping(
     "address1" -> text(0, addressMaxLength),
     "address2" -> text(0, addressMaxLength),
     "town" -> text(0, addressMaxLength),
     "postcode" -> text(0, addressMaxLength)
-  )(Address.apply(_:String, _:String, _: String, "United Kingdom", _: String, Countries.UK))(unapplyUkAddress)
+  )(applyUkAddress)(unapplyUkAddress)
 
   val emailMapping = tuple(
     "email" -> email.verifying("This email is too long", _.length < emailMaxLength + 1),
