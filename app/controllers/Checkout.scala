@@ -36,7 +36,7 @@ object Checkout extends Controller with LazyLogging with ActivityTracking {
 
   def renderCheckout = NoCacheAction.async { implicit request =>
     implicit val touchpointBackend = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
-    track(PreSigninTestCookie, request.cookies, CheckoutReachedActivity("checkoutReached", "UK"))
+    track(PreSigninTestCookie, request.cookies, CheckoutReachedActivity("checkoutReached", "United Kingdom"))
 
     val authUserOpt = authenticatedUserFor(request)
 

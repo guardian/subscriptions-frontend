@@ -36,7 +36,7 @@ trait ActivityTracking {
     if (!analyticsOff) executeTracking(data)
   }
 
-  def track[C](permittedAltCredentialType: TestUserCredentialType[C], altCredentialSource: C, data: TrackerData) {
+  def track[C](permittedAltCredentialType: TestUserCredentialType[C], altCredentialSource: C, data: TrackerData)(implicit request: RequestHeader) {
       isTestUser(permittedAltCredentialType, altCredentialSource).map(_ => executeTracking(data))
   }
 
