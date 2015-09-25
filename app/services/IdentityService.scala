@@ -15,6 +15,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class IdentityService(identityApiClient: => IdentityApiClient) extends LazyLogging {
+
   import IdentityService._
 
   def doesUserExist(email: String): Future[Boolean] =
@@ -49,8 +50,10 @@ class IdentityService(identityApiClient: => IdentityApiClient) extends LazyLoggi
 }
 
 object IdentityService extends IdentityService(IdentityApiClient) {
+
   class IdentityGuestPasswordError(jsonMsg: String) extends RuntimeException(
     s"Cannot set password for Identity guest user. Json response form service: $jsonMsg")
+
 }
 
 object PersonalDataJsonSerialiser {
@@ -66,10 +69,10 @@ object PersonalDataJsonSerialiser {
       "privateFields" -> Json.obj(
         "firstName" -> personalData.firstName,
         "secondName" -> personalData.lastName,
-	"billingAddress1" -> personalData.address.lineOne,
-	"billingAddress2" -> personalData.address.lineTwo,
+        "billingAddress1" -> personalData.address.lineOne,
+        "billingAddress2" -> personalData.address.lineTwo,
         "billingAddress3" -> personalData.address.town,
-	"billingPostcode" -> personalData.address.postCode,
+        "billingPostcode" -> personalData.address.postCode,
         "billingCountry" -> "United Kingdom"
       ),
       "statusFields" ->
@@ -78,7 +81,9 @@ object PersonalDataJsonSerialiser {
 }
 
 trait IdentityApiClient {
+
   import PersonalDataJsonSerialiser._
+
   val createOnlyFields = Seq(primaryEmailAddress, publicFields)
   type Password = String
   type Email = String
@@ -97,6 +102,7 @@ trait IdentityApiClient {
 }
 
 object IdentityApiClient extends IdentityApiClient with LazyLogging {
+
   import PersonalDataJsonSerialiser._
 
   lazy val identityEndpoint = Config.Identity.baseUri
@@ -114,8 +120,8 @@ object IdentityApiClient extends IdentityApiClient with LazyLogging {
       eventualResponse.map(response =>
         (response.json \ "status").asOpt[String].filter(_ == "error")
           .foreach(_ => (response.json \ "errors").asOpt[JsArray].flatMap(_.value.headOption)
-            .filter(errorMessageFilter)
-            .foreach(_ => block(response))))
+          .filter(errorMessageFilter)
+          .foreach(_ => block(response))))
     }
 
     def withWSFailureLogging(request: WSRequest) = {
@@ -193,9 +199,9 @@ object IdentityApiClient extends IdentityApiClient with LazyLogging {
 }
 
 class IdApiMetrics(val stage: String) extends CloudWatch
-  with StatusMetrics
-  with RequestMetrics
-  with AuthenticationMetrics {
+with StatusMetrics
+with RequestMetrics
+with AuthenticationMetrics {
 
   val region = Region.getRegion(Regions.EU_WEST_1)
   val application = Config.appName
