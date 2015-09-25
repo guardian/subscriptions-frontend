@@ -12,8 +12,9 @@ import play.api.libs.json._
 import play.api.mvc._
 import services.AuthenticationService.authenticatedUserFor
 import services._
-import tracking.activities.{MemberData, SubscriptionRegistrationActivity, CheckoutReachedActivity}
+import tracking.activities.{MemberData, SubscriptionRegistrationActivity}
 import tracking.{CheckoutReachedActivity, ActivityTracking}
+>>>>>>> Added some basic activity tracking boilerplate simmilar to membership common
 import utils.TestUsers.{NameEnteredInForm, PreSigninTestCookie}
 import views.html.{checkout => view}
 
@@ -22,7 +23,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 object Checkout extends Controller with LazyLogging with ActivityTracking {
-
   object SessionKeys {
     val SubsName = "newSubs_subscriptionName"
     val RatePlanId = "newSubs_ratePlanId"

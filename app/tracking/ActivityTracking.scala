@@ -9,7 +9,7 @@ import configuration.Config
 import controllers.Testing
 import play.api.Logger
 import play.api.mvc.RequestHeader
-import utils.TestUsers.TestUserCredentialType
+import utils.TestUsers.{TestUserCredentialType, isTestUser}
 
 import scala.collection.JavaConversions._
 
@@ -55,5 +55,5 @@ object ActivityTracking {
   val url = Config.trackerUrl
 
   def setSubMap(in: Map[String, Any]): JMap[String, Object] =
-    mapAsJavaMap(in).asInstanceOf[java.util.Map[java.lang.String, java.lang.Object]]
+     mapAsJavaMap(in).asInstanceOf[java.util.Map[java.lang.String, java.lang.Object]]
 }
