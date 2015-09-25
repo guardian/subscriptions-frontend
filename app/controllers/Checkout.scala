@@ -12,7 +12,7 @@ import play.api.libs.json._
 import play.api.mvc._
 import services.AuthenticationService.authenticatedUserFor
 import services._
-import tracking.{CheckoutReachedActivity, ActivityTracking}
+import tracking.{MemberData, SubscriptionCreatedActivity, CheckoutReachedActivity, ActivityTracking}
 import utils.TestUsers.{NameEnteredInForm, PreSigninTestCookie}
 import views.html.{checkout => view}
 
@@ -36,7 +36,7 @@ object Checkout extends Controller with LazyLogging with ActivityTracking {
 
   def renderCheckout = NoCacheAction.async { implicit request =>
     implicit val touchpointBackend = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
-    track(PreSigninTestCookie, request.cookies, CheckoutReachedActivity("checkoutReached", "United Kingdom"))
+    trackAnon(CheckoutReachedActivity("United Kingdom"))
 
     val authUserOpt = authenticatedUserFor(request)
 
@@ -87,6 +87,14 @@ object Checkout extends Controller with LazyLogging with ActivityTracking {
 	SessionKeys.SubsName -> result.subscribeResult.name,
         SessionKeys.RatePlanId -> formData.ratePlanId
       ) ++ userSessionFields).foldLeft(request.session) { _ + _ }
+
+      for {
+	products <- zuoraService.products
+	product = products.find(p=> p.ratePlanId==formData.ratePlanId)
+      } yield {
+	product.map(prod => track(NameEnteredInForm, formData, SubscriptionCreatedActivity(MemberData(result, formData, prod))))
+
+      }
 
       Redirect(routes.Checkout.thankYou()).withSession(session)
     }

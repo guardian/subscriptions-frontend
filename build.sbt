@@ -42,7 +42,9 @@ libraryDependencies ++= Seq(
   "org.seleniumhq.selenium" % "selenium-java" % "2.44.0" % "test",
   "com.gocardless" % "gocardless-pro" % "1.0.0",
   "com.squareup.okhttp" % "okhttp" % "2.4.0",
-  "com.snowplowanalytics" % "snowplow-java-tracker" % "0.5.2-SNAPSHOT"
+  "com.snowplowanalytics" % "snowplow-java-tracker" % "0.5.2-SNAPSHOT",
+  "com.github.t3hnar" %% "scala-bcrypt" % "2.4"
+
 )
 
 testOptions in Test ++= Seq(
