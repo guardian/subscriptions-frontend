@@ -12,9 +12,8 @@ import play.api.libs.json._
 import play.api.mvc._
 import services.AuthenticationService.authenticatedUserFor
 import services._
-import tracking.activities.{MemberData, SubscriptionRegistrationActivity}
-import tracking.{CheckoutReachedActivity, ActivityTracking}
->>>>>>> Added some basic activity tracking boilerplate simmilar to membership common
+import tracking.activities.SubscriptionRegistrationActivity
+import tracking.{MemberData, SubscriptionCreatedActivity, CheckoutReachedActivity, ActivityTracking}
 import utils.TestUsers.{NameEnteredInForm, PreSigninTestCookie}
 import views.html.{checkout => view}
 
