@@ -55,10 +55,10 @@ module.exports = function(grunt) {
                 expand: true
             },
             zxcvbn: {
-              cwd: '<%= dirs.assets.javascripts %>/bower_components/zxcvbn',
-              src: ['zxcvbn.js'],
+              src: '<%= dirs.assets.javascripts %>/bower_components/zxcvbn/dist/zxcvbn.js',
               dest: '<%= dirs.public.javascripts %>/vendor',
-              expand: true
+              expand: true,
+              flatten: true
             },
             images: {
                 cwd: '<%= dirs.assets.images %>',
