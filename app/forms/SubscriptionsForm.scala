@@ -28,7 +28,7 @@ object SubscriptionsForm {
   private val emailMaxLength = 240
 
   def unapplyUkAddress(a: Address) = Some((a.lineOne, a.lineTwo, a.town, a.postCode))
-  def applyUkAddress(lineOne: String, lineTwo: String, town: String, postCode: String) = Address(lineOne, lineOne, town, "", postCode, Countries.UK)
+  def applyUkAddress(lineOne: String, lineTwo: String, town: String, postCode: String) = Address(lineOne, lineTwo, town, "", postCode, Countries.UK)
   val addressDataMapping = mapping(
     "address1" -> text(0, addressMaxLength),
     "address2" -> text(0, addressMaxLength),

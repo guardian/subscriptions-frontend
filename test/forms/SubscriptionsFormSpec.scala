@@ -25,7 +25,7 @@ class SubscriptionsFormSpec extends FreeSpec {
         lastName = "last",
         email = "a@example.com",
         receiveGnmMarketing = true,
-	address = Address("address1","address2","town", "United Kingdom", "postcode", Countries.UK)
+	address = Address("address1","address2","town", "", "postcode", Countries.UK)
       )))(personalDataMapping.bind(formData))
     }
 
