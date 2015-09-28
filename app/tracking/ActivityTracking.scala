@@ -2,6 +2,7 @@ package tracking
 
 import java.util.{List => JList, Map => JMap}
 
+import com.github.t3hnar.bcrypt._
 import com.snowplowanalytics.snowplow.tracker.core.emitter.{HttpMethod, RequestMethod}
 import com.snowplowanalytics.snowplow.tracker.emitter.Emitter
 import com.snowplowanalytics.snowplow.tracker.{Subject, Tracker}

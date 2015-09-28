@@ -93,7 +93,7 @@ object Checkout extends Controller with LazyLogging with ActivityTracking {
 	products <- zuoraService.products
 	product = products.find(p => p.ratePlanId == formData.ratePlanId)
       } yield {
-	product.map(prod => trackAnon(SubscriptionRegistrationActivity(MemberData(result, formData, prod))))
+	product.map(prod => track(NameEnteredInForm, formData, SubscriptionCreatedActivity(MemberData(result, formData, prod))))
 
       }
 
