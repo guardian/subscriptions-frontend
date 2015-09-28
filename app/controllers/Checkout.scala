@@ -12,7 +12,8 @@ import play.api.libs.json._
 import play.api.mvc._
 import services.AuthenticationService.authenticatedUserFor
 import services._
-import tracking.{MemberData, SubscriptionCreatedActivity, CheckoutReachedActivity, ActivityTracking}
+import tracking.activities.{MemberData, SubscriptionRegistrationActivity, CheckoutReachedActivity}
+import tracking.{MemberData, ActivityTracking}
 import utils.TestUsers.{NameEnteredInForm, PreSigninTestCookie}
 import views.html.{checkout => view}
 
@@ -55,7 +56,7 @@ object Checkout extends Controller with LazyLogging with ActivityTracking {
       products <- zuoraService.products
       selectedProduct = products.find(p=> p.frequency==BillingFrequency.Month).get
     } yield {
-      Ok(views.html.checkout.payment(filledForm, userIsSignedIn = authUserOpt.isDefined, products, touchpointBackend))
+      Ok(views.html.checkout.payment(filledForm, userIsSignedIn = authUserOpt.isDefined, products, selectedProduct, touchpointBackend))
     }
   }
 
@@ -84,7 +85,7 @@ object Checkout extends Controller with LazyLogging with ActivityTracking {
       }
 
       val session = (Seq(
-	SessionKeys.SubsName -> result.subscribeResult.name,
+	      SessionKeys.SubsName -> result.subscribeResult.name,
         SessionKeys.RatePlanId -> formData.ratePlanId
       ) ++ userSessionFields).foldLeft(request.session) { _ + _ }
 
@@ -92,7 +93,7 @@ object Checkout extends Controller with LazyLogging with ActivityTracking {
 	products <- zuoraService.products
 	product = products.find(p=> p.ratePlanId==formData.ratePlanId)
       } yield {
-	product.map(prod => track(NameEnteredInForm, formData, SubscriptionCreatedActivity(MemberData(result, formData, prod))))
+	product.map(prod => trackAnon(SubscriptionRegistrationActivity(MemberData(result, formData, prod))))
 
       }
 
