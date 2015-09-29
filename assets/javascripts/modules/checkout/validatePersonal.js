@@ -1,3 +1,4 @@
+/* global Raven */
 define([
     'utils/ajax',
     'modules/forms/regex'
