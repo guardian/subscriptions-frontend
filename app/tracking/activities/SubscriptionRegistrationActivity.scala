@@ -68,7 +68,6 @@ case class MemberData(town: String, country: String, postCode: String, billingFr
 
 }
 
-
 case class SubscriptionRegistrationActivity(memberData: MemberData) extends TrackerData {
   override def toMap: JMap[String, Object] = {
     println(memberData.toMap)

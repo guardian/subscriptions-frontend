@@ -12,8 +12,8 @@ import play.api.libs.json._
 import play.api.mvc._
 import services.AuthenticationService.authenticatedUserFor
 import services._
-import tracking.activities.SubscriptionRegistrationActivity
-import tracking.{MemberData, SubscriptionCreatedActivity, CheckoutReachedActivity, ActivityTracking}
+import tracking.activities.{MemberData, SubscriptionRegistrationActivity, CheckoutReachedActivity}
+import tracking.ActivityTracking
 import utils.TestUsers.{NameEnteredInForm, PreSigninTestCookie}
 import views.html.{checkout => view}
 
@@ -93,7 +93,7 @@ object Checkout extends Controller with LazyLogging with ActivityTracking {
 	products <- zuoraService.products
 	product = products.find(p => p.ratePlanId == formData.ratePlanId)
       } yield {
-	product.map(prod => track(NameEnteredInForm, formData, SubscriptionCreatedActivity(MemberData(result, formData, prod))))
+	product.map(prod => trackAnon(SubscriptionRegistrationActivity(MemberData(result, formData, prod))))
 
       }
 

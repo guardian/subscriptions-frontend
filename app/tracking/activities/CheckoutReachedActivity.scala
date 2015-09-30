@@ -1,7 +1,8 @@
 package tracking.activities
 
-import sun.tools.jmap.JMap
+import java.util.{Map => JMap}
 import tracking.TrackerData
+import scala.collection.JavaConversions._
 
 
 case class CheckoutReachedActivity(country: String) extends TrackerData {

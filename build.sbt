@@ -28,24 +28,25 @@ scalaVersion := "2.11.6"
 val scalatestVersion = "2.2.4"
 
 libraryDependencies ++= Seq(
-  cache,
-  ws,
-  filters,
-  PlayImport.specs2,
-  "com.gu" %% "membership-common" % "0.88",
-  "com.gu" %% "play-googleauth" % "0.3.1",
-  "com.gu" %% "identity-test-users" % "0.5",
-  "com.gu.identity" %% "identity-play-auth" % "0.10",
-  "com.github.nscala-time" %% "nscala-time" % "2.0.0",
-  "net.kencochrane.raven" % "raven-logback" % "6.0.0",
-  "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0",
-  "org.scalatest" %% "scalatest" % scalatestVersion % "test",
-  "org.scalactic" %% "scalactic" % scalatestVersion % "test",
-  "org.seleniumhq.selenium" % "selenium-java" % "2.44.0" % "test",
-  "com.gocardless" % "gocardless-pro" % "1.0.0",
-  "com.squareup.okhttp" % "okhttp" % "2.4.0",
-  "com.snowplowanalytics" % "snowplow-java-tracker" % "0.5.2-SNAPSHOT",
-  "com.github.t3hnar" %% "scala-bcrypt" % "2.4"
+    cache,
+    ws,
+    filters,
+    PlayImport.specs2,
+    "com.gu" %% "membership-common" % "0.88",
+    "com.gu" %% "play-googleauth" % "0.3.1",
+    "com.gu" %% "identity-test-users" % "0.5",
+    "com.gu.identity" %% "identity-play-auth" % "0.10",
+    "com.github.nscala-time" %% "nscala-time" % "2.0.0",
+    "net.kencochrane.raven" % "raven-logback" % "6.0.0",
+    "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0",
+    "org.scalatest" %% "scalatest" % scalatestVersion % "test",
+    "org.scalactic" %% "scalactic" % scalatestVersion % "test",
+    "org.seleniumhq.selenium" % "selenium-java" % "2.44.0" % "test",
+    "com.gocardless" % "gocardless-pro" % "1.0.0",
+    "com.squareup.okhttp" % "okhttp" % "2.4.0",
+    "com.snowplowanalytics" % "snowplow-java-tracker" % "0.5.2-SNAPSHOT",
+    "com.github.t3hnar" %% "scala-bcrypt" % "2.4",
+    "org.apache.commons" % "commons-io" % "1.3.2"
 )
 
 testOptions in Test ++= Seq(
@@ -53,7 +54,6 @@ testOptions in Test ++= Seq(
 )
 
 testResultLogger in Test := new ScalaTestWithExitCode
-
 
 javaOptions in Test += "-Dconfig.file=test/conf/application.conf"
 
