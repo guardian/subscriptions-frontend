@@ -31,8 +31,9 @@ define(['$', 'modules/analytics/omniture'], function ($, omniture) {
 
     function paymentSubmissionTracking(){
         var prop17 = 'GuardianDigiPack:Review and confirm',
-            pageName = 'Payment submission/signup | Digital | Subscriptions | The Guardian';
-        trackEvent(prop17, pageName, 'scCheckout');
+            pageName = 'Payment submission/signup | Digital | Subscriptions | The Guardian',
+            eventName = 'scCheckout';
+        trackEvent(prop17, pageName, eventName);
     }
 
     function subscriptionCompleteTracking(){
