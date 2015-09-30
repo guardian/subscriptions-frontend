@@ -15,11 +15,7 @@ define([
             if (prop17) {
                 s.prop17 = prop17;
                 s.pageName = pageName;
-            }
-            if (products) {
                 s.products = products;
-            }
-            if (prop17 || products) {
                 s.t();
             }
         });
@@ -32,7 +28,7 @@ define([
                     products = domElem.getAttribute('data-tracking-products');
 
                 bean.on(domElem, 'click', function () {
-                    sendEvent(prop17, products);
+                    sendEvent(prop17, document.title, products);
                 });
             });
         });

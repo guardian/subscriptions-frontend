@@ -43,7 +43,7 @@
                         Change payment frequency
                     </button>
                 </div>
-                <fieldset class="basket-billing-options is-hidden js-option-mirror-group" id="change-payment-frequency">
+                <fieldset class="basket-billing-options is-hidden js-payment-frequency js-option-mirror-group" id="change-payment-frequency">
                     @products.find(_.frequency == BillingFrequency.Month).map { product =>
                         @priceOption(product, "every month", product.frequency.numberOfMonths, isChecked=true)
                     }
