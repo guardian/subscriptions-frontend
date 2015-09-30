@@ -3,13 +3,12 @@
 
 @(subscriptionId: String, subscriptionProduct: SubscriptionProduct)
 
-<div class="review-panel">
-    <input
-    type="hidden" name="subscriptionDetails"
-    class="js-payment-frequency"
-    data-amount="@subscriptionProduct.price.pretty"
-    data-number-of-months="@subscriptionProduct.frequency.numberOfMonths"
-    >
+<div class="review-panel js-payment-frequency">
+    <input type="checkbox" name="subscriptionDetails"
+           checked="checked"
+           class="u-h"
+           data-amount="@subscriptionProduct.price.pretty"
+           data-number-of-months="@subscriptionProduct.frequency.numberOfMonths">
     <div class="review-panel__item">
         <h4 class="review-panel__label">Subscriber ID:</h4>
         <div class="review-panel__details">

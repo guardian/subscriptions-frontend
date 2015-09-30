@@ -1,35 +1,45 @@
 define(['$', 'modules/analytics/omniture'], function ($, omniture) {
     'use strict';
 
-    function subscriptionProducts(){
+    function subscriptionProducts(eventName){
         var selectedFrequency = $('.js-payment-frequency input:checked');
-        if (selectedFrequency.length) {
+        if (selectedFrequency.length && eventName) {
             var amount = selectedFrequency[0].getAttribute('data-amount'),
                 qty = selectedFrequency[0].getAttribute('data-number-of-months');
-            return 'Subscriptions and Membership;GUARDIAN_DIGIPACK;' + qty + ';' + amount + ';scOpen';
+            return 'Subscriptions and Membership;GUARDIAN_DIGIPACK;' + qty + ';' + amount + ';' + eventName;
         }
-        return false;
+        return undefined;
     }
 
-    function trackEvent(prop17, pageName) {
-        var products = subscriptionProducts();
+    function trackEvent(prop17, pageName, eventName) {
+        var products = subscriptionProducts(eventName);
         omniture.sendEvent(prop17, pageName, products);
     }
 
-    function personalDetailsTracking(){
-        trackEvent('GuardianDigiPack:Name and address', 'Details - name and address | Digital | Subscriptions | The Guardian');
+    function personalDetailsTracking() {
+        var prop17 = 'GuardianDigiPack:Name and address',
+            pageName = 'Details - name and address | Digital | Subscriptions | The Guardian',
+            eventName = 'scOpen';
+        trackEvent(prop17, pageName, eventName);
     }
 
     function paymentDetailsTracking(){
-        trackEvent('GuardianDigiPack:Payment Details', 'Details - payment details | Digital | Subscriptions | The Guardian');
+        var prop17 = 'GuardianDigiPack:Payment Details',
+            pageName = 'Details - payment details | Digital | Subscriptions | The Guardian';
+        trackEvent(prop17, pageName);
     }
 
     function paymentSubmissionTracking(){
-        trackEvent('GuardianDigiPack:Review and confirm', 'Payment submission/signup | Digital | Subscriptions | The Guardian');
+        var prop17 = 'GuardianDigiPack:Review and confirm',
+            pageName = 'Payment submission/signup | Digital | Subscriptions | The Guardian';
+        trackEvent(prop17, pageName, 'scCheckout');
     }
 
     function subscriptionCompleteTracking(){
-        trackEvent('GuardianDigiPack:Order Complete', 'Confirmation | Digital | Subscriptions | The Guardian');
+        var prop17 = 'GuardianDigiPack:Order Complete',
+            pageName = 'Confirmation | Digital | Subscriptions | The Guardian',
+            eventName = 'purchase';
+        trackEvent(prop17, pageName, eventName);
     }
 
     return {
