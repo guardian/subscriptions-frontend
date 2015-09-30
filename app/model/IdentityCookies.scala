@@ -11,14 +11,13 @@ import scala.util.Try
 case class IdentityCookies(guu: Cookie, scguu: Cookie)
 
 object IdentityCookies {
-  def fromGuestConversion(payload: String): Option[IdentityCookies] = {
+  def fromGuestConversion(json: JsValue): Option[IdentityCookies] = {
     implicit val cookieRead: Reads[Cookie] = (
       (JsPath \ "key").read[String] and
         (JsPath \ "value").read[String]
       )(Cookie.apply(_, _))
 
     for {
-      json <- Try { Json.parse(payload)}.toOption
       expirationString <- (json \ "cookies" \ "expiresAt").asOpt[String]
       expiration <- Try { new DateTime(expirationString) }.toOption
       maxAge = new Duration(DateTime.now, expiration).getStandardSeconds.toInt

@@ -32,6 +32,8 @@ object Config {
   val stage = config.getString("stage")
   val stageProd: Boolean = stage == "PROD"
 
+  lazy val sessionDomain = config.getString("session.domain")
+
   object Identity {
     private val idConfig = config.getConfig("identity")
 

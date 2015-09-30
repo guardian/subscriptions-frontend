@@ -4,6 +4,7 @@ import org.joda.time.format.ISODateTimeFormat
 import org.joda.time.{DateTime, Duration}
 import org.scalactic.Tolerance._
 import org.scalatest.FreeSpec
+import play.api.libs.json.Json
 
 class IdentityCookiesTest extends FreeSpec {
   "After registering a guest user" - {
@@ -14,8 +15,8 @@ class IdentityCookiesTest extends FreeSpec {
       // 2015-12-28T15:22:01+00:00
       val inThreeMonthsStr =ISODateTimeFormat.dateHourMinuteSecond.print(inThreeMonths) + "+00:00"
 
-      val payload =
-        s"""
+      val json =
+        Json.parse(s"""
           |{
           |  "status": "ok",
           |  "cookies": {
@@ -37,9 +38,9 @@ class IdentityCookiesTest extends FreeSpec {
           |    "expiresAt": "$inThreeMonthsStr"
           |  }
           |}
-        """.stripMargin
+        """.stripMargin)
 
-        val idCookies = IdentityCookies.fromGuestConversion(payload)
+        val idCookies = IdentityCookies.fromGuestConversion(json)
         val guCookie = idCookies.map(_.guu)
         val scguCookie = idCookies.map(_.scguu)
 
