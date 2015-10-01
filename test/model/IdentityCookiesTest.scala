@@ -40,23 +40,34 @@ class IdentityCookiesTest extends FreeSpec {
           |}
         """.stripMargin)
 
-        val idCookies = IdentityCookies.fromGuestConversion(json)
-        val guCookie = idCookies.map(_.guu)
-        val scguCookie = idCookies.map(_.scguu)
+      val idCookies = IdentityCookies.fromGuestConversion(json)
+      val guuCookie = idCookies.map(_.guu)
+      val scguuCookie = idCookies.map(_.scguu)
+      val scgulaCookie = idCookies.map(_.scgula)
 
-        guCookie.fold(fail("Failed to parse GU_U cookie")){ c =>
-          assert(c.name === "GU_U")
-          assert(c.value === "gu_u_value")
-          assert(c.maxAge.get === (90 * 24 * 60 * 60) +- 5)
-          assert(!c.secure)
-        }
+      guuCookie.fold(fail("Failed to parse GU_U cookie")){ c =>
+        assert(c.name === "GU_U")
+        assert(c.value === "gu_u_value")
+        assert(c.maxAge.get === (90 * 24 * 60 * 60) +- 5)
+        assert(!c.secure)
+        assert(!c.httpOnly)
+      }
 
-        scguCookie.fold(fail("Failed to parse SC_GU_U cookie")){ c =>
-          assert(c.name === "SC_GU_U")
-          assert(c.value === "sc_gu_u_value")
-          assert(c.maxAge.get === (90 * 24 * 60 * 60) +- 5)
-          assert(c.secure)
-        }
+      scguuCookie.fold(fail("Failed to parse SC_GU_U cookie")){ c =>
+        assert(c.name === "SC_GU_U")
+        assert(c.value === "sc_gu_u_value")
+        assert(c.maxAge.get === (90 * 24 * 60 * 60) +- 5)
+        assert(c.secure)
+        assert(c.httpOnly)
+      }
+
+      scgulaCookie.fold(fail("Failed to parse SC_GU_LA cookie")){ c =>
+        assert(c.name === "SC_GU_LA")
+        assert(c.value === "sc_gu_la_value")
+        assert(c.maxAge === None)
+        assert(c.secure)
+        assert(c.httpOnly)
+      }
     }
   }
 }

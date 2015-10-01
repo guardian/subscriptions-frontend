@@ -39,7 +39,7 @@ class CheckoutSpec extends FeatureSpec with WebBrowser with Util with GivenWhenT
 
       And("I should have Identity cookies")
       go.to(checkout)
-      Seq("GU_U", "SC_GU_U").foreach { idCookie =>
+      Seq("GU_U", "SC_GU_U", "SC_GU_LA").foreach { idCookie =>
         assert(cookiesSet.map(_.getName).contains(idCookie))
       }
     }

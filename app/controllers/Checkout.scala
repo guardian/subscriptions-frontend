@@ -98,7 +98,7 @@ object Checkout extends Controller with LazyLogging {
         IdentityService.convertGuest(guestAccountData.password, IdentityToken(guestAccountData.token))
           .map { idCookies =>
             val cookies = idCookies.map { c =>
-              Seq(c.guu, c.scguu).map(_.copy(domain = Some(Config.sessionDomain)))
+              Seq(c.guu, c.scguu, c.scgula).map(_.copy(domain = Some(Config.sessionDomain)))
             }.getOrElse {
               logger.error("Failed to create identity cookies from Identity response after converting a guest user")
               Seq()

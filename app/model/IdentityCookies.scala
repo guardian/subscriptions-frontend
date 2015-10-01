@@ -8,7 +8,7 @@ import play.api.mvc.Cookie
 
 import scala.util.Try
 
-case class IdentityCookies(guu: Cookie, scguu: Cookie)
+case class IdentityCookies(guu: Cookie, scguu: Cookie, scgula: Cookie)
 
 object IdentityCookies {
   def fromGuestConversion(json: JsValue): Option[IdentityCookies] = {
@@ -24,10 +24,12 @@ object IdentityCookies {
       cookies <- (json \ "cookies" \ "values").asOpt[Seq[Cookie]]
       guuCookie <- cookies.find(_.name == "GU_U")
       scguuCookie <- cookies.find(_.name == "SC_GU_U")
+      scgulaCookie <- cookies.find(_.name == "SC_GU_LA")
     } yield {
       IdentityCookies(
-        guuCookie.copy(maxAge = Some(maxAge)),
-        scguuCookie.copy(maxAge = Some(maxAge), secure = true)
+        guuCookie.copy(maxAge = Some(maxAge), secure = false, httpOnly = false),
+        scguuCookie.copy(maxAge = Some(maxAge), secure = true, httpOnly = true),
+        scgulaCookie.copy(secure = true, httpOnly = true)
       )
     }
   }
