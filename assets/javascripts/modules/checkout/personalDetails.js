@@ -54,7 +54,7 @@ define([
             .addClass(FIELDSET_COMPLETE)[0]
             .scrollIntoView();
 
-        tracking.personalDetailsTracking();
+        tracking.paymentDetailsTracking();
     }
 
     function handleValidation(personalDetails) {

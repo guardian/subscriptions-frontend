@@ -11,9 +11,12 @@
 @import services.IdentityToken.{paramName => identityTokenParam}
 @import services.UserId.{paramName => userIdParam}
 
-@main("Thank you | Subscriptions | The Guardian", bodyClasses=List("is-wide"), touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
+@main("Confirmation | Digital | Subscriptions | The Guardian", bodyClasses=List("is-wide"), touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
 
-<main class="page-container gs-container gs-container--slim">
+<main class="page-container gs-container gs-container--slim"
+data-tracking-prop17="GuardianDigiPack:Order Complete"
+data-tracking-products="Subscriptions and Membership;GUARDIAN_DIGIPACK;@{subscriptionProduct.frequency.numberOfMonths};@{subscriptionProduct.price};purchase">
+>
 
     @fragments.page.header("Thank you for your order", None, List("l-padded"))
 

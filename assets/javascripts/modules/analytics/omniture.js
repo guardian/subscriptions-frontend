@@ -85,6 +85,6 @@ define([
 
     return {
         init: init,
-        sendEvent: trackEvent
+        trackEvent: trackEvent
     };
 });

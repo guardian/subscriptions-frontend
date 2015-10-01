@@ -36,7 +36,7 @@ define([
         formEls.$FIELDSET_YOUR_DETAILS[0]
             .scrollIntoView();
 
-        tracking.paymentDetailsTracking();
+        tracking.paymentReviewTracking();
     }
 
     function handleValidation() {
