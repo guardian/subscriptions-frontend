@@ -13,7 +13,7 @@ define(['$', 'modules/analytics/omniture'], function ($, omniture) {
 
     function trackEvent(prop17, pageName, eventName) {
         var products = subscriptionProducts(eventName);
-        omniture.sendEvent(prop17, pageName, products);
+        omniture.trackEvent(prop17, pageName, products);
     }
 
     function personalDetailsTracking() {
