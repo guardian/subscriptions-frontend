@@ -54,10 +54,10 @@ define([
         s.prop42 = 'Subscriber';
         s.prop47 = 'UK';
 
-        var main = $('main')[0];
+        var main = document.querySelector('main');
         if(main) {
             var attributes = [].slice.call(main.attributes);
-            attributes.map(function(attr){
+            attributes.forEach(function(attr){
                 if(attr.name.indexOf('data-tracking-')>-1){
                     var prop = attr.name.replace('data-tracking-','');
                     s[prop] = attr.nodeValue;
