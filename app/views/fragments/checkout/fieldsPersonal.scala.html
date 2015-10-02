@@ -6,7 +6,7 @@
 <div class="form-field js-checkout-first">
     <label class="label" for="first">First name</label>
     <input type="text" class="input-text js-input" name="personal.first" id="first"
-        value="@form.data.get("personal.first")" maxlength="50" required>
+        value="@form.data.get("personal.first")" maxlength="40" required>
     @fragments.forms.errorMessage("This field is required")
 </div>
 <div class="form-field js-checkout-last">
@@ -20,7 +20,7 @@
 <div class="form-field @if(!userIsSignedIn) {js-checkout-email}">
     <label class="label" for="email">Email address</label>
     <input type="email" class="input-text js-input" name="personal.emailValidation.email" id="email"
-        value="@form.data.get("personal.emailValidation.email")" maxlength="240" @signedInAttrs>
+        value="@form.data.get("personal.emailValidation.email")" maxlength="80" @signedInAttrs>
     @fragments.forms.errorMessage("")
 </div>
 <div class="form-field @if(!userIsSignedIn) {js-checkout-confirm-email}">
@@ -50,7 +50,7 @@
     <div class="form-field js-checkout-town">
         <label class="label" for="address-town">Town/City</label>
         <input type="text" class="input-text js-input" id="address-town" name="personal.address.town"
-            value="@form.data.get("personal.address.town")" maxlength="255" required>
+            value="@form.data.get("personal.address.town")" maxlength="40" required>
         @fragments.forms.errorMessage("This field is required")
     </div>
 </div>
