@@ -33,10 +33,13 @@ class IdentityService(identityApiClient: => IdentityApiClient) extends LazyLoggi
     identityApiClient.createGuest(personalData).map(response => response.json.as[GuestUser])
   }
 
-  def convertGuest(password: String, token: IdentityToken): Future[Option[Seq[Cookie]]] = {
+  def convertGuest(password: String, token: IdentityToken): Future[Seq[Cookie]] = {
     IdentityApiClient.convertGuest(password, token).map { r =>
       if (r.status == Status.OK) {
-        CookieBuilder.fromGuestConversion(r.json, Some(Config.sessionDomain))
+        CookieBuilder.fromGuestConversion(r.json, Some(Config.sessionDomain)).fold({ err =>
+          logger.error(s"Error while parsing the identity cookies: $err")
+          Seq.empty // Worst case the user is not automatically logged in
+        }, identity)
       } else {
         throw new IdentityGuestPasswordError(r.body)
       }

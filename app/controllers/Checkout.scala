@@ -3,7 +3,6 @@ package controllers
 import actions.CommonActions._
 import com.gu.identity.play.IdUser
 import com.typesafe.scalalogging.LazyLogging
-import configuration.Config
 import configuration.Config.Identity.webAppProfileUrl
 import forms.{FinishAccountForm, SubscriptionsForm}
 import model.zuora.BillingFrequency
@@ -91,20 +90,12 @@ object Checkout extends Controller with LazyLogging {
     }
   }
 
-  def convertGuestUser = NoCacheAction.async { implicit request =>
-    FinishAccountForm().bindFromRequest.fold(
-      handleWithBadRequest,
-      guestAccountData => {
-        IdentityService.convertGuest(guestAccountData.password, IdentityToken(guestAccountData.token))
-          .map { idCookies =>
-            val cookies = idCookies.getOrElse {
-              logger.error("Failed to create identity cookies from Identity response after converting a guest user")
-              Seq()
-            }
-            Ok(Json.obj("profileUrl" -> webAppProfileUrl.toString())).withCookies(cookies: _*)
-          }
+  def convertGuestUser = NoCacheAction.async(parse.form(FinishAccountForm())) { implicit request =>
+    val guestAccountData = request.body
+    IdentityService.convertGuest(guestAccountData.password, IdentityToken(guestAccountData.token))
+      .map { cookies =>
+        Ok(Json.obj("profileUrl" -> webAppProfileUrl.toString())).withCookies(cookies: _*)
       }
-    )
   }
 
   def thankYou = NoCacheAction.async { implicit request =>
