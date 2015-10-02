@@ -1,15 +1,16 @@
 package services
 
 import com.amazonaws.regions.{Region, Regions}
-import com.gu.identity.play.{AuthenticatedIdUser, IdUser}
+import com.gu.identity.play.{CookieBuilder, AuthenticatedIdUser, IdUser}
 import com.gu.monitoring.{AuthenticationMetrics, CloudWatch, RequestMetrics, StatusMetrics}
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
-import model.{IdentityCookies, PersonalData}
+import model.PersonalData
 import play.api.Play.current
 import play.api.http.Status
 import play.api.libs.json._
 import play.api.libs.ws.{WS, WSRequest, WSResponse}
+import play.api.mvc.Cookie
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -32,10 +33,10 @@ class IdentityService(identityApiClient: => IdentityApiClient) extends LazyLoggi
     identityApiClient.createGuest(personalData).map(response => response.json.as[GuestUser])
   }
 
-  def convertGuest(password: String, token: IdentityToken): Future[Option[IdentityCookies]] = {
+  def convertGuest(password: String, token: IdentityToken): Future[Option[Seq[Cookie]]] = {
     IdentityApiClient.convertGuest(password, token).map { r =>
       if (r.status == Status.OK) {
-        IdentityCookies.fromGuestConversion(r.json)
+        CookieBuilder.fromGuestConversion(r.json, Some(Config.sessionDomain))
       } else {
         throw new IdentityGuestPasswordError(r.body)
       }
