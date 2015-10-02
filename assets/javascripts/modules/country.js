@@ -1,8 +1,10 @@
 /*global guardian */
 define([
     'modules/country/elements',
-    'utils/cookie'
-], function (elements, cookie) {
+    'utils/cookie',
+    'modules/analytics/snowplow',
+    'bean'
+], function (elements, cookie, snowplow, bean) {
     'use strict';
 
     var COUNTRY_FLOW_COOKIE_NAME = 'COUNTRY_FLOW';
@@ -35,6 +37,9 @@ define([
         }
         if (cookieInfo.switchUrl) {
             switchUrl();
+	    bean.on(elements.$CHECKOUT_LINK[0], 'click', function () {
+		snowplow.trackActivity('redirectedToQss');
+	    });
         }
     }
 
