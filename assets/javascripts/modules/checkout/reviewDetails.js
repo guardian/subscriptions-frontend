@@ -3,15 +3,13 @@ define([
     'utils/ajax',
     'utils/text',
     'modules/forms/loader',
-    'modules/checkout/formElements',
-    'modules/checkout/tracking'
+    'modules/checkout/formElements'
 ], function (
     bean,
     ajax,
     textUtils,
     loader,
-    formEls,
-    tracking
+    formEls
 ) {
     'use strict';
 
@@ -60,9 +58,6 @@ define([
         var submitEl;
         if(formEls.$CHECKOUT_SUBMIT.length) {
             submitEl = formEls.$CHECKOUT_SUBMIT[0];
-            bean.on(submitEl, 'click', function () {
-                tracking.paymentSubmissionTracking();
-            });
 
             var form = formEls.$CHECKOUT_FORM[0];
             form.addEventListener('submit', function() {

@@ -5,6 +5,7 @@ import com.gu.identity.play.IdUser
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config.Identity.webAppProfileUrl
 import forms.{FinishAccountForm, SubscriptionsForm}
+import model.zuora.BillingFrequency
 import model.{PaymentData, SubscriptionData, SubscriptionRequestData}
 import play.api.data.Form
 import play.api.libs.json._
@@ -50,8 +51,9 @@ object Checkout extends Controller with LazyLogging {
     for {
       filledForm <- fillForm()
       products <- zuoraService.products
+      selectedProduct = products.find(p=> p.frequency==BillingFrequency.Month).get
     } yield {
-      Ok(views.html.checkout.payment(filledForm, userIsSignedIn = authUserOpt.isDefined, products, touchpointBackend))
+      Ok(views.html.checkout.payment(filledForm, userIsSignedIn = authUserOpt.isDefined, products, selectedProduct, touchpointBackend))
     }
   }
 

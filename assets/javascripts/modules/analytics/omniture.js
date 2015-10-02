@@ -5,10 +5,25 @@ define([
 ], function ($, bean) {
     'use strict';
 
-    var dataTrackingClickableElements = ['a', 'button', 'input'],
-        omniture, s;
+    var omniture, s;
 
-    function sendEvent(prop17, pageName, products) {
+
+    function bindLinkTracking() {
+        $('a[data-link-tracking]').each(function (domElem) {
+            bean.on(domElem, 'click', function () {
+                trackLink($(this).attr('href'));
+            });
+        });
+    }
+
+    function trackLink(link) {
+        omniture = omniture || init();
+        omniture.then(function(){
+            s.tl(true, 'o', link);
+        });
+    }
+
+    function trackEvent(prop17, pageName, products) {
         omniture = omniture || init();
 
         omniture.then(function(){
@@ -18,19 +33,6 @@ define([
                 s.products = products;
                 s.t();
             }
-        });
-    }
-
-    function bindDataTracking() {
-        dataTrackingClickableElements.forEach(function (elem) {
-            $(elem + '[data-tracking]').each(function (domElem) {
-                var prop17 = domElem.getAttribute('data-tracking-prop17'),
-                    products = domElem.getAttribute('data-tracking-products');
-
-                bean.on(domElem, 'click', function () {
-                    sendEvent(prop17, document.title, products);
-                });
-            });
         });
     }
 
@@ -51,6 +53,18 @@ define([
         s.eVar19 = 'D=c19';
         s.prop42 = 'Subscriber';
         s.prop47 = 'UK';
+
+        var main = document.querySelector('main');
+        if(main) {
+            var attributes = [].slice.call(main.attributes);
+            attributes.forEach(function(attr){
+                if(attr.name.indexOf('data-tracking-')>-1){
+                    var prop = attr.name.replace('data-tracking-','');
+                    s[prop] = attr.nodeValue;
+                }
+            });
+        }
+
         s_code = s.t();
 
         if (s_code) {
@@ -58,7 +72,7 @@ define([
             document.write(s_code);
         }
 
-        bindDataTracking();
+        bindLinkTracking();
     }
 
     function init() {
@@ -71,6 +85,6 @@ define([
 
     return {
         init: init,
-        sendEvent: sendEvent
+        trackEvent: trackEvent
     };
 });

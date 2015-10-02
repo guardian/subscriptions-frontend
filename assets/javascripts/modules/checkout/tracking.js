@@ -13,41 +13,27 @@ define(['$', 'modules/analytics/omniture'], function ($, omniture) {
 
     function trackEvent(prop17, pageName, eventName) {
         var products = subscriptionProducts(eventName);
-        omniture.sendEvent(prop17, pageName, products);
-    }
-
-    function personalDetailsTracking() {
-        var prop17 = 'GuardianDigiPack:Name and address',
-            pageName = 'Details - name and address | Digital | Subscriptions | The Guardian',
-            eventName = 'scOpen';
-        trackEvent(prop17, pageName, eventName);
+        omniture.trackEvent(prop17, pageName, products);
     }
 
     function paymentDetailsTracking(){
         var prop17 = 'GuardianDigiPack:Payment Details',
-            pageName = 'Details - payment details | Digital | Subscriptions | The Guardian';
-        trackEvent(prop17, pageName);
+            pageName = 'Details - payment details | Digital | Subscriptions | The Guardian',
+            eventName = 'scOpen';
+        trackEvent(prop17, pageName, eventName);
     }
 
-    function paymentSubmissionTracking(){
+    function paymentReviewTracking(){
         var prop17 = 'GuardianDigiPack:Review and confirm',
             pageName = 'Payment submission/signup | Digital | Subscriptions | The Guardian',
             eventName = 'scCheckout';
         trackEvent(prop17, pageName, eventName);
     }
 
-    function subscriptionCompleteTracking(){
-        var prop17 = 'GuardianDigiPack:Order Complete',
-            pageName = 'Confirmation | Digital | Subscriptions | The Guardian',
-            eventName = 'purchase';
-        trackEvent(prop17, pageName, eventName);
-    }
 
     return {
-        personalDetailsTracking: personalDetailsTracking,
         paymentDetailsTracking: paymentDetailsTracking,
-        paymentSubmissionTracking: paymentSubmissionTracking,
-        subscriptionCompleteTracking: subscriptionCompleteTracking
+        paymentReviewTracking: paymentReviewTracking
     };
 
 });

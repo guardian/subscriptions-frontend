@@ -2,7 +2,11 @@
 @import model.JsVars
 @import configuration.Config.Identity._
 
-@(form: Form[model.SubscriptionData], userIsSignedIn: Boolean, products: Seq[SubscriptionProduct], touchpointBackendResolution: services.TouchpointBackend.Resolution)(implicit request: RequestHeader)
+@(form: Form[model.SubscriptionData],
+    userIsSignedIn: Boolean,
+    products: Seq[SubscriptionProduct],
+    selectedProduct : SubscriptionProduct,
+    touchpointBackendResolution: services.TouchpointBackend.Resolution)(implicit request: RequestHeader)
 
 @import model.zuora.BillingFrequency
 @import utils.Prices._
@@ -23,12 +27,14 @@
 }
 
 @main(
-    title = "Checkout | Subscriptions | The Guardian",
+    title = "Details - name and address | Subscriptions | The Guardian",
     jsVars = JsVars.default.copy(userIsSignedIn = userIsSignedIn),
     bodyClasses = List("is-wide"),
     touchpointBackendResolutionOpt = Some(touchpointBackendResolution)
 ) {
-<main class="page-container gs-container">
+<main class="page-container gs-container"
+      data-tracking-prop17="GuardianDigiPack:Name and address"
+      data-tracking-products="Subscriptions and Membership;GUARDIAN_DIGIPACK;@{selectedProduct.frequency.numberOfMonths};@{selectedProduct.price};scOpen">
 
     <section class="checkout-container">
         <form class="form js-checkout-form" action="@routes.Checkout.renderCheckout().toString()" method="POST">
