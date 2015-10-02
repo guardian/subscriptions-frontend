@@ -36,6 +36,12 @@ class CheckoutSpec extends FeatureSpec with WebBrowser with Util with GivenWhenT
 
       Then("I should read a confirmation message")
       assert(pageHasText("All done"))
+
+      And("I should have Identity cookies")
+      go.to(checkout)
+      Seq("GU_U", "SC_GU_U", "SC_GU_LA").foreach { idCookie =>
+        assert(cookiesSet.map(_.getName).contains(idCookie))
+      }
     }
 
     scenario("Guest user supplies invalid details", Acceptance) {

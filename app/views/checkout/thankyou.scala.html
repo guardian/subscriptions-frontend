@@ -51,7 +51,7 @@ data-tracking-products="Subscriptions and Membership;GUARDIAN_DIGIPACK;@{subscri
                     <p>Some features of your subscription require you to be signed in to theguardian.com before you can make use of them.</p>
                 </div>
 
-                <form action="@routes.Checkout.processFinishAccount" method="POST" class="form js-finish-account" autocomplete="off">
+                <form action="@routes.Checkout.convertGuestUser" method="POST" class="form js-finish-account" autocomplete="off">
                     @helper.CSRF.formField
 
                     <div class="form-field js-checkout-finish-account-password">

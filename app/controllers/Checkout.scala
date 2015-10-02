@@ -90,15 +90,12 @@ object Checkout extends Controller with LazyLogging {
     }
   }
 
-  def processFinishAccount = NoCacheAction.async { implicit request =>
-    FinishAccountForm().bindFromRequest.fold(
-      handleWithBadRequest,
-      guestAccountData => {
-        IdentityService.convertGuest(guestAccountData.password, IdentityToken(guestAccountData.token))
-          .map { _ =>
-          Ok(Json.obj("profileUrl" -> webAppProfileUrl.toString()))
-        }
-      })
+  def convertGuestUser = NoCacheAction.async(parse.form(FinishAccountForm())) { implicit request =>
+    val guestAccountData = request.body
+    IdentityService.convertGuest(guestAccountData.password, IdentityToken(guestAccountData.token))
+      .map { cookies =>
+        Ok(Json.obj("profileUrl" -> webAppProfileUrl.toString())).withCookies(cookies: _*)
+      }
   }
 
   def thankYou = NoCacheAction.async { implicit request =>

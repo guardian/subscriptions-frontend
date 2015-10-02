@@ -56,7 +56,9 @@ class Checkout(implicit val driver: WebDriver) extends Page with WebBrowser with
     }
 
     def continue(): Unit = {
-      click.on(cssSelector(".js-checkout-payment-details-submit"))
+      val selector = cssSelector(".js-checkout-payment-details-submit")
+      pageHasElement(selector)
+      click.on(selector)
     }
   }
 

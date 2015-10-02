@@ -3,12 +3,13 @@ package acceptance
 import java.net.URL
 import java.util.concurrent.TimeUnit
 
-import org.openqa.selenium.support.ui.{WebDriverWait, ExpectedConditions}
-import org.openqa.selenium.{By, Cookie, WebDriver}
-import org.scalatest.selenium.WebBrowser
 import acceptance.Config.appUrl
 import configuration.QA.{passthroughCookie => qaCookie}
+import org.openqa.selenium.support.ui.{ExpectedConditions, WebDriverWait}
+import org.openqa.selenium.{By, Cookie, WebDriver}
+import org.scalatest.selenium.WebBrowser
 
+import scala.collection.JavaConverters._
 import scala.util.Try
 
 trait Util { this: WebBrowser =>
@@ -26,6 +27,7 @@ trait Util { this: WebBrowser =>
 
   def resetDriver() = {
     driver.get("about:about")
+    go.to(appUrl)
     driver.manage().deleteAllCookies()
     driver.manage().timeouts().implicitlyWait(60, TimeUnit.SECONDS)
   }
@@ -43,4 +45,6 @@ trait Util { this: WebBrowser =>
   }
 
   protected def currentHost: String = new URL(currentUrl).getHost
+
+  def cookiesSet: Set[Cookie] = driver.manage().getCookies.asScala.toSet
 }
