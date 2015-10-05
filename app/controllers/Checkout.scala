@@ -120,8 +120,7 @@ object Checkout extends Controller with LazyLogging with ActivityTracking {
 
     // TODO If some pieces of information are missing, redirect to an empty form. Is it the expected behaviour?
     def redirectToEmptyForm = Future {
-      Redirect(routes.Checkout.renderCheckout())
-    }
+      Redirect(routes.Checkout.renderCheckout()) }
 
     sessionInfo.fold(redirectToEmptyForm) { case (subsName, ratePlanId) =>
       val passwordForm = authenticatedUserFor(request).fold {
@@ -133,10 +132,10 @@ object Checkout extends Controller with LazyLogging with ActivityTracking {
       }{ const(None) } // Don't display the user registration form if the user is logged in
 
       zuoraService.products.map { products =>
-	val product = products.find(_.ratePlanId == ratePlanId).getOrElse(
-          throw new NoSuchElementException(s"Could not find a product with rate plan id $ratePlanId")
-        )
-        Ok(view.thankyou(subsName, passwordForm, touchpointBackend, product))
+		val product = products.find(_.ratePlanId == ratePlanId).getOrElse(
+	  throw new NoSuchElementException(s"Could not find a product with rate plan id $ratePlanId")
+	)
+	Ok(view.thankyou(subsName, passwordForm, touchpointBackend, product))
       }
     }
   }
