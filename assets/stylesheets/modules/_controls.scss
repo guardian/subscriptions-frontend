@@ -35,6 +35,31 @@
         border-color: white;
     }
     .control__info {
-        text-decoration: underline;
+        border-bottom: 1px solid white;
+        border-color: rgba(255,255,255,0.8);
+    }
+}
+
+$toggle-arrow-size: 4px;
+@include mq(tablet) {
+    .control--toggle:after {
+        content: '';
+        display: inline-block;
+        vertical-align: bottom;
+        pointer-events: none;
+        width: 0;
+        height: 0;
+        margin-left: -3px;
+        margin-right: 3px;
+        position: relative;
+        top: -3px;
+        border-bottom: 0;
+        border-left: $toggle-arrow-size solid transparent;
+        border-right: $toggle-arrow-size solid transparent;
+        border-top: $toggle-arrow-size solid white;
+    }
+    .control--toggle.is-active:after {
+        border-top: 0;
+        border-bottom: $toggle-arrow-size solid white;
     }
 }

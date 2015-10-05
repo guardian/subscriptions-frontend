@@ -1,14 +1,20 @@
 /* ==========================================================================
-   Lists
+   Objects: Lists
    ========================================================================== */
 
-.inline-list {
+.o-inline-list {
+    list-style: none;
     margin: 0;
     padding: 0;
-    list-style: none;
 }
-.inline-list__item {
+.o-inline-list__item {
     display: inline-block;
+    margin-left: $gs-gutter / 4;
+    position: relative;
+
+    &:first-child {
+        margin-left: 0;
+    }
 }
 
 .numbered {

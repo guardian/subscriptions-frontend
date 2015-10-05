@@ -1,26 +1,31 @@
-define(['bean', 'utils/user'], function (bean, userUtil) {
+define(['utils/user'], function (userUtil) {
     'use strict';
 
-    var IS_ACTIVE = 'is-active';
     var IDENTITY_MENU = '.js-identity-menu';
     var IDENTITY_TOGGLE = '.js-identity-menu-toggle';
 
+    var ACTIVE_CLASS = 'is-active';
+    var TOGGLE_CLASS = 'control--toggle';
+
     function addMenuListeners(menu, toggle) {
-        toggle.addEventListener('click', function(e) {
+        toggle.classList.add(TOGGLE_CLASS);
+
+        var listener = toggle.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopImmediatePropagation();
 
-            toggle.classList.toggle(IS_ACTIVE);
-            menu.classList.toggle(IS_ACTIVE);
-
-            if(!menu.classList.contains(IS_ACTIVE)) {
-                bean.off(menu, 'click');
-            } else {
-                bean.on(document.documentElement, 'click', function () {
-                    menu.classList.remove(IS_ACTIVE);
-                });
-            }
+            toggle.classList.toggle(ACTIVE_CLASS);
+            menu.classList.toggle(ACTIVE_CLASS);
         });
+
+        if(menu.classList.contains(ACTIVE_CLASS)) {
+            document.removeEventListener('click', listener);
+        } else {
+            document.documentElement.addEventListener('click', function() {
+                menu.classList.remove(ACTIVE_CLASS);
+                toggle.classList.remove(ACTIVE_CLASS);
+            });
+        }
     }
 
     function populateReturnUrl(href, currentUrl) {

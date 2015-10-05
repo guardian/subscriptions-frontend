@@ -2,11 +2,11 @@
 define(function () {
     'use strict';
 
-    /*eslint-disable */
     function AtoB(){
+        /* eslint-disable */
         return window.atob ? function(str){
             return window.atob(str);
-        } : (function(){
+        } : (function() {
             var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=',
                 INVALID_CHARACTER_ERR = (function(){
                     // fabricate a suitable error object
@@ -34,8 +34,8 @@ define(function () {
                 return output;
             };
         })();
+        /* eslint-enable */
     }
-    /*eslint-enable */
 
     function decode(str) {
         /**

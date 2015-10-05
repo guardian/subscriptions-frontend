@@ -37,6 +37,7 @@
 
 @import 'objects/icons';
 @import 'objects/grid';
+@import 'objects/lists';
 
 /* ==========================================================================
    Modules
@@ -45,20 +46,19 @@
 @import 'modules/global-header';
 @import 'modules/global-navigation';
 @import 'modules/global-footer';
+@import 'modules/buttons';
 @import 'modules/page';
-@import 'modules/lists';
+@import 'modules/popup';
 @import 'modules/blocks';
 @import 'modules/controls';
 @import 'modules/sections';
-@import 'modules/navigation';
-@import 'modules/apps';
 @import 'modules/forms';
 @import 'modules/forms-password';
-@import 'modules/buttons';
+@import 'modules/warnings';
 @import 'modules/packages';
 @import 'modules/checkout';
 @import 'modules/checkout-basket';
-@import 'modules/warnings';
+@import 'modules/apps';
 @import 'modules/patterns';
 
 // =============================================================================
