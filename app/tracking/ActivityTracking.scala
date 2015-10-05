@@ -29,9 +29,8 @@ trait ActivityTracking {
   }
 
   def track[C](permittedAltCredentialType: TestUserCredentialType[C], altCredentialSource: C, data: TrackerData)(implicit request: RequestHeader) {
-      isTestUser(permittedAltCredentialType, altCredentialSource).map(_ => executeTracking(data))
+    isTestUser(permittedAltCredentialType, altCredentialSource).map(_ => executeTracking(data))
   }
-
 
   private def executeTracking(data: TrackerData) {
     try {
@@ -49,12 +48,10 @@ trait ActivityTracking {
     val subject = new Subject
     new Tracker(emitter, subject, "subscriptions", "subscriptions-frontend")
   }
-
 }
 
 object ActivityTracking {
   val url = Config.trackerUrl
-
   def setSubMap(in: Map[String, Any]): JMap[String, Object] =
      mapAsJavaMap(in).asInstanceOf[java.util.Map[java.lang.String, java.lang.Object]]
 }

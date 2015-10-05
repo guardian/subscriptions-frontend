@@ -10,7 +10,6 @@ import services.CheckoutService.CheckoutResult
 import tracking.{ActivityTracking, TrackerData}
 import scala.collection.JavaConversions._
 
-//TODO: Shouldn't be passing CheckoutResult etc here, just doing this here now for clarity of whats needed
 object MemberData {
   def apply(checkoutResult: CheckoutResult, subscriptionData: SubscriptionData, product: SubscriptionProduct): MemberData = {
     val address: Address = subscriptionData.personalData.address

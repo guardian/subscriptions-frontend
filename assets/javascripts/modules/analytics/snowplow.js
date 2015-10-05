@@ -10,8 +10,7 @@ define([], function () {
 	)
     }
 
-    function init() {
-    }
+    function init() {}
 
     return {
 	init: init,

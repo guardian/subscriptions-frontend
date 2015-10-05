@@ -25,7 +25,7 @@ define([
         );
 
         if (analyticsEnabled) {
-	    snowplow.init();
+		snowplow.init();
             ga.init();
             omniture.init();
 

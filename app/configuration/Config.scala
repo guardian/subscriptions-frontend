@@ -40,8 +40,7 @@ object Config {
 
 
 
-
-  object Identity {
+ object Identity {
     private val idConfig = config.getConfig("identity")
 
     val baseUri = idConfig.getString("baseUri")
