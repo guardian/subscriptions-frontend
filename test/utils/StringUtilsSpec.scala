@@ -10,9 +10,9 @@ class StringUtilsSpec extends FreeSpec {
       assert(slugify("àáâãäåçèéêëìíîïñòóôõöùúûüýÿ") == "aaaaaaceeeeiiiinooooouuuuyy")
     }
 
-    "normalize accented characters" in {
+    "remove symbols" in {
       assert(slugify("Something & something else") == "something-something-else")
-      assert(slugify("àáâãäåçèéêëìíîïñòóôõöùúûüýÿ") == "aaaaaaceeeeiiiinooooouuuuyy")
+      assert(slugify("****£20 /|/|/|/| @blah ^^^") == "20-blah")
     }
 
     "never have multiple hyphens consecutively" in {
