@@ -1,0 +1,40 @@
+/* ==========================================================================
+   Controls
+   ========================================================================== */
+
+.control,
+.control:active {
+    color: white;
+    display: table;
+    border-bottom: none;
+}
+.control__item {
+    display: table-cell;
+    vertical-align: middle;
+    padding-right: $gs-gutter / 4;
+}
+.control__info {
+    @include fs-bodyHeading(1);
+    color: white;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    text-align: left;
+    max-width: $gs-gutter * 10;
+    user-select: none;
+}
+.control__icon {
+    color: white;
+    border-color: white;
+    border-color: rgba(255,255,255,0.3);
+}
+.control:hover,
+.control:active,
+.control.is-active {
+    .control__icon {
+        border-color: white;
+    }
+    .control__info {
+        text-decoration: underline;
+    }
+}

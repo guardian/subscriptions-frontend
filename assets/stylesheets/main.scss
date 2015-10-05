@@ -3,13 +3,16 @@
  * CONTENTS
  *
  * SETTINGS & TOOLS
- * Vars.................Variables and settings
- * Mixins...............Sass mixins
+ * Vars.................Variables and settings.
+ * Mixins...............Site specific mixins.
+ * Webfonts.............Load webfonts mixins early for use in other modules.
  *
- * BASE.................Global / element level rules
- * MODULE...............Individual components. One file per component,
- *                      The majority of all styles should be modules.
- * STATE................Styles which augment & overrides all other styles
+ * BASE.................Global / element level rules.
+ * OBJECTS..............Low level object styles (more abstract that components).
+ * COMPONENTS...........Individual components. One file per component or topic.
+ *                      The majority of all styles should be components.
+ * SCOPES...............Scoped styling contexts. Notably text from Content API.
+ * UTILITIES............Single use helper classes. Keep these to a minimum.
  */
 /* ==========================================================================
    SETTINGS & TOOLS
@@ -29,19 +32,25 @@
 @import 'base/helpers';
 
 /* ==========================================================================
-   MODULES
+   Objects
+   ========================================================================== */
+
+@import 'objects/icons';
+@import 'objects/grid';
+
+/* ==========================================================================
+   Modules
    ========================================================================== */
 
 @import 'modules/global-header';
 @import 'modules/global-navigation';
 @import 'modules/global-footer';
-@import 'modules/prose';
-@import 'modules/grid';
 @import 'modules/page';
 @import 'modules/lists';
 @import 'modules/blocks';
+@import 'modules/controls';
 @import 'modules/sections';
-@import 'modules/icons';
+@import 'modules/navigation';
 @import 'modules/apps';
 @import 'modules/forms';
 @import 'modules/forms-password';
@@ -50,13 +59,16 @@
 @import 'modules/checkout';
 @import 'modules/checkout-basket';
 @import 'modules/warnings';
-
-// Dev modules:
-// - Pattern library
 @import 'modules/patterns';
+
+// =============================================================================
+// Scopes
+// =============================================================================
+
+@import 'scopes/prose';
 
 /* ==========================================================================
    STATE
    ========================================================================== */
 
-@import 'state/responsive';
+@import 'utilities/visibility';

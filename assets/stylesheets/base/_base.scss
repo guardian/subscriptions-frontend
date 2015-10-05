@@ -42,22 +42,8 @@ p {
     margin-bottom: $gs-baseline * 1.33;
 }
 
-// TODO: Don't set borders globally.
-// Scope to .prose
 a {
-    color: $c-link;
     text-decoration: none;
-    border-bottom: 1px solid $c-neutral4;
-
-    &:hover,
-    &:focus {
-        border-color: $c-link-hover
-    }
-
-    &:active {
-        color: $c-link-active;
-        border-color: $c-link-active;
-    }
 }
 
 strong {

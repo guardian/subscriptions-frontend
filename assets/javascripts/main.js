@@ -3,8 +3,10 @@ require([
     'modules/raven',
     'modules/analytics/setup',
     'modules/toggle',
-    'modules/optionMirror',
     'modules/appendAround',
+    'modules/controls',
+    'modules/userDetails',
+    'modules/optionMirror',
     'modules/password',
     'modules/inputMask',
     'modules/checkout',
@@ -19,6 +21,8 @@ require([
     analytics,
     toggle,
     appendAround,
+    controls,
+    userDetails,
     optionMirror,
     password,
     inputMask,
@@ -34,16 +38,15 @@ require([
     analytics.init();
 
     toggle.init();
-    optionMirror.init();
     appendAround.init();
+    controls.init();
+    userDetails.init();
+    optionMirror.init();
     password.init();
-
     inputMask.init();
     country.init();
     checkout.init();
     confirmation.init();
-
-    // Pattern library
     patterns.init();
 
 });

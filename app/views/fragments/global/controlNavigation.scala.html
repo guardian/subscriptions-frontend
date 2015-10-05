@@ -1,0 +1,52 @@
+@()
+
+@import configuration.ProfileLinks
+
+@navPopup = {
+    <nav role="navigation" class="nav-popup js-identity-menu" aria-label="Profile menu">
+        <ul class="nav-popup__list">
+            @for(link <- ProfileLinks.popupLinks) {
+                <li class="nav-popup__item">
+                    <a href="@link.href"
+                       class="nav-popup__link"
+                       data-identity-link="@link.slug"
+                       id="qa-identity-nav-@link.slug"
+                    >@link.title</a>
+                </li>
+            }
+        </ul>
+    </nav>
+}
+
+<ul class="nav-control" role="menubar">
+    <li class="nav-control__item">
+        <a href="@ProfileLinks.signIn.href"
+            class="control js-identity-menu-toggle"
+            id="qa-identity-control"
+            title="@ProfileLinks.signIn.title"
+            role="menuitem"
+        >
+            <span class="control__item">
+                <span class="control__icon icon-holder icon-holder--large icon-holder--neutral">
+                    @fragments.common.inlineIcon("user")
+                </span>
+            </span>
+            <span class="control__item u-hide-until-tablet">
+                <span class="control__info">
+                    <span class="u-lowercase js-user-displayname">Sign in</span>
+                </span>
+            </span>
+        </a>
+        @navPopup
+    </li>
+    <li class="nav-control__item">
+        <a class="control" href="http://theguardian.com/" role="menuitem">
+            <span class="control__item">
+                @fragments.common.inlineIcon("g-mark", List("icon--large"))
+            </span>
+            <span class="control__item u-hide-until-tablet">
+                <span class="control__info">the guardian</span>
+            </span>
+        </a>
+    </li>
+</ul>

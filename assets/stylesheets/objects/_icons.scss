@@ -71,23 +71,6 @@
     vertical-align: bottom;
 }
 
-/* PNGs for now */
-.icon-logo {
-    background-image: url(/assets/images/icons/icon-logo-small.png);
-    display: inline-block;
-    height: 32px;
-    margin-top: $gs-baseline/2;
-    width: 162px;
-
-    @include mq(tablet) {
-        background-image: url(/assets/images/icons/icon-logo.png);
-        height: 62px;
-        width: 320px;
-        margin-top: $gs-baseline*.75;
-        margin-bottom: $gs-baseline/2;
-    }
-}
-
 .icon-arrow-up {
     background-image: url(/assets/images/icons/icon-arrow-up.png);
     background-position: center 10px;
