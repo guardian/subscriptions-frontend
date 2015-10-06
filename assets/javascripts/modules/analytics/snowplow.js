@@ -1,16 +1,25 @@
-/*global guardian:true */
-define([], function () {
+/*global snowplow_name_here,  */
+define(['lodash/object'], function (_) {
     'use strict';
 
-    function trackActivity(source) {
-	var snowplowNameHere = window.snowplow_name_here;
-	snowplowNameHere('trackUnstructEvent:subscriptions', {
-		eventSource: source
-	    }
-	)
+    var snowplow;
+
+    function trackActivity(source, data) {
+	var eventData = _.merge({
+	    eventSource: source
+	}, (data || {}));
+
+	snowplow('trackUnstructEvent:subscriptions', eventData)
     }
 
-    function init() {}
+    function init() {
+	snowplow = snowplow_name_here;
+	trackActivity('pageLoaded', {
+	    title: document.title,
+	    url: window.location.href
+	});
+	return snowplow;
+    }
 
     return {
 	init: init,
