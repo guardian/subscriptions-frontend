@@ -21,12 +21,12 @@ define([
     }
 
     function init() {
-        guardian.productData = {
+        guardian.pageInfo.productData = {
             source: 'Subscriptions and Membership',
             type: 'GUARDIAN_DIGIPACK',
             eventName: 'prodView'
         };
-        guardian.slug = 'GuardianDigiPack:Select Country';
+        guardian.pageInfo.slug = 'GuardianDigiPack:Select Country';
 
         var cookieInfo = loadCountryInfo();
         if (!cookieInfo) {

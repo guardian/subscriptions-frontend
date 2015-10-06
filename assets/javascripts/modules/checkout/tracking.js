@@ -18,22 +18,22 @@ define(['$', 'modules/analytics/omniture'], function ($, omniture) {
     }
 
     function personalDetailsTracking() {
-        guardian.slug = 'GuardianDigiPack:Name and address';
-        guardian.productData = subscriptionProducts('scOpen');
+        guardian.pageInfo.slug = 'GuardianDigiPack:Name and address';
+        guardian.pageInfo.productData = subscriptionProducts('scOpen');
         omniture.triggerPageLoadEvent();
     }
 
     function paymentDetailsTracking(){
-        guardian.slug = 'GuardianDigiPack:Payment Details';
+        guardian.pageInfo.slug = 'GuardianDigiPack:Payment Details';
         guardian.pageName = 'Details - payment details | Digital | Subscriptions | The Guardian';
-        guardian.productData = subscriptionProducts('scOpen');
+        guardian.pageInfo.productData = subscriptionProducts('scOpen');
         omniture.triggerPageLoadEvent();
     }
 
     function paymentReviewTracking(){
-        guardian.slug = 'GuardianDigiPack:Review and confirm';
+        guardian.pageInfo.slug = 'GuardianDigiPack:Review and confirm';
         guardian.pageName ='Payment submission/signup | Digital | Subscriptions | The Guardian';
-        guardian.productData =  subscriptionProducts('scCheckout');
+        guardian.pageInfo.productData =  subscriptionProducts('scCheckout');
         omniture.triggerPageLoadEvent();
     }
 

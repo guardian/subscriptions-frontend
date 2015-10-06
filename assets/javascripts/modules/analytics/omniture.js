@@ -24,7 +24,7 @@ define([
 
     function setTracker(s) {
         var pageInfo = guardian.pageInfo,
-            productData = guardian.productData;
+            productData = guardian.pageInfo.productData;
 
         s.pageName = pageInfo.name;
         s.channel = pageInfo.channel;
@@ -46,7 +46,7 @@ define([
                 productData.eventName
             ].join(';');
         }
-        if (guardian.slug) {
+        if (guardian.pageInfo.slug) {
             s.prop17 = guardian.slug;
         }
     }
@@ -58,7 +58,6 @@ define([
             var s_code = s.t();
             setTracker(s);
             if (s_code) {
-                /*jslint evil: true */
                 document.write(s_code);
             }
         });

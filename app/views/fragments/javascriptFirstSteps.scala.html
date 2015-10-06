@@ -25,6 +25,16 @@
         && 'bind' in Function
         && (('XMLHttpRequest' in window && 'withCredentials' in new XMLHttpRequest()) || 'XDomainRequest' in window)
     );
+    guardian.pageInfo = {
+        channel: 'Subscriber',
+        slug: null,
+        name: document.title,
+        publication: 'GU.co.uk',
+        commissioningDesk: 'Subscriber',
+        product: 'Subscriber',
+        edition: 'UK',
+        productData: null
+    };
 
     (function(isModern) {
         // We want to add/remove classes to HTML ASAP to avoid FOUC
@@ -97,17 +107,4 @@
     })(guardian.isModernBrowser);
 </script>
 
-
-<script id="gu_page_info">
-    guardian.pageInfo = {
-        channel: 'Subscriber',
-        slug: null,
-        name: document.title,
-        publication: 'GU.co.uk',
-        commissioningDesk: 'Subscriber',
-        product: 'Subscriber',
-        edition: 'UK',
-        productData: null
-    };
-</script>
 
