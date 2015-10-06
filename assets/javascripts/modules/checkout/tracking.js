@@ -1,4 +1,4 @@
-define(['$', 'modules/analytics/omniture'], function ($, omniture) {
+define(['$', 'modules/analytics/omniture', 'modules/analytics/snowplow'], function ($, omniture, snowplow) {
     'use strict';
 
     function subscriptionProducts(eventName){
@@ -21,6 +21,7 @@ define(['$', 'modules/analytics/omniture'], function ($, omniture) {
         guardian.pageInfo.slug = 'GuardianDigiPack:Name and address';
         guardian.pageInfo.productData = subscriptionProducts('scOpen');
         omniture.triggerPageLoadEvent();
+	snowplow.trackPageLoad();
     }
 
     function paymentDetailsTracking(){
@@ -28,6 +29,7 @@ define(['$', 'modules/analytics/omniture'], function ($, omniture) {
         guardian.pageName = 'Details - payment details | Digital | Subscriptions | The Guardian';
         guardian.pageInfo.productData = subscriptionProducts('scOpen');
         omniture.triggerPageLoadEvent();
+	snowplow.trackPageLoad();
     }
 
     function paymentReviewTracking(){
@@ -35,6 +37,7 @@ define(['$', 'modules/analytics/omniture'], function ($, omniture) {
         guardian.pageName ='Payment submission/signup | Digital | Subscriptions | The Guardian';
         guardian.pageInfo.productData =  subscriptionProducts('scCheckout');
         omniture.triggerPageLoadEvent();
+	snowplow.trackPageLoad();
     }
 
 
