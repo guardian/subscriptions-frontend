@@ -1,3 +1,4 @@
+/*global guardian */
 define([
     'modules/country/elements',
     'utils/cookie'
@@ -20,6 +21,13 @@ define([
     }
 
     function init() {
+        guardian.productData = {
+            source: 'Subscriptions and Membership',
+            type: 'GUARDIAN_DIGIPACK',
+            eventName: 'prodView'
+        };
+        guardian.slug = 'GuardianDigiPack:Select Country';
+
         var cookieInfo = loadCountryInfo();
         if (!cookieInfo) {
             cookieInfo = {switchUrl: shouldSwitch(50)};
