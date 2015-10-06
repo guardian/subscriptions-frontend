@@ -9,6 +9,7 @@ GET         /favicon.ico                     controllers.CacheBustedAssets.at(pa
 GET         /                                controllers.Homepage.index
 GET         /au                              controllers.Homepage.indexAu
 GET         /us                              controllers.Homepage.indexUs
+GET         /int                             controllers.Default.redirect(to = "/us")
 
 # Health check
 GET         /healthcheck                     controllers.Healthcheck.index
