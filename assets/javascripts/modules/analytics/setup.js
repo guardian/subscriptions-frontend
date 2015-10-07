@@ -6,28 +6,24 @@ define([
     'modules/analytics/krux',
     'modules/analytics/affectv',
     'modules/analytics/snowplow'
-], function (
-    cookie,
-    ga,
-    omniture,
-    remarketing,
-    krux,
-    affectv,
-    snowplow
-) {
+], function (cookie,
+	     ga,
+	     omniture,
+	     remarketing,
+	     krux,
+	     affectv,
+	     snowplow) {
     'use strict';
 
     function init() {
-        var analyticsEnabled = (
-            window.guardian.analyticsEnabled &&
-            !navigator.doNotTrack &&
-            !cookie.getCookie('ANALYTICS_OFF_KEY')
-        );
+	var analyticsEnabled = (
+	    window.guardian.analyticsEnabled && !navigator.doNotTrack && !cookie.getCookie('ANALYTICS_OFF_KEY')
+	);
 
-        if (analyticsEnabled) {
-		snowplow.init();
-            ga.init();
-            omniture.init();
+	if (analyticsEnabled) {
+	    snowplow.init();
+	    ga.init();
+	    omniture.init();
 
             if (!window.guardian.isDev) {
                 remarketing.init();
