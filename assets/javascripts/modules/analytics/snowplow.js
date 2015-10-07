@@ -33,7 +33,7 @@ define(['lodash/object'], function (_) {
 		'type': 'string'
 	    }
 	},
-	'required': ['eventSource', 'pageName', 'channel','productBillingFrequency','productBillingAmount','productType'],
+	'required': ['eventSource', 'pageName', 'channel', 'productBillingFrequency', 'productBillingAmount', 'productType'],
 	'additionalProperties': false
     };
 
