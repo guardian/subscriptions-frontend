@@ -72,6 +72,8 @@ define([
     function init() {
         var $actionEl = formEls.$YOUR_DETAILS_SUBMIT;
         var actionEl = $actionEl[0];
+        tracking.personalDetailsTracking();
+
 
         if($actionEl.length) {
             actionEl.addEventListener('click', function(e) {
