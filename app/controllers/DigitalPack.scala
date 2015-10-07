@@ -1,21 +1,13 @@
 package controllers
 
 import actions.CommonActions.CachedAction
+import model.DigitalEdition
+import model.DigitalEdition.{UK, AU, US}
 import play.api.mvc._
 
-case class DigitalEdition(id: String, name: String, price: String, cmp: String)
-
-object DigitalEdition {
-
-  object UK extends DigitalEdition("uk", "UK", "£11.99", "dis_2408")
-  object US extends DigitalEdition("us", "US", "$19.99", "dis_2378")
-  object AU extends DigitalEdition("au", "Australia", "$21.50", "dis_2379")
-
-}
 
 object DigitalPack extends Controller {
 
-  import DigitalEdition._
 
   def uk = landingPage(UK)
   def us = landingPage(US)
@@ -26,7 +18,7 @@ object DigitalPack extends Controller {
   def selectAu = country(AU)
 
   def landingPage(digitalEdition: DigitalEdition) = CachedAction {
-    Ok(views.html.digitalpack.info(digitalEdition))
+    Ok(views.html.digitalpack.info(digitalEdition, DigitalEdition.getRedirect(digitalEdition)))
   }
 
   def country(digitalEdition: DigitalEdition) = CachedAction {

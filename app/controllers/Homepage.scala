@@ -1,6 +1,7 @@
 package controllers
 
 import actions.CommonActions.CachedAction
+import model.DigitalEdition
 import play.api.mvc._
 
 object Homepage extends Controller {
