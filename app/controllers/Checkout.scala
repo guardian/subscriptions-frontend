@@ -14,6 +14,7 @@ import services.AuthenticationService.authenticatedUserFor
 import services._
 import tracking.activities.{MemberData, SubscriptionRegistrationActivity, CheckoutReachedActivity}
 import tracking.ActivityTracking
+import tracking.activities.{CheckoutReachedActivity, MemberData, SubscriptionRegistrationActivity}
 import utils.TestUsers.{NameEnteredInForm, PreSigninTestCookie}
 import views.html.{checkout => view}
 
@@ -22,6 +23,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 object Checkout extends Controller with LazyLogging with ActivityTracking {
+
   object SessionKeys {
     val SubsName = "newSubs_subscriptionName"
     val RatePlanId = "newSubs_ratePlanId"
@@ -92,8 +94,7 @@ object Checkout extends Controller with LazyLogging with ActivityTracking {
 	products <- zuoraService.products
 	product = products.find(p => p.ratePlanId == formData.ratePlanId)
       } yield {
-	product.map(prod => trackAnon(SubscriptionRegistrationActivity(MemberData(result, formData, prod))))
-
+	      product.map(prod => trackAnon(SubscriptionRegistrationActivity(MemberData(result, formData, prod))))
       }
 
       Redirect(routes.Checkout.thankYou()).withSession(session)
@@ -119,7 +120,8 @@ object Checkout extends Controller with LazyLogging with ActivityTracking {
 
     // TODO If some pieces of information are missing, redirect to an empty form. Is it the expected behaviour?
     def redirectToEmptyForm = Future {
-      Redirect(routes.Checkout.renderCheckout()) }
+      Redirect(routes.Checkout.renderCheckout())
+    }
 
     sessionInfo.fold(redirectToEmptyForm) { case (subsName, ratePlanId) =>
       val passwordForm = authenticatedUserFor(request).fold {
