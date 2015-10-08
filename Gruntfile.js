@@ -190,6 +190,7 @@ module.exports = function(grunt) {
             options: {
                 prefix: 'icon-',
                 symbol: true,
+                includeTitleElement: false,
                 inheritviewbox: true,
                 cleanup: ['fill'],
                 svg: {
