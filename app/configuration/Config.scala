@@ -19,7 +19,6 @@ object Config {
   val config = ConfigFactory.load()
 
   val playSecret = config.getString("play.crypto.secret")
-  val externalSubscriptionUrl = config.getString("subscriptions.external.url")
 
   val googleAuthConfig = {
     val con = ConfigFactory.load().getConfig("google.oauth")
