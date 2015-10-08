@@ -8,16 +8,18 @@ import com.gu.identity.cookie.{PreProductionKeys, ProductionKeys}
 import com.gu.membership.salesforce.SalesforceConfig
 import com.netaporter.uri.dsl._
 import com.typesafe.config.ConfigFactory
+import model.DigitalEdition
 import net.kencochrane.raven.dsn.Dsn
 import play.api.mvc.{Call, RequestHeader}
 
 import scala.util.Try
 
-object Config {
+object Config extends DigitalEdition.UrlConfig {
   val appName = "subscriptions-frontend"
   val config = ConfigFactory.load()
 
   val playSecret = config.getString("play.crypto.secret")
+  val externalSubscriptionUrl = config.getString("subscriptions.external.url")
 
   val googleAuthConfig = {
     val con = ConfigFactory.load().getConfig("google.oauth")
