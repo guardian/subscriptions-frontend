@@ -14,7 +14,7 @@ import play.api.mvc.{Call, RequestHeader}
 
 import scala.util.Try
 
-object Config extends DigitalEdition.UrlConfig {
+object Config {
   val appName = "subscriptions-frontend"
   val config = ConfigFactory.load()
 
