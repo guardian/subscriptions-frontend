@@ -32,8 +32,6 @@ object Config {
   val stage = config.getString("stage")
   val stageProd: Boolean = stage == "PROD"
 
-  lazy val sessionDomain = config.getString("session.domain")
-
   object Identity {
     private val idConfig = config.getConfig("identity")
 
@@ -47,6 +45,8 @@ object Config {
     val webAppUrl = idConfig.getString("webapp.url")
 
     val webAppProfileUrl = webAppUrl / "account" / "edit"
+
+    val sessionDomain = idConfig.getString("sessionDomain")
 
     def idWebAppSigninUrl(returnTo: Call)(implicit request: RequestHeader) = idWebAppUrl("signin", returnTo)
 
