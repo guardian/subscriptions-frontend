@@ -2,7 +2,7 @@ package model
 
 import configuration.Config
 
-case class DigitalEdition(id: String, name: String, price: String, cmp: String)
+case class DigitalEdition(id: String, name: String, price: String, campaign: String)
 
 
 object DigitalEdition {
@@ -19,7 +19,7 @@ object DigitalEdition {
   def getRedirect(edition: DigitalEdition)(implicit urlConfig: UrlConfig): String = {
     edition match {
       case UK => "/digital/country"
-      case DigitalEdition(_, _, _, cmp) => urlConfig.externalSubscriptionUrl + "?prom=DGA38&CMP=" + cmp
+      case DigitalEdition(_, _, _, campaign) => urlConfig.externalSubscriptionUrl + "?prom=DGA38&CMP=" + campaign
     }
   }
 }
