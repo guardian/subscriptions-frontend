@@ -15,7 +15,9 @@
     @fragments.head(title, jsVars)
 </head>
     <body class="js-off @bodyClasses.mkString(" ")">
-        <div style="height: 0; display: none">@Html(Assets.svgSprite)</div>
+        @for(svgSprite <- Assets.svgSprite) {
+            <div style="height: 0; display: none">@Html(svgSprite)</div>
+        }
         @for(
             touchpointBackendResolution <- touchpointBackendResolutionOpt;
             validTestUserCredential <- touchpointBackendResolution.validTestUserCredentialOpt;

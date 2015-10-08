@@ -1,30 +1,15 @@
 package utils
 
-import java.net.URL
-import controllers.CachedAssets.hashedPaths
-import play.api.Play
-import org.apache.commons.io.IOUtils
+import com.typesafe.scalalogging.LazyLogging
+import scala.io.Source
 
-object Assets {
-
-  def inlineResource(path: String) = {
-    val url = AssetFinder("public/" + hashedPaths.getOrElse(path, path))
-    IOUtils.toString(url)
+object Assets extends LazyLogging {
+  def inlineResource(path: String) = (for {
+    resourceIs <- Option(getClass.getClassLoader.getResourceAsStream(path))
+  } yield Some(Source.fromInputStream(resourceIs).mkString)).getOrElse {
+    logger.warn(s"Could not find $path. You may need to run grunt compile")
+    None
   }
 
-  val svgSprite = inlineResource("images/svg-sprite.svg")
+  val svgSprite = inlineResource("assets/svg-sprite.svg")
 }
-
-object AssetFinder {
-  def apply(assetPath: String): URL = {
-    Option(Play.classloader(Play.current).getResource(assetPath)).getOrElse {
-      throw AssetNotFoundException(assetPath)
-    }
-  }
-}
-
-case class AssetNotFoundException(assetPath: String) extends Exception {
-  override val getMessage: String =
-    s"Cannot find asset $assetPath. You probably need to run 'grunt compile'."
-}
-

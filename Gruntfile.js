@@ -44,7 +44,7 @@ module.exports = function(grunt) {
         clean: {
             assets: ['<%= dirs.public.javascripts %>','<%= dirs.public.stylesheets %>', '<%= dirs.public.images %>'],
             dist: ['<%= dirs.public.root %>/dist/', 'conf/assets.map'],
-            icons: ['<%= dirs.assets.images %>/inline-svgs/compressed/*.svg'],
+            icons: ['conf/assets/*.svg', '<%= dirs.assets.images %>/inline-svgs/compressed/*.svg'],
         },
 
         copy: {
@@ -200,7 +200,7 @@ module.exports = function(grunt) {
             },
             icons: {
                 files: {
-                    '<%= dirs.assets.images %>/svg-sprite.svg': ['<%= dirs.assets.images %>/inline-svgs/compressed/*.svg']
+                    'conf/assets/svg-sprite.svg': ['<%= dirs.assets.images %>/inline-svgs/compressed/*.svg']
                 }
             }
         },
