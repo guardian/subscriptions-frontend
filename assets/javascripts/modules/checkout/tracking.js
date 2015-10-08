@@ -6,32 +6,40 @@ define(['$', 'modules/analytics/omniture'], function ($, omniture) {
         if (selectedFrequency.length && eventName) {
             var amount = selectedFrequency[0].getAttribute('data-amount'),
                 qty = selectedFrequency[0].getAttribute('data-number-of-months');
-            return 'Subscriptions and Membership;GUARDIAN_DIGIPACK;' + qty + ';' + amount + ';' + eventName;
+            return {
+                source: 'Subscriptions and Membership',
+                type: 'GUARDIAN_DIGIPACK',
+                eventName: eventName,
+                amount: amount,
+                frequency: qty
+            };
         }
         return undefined;
     }
 
-    function trackEvent(prop17, pageName, eventName) {
-        var products = subscriptionProducts(eventName);
-        omniture.trackEvent(prop17, pageName, products);
+    function personalDetailsTracking() {
+        guardian.pageInfo.slug = 'GuardianDigiPack:Name and address';
+        guardian.pageInfo.productData = subscriptionProducts('scOpen');
+        omniture.triggerPageLoadEvent();
     }
 
     function paymentDetailsTracking(){
-        var prop17 = 'GuardianDigiPack:Payment Details',
-            pageName = 'Details - payment details | Digital | Subscriptions | The Guardian',
-            eventName = 'scOpen';
-        trackEvent(prop17, pageName, eventName);
+        guardian.pageInfo.slug = 'GuardianDigiPack:Payment Details';
+        guardian.pageName = 'Details - payment details | Digital | Subscriptions | The Guardian';
+        guardian.pageInfo.productData = subscriptionProducts('scOpen');
+        omniture.triggerPageLoadEvent();
     }
 
     function paymentReviewTracking(){
-        var prop17 = 'GuardianDigiPack:Review and confirm',
-            pageName = 'Payment submission/signup | Digital | Subscriptions | The Guardian',
-            eventName = 'scCheckout';
-        trackEvent(prop17, pageName, eventName);
+        guardian.pageInfo.slug = 'GuardianDigiPack:Review and confirm';
+        guardian.pageName ='Payment submission/signup | Digital | Subscriptions | The Guardian';
+        guardian.pageInfo.productData =  subscriptionProducts('scCheckout');
+        omniture.triggerPageLoadEvent();
     }
 
 
     return {
+        personalDetailsTracking: personalDetailsTracking,
         paymentDetailsTracking: paymentDetailsTracking,
         paymentReviewTracking: paymentReviewTracking
     };
