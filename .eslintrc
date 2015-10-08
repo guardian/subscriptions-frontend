@@ -10,6 +10,7 @@
     },
     "rules": {
         "curly": [2, "all"],
+        "no-console": 0,
         "no-trailing-spaces": 2,
         "quotes": [2, "single"],
         "wrap-iife": 2
