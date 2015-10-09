@@ -1,0 +1,73 @@
+/* ==========================================================================
+   Popup
+   ========================================================================== */
+
+.popup {
+    display: none;
+
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    clear: both;
+
+    position: absolute;
+    top: 40px;
+    min-height: 47px;
+    min-width: gs-span(2);
+    z-index: 10;
+
+    box-shadow: 0 1px 1px 0 rgba(0, 0, 0, .25);
+    background-color: $c-neutral8;
+    padding: 0 ($gs-gutter / 2);
+
+    &.is-active {
+        display: block;
+    }
+
+    @include mq(tablet) {
+        left: $gs-gutter * 2;
+    }
+
+    &:after {
+        bottom: 100%;
+        left: $gs-gutter;
+        content: '';
+        height: 0;
+        width: 0;
+        position: absolute;
+        pointer-events: none;
+        border: solid transparent;
+        border-bottom-color: $c-neutral8;
+        border-width: 6px;
+        margin-left: -6px;
+
+        @include mq(desktop) {
+            left: 18%;
+            border-width: $gs-gutter / 2;
+            margin-left: -($gs-gutter / 2);
+        }
+    }
+}
+.popup__item {
+    float: none;
+    width: 100%;
+    display: block;
+    border-right: 0;
+    box-sizing: border-box;
+}
+.popup__link {
+    @include fs-bodyHeading(1);
+    @include font-smoothing();
+
+    display: block;
+    text-decoration: none;
+    border-bottom: 1px solid $c-neutral4;
+    padding: ($gs-baseline / 2) 0;
+
+    &:hover {
+        text-decoration: underline;
+    }
+}
+.popup__item:last-child .popup__link {
+    border-bottom: 0 none;
+}

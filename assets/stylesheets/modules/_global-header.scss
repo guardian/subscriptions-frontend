@@ -2,30 +2,82 @@
    Global Header
    ========================================================================== */
 
+/* ==========================================================================
+   Global Header
+   ========================================================================== */
+
 .global-header {
     background-color: $c-brand;
-    text-align: right;
+    position: relative;
+    z-index: 2;
+}
+.global-header__inner {
+    @include clearfix();
+    padding: ($gs-baseline / 2) ($gs-gutter / 2);
 
-    a {
-        border: none;
+    @include mq(tablet) {
+        padding-bottom: $gs-baseline * 2;
+        padding-left: 0;
+        padding-right: 0;
     }
 }
-.global-header__nav {
-    font-family: $f-serif-text;
-    font-weight: bold;
-    @include font-size(14px, 36px);
-    text-transform: lowercase;
-    padding-top: $gs-baseline/2;
+.global-header__controls {
+    float: left;
+    padding-right: $gs-gutter;
+}
+.global-header__branding {
+    float: right;
+    width: auto;
+}
+.global-header__logo {
+    display: block;
+    margin-top: $gs-baseline / 2;
+/*  PNGs for now */
+    background-image: url(/assets/images/icons/icon-logo-small.png);
+    background-repeat: no-repeat;
+    height: 32px;
+    width: 162px;
 
-    .action {
-        color: $c-white;
-        margin-left: $gs-gutter*.75;
-        text-decoration: none;
-
-        &:hover,
-        &:focus,
-        &:active {
-            text-decoration: underline;
-        }
+    @include mq(tablet) {
+        background-image: url(/assets/images/icons/icon-logo.png);
+        height: 62px;
+        width: 320px;
     }
 }
+
+// .global-header__logo {
+//     float: right;
+//     width: auto;
+
+//     @include mq(tablet) {
+//         margin-right: -20px;
+//     }
+// }
+// .global-header__logo__image {
+//     width: auto;
+//     height: 50px;
+
+//     @include mq(tablet) {
+//         height: 90px;
+//     }
+// }
+
+// .global-header__nav {
+//     font-family: $f-serif-text;
+//     font-weight: bold;
+//     @include font-size(14px, 36px);
+//     text-transform: lowercase;
+//     padding-top: $gs-baseline/2;
+
+//     .action {
+//         color: $c-white;
+//         margin-left: $gs-gutter*.75;
+//         text-decoration: none;
+
+//         &:hover,
+//         &:focus,
+//         &:active {
+//             text-decoration: underline;
+//         }
+//     }
+// }

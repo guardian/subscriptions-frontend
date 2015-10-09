@@ -1,6 +1,10 @@
 package configuration
 
-case class Links(href: String, title: String)
+import utils.StringUtils._
+
+case class Links(href: String, title: String) {
+  val slug = slugify(title)
+}
 
 object Links {
   val terms = Links(
@@ -21,4 +25,18 @@ object Links {
     "http://www.theguardian.com/subscriber-direct/subscription-frequently-asked-questions",
     "Frequently Asked Questions"
   )
+}
+
+object ProfileLinks {
+  private val identityUrl = Config.Identity.webAppUrl
+
+  val signIn =  Links(s"$identityUrl/signin?returnUrl=${Config.subscriptionsUrl}", "Your account")
+
+  val commentActivity = Links(s"$identityUrl/user/id/", "Comment activity")
+  val editProfile = Links(s"$identityUrl/public/edit", "Edit profile")
+  val emailPreferences = Links(s"$identityUrl/email-prefs", "Email preferences")
+  val changePassword = Links(s"$identityUrl/password/change", "Change password")
+  val signOut = Links(s"$identityUrl/signout", "Sign out")
+
+  val popupLinks = Seq(commentActivity, editProfile, emailPreferences, changePassword, signOut)
 }

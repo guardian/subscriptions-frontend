@@ -1,0 +1,18 @@
+/* ==========================================================================
+   Utilities: Text
+   ========================================================================== */
+
+.u-lowercase {
+    text-transform: lowercase;
+}
+.u-capitalize {
+    text-transform: capitalize;
+}
+.u-parentheses {
+    &:before { content: '('; }
+    &:after { content: ')'; }
+}
+.u-block-link {
+    display: block;
+    height: 100%;
+}

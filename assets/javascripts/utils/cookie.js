@@ -1,9 +1,6 @@
-define(function () {
+define(['utils/base64'], function (base64) {
     'use strict';
 
-    /*
-     Cookie functions originally from http://www.quirksmode.org/js/cookies.html
-     */
     function setCookie(name, value, days, isUnSecure) {
         var date;
         var expires;
@@ -36,10 +33,21 @@ define(function () {
         setCookie(name, '', -1);
     }
 
+    function getDecodedCookie(name) {
+        return decodeCookie(getCookie(name));
+    }
+
+    function decodeCookie(cookieData) {
+        var cookieVal = cookieData ? base64.decode(cookieData.split('.')[0]) : undefined;
+        return (cookieVal) ? JSON.parse(cookieVal) : undefined;
+    }
+
     return {
         setCookie: setCookie,
         getCookie: getCookie,
-        removeCookie: removeCookie
+        removeCookie: removeCookie,
+        getDecodedCookie: getDecodedCookie,
+        decodeCookie: decodeCookie
     };
 
 });

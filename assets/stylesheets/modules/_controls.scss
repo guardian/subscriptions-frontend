@@ -1,0 +1,65 @@
+/* ==========================================================================
+   Controls
+   ========================================================================== */
+
+.control,
+.control:active {
+    color: white;
+    display: table;
+    border-bottom: none;
+}
+.control__item {
+    display: table-cell;
+    vertical-align: middle;
+    padding-right: $gs-gutter / 4;
+}
+.control__info {
+    @include fs-bodyHeading(1);
+    color: white;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    text-align: left;
+    max-width: $gs-gutter * 10;
+    user-select: none;
+}
+.control__icon {
+    color: white;
+    border-color: white;
+    border-color: rgba(255,255,255,0.3);
+}
+.control:hover,
+.control:active,
+.control.is-active {
+    .control__icon {
+        border-color: white;
+    }
+    .control__info {
+        border-bottom: 1px solid white;
+        border-color: rgba(255,255,255,0.8);
+    }
+}
+
+$toggle-arrow-size: 4px;
+@include mq(tablet) {
+    .control--toggle:after {
+        content: '';
+        display: inline-block;
+        vertical-align: bottom;
+        pointer-events: none;
+        width: 0;
+        height: 0;
+        margin-left: -3px;
+        margin-right: 3px;
+        position: relative;
+        top: -3px;
+        border-bottom: 0;
+        border-left: $toggle-arrow-size solid transparent;
+        border-right: $toggle-arrow-size solid transparent;
+        border-top: $toggle-arrow-size solid white;
+    }
+    .control--toggle.is-active:after {
+        border-top: 0;
+        border-bottom: $toggle-arrow-size solid white;
+    }
+}
