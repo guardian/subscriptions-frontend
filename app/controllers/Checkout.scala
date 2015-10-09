@@ -12,7 +12,6 @@ import play.api.libs.json._
 import play.api.mvc._
 import services.AuthenticationService.authenticatedUserFor
 import services._
-import tracking.activities.{MemberData, SubscriptionRegistrationActivity, CheckoutReachedActivity}
 import tracking.ActivityTracking
 import tracking.activities.{CheckoutReachedActivity, MemberData, SubscriptionRegistrationActivity}
 import utils.TestUsers.{NameEnteredInForm, PreSigninTestCookie}
@@ -87,8 +86,8 @@ object Checkout extends Controller with LazyLogging with ActivityTracking {
 
       val session = (Seq(
 	SessionKeys.SubsName -> result.subscribeResult.name,
-        SessionKeys.RatePlanId -> formData.ratePlanId
-      ) ++ userSessionFields).foldLeft(request.session) {_ + _}
+	SessionKeys.RatePlanId -> formData.ratePlanId
+      ) ++ userSessionFields).foldLeft(request.session) { _ + _ }
 
       for {
 	products <- zuoraService.products

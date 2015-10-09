@@ -4,46 +4,12 @@ define(['lodash/object'], function (_) {
 
     var snowplow;
 
-    var schema = {
-	'$schema': 'http://json-schema.org/schema#',
-	'self': {
-	    'vendor': 'com.gu',
-	    'name': 'page_load',
-	    'format': 'jsonschema',
-	    'version': '1-0-0'
-	},
-	'type': 'object',
-	'properties': {
-	    'eventSource': {
-		'type': 'string'
-	    },
-	    'pageName': {
-		'type': 'string'
-	    },
-	    'channel': {
-		'type': 'string'
-	    },
-	    'productBillingFrequency': {
-		'type': 'string'
-	    },
-	    'productBillingAmount': {
-		'type': 'string'
-	    },
-	    'productType': {
-		'type': 'string'
-	    }
-	},
-	'required': ['eventSource', 'pageName', 'channel', 'productBillingFrequency', 'productBillingAmount', 'productType'],
-	'additionalProperties': false
-    };
-
-
     function trackActivity(source, data) {
 	var eventData = _.merge({
 	    eventSource: source
 	}, (data || {}));
 
-	snowplow('trackUnstructEvent', {schema: schema, data: eventData})
+	snowplow('trackUnstructEvent', eventData)
     }
 
     function trackPageLoad() {
