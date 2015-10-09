@@ -12,7 +12,7 @@ object DigitalEdition {
   def getRedirect(edition: DigitalEdition): String = {
     edition match {
       case UK => "/digital/country"
-      case DigitalEdition(_, _, _, cmp) => "https://www.guardiansubscriptions.co.uk/digitalsubscriptions/?prom=DGA38&CMP=" + cmp
+      case _ => "https://www.guardiansubscriptions.co.uk/digitalsubscriptions/?prom=dga38&CMP=FAB_3062"
     }
   }
 }
