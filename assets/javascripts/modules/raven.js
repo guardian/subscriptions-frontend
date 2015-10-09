@@ -1,5 +1,14 @@
-define(['raven'], function (raven) {
+define(['lodash/object/pick', 'utils/user', 'raven'], function (pick, userUtil, raven) {
     'use strict';
+
+    function getTags(buildNumber, user) {
+        return pick({
+          build_number: buildNumber,
+          userIdentityId: (user) ? user.id : undefined
+        }, function(val) {
+          return val !== undefined;
+        });
+    }
 
     function init(dsn) {
         raven.config(dsn, {
@@ -8,9 +17,10 @@ define(['raven'], function (raven) {
                 /sub\.thegulocal\.com/,
                 /localhost/
             ],
-            tags: {
-                build_number: guardian.buildNumber
-            },
+            tags: getTags(
+                window.guardian.buildNumber,
+                userUtil.getUserFromCookie()
+            ),
             ignoreErrors: [
                 /duplicate define: jquery/
             ],
@@ -24,6 +34,7 @@ define(['raven'], function (raven) {
     }
 
     return {
-        init: init
+        init: init,
+        getTags: getTags
     };
 });
