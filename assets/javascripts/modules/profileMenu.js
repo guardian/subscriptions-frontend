@@ -3,7 +3,6 @@ define(['utils/user'], function (userUtil) {
 
     var IDENTITY_MENU = '.js-identity-menu';
     var IDENTITY_TOGGLE = '.js-identity-menu-toggle';
-
     var ACTIVE_CLASS = 'is-active';
     var TOGGLE_CLASS = 'control--toggle';
 
@@ -39,6 +38,15 @@ define(['utils/user'], function (userUtil) {
         toggle.setAttribute('href', newHref);
     }
 
+    function updateCommentsLink(menu) {
+        var userDetails = userUtil.getUserFromCookie();
+        var comments = menu.querySelector('[data-identity-link="comment-activity"]');
+        var href = comments.getAttribute('href');
+        if (userDetails && comments) {
+            comments.setAttribute('href', href + userDetails.id);
+        }
+    }
+
     function init() {
         var menu = document.querySelector(IDENTITY_MENU);
         var toggle = document.querySelector(IDENTITY_TOGGLE);
@@ -49,6 +57,7 @@ define(['utils/user'], function (userUtil) {
 
         if (userUtil.isLoggedIn()) {
             addMenuListeners(menu, toggle);
+            updateCommentsLink(menu);
         } else {
             setIdentityCtaReturnUrl(toggle);
         }

@@ -4,7 +4,7 @@ require([
     'modules/analytics/setup',
     'modules/toggle',
     'modules/appendAround',
-    'modules/controls',
+    'modules/profileMenu',
     'modules/userDetails',
     'modules/optionMirror',
     'modules/password',
@@ -21,7 +21,7 @@ require([
     analytics,
     toggle,
     appendAround,
-    controls,
+    profileMenu,
     userDetails,
     optionMirror,
     password,
@@ -39,7 +39,7 @@ require([
 
     toggle.init();
     appendAround.init();
-    controls.init();
+    profileMenu.init();
     userDetails.init();
     optionMirror.init();
     password.init();
