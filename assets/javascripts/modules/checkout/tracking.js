@@ -40,7 +40,6 @@ define(['$', 'modules/analytics/omniture', 'modules/analytics/snowplow'], functi
 	snowplow.trackPageLoad();
     }
 
-
     return {
         personalDetailsTracking: personalDetailsTracking,
         paymentDetailsTracking: paymentDetailsTracking,

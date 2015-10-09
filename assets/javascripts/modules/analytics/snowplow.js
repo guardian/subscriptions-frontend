@@ -37,7 +37,6 @@ define(['lodash/object'], function (_) {
 	snowplow = snowplow_name_here;
 	trackPageLoad();
 	return snowplow;
-
     }
 
     return {
