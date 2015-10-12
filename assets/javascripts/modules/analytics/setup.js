@@ -17,7 +17,9 @@ define([
 
     function init() {
 	var analyticsEnabled = (
-	    window.guardian.analyticsEnabled && !navigator.doNotTrack && !cookie.getCookie('ANALYTICS_OFF_KEY')
+	    window.guardian.analyticsEnabled &&
+	    !navigator.doNotTrack &&
+	    !cookie.getCookie('ANALYTICS_OFF_KEY')
 	);
 
 	if (analyticsEnabled) {

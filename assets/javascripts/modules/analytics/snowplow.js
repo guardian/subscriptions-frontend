@@ -1,25 +1,40 @@
-/*global snowplow_name_here, guardian */
-define(['lodash/object'], function (_) {
+/*global snowplow, guardian */
+define(['lodash/object/merge'], function (merge) {
     'use strict';
 
-    var snowplow;
+    function loadSnowPlow() {
+	if (!window.snowplow) {
+	    window.GlobalSnowplowNamespace = window.GlobalSnowplowNamespace || [];
+	    window.GlobalSnowplowNamespace.push('snowplow');
+	    window.snowplow = function () {
+		(window.snowplow.q = window.snowplow.q || []).push(arguments);
+	    };
+	    window.snowplow.q = window.snowplow.q || [];
+	    window.snowplow('newTracker', 'subscriptions', guardian.trackerUrl, {
+		appId: 'subscriptions-frontend'
+	    });
+	}
+	return require('js!snowplow');
+    }
 
     function trackActivity(source, data) {
-	var eventData = _.merge({
+	var eventData = merge({
 	    eventSource: source
 	}, (data || {}));
 
-	snowplow('trackUnstructEvent', eventData)
+	loadSnowPlow().then(function () {
+	    snowplow('trackUnstructEvent', eventData)
+	});
     }
 
     function trackPageLoad() {
 	var pageInfo = guardian.pageInfo,
-	    productData = guardian.productData;
+	    productData = guardian.pageInfo.productData;
 
 	var data = {
 	    pageName: pageInfo.name,
 	    channel: pageInfo.channel,
-	    productBillingFrequency: '', //NOTE Seems that snowplow doesnt work without these default values and requiring in schema
+	    productBillingFrequency: '', //NOTE: Seems that snowplow doesn't work without these default values
 	    productBillingAmount: '',
 	    productType: ''
 	};
@@ -34,9 +49,7 @@ define(['lodash/object'], function (_) {
     }
 
     function init() {
-	snowplow = snowplow_name_here;
 	trackPageLoad();
-	return snowplow;
     }
 
     return {
