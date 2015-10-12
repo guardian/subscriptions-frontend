@@ -58,12 +58,12 @@ define([
     }
 
     function onSuccess() {
-        window.s_account = 'guardiangu-subscribe,guardiangu-network';
-        s = s_gi('guardiangu-network');
-	if (!document.querySelector('main[data-no-page-load-tracking]')) {
-            triggerPageLoadEvent();
-        }
-        bindLinkTracking();
+	window.s_account = 'guardiangu-subscribe,guardiangu-network';
+	s = s_gi('guardiangu-network');
+	if (!guardian.ignorePageLoadTracking) {
+	    triggerPageLoadEvent();
+	}
+	bindLinkTracking();
     }
 
     function init() {

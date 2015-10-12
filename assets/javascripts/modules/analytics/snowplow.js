@@ -49,7 +49,9 @@ define(['lodash/object/merge'], function (merge) {
     }
 
     function init() {
-	trackPageLoad();
+	if (!guardian.ignorePageLoadTracking) {
+	    trackPageLoad();
+	}
     }
 
     return {
