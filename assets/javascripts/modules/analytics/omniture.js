@@ -29,7 +29,7 @@ define([
         s.pageName = pageInfo.name;
         s.channel = pageInfo.channel;
         s.prop19 = pageInfo.product;
-	s.prop17 = 'GuardianDigiPack:Select Country';
+        s.prop17 = 'GuardianDigiPack:Select Country';
 
         if (productData) {
             s.products = [
@@ -58,12 +58,12 @@ define([
     }
 
     function onSuccess() {
-	window.s_account = 'guardiangu-subscribe,guardiangu-network';
-	s = s_gi('guardiangu-network');
-	if (!guardian.ignorePageLoadTracking) {
-	    triggerPageLoadEvent();
-	}
-	bindLinkTracking();
+        window.s_account = 'guardiangu-subscribe,guardiangu-network';
+        s = s_gi('guardiangu-network');
+        if (!guardian.ignorePageLoadTracking) {
+            triggerPageLoadEvent();
+        }
+        bindLinkTracking();
     }
 
     function init() {

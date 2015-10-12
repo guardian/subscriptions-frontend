@@ -23,45 +23,60 @@ class CheckoutServiceSpec extends FreeSpec with Futures with ScalaFutures {
 
   class UpdateFlag(var updated: Boolean = false)
 
-  def makeIdentityService(updateFlag: UpdateFlag): IdentityService=
+  def makeIdentityService(updateFlag: UpdateFlag): IdentityService =
     new IdentityService(???) {
       override def registerGuest(personalData: PersonalData): Future[GuestUser] = {
-        Future { GuestUser(UserId(personalData.firstName), IdentityToken("token")) }
+        Future {
+          GuestUser(UserId(personalData.firstName), IdentityToken("token"))
+        }
       }
 
       override def updateUserDetails(personalData: PersonalData, userId: AuthenticatedIdUser): Future[Unit] = {
-        Future { updateFlag.updated = true }
+        Future {
+          updateFlag.updated = true
+        }
       }
     }
 
   object TestSalesforceService extends SalesforceService {
     override def repo = ???
+
     override def createOrUpdateUser(personalData: PersonalData, userId: UserId): Future[MemberId] =
-      Future { BasicMember(s"${userId.id} contactId", s"${userId.id} accountId") }
+      Future {
+        BasicMember(s"${userId.id} contactId", s"${userId.id} accountId")
+      }
   }
 
   object TestZuoraService extends ZuoraService {
     override def createSubscription(memberId: MemberId, data: SubscriptionData, requestData: SubscriptionRequestData): Future[SubscribeResult] = {
-      Future { SubscribeResult(
-        id = s"Subscribed ${memberId.salesforceContactId}", name = "A-Sxxxxx") }
+      Future {
+        SubscribeResult(
+          id = s"Subscribed ${memberId.salesforceContactId}", name = "A-Sxxxxx")
+      }
     }
 
     override def subscriptionByName(id: String): Future[Subscription] = {
       val date = new DateTime()
       Future {
-         Subscription("test","test","213",1,date.plusDays(1),date,date, None)
+        Subscription("test", "test", "213", 1, date.plusDays(1), date, date, None)
       }
     }
 
-    override  def ratePlans(subscription: Subscription): Future[Seq[RatePlan]] = ???
+    override def ratePlans(subscription: Subscription): Future[Seq[RatePlan]] = ???
+
     def defaultPaymentMethod(account: Account): Future[PaymentMethod] = ???
+
     def account(subscription: Subscription): Future[Account] = ???
+
     def normalRatePlanCharge(subscription: Subscription): Future[RatePlanCharge] = ???
 
-    override def products: Future[Seq[SubscriptionProduct]] = Future { Seq.empty }
+    override def products: Future[Seq[SubscriptionProduct]] = Future {
+      Seq.empty
+    }
   }
 
   object TestExactTargetService extends ExactTargetService {
+
     object TestETClient extends ETClient {
       override def sendSubscriptionRow(row: SubscriptionDataExtensionRow): Future[Response] = {
         Future.successful {
@@ -69,6 +84,7 @@ class CheckoutServiceSpec extends FreeSpec with Futures with ScalaFutures {
         }
       }
     }
+
     override def etClient: ETClient = TestETClient
   }
 
@@ -94,7 +110,7 @@ class CheckoutServiceSpec extends FreeSpec with Futures with ScalaFutures {
           }
 
           "containing the Zuora subscription result" in {
-	    assertResult(SubscribeResult("Subscribed RegisteredId contactId", "A-Sxxxxx"))(res.subscribeResult)
+            assertResult(SubscribeResult("Subscribed RegisteredId contactId", "A-Sxxxxx"))(res.subscribeResult)
           }
         }
       }

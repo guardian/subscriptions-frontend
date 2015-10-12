@@ -37,9 +37,9 @@ define([
         }
         if (cookieInfo.switchUrl) {
             switchUrl();
-	    bean.on(elements.$CHECKOUT_LINK[0], 'click', function () {
-		snowplow.trackActivity('redirectedToQss');
-	    });
+            bean.on(elements.$CHECKOUT_LINK[0], 'click', function () {
+                snowplow.trackActivity('redirectedToQss');
+            });
         }
     }
 

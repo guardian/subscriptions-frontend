@@ -21,23 +21,23 @@ define(['$', 'modules/analytics/omniture', 'modules/analytics/snowplow'], functi
         guardian.pageInfo.slug = 'GuardianDigiPack:Name and address';
         guardian.pageInfo.productData = subscriptionProducts('scOpen');
         omniture.triggerPageLoadEvent();
-	snowplow.trackPageLoad();
+        snowplow.trackPageLoad();
     }
 
     function paymentDetailsTracking() {
-	guardian.pageInfo.slug = 'GuardianDigiPack:Payment Details';
-	guardian.pageInfo.name = 'Details - payment details | Digital | Subscriptions | The Guardian';
-	guardian.pageInfo.productData = subscriptionProducts('scOpen');
-	omniture.triggerPageLoadEvent();
-	snowplow.trackPageLoad();
+        guardian.pageInfo.slug = 'GuardianDigiPack:Payment Details';
+        guardian.pageInfo.name = 'Details - payment details | Digital | Subscriptions | The Guardian';
+        guardian.pageInfo.productData = subscriptionProducts('scOpen');
+        omniture.triggerPageLoadEvent();
+        snowplow.trackPageLoad();
     }
 
     function paymentReviewTracking() {
-	guardian.pageInfo.slug = 'GuardianDigiPack:Review and confirm';
-	guardian.pageInfo.name = 'Payment submission/signup | Digital | Subscriptions | The Guardian';
-	guardian.pageInfo.productData = subscriptionProducts('scCheckout');
-	omniture.triggerPageLoadEvent();
-	snowplow.trackPageLoad();
+        guardian.pageInfo.slug = 'GuardianDigiPack:Review and confirm';
+        guardian.pageInfo.name = 'Payment submission/signup | Digital | Subscriptions | The Guardian';
+        guardian.pageInfo.productData = subscriptionProducts('scCheckout');
+        omniture.triggerPageLoadEvent();
+        snowplow.trackPageLoad();
     }
 
     return {
