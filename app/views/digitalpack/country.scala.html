@@ -1,3 +1,4 @@
+@import model.DigitalEdition
 @(edition: DigitalEdition, subscriptionNumberOfMonths: Int = 1)
 
 @main("Select your country | Digital | Subscriptions | The Guardian", bodyClasses = List("is-wide")) {
@@ -18,7 +19,7 @@
                     <h3 class="u-pad-bottom">Choose your location</h3>
                     <div class="button-group">
                         <a class="button button--primary button--large js-checkout-link" data-link-tracking
-                           data-previous-href="https://www.guardiansubscriptions.co.uk/digitalsubscriptions/?prom=DGA38&CMP=@edition.cmp"
+                           data-previous-href="https://www.guardiansubscriptions.co.uk/digitalsubscriptions/?prom=DGA38&CMP=@edition.campaign"
                            href="@routes.Checkout.renderCheckout()">
                            United Kingdom
                         </a>

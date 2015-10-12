@@ -8,6 +8,7 @@ import com.gu.identity.cookie.{PreProductionKeys, ProductionKeys}
 import com.gu.membership.salesforce.SalesforceConfig
 import com.netaporter.uri.dsl._
 import com.typesafe.config.ConfigFactory
+import model.DigitalEdition
 import net.kencochrane.raven.dsn.Dsn
 import play.api.mvc.{Call, RequestHeader}
 
