@@ -1,4 +1,5 @@
 package model
+
 import play.api.libs.json._
 
 object JsVars {
@@ -7,10 +8,11 @@ object JsVars {
   implicit val jsVarsWrites = new Writes[JsVars] {
     def writes(jsVars: JsVars) = Json.obj(
       "user" -> Json.obj(
-	"isSignedIn" -> jsVars.userIsSignedIn,
-	"ignorePageLoadTracking" -> jsVars.ignorePageLoadTracking
+        "isSignedIn" -> jsVars.userIsSignedIn,
+        "ignorePageLoadTracking" -> jsVars.ignorePageLoadTracking
       )
     )
   }
 }
-case class JsVars(userIsSignedIn: Boolean, ignorePageLoadTracking : Boolean)
+
+case class JsVars(userIsSignedIn: Boolean, ignorePageLoadTracking: Boolean)

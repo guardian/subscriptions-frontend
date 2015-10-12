@@ -85,13 +85,13 @@ object Checkout extends Controller with LazyLogging with ActivityTracking {
       }
 
       val session = (Seq(
-	SessionKeys.SubsName -> result.subscribeResult.name,
-	SessionKeys.RatePlanId -> formData.ratePlanId
+        SessionKeys.SubsName -> result.subscribeResult.name,
+        SessionKeys.RatePlanId -> formData.ratePlanId
       ) ++ userSessionFields).foldLeft(request.session) { _ + _ }
 
       for {
-	products <- zuoraService.products
-	product = products.find(p => p.ratePlanId == formData.ratePlanId)
+        products <- zuoraService.products
+        product = products.find(p => p.ratePlanId == formData.ratePlanId)
       } yield {
 	      product.map(prod => trackAnon(SubscriptionRegistrationActivity(MemberData(result, formData, prod))))
       }
