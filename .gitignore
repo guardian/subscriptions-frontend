@@ -36,7 +36,6 @@ project/plugins/project/
 bower_components
 node_modules
 conf/assets.map
-conf/assets/svg-sprite.svg
 
 public/dist
 public/images

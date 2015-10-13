@@ -10,7 +10,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 object CachedAssets extends Controller with LazyLogging {
   val hashedPaths: Map[String, String] =
     (for {
-      resourceIs <- Option(getClass.getClassLoader.getResourceAsStream("assets/assets.map"))
+      resourceIs <- Option(getClass.getClassLoader.getResourceAsStream("assets.map"))
     } yield Json.parse(resourceIs).as[Map[String, String]]).getOrElse {
 
       logger.warn("Could not find a config/assets.map file. You can generate it by running 'grunt compile'")
