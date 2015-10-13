@@ -22,6 +22,15 @@ define([
         elements.$CHECKOUT_LINK.attr('href', elements.$CHECKOUT_LINK.attr('data-previous-href'));
     }
 
+    function recordRedirect() {
+        var link = elements.$CHECKOUT_LINK[0];
+        if (link) {
+            bean.on(link, 'click', function () {
+                snowplow.trackActivity('redirectedToQss');
+            });
+        }
+    }
+
     function init() {
         guardian.pageInfo.productData = {
             source: 'Subscriptions and Membership',
@@ -35,11 +44,9 @@ define([
             cookieInfo = {switchUrl: shouldSwitch(50)};
             cookie.setCookie(COUNTRY_FLOW_COOKIE_NAME, JSON.stringify(cookieInfo));
         }
-        if (cookieInfo.switchUrl) {
+        if (cookieInfo && cookieInfo.switchUrl) {
             switchUrl();
-            bean.on(elements.$CHECKOUT_LINK[0], 'click', function () {
-                snowplow.trackActivity('redirectedToQss');
-            });
+            recordRedirect();
         }
     }
 
