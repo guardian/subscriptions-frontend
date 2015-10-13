@@ -5,9 +5,7 @@
     bodyClasses: Seq[String] = Nil,
     touchpointBackendResolutionOpt: Option[services.TouchpointBackend.Resolution] = None
 )(content: Html)
-
 @import utils.TestUsers.{PreSigninTestCookie, NameEnteredInForm, SignedInUsername}
-@import utils.Assets
 
 <!DOCTYPE html>
 <html lang="en-GB">
@@ -15,9 +13,6 @@
     @fragments.head(title, jsVars)
 </head>
     <body class="js-off @bodyClasses.mkString(" ")">
-        @for(svgSprite <- Assets.svgSprite) {
-            <div style="height: 0; display: none">@Html(svgSprite)</div>
-        }
         @for(
             touchpointBackendResolution <- touchpointBackendResolutionOpt;
             validTestUserCredential <- touchpointBackendResolution.validTestUserCredentialOpt;
