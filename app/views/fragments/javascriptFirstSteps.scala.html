@@ -29,12 +29,11 @@
         channel: 'Subscriber',
         slug: null,
         name: document.title,
-        publication: 'GU.co.uk',
-        commissioningDesk: 'Subscriber',
         product: 'Subscriber',
-        edition: 'UK',
         productData: null
     };
+
+    guardian.trackerUrl = '@{Config.trackerUrl}';
 
     (function(isModern) {
         // We want to add/remove classes to HTML ASAP to avoid FOUC
@@ -106,5 +105,3 @@
         }
     })(guardian.isModernBrowser);
 </script>
-
-

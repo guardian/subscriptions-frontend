@@ -15,6 +15,7 @@ define([
 
     function init() {
 
+
         if(formElements.$CHECKOUT_FORM.length) {
             personalDetails.init();
             paymentDetails.init();

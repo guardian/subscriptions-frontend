@@ -28,11 +28,11 @@
 
 @main(
     title = "Details - name and address | Subscriptions | The Guardian",
-    jsVars = JsVars.default.copy(userIsSignedIn = userIsSignedIn),
+    jsVars = JsVars.default.copy(userIsSignedIn = userIsSignedIn, ignorePageLoadTracking = true),
     bodyClasses = List("is-wide"),
     touchpointBackendResolutionOpt = Some(touchpointBackendResolution)
 ) {
-<main class="page-container gs-container" data-no-page-load-tracking >
+<main class="page-container gs-container">
 
     <section class="checkout-container">
         <form class="form js-checkout-form" action="@routes.Checkout.renderCheckout().toString()" method="POST">

@@ -4,15 +4,15 @@ define([
     'modules/analytics/omniture',
     'modules/analytics/remarketing',
     'modules/analytics/krux',
-    'modules/analytics/affectv'
-], function (
-    cookie,
-    ga,
-    omniture,
-    remarketing,
-    krux,
-    affectv
-) {
+    'modules/analytics/affectv',
+    'modules/analytics/snowplow'
+], function (cookie,
+             ga,
+             omniture,
+             remarketing,
+             krux,
+             affectv,
+             snowplow) {
     'use strict';
 
     function init() {
@@ -23,6 +23,7 @@ define([
         );
 
         if (analyticsEnabled) {
+            snowplow.init();
             ga.init();
             omniture.init();
 

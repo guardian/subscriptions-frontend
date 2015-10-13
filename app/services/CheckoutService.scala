@@ -10,7 +10,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 object CheckoutService {
-  case class CheckoutResult(salesforceMember: MemberId, userIdData: UserIdData, zuoraResult: SubscribeResult)
+  case class CheckoutResult(salesforceMember: MemberId, userIdData: UserIdData, subscribeResult: SubscribeResult)
 }
 
 class CheckoutService(

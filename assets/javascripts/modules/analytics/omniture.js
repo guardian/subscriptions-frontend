@@ -28,14 +28,8 @@ define([
 
         s.pageName = pageInfo.name;
         s.channel = pageInfo.channel;
-        s.prop3 = pageInfo.publication;
-        s.prop5 = pageInfo.commissioningDesk;
-        s.prop11 = 'Subscriber';
-        s.prop14 = '24.0';
         s.prop19 = pageInfo.product;
-        s.eVar19 = 'D=c19';
-        s.prop42 = 'Subscriber';
-        s.prop47 = pageInfo.edition;
+        s.prop17 = 'GuardianDigiPack:Select Country';
 
         if (productData) {
             s.products = [
@@ -66,7 +60,7 @@ define([
     function onSuccess() {
         window.s_account = 'guardiangu-subscribe,guardiangu-network';
         s = s_gi('guardiangu-network');
-        if(!document.querySelector('main[data-no-page-load-tracking]')) {
+        if (!guardian.ignorePageLoadTracking) {
             triggerPageLoadEvent();
         }
         bindLinkTracking();
