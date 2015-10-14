@@ -46,7 +46,7 @@ class IdentityService(identityApiClient: => IdentityApiClient) extends LazyLoggi
     }
   }
 
-  def updateUserDetails(personalData: PersonalData, authenticatedUser: AuthenticatedIdUser): Future[Unit] = {
+  def updateUserDetails(personalData: PersonalData)(authenticatedUser: AuthenticatedIdUser): Future[Unit] = {
     identityApiClient.updateUserDetails(
       personalData,
       UserId(authenticatedUser.user.id),

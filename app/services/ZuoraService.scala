@@ -1,17 +1,15 @@
 package services
 
-import com.gu.membership.salesforce.MemberId
-import com.gu.membership.zuora.soap.models.Results.SubscribeResult
-import com.gu.membership.zuora.{soap, ZuoraApiConfig}
-import com.gu.membership.zuora.soap._
-import com.gu.membership.zuora.soap.models.Queries._
 import com.gu.membership.zuora.soap.Readers._
-import com.gu.membership.zuora.soap.actions.subscribe
+import com.gu.membership.zuora.soap._
 import com.gu.membership.zuora.soap.actions.subscribe.Subscribe
+import com.gu.membership.zuora.soap.models.Queries._
+import com.gu.membership.zuora.soap.models.Results.SubscribeResult
+import com.gu.membership.zuora.{ZuoraApiConfig, soap}
 import com.gu.monitoring.ServiceMetrics
 import configuration.Config
 import model.zuora.{DigitalProductPlan, SubscriptionProduct}
-import model.{SubscriptionData, SubscriptionRequestData}
+import org.joda.time.Period
 import play.api.Play.current
 import play.api.libs.concurrent.Akka
 import touchpoint.ZuoraProperties
@@ -23,12 +21,13 @@ import scala.concurrent.duration._
 
 trait ZuoraService {
   def subscriptionByName(id: String): Future[Subscription]
-  def createSubscription(memberId: MemberId, data: SubscriptionData, requestData: SubscriptionRequestData): Future[SubscribeResult]
   def products: Future[Seq[SubscriptionProduct]]
   def ratePlans(subscription: Subscription): Future[Seq[RatePlan]]
   def defaultPaymentMethod(account: Account): Future[PaymentMethod]
   def account(subscription: Subscription): Future[Account]
   def normalRatePlanCharge(subscription: Subscription): Future[RatePlanCharge]
+  def subscribe(subscribe: Subscribe): Future[SubscribeResult]
+  def paymentDelaysInDays: Period
 }
 
 class ZuoraApiClient(zuoraApiConfig: ZuoraApiConfig,
@@ -73,25 +72,7 @@ class ZuoraApiClient(zuoraApiConfig: ZuoraApiConfig,
       throw new ZuoraServiceError(s"Cannot find default subscription rate plan charge for $subscription")
   }
 
-  override def createSubscription(memberId: MemberId, data: SubscriptionData, requestData: SubscriptionRequestData): Future[SubscribeResult] = {
-    val account = subscribe.Account.goCardless(memberId, autopay = true)
+  override def subscribe(subscribe: Subscribe) = client.authenticatedRequest(subscribe)
 
-    val paymentMethod  = subscribe.BankTransfer(data.paymentData.holder,
-						data.paymentData.account,
-						data.paymentData.sortCode,
-						data.personalData.firstName,
-						data.personalData.lastName)
-
-    client.authenticatedRequest(Subscribe(account = account,
-				paymentMethodOpt = Some(paymentMethod),
-				ratePlanId = data.ratePlanId,
-				firstName = data.personalData.firstName,
-				lastName = data.personalData.lastName,
-				address = data.personalData.address,
-				paymentDelay = Some(zuoraProperties.paymentDelayInDays),
-				casIdOpt = None,
-				ipAddressOpt = Some(requestData.ipAddress),
-				featureIds = Nil))
-  }
-
+  override def paymentDelaysInDays = zuoraProperties.paymentDelayInDays
 }

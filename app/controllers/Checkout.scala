@@ -6,7 +6,7 @@ import com.typesafe.scalalogging.LazyLogging
 import configuration.Config.Identity.webAppProfileUrl
 import forms.{FinishAccountForm, SubscriptionsForm}
 import model.zuora.BillingFrequency
-import model.{PaymentData, SubscriptionData, SubscriptionRequestData}
+import model.{DirectDebitData, SubscriptionData, SubscriptionRequestData}
 import play.api.data.Form
 import play.api.libs.json._
 import play.api.mvc._
@@ -93,7 +93,7 @@ object Checkout extends Controller with LazyLogging with ActivityTracking {
         products <- zuoraService.products
         product = products.find(p => p.ratePlanId == formData.ratePlanId)
       } yield {
-	      product.map(prod => trackAnon(SubscriptionRegistrationActivity(MemberData(result, formData, prod))))
+	      product.foreach(prod => trackAnon(SubscriptionRegistrationActivity(MemberData(result, formData, prod))))
       }
 
       Redirect(routes.Checkout.thankYou()).withSession(session)
@@ -146,20 +146,11 @@ object Checkout extends Controller with LazyLogging with ActivityTracking {
     } yield Ok(Json.obj("emailInUse" -> doesUserExist))
   }
 
-  val parsePaymentForm: BodyParser[PaymentData] = parse.form[PaymentData](Form(SubscriptionsForm.paymentDataMapping))
+  val parseDirectDebitForm: BodyParser[DirectDebitData] = parse.form[DirectDebitData](Form(SubscriptionsForm.directDebitDataMapping))
 
-  def checkAccount = CachedAction.async(parsePaymentForm) { implicit request =>
+  def checkAccount = CachedAction.async(parseDirectDebitForm) { implicit request =>
     for {
       isAccountValid <- GoCardlessService.checkBankDetails(request.body)
     } yield Ok(Json.obj("accountValid" -> isAccountValid))
   }
-
-  private def handleWithBadRequest[A](formWithErrors: Form[A]): Future[Result] =
-    Future {
-      logger.error(s"Backend form validation failed. Please make sure that the front-end and the backend validations are in sync (validation errors: ${formWithErrors.errors}})")
-      BadRequest(Json.obj(
-        "error" -> "Invalid form submissions",
-        "invalidFields" -> formWithErrors.errors.map(_.key)
-      ))
-    }
 }

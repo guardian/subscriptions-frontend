@@ -16,20 +16,21 @@ import scala.concurrent.Future
 import scala.concurrent.duration._
 
 trait ExactTargetService extends LazyLogging {
-  def etClient: ETClient
+  lazy val etClient: ETClient = ETClient
+  def zuoraService: ZuoraService
 
-  def sendETDataExtensionRow(subscribeResult: SubscribeResult, subscriptionData: SubscriptionData, zs: ZuoraService): Future[Unit] = {
-    val subscription = zs.subscriptionByName(subscribeResult.name)
+  def sendETDataExtensionRow(subscribeResult: SubscribeResult, subscriptionData: SubscriptionData): Future[Unit] = {
+    val subscription = zuoraService.subscriptionByName(subscribeResult.name)
 
     val accAndPaymentMethod = for {
       subs <- subscription
-      acc <- zs.account(subs)
-      pm <- zs.defaultPaymentMethod(acc)
+      acc <- zuoraService.account(subs)
+      pm <- zuoraService.defaultPaymentMethod(acc)
     } yield (acc, pm)
 
     for {
       subs <- subscription
-      rpc <- zs.normalRatePlanCharge(subs)
+      rpc <- zuoraService.normalRatePlanCharge(subs)
       (acc, pm) <- accAndPaymentMethod
       row = SubscriptionDataExtensionRow(
         subscription = subs,
@@ -52,10 +53,6 @@ trait ExactTargetService extends LazyLogging {
       }
     }
   }
-}
-
-object ExactTargetService extends ExactTargetService {
-  lazy val etClient = ETClient
 }
 
 trait ETClient {

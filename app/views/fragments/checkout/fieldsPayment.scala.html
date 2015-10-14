@@ -33,6 +33,12 @@
     @fragments.forms.errorMessage("The account holder name must be less than 18 characters")
 </div>
 
+@* TODO: handle credit cards *@
+@* ===== Account type ===== *@
+<div class="form-field js-checkout-type">
+    <input type="hidden" id="payment-type" name="payment.type" value="direct-debit">
+</div>
+
 @* ===== Confirm Payment ===== *@
 <div class="form-field js-checkout-confirm-payment">
     <label class="option">

@@ -1,11 +1,34 @@
 package model
 
 import com.gu.identity.play.IdUser
-import com.gu.membership.zuora.{Countries, Address}
+import com.gu.membership.zuora.{Address, Countries}
 
-case class PaymentData(account: String, sortCodeValue: String, holder: String) {
+sealed trait PaymentType {
+  def toKey: String
+}
+
+object PaymentType {
+  def fromKey(key: String): Option[PaymentType] = key match {
+    case "credit-card" => Some(CreditCard)
+    case "direct-debit" => Some(DirectDebit)
+    case _ => None
+  }
+}
+
+case object DirectDebit extends PaymentType {
+  override def toKey = "direct-debit"
+}
+
+case object CreditCard extends PaymentType {
+  override def toKey = "credit-card"
+}
+
+sealed trait PaymentData
+
+case class DirectDebitData(account: String, sortCodeValue: String, holder: String) extends PaymentData {
   val sortCode = sortCodeValue.filter(_.isDigit)
 }
+case class CreditCardData(stripeToken: String) extends PaymentData
 
 case class PersonalData(firstName: String, lastName: String, email: String, receiveGnmMarketing: Boolean, address: Address) {
   def fullName = s"$firstName $lastName"
@@ -41,7 +64,7 @@ object SubscriptionData {
       addressData
     )
 
-    val blankPaymentData = PaymentData("", "", "")
+    val blankPaymentData = DirectDebitData("", "", "")
 
     val blankRatePlanId = ""
 

@@ -1,7 +1,7 @@
 package forms
 
 import com.gu.membership.zuora.{Countries, Address}
-import model.{PaymentData, PersonalData, SubscriptionData}
+import model._
 import play.api.data.format.Formatter
 import play.api.data.format.Formats._
 
@@ -53,19 +53,44 @@ object SubscriptionsForm {
     "address" -> addressDataMapping
   )(PersonalData.apply)(PersonalData.unapply)
 
-  val paymentDataMapping = mapping(
+  val directDebitDataMapping = mapping(
     "account" -> text(6, 10),
     "sortcode" -> text(6, 8),
     "holder" -> text
-  )(PaymentData.apply)(PaymentData.unapply)
+  )(DirectDebitData.apply)(DirectDebitData.unapply)
+
+  val creditCardDataMapping = mapping("token" -> text)(CreditCardData)(CreditCardData.unapply)
+
+  implicit val paymentFormatter: Formatter[PaymentData] = new Formatter[PaymentData] {
+    override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], PaymentData] = {
+      val methodKey = s"$key.type"
+      data.get(methodKey).flatMap(PaymentType.fromKey) match {
+        case Some(CreditCard) => creditCardDataMapping.withPrefix(key).bind(data)
+        case Some(DirectDebit) => directDebitDataMapping.withPrefix(key).bind(data)
+        case Some(_) => Left(Seq(FormError(methodKey, "valid values are credit-card and direct-debit")))
+        case _ => Left(Seq(FormError(methodKey, "missing")))
+      }
+    }
+    override def unbind(key: String, value: PaymentData): Map[String, String] = {
+      val unPrefixed = value match {
+        case CreditCardData(stripeToken) => Seq("type" -> CreditCard.toKey)
+        case DirectDebitData(account, sortCode, holder) =>
+          Seq(
+            "account" -> account,
+            "sortcode" -> sortCode,
+            "holder" -> holder,
+            "type" -> DirectDebit.toKey
+          )
+      }
+      unPrefixed.map { case (k, v) => s"$key.$k" -> v }.toMap
+    }
+  }
 
   val subsForm = Form(mapping(
     "personal" -> personalDataMapping,
-    "payment" -> paymentDataMapping,
+    "payment" -> of[PaymentData],
     "ratePlanId" -> text
   )(SubscriptionData.apply)(SubscriptionData.unapply))
-
-  def paymentDataForm = Form("payment" -> paymentDataMapping)
 
   def apply() = subsForm
 }

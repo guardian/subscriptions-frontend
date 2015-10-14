@@ -1,9 +1,10 @@
 package forms
 
 import com.gu.membership.zuora.{Address, Countries}
-import forms.SubscriptionsForm.{addressDataMapping, personalDataMapping}
-import model.PersonalData
+import forms.SubscriptionsForm.{addressDataMapping, personalDataMapping, paymentFormatter}
+import model._
 import org.scalatest.FreeSpec
+import play.api.data.Forms._
 
 class SubscriptionsFormSpec extends FreeSpec {
   val formData = Map(
@@ -68,6 +69,36 @@ class SubscriptionsFormSpec extends FreeSpec {
       )
 
       assert(data.isLeft, s"Email should have a max size of 240")
+    }
+  }
+
+  "paymentFormatter" - {
+    "handle payment form data" - {
+      "for direct debit" in {
+        val paymentData = DirectDebitData("account", "sortcode", "holder")
+        val paymentFormData = Map(
+          "payment.account" -> paymentData.account,
+          "payment.sortcode" -> paymentData.sortCodeValue,
+          "payment.holder" -> paymentData.holder,
+          "payment.type" -> DirectDebit.toKey
+        )
+        val mapping = single[PaymentData]("payment" -> of[PaymentData])
+
+        assertResult(Right(paymentData))(mapping.bind(paymentFormData))
+        assertResult(paymentFormData)(mapping.unbind(paymentData))
+      }
+
+      "for credit card" in {
+        val paymentData = CreditCardData("token")
+        val paymentFormData = Map(
+          "payment.token" -> paymentData.stripeToken,
+          "payment.type" -> CreditCard.toKey
+        )
+        val mapping = single[PaymentData]("payment" -> of[PaymentData])
+
+        assertResult(Right(paymentData))(mapping.bind(paymentFormData))
+        assertResult(Map("payment.type" -> CreditCard.toKey))(mapping.unbind(paymentData))
+      }
     }
   }
 }
