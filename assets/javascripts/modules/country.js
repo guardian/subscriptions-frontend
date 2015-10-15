@@ -23,9 +23,8 @@ define([
     }
 
     function recordRedirect() {
-        var link = elements.$CHECKOUT_LINK[0];
-        if (link) {
-            bean.on(link, 'click', function () {
+        if (elements.$CHECKOUT_LINK && elements.$CHECKOUT_LINK.length==1) {
+            bean.on(elements.$CHECKOUT_LINK[0], 'click', function () {
                 snowplow.trackActivity('redirectedToQss');
             });
         }
