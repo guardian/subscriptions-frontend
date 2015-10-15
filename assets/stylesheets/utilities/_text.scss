@@ -2,6 +2,15 @@
    Utilities: Text
    ========================================================================== */
 
+.u-note {
+    @include fs-textSans(3);
+    color: $c-neutral2;
+}
+.u-error {
+    @include fs-data(3);
+    color: guss-colour(error);
+}
+
 .u-lowercase {
     text-transform: lowercase;
 }
@@ -15,4 +24,32 @@
 .u-block-link {
     display: block;
     height: 100%;
+}
+
+.u-button-reset {
+    padding: 0;
+    border: 0;
+    outline: none;
+    background: transparent;
+}
+
+.u-link {
+    color: $c-link;
+    text-decoration: none;
+    border-bottom: 1px solid $c-neutral4;
+
+    &:hover,
+    &:focus {
+        border-color: $c-link-hover
+    }
+
+    &:active {
+        color: $c-link-active;
+        border-color: $c-link-active;
+    }
+
+    &[disabled] {
+        color: $c-neutral2;
+        border-bottom: none;
+    }
 }
