@@ -13,12 +13,28 @@ define(['$'], function ($) {
         $ADDRESS2: $('.js-checkout-street .js-input'),
         $ADDRESS3: $('.js-checkout-town .js-input'),
         $POSTCODE: $('.js-checkout-postcode .js-input'),
+
+        $PAYMENT_METHOD: $('.js-checkout-payment-method .js-option-switch'),
+
+        // Direct Debit
+        $ACCOUNT_CONTAINER: $('.js-checkout-account'),
+        $SORTCODE_CONTAINER: $('.js-checkout-sortcode'),
+        $HOLDER_CONTAINER: $('.js-checkout-holder'),
+        $CONFIRM_PAYMENT_CONTAINER: $('.js-checkout-confirm-payment'),
         $ACCOUNT: $('.js-checkout-account .js-input'),
         $SORTCODE: $('.js-checkout-sortcode .js-input'),
-
         $HOLDER: $('.js-checkout-holder .js-input'),
-        $FULL_ADDRESS: $('.js-checkout-full-address .js-input'),
         $CONFIRM_PAYMENT: $('.js-checkout-confirm-payment .js-input'),
+
+        // Credit Card
+        $CARD_NUMBER_CONTAINER: $('.js-checkout-card-number'),
+        $CARD_CVC_CONTAINER: $('.js-checkout-card-cvc'),
+        $CARD_EXPIRY_MONTH_CONTAINER: $('.js-checkout-card-expiry-month'),
+        $CARD_EXPIRY_YEAR_CONTAINER: $('.js-checkout-card-expiry-year'),
+        $CARD_NUMBER: $('.js-checkout-card-number .js-input'),
+        $CARD_CVC: $('.js-checkout-card-cvc .js-input'),
+        $CARD_EXPIRY_MONTH: $('.js-checkout-card-expiry-month .js-input'),
+        $CARD_EXPIRY_YEAR: $('.js-checkout-card-expiry-year .js-input'),
 
         $FIRST_NAME_CONTAINER: $('.js-checkout-first'),
         $LAST_NAME_CONTAINER: $('.js-checkout-last'),
@@ -28,12 +44,8 @@ define(['$'], function ($) {
         $ADDRESS2_CONTAINER: $('.js-checkout-street'),
         $ADDRESS3_CONTAINER: $('.js-checkout-town'),
         $POSTCODE_CONTAINER: $('.js-checkout-postcode'),
-        $ACCOUNT_CONTAINER: $('.js-checkout-account'),
-        $SORTCODE_CONTAINER: $('.js-checkout-sortcode'),
-        $HOLDER_CONTAINER: $('.js-checkout-holder'),
         $MANUAL_ADDRESS_CONTAINER: $('.js-checkout-manual-address'),
         $FULL_ADDRESS_CONTAINER: $('.js-checkout-full-address'),
-        $CONFIRM_PAYMENT_CONTAINER: $('.js-checkout-confirm-payment'),
 
         $YOUR_DETAILS_SUBMIT: $('.js-checkout-your-details-submit'),
         $PAYMENT_DETAILS_SUBMIT: $('.js-checkout-payment-details-submit'),

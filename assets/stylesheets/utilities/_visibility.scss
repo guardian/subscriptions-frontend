@@ -2,6 +2,10 @@
    Responsive State Helpers
    ========================================================================== */
 
+.u-h {
+    @include u-h;
+}
+
 .is-hidden,
 [hidden] {
     display: none !important;
@@ -38,3 +42,10 @@
 .visible {
     display: inline-block !important;
 }
+
+.break-tablet {
+    @include mq(tablet) {
+        display: block;
+    }
+}
+
