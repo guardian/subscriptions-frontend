@@ -42,7 +42,7 @@ libraryDependencies ++= Seq(
     "org.scalatest" %% "scalatest" % scalatestVersion % "test",
     "org.scalactic" %% "scalactic" % scalatestVersion % "test",
     "org.seleniumhq.selenium" % "selenium-java" % "2.44.0" % "test",
-    "com.gocardless" % "gocardless-pro" % "1.0.0",
+    "com.gocardless" % "gocardless-pro" % "1.8.0",
     "com.squareup.okhttp" % "okhttp" % "2.4.0",
     "com.snowplowanalytics" % "snowplow-java-tracker" % "0.5.2-SNAPSHOT",
     "com.github.t3hnar" %% "scala-bcrypt" % "2.4",
