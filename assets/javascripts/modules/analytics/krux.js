@@ -1,5 +1,5 @@
 /*global Raven */
-define(function() {
+define(['modules/analytics/analyticsEnabled'], function(analyticsEnabled) {
     'use strict';
 
     var KRUX_ID = 'Jglpp88U';
@@ -11,6 +11,6 @@ define(function() {
     }
 
     return {
-        init: init
+        init: analyticsEnabled(init)
     };
 });

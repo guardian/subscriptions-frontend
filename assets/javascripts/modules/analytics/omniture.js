@@ -1,8 +1,9 @@
 /*global Raven, s_gi, guardian */
 define([
     '$',
-    'bean'
-], function ($, bean) {
+    'bean',
+    'modules/analytics/analyticsEnabled'
+], function ($, bean, analyticsEnabled) {
     'use strict';
 
     var omniture, s;
@@ -75,7 +76,7 @@ define([
     }
 
     return {
-        init: init,
-        triggerPageLoadEvent: triggerPageLoadEvent
+        init: analyticsEnabled(init),
+        triggerPageLoadEvent: analyticsEnabled(triggerPageLoadEvent)
     };
 });
