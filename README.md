@@ -39,15 +39,12 @@
    [membership]
    aws_access_key_id = [YOUR_AWS_ACCESS_KEY]
    aws_secret_access_key = [YOUR_AWS_SECRET_ACCESS_KEY]
-   region = eu-west-1
-
    ```
 
    In `~/.aws/config` add the following:
 
    ```
    [default]
-   output = json
    region = eu-west-1
    ```
 
