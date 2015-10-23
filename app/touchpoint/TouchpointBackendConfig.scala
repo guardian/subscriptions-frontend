@@ -2,6 +2,7 @@ package touchpoint
 
 import com.github.nscala_time.time.Imports._
 import com.gu.membership.salesforce.SalesforceConfig
+import com.gu.membership.stripe.StripeApiConfig
 import com.gu.membership.zuora.ZuoraApiConfig
 import com.typesafe.scalalogging.LazyLogging
 import model.zuora.DigitalProductPlan
@@ -12,7 +13,8 @@ case class TouchpointBackendConfig(
   salesforce: SalesforceConfig,
   zuora: ZuoraApiConfig,
   zuoraProperties: ZuoraProperties,
-  digitalProductPlan: DigitalProductPlan
+  digitalProductPlan: DigitalProductPlan,
+  stripe: StripeApiConfig
 )
 
 object TouchpointBackendConfig extends LazyLogging {
@@ -47,7 +49,8 @@ object TouchpointBackendConfig extends LazyLogging {
       SalesforceConfig.from(envBackendConf, environmentName),
       ZuoraApiConfig.from(envBackendConf, environmentName),
       ZuoraProperties.from(envBackendConf, environmentName),
-      DigitalProductPlan(envBackendConf.getString("zuora.digital"))
+      DigitalProductPlan(envBackendConf.getString("zuora.digital")),
+      StripeApiConfig.from(envBackendConf, environmentName)
     )
   }
 }

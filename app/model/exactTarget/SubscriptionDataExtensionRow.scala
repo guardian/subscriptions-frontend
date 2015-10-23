@@ -1,10 +1,11 @@
 package model.exactTarget
 
 import com.gu.membership.zuora.soap.models.Queries._
-import model.SubscriptionData
+import model.{CreditCardData, DirectDebitData, SubscriptionData}
 import org.joda.time.DateTime
-import scala.math.BigDecimal.decimal
 import utils.Dates
+
+import scala.math.BigDecimal.decimal
 
 object SubscriptionDataExtensionRow {
   def apply(
@@ -23,33 +24,41 @@ object SubscriptionDataExtensionRow {
 
     val address = personalData.address
 
-    val paymentData = subscriptionData.paymentData
+    val paymentFields = subscriptionData.paymentData match {
+      case DirectDebitData(accountNumber, sortCode, holder) => Seq(
+        "Account number" -> formatAccountNumber(accountNumber),
+        "Sort Code" -> formatSortCode(sortCode),
+        "Account Name" -> holder
+      )
+
+      case CreditCardData(_) => Seq.empty
+    }
 
     SubscriptionDataExtensionRow(
       personalData.email,
-      "ZuoraSubscriberId" -> subscription.name,
-      "SubscriberKey" -> personalData.email,
-      "EmailAddress" -> personalData.email,
-      "Subscription term" -> formatSubscriptionTerm(billingPeriod),
-      "Payment amount" -> formatPrice(ratePlanCharge.price),
-      "Default payment method" -> formatPaymentMethod(paymentMethod.`type`),
-      "First Name" -> personalData.firstName,
-      "Last Name" -> personalData.lastName,
-      "Address 1" -> address.lineOne,
-      "Address 2" -> address.lineTwo,
-      "City" -> address.town,
-      "Post Code" -> address.postCode,
-      //TODO hardcoded!
-      "Country" -> "UK",
-      "Account Name" -> paymentData.holder,
-      "Sort Code" -> formatSortCode(paymentData.sortCode),
-      "Account number" -> formatAccountNumber(paymentData.account),
-      "Date of first payment" -> formatDate(subscription.contractAcceptanceDate),
-      "Currency" -> formatCurrency(account.currency),
-      //TODO to remove, hardcoded in the template
-      "Trial period" -> "14",
-      "MandateID" -> paymentMethod.mandateId,
-      "Email" -> personalData.email
+      Seq(
+        "ZuoraSubscriberId" -> subscription.name,
+        "SubscriberKey" -> personalData.email,
+        "EmailAddress" -> personalData.email,
+        "Subscription term" -> formatSubscriptionTerm(billingPeriod),
+        "Payment amount" -> formatPrice(ratePlanCharge.price),
+        "Default payment method" -> formatPaymentMethod(paymentMethod.`type`),
+        "First Name" -> personalData.firstName,
+        "Last Name" -> personalData.lastName,
+        "Address 1" -> address.lineOne,
+        "Address 2" -> address.lineTwo,
+        "City" -> address.town,
+        "Post Code" -> address.postCode,
+        "Default payment method" -> formatPaymentMethod(paymentMethod.`type`),
+        //TODO hardcoded!
+        "Country" -> "UK",
+        "Date of first payment" -> formatDate(subscription.contractAcceptanceDate),
+        "Currency" -> formatCurrency(account.currency),
+        //TODO to remove, hardcoded in the template
+        "Trial period" -> "14",
+        "MandateID" -> paymentMethod.mandateId,
+        "Email" -> personalData.email
+      ) ++ paymentFields
     )
   }
 
@@ -104,4 +113,4 @@ trait DataExtensionRow {
   def fields: Seq[(String, String)]
 }
 
-case class SubscriptionDataExtensionRow(email: String, fields: (String, String)*) extends DataExtensionRow
+case class SubscriptionDataExtensionRow(email: String, fields: Seq[(String, String)]) extends DataExtensionRow
