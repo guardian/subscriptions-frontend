@@ -126,16 +126,18 @@ object Checkout extends Controller with LazyLogging with ActivityTracking {
       val passwordForm = authenticatedUserFor(request).fold {
         for {
           userId <- session.get(SessionKeys.UserId)
-	  token <- session.get(SessionKeys.IdentityGuestPasswordSettingToken)
-	  form <- GuestUser(UserId(userId), IdentityToken(token)).toGuestAccountForm
-	} yield form
-      }{ const(None) } // Don't display the user registration form if the user is logged in
+          token <- session.get(SessionKeys.IdentityGuestPasswordSettingToken)
+          form <- GuestUser(UserId(userId), IdentityToken(token)).toGuestAccountForm
+        } yield form
+      } {
+        const(None)
+      } // Don't display the user registration form if the user is logged in
 
       zuoraService.products.map { products =>
-		val product = products.find(_.ratePlanId == ratePlanId).getOrElse(
-	  throw new NoSuchElementException(s"Could not find a product with rate plan id $ratePlanId")
-	)
-	Ok(view.thankyou(subsName, passwordForm, touchpointBackend, product))
+        val product = products.find(_.ratePlanId == ratePlanId).getOrElse(
+          throw new NoSuchElementException(s"Could not find a product with rate plan id $ratePlanId")
+        )
+        Ok(view.thankyou(subsName, passwordForm, touchpointBackend, product))
       }
     }
   }

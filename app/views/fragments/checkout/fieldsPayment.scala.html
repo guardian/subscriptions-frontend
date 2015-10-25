@@ -4,7 +4,7 @@
 
 <div class="label u-margin-bottom">How would you like to pay?</div>
 
-<div class="field-group">
+<div class="field-group js-checkout-paymount-method">
     <div class="field-group__item">
         <label class="option">
             <span class="option__input">
@@ -58,19 +58,33 @@
             name="payment.holder" maxlength="18" required>
         @fragments.forms.errorMessage("The account holder name must be less than 18 characters")
     </div>
+
+    @* ===== Confirm Payment ===== *@
+    <div class="form-field js-checkout-confirm-payment">
+        <label class="option">
+            <span class="option__input">
+                <input type="checkbox" class="js-input">
+            </span>
+            <span class="option__label">
+                I confirm that I am the account holder and I am solely able to authorise debit from the account
+            </span>
+        </label>
+        @fragments.forms.errorMessage("Please confirm that you are the account holder")
+    </div>
 </div>
 
-<div class="payment-type payment-type--card" class="js-option-switch__item" id="payment-type-card">
-    <div class="form-field">
+<div class="payment-type payment-type--card js-option-switch__item" id="payment-type-card">
+    <div class="form-field js-checkout-card-number">
         <label class="label" for="payment-card-number">Card number</label>
         <input type="text" pattern="[0-9]*" size="20"
                class="input-text"
                id="payment-card-number"
                placeholder="0000 0000 0000 0000"
                maxlength="19" />
+        @fragments.forms.errorMessage("Please check your card details")
     </div>
 
-    <div class="form-field">
+    <div class="form-field js-checkout-card-cvc">
         <label class="label" for="payment-card-cvc">Security code</label>
         <input type="text" pattern="[0-9]*"
                size="4" class="input-text input-text--small js-input"
@@ -83,7 +97,7 @@
         <span class="label">Expires</span>
         <div class="field-group">
             @for(input <- Seq(("Month", "MM"), ("Year", "YY"))) {
-                <div class="field-group__item">
+                <div class="field-group__item js-checkout-card-expiry-@input._1.toLowerCase()">
                     <label class="label label--inline" for="payment-card-expiry-@input._1.toLowerCase()">@input._1</label>
                     <input class="input-text input-text--small js-input"
                         id="payment-card-expiry-@input._1.toLowerCase()"
@@ -95,18 +109,4 @@
         </div>
         @fragments.forms.errorMessage("Sorry, the expiry date that you have entered is invalid. Please check and re-enter.")
     </div>
-</div>
-
-
-@* ===== Confirm Payment ===== *@
-<div class="form-field js-checkout-confirm-payment">
-    <label class="option">
-        <span class="option__input">
-            <input type="checkbox" class="js-input">
-        </span>
-        <span class="option__label">
-            I confirm that I am the account holder and I am solely able to authorise debit from the account
-        </span>
-    </label>
-    @fragments.forms.errorMessage("Please confirm that you are the account holder")
 </div>
