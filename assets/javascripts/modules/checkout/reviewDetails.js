@@ -14,7 +14,7 @@ define([
     'use strict';
 
     function clickHelper($elem, callback) {
-        if($elem.length) {
+        if ($elem.length) {
             bean.on($elem[0], 'click', function (e) {
                 e.preventDefault();
                 callback();
@@ -56,7 +56,7 @@ define([
 
     function submitHandler() {
         var submitEl;
-        if(formEls.$CHECKOUT_SUBMIT.length) {
+        if (formEls.$CHECKOUT_SUBMIT.length) {
             submitEl = formEls.$CHECKOUT_SUBMIT[0];
 
             var form = formEls.$CHECKOUT_FORM[0];

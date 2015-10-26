@@ -4,7 +4,6 @@
 @import configuration.Config
 
 @(jsVars: JsVars)
-@(pageInfo: model.PageInfo)
 
 <!--[if lte IE 9]>
 <script src="@hashedPathFor("javascripts/vendor/polyfills.js")"></script>
@@ -26,9 +25,6 @@
         && 'bind' in Function
         && (('XMLHttpRequest' in window && 'withCredentials' in new XMLHttpRequest()) || 'XDomainRequest' in window)
     );
-    @for(stripePublicKey <- pageInfo.stripePublicKey) {
-        guardian.stripePublicKey: '@stripePublicKey';
-    }
     guardian.pageInfo = {
         channel: 'Subscriber',
         slug: null,

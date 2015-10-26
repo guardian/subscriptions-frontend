@@ -29,8 +29,7 @@ define(['$'], function ($) {
         // Credit Card
         $CARD_NUMBER_CONTAINER: $('.js-checkout-card-number'),
         $CARD_CVC_CONTAINER: $('.js-checkout-card-cvc'),
-        $CARD_EXPIRY_MONTH_CONTAINER: $('.js-checkout-card-expiry-month'),
-        $CARD_EXPIRY_YEAR_CONTAINER: $('.js-checkout-card-expiry-year'),
+        $CARD_EXPIRY_CONTAINER: $('.js-checkout-card-expiry'),
         $CARD_NUMBER: $('.js-checkout-card-number .js-input'),
         $CARD_CVC: $('.js-checkout-card-cvc .js-input'),
         $CARD_EXPIRY_MONTH: $('.js-checkout-card-expiry-month .js-input'),
