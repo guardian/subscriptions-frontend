@@ -79,7 +79,7 @@ define([
 
     function init() {
         var $actionEl = formEls.$PAYMENT_DETAILS_SUBMIT;
-        if($actionEl.length) {
+        if ($actionEl.length) {
             bean.on($actionEl[0], 'click', function (evt) {
                 evt.preventDefault();
                 handleValidation();
