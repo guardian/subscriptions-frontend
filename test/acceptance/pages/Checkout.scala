@@ -2,9 +2,11 @@ package acceptance.pages
 
 
 import acceptance.Config.appUrl
-import acceptance.Util
+import acceptance.{Config, Util}
 import org.openqa.selenium.WebDriver
 import org.scalatest.selenium.{WebBrowser, Page}
+
+
 
 class Checkout(implicit val driver: WebDriver) extends Page with WebBrowser with Util {
   val url = s"$appUrl/checkout"
@@ -23,9 +25,19 @@ class Checkout(implicit val driver: WebDriver) extends Page with WebBrowser with
     val receiveGnmMarketing = checkbox(name("personal.receiveGnmMarketing"))
 
     def fillIn(): Unit = {
-      val emailValue = s"test-${System.currentTimeMillis()}@gu.com"
-      firstName.value = "first"
-      lastName.value = "last"
+
+      import com.gu.identity.testing.usernames.TestUsernames
+      import com.github.nscala_time.time.Imports._
+
+      val testUsers = TestUsernames(
+        com.gu.identity.testing.usernames.Encoder.withSecret(Config.testUsersSecret),
+        recency = 2.days.standardDuration
+      )
+      val testUserString = testUsers.generate()
+
+      val emailValue = s"${testUserString}@gu.com"
+      firstName.value = s"${testUserString}"
+      lastName.value = s"${testUserString}"
       email.value = emailValue
       emailConfirmation.value = emailValue
       address1.value = "address 1"
@@ -69,6 +81,11 @@ class Checkout(implicit val driver: WebDriver) extends Page with WebBrowser with
   }
 
   def fillInPersonalDetails(): Unit = {
+    PersonalDetails.fillIn()
+    PersonalDetails.continue()
+  }
+
+  def fillInPersonalDetailsTestUser(): Unit = {
     PersonalDetails.fillIn()
     PersonalDetails.continue()
   }
