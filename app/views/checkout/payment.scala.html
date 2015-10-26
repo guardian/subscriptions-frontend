@@ -59,8 +59,17 @@
                     }
                 </fieldset>
                 <div class="u-display-from-tablet" data-set="checkout-notices">
+                    <!-- TODO: find out what this js-append thing does! and maybe remove -->
                     <div class="js-append">
-                        @fragments.checkout.notices()
+                        <div class="js-payment-type-direct-debit">
+                            @fragments.checkout.notices()
+                        </div>
+                        <div class="js-payment-type-card" hidden="true">
+                            <div class="notice">
+                                <h3 class="notice__header">****CREDIT CARD PLACEHOLDER****</h3>
+                                <div class="notice__content">****CREDIT CARD PLACEHOLDER****</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
