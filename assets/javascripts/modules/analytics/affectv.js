@@ -1,4 +1,6 @@
-define(['utils/loadJs'], function(loadJs) {
+define(['utils/loadJs',
+        'modules/analytics/analyticsEnabled'
+], function(loadJs, analyticsEnabled) {
     'use strict';
 
     var digitalPackId = '546dd61001896028ffd29273';
@@ -18,6 +20,6 @@ define(['utils/loadJs'], function(loadJs) {
     }
 
     return {
-        init: init
+        init: analyticsEnabled(init)
     };
 });

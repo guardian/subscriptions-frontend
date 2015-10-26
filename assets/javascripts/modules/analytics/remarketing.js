@@ -1,4 +1,4 @@
-define(function () {
+define(['modules/analytics/analyticsEnabled'], function(analyticsEnabled) {
     'use strict';
 
     var remarketingUrl = 'https://www.googleadservices.com/pagead/conversion_async.js';
@@ -14,6 +14,6 @@ define(function () {
     }
 
     return {
-        init: init
+        init: analyticsEnabled(init)
     };
 });

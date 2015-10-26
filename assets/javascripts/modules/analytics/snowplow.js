@@ -1,5 +1,5 @@
 /*global snowplow, guardian */
-define(['lodash/object/merge'], function (merge) {
+define(['lodash/object/merge','modules/analytics/analyticsEnabled'], function (merge, analyticsEnabled) {
     'use strict';
 
     function loadSnowPlow() {
@@ -55,8 +55,8 @@ define(['lodash/object/merge'], function (merge) {
     }
 
     return {
-        init: init,
-        trackActivity: trackActivity,
-        trackPageLoad: trackPageLoad
+        init: analyticsEnabled(init),
+        trackActivity: analyticsEnabled(trackActivity),
+        trackPageLoad: analyticsEnabled(trackPageLoad)
     }
 });
