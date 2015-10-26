@@ -8,7 +8,7 @@
     <div class="field-group__item">
         <label class="option">
             <span class="option__input">
-                <input class="js-option-switch" data-option-switch="payment-type-direct-debit"
+                <input class="js-option-switch" data-option-switch=".js-payment-type-direct-debit"
                     type="radio" name="payment.type" value="direct-debit" checked>
             </span>
             <span class="option__label">Direct Debit</span>
@@ -17,7 +17,7 @@
     <div class="field-group__item">
         <label class="option">
             <span class="option__input">
-                <input class="js-option-switch" data-option-switch="payment-type-card"
+                <input class="js-option-switch" data-option-switch=".js-payment-type-card"
                     type="radio" name="payment.type" value="card">
             </span>
             <span class="option__label">Credit/Debit card</span>
@@ -25,7 +25,7 @@
     </div>
 </div>
 
-<div class="payment-type payment-type--direct-debit" class="js-option-switch__item" id="payment-type-direct-debit">
+<div class="payment-type payment-type--direct-debit js-payment-type-direct-debit">
     @* ===== Account number ===== *@
     <div class="form-field js-checkout-account">
         <label class="label" for="payment-account">Bank account number</label>
@@ -73,7 +73,7 @@
     </div>
 </div>
 
-<div class="payment-type payment-type--card js-option-switch__item" id="payment-type-card">
+<div class="payment-type payment-type--card js-payment-type-card" hidden="true">
     <div class="form-field js-checkout-card-number">
         <label class="label" for="payment-card-number">Card number</label>
         <input type="text" pattern="[0-9]*" size="20"

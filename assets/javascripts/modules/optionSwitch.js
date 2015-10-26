@@ -1,51 +1,34 @@
-define(['$', 'bean',
-    'lodash/collection/reduce',
-    'lodash/object/forOwn'
-], function ($, bean, reduce, forOwn) {
+define(['$', 'bean'], function ($, bean) {
     'use strict';
 
     var OPTION_SELECTOR = '.js-option-switch';
     var TARGET_ATTR = 'data-option-switch';
 
-    function getAllTargets(els) {
-        return reduce(els, function(result, current) {
-            var id = current.getAttribute(TARGET_ATTR);
-            result[id] = document.getElementById(id);
-            return result;
-        }, {});
-    }
-
-    function hideAllTargets(targets) {
-        forOwn(targets, function(item) {
-            item.setAttribute('hidden', true);
-        });
-    }
-
-    function displayActive(el, targets) {
-        if (el.checked) {
-            hideAllTargets(targets);
-            var id = el.getAttribute(TARGET_ATTR);
-            var target = targets[id] || false;
-            if (target) {
-                target.removeAttribute('hidden');
-            }
-        }
+    // Returns a bonzo wrapped set
+    function getTargets(el) {
+        return $(el.getAttribute(TARGET_ATTR));
     }
 
     function init() {
         var optionEls = $(OPTION_SELECTOR);
-        var targets;
 
-        if(!optionEls.length) {
-            return;
-        }
+        optionEls.each(function(el) {
+            bean.on(el, 'change', function (e) {
+                if (e.target.checked) {
+                    // Unhide my targets
+                    getTargets(e.target).removeAttr('hidden');
 
-        targets = getAllTargets(optionEls);
-        hideAllTargets(targets);
-        optionEls.each(function (el) {
-            displayActive(el, targets);
-            bean.on(el, 'click', function() {
-                displayActive(el, targets);
+                    // Get my unchecked buddies
+                    $('[name="' + e.target.name + '"]:not(:checked)').each(function(el) {
+                        // Hide their targets
+                        getTargets(el).attr('hidden', true);
+                    });
+                } else {
+                    // Hide my targets.
+                    // This should only happen for checkboxes because with radio
+                    // buttons the 'change' event only fires when checked.
+                    getTargets(e.target).attr('hidden', true);
+                }
             });
         });
     }
