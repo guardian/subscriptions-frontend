@@ -5,7 +5,7 @@ define([
     'modules/checkout/formElements',
     'modules/checkout/validatePayment',
     'modules/checkout/tracking',
-    'lodash/collection/filter',
+    'lodash/collection/find',
     'lodash/object/assign'
 ], function (
     bean,
@@ -14,7 +14,7 @@ define([
     formEls,
     validatePayment,
     tracking,
-    filter,
+    find,
     assign
 ) {
     'use strict';
@@ -30,8 +30,7 @@ define([
 
         toggleError(formEls.$CARD_NUMBER_CONTAINER, !validity.cardNumberValid);
         toggleError(formEls.$CARD_CVC_CONTAINER, !validity.cardCVCValid);
-        toggleError(formEls.$CARD_EXPIRY_MONTH_CONTAINER, !validity.cardExpiryMonthValid);
-        toggleError(formEls.$CARD_EXPIRY_YEAR_CONTAINER, !validity.cardExpiryYearValid);
+        toggleError(formEls.$CARD_EXPIRY_CONTAINER, !validity.cardExpiryValid);
     }
 
     function nextStep() {
@@ -49,9 +48,7 @@ define([
     }
 
     function handleValidation() {
-        var paymentMethod = filter(formEls.$PAYMENT_METHOD, function(elem) {
-            return elem.checked;
-        })[0].value;
+        var paymentMethod = find(formEls.$PAYMENT_METHOD, function(elem) {return elem.checked}).value;
         var paymentDetails = {paymentMethod: paymentMethod};
 
         if (paymentMethod === 'direct-debit') {

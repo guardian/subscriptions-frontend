@@ -1,10 +1,20 @@
+/* global Stripe */
 define(['modules/forms/regex'], function (regex) {
     'use strict';
 
     return function (data) {
-        var validity = {};
+        var validity = {
+            accountNumberValid: true,
+            accountHolderNameValid: true,
+            sortCodeValid: true,
+            detailsConfirmedValid: true,
 
-        if (data.method === 'direct-debit') {
+            cardNumberValid: true,
+            cardCVCValid: true,
+            cardExpiryValid: true
+        };
+
+        if (data.paymentMethod === 'direct-debit') {
             validity.accountNumberValid = (
                 data.accountNumber !== '' &&
                 data.accountNumber.length >= 6 &&
@@ -31,8 +41,15 @@ define(['modules/forms/regex'], function (regex) {
                 validity.detailsConfirmedValid
             );
         } else {
-            validity.allValid = false;
-            console.log('CREDIT CARD');
+            validity.cardNumberValid = Stripe.card.validateCardNumber(data.cardNumber);
+            validity.cardCVCValid = Stripe.card.validateCVC(data.cardCVC);
+            validity.cardExpiryValid = Stripe.card.validateExpiry(data.cardExpiryMonth, data.cardExpiryYear);
+
+            validity.allValid = (
+                validity.cardNumberValid &&
+                validity.cardCVCValid &&
+                validity.cardExpiryValid
+            );
         }
 
 

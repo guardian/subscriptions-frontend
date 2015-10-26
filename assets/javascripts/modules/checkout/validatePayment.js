@@ -2,9 +2,8 @@
 define([
     'utils/ajax',
     'modules/forms/regex',
-    'modules/checkout/validatePaymentFormat',
-    'modules/checkout/stripeErrorMessages'
-], function (ajax, regex, validatePaymentFormat, stripeErrorMessages) {
+    'modules/checkout/validatePaymentFormat'
+], function (ajax, regex, validatePaymentFormat) {
     'use strict';
 
     var ACCOUNT_CHECK_ENDPOINT = '/checkout/check-account';
@@ -34,17 +33,11 @@ define([
                 exp_month: cardExpiryMonth,
                 exp_year: cardExpiryYear
             }, function(status, response) {
-                console.log('STRIPE RESPONSE');
-                console.log(response);
-
-                var errMsg;
                 if (response.error) {
-                    // TODO: put this message on the page against credit card field
+                    // Since we've already validated the card details clientside using Stripe's
+                    // library, an error during token creation is unexpected. For simplicity we
+                    // just log the error and display a message against the card number in such cases.
                     Raven.captureMessage(response.error.code + ' ' + response.error.message);
-                    errMsg = stripeErrorMessages.getMessage(response.error);
-                    if (errMsg) {
-                        console.log('STRIPE ERROR: '+errMsg);
-                    }
                     resolve(false);
                 } else {
                     resolve(true);
@@ -65,7 +58,6 @@ define([
                         resolve(validity);
                     });
                 } else {
-                    console.log('CREDIT CARD');
                     cardCheck(data.cardNumber, data.cardCVC, data.cardExpiryMonth, data.cardExpiryYear).then(function (cardValid) {
                         validity.cardNumberValid = cardValid;
                         validity.allValid = cardValid;
