@@ -10,7 +10,7 @@ class DigitalEditionTest extends PlaySpecification {
     }
 
     "go straight to the subscription page for non UK users" in {
-      DigitalEdition.getRedirect(US) mustEqual "https://www.guardiansubscriptions.co.uk/digitalsubscriptions/?prom=dga38&CMP=FAB_3062"
+      DigitalEdition.getRedirect(US) mustEqual "https://www.myguardianweekly.co.uk/subscribe/?title=GDP&prom=DGA38&CMP=FAB_3062"
     }
   }
 }
