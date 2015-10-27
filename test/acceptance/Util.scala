@@ -36,7 +36,9 @@ trait Util { this: WebBrowser =>
 
   protected def pageHasText(text: String, timeoutSecs: Int=defaultTimeOut): Boolean = {
     val pred = ExpectedConditions.textToBePresentInElementLocated(By.tagName("body"), text)
-    new WebDriverWait(driver, timeoutSecs).until(pred)
+    Try {
+      new WebDriverWait(driver, timeoutSecs).until(pred)
+    }.isSuccess
   }
 
   protected def pageHasElement(q: Query, timeoutSecs: Int=defaultTimeOut): Boolean = {

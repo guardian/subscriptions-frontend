@@ -4,6 +4,7 @@ import java.net.URL
 
 import com.typesafe.config.ConfigFactory
 import org.openqa.selenium.chrome.ChromeDriver
+import org.openqa.selenium.firefox.FirefoxDriver
 import org.openqa.selenium.remote.{DesiredCapabilities, RemoteWebDriver}
 import org.openqa.selenium.{Platform, WebDriver}
 
@@ -18,7 +19,7 @@ object Config {
     Try { new URL(conf.getString("webDriverRemoteUrl")) }.toOption.map { url =>
       new RemoteWebDriver(url, defaultCapabilities)
     }.getOrElse {
-      new ChromeDriver()
+      new FirefoxDriver()
     }
   }
 
