@@ -32,12 +32,14 @@ trait Util { this: WebBrowser =>
     driver.manage().timeouts().implicitlyWait(60, TimeUnit.SECONDS)
   }
 
-  protected def pageHasText(text: String, timeoutSecs: Int=50): Boolean = {
+  private val defaultTimeOut = 60
+
+  protected def pageHasText(text: String, timeoutSecs: Int=defaultTimeOut): Boolean = {
     val pred = ExpectedConditions.textToBePresentInElementLocated(By.tagName("body"), text)
     new WebDriverWait(driver, timeoutSecs).until(pred)
   }
 
-  protected def pageHasElement(q: Query, timeoutSecs: Int=50): Boolean = {
+  protected def pageHasElement(q: Query, timeoutSecs: Int=defaultTimeOut): Boolean = {
     val pred = ExpectedConditions.visibilityOfElementLocated(q.by)
     Try {
       new WebDriverWait(driver, timeoutSecs).until(pred)
@@ -47,4 +49,15 @@ trait Util { this: WebBrowser =>
   protected def currentHost: String = new URL(currentUrl).getHost
 
   def cookiesSet: Set[Cookie] = driver.manage().getCookies.asScala.toSet
+}
+
+object TestUser {
+  import com.gu.identity.testing.usernames.TestUsernames
+  import com.github.nscala_time.time.Imports._
+
+  private val testUsers = TestUsernames(
+    com.gu.identity.testing.usernames.Encoder.withSecret(Config.testUsersSecret),
+    recency = 2.days.standardDuration
+  )
+  val specialString = testUsers.generate()
 }

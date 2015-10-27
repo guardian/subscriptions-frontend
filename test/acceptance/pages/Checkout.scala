@@ -1,12 +1,9 @@
 package acceptance.pages
 
-
 import acceptance.Config.appUrl
-import acceptance.{Config, Util}
+import acceptance.{TestUser, Util}
 import org.openqa.selenium.WebDriver
 import org.scalatest.selenium.{WebBrowser, Page}
-
-
 
 class Checkout(implicit val driver: WebDriver) extends Page with WebBrowser with Util {
   val url = s"$appUrl/checkout"
@@ -25,19 +22,11 @@ class Checkout(implicit val driver: WebDriver) extends Page with WebBrowser with
     val receiveGnmMarketing = checkbox(name("personal.receiveGnmMarketing"))
 
     def fillIn(): Unit = {
+      assert(pageHasElement(id("address-postcode")))
 
-      import com.gu.identity.testing.usernames.TestUsernames
-      import com.github.nscala_time.time.Imports._
-
-      val testUsers = TestUsernames(
-        com.gu.identity.testing.usernames.Encoder.withSecret(Config.testUsersSecret),
-        recency = 2.days.standardDuration
-      )
-      val testUserString = testUsers.generate()
-
-      val emailValue = s"${testUserString}@gu.com"
-      firstName.value = s"${testUserString}"
-      lastName.value = s"${testUserString}"
+      val emailValue = s"${TestUser.specialString}@gu.com"
+      firstName.value = s"${TestUser.specialString}"
+      lastName.value = s"${TestUser.specialString}"
       email.value = emailValue
       emailConfirmation.value = emailValue
       address1.value = "address 1"
@@ -50,7 +39,9 @@ class Checkout(implicit val driver: WebDriver) extends Page with WebBrowser with
       fieldHasError(emailConfirmation)
 
     def continue(): Unit = {
-      click.on(cssSelector(".js-checkout-your-details-submit"))
+      val selector = cssSelector(".js-checkout-your-details-submit")
+      assert(pageHasElement(selector))
+      click.on(selector)
     }
   }
 
@@ -61,6 +52,8 @@ class Checkout(implicit val driver: WebDriver) extends Page with WebBrowser with
     val confirm = checkbox(cssSelector(""".js-checkout-confirm-payment input[type="checkbox"]"""))
 
     def fillIn(): Unit = {
+      assert(pageHasElement(id("payment-holder")))
+
       account.value = "55779911"
       sortcode.value = "200000"
       payment.value = "payment"
@@ -69,7 +62,7 @@ class Checkout(implicit val driver: WebDriver) extends Page with WebBrowser with
 
     def continue(): Unit = {
       val selector = cssSelector(".js-checkout-payment-details-submit")
-      pageHasElement(selector)
+      assert(pageHasElement(selector))
       click.on(selector)
     }
   }
@@ -81,11 +74,6 @@ class Checkout(implicit val driver: WebDriver) extends Page with WebBrowser with
   }
 
   def fillInPersonalDetails(): Unit = {
-    PersonalDetails.fillIn()
-    PersonalDetails.continue()
-  }
-
-  def fillInPersonalDetailsTestUser(): Unit = {
     PersonalDetails.fillIn()
     PersonalDetails.continue()
   }

@@ -41,7 +41,7 @@ libraryDependencies ++= Seq(
     "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0",
     "org.scalatest" %% "scalatest" % scalatestVersion % "test",
     "org.scalactic" %% "scalactic" % scalatestVersion % "test",
-    "org.seleniumhq.selenium" % "selenium-java" % "2.44.0" % "test",
+    "org.seleniumhq.selenium" % "selenium-java" % "2.48.2" % "test",
     "com.gocardless" % "gocardless-pro" % "1.8.0",
     "com.squareup.okhttp" % "okhttp" % "2.4.0",
     "com.snowplowanalytics" % "snowplow-java-tracker" % "0.5.2-SNAPSHOT",
