@@ -19,7 +19,7 @@ object Config {
     Try { new URL(conf.getString("webDriverRemoteUrl")) }.toOption.map { url =>
       new RemoteWebDriver(url, defaultCapabilities)
     }.getOrElse {
-      new FirefoxDriver()
+      new ChromeDriver()
     }
   }
 

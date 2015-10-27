@@ -47,21 +47,21 @@ class CheckoutSpec extends FeatureSpec
       }
     }
 
-    scenario("Guest user supplies invalid details", Acceptance) {
-      val checkout = new Checkout()
-      import checkout.PersonalDetails
-
-      When("I visit the checkout page")
-      go.to(checkout)
-
-      And("I fill in personal details with inconsistent emails")
-      PersonalDetails.fillIn()
-      PersonalDetails.emailConfirmation.value = "non-matching-email@example.com"
-
-      PersonalDetails.continue()
-
-      Then("The email field should be marked with an error")
-      assert(PersonalDetails.emailNotValid(), "email confirmation should not be valid")
-    }
+//    scenario("Guest user supplies invalid details", Acceptance) {
+//      val checkout = new Checkout()
+//      import checkout.PersonalDetails
+//
+//      When("I visit the checkout page")
+//      go.to(checkout)
+//
+//      And("I fill in personal details with inconsistent emails")
+//      PersonalDetails.fillIn()
+//      PersonalDetails.emailConfirmation.value = "non-matching-email@example.com"
+//
+//      PersonalDetails.continue()
+//
+//      Then("The email field should be marked with an error")
+//      assert(PersonalDetails.emailNotValid(), "email confirmation should not be valid")
+//    }
   }
 }
