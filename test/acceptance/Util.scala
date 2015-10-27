@@ -12,6 +12,9 @@ import org.scalatest.selenium.WebBrowser
 import scala.collection.JavaConverters._
 import scala.util.Try
 
+import com.gu.identity.testing.usernames.TestUsernames
+import com.github.nscala_time.time.Imports._
+
 trait Util { this: WebBrowser =>
   implicit val driver: WebDriver
 
@@ -30,6 +33,17 @@ trait Util { this: WebBrowser =>
     go.to(appUrl)
     driver.manage().deleteAllCookies()
     driver.manage().timeouts().implicitlyWait(60, TimeUnit.SECONDS)
+
+    val cookie = new Cookie(qaCookie.name, qaCookie.value)
+    driver.manage().addCookie(cookie)
+
+    val analyticsCookie = new Cookie("ANALYTICS_OFF_KEY", "true")
+    driver.manage().addCookie(analyticsCookie)
+
+    val testUserCookie =
+      new Cookie.Builder("pre-signin-test-user", TestUser.specialString)
+        .isHttpOnly(true).build()
+    driver.manage().addCookie(testUserCookie)
   }
 
   private val defaultTimeOut = 90
@@ -54,9 +68,6 @@ trait Util { this: WebBrowser =>
 }
 
 object TestUser {
-  import com.gu.identity.testing.usernames.TestUsernames
-  import com.github.nscala_time.time.Imports._
-
   private val testUsers = TestUsernames(
     com.gu.identity.testing.usernames.Encoder.withSecret(Config.testUsersSecret),
     recency = 2.days.standardDuration
