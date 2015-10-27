@@ -34,8 +34,12 @@ trait Util { this: WebBrowser =>
     driver.manage().deleteAllCookies()
     driver.manage().timeouts().implicitlyWait(60, TimeUnit.SECONDS)
 
-    val cookie = new Cookie(qaCookie.name, qaCookie.value)
-    driver.manage().addCookie(cookie)
+    addTestUserCookies()
+  }
+
+  private def addTestUserCookies() = {
+    val passthroughCookie = new Cookie(qaCookie.name, qaCookie.value)
+    driver.manage().addCookie(passthroughCookie)
 
     val analyticsCookie = new Cookie("ANALYTICS_OFF_KEY", "true")
     driver.manage().addCookie(analyticsCookie)

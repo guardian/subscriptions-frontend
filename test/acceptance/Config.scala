@@ -4,7 +4,6 @@ import java.net.URL
 
 import com.typesafe.config.ConfigFactory
 import org.openqa.selenium.chrome.ChromeDriver
-import org.openqa.selenium.firefox.FirefoxDriver
 import org.openqa.selenium.remote.{DesiredCapabilities, RemoteWebDriver}
 import org.openqa.selenium.{Platform, WebDriver}
 
