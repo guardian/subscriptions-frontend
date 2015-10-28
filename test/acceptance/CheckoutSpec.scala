@@ -3,15 +3,18 @@ package acceptance
 import acceptance.pages.{Checkout, ThankYou}
 import org.openqa.selenium.WebDriver
 import org.scalatest.selenium.WebBrowser
-import org.scalatest.{BeforeAndAfter, FeatureSpec, GivenWhenThen}
+import org.scalatest.{BeforeAndAfterAll, BeforeAndAfter, FeatureSpec, GivenWhenThen}
 
-class CheckoutSpec extends FeatureSpec with WebBrowser with Util with GivenWhenThen with BeforeAndAfter {
+class CheckoutSpec extends FeatureSpec
+  with WebBrowser with Util with GivenWhenThen with BeforeAndAfter with BeforeAndAfterAll  {
 
   implicit lazy val driver: WebDriver = Config.driver
 
-  before {
-    resetDriver()
-  }
+  // Before each test ...
+  before { resetDriver() }
+
+  // After all tests execute, close all windows, and exit the driver
+  override def afterAll(): Unit = { quit() }
 
   feature("Checkout page") {
     scenario("Guest user completes a checkout and sets an account password", Acceptance) {

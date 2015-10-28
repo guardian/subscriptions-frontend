@@ -28,4 +28,6 @@ object Config {
     capabilities.setCapability("name", "Subscriptions frontend Acceptance test: https://github.com/guardian/subscriptions-frontend")
     capabilities
   }
+
+  val testUsersSecret = conf.getString("identity.test.users.secret")
 }
