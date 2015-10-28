@@ -38,9 +38,6 @@ trait Util { this: WebBrowser =>
   }
 
   private def addTestUserCookies() = {
-    val passthroughCookie = new Cookie(qaCookie.name, qaCookie.value)
-    driver.manage().addCookie(passthroughCookie)
-
     val analyticsCookie = new Cookie("ANALYTICS_OFF_KEY", "true")
     driver.manage().addCookie(analyticsCookie)
 
