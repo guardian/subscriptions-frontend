@@ -2,6 +2,7 @@ define([
     'bean',
     'utils/ajax',
     'utils/text',
+    'utils/serializer',
     'modules/forms/loader',
     'modules/checkout/formElements',
     'modules/checkout/payment'
@@ -9,6 +10,7 @@ define([
     bean,
     ajax,
     textUtils,
+    serializer,
     loader,
     formEls,
     payment
@@ -62,12 +64,33 @@ define([
                 e.preventDefault();
 
                 loader.startLoader();
-                loader.stopLoader();
                 submitEl.setAttribute('disabled', 'disabled');
-                submitEl.removeAttribute('disabled');
 
-                console.log('SUBMIT!');
-                console.log('STRIPE TOKEN: '+payment.getStripeToken());
+                var data = serializer([].slice.call(form.elements));
+
+                if (data['payment.type'] === 'card') {
+                    data['payment.token'] = payment.getStripeToken();
+
+                    // TODO: do we want to remove direct debit data in this case?
+                }
+
+                ajax({
+                    url: form.action,
+                    method: 'post',
+                    data: data,
+                    success: function(successData) {
+                        window.location.assign(successData.redirect);
+                    },
+                    error: function(err) {
+                        // TODO: Log error
+                        // TODO: Display something against card number?
+                        loader.stopLoader();
+                        submitEl.removeAttribute('disabled');
+
+                        console.log('ERROR');
+                        console.log(err);
+                    }
+                })
             }, false);
         }
 
