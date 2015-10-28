@@ -35,7 +35,7 @@
 <main class="page-container gs-container">
 
     <section class="checkout-container">
-        <form class="form js-checkout-form" action="@routes.Checkout.renderCheckout().toString()" method="POST">
+        <form class="form js-checkout-form" action="@routes.Checkout.renderCheckout().toString()" method="POST" novalidate>
             @helper.CSRF.formField
 
             @fragments.checkout.checkoutHeader("Checkout")

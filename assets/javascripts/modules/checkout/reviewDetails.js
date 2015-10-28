@@ -3,13 +3,15 @@ define([
     'utils/ajax',
     'utils/text',
     'modules/forms/loader',
-    'modules/checkout/formElements'
+    'modules/checkout/formElements',
+    'modules/checkout/payment'
 ], function (
     bean,
     ajax,
     textUtils,
     loader,
-    formEls
+    formEls,
+    payment
 ) {
     'use strict';
 
@@ -36,21 +38,17 @@ define([
                 formEls.$POSTCODE.val()
             ], ', '));
 
-            formEls.$REVIEW_EMAIL.text(textUtils.mergeValues([
-                formEls.$EMAIL.val()
-            ], ''));
+            formEls.$REVIEW_EMAIL.text(formEls.$EMAIL.val());
+            formEls.$REVIEW_ACCOUNT.text(formEls.$ACCOUNT.val());
+            formEls.$REVIEW_SORTCODE.text(formEls.$SORTCODE.val());
+            formEls.$REVIEW_HOLDER.text(formEls.$HOLDER.val());
 
-            formEls.$REVIEW_ACCOUNT.text(textUtils.mergeValues([
-                formEls.$ACCOUNT.val()
-            ], ''));
-
-            formEls.$REVIEW_SORTCODE.text(textUtils.mergeValues([
-                formEls.$SORTCODE.val()
-            ], ''));
-
-            formEls.$REVIEW_HOLDER.text(textUtils.mergeValues([
-                formEls.$HOLDER.val()
-            ], ''));
+            var obscuredCardNumber = textUtils.obscure(formEls.$CARD_NUMBER.val(), 4, '*');
+            formEls.$REVIEW_CARD_NUMBER.text(obscuredCardNumber);
+            formEls.$REVIEW_CARD_EXPIRY.text(textUtils.mergeValues([
+                formEls.$CARD_EXPIRY_MONTH.val(),
+                formEls.$CARD_EXPIRY_YEAR.val()
+            ], '/'));
         });
     }
 
@@ -60,9 +58,16 @@ define([
             submitEl = formEls.$CHECKOUT_SUBMIT[0];
 
             var form = formEls.$CHECKOUT_FORM[0];
-            form.addEventListener('submit', function() {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+
                 loader.startLoader();
+                loader.stopLoader();
                 submitEl.setAttribute('disabled', 'disabled');
+                submitEl.removeAttribute('disabled');
+
+                console.log('SUBMIT!');
+                console.log('STRIPE TOKEN: '+payment.getStripeToken());
             }, false);
         }
 

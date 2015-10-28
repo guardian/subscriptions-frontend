@@ -3,7 +3,7 @@ define([
     'utils/ajax',
     'modules/forms/toggleError',
     'modules/checkout/formElements',
-    'modules/checkout/validatePayment',
+    'modules/checkout/payment',
     'modules/checkout/tracking',
     'lodash/collection/find',
     'lodash/object/assign'
@@ -12,7 +12,7 @@ define([
     ajax,
     toggleError,
     formEls,
-    validatePayment,
+    payment,
     tracking,
     find,
     assign
@@ -69,7 +69,7 @@ define([
             throw new Error('Invalid payment method '+paymentMethod);
         }
 
-        validatePayment(paymentDetails).then(function(validity){
+        payment.validate(paymentDetails).then(function(validity){
             displayErrors(validity);
             if (validity.allValid) {
                 nextStep();

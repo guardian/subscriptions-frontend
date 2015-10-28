@@ -49,15 +49,18 @@ define(['$'], function ($) {
         $YOUR_DETAILS_SUBMIT: $('.js-checkout-your-details-submit'),
         $PAYMENT_DETAILS_SUBMIT: $('.js-checkout-payment-details-submit'),
         $CHECKOUT_SUBMIT: $('.js-checkout-submit'),
+        $FIELDSET_REVIEW: $('.js-fieldset-review'),
+        $FIELDSET_YOUR_DETAILS: $('.js-fieldset-your-details'),
         $REVIEW_NAME: $('.js-checkout-review-name'),
         $REVIEW_ADDRESS: $('.js-checkout-review-address'),
         $REVIEW_EMAIL: $('.js-checkout-review-email'),
+
+        $FIELDSET_PAYMENT_DETAILS: $('.js-fieldset-payment-details'),
         $REVIEW_ACCOUNT: $('.js-checkout-review-account'),
         $REVIEW_SORTCODE: $('.js-checkout-review-sortcode'),
         $REVIEW_HOLDER: $('.js-checkout-review-holder'),
-        $FIELDSET_YOUR_DETAILS: $('.js-fieldset-your-details'),
-        $FIELDSET_PAYMENT_DETAILS: $('.js-fieldset-payment-details'),
-        $FIELDSET_REVIEW: $('.js-fieldset-review'),
+        $REVIEW_CARD_NUMBER: $('.js-checkout-review-card-number'),
+        $REVIEW_CARD_EXPIRY: $('.js-checkout-review-card-expiry'),
 
         $EDIT_YOUR_DETAILS: $('.js-edit-your-details'),
         $EDIT_PAYMENT_DETAILS: $('.js-edit-payment-details')
