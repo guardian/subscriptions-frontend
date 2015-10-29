@@ -30,7 +30,7 @@ object Management extends Controller with LazyLogging {
       "Products" -> TouchpointBackend.Normal.zuoraService.products.value
     )
 
-    Ok(data map { case (k, v) => s"$k: $v"} mkString "\n")
+    Cached(1)(Ok(data map { case (k, v) => s"$k: $v"} mkString "\n"))
   }
 
 }
