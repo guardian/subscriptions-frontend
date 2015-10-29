@@ -1,13 +1,16 @@
 package controllers
 
+import java.util.Date
+
+import app.BuildInfo
 import com.typesafe.scalalogging.LazyLogging
+import play.api.libs.concurrent.Execution.Implicits._
 import play.api.mvc._
 import services.TouchpointBackend
-import play.api.libs.concurrent.Execution.Implicits._
 
-object Healthcheck extends Controller with LazyLogging{
+object Management extends Controller with LazyLogging {
 
-  def index = Action.async {
+  def healthcheck = Action.async {
       (for {
         products <- TouchpointBackend.Normal.zuoraService.products if products.nonEmpty
         sfAuth <- TouchpointBackend.Normal.salesforceService.repo.salesforce.getAuthentication
@@ -17,6 +20,17 @@ object Healthcheck extends Controller with LazyLogging{
         ServiceUnavailable("Service Unavailable")
       }
       .map(Cached(1)(_))
+  }
+
+  def manifest() = Action {
+    val data = Map(
+      "Build" -> BuildInfo.buildNumber,
+      "Date" -> new Date(BuildInfo.buildTime).toString,
+      "Commit" -> BuildInfo.gitCommitId,
+      "Products" -> TouchpointBackend.Normal.zuoraService.products.value
+    )
+
+    Ok(data map { case (k, v) => s"$k: $v"} mkString "\n")
   }
 
 }
