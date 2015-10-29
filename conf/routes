@@ -11,7 +11,7 @@ GET         /au                              controllers.Homepage.indexAu
 GET         /us                              controllers.Homepage.indexUs
 
 # Health check
-GET         /healthcheck                     controllers.Healthcheck.index
+GET         /healthcheck                     controllers.Management.healthcheck
 
 # Digital pack
 GET         /digital/country                 controllers.DigitalPack.selectUk
