@@ -6,7 +6,8 @@
             "afterSeen": {
                 "travis": {
                     "config": {
-                        "script": "sbt ++$TRAVIS_SCALA_VERSION acceptance-test-buy-sub"
+                        "script": "sbt ++$TRAVIS_SCALA_VERSION acceptance-test-buy-sub",
+                        "after_script": "./test_feedback.sh"
                     }
                 }
             }
