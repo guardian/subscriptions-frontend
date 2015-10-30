@@ -11,6 +11,7 @@
     margin-bottom: $gs-baseline;
     position: relative;
     border: none;
+    color: $c-brand;
 }
 .package:hover,
 .package:active {
@@ -150,21 +151,20 @@ $step-size: 40px;
 $step-size-tablet: 60px;
 
 .steps {
-    @extend .inline-list;
-    counter-reset: li;
-
+    @extend .o-inline-list;
     @include mq(tablet) {
         margin-bottom: $gs-baseline;
     }
 }
 
 .steps__item {
-    @extend .inline-list__item;
+    @extend .o-inline-list__item;
     margin-bottom: $gs-baseline/2;
     min-height: $step-size + $gs-baseline/2;
     padding-left: $step-size + $gs-gutter/2;
     padding-right: $gs-gutter/2;
     position: relative;
+    margin-left: 0;
 
     @include mq(tablet) {
         width: 33%;
@@ -176,8 +176,8 @@ $step-size-tablet: 60px;
     &:before {
         background-color: $c-brand;
         color: $c-white;
-        content: counter(li);
-        counter-increment: li;
+        content: counter(steps);
+        counter-increment: steps;
         display: block;
         float: left;
         font-weight: 500;
