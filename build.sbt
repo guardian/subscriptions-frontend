@@ -24,6 +24,7 @@ lazy val root = (project in file(".")).enablePlugins(
     )
 
 scalaVersion := "2.11.6"
+scalacOptions ++= Seq("-feature")
 
 val scalatestVersion = "2.2.4"
 
