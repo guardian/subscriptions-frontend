@@ -84,6 +84,10 @@ define([
                     error: function(err) {
                         // TODO: Log error
                         // TODO: Display something against card number?
+                        // Need to distinguish between Stripe errors where we can display something useful
+                        // to the user, and other errors where we have to say 'An unexpected error...'
+                        // Stripe errors we can determine a sensible message to display & element to display against.
+                        // Other errors we give a generic message... against which field?
                         loader.stopLoader();
                         submitEl.removeAttribute('disabled');
 
