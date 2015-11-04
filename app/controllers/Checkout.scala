@@ -96,7 +96,7 @@ object Checkout extends Controller with LazyLogging with ActivityTracking {
 	      product.foreach(prod => trackAnon(SubscriptionRegistrationActivity(MemberData(result, formData, prod))))
       }
 
-      Redirect(routes.Checkout.thankYou()).withSession(session)
+      Ok(Json.obj("redirect" -> routes.Checkout.thankYou().url)).withSession(session);
     }
   }
 

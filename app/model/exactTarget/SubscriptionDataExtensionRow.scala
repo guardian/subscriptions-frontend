@@ -1,13 +1,14 @@
 package model.exactTarget
 
 import com.gu.membership.zuora.soap.models.Queries._
+import com.typesafe.scalalogging.LazyLogging
 import model.{CreditCardData, DirectDebitData, SubscriptionData}
 import org.joda.time.DateTime
 import utils.Dates
 
 import scala.math.BigDecimal.decimal
 
-object SubscriptionDataExtensionRow {
+object SubscriptionDataExtensionRow extends LazyLogging{
   def apply(
       subscription: Subscription,
       subscriptionData: SubscriptionData,
@@ -25,13 +26,22 @@ object SubscriptionDataExtensionRow {
     val address = personalData.address
 
     val paymentFields = subscriptionData.paymentData match {
-      case DirectDebitData(accountNumber, sortCode, holder) => Seq(
-        "Account number" -> formatAccountNumber(accountNumber),
-        "Sort Code" -> formatSortCode(sortCode),
-        "Account Name" -> holder
-      )
+      case DirectDebitData(accountNumber, sortCode, holder) =>
+        val mandateParam = paymentMethod.mandateId match {
+          case Some(id) => Seq("MandateID" -> id)
+          case None =>
+            logger.error(s"Expected the payment method for subscription ${subscription.name} to have a mandate id (Direct Debit payment).")
+            Seq()
+        }
 
-      case CreditCardData(_) => Seq.empty
+        Seq(
+          "Account number" -> formatAccountNumber(accountNumber),
+          "Sort Code" -> formatSortCode(sortCode),
+          "Account Name" -> holder,
+          "Default payment method" -> "Direct Debit"
+        ) ++ mandateParam
+
+      case CreditCardData(_) => Seq("Default payment method" -> "Credit/Debit Card")
     }
 
     SubscriptionDataExtensionRow(
@@ -42,21 +52,18 @@ object SubscriptionDataExtensionRow {
         "EmailAddress" -> personalData.email,
         "Subscription term" -> formatSubscriptionTerm(billingPeriod),
         "Payment amount" -> formatPrice(ratePlanCharge.price),
-        "Default payment method" -> formatPaymentMethod(paymentMethod.`type`),
         "First Name" -> personalData.firstName,
         "Last Name" -> personalData.lastName,
         "Address 1" -> address.lineOne,
         "Address 2" -> address.lineTwo,
         "City" -> address.town,
         "Post Code" -> address.postCode,
-        "Default payment method" -> formatPaymentMethod(paymentMethod.`type`),
         //TODO hardcoded!
         "Country" -> "UK",
         "Date of first payment" -> formatDate(subscription.contractAcceptanceDate),
         "Currency" -> formatCurrency(account.currency),
         //TODO to remove, hardcoded in the template
         "Trial period" -> "14",
-        "MandateID" -> paymentMethod.mandateId,
         "Email" -> personalData.email
       ) ++ paymentFields
     )

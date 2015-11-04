@@ -17,9 +17,9 @@ trait PaymentService {
   }
 
   case class DirectDebitPayment(paymentData: DirectDebitData, personalData: PersonalData, memberId: MemberId) extends Payment {
-    override lazy val makeAccount = Account.goCardless(memberId, autopay = true)
+    override def makeAccount = Account.goCardless(memberId, autopay = true)
 
-    override lazy val makePaymentMethod =
+    override def makePaymentMethod =
       Future(BankTransfer(
         accountNumber = paymentData.account,
         sortCode = paymentData.sortCode,
@@ -29,8 +29,8 @@ trait PaymentService {
   }
 
   class CreditCardPayment(val paymentData: CreditCardData, val userIdData: UserIdData, val memberId: MemberId) extends Payment {
-    override val makeAccount = Account.stripe(memberId, autopay = true)
-    override lazy val makePaymentMethod =
+    override def makeAccount = Account.stripe(memberId, autopay = true)
+    override def makePaymentMethod =
       stripeService.Customer.create(userIdData.id.id, paymentData.stripeToken)
         .map(CreditCardReferenceTransaction)
   }
