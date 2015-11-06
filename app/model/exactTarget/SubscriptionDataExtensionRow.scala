@@ -56,7 +56,7 @@ object SubscriptionDataExtensionRow {
         "Currency" -> formatCurrency(account.currency),
         //TODO to remove, hardcoded in the template
         "Trial period" -> "14",
-        "MandateID" -> paymentMethod.mandateId,
+        "MandateID" -> paymentMethod.mandateId.mkString,
         "Email" -> personalData.email
       ) ++ paymentFields
     )

@@ -5,7 +5,7 @@ import com.gu.membership.zuora.soap._
 import com.gu.membership.zuora.soap.actions.subscribe.Subscribe
 import com.gu.membership.zuora.soap.models.Queries._
 import com.gu.membership.zuora.soap.models.Results.SubscribeResult
-import com.gu.membership.zuora.{ZuoraApiConfig, soap}
+import com.gu.membership.zuora.{ZuoraSoapConfig, ZuoraApiConfig, soap}
 import com.gu.monitoring.ServiceMetrics
 import configuration.Config
 import model.zuora.{DigitalProductPlan, SubscriptionProduct}
@@ -30,7 +30,7 @@ trait ZuoraService {
   def paymentDelaysInDays: Period
 }
 
-class ZuoraApiClient(zuoraApiConfig: ZuoraApiConfig,
+class ZuoraApiClient(zuoraApiConfig: ZuoraSoapConfig,
                      digitalProductPlan: DigitalProductPlan,
                      zuoraProperties: ZuoraProperties) extends ZuoraService {
 
