@@ -3,7 +3,7 @@
 @import controllers.CachedAssets.hashedPathFor
 @import configuration.Config
 
-@(jsVars: JsVars)
+@(jsVars: JsVars, touchpointBackendResolutionOpt: Option[services.TouchpointBackend.Resolution])
 
 <!--[if lte IE 9]>
 <script src="@hashedPathFor("javascripts/vendor/polyfills.js")"></script>
@@ -32,6 +32,12 @@
         product: 'Subscriber',
         productData: null
     };
+    @for(
+        touchpointBackendResolution <- touchpointBackendResolutionOpt;
+        backend = touchpointBackendResolution.backend
+    ) {
+        guardian.stripePublicKey = '@backend.paymentService.stripeService.publicKey';
+    }
 
     guardian.trackerUrl = '@{Config.trackerUrl}';
 

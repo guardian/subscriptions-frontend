@@ -23,8 +23,7 @@ define([
         }
 
         require('js!stripe').then(function() {
-            // TODO: IMPORTANT get this value from config
-            Stripe.setPublishableKey('pk_test_Qm3CGRdrV4WfGYCpm0sftR0f');
+            Stripe.setPublishableKey(guardian.stripePublicKey);
         });
     }
 
