@@ -4,6 +4,7 @@ define([
     'utils/text',
     'utils/serializer',
     'modules/forms/loader',
+    'modules/forms/toggleError',
     'modules/checkout/formElements',
     'modules/checkout/payment'
 ], function (
@@ -12,6 +13,7 @@ define([
     textUtils,
     serializer,
     loader,
+    toggleError,
     formEls,
     payment
 ) {
@@ -81,18 +83,11 @@ define([
                     success: function(successData) {
                         window.location.assign(successData.redirect);
                     },
-                    error: function(err) {
-                        // TODO: Log error
-                        // TODO: Display something against card number?
-                        // Need to distinguish between Stripe errors where we can display something useful
-                        // to the user, and other errors where we have to say 'An unexpected error...'
-                        // Stripe errors we can determine a sensible message to display & element to display against.
-                        // Other errors we give a generic message... against which field?
+                    error: function() {
                         loader.stopLoader();
                         submitEl.removeAttribute('disabled');
 
-                        console.log('ERROR');
-                        console.log(err);
+                        toggleError(formEls.$CARD_CONTAINER, true);
                     }
                 })
             }, false);

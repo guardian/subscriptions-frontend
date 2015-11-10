@@ -2,6 +2,8 @@ package controllers
 
 import actions.CommonActions._
 import com.gu.identity.play.IdUser
+import com.gu.membership.stripe.Stripe
+import com.gu.membership.zuora.soap
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config.Identity.webAppProfileUrl
 import forms.{FinishAccountForm, SubscriptionsForm}
@@ -97,6 +99,9 @@ object Checkout extends Controller with LazyLogging with ActivityTracking {
       }
 
       Ok(Json.obj("redirect" -> routes.Checkout.thankYou().url)).withSession(session);
+    }.recover {
+      case err: soap.Error if err.code == "TRANSACTION_FAILED" => Forbidden
+      case err: Stripe.Error => Forbidden
     }
   }
 
