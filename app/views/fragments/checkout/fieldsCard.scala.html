@@ -1,0 +1,55 @@
+@()
+
+<div class="form-field js-checkout-card-number">
+    <div class="u-cf">
+        <label class="label u-align-left" for="payment-card-number">Card number</label>
+        <ul class="o-inline-list u-align-right">
+            <li class="u-align-middle o-inline-list__item">
+                <i class="sprite-card sprite-card--small sprite-card--visa"></i>
+            </li>
+            <li class="u-align-middle o-inline-list__item">
+                <i class="sprite-card sprite-card--small sprite-card--mastercard"></i>
+            </li>
+            <li class="u-align-middle o-inline-list__item">
+                <i class="sprite-card sprite-card--small sprite-card--american-express"></i>
+            </li>
+        </ul>
+    </div>
+    <div class="card-number">
+        <i class="card-number__icon sprite-card sprite-card--unknown js-credit-card-image"></i>
+        <input type="text" pattern="[0-9]*" size="20"
+        class="input-text js-input"
+        id="payment-card-number"
+        placeholder="0000 0000 0000 0000"
+        maxlength="19"
+        data-masker-delim=" " data-masker-length="4"/>
+        @fragments.forms.errorMessage("Please check your card number")
+        </div>
+</div>
+
+<div class="form-field js-checkout-card-cvc">
+    <label class="label" for="payment-card-cvc">Security code</label>
+    <input type="text" pattern="[0-9]*"
+    size="4" class="input-text input-text--small js-input"
+    id="payment-card-cvc"
+    placeholder="CVC"
+    maxlength="4" />
+    @fragments.forms.errorMessage("Please check your security code")
+</div>
+
+<div class="form-field js-checkout-card-expiry">
+    <span class="label">Expires</span>
+    <div class="field-group">
+    @for(input <- Seq(("Month", "MM"), ("Year", "YY"))) {
+        <div class="field-group__item js-checkout-card-expiry-@input._1.toLowerCase()">
+            <label class="label label--inline" for="payment-card-expiry-@input._1.toLowerCase()">@input._1</label>
+            <input class="input-text input-text--small js-input"
+            id="payment-card-expiry-@input._1.toLowerCase()"
+            placeholder="@input._2"
+            type="text" pattern="[0-9]*" maxlength="2">
+        </div>
+    }
+    </div>
+    @fragments.forms.errorMessage("Please check your expiry date")
+</div>
+@fragments.forms.errorMessage("There was a problem processing your payment. Please check your card details.")

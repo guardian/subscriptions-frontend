@@ -26,106 +26,10 @@
 </div>
 
 <div class="payment-type payment-type--direct-debit js-payment-type-direct-debit">
-    @* ===== Account number ===== *@
-    <div class="form-field js-checkout-account">
-        <label class="label" for="payment-account">Bank account number</label>
-        <input type="text" class="input-text js-input" id="payment-account"
-            name="payment.account" pattern="[0-9]*" minlength="6" maxlength="10" required>
-        @fragments.forms.errorMessage("Please enter between 6 and 10 digits for the account number, and make sure the account is valid")
-    </div>
-
-    @* ===== Sortcode ===== *@
-    <div class="form-field js-checkout-sortcode">
-        <label class="label" for="payment-sortcode">Bank sort code</label>
-        <input type="text" class="input-text input-text--small js-input"
-            name="payment.sortcode" id="payment-sortcode"
-            placeholder="00-00-00"  maxlength="8" required
-            data-masker-delim="-" data-masker-length="2">
-        @fragments.forms.errorMessage("")
-    </div>
-
-    @* ===== Account Holder Name ===== *@
-    <div class="form-field js-checkout-holder">
-        @*
-            BACS requirement:
-            "The payer’s account name (maximum of 18 characters).
-            This must be the name of the person who is paying the Direct Debit
-            and has signed the Direct Debit Instruction (DDI)."
-            http://www.bacs.co.uk/Bacs/Businesses/Resources/Pages/Glossary.aspx
-        *@
-        <label class="label" for="payment-holder">Name of account holder</label>
-        <input type="text" class="input-text js-input" id="payment-holder"
-            name="payment.holder" maxlength="18" required>
-        @fragments.forms.errorMessage("The account holder name must be less than 18 characters")
-    </div>
-
-    @* ===== Confirm Payment ===== *@
-    <div class="form-field js-checkout-confirm-payment">
-        <label class="option">
-            <span class="option__input">
-                <input type="checkbox" class="js-input">
-            </span>
-            <span class="option__label">
-                I confirm that I am the account holder and I am solely able to authorise debit from the account
-            </span>
-        </label>
-        @fragments.forms.errorMessage("Please confirm that you are the account holder")
-    </div>
+    @fragments.checkout.fieldsDirectDebit()
 </div>
 
 @* TODO: putting hidden in the HTML has issues, e.g. when browser remembers which toggle was ticked previously *@
 <div class="payment-type payment-type--card js-payment-type-card" hidden="true">
-    <div class="form-field js-checkout-card-number">
-        <div class="u-cf">
-            <label class="label u-align-left" for="payment-card-number">Card number</label>
-            <ul class="o-inline-list u-align-right">
-                <li class="u-align-middle o-inline-list__item">
-                    <i class="sprite-card sprite-card--small sprite-card--visa"></i>
-                </li>
-                <li class="u-align-middle o-inline-list__item">
-                    <i class="sprite-card sprite-card--small sprite-card--mastercard"></i>
-                </li>
-                <li class="u-align-middle o-inline-list__item">
-                    <i class="sprite-card sprite-card--small sprite-card--american-express"></i>
-                </li>
-            </ul>
-        </div>
-        <div class="card-number">
-            <i class="card-number__icon sprite-card sprite-card--unknown js-credit-card-image"></i>
-            <input type="text" pattern="[0-9]*" size="20"
-            class="input-text js-input"
-            id="payment-card-number"
-            placeholder="0000 0000 0000 0000"
-            maxlength="19"
-            data-masker-delim=" " data-masker-length="4"/>
-            @fragments.forms.errorMessage("Please check your card number")
-        </div>
-    </div>
-
-    <div class="form-field js-checkout-card-cvc">
-        <label class="label" for="payment-card-cvc">Security code</label>
-        <input type="text" pattern="[0-9]*"
-               size="4" class="input-text input-text--small js-input"
-               id="payment-card-cvc"
-               placeholder="CVC"
-               maxlength="4" />
-        @fragments.forms.errorMessage("Please check your security code")
-    </div>
-
-    <div class="form-field js-checkout-card-expiry">
-        <span class="label">Expires</span>
-        <div class="field-group">
-            @for(input <- Seq(("Month", "MM"), ("Year", "YY"))) {
-                <div class="field-group__item js-checkout-card-expiry-@input._1.toLowerCase()">
-                    <label class="label label--inline" for="payment-card-expiry-@input._1.toLowerCase()">@input._1</label>
-                    <input class="input-text input-text--small js-input"
-                        id="payment-card-expiry-@input._1.toLowerCase()"
-                        placeholder="@input._2"
-                        type="text" pattern="[0-9]*" maxlength="2">
-                </div>
-            }
-        </div>
-        @fragments.forms.errorMessage("Please check your expiry date")
-    </div>
-    @fragments.forms.errorMessage("There was a problem processing your payment. Please check your card details.")
+    @fragments.checkout.fieldsCard()
 </div>
