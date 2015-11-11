@@ -121,14 +121,17 @@
                         <div class="field-panel__intro">
                             <div class="field-note field-note--offset">
                                 @fragments.forms.securityNote()
-                                Payment will be taken by Direct Debit
+                                @* This block will be removed once credit/debit card option is visible to real users *@
+                                @if(touchpointBackendResolution.validTestUserCredentialOpt.isEmpty) {
+                                    Payment will be taken by Direct Debit
+                                }
                             </div>
                         </div>
                         <div class="field-panel__edit">
                             <a href="#paymentDetails" class="text-button u-button-reset js-edit-payment-details" title="Edit your payment details">Edit</a>
                         </div>
                         <div class="field-panel__fields">
-                            @fragments.checkout.fieldsPayment(form)
+                            @fragments.checkout.fieldsPayment(form, touchpointBackendResolution)
 
                             <div class="actions">
                                 <a href="#formReview" class="button button--primary button--large js-checkout-payment-details-submit">Continue</a>

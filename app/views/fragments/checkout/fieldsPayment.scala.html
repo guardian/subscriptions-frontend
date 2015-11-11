@@ -1,27 +1,32 @@
-@(form: Form[model.SubscriptionData])
+@(form: Form[model.SubscriptionData], touchpointBackendResolution: services.TouchpointBackend.Resolution)
 
 @* ===== Payment type ===== *@
 
-<div class="label u-margin-bottom">How would you like to pay?</div>
-
-<div class="field-group js-checkout-payment-method">
-    <div class="field-group__item">
-        <label class="option">
-            <span class="option__input">
-                <input class="js-option-switch" data-option-switch=".js-payment-type-direct-debit"
+@******************************************************************************************
+    Credit/debit card payment option is currently only exposed to logged-in test users.
+    TODO: remove this condition once Manage My Account functionality is released.
+*******************************************************************************************@
+<div @if(touchpointBackendResolution.validTestUserCredentialOpt.isEmpty){ hidden="true" }>
+    <div class="label u-margin-bottom">How would you like to pay?</div>
+    <div class="field-group js-checkout-payment-method">
+        <div class="field-group__item">
+            <label class="option">
+                <span class="option__input">
+                    <input class="js-option-switch" data-option-switch=".js-payment-type-direct-debit"
                     type="radio" name="payment.type" value="direct-debit" checked>
-            </span>
-            <span class="option__label">Direct Debit</span>
-        </label>
-    </div>
-    <div class="field-group__item">
-        <label class="option">
-            <span class="option__input">
-                <input class="js-option-switch" data-option-switch=".js-payment-type-card"
+                </span>
+                <span class="option__label">Direct Debit</span>
+            </label>
+        </div>
+        <div class="field-group__item">
+            <label class="option">
+                <span class="option__input">
+                    <input class="js-option-switch" data-option-switch=".js-payment-type-card"
                     type="radio" name="payment.type" value="card">
-            </span>
-            <span class="option__label">Credit/Debit card</span>
-        </label>
+                </span>
+                <span class="option__label">Credit/Debit card</span>
+            </label>
+        </div>
     </div>
 </div>
 
@@ -29,7 +34,6 @@
     @fragments.checkout.fieldsDirectDebit()
 </div>
 
-@* TODO: putting hidden in the HTML has issues, e.g. when browser remembers which toggle was ticked previously *@
-<div class="payment-type payment-type--card js-payment-type-card" hidden="true">
+<div class="payment-type payment-type--card js-payment-type-card">
     @fragments.checkout.fieldsCard()
 </div>
