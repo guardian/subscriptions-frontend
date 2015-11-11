@@ -165,7 +165,7 @@ input[type=number] {
     width: 100%;
     -webkit-appearance: none;
     appearance: none;
-    border-radius: 20px;
+    border-radius: $input-border-radius;
 
     &:focus {
         border-color: $c-neutral3;

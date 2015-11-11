@@ -3,6 +3,7 @@ define([
     'utils/ajax',
     'modules/forms/toggleError',
     'modules/checkout/formElements',
+    'modules/checkout/displayCardImg',
     'modules/checkout/payment',
     'modules/checkout/tracking',
     'lodash/collection/find',
@@ -12,6 +13,7 @@ define([
     ajax,
     toggleError,
     formEls,
+    displayCardImg,
     payment,
     tracking,
     find,
@@ -83,6 +85,14 @@ define([
             bean.on($actionEl[0], 'click', function (evt) {
                 evt.preventDefault();
                 handleValidation();
+            });
+        }
+
+        var $cardNumberEl = formEls.$CARD_NUMBER;
+        if ($cardNumberEl.length) {
+            bean.on($cardNumberEl[0], 'keyup blur', function (e) {
+                var input = e && e.target;
+                displayCardImg(input.value);
             });
         }
     }

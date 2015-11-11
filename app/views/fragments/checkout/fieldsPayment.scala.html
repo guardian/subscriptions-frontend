@@ -76,14 +76,30 @@
 @* TODO: putting hidden in the HTML has issues, e.g. when browser remembers which toggle was ticked previously *@
 <div class="payment-type payment-type--card js-payment-type-card" hidden="true">
     <div class="form-field js-checkout-card-number">
-        <label class="label" for="payment-card-number">Card number</label>
-        <input type="text" pattern="[0-9]*" size="20"
-               class="input-text js-input"
-               id="payment-card-number"
-               placeholder="0000 0000 0000 0000"
-               maxlength="19"
-               data-masker-delim=" " data-masker-length="4"/>
-        @fragments.forms.errorMessage("Please check your card number")
+        <div class="u-cf">
+            <label class="label u-align-left" for="payment-card-number">Card number</label>
+            <ul class="o-inline-list u-align-right">
+                <li class="u-align-middle o-inline-list__item">
+                    <i class="sprite-card sprite-card--small sprite-card--visa"></i>
+                </li>
+                <li class="u-align-middle o-inline-list__item">
+                    <i class="sprite-card sprite-card--small sprite-card--mastercard"></i>
+                </li>
+                <li class="u-align-middle o-inline-list__item">
+                    <i class="sprite-card sprite-card--small sprite-card--american-express"></i>
+                </li>
+            </ul>
+        </div>
+        <div class="card-number">
+            <i class="card-number__icon sprite-card sprite-card--unknown js-credit-card-image"></i>
+            <input type="text" pattern="[0-9]*" size="20"
+            class="input-text js-input"
+            id="payment-card-number"
+            placeholder="0000 0000 0000 0000"
+            maxlength="19"
+            data-masker-delim=" " data-masker-length="4"/>
+            @fragments.forms.errorMessage("Please check your card number")
+        </div>
     </div>
 
     <div class="form-field js-checkout-card-cvc">
