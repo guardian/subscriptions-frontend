@@ -30,6 +30,7 @@ define(['$', 'bean'], function ($, bean) {
                     getTargets(e.target).attr('hidden', true);
                 }
             });
+            bean.fire(el, 'change');
         });
     }
 
