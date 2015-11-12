@@ -53,11 +53,12 @@ body:not(:-moz-handler-blocked) fieldset {
     }
 }
 .field-panel__fields {
-    padding-bottom: $gs-baseline * 2;
+    padding: $gs-baseline 0;
 
     @include mq(tablet) {
         float: right;
         width: 65%;
+        padding-top: 0;
     }
 }
 
@@ -266,6 +267,7 @@ input[type=number] {
 }
 .field-group__item {
     display: inline-block;
+    vertical-align: top;
     margin-right: $gs-gutter / 2;
 }
 
@@ -297,7 +299,6 @@ input[type=number] {
 .security-note {
     @include fs-textSans(2);
     color: $c-neutral2;
-    margin-bottom: $gs-baseline / 2;
 }
 
 /* Form Extras

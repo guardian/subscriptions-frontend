@@ -99,14 +99,25 @@
 /* Credit/Debit Card
    ========================================================================== */
 
+.card-choices {
+    margin-top: -5px;
+    margin-bottom: 5px;
+}
+
 .card-number {
     position: relative;
 }
-
 .card-number__icon {
     position: absolute;
     right: $input-border-radius;
     top: 2px;
+}
+.card-expiry__field {
+    display: inline-block;
+    margin-right: 4px;
+    &:last-child {
+        margin-right: $gs-gutter;
+    }
 }
 
 /* Payment Cards Sprite
@@ -161,7 +172,6 @@ $sprite-card-offset-visa:               -355px;
    ========================================================================== */
 
 .review-details {
-    margin: $gs-baseline 0;
     @include fs-bodyCopy(2);
 }
 .review-details__item {
