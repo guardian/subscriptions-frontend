@@ -2,11 +2,13 @@ define([
     'modules/forms/toggleError',
     'modules/checkout/formElements',
     'modules/checkout/validatePersonal',
+    'modules/forms/loader',
     'modules/checkout/tracking'
 ], function (
     toggleError,
     formEls,
     validatePersonal,
+    loader,
     tracking
 ) {
     'use strict';
@@ -29,7 +31,6 @@ define([
     }
 
     function displayErrors(validity) {
-
         requiredFields.forEach(function(field) {
             var isEmpty = !field.input.val();
             toggleError(field.container, isEmpty);
@@ -58,15 +59,19 @@ define([
     }
 
     function handleValidation(personalDetails) {
+        loader.setLoaderElem(document.querySelector('.js-personal-details-validating'));
+        loader.startLoader();
+
         validatePersonal(
             personalDetails,
-            guardian.user.isSignedIn
+                guardian.user.isSignedIn
         ).then(function (validity) {
+            loader.stopLoader();
             displayErrors(validity);
-            if(validity.allValid) {
+            if (validity.allValid) {
                 nextStep();
             }
-        });
+        })
     }
 
     function init() {
@@ -74,8 +79,7 @@ define([
         var actionEl = $actionEl[0];
         tracking.personalDetailsTracking();
 
-
-        if($actionEl.length) {
+        if ($actionEl.length) {
             actionEl.addEventListener('click', function(e) {
                 e.preventDefault();
                 handleValidation({

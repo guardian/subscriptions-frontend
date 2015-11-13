@@ -7,6 +7,7 @@ define([
     'modules/checkout/payment',
     'modules/checkout/tracking',
     'lodash/collection/find',
+    'modules/forms/loader',
     'lodash/object/assign'
 ], function (
     bean,
@@ -17,6 +18,7 @@ define([
     payment,
     tracking,
     find,
+    loader,
     assign
 ) {
     'use strict';
@@ -71,7 +73,10 @@ define([
             throw new Error('Invalid payment method '+paymentMethod);
         }
 
-        payment.validate(paymentDetails).then(function(validity){
+        loader.setLoaderElem(document.querySelector('.js-payment-details-validating'));
+        loader.startLoader();
+        payment.validate(paymentDetails).then(function(validity) {
+            loader.stopLoader();
             displayErrors(validity);
             if (validity.allValid) {
                 nextStep();

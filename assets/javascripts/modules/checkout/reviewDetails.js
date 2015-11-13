@@ -65,6 +65,7 @@ define([
             form.addEventListener('submit', function(e) {
                 e.preventDefault();
 
+                loader.setLoaderElem(document.querySelector('.js-loader'));
                 loader.startLoader();
                 submitEl.setAttribute('disabled', 'disabled');
 
@@ -72,8 +73,6 @@ define([
 
                 if (data['payment.type'] === 'card') {
                     data['payment.token'] = payment.getStripeToken();
-
-                    // TODO: do we want to remove direct debit data in this case?
                 }
 
                 ajax({
