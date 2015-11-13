@@ -90,12 +90,12 @@ body:not(:-moz-handler-blocked) fieldset {
         display: block;
     }
 }
-// .js-on .field-panel.is-collapsed {
-//     .field-panel__intro,
-//     .field-panel__fields {
-//         display: none;
-//     }
-// }
+.js-on .field-panel.is-collapsed {
+    .field-panel__intro,
+    .field-panel__fields {
+        display: none;
+    }
+}
 
 // Field Notes
 // ============================================================================
