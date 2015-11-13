@@ -63,6 +63,7 @@ define([
                 detailsConfirmed: formEls.$CONFIRM_PAYMENT[0].checked
             });
         } else if (paymentMethod === 'card') {
+            toggleError(formEls.$CARD_CONTAINER, false);
             assign(paymentDetails, {
                 cardNumber: formEls.$CARD_NUMBER.val(),
                 cardCVC: formEls.$CARD_CVC.val(),

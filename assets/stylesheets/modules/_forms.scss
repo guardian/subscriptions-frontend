@@ -91,11 +91,11 @@ body:not(:-moz-handler-blocked) fieldset {
     }
 }
 .js-on .field-panel.is-collapsed {
-    .field-panel__intro,
-    .field-panel__fields {
-        display: none;
-    }
-}
+     .field-panel__intro,
+     .field-panel__fields {
+         display: none;
+     }
+ }
 
 // Field Notes
 // ============================================================================

@@ -19,6 +19,8 @@ define([
 ) {
     'use strict';
 
+    var FIELDSET_COLLAPSED = 'is-collapsed';
+
     function clickHelper($elem, callback) {
         if ($elem.length) {
             bean.on($elem[0], 'click', function (e) {
@@ -85,6 +87,15 @@ define([
                     error: function() {
                         loader.stopLoader();
                         submitEl.removeAttribute('disabled');
+
+                        formEls.$FIELDSET_PAYMENT_DETAILS
+                            .removeClass(FIELDSET_COLLAPSED);
+
+                        formEls.$FIELDSET_REVIEW
+                            .addClass(FIELDSET_COLLAPSED);
+
+                        formEls.$FIELDSET_YOUR_DETAILS[0]
+                            .scrollIntoView();
 
                         toggleError(formEls.$CARD_CONTAINER, true);
                     }
