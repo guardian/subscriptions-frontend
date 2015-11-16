@@ -1,28 +1,31 @@
 define(['modules/checkout/validatePaymentFormat'], function (validatePaymentFormat) {
 
     describe('#validatePaymentFormat', function () {
-
         it('should validate account number', function () {
 
             var tooShort = {
+                paymentMethod: 'direct-debit',
                 accountNumber: '123',
                 accountHolderName: '',
                 sortCode: null,
                 detailsConfirmed: false
             };
             var tooLong = {
+                paymentMethod: 'direct-debit',
                 accountNumber: '123456789101112',
                 accountHolderName: '',
                 sortCode: null,
                 detailsConfirmed: false
             };
             var justRightLow = {
+                paymentMethod: 'direct-debit',
                 accountNumber: '123456',
                 accountHolderName: '',
                 sortCode: null,
                 detailsConfirmed: false
             };
             var justRightHigh = {
+                paymentMethod: 'direct-debit',
                 accountNumber: '1234567890',
                 accountHolderName: '',
                 sortCode: null,
@@ -37,12 +40,14 @@ define(['modules/checkout/validatePaymentFormat'], function (validatePaymentForm
 
         it('should validate account holder name', function () {
             var tooLong = {
+                paymentMethod: 'direct-debit',
                 accountNumber: '',
                 accountHolderName: 'This name is longer than 18 characters',
                 sortCode: null,
                 detailsConfirmed: false
             };
             var valid = {
+                paymentMethod: 'direct-debit',
                 accountNumber: '',
                 accountHolderName: 'Example Name',
                 sortCode: null,
@@ -55,18 +60,21 @@ define(['modules/checkout/validatePaymentFormat'], function (validatePaymentForm
         it('should validate sort code', function () {
 
             var tooShort = {
+                paymentMethod: 'direct-debit',
                 accountNumber: '',
                 accountHolderName: '',
                 sortCode: '00-00',
                 detailsConfirmed: false
             };
             var tooLong = {
+                paymentMethod: 'direct-debit',
                 accountNumber: '',
                 accountHolderName: '',
                 sortCode: '01-01-0100',
                 detailsConfirmed: false
             };
             var justRight = {
+                paymentMethod: 'direct-debit',
                 accountNumber: '',
                 accountHolderName: '',
                 sortCode: '01-01-01',
@@ -82,6 +90,7 @@ define(['modules/checkout/validatePaymentFormat'], function (validatePaymentForm
         it('should validate all details', function () {
 
             var valid = validatePaymentFormat({
+                paymentMethod: 'direct-debit',
                 accountNumber: '12346789',
                 accountHolderName: 'Example Name',
                 sortCode: '01-01-01',
@@ -89,6 +98,7 @@ define(['modules/checkout/validatePaymentFormat'], function (validatePaymentForm
             });
 
             var invalid = validatePaymentFormat({
+                paymentMethod: 'direct-debit',
                 accountNumber: '12346789',
                 accountHolderName: 'This name is longer than 18 characters',
                 sortCode: '01-01-0100',

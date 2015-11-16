@@ -16,7 +16,12 @@ define(function() {
         LOADER_ELEM.textContent = msg;
     };
 
+    var setLoaderElem = function(elem) {
+        LOADER_ELEM = elem;
+    };
+
     return {
+        setLoaderElem: setLoaderElem,
         setProcessingMessage: setProcessingMessage,
         startLoader: startLoader,
         stopLoader: stopLoader

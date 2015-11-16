@@ -29,7 +29,6 @@
 @import 'base/normalize';
 @import 'base/base';
 @import 'base/layout';
-@import 'base/helpers';
 
 /* ==========================================================================
    Objects
@@ -72,3 +71,5 @@
    ========================================================================== */
 
 @import 'utilities/visibility';
+@import 'utilities/layout';
+@import 'utilities/text';

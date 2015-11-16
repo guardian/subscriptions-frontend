@@ -1,4 +1,4 @@
-@(title: String, jsVars: model.JsVars)
+@(title: String, jsVars: model.JsVars, touchpointBackendResolutionOpt: Option[services.TouchpointBackend.Resolution])
 
 @import play.api.Play
 @import controllers.CachedAssets.hashedPathFor
@@ -13,7 +13,7 @@
 <meta name="format-detection" content="telephone=no">
 <meta name="HandheldFriendly" content="True">
 
-@fragments.javascriptFirstSteps(jsVars)
+@fragments.javascriptFirstSteps(jsVars, touchpointBackendResolutionOpt)
 
 <link rel="stylesheet" href="@hashedPathFor("stylesheets/main.min.css")"/>
 <!--[if (IE 9)]>

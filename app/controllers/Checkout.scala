@@ -2,6 +2,8 @@ package controllers
 
 import actions.CommonActions._
 import com.gu.identity.play.IdUser
+import com.gu.membership.stripe.Stripe
+import com.gu.membership.zuora.soap
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config.Identity.webAppProfileUrl
 import forms.{FinishAccountForm, SubscriptionsForm}
@@ -96,7 +98,10 @@ object Checkout extends Controller with LazyLogging with ActivityTracking {
 	      product.foreach(prod => trackAnon(SubscriptionRegistrationActivity(MemberData(result, formData, prod))))
       }
 
-      Redirect(routes.Checkout.thankYou()).withSession(session)
+      Ok(Json.obj("redirect" -> routes.Checkout.thankYou().url)).withSession(session);
+    }.recover {
+      case err: soap.Error if err.code == "TRANSACTION_FAILED" => Forbidden
+      case err: Stripe.Error => Forbidden
     }
   }
 
@@ -126,16 +131,18 @@ object Checkout extends Controller with LazyLogging with ActivityTracking {
       val passwordForm = authenticatedUserFor(request).fold {
         for {
           userId <- session.get(SessionKeys.UserId)
-	  token <- session.get(SessionKeys.IdentityGuestPasswordSettingToken)
-	  form <- GuestUser(UserId(userId), IdentityToken(token)).toGuestAccountForm
-	} yield form
-      }{ const(None) } // Don't display the user registration form if the user is logged in
+          token <- session.get(SessionKeys.IdentityGuestPasswordSettingToken)
+          form <- GuestUser(UserId(userId), IdentityToken(token)).toGuestAccountForm
+        } yield form
+      } {
+        const(None)
+      } // Don't display the user registration form if the user is logged in
 
       zuoraService.products.map { products =>
-		val product = products.find(_.ratePlanId == ratePlanId).getOrElse(
-	  throw new NoSuchElementException(s"Could not find a product with rate plan id $ratePlanId")
-	)
-	Ok(view.thankyou(subsName, passwordForm, touchpointBackend, product))
+        val product = products.find(_.ratePlanId == ratePlanId).getOrElse(
+          throw new NoSuchElementException(s"Could not find a product with rate plan id $ratePlanId")
+        )
+        Ok(view.thankyou(subsName, passwordForm, touchpointBackend, product))
       }
     }
   }

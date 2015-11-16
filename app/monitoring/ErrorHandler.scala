@@ -29,20 +29,7 @@ class ErrorHandler @Inject() (env: Environment,
     Future.successful(Cached(NotFound(views.html.error404())))
   }
 
-  override protected def onDevServerError(request: RequestHeader, exception: UsefulException): Future[Result] = {
-    specialHandler.applyOrElse(exception.cause, { case e =>
-      super.onDevServerError(request, exception)
-    }: Handler)
-  }
-
   override protected def onProdServerError(request: RequestHeader, exception: UsefulException): Future[Result] = {
-    specialHandler.applyOrElse(exception.cause, { case _ =>
-      Future.successful(NoCache(InternalServerError(views.html.error500(exception))))
-    }: Handler)
-  }
-
-  private val specialHandler: Handler = {
-    case err: soap.Error if err.code == "TRANSACTION_FAILED" =>
-      Future.successful(NoCache(BadRequest(views.html.zuoraTransactionFailed())))
+    Future.successful(NoCache(InternalServerError(views.html.error500(exception))))
   }
 }

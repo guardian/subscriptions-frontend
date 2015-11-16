@@ -1,53 +1,39 @@
-@(form: Form[model.SubscriptionData])
+@(form: Form[model.SubscriptionData], touchpointBackendResolution: services.TouchpointBackend.Resolution)
 
-@* ===== Account number ===== *@
-<div class="form-field js-checkout-account">
-    <label class="label" for="payment-account">Bank account number</label>
-    <input type="text" class="input-text js-input" id="payment-account"
-        name="payment.account" pattern="[0-9]*" minlength="6" maxlength="10" required>
-    @fragments.forms.errorMessage("Please enter between 6 and 10 digits for the account number, and make sure the account is valid")
+@* ===== Payment type ===== *@
+
+@******************************************************************************************
+    Credit/debit card payment option is currently only exposed to logged-in test users.
+    TODO: remove this condition once Manage My Account functionality is released.
+*******************************************************************************************@
+<div @if(touchpointBackendResolution.validTestUserCredentialOpt.isEmpty){ hidden="true" }>
+    <div class="label u-margin-bottom">How would you like to pay?</div>
+    <div class="field-group js-checkout-payment-method">
+        <div class="field-group__item">
+            <label class="option">
+                <span class="option__input">
+                    <input class="js-option-switch" data-option-switch=".js-payment-type-direct-debit"
+                    type="radio" name="payment.type" value="direct-debit" checked>
+                </span>
+                <span class="option__label">Direct Debit</span>
+            </label>
+        </div>
+        <div class="field-group__item">
+            <label class="option">
+                <span class="option__input">
+                    <input class="js-option-switch" data-option-switch=".js-payment-type-card"
+                    type="radio" name="payment.type" value="card">
+                </span>
+                <span class="option__label">Credit/Debit card</span>
+            </label>
+        </div>
+    </div>
 </div>
 
-@* ===== Sortcode ===== *@
-<div class="form-field js-checkout-sortcode">
-    <label class="label" for="payment-sortcode">Bank sort code</label>
-    <input type="text" class="input-text input-text--small js-input"
-        name="payment.sortcode" id="payment-sortcode"
-        placeholder="00-00-00"  maxlength="8" required
-        data-masker-delim="-" data-masker-length="2">
-    @fragments.forms.errorMessage("")
+<div class="payment-type payment-type--direct-debit js-payment-type-direct-debit">
+    @fragments.checkout.fieldsDirectDebit()
 </div>
 
-@* ===== Account Holder Name ===== *@
-<div class="form-field js-checkout-holder">
-    @*
-        BACS requirement:
-        "The payer’s account name (maximum of 18 characters).
-        This must be the name of the person who is paying the Direct Debit
-        and has signed the Direct Debit Instruction (DDI)."
-        http://www.bacs.co.uk/Bacs/Businesses/Resources/Pages/Glossary.aspx
-    *@
-    <label class="label" for="payment-holder">Name of account holder</label>
-    <input type="text" class="input-text js-input" id="payment-holder"
-        name="payment.holder" maxlength="18" required>
-    @fragments.forms.errorMessage("The account holder name must be less than 18 characters")
-</div>
-
-@* TODO: handle credit cards *@
-@* ===== Account type ===== *@
-<div class="form-field js-checkout-type">
-    <input type="hidden" id="payment-type" name="payment.type" value="direct-debit">
-</div>
-
-@* ===== Confirm Payment ===== *@
-<div class="form-field js-checkout-confirm-payment">
-    <label class="option">
-        <span class="option__input">
-            <input type="checkbox" class="js-input">
-        </span>
-        <span class="option__label">
-            I confirm that I am the account holder and I am solely able to authorise debit from the account
-        </span>
-    </label>
-    @fragments.forms.errorMessage("Please confirm that you are the account holder")
+<div class="payment-type payment-type--card js-payment-type-card">
+    @fragments.checkout.fieldsCard()
 </div>

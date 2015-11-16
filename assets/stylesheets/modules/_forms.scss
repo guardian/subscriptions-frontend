@@ -53,11 +53,12 @@ body:not(:-moz-handler-blocked) fieldset {
     }
 }
 .field-panel__fields {
-    padding-bottom: $gs-baseline * 2;
+    padding: $gs-baseline 0;
 
     @include mq(tablet) {
         float: right;
         width: 65%;
+        padding-top: 0;
     }
 }
 
@@ -90,11 +91,11 @@ body:not(:-moz-handler-blocked) fieldset {
     }
 }
 .js-on .field-panel.is-collapsed {
-    .field-panel__intro,
-    .field-panel__fields {
-        display: none;
-    }
-}
+     .field-panel__intro,
+     .field-panel__fields {
+         display: none;
+     }
+ }
 
 // Field Notes
 // ============================================================================
@@ -125,8 +126,14 @@ body:not(:-moz-handler-blocked) fieldset {
 .label {
     @include fs-bodyCopy(2);
     display: block;
-    cursor: pointer;
     margin-bottom: 2px;
+}
+
+.label--inline {
+    @include fs-textSans(3);
+    display: inline-block;
+    margin-right: .3em;
+    margin-bottom: 0;
 }
 
 /**
@@ -159,7 +166,7 @@ input[type=number] {
     width: 100%;
     -webkit-appearance: none;
     appearance: none;
-    border-radius: 20px;
+    border-radius: $input-border-radius;
 
     &:focus {
         border-color: $c-neutral3;
@@ -174,12 +181,8 @@ input[type=number] {
     }
 }
 .input-text--small {
-    width: 30%;
+    width: 120px;
 }
-.input-text--xsmall {
-    width: 15%;
-}
-
 .input-textarea {
     resize: vertical;
 }
@@ -205,7 +208,7 @@ input[type=number] {
 }
 .option__input {
     position: relative;
-    top: -1px; // Optical alignment
+    top: -2px; // Optical alignment
     width: 1em;
     padding-right: $gs-baseline / 2;
 }
@@ -256,6 +259,19 @@ input[type=number] {
     }
 }
 
+/**
+ * Option groups
+ */
+.field-group {
+    margin-bottom: $gs-baseline / 2;
+}
+.field-group__item {
+    display: inline-block;
+    vertical-align: top;
+    margin-right: $gs-gutter / 2;
+}
+
+
 /* Form Notes
    ========================================================================== */
 
@@ -283,7 +299,6 @@ input[type=number] {
 .security-note {
     @include fs-textSans(2);
     color: $c-neutral2;
-    margin-bottom: $gs-baseline / 2;
 }
 
 /* Form Extras
