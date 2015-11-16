@@ -60,7 +60,7 @@ define([
     function handleValidation(personalDetails) {
         validatePersonal(
             personalDetails,
-            guardian.user.isSignedIn
+            guardian.user.userIsSignedIn
         ).then(function (validity) {
             displayErrors(validity);
             if(validity.allValid) {
