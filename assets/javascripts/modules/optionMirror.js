@@ -6,24 +6,26 @@ define(function () {
         MIRROR_VALUE: '.js-option-mirror-value'
     };
 
-    function mirror(valueElem) {
+    function mirror(valueElems) {
         var selected = document.querySelector(selectors.OPTION_GROUP + ' input:checked');
         var selectedValue = selected.getAttribute('data-option-mirror-label');
-        if(selectedValue) {
-            valueElem.textContent = selectedValue;
+        if (selectedValue) {
+            [].forEach.call(valueElems, function(valueElem) {
+                valueElem.textContent = selectedValue;
+            });
         }
     }
 
     var init = function() {
-        var valueElem = document.querySelector(selectors.MIRROR_VALUE);
+        var valueElems = document.querySelectorAll(selectors.MIRROR_VALUE);
         var options = document.querySelectorAll(selectors.OPTION_GROUP + ' input');
-        if (valueElem && options.length) {
+        if (valueElems && options.length) {
             [].forEach.call(options, function(option) {
                 option.addEventListener('change', function() {
-                    mirror(valueElem);
+                    mirror(valueElems);
                 });
             });
-            mirror(valueElem);
+            mirror(valueElems);
         }
     };
 

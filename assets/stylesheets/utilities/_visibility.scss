@@ -2,6 +2,23 @@
    Responsive State Helpers
    ========================================================================== */
 
+.u-h {
+    @include u-h;
+}
+
+// Visually hide an element but allow screen readers to read it.
+// Useful for hiding form labels when using the placeholder text as an input cue.
+.u-sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0,0,0,0);
+    border: 0;
+}
+
 .is-hidden,
 [hidden] {
     display: none !important;
@@ -38,3 +55,10 @@
 .visible {
     display: inline-block !important;
 }
+
+.break-tablet {
+    @include mq(tablet) {
+        display: block;
+    }
+}
+

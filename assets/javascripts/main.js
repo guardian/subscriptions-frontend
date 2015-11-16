@@ -7,6 +7,7 @@ require([
     'modules/profileMenu',
     'modules/userDetails',
     'modules/optionMirror',
+    'modules/optionSwitch',
     'modules/password',
     'modules/inputMask',
     'modules/checkout',
@@ -24,6 +25,7 @@ require([
     profileMenu,
     userDetails,
     optionMirror,
+    optionSwitch,
     password,
     inputMask,
     checkout,
@@ -42,6 +44,7 @@ require([
     profileMenu.init();
     userDetails.init();
     optionMirror.init();
+    optionSwitch.init();
     password.init();
     inputMask.init();
     country.init();

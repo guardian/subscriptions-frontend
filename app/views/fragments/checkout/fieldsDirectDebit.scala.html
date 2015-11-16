@@ -1,0 +1,47 @@
+@()
+
+@* ===== Account number ===== *@
+<div class="form-field js-checkout-account">
+    <label class="label" for="payment-account">Bank account number</label>
+    <input type="text" class="input-text js-input" id="payment-account"
+    name="payment.account" pattern="[0-9]*" minlength="6" maxlength="10" required>
+        @fragments.forms.errorMessage("Please enter between 6 and 10 digits for the account number, and make sure the account is valid")
+</div>
+
+@* ===== Sortcode ===== *@
+<div class="form-field js-checkout-sortcode">
+    <label class="label" for="payment-sortcode">Bank sort code</label>
+    <input type="text" class="input-text input-text--small js-input"
+    name="payment.sortcode" id="payment-sortcode"
+    placeholder="00-00-00"  maxlength="8" required
+    data-masker-delim="-" data-masker-length="2">
+    @fragments.forms.errorMessage("")
+</div>
+
+@* ===== Account Holder Name ===== *@
+<div class="form-field js-checkout-holder">
+    @*
+    BACS requirement:
+    "The payer’s account name (maximum of 18 characters).
+    This must be the name of the person who is paying the Direct Debit
+    and has signed the Direct Debit Instruction (DDI)."
+    http://www.bacs.co.uk/Bacs/Businesses/Resources/Pages/Glossary.aspx
+    *@
+    <label class="label" for="payment-holder">Name of account holder</label>
+    <input type="text" class="input-text js-input" id="payment-holder"
+    name="payment.holder" maxlength="18" required>
+    @fragments.forms.errorMessage("This field is required")
+</div>
+
+@* ===== Confirm Payment ===== *@
+<div class="form-field js-checkout-confirm-payment">
+    <label class="option">
+        <span class="option__input">
+            <input type="checkbox" class="js-input">
+        </span>
+        <span class="option__label">
+            I confirm that I am the account holder and I am solely able to authorise debit from the account
+        </span>
+    </label>
+    @fragments.forms.errorMessage("Please confirm that you are the account holder")
+</div>

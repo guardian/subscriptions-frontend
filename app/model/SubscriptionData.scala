@@ -9,7 +9,7 @@ sealed trait PaymentType {
 
 object PaymentType {
   def fromKey(key: String): Option[PaymentType] = key match {
-    case "credit-card" => Some(CreditCard)
+    case "card" => Some(CreditCard)
     case "direct-debit" => Some(DirectDebit)
     case _ => None
   }
@@ -20,7 +20,7 @@ case object DirectDebit extends PaymentType {
 }
 
 case object CreditCard extends PaymentType {
-  override def toKey = "credit-card"
+  override def toKey = "card"
 }
 
 sealed trait PaymentData

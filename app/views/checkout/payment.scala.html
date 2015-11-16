@@ -35,7 +35,7 @@
 <main class="page-container gs-container">
 
     <section class="checkout-container">
-        <form class="form js-checkout-form" action="@routes.Checkout.renderCheckout().toString()" method="POST">
+        <form class="form js-checkout-form" action="@routes.Checkout.renderCheckout().toString()" method="POST" novalidate>
             @helper.CSRF.formField
 
             @fragments.checkout.checkoutHeader("Checkout")
@@ -60,7 +60,22 @@
                 </fieldset>
                 <div class="u-display-from-tablet" data-set="checkout-notices">
                     <div class="js-append">
-                        @fragments.checkout.notices()
+                        <div class="js-payment-type-direct-debit">
+                            @fragments.checkout.notices()
+                        </div>
+                        <div class="js-payment-type-card" hidden="true">
+                            <div class="notice">
+                                <h3 class="notice__header">First payment</h3>
+                                <div class="notice__content">You first payment will be taken in 14 days under the name Guardian News & Media.</div>
+                            </div>
+                            <div class="notice">
+                                <h3 class="notice__header">Ongoing payments</h3>
+                                <div class="notice__content">Your card will be charged
+                                    @products.find(_.frequency == BillingFrequency.Month).map {product => <span class="js-option-mirror-value">@product.price.pretty every month</span>}.
+                                    Payments will taken on or shortly after the [DATE].
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -91,6 +106,7 @@
 
                             <div class="actions">
                                 <a href="#paymentDetails" class="button button--primary button--large js-checkout-your-details-submit">Continue</a>
+                                <div class="loader js-personal-details-validating">Validating...</div>
                             </div>
                         </div>
                     </fieldset>
@@ -105,17 +121,21 @@
                         <div class="field-panel__intro">
                             <div class="field-note field-note--offset">
                                 @fragments.forms.securityNote()
-                                Payment will be taken by Direct Debit
+                                @* This block will be removed once credit/debit card option is visible to real users *@
+                                @if(touchpointBackendResolution.validTestUserCredentialOpt.isEmpty) {
+                                    Payment will be taken by Direct Debit
+                                }
                             </div>
                         </div>
                         <div class="field-panel__edit">
                             <a href="#paymentDetails" class="text-button u-button-reset js-edit-payment-details" title="Edit your payment details">Edit</a>
                         </div>
                         <div class="field-panel__fields">
-                            @fragments.checkout.fieldsPayment(form)
+                            @fragments.checkout.fieldsPayment(form, touchpointBackendResolution)
 
                             <div class="actions">
                                 <a href="#formReview" class="button button--primary button--large js-checkout-payment-details-submit">Continue</a>
+                                <div class="loader js-payment-details-validating">Validating...</div>
                             </div>
                         </div>
                     </fieldset>

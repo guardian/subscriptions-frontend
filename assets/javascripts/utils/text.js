@@ -17,6 +17,17 @@ define(function() {
             return values.filter(function(val) {
                 return val !== '';
             }).join(separator);
+        },
+        /**
+         * For credit/debit card number.
+         * Replaces all digits except for last n with chars.
+         * Does not modify string in place but returns a new string.
+         */
+        obscure: function(str, n, chars) {
+            var replace = str.slice(0, str.length-n);
+            var leaveIntact = n === 0 ? '' : str.slice(-n);
+
+            return replace.replace(/\d/g, chars) + leaveIntact;
         }
     };
 });
