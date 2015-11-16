@@ -64,7 +64,7 @@ define([
 
         validatePersonal(
             personalDetails,
-            guardian.user.isSignedIn
+            guardian.user.userIsSignedIn
         ).then(function (validity) {
             loader.stopLoader();
             displayErrors(validity);
