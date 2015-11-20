@@ -6,7 +6,7 @@ define([
     'use strict';
 
     function emailCheck(email) {
-        return ajax({ url: '/checkout/check-identity?email=' + email }).then(function (response) {
+        return ajax({ url: '/checkout/check-identity?email=' + encodeURIComponent(email) }).then(function (response) {
             return response.emailInUse;
         }).fail(function (err) {
             Raven.captureException(err);
@@ -54,13 +54,13 @@ define([
                 isEmailInUse: false
             };
 
-            if(hasBasicValidity) {
+            if (hasBasicValidity) {
 
                 /**
                  * If the user is signed in we do not need to
                  * validate their email address
                  */
-                if(isSignedIn) {
+                if (isSignedIn) {
                     validity.allValid = true;
                     resolve(validity);
                 }
@@ -70,7 +70,7 @@ define([
                  * a) validate their email address
                  * b) confirm their email address is not in use
                  */
-                if(!isSignedIn && hasBasicEmailValidity) {
+                if (!isSignedIn && hasBasicEmailValidity) {
                     emailCheck(emailValue).then(function(isEmailInUse) {
                         if(isEmailInUse) {
                             validity.isEmailInUse = true;
