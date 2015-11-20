@@ -46,7 +46,7 @@ trait ExactTargetService extends LazyLogging {
           logger.info(s"Successfully sent an email to confirm the subscription: $subscribeResult")
         }
         case _ => {
-          val errorMsg = s"Failed to send the subscription email $subscribeResult. Code: ${response.code()}, Message: ${response.body()}"
+          val errorMsg = s"Failed to send the subscription email $subscribeResult. Code: ${response.code()}, Message: ${response.body.string()}"
           logger.error(errorMsg)
           throw new ExactTargetException(errorMsg)
         }
