@@ -55,6 +55,8 @@ define([
             .addClass(FIELDSET_COMPLETE)[0]
             .scrollIntoView();
 
+        formEls.$NOTICES.removeAttr('hidden');
+
         tracking.paymentDetailsTracking();
     }
 

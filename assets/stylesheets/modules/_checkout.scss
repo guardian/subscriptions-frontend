@@ -75,6 +75,12 @@
 /* Notice
    ========================================================================== */
 
+.notices-container {
+    display: none;
+    @include mq(tablet) {
+        display: block;
+    }
+}
 .notice {
     @include fs-textSans(2);
     border-top: 1px dotted $c-neutral5;
