@@ -3,27 +3,20 @@
 @import configuration.Details
 @import controllers.CachedAssets.hashedPathFor
 
-@notice(title: String)(content: Html) = {
-    <div class="notice">
-        <h3 class="notice__header">@title</h3>
-        <div class="notice__content">@content</div>
-    </div>
-}
-
-@notice("Advanced Notice") {
+@fragments.checkout.notice("Advanced Notice") {
     <p>
         The details of your Direct Debit instruction including payment schedule,
         due date, frequency and amount will be sent to you within three working days.
         All the normal Direct Debit safeguards and guarantees apply.
     </p>
 }
-@notice("Money Back Guarantee") {
+@fragments.checkout.notice("Money Back Guarantee") {
     <p>
         If you wish to cancel your subscription, we will send
         you a refund of the unexpired part of your subscription.
     </p>
 }
-@notice("Direct Debit") {
+@fragments.checkout.notice("Direct Debit") {
 
     <address>
         The Guardian, The Quorum,
