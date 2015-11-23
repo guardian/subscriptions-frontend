@@ -95,7 +95,7 @@ object ETClient extends ETClient with LazyLogging {
     (Json.parse(respBody) \ "accessToken").as[String]
   }
 
-  Akka.system.scheduler.schedule(initialDelay = 55.minutes, interval = 55.minutes) {
+  Akka.system.scheduler.schedule(initialDelay = 30.minutes, interval = 30.minutes) {
     accessToken send getAccessToken
   }
 
