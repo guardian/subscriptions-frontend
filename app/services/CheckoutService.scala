@@ -72,15 +72,15 @@ class CheckoutService(
       }
       subscribe <- subscribeAction(payment)
       result <- zuoraService.subscribe(subscribe)
+      postSubscribe = subscribe.paymentMethodOpt match {
+        case Some(CreditCardReferenceTransaction(customer)) => salesforceService.setCardInformation(userData.id, customer.id, customer.card.id)
+        case _ => Future(memberId)
+      }
+      postSubscribeResult <- postSubscribe
     } yield {
       updateAuthenticatedUserDetails()
       sendETDataExtensionRow(result)
-      subscribe.paymentMethodOpt match {
-        case Some(CreditCardReferenceTransaction(customer)) =>
-          salesforceService.setCardInformation(userData.id, customer.id, customer.card.id)
-      }
       CheckoutResult(memberId, userData, result)
-
     }
   }
 }

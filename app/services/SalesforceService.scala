@@ -18,7 +18,7 @@ trait SalesforceService extends LazyLogging {
 
   def createOrUpdateUser(personalData: PersonalData, userId: UserId): Future[MemberId]
 
-  def setCardInformation(userId: UserId, customerId: String, cardId: String)
+  def setCardInformation(userId: UserId, customerId: String, cardId: String): Future[MemberId]
 
   def createSalesforceUserData(personalData: PersonalData): JsObject = Json.obj(
       EMAIL -> personalData.email,
