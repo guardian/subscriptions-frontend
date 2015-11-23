@@ -61,20 +61,10 @@
                 <div class="u-display-from-tablet" data-set="checkout-notices">
                     <div class="js-append">
                         <div class="js-payment-type-direct-debit">
-                            @fragments.checkout.notices()
+                            @fragments.checkout.noticesDirectDebit()
                         </div>
                         <div class="js-payment-type-card" hidden="true">
-                            <div class="notice">
-                                <h3 class="notice__header">First payment</h3>
-                                <div class="notice__content">You first payment will be taken in 14 days under the name Guardian News & Media.</div>
-                            </div>
-                            <div class="notice">
-                                <h3 class="notice__header">Ongoing payments</h3>
-                                <div class="notice__content">Your card will be charged
-                                    @products.find(_.frequency == BillingFrequency.Month).map {product => <span class="js-option-mirror-value">@product.price.pretty every month</span>}.
-                                    Payments will taken on or shortly after the [DATE].
-                                </div>
-                            </div>
+                            @fragments.checkout.noticesCard()
                         </div>
                     </div>
                 </div>
