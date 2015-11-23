@@ -4,6 +4,8 @@ define(['$'], function ($) {
     return {
         $CHECKOUT_FORM: $('.js-checkout-form'),
 
+        $NOTICES: $('.js-checkout-notices'),
+
         $FIRST_NAME: $('.js-checkout-first .js-input'),
         $LAST_NAME: $('.js-checkout-last .js-input'),
         $EMAIL: $('.js-checkout-email .js-input'),
