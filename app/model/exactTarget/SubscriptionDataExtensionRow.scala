@@ -105,7 +105,7 @@ object SubscriptionDataExtensionRow extends LazyLogging{
   }
 
   private def formatSortCode(sortCode: String): String = {
-    sortCode.grouped(2).mkString("-")
+    sortCode.filter(_.isDigit).grouped(2).mkString("-")
   }
 
   private def formatCurrency(currency: String): String = {
