@@ -45,7 +45,7 @@ object Checkout extends Controller with LazyLogging with ActivityTracking {
     val authUserOpt = authenticatedUserFor(request)
 
     def fillForm(): Future[Form[SubscriptionData]] = for {
-      fullUserOpt <- authUserOpt.fold[Future[Option[IdUser]]](Future.successful(None))(au => IdentityService.userLookupByScGuU(AuthCookie(au.authCookie)))
+      fullUserOpt <- authUserOpt.fold[Future[Option[IdUser]]](Future.successful(None))(au => IdentityService.userLookupByCredentials(au.credentials))
     } yield {
         fullUserOpt.map { idUser =>
           SubscriptionsForm().fill(SubscriptionData.fromIdUser(idUser))
