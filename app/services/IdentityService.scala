@@ -1,7 +1,7 @@
 package services
 
 import com.amazonaws.regions.{Region, Regions}
-import com.gu.identity.play.{AccessCredentials, CookieBuilder, AuthenticatedIdUser, IdUser}
+import com.gu.identity.play.{CookieBuilder, AuthenticatedIdUser, IdUser}
 import com.gu.monitoring.{AuthenticationMetrics, CloudWatch, RequestMetrics, StatusMetrics}
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
@@ -24,15 +24,10 @@ class IdentityService(identityApiClient: => IdentityApiClient) extends LazyLoggi
       (response.json \ "user" \ "id").asOpt[String].isDefined
     }
 
-  def userLookupByCredentials(accessCredentials: AccessCredentials): Future[Option[IdUser]] = accessCredentials match {
-    case cookies: AccessCredentials.Cookies => identityApiClient.userLookupByCookies (cookies).map {
-        response => (response.json \ "user").asOpt[IdUser]
-      }
-    case _ => Future.successful {
-      logger.error("ID API only supports forwarded access for Cookies")
-      None
+  def userLookupByScGuU(authCookie: AuthCookie): Future[Option[IdUser]] =
+    identityApiClient.userLookupByScGuUCookie(authCookie.value).map { response =>
+      (response.json \ "user").asOpt[IdUser]
     }
-  }
 
   def registerGuest(personalData: PersonalData): Future[GuestUser] = {
     identityApiClient.createGuest(personalData).map(response => response.json.as[GuestUser])
@@ -51,16 +46,13 @@ class IdentityService(identityApiClient: => IdentityApiClient) extends LazyLoggi
     }
   }
 
-  def updateUserDetails(personalData: PersonalData)(authenticatedUser: AuthenticatedIdUser): Future[Unit] =
-    authenticatedUser.credentials match {
-      case cookies: AccessCredentials.Cookies =>
-        identityApiClient.updateUserDetails(
-          personalData,
-          UserId(authenticatedUser.user.id),
-          cookies
-        ).map(_ => Unit)
-      case _ => Future.successful(logger.error("ID API only supports forwarded access for Cookies"))
-    }
+  def updateUserDetails(personalData: PersonalData)(authenticatedUser: AuthenticatedIdUser): Future[Unit] = {
+    identityApiClient.updateUserDetails(
+      personalData,
+      UserId(authenticatedUser.user.id),
+      AuthCookie(authenticatedUser.authCookie)
+    ).map(_ => Unit)
+  }
 }
 
 object IdentityService extends IdentityService(IdentityApiClient) {
@@ -100,8 +92,10 @@ trait IdentityApiClient {
   val createOnlyFields = Seq(primaryEmailAddress, publicFields)
   type Password = String
   type Email = String
+  type CookieValue = String
 
-  def userLookupByCookies: AccessCredentials.Cookies => Future[WSResponse]
+
+  def userLookupByScGuUCookie: CookieValue => Future[WSResponse]
 
   def createGuest: PersonalData => Future[WSResponse]
 
@@ -109,7 +103,7 @@ trait IdentityApiClient {
 
   def userLookupByEmail: Email => Future[WSResponse]
 
-  def updateUserDetails: (PersonalData, UserId, AccessCredentials.Cookies) => Future[WSResponse]
+  def updateUserDetails: (PersonalData, UserId, AuthCookie) => Future[WSResponse]
 }
 
 object IdentityApiClient extends IdentityApiClient with LazyLogging {
@@ -170,10 +164,10 @@ object IdentityApiClient extends IdentityApiClient with LazyLogging {
       .withCloudwatchMonitoringOfGet
   }
 
-  override val userLookupByCookies: AccessCredentials.Cookies => Future[WSResponse] = {
+  override val userLookupByScGuUCookie: CookieValue => Future[WSResponse] = {
     val endpoint = authoriseCall(WS.url(s"$identityEndpoint/user/me").withHeaders(("Referer", s"$identityEndpoint/")))
 
-    cookies => endpoint.withHeaders(cookies.forwardingHeader).execute()
+    cookieValue => endpoint.withHeaders(("X-GU-ID-FOWARDED-SC-GU-U", cookieValue)).execute()
       .withWSFailureLogging(endpoint)
       .withCloudwatchMonitoringOfGet
   }
@@ -197,13 +191,13 @@ object IdentityApiClient extends IdentityApiClient with LazyLogging {
       .withCloudwatchMonitoringOfPut
   }
 
-  override val updateUserDetails: (PersonalData, UserId, AccessCredentials.Cookies) => Future[WSResponse] = { (user, userId, authCookies) =>
+  override val updateUserDetails: (PersonalData, UserId, AuthCookie) => Future[WSResponse] = { (user, userId, authCookie) =>
     val endpoint = authoriseCall(WS.url(s"$identityEndpoint/user/${userId.id}"))
     val userJson: JsObject = user
     val updatedFields =
       createOnlyFields.foldLeft(userJson) { (map, field) => map - field }
 
-    endpoint.withHeaders(authCookies.forwardingHeader).post(updatedFields)
+    endpoint.withHeaders(("X-GU-ID-FOWARDED-SC-GU-U", authCookie.value)).post(updatedFields)
       .withWSFailureLogging(endpoint)
       .withCloudwatchMonitoringOfPost
   }
