@@ -4,7 +4,7 @@ import java.util.{Map => JMap}
 import com.github.t3hnar.bcrypt._
 import com.gu.membership.zuora.Address
 import configuration.Config
-import model.SubscriptionData
+import model.{CreditCardData, DirectDebitData, PaymentData, SubscriptionData}
 import model.zuora.{BillingFrequency, SubscriptionProduct}
 import services.CheckoutService.CheckoutResult
 import tracking.{ActivityTracking, TrackerData}
@@ -13,18 +13,19 @@ import scala.collection.JavaConversions._
 object MemberData {
   def apply(checkoutResult: CheckoutResult, subscriptionData: SubscriptionData, product: SubscriptionProduct): MemberData = {
     val address: Address = subscriptionData.personalData.address
-      MemberData(address.town,
+    MemberData(address.town,
       address.country.name,
       address.postCode,
       product.frequency,
       subscriptionData.personalData.receiveGnmMarketing,
       checkoutResult.salesforceMember.salesforceContactId,
-      checkoutResult.userIdData.id.toString
+      checkoutResult.userIdData.id.toString,
+      subscriptionData.paymentData
     )
   }
 }
 
-case class MemberData(town: String, country: String, postCode: String, billingFrequency: BillingFrequency, receiveGnmMarketing: Boolean, salesForceContactId: String, userId: String) {
+case class MemberData(town: String, country: String, postCode: String, billingFrequency: BillingFrequency, receiveGnmMarketing: Boolean, salesForceContactId: String, userId: String, paymentData: PaymentData) {
 
   def toMap: JMap[String, Any] = {
 
@@ -58,7 +59,14 @@ case class MemberData(town: String, country: String, postCode: String, billingFr
       "tier" -> "digital"
     )
 
-    addressData ++ marketingChoices ++ subscriptionPlan ++ identityData ++ tierData
+    val paymentMethodData = Map(
+      "paymentMethod" -> (paymentData match {
+        case d: DirectDebitData => "direct-debit"
+        case c: CreditCardData => "credit-card"
+      })
+    )
+
+    addressData ++ marketingChoices ++ subscriptionPlan ++ identityData ++ tierData ++ paymentMethodData
   }
 
   def truncatePostcode(postcode: String) = {
