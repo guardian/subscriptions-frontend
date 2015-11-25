@@ -36,6 +36,10 @@
             "Type" : "String",
             "Default" : "0.0.0.0/0"
         },
+        "StatusAppSecurityGroup" : {
+            "Description" : "Security group to add instances to so StatusApp can access management pages - search for 'StatusApp-InstanceSecurityGroup' to find the Security Group",
+            "Type" : "AWS::EC2::SecurityGroup::Id"
+        },
         "InstanceType" : {
             "Type" : "String",
             "Description" : "EC2 instance type",
@@ -222,7 +226,8 @@
                 "SecurityGroupIngress" : [
                     { "IpProtocol": "tcp", "FromPort": "22", "ToPort": "22", "CidrIp": "77.91.248.0/21" },
                     { "IpProtocol": "tcp", "FromPort": "9000", "ToPort": "9000", "CidrIp": "77.91.248.0/21" },
-                    { "IpProtocol": "tcp", "FromPort": "9000", "ToPort": "9000", "SourceSecurityGroupId" : { "Ref" : "LoadBalancerSecurityGroup" } }
+                    { "IpProtocol": "tcp", "FromPort": "9000", "ToPort": "9000", "SourceSecurityGroupId" : { "Ref" : "LoadBalancerSecurityGroup" } },
+                    { "IpProtocol": "tcp", "FromPort": "9000", "ToPort": "9000", "SourceSecurityGroupId" : { "Ref" : "StatusAppSecurityGroup" } }
                 ]
             }
         },
