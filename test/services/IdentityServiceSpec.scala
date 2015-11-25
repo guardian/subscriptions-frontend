@@ -1,6 +1,5 @@
 package services
 
-import com.gu.identity.play.AccessCredentials
 import model.PersonalData
 import org.scalatest.FreeSpec
 import play.api.libs.json._
@@ -14,9 +13,9 @@ import scala.concurrent.Future
 
 class IdentityServiceSpec extends FreeSpec {
   class TestIdentityApiClient extends IdentityApiClient {
-    override def userLookupByCookies: (AccessCredentials.Cookies) => Future[WSResponse] = ???
+    override def userLookupByScGuUCookie: (String) => Future[WSResponse] = ???
     override def createGuest: (PersonalData) => Future[WSResponse] = ???
-    override def updateUserDetails: (PersonalData, UserId, AccessCredentials.Cookies) => Future[WSResponse] = ???
+    override def updateUserDetails: (PersonalData, UserId, AuthCookie) => Future[WSResponse] = ???
     override def convertGuest: (String, IdentityToken) => Future[WSResponse] = ???
     override def userLookupByEmail: (String) => Future[WSResponse] = ???
   }
@@ -54,14 +53,14 @@ class IdentityServiceSpec extends FreeSpec {
   }
 
   "userLookupByScGuUCookie" - {
-    val validCookies = AccessCredentials.Cookies("valid_cookie", "foo")
-    val invalidCookies = AccessCredentials.Cookies("invalid_cookie", "bar")
+    val validCookie = AuthCookie("valid_cookie")
+    val invalidCookie = AuthCookie("invalid_cookie")
 
     val client = new TestIdentityApiClient {
-      override val userLookupByCookies = (cookies: AccessCredentials.Cookies) =>
+      override val userLookupByScGuUCookie = (cookieValue: String) =>
         Future {
           val body =
-            if (cookies == validCookies)
+            if (AuthCookie(cookieValue) == validCookie)
               Json.obj(
                 "user" -> testUser
               )
@@ -73,13 +72,13 @@ class IdentityServiceSpec extends FreeSpec {
     }
 
     "returns true if looking up a user by cookie is successful" in {
-      makeIdentityService(client).userLookupByCredentials(validCookies).map { res =>
+      makeIdentityService(client).userLookupByScGuU(validCookie).map { res =>
         assertResult(Some(testUser))(res)
       }
     }
 
     "returns false if looking up a user by cookie is unsuccessful" in {
-      makeIdentityService(client).userLookupByCredentials(invalidCookies).map { res =>
+      makeIdentityService(client).userLookupByScGuU(invalidCookie).map { res =>
         assertResult(None)(res)
       }
     }

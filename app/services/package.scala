@@ -7,6 +7,8 @@ import play.api.libs.json._
 
 package object services {
 
+  case class AuthCookie(value: String)
+
   case class UserId(id: String) {
     override def toString = id
   }
