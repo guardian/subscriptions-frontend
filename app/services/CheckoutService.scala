@@ -2,7 +2,7 @@ package services
 
 import com.gu.identity.play.AuthenticatedIdUser
 import com.gu.membership.salesforce.MemberId
-import com.gu.membership.zuora.soap.actions.subscribe.Subscribe
+import com.gu.membership.zuora.soap.actions.subscribe.{CreditCardReferenceTransaction, Subscribe}
 import com.gu.membership.zuora.soap.models.Results.SubscribeResult
 import com.typesafe.scalalogging.LazyLogging
 import model._
@@ -72,6 +72,11 @@ class CheckoutService(
       }
       subscribe <- subscribeAction(payment)
       result <- zuoraService.subscribe(subscribe)
+      postSubscribe = subscribe.paymentMethodOpt match {
+        case Some(CreditCardReferenceTransaction(customer)) => salesforceService.setCardInformation(userData.id, customer.id, customer.card.id)
+        case _ => Future(memberId)
+      }
+      postSubscribeResult <- postSubscribe
     } yield {
       updateAuthenticatedUserDetails()
       sendETDataExtensionRow(result)

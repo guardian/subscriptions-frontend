@@ -1,6 +1,6 @@
 package services
 
-import com.gu.membership.salesforce.Member.Keys
+import com.gu.membership.salesforce.Member.Keys._
 import com.gu.membership.salesforce._
 import com.gu.membership.util.FutureSupplier
 import com.typesafe.scalalogging.LazyLogging
@@ -18,21 +18,27 @@ trait SalesforceService extends LazyLogging {
 
   def createOrUpdateUser(personalData: PersonalData, userId: UserId): Future[MemberId]
 
+  def setCardInformation(userId: UserId, customerId: String, cardId: String): Future[MemberId]
+
   def createSalesforceUserData(personalData: PersonalData): JsObject = Json.obj(
-      Keys.EMAIL -> personalData.email,
-      Keys.FIRST_NAME -> personalData.firstName,
-      Keys.LAST_NAME -> personalData.lastName,
-      Keys.MAILING_STREET -> personalData.address.line,
-      Keys.MAILING_CITY -> personalData.address.town,
-      Keys.MAILING_POSTCODE -> personalData.address.postCode,
-      Keys.MAILING_COUNTRY -> "United Kingdom",
-      Keys.ALLOW_GU_RELATED_MAIL -> personalData.receiveGnmMarketing)
+      EMAIL -> personalData.email,
+      FIRST_NAME -> personalData.firstName,
+      LAST_NAME -> personalData.lastName,
+      MAILING_STREET -> personalData.address.line,
+      MAILING_CITY -> personalData.address.town,
+      MAILING_POSTCODE -> personalData.address.postCode,
+      MAILING_COUNTRY -> "United Kingdom",
+      ALLOW_GU_RELATED_MAIL -> personalData.receiveGnmMarketing)
 
 }
 
 class SalesforceServiceImp(val repo: SalesforceRepo) extends SalesforceService {
+
   override def createOrUpdateUser(personalData: PersonalData, userId: UserId): Future[MemberId] =
     repo.upsert(userId.id, createSalesforceUserData(personalData))
+
+  def setCardInformation(userId: UserId, customerId: String, cardId: String) =
+    repo.upsert(userId.id, Json.obj(CUSTOMER_ID -> customerId, DEFAULT_CARD_ID -> cardId))
 }
 
 class SalesforceRepo(salesforceConfig: SalesforceConfig) extends MemberRepository {
