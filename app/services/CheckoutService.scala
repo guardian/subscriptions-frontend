@@ -1,7 +1,7 @@
 package services
 
 import com.gu.identity.play.AuthenticatedIdUser
-import com.gu.membership.salesforce.MemberId
+import com.gu.membership.salesforce.ContactId
 import com.gu.membership.zuora.soap.actions.subscribe.Subscribe
 import com.gu.membership.zuora.soap.models.Results.SubscribeResult
 import com.typesafe.scalalogging.LazyLogging
@@ -11,7 +11,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 object CheckoutService {
-  case class CheckoutResult(salesforceMember: MemberId, userIdData: UserIdData, subscribeResult: SubscribeResult)
+  case class CheckoutResult(salesforceMember: ContactId, userIdData: UserIdData, subscribeResult: SubscribeResult)
 }
 
 class CheckoutService(

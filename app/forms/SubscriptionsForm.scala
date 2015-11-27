@@ -1,9 +1,9 @@
 package forms
 
-import com.gu.membership.zuora.{Countries, Address}
+import com.gu.i18n.{Address, Countries}
 import model._
-import play.api.data.format.Formatter
 import play.api.data.format.Formats._
+import play.api.data.format.Formatter
 
 object SubscriptionsForm {
   import play.api.data.Forms._

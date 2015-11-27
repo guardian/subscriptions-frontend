@@ -1,6 +1,6 @@
 package utils
 
-import com.gu.membership.zuora.{Countries, Address}
+import com.gu.i18n.{Address, Countries}
 import model.PersonalData
 
 object TestPersonalData {

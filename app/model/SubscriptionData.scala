@@ -1,7 +1,7 @@
 package model
 
+import com.gu.i18n.{Address, Countries}
 import com.gu.identity.play.IdUser
-import com.gu.membership.zuora.{Address, Countries}
 
 sealed trait PaymentType {
   def toKey: String

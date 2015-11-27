@@ -1,7 +1,7 @@
 package forms
 
-import com.gu.membership.zuora.{Address, Countries}
-import forms.SubscriptionsForm.{addressDataMapping, personalDataMapping, paymentFormatter}
+import com.gu.i18n.{Address, Countries}
+import forms.SubscriptionsForm.{addressDataMapping, paymentFormatter, personalDataMapping}
 import model._
 import org.scalatest.FreeSpec
 import play.api.data.Forms._
