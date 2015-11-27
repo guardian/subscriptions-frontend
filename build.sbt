@@ -53,6 +53,7 @@ libraryDependencies ++= Seq(
 testOptions in Test ++= Seq(
     Tests.Argument("-oFD") // display full stack errors and execution times in Scalatest output
 )
+traceLevel in Test := 0
 
 testResultLogger in Test := new ScalaTestWithExitCode
 

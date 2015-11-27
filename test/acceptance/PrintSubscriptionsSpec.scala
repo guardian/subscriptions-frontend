@@ -1,8 +1,7 @@
 package acceptance
 
-import acceptance.Config.appUrl
+import acceptance.Config.baseUrl
 import acceptance.pages.{Home, SubscriptionPlan}
-import org.openqa.selenium.WebDriver
 import org.scalatest._
 import org.scalatest.selenium.WebBrowser
 
@@ -16,7 +15,6 @@ object SubscriptionTest {
 }
 
 class PrintSubscriptionsSpec extends FeatureSpec with Util with WebBrowser with GivenWhenThen with BeforeAndAfter {
-  implicit lazy val driver: WebDriver = Config.driver
 
   before {
     resetDriver()
@@ -31,7 +29,7 @@ class PrintSubscriptionsSpec extends FeatureSpec with Util with WebBrowser with 
 
   feature("Print subscriptions") {
     for (test <- testData) yield scenario(test.name, Acceptance) {
-      go.to(s"$appUrl/${test.url}")
+      go.to(s"$baseUrl/${test.url}")
       SubscriptionPlan.selectSixdayPackage()
       assert(pageHasText("You have chosen\nSIXDAY"), "document contains selected plan")
       assertResult(test.landingHost)(currentHost)

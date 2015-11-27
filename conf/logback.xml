@@ -3,8 +3,7 @@ Play expects this file to be at 'conf/logback.xml' - not logger.xml:
 
 https://www.playframework.com/documentation/2.4.x/SettingsLogger#Using-a-configuration-file-from-project-source
 -->
-<configuration>
-
+<configuration debug="false">
     <contextName>subscriptions-frontend</contextName>
 
     <appender name="LOGFILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -27,5 +26,4 @@ https://www.playframework.com/documentation/2.4.x/SettingsLogger#Using-a-configu
     <root level="INFO">
         <appender-ref ref="LOGFILE"/>
     </root>
-
 </configuration>

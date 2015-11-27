@@ -1,11 +1,11 @@
 package acceptance.pages
 
-import acceptance.Config.appUrl
+import acceptance.Config.baseUrl
 import org.openqa.selenium.WebDriver
 import org.scalatest.selenium.{Page, WebBrowser}
 
 object Home extends Page with WebBrowser {
-  val url = appUrl
+  val url = baseUrl
 
   def selectPaperPlusDigital()(implicit d: WebDriver) =
     selectPlan("""*[data-test-id="subscriptions-uk-paper-digital"]""")
