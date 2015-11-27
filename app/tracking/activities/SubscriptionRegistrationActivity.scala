@@ -1,13 +1,15 @@
 package tracking.activities
 
 import java.util.{Map => JMap}
+
 import com.github.t3hnar.bcrypt._
-import com.gu.membership.zuora.Address
+import com.gu.i18n.Address
 import configuration.Config
-import model.{CreditCardData, DirectDebitData, PaymentData, SubscriptionData}
 import model.zuora.{BillingFrequency, SubscriptionProduct}
+import model.{CreditCardData, DirectDebitData, PaymentData, SubscriptionData}
 import services.CheckoutService.CheckoutResult
 import tracking.{ActivityTracking, TrackerData}
+
 import scala.collection.JavaConversions._
 
 object MemberData {

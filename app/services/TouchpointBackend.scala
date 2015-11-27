@@ -4,21 +4,23 @@ import com.gu.membership.stripe.StripeService
 import com.gu.monitoring.StatusMetrics
 import configuration.Config
 import monitoring.TouchpointBackendMetrics
+import play.api.libs.ws.WS
 import play.api.mvc.RequestHeader
 import touchpoint.TouchpointBackendConfig
 import touchpoint.TouchpointBackendConfig.BackendType
 import utils.TestUsers._
+import play.api.Play.current
 
 object TouchpointBackend {
 
   def apply(backendType: TouchpointBackendConfig.BackendType): TouchpointBackend = {
     val touchpointBackendConfig = TouchpointBackendConfig.backendType(backendType, Config.config)
     val salesforceService = new SalesforceServiceImp(new SalesforceRepo(touchpointBackendConfig.salesforce))
-    val zuoraService = new ZuoraApiClient(touchpointBackendConfig.zuora, touchpointBackendConfig.digitalProductPlan, touchpointBackendConfig.zuoraProperties)
+    val zuoraService = new ZuoraApiClient(touchpointBackendConfig.zuoraSoap, touchpointBackendConfig.digitalProductPlan, touchpointBackendConfig.zuoraProperties)
     val stripeServiceInstance = new StripeService(touchpointBackendConfig.stripe, new TouchpointBackendMetrics with StatusMetrics {
       val backendEnv = touchpointBackendConfig.stripe.envName
       val service = "Stripe"
-    })
+    }, WS.client)
     val paymentService = new PaymentService {
       override def stripeService = stripeServiceInstance
     }

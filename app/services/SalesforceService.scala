@@ -1,22 +1,23 @@
 package services
 
-import com.gu.membership.salesforce.Member.Keys
+import com.gu.membership.salesforce.ContactDeserializer.Keys
 import com.gu.membership.salesforce._
 import com.gu.membership.util.FutureSupplier
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
 import model.PersonalData
+import play.api.Play.current
 import play.api.libs.concurrent.Akka
 import play.api.libs.json.{JsObject, Json}
-import scala.concurrent.duration._
-import scala.concurrent.Future
+
 import scala.concurrent.ExecutionContext.Implicits.global
-import play.api.Play.current
+import scala.concurrent.Future
+import scala.concurrent.duration._
 
 trait SalesforceService extends LazyLogging {
   def repo: SalesforceRepo
 
-  def createOrUpdateUser(personalData: PersonalData, userId: UserId): Future[MemberId]
+  def createOrUpdateUser(personalData: PersonalData, userId: UserId): Future[ContactId]
 
   def createSalesforceUserData(personalData: PersonalData): JsObject = Json.obj(
       Keys.EMAIL -> personalData.email,
@@ -31,11 +32,11 @@ trait SalesforceService extends LazyLogging {
 }
 
 class SalesforceServiceImp(val repo: SalesforceRepo) extends SalesforceService {
-  override def createOrUpdateUser(personalData: PersonalData, userId: UserId): Future[MemberId] =
+  override def createOrUpdateUser(personalData: PersonalData, userId: UserId): Future[ContactId] =
     repo.upsert(userId.id, createSalesforceUserData(personalData))
 }
 
-class SalesforceRepo(salesforceConfig: SalesforceConfig) extends MemberRepository {
+class SalesforceRepo(salesforceConfig: SalesforceConfig) extends ContactRepository {
   override val salesforce = new Scalaforce {
     override val consumerKey = salesforceConfig.consumerKey
     override val apiUsername = salesforceConfig.apiUsername

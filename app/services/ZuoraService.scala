@@ -5,7 +5,7 @@ import com.gu.membership.zuora.soap._
 import com.gu.membership.zuora.soap.actions.subscribe.Subscribe
 import com.gu.membership.zuora.soap.models.Queries._
 import com.gu.membership.zuora.soap.models.Results.SubscribeResult
-import com.gu.membership.zuora.{ZuoraApiConfig, soap}
+import com.gu.membership.zuora.{ZuoraSoapConfig, ZuoraApiConfig, soap}
 import com.gu.monitoring.ServiceMetrics
 import configuration.Config
 import model.zuora.{DigitalProductPlan, SubscriptionProduct}
@@ -30,12 +30,12 @@ trait ZuoraService {
   def paymentDelaysInDays: Period
 }
 
-class ZuoraApiClient(zuoraApiConfig: ZuoraApiConfig,
+class ZuoraApiClient(zuoraSoapConfig: ZuoraSoapConfig,
                      digitalProductPlan: DigitalProductPlan,
                      zuoraProperties: ZuoraProperties) extends ZuoraService {
 
   private val akkaSystem = Akka.system
-  private val client = new soap.Client(zuoraApiConfig, new ServiceMetrics(Config.stage, Config.appName, "zuora-soap-client"), akkaSystem)
+  private val client = new soap.Client(zuoraSoapConfig, new ServiceMetrics(Config.stage, Config.appName, "zuora-soap-client"), akkaSystem)
   private val cache: ProductsCache = new ProductsCache(client, akkaSystem, digitalProductPlan).refreshEvery(2.hour)
 
   def products = cache.items
