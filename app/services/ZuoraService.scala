@@ -5,10 +5,11 @@ import com.gu.membership.zuora.soap._
 import com.gu.membership.zuora.soap.actions.subscribe.Subscribe
 import com.gu.membership.zuora.soap.models.Queries._
 import com.gu.membership.zuora.soap.models.Results.SubscribeResult
-import com.gu.membership.zuora.{ZuoraSoapConfig, ZuoraApiConfig, soap}
+import com.gu.membership.zuora.{ZuoraSoapConfig, soap}
 import com.gu.monitoring.ServiceMetrics
 import configuration.Config
 import model.zuora.{DigitalProductPlan, SubscriptionProduct}
+import monitoring.TouchpointBackendMetrics
 import org.joda.time.Period
 import play.api.Play.current
 import play.api.libs.concurrent.Akka
@@ -36,7 +37,10 @@ class ZuoraApiClient(zuoraSoapConfig: ZuoraSoapConfig,
 
   private val akkaSystem = Akka.system
   private val client = new soap.Client(zuoraSoapConfig, new ServiceMetrics(Config.stage, Config.appName, "zuora-soap-client"), akkaSystem)
-  private val cache: ProductsCache = new ProductsCache(client, akkaSystem, digitalProductPlan).refreshEvery(2.hour)
+  private val cache: ProductsCache = new ProductsCache(client, akkaSystem, digitalProductPlan, new TouchpointBackendMetrics {
+    val backendEnv = zuoraSoapConfig.envName
+    val service = "ProductsCache"
+  }).refreshEvery(2.hour)
 
   def products = cache.items
 
