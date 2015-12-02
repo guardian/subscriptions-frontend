@@ -53,6 +53,7 @@ libraryDependencies ++= Seq(
 testOptions in Test ++= Seq(
     Tests.Argument("-oFD") // display full stack errors and execution times in Scalatest output
 )
+traceLevel in Test := 0
 
 testResultLogger in Test := new ScalaTestWithExitCode
 
@@ -66,7 +67,6 @@ resolvers ++= Seq(
 
 addCommandAlias("devrun", "run -Dconfig.resource=DEV.conf 9200")
 addCommandAlias("fast-test", "testOnly -- -l Acceptance")
-addCommandAlias("acceptance-test", "testOnly acceptance.Main")
-addCommandAlias("acceptance-test-buy-sub", "testOnly acceptance.CheckoutSpec")
+addCommandAlias("acceptance-test", "testOnly acceptance.CheckoutSpec")
 
 playArtifactDistSettings
