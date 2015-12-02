@@ -50,7 +50,6 @@ class CheckoutSpec extends FeatureSpec with WebBrowser with Util
       assert(thankYou.hasMyProfileButton)
 
       And("I should have Identity cookies")
-      go.to(checkout)
       Seq("GU_U", "SC_GU_U", "SC_GU_LA").foreach { idCookie =>
         assert(cookiesSet.map(_.getName).contains(idCookie))
       }
@@ -86,7 +85,6 @@ class CheckoutSpec extends FeatureSpec with WebBrowser with Util
       assert(thankYou.hasMyProfileButton)
 
       And("I should have Identity cookies")
-      go.to(checkout)
       Seq("GU_U", "SC_GU_U", "SC_GU_LA").foreach { idCookie =>
         assert(cookiesSet.map(_.getName).contains(idCookie))
       }
@@ -141,7 +139,6 @@ class CheckoutSpec extends FeatureSpec with WebBrowser with Util
       assert(checkout.PersonalDetails.email.value == s"${testUser.username.toLowerCase}@gu.com")
 
       And("I should have Identity cookies.")
-      go.to(checkout)
       Seq("GU_U", "SC_GU_U", "SC_GU_LA").foreach { idCookie =>
         assert(cookiesSet.map(_.getName).contains(idCookie))
       }
@@ -195,7 +192,6 @@ class CheckoutSpec extends FeatureSpec with WebBrowser with Util
       assert(checkout.PersonalDetails.email.value == s"${testUser.username.toLowerCase}@gu.com")
 
       And("I should have Identity cookies.")
-      go.to(checkout)
       Seq("GU_U", "SC_GU_U", "SC_GU_LA").foreach { idCookie =>
         assert(cookiesSet.map(_.getName).contains(idCookie))
       }

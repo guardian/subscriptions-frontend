@@ -50,7 +50,6 @@ object Config {
     logger.info(s"Stage: ${stage}")
     logger.info(s"Subscription Frontend: ${Config.baseUrl}")
     logger.info(s"Identity Frontend: ${conf.getString("identity.webapp.url")}")
-//    logger.info(s"Identity API: ${conf.getString("identity.baseUri")}")
     logger.info(s"WebDriver Session ID = ${Config.webDriverSessionId}")
   }
 }
