@@ -1,8 +1,7 @@
 package acceptance.pages
 
-import acceptance.Config.baseUrl
-import acceptance.{TestUser, Util}
-import org.openqa.selenium.WebDriver
+import acceptance.util.{TestUser, Util, Config}
+import Config.baseUrl
 import org.scalatest.selenium.{WebBrowser, Page}
 
 class Checkout(val testUser: TestUser) extends Page with WebBrowser with Util {

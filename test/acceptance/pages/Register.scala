@@ -1,8 +1,8 @@
 package acceptance.pages
 
-import acceptance.{TestUser, Util}
-import acceptance.Config.baseUrl
-import acceptance.Config.profileUrl
+import acceptance.util.{Util, TestUser, Config}
+import Config.baseUrl
+import Config.profileUrl
 import org.scalatest.selenium.{Page, WebBrowser}
 
 class Register(testUser: TestUser) extends Page with WebBrowser with Util {

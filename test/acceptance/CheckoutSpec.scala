@@ -1,6 +1,7 @@
 package acceptance
 
 import acceptance.pages.{Checkout, ThankYou}
+import acceptance.util.{Util, TestUser, Config, Acceptance}
 import org.scalatest.selenium.WebBrowser
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfter, FeatureSpec, GivenWhenThen}
 import org.slf4j.LoggerFactory

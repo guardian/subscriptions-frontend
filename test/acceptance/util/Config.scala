@@ -1,4 +1,4 @@
-package acceptance
+package acceptance.util
 
 import java.net.URL
 
@@ -18,7 +18,7 @@ object Config {
   val profileUrl = conf.getString("identity.webapp.url")
   val testUsersSecret = conf.getString("identity.test.users.secret")
 
-  val driver: WebDriver = {
+  lazy val driver: WebDriver = {
     Try { new URL(conf.getString("webDriverRemoteUrl")) }.toOption.map { url =>
       val capabilities = DesiredCapabilities.chrome()
       capabilities.setCapability("platform", Platform.WIN8)

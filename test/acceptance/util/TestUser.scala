@@ -1,8 +1,8 @@
-package acceptance
+package acceptance.util
 
-import org.openqa.selenium.Cookie
-import com.gu.identity.testing.usernames.TestUsernames
 import com.github.nscala_time.time.Imports._
+import com.gu.identity.testing.usernames.TestUsernames
+import org.openqa.selenium.Cookie
 
 class TestUser {
   private val testUsers = TestUsernames(

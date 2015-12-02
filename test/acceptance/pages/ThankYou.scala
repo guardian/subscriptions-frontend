@@ -1,7 +1,8 @@
 package acceptance.pages
 
-import acceptance.Config.baseUrl
-import acceptance.{Config, Util}
+import acceptance.util.{Util, Config}
+import Config.baseUrl
+import acceptance.util.Config
 import org.scalatest.selenium.{Page, WebBrowser}
 
 class ThankYou extends Page with WebBrowser with Util {

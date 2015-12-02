@@ -1,23 +1,20 @@
-package acceptance
+package acceptance.util
 
 import java.net.URL
 import java.util.concurrent.TimeUnit
-
-import acceptance.Config.baseUrl
 import org.openqa.selenium.support.ui.{ExpectedConditions, WebDriverWait}
 import org.openqa.selenium.{By, Cookie}
 import org.scalatest.selenium.WebBrowser
-
-import scala.collection.JavaConverters._
 import scala.util.Try
+import scala.collection.JavaConverters._
 
 trait Util { this: WebBrowser =>
 
-  implicit val driver = Config.driver
+  lazy implicit val driver = Config.driver
 
   def resetDriver() = {
     driver.get("about:about")
-    go.to(baseUrl)
+    go.to(Config.baseUrl)
     driver.manage().deleteAllCookies()
     driver.manage().timeouts().implicitlyWait(60, TimeUnit.SECONDS)
   }
