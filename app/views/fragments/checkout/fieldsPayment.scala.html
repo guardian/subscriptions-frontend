@@ -2,11 +2,7 @@
 
 @* ===== Payment type ===== *@
 
-@******************************************************************************************
-    Credit/debit card payment option is currently only exposed to logged-in test users.
-    TODO: remove this condition once Manage My Account functionality is released.
-*******************************************************************************************@
-<div @if(touchpointBackendResolution.validTestUserCredentialOpt.isEmpty){ hidden="true" }>
+<div>
     <div class="label u-margin-bottom">How would you like to pay?</div>
     <div class="field-group js-checkout-payment-method">
         <div class="field-group__item">
