@@ -111,10 +111,6 @@
                         <div class="field-panel__intro">
                             <div class="field-note field-note--offset">
                                 @fragments.forms.securityNote()
-                                @* This block will be removed once credit/debit card option is visible to real users *@
-                                @if(touchpointBackendResolution.validTestUserCredentialOpt.isEmpty) {
-                                    Payment will be taken by Direct Debit
-                                }
                             </div>
                         </div>
                         <div class="field-panel__edit">
