@@ -116,7 +116,7 @@ class CheckoutSpec extends FeatureSpec with WebBrowser with Util
         "'Subscribe now' --> 'Start your free trial' --> 'United Kingdom'")
 
       When("I land on 'Identity Register' page")
-      val register = new pages.Register(new TestUser)
+      val register = new pages.Register(testUser)
       go.to(register)
       assert(register.pageHasLoaded())
 
