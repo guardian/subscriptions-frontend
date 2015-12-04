@@ -1,7 +1,7 @@
 package services
 
 import com.amazonaws.regions.{Region, Regions}
-import com.gu.identity.play.{AccessCredentials, CookieBuilder, AuthenticatedIdUser, IdUser}
+import com.gu.identity.play.{AccessCredentials, AuthenticatedIdUser, CookieBuilder, IdUser}
 import com.gu.monitoring.{AuthenticationMetrics, CloudWatch, RequestMetrics, StatusMetrics}
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
@@ -14,6 +14,7 @@ import play.api.mvc.Cookie
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.language.implicitConversions
 
 class IdentityService(identityApiClient: => IdentityApiClient) extends LazyLogging {
 
