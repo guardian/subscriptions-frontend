@@ -6,7 +6,7 @@ import Config.profileUrl
 import org.scalatest.selenium.{Page, WebBrowser}
 
 class Register(testUser: TestUser) extends Page with WebBrowser with Util {
-  val url = s"${profileUrl}/register?skipConfirmation=true&returnUrl=${baseUrl}/checkout"
+  val url = s"""${profileUrl}/register?returnUrl=${baseUrl}/checkout&skipConfirmation=true"""
 
   private object RegisterFields {
     val firstName = textField(id("user_firstName"))

@@ -3,7 +3,7 @@ package acceptance.util
 import java.net.URL
 
 import com.typesafe.config.ConfigFactory
-import org.openqa.selenium.chrome.ChromeDriver
+import org.openqa.selenium.firefox.FirefoxDriver
 import org.openqa.selenium.remote.{DesiredCapabilities, RemoteWebDriver}
 import org.openqa.selenium.{Platform, WebDriver}
 import org.slf4j.LoggerFactory
@@ -20,19 +20,21 @@ object Config {
 
   lazy val driver: WebDriver = {
     Try { new URL(conf.getString("webDriverRemoteUrl")) }.toOption.map { url =>
-      val capabilities = DesiredCapabilities.chrome()
+      val capabilities = DesiredCapabilities.firefox()
       capabilities.setCapability("platform", Platform.WIN8)
       capabilities.setCapability("name", "subscription-frontend: https://github.com/guardian/subscriptions-frontend")
       new RemoteWebDriver(url, capabilities)
     }.getOrElse {
-      new ChromeDriver()
+      new FirefoxDriver()
     }
   }
 
   def webDriverSessionId(): String = {
     Config.driver match {
-      case remoteDriver: RemoteWebDriver => remoteDriver.getSessionId.toString
-      case _ => throw new ClassCastException
+      case remoteDriver: RemoteWebDriver => {
+        remoteDriver.getSessionId.toString
+      }
+      case _ => "unknown session ID"
     }
   }
 
