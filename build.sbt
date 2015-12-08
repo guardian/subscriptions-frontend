@@ -57,7 +57,7 @@ traceLevel in Test := 0
 
 testResultLogger in Test := new ScalaTestWithExitCode
 
-javaOptions in Test += "-Dconfig.file=test/acceptance/conf/application-test.conf"
+javaOptions in Test += "-Dconfig.file=test/acceptance/conf/acceptance-test.conf"
 
 resolvers ++= Seq(
     "Guardian Github Releases" at "https://guardian.github.io/maven/repo-releases",
