@@ -6,9 +6,9 @@ import play.api.mvc._
 
 object Homepage extends Controller {
 
-  def index = CachedAction(Ok(views.html.index()))
+  def index = CachedAction(Ok(views.html.index(DigitalEdition.getMembershipLandingPage(DigitalEdition.UK))))
 
-  def index(edition: DigitalEdition) = CachedAction(Ok(views.html.index_intl(edition)))
+  def index(edition: DigitalEdition) = CachedAction(Ok(views.html.index_intl(edition, DigitalEdition.getMembershipLandingPage(edition))))
 
   def indexAu() = index(DigitalEdition.AU)
 

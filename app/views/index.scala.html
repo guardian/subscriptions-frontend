@@ -1,4 +1,4 @@
-@()
+@(membershipLink: String)
 
 @main("Subscriptions | The Guardian") {
 
@@ -51,7 +51,7 @@
         </div>
         <div class="row row--items-1">
             <div class="row__item">
-                @fragments.promos.members("uk")
+                @fragments.promos.members("uk", membershipLink)
             </div>
         </div>
         <div class="row row--items-3">
