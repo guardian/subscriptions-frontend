@@ -1,5 +1,6 @@
 @import model.DigitalEdition
-@(edition: DigitalEdition)
+@import com.netaporter.uri.Uri
+@(edition: DigitalEdition, membershipLink: Uri)
 
 @main(s"Subscriptions | ${edition.name} | The Guardian", isInternational=true) {
 
@@ -40,7 +41,7 @@
     </div>
     <div class="row row--items-1">
         <div class="row__item">
-            @fragments.promos.members(edition.id)
+            @fragments.promos.members(edition.id, membershipLink)
         </div>
     </div>
     <div class="row row--items-1">
