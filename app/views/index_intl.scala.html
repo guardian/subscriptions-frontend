@@ -1,5 +1,6 @@
 @import model.DigitalEdition
-@(edition: DigitalEdition, membershipLink: String)
+@import com.netaporter.uri.Uri
+@(edition: DigitalEdition, membershipLink: Uri)
 
 @main(s"Subscriptions | ${edition.name} | The Guardian", isInternational=true) {
 
