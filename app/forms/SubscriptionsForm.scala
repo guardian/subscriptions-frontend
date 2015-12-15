@@ -1,6 +1,6 @@
 package forms
 
-import com.gu.i18n.{Address, Countries}
+import com.gu.i18n.{Address, Country}
 import model._
 import play.api.data.format.Formats._
 import play.api.data.format.Formatter
@@ -28,7 +28,7 @@ object SubscriptionsForm {
   private val emailMaxLength = 240
 
   def unapplyUkAddress(a: Address) = Some((a.lineOne, a.lineTwo, a.town, a.postCode))
-  def applyUkAddress(lineOne: String, lineTwo: String, town: String, postCode: String) = Address(lineOne, lineTwo, town, "", postCode, Countries.UK)
+  def applyUkAddress(lineOne: String, lineTwo: String, town: String, postCode: String) = Address(lineOne, lineTwo, town, "", postCode, Country.UK)
   val addressDataMapping = mapping(
     "address1" -> text(0, addressMaxLength),
     "address2" -> text(0, addressMaxLength),

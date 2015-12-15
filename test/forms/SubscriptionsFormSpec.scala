@@ -1,6 +1,6 @@
 package forms
 
-import com.gu.i18n.{Address, Countries}
+import com.gu.i18n.{Address, Country}
 import forms.SubscriptionsForm.{addressDataMapping, paymentFormatter, personalDataMapping}
 import model._
 import org.scalatest.FreeSpec
@@ -26,7 +26,7 @@ class SubscriptionsFormSpec extends FreeSpec {
         lastName = "last",
         email = "a@example.com",
         receiveGnmMarketing = true,
-	address = Address("address1","address2","town", "", "postcode", Countries.UK)
+	address = Address("address1","address2","town", "", "postcode", Country.UK)
       )))(personalDataMapping.bind(formData))
     }
 
