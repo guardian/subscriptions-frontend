@@ -1,7 +1,8 @@
 package model
 
-import com.gu.i18n.{Address, Countries}
+import com.gu.i18n.Country
 import com.gu.identity.play.IdUser
+import com.gu.memsub.Address
 
 sealed trait PaymentType {
   def toKey: String
@@ -53,7 +54,7 @@ object SubscriptionData {
       town = u.privateFields.getOrBlank(_.billingAddress3),
       postCode = u.privateFields.getOrBlank(_.billingPostcode),
       countyOrState = u.privateFields.getOrBlank(_.country),
-      country = Countries.UK
+      country = Country.UK
     )
 
     val personalData = PersonalData(

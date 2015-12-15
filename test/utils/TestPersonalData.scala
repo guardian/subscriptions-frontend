@@ -1,6 +1,7 @@
 package utils
 
-import com.gu.i18n.{Address, Countries}
+import com.gu.i18n.Country
+import com.gu.memsub.Address
 import model.PersonalData
 
 object TestPersonalData {
@@ -9,6 +10,6 @@ object TestPersonalData {
     lastName = "LastName",
     email = "email@example.com",
     receiveGnmMarketing = true,
-    address = Address("address1","address2","Town", "United Kingdom", "AAAAAA", Countries.UK)
+    address = Address("address1","address2","Town", "United Kingdom", "AAAAAA", Country.UK)
   )
 }

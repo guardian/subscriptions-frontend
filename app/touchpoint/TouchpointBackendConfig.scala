@@ -1,9 +1,9 @@
 package touchpoint
 
 import com.github.nscala_time.time.Imports._
-import com.gu.membership.salesforce.SalesforceConfig
-import com.gu.membership.stripe.StripeApiConfig
-import com.gu.membership.zuora.{ZuoraRestConfig, ZuoraSoapConfig, ZuoraApiConfig}
+import com.gu.salesforce.SalesforceConfig
+import com.gu.stripe.StripeApiConfig
+import com.gu.zuora.{ZuoraRestConfig, ZuoraSoapConfig, ZuoraApiConfig}
 import com.typesafe.scalalogging.LazyLogging
 import model.zuora.DigitalProductPlan
 import org.joda.time.Period

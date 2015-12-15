@@ -12,7 +12,7 @@ import utils.TestWSResponse
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class IdentityServiceSpec extends FreeSpec {
+class IdentityServiceTest extends FreeSpec {
   class TestIdentityApiClient extends IdentityApiClient {
     override def userLookupByCookies: (AccessCredentials.Cookies) => Future[WSResponse] = ???
     override def createGuest: (PersonalData) => Future[WSResponse] = ???

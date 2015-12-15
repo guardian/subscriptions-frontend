@@ -8,7 +8,7 @@ import play.api.http.DefaultHttpErrorHandler
 import play.api.mvc.Results._
 import play.api.mvc._
 import play.api.routing.Router
-import com.gu.membership.zuora.soap
+import com.gu.zuora.soap
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent._

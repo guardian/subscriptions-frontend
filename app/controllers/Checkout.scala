@@ -2,8 +2,8 @@ package controllers
 
 import actions.CommonActions._
 import com.gu.identity.play.IdUser
-import com.gu.membership.stripe.Stripe
-import com.gu.membership.zuora.soap
+import com.gu.stripe.Stripe
+import com.gu.zuora.soap
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config.Identity.webAppProfileUrl
 import forms.{FinishAccountForm, SubscriptionsForm}
