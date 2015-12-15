@@ -1,12 +1,13 @@
 package forms
 
-import com.gu.i18n.{Address, Countries}
+import com.gu.i18n.Country
+import com.gu.memsub.Address
 import forms.SubscriptionsForm.{addressDataMapping, paymentFormatter, personalDataMapping}
 import model._
 import org.scalatest.FreeSpec
 import play.api.data.Forms._
 
-class SubscriptionsFormSpec extends FreeSpec {
+class SubscriptionsFormTest extends FreeSpec {
   val formData = Map(
     "first" -> "first",
     "last" -> "last",
@@ -26,7 +27,7 @@ class SubscriptionsFormSpec extends FreeSpec {
         lastName = "last",
         email = "a@example.com",
         receiveGnmMarketing = true,
-	address = Address("address1","address2","town", "", "postcode", Countries.UK)
+	address = Address("address1","address2","town", "", "postcode", Country.UK)
       )))(personalDataMapping.bind(formData))
     }
 

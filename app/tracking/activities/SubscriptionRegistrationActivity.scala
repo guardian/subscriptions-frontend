@@ -3,7 +3,7 @@ package tracking.activities
 import java.util.{Map => JMap}
 
 import com.github.t3hnar.bcrypt._
-import com.gu.i18n.Address
+import com.gu.memsub.Address
 import configuration.Config
 import model.zuora.{BillingFrequency, SubscriptionProduct}
 import model.{CreditCardData, DirectDebitData, PaymentData, SubscriptionData}

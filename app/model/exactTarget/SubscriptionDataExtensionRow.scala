@@ -1,6 +1,6 @@
 package model.exactTarget
 
-import com.gu.membership.zuora.soap.models.Queries._
+import com.gu.zuora.soap.models.Queries._
 import com.typesafe.scalalogging.LazyLogging
 import model.{CreditCardData, DirectDebitData, SubscriptionData}
 import org.joda.time.DateTime

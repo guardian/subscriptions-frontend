@@ -13,6 +13,7 @@ import play.api.libs.ws.{WS, WSRequest, WSResponse}
 import play.api.mvc.Cookie
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.language.implicitConversions
 import scala.concurrent.Future
 
 class IdentityService(identityApiClient: => IdentityApiClient) extends LazyLogging {

@@ -1,9 +1,9 @@
 package services
 
 import com.gu.identity.play.AuthenticatedIdUser
-import com.gu.membership.salesforce.ContactId
-import com.gu.membership.zuora.soap.actions.subscribe.Subscribe
-import com.gu.membership.zuora.soap.models.Results.SubscribeResult
+import com.gu.salesforce.ContactId
+import com.gu.zuora.soap.actions.subscribe.Subscribe
+import com.gu.zuora.soap.models.Results.SubscribeResult
 import com.typesafe.scalalogging.LazyLogging
 import model._
 
@@ -49,14 +49,14 @@ class CheckoutService(
       } yield {
         Subscribe(
           account = payment.makeAccount,
-          paymentMethodOpt = Some(paymentMethod),
-          ratePlanId = subscriptionData.ratePlanId,
+          paymentMethod = Some(paymentMethod),
+          productRatePlanId = subscriptionData.ratePlanId,
           firstName = personalData.firstName,
           lastName = personalData.lastName,
           address = personalData.address,
           paymentDelay = Some(zuoraService.paymentDelaysInDays),
-          casIdOpt = None,
-          ipAddressOpt = Some(requestData.ipAddress),
+          casId = None,
+          ipAddress = Some(requestData.ipAddress),
           featureIds = Nil
         )
       }

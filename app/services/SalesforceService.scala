@@ -1,7 +1,7 @@
 package services
 
-import com.gu.membership.salesforce.ContactDeserializer.Keys
-import com.gu.membership.salesforce._
+import com.gu.salesforce.ContactDeserializer.Keys
+import com.gu.salesforce._
 import com.gu.membership.util.FutureSupplier
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config

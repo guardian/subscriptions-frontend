@@ -1,15 +1,13 @@
 package services
 
-import com.gu.membership.stripe.StripeService
 import com.gu.monitoring.StatusMetrics
+import com.gu.stripe.StripeService
 import configuration.Config
 import monitoring.TouchpointBackendMetrics
-import play.api.libs.ws.WS
 import play.api.mvc.RequestHeader
 import touchpoint.TouchpointBackendConfig
 import touchpoint.TouchpointBackendConfig.BackendType
 import utils.TestUsers._
-import play.api.Play.current
 
 object TouchpointBackend {
 
@@ -20,7 +18,7 @@ object TouchpointBackend {
     val stripeServiceInstance = new StripeService(touchpointBackendConfig.stripe, new TouchpointBackendMetrics with StatusMetrics {
       val backendEnv = touchpointBackendConfig.stripe.envName
       val service = "Stripe"
-    }, WS.client)
+    })
     val paymentService = new PaymentService {
       override def stripeService = stripeServiceInstance
     }

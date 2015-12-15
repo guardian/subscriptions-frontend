@@ -1,11 +1,11 @@
 package services
 
-import com.gu.membership.zuora.soap.Readers._
-import com.gu.membership.zuora.soap._
-import com.gu.membership.zuora.soap.actions.subscribe.Subscribe
-import com.gu.membership.zuora.soap.models.Queries._
-import com.gu.membership.zuora.soap.models.Results.SubscribeResult
-import com.gu.membership.zuora.{ZuoraSoapConfig, soap}
+import com.gu.zuora.soap.Readers._
+import com.gu.zuora.soap._
+import com.gu.zuora.soap.actions.subscribe.Subscribe
+import com.gu.zuora.soap.models.Queries._
+import com.gu.zuora.soap.models.Results.SubscribeResult
+import com.gu.zuora.{ZuoraSoapConfig, soap}
 import com.gu.monitoring.ServiceMetrics
 import configuration.Config
 import model.zuora.{DigitalProductPlan, SubscriptionProduct}
