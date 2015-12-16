@@ -3,12 +3,12 @@ package configuration
 import com.github.nscala_time.time.Imports._
 import com.gocardless.GoCardlessClient
 import com.gocardless.GoCardlessClient.Environment
+import com.gu.config.DigitalPack
 import com.gu.googleauth.GoogleAuthConfig
 import com.gu.identity.cookie.{PreProductionKeys, ProductionKeys}
 import com.gu.salesforce.SalesforceConfig
 import com.netaporter.uri.dsl._
 import com.typesafe.config.ConfigFactory
-import model.DigitalEdition
 import net.kencochrane.raven.dsn.Dsn
 import play.api.mvc.{Call, RequestHeader}
 
@@ -37,8 +37,6 @@ object Config {
   val trackerUrl = config.getString("snowplow.url")
   val bcryptSalt = config.getString("activity.tracking.bcrypt.salt")
   val bcryptPepper = config.getString("activity.tracking.bcrypt.pepper")
-
-
 
  object Identity {
     private val idConfig = config.getConfig("identity")
@@ -89,4 +87,7 @@ object Config {
     val clientSecret = config.getString("exact-target.client-secret")
     val welcomeTriggeredSendKey = config.getString("exact-target.triggered-send-keys.welcome")
   }
+
+  def productFamily(env: String) = DigitalPack.fromConfig(
+    config.getConfig(s"touchpoint.backend.environments.$env.zuora.ratePlanIds"))
 }

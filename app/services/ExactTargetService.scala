@@ -1,6 +1,7 @@
 package services
 
 import akka.agent.Agent
+import com.gu.zuora.api.ZuoraService
 import com.gu.zuora.soap.models.Results.SubscribeResult
 import com.squareup.okhttp.Request.Builder
 import com.squareup.okhttp.{MediaType, OkHttpClient, RequestBody, Response}
@@ -17,20 +18,21 @@ import scala.concurrent.duration._
 
 trait ExactTargetService extends LazyLogging {
   lazy val etClient: ETClient = ETClient
+  def catalogService: CatalogService
   def zuoraService: ZuoraService
 
   def sendETDataExtensionRow(subscribeResult: SubscribeResult, subscriptionData: SubscriptionData): Future[Unit] = {
-    val subscription = zuoraService.subscriptionByName(subscribeResult.name)
+    val subscription = zuoraService.getSubscriptionByName(subscribeResult.name)
 
     val accAndPaymentMethod = for {
       subs <- subscription
       acc <- zuoraService.account(subs)
-      pm <- zuoraService.defaultPaymentMethod(acc)
+      pm <- zuoraService.getDefaultPaymentMethod(acc)
     } yield (acc, pm)
 
     (for {
       subs <- subscription
-      rpc <- zuoraService.normalRatePlanCharge(subs)
+      rpc <- zuoraService.recurringRatePlanCharge(subs)
       (acc, pm) <- accAndPaymentMethod
       row = SubscriptionDataExtensionRow(
         subscription = subs,
@@ -42,14 +44,12 @@ trait ExactTargetService extends LazyLogging {
       response <- etClient.sendSubscriptionRow(row)
     } yield {
       response.code() match {
-        case 202 => {
+        case 202 =>
           logger.info(s"Successfully sent an email to confirm the subscription: $subscribeResult")
-        }
-        case _ => {
+        case _ =>
           val errorMsg = s"Failed to send the subscription email $subscribeResult. Code: ${response.code()}, Message: ${response.body.string()}"
           logger.error(errorMsg)
           throw new ExactTargetException(errorMsg)
-        }
       }
     }) recover { case err: Throwable =>
       logger.error(s"Error while trying to send an email to ExactTarget", err)

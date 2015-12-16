@@ -2,10 +2,12 @@ package services
 
 import com.gu.identity.play.AuthenticatedIdUser
 import com.gu.salesforce.ContactId
+import com.gu.zuora.api.ZuoraService
 import com.gu.zuora.soap.actions.subscribe.Subscribe
 import com.gu.zuora.soap.models.Results.SubscribeResult
 import com.typesafe.scalalogging.LazyLogging
 import model._
+import touchpoint.ZuoraProperties
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -14,19 +16,21 @@ object CheckoutService {
   case class CheckoutResult(salesforceMember: ContactId, userIdData: UserIdData, subscribeResult: SubscribeResult)
 }
 
-class CheckoutService(
-       identityService: IdentityService,
-       salesforceService: SalesforceService,
-       paymentService: PaymentService,
-       zuoraService: ZuoraService,
-       exactTargetService: ExactTargetService
-    ) extends LazyLogging {
+class CheckoutService(identityService: IdentityService,
+                      salesforceService: SalesforceService,
+                      paymentService: PaymentService,
+                      catalogService: CatalogService,
+                      zuoraService: ZuoraService,
+                      exactTargetService: ExactTargetService,
+                      zuoraProperties: ZuoraProperties) extends LazyLogging {
+
   import CheckoutService.CheckoutResult
 
   def processSubscription(subscriptionData: SubscriptionData,
                           authenticatedUserOpt: Option[AuthenticatedIdUser],
                           requestData: SubscriptionRequestData
                          ): Future[CheckoutResult] = {
+
     val personalData = subscriptionData.personalData
 
     def updateAuthenticatedUserDetails(): Unit =
@@ -43,24 +47,6 @@ class CheckoutService(
         identityService.registerGuest(personalData)
       }
 
-    def subscribeAction(payment: PaymentService#Payment): Future[Subscribe] =
-      for {
-        paymentMethod <- payment.makePaymentMethod
-      } yield {
-        Subscribe(
-          account = payment.makeAccount,
-          paymentMethod = Some(paymentMethod),
-          productRatePlanId = subscriptionData.ratePlanId,
-          firstName = personalData.firstName,
-          lastName = personalData.lastName,
-          address = personalData.address,
-          paymentDelay = Some(zuoraService.paymentDelaysInDays),
-          casId = None,
-          ipAddress = Some(requestData.ipAddress),
-          featureIds = Nil
-        )
-      }
-
     for {
       userData <- userOrElseRegisterGuest
       memberId <- salesforceService.createOrUpdateUser(personalData, userData.id)
@@ -70,8 +56,16 @@ class CheckoutService(
         case paymentData@CreditCardData(_) =>
           paymentService.makeCreditCardPayment(paymentData, userData, memberId)
       }
-      subscribe <- subscribeAction(payment)
-      result <- zuoraService.subscribe(subscribe)
+      method <- payment.makePaymentMethod
+      result <- zuoraService.createSubscription(
+        subscribeAccount = payment.makeAccount,
+        paymentMethod = Some(method),
+        productRatePlanId = subscriptionData.ratePlanId,
+        name = subscriptionData.personalData,
+        address = personalData.address,
+        paymentDelay = Some(zuoraProperties.paymentDelayInDays),
+        ipAddressOpt = Some(requestData.ipAddress))
+
     } yield {
       updateAuthenticatedUserDetails()
       sendETDataExtensionRow(result)

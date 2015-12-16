@@ -21,8 +21,8 @@ trait SalesforceService extends LazyLogging {
 
   def createSalesforceUserData(personalData: PersonalData): JsObject = Json.obj(
       Keys.EMAIL -> personalData.email,
-      Keys.FIRST_NAME -> personalData.firstName,
-      Keys.LAST_NAME -> personalData.lastName,
+      Keys.FIRST_NAME -> personalData.first,
+      Keys.LAST_NAME -> personalData.last,
       Keys.MAILING_STREET -> personalData.address.line,
       Keys.MAILING_CITY -> personalData.address.town,
       Keys.MAILING_POSTCODE -> personalData.address.postCode,
