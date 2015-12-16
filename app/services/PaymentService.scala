@@ -25,8 +25,8 @@ trait PaymentService {
         accountNumber = paymentData.account,
         sortCode = paymentData.sortCode,
         accountHolderName = paymentData.holder,
-        firstName = personalData.firstName,
-        lastName = personalData.lastName,
+        firstName = personalData.first,
+        lastName = personalData.last,
         countryCode = Country.UK.alpha2
       ))
   }

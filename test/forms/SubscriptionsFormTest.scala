@@ -23,8 +23,8 @@ class SubscriptionsFormTest extends FreeSpec {
   "PersonalDataMapping" - {
     "maps form submissions to PersonalData" in {
       assertResult(Right(PersonalData(
-        firstName = "first",
-        lastName = "last",
+        first = "first",
+        last = "last",
         email = "a@example.com",
         receiveGnmMarketing = true,
 	address = Address("address1","address2","town", "", "postcode", Country.UK)

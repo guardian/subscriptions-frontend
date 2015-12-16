@@ -3,6 +3,7 @@ package model
 import com.gu.i18n.Country
 import com.gu.identity.play.IdUser
 import com.gu.memsub.Address
+import com.gu.memsub.services.Name
 
 sealed trait PaymentType {
   def toKey: String
@@ -31,8 +32,8 @@ case class DirectDebitData(account: String, sortCodeValue: String, holder: Strin
 }
 case class CreditCardData(stripeToken: String) extends PaymentData
 
-case class PersonalData(firstName: String, lastName: String, email: String, receiveGnmMarketing: Boolean, address: Address) {
-  def fullName = s"$firstName $lastName"
+case class PersonalData(first: String, last: String, email: String, receiveGnmMarketing: Boolean, address: Address) extends Name {
+  def fullName = s"$first $last"
 }
 
 case class SubscriptionData(personalData: PersonalData, paymentData: PaymentData, ratePlanId: String)

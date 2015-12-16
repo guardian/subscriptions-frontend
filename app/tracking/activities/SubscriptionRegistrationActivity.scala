@@ -35,7 +35,7 @@ case class MemberData(town: String, country: String, postCode: String, billingFr
 
     val subscriptionPlan = Map("subscriptionPlan" -> (billingFrequency match {
       case BillingFrequency.Month => "monthly"
-      case BillingFrequency.Quarter => "quaterly"
+      case BillingFrequency.Quarter => "quarterly"
       case BillingFrequency.Annual => "annual"
     }))
 

@@ -32,8 +32,8 @@ object Checkout extends Controller with LazyLogging with ActivityTracking {
     val IdentityGuestPasswordSettingToken = "newSubs_token"
   }
 
-  def zuoraService(implicit res: TouchpointBackend.Resolution): ZuoraService =
-    res.backend.zuoraService
+  def zuoraService(implicit res: TouchpointBackend.Resolution): CatalogService =
+    res.backend.catalogService
 
   def checkoutService(implicit res: TouchpointBackend.Resolution): CheckoutService =
     res.backend.checkoutService

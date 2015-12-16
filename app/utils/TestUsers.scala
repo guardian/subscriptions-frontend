@@ -30,7 +30,7 @@ object TestUsers {
   }
 
   object NameEnteredInForm extends TestUserCredentialType[SubscriptionData] {
-    def token(formData: SubscriptionData) = Some(formData.personalData.firstName)
+    def token(formData: SubscriptionData) = Some(formData.personalData.first)
   }
 
   object SignedInUsername extends TestUserCredentialType[IdMinimalUser] {

@@ -78,11 +78,11 @@ object PersonalDataJsonSerialiser {
     Json.obj(
       primaryEmailAddress -> personalData.email,
       publicFields -> Json.obj(
-        "displayName" -> s"${personalData.firstName} ${personalData.lastName}"
+        "displayName" -> s"${personalData.first} ${personalData.last}"
       ),
       "privateFields" -> Json.obj(
-        "firstName" -> personalData.firstName,
-        "secondName" -> personalData.lastName,
+        "firstName" -> personalData.first,
+        "secondName" -> personalData.last,
         "billingAddress1" -> personalData.address.lineOne,
         "billingAddress2" -> personalData.address.lineTwo,
         "billingAddress3" -> personalData.address.town,
