@@ -26,7 +26,7 @@ trait ExactTargetService extends LazyLogging {
 
     val accAndPaymentMethod = for {
       subs <- subscription
-      acc <- zuoraService.account(subs)
+      acc <- zuoraService.getAccount(subs)
       pm <- zuoraService.getDefaultPaymentMethod(acc)
     } yield (acc, pm)
 
