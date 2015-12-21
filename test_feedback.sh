@@ -17,7 +17,7 @@ echo "Feeding test results back to Prout..."
 set -ex
 
 # Prout's Travis webhook
-PROUT_HOOK=https://my-prout-host/api/hooks/travis
+PROUT_HOOK=https://prout-bot.herokuapp.com/api/hooks/travis
 
 # SauceLabs session ID
 if [ ! -f ./logs/screencastId ]; then
