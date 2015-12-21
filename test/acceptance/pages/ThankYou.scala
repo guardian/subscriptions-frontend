@@ -28,6 +28,6 @@ class ThankYou extends Page with WebBrowser with WebBrowserUtil {
   }
 
   def hasMyProfileButton = {
-    pageHasElement(cssSelector(s"a[href='${Config.profileUrl}/account/edit']"))
+    pageHasElement(cssSelector(s"a[href='${Config.identityFrontendUrl}/account/edit']"))
   }
 }

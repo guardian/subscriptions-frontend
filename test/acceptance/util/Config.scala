@@ -15,7 +15,7 @@ object Config {
 
   private val conf = ConfigFactory.load()
   val baseUrl = conf.getString("subscriptions.url")
-  val profileUrl = conf.getString("identity.webapp.url")
+  val identityFrontendUrl = conf.getString("identity.webapp.url")
   val testUsersSecret = conf.getString("identity.test.users.secret")
 
   lazy val driver: WebDriver = {
@@ -40,7 +40,7 @@ object Config {
     logger.info("=============================")
     logger.info(s"Stage: ${conf.getString("stage")}")
     logger.info(s"Subscription Frontend: ${baseUrl}")
-    logger.info(s"Identity Frontend: ${conf.getString("identity.webapp.url")}")
+    logger.info(s"Identity Frontend: ${identityFrontendUrl}")
     logger.info(s"Screencast = https://saucelabs.com/tests/${webDriverSessionId}")
   }
 }
