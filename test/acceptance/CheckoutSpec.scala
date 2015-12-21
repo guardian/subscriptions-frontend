@@ -1,12 +1,12 @@
 package acceptance
 
 import acceptance.pages.{Checkout, ThankYou}
-import acceptance.util.{Util, TestUser, Config, Acceptance}
+import acceptance.util._
 import org.scalatest.selenium.WebBrowser
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfter, FeatureSpec, GivenWhenThen}
 import org.slf4j.LoggerFactory
 
-class CheckoutSpec extends FeatureSpec with WebBrowser with Util
+class CheckoutSpec extends FeatureSpec with WebBrowser with WebBrowserUtil
   with GivenWhenThen with BeforeAndAfter with BeforeAndAfterAll  {
 
   def logger = LoggerFactory.getLogger(this.getClass)
@@ -16,6 +16,7 @@ class CheckoutSpec extends FeatureSpec with WebBrowser with Util
   }
 
   override def beforeAll() = {
+    Screencast.storeId()
     Config.printSummary()
   }
 
@@ -26,7 +27,7 @@ class CheckoutSpec extends FeatureSpec with WebBrowser with Util
 
   feature("Guest user subscription checkout") {
     scenario("Guest user subscribes with direct debit", Acceptance) {
-      val checkout = new pages.Checkout(new TestUser)
+      val checkout = new Checkout(new TestUser)
       When("I visit the checkout page ")
       go.to(checkout)
 

@@ -29,29 +29,18 @@ object Config {
     }
   }
 
-  def webDriverSessionId(): String = {
-    Config.driver match {
-      case remoteDriver: RemoteWebDriver => {
-        remoteDriver.getSessionId.toString
-      }
-      case _ => "unknown session ID"
-    }
-  }
+  val webDriverSessionId = driver.asInstanceOf[RemoteWebDriver].getSessionId.toString
 
-  def stage(): String = {
-    conf.getString("stage")
-  }
+  val screencastIdFile = conf.getString("screencastId.file")
 
-  def debug() = {
-    conf.root().render()
-  }
+  def debug() = conf.root().render()
 
   def printSummary(): Unit = {
     logger.info("Acceptance Test Configuration")
     logger.info("=============================")
-    logger.info(s"Stage: ${stage}")
-    logger.info(s"Subscription Frontend: ${Config.baseUrl}")
+    logger.info(s"Stage: ${conf.getString("stage")}")
+    logger.info(s"Subscription Frontend: ${baseUrl}")
     logger.info(s"Identity Frontend: ${conf.getString("identity.webapp.url")}")
-    logger.info(s"WebDriver Session ID = ${Config.webDriverSessionId}")
+    logger.info(s"Screencast = https://saucelabs.com/tests/${webDriverSessionId}")
   }
 }

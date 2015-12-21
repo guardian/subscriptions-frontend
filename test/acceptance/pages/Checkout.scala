@@ -1,10 +1,10 @@
 package acceptance.pages
 
-import acceptance.util.{TestUser, Util, Config}
+import acceptance.util.{TestUser, WebBrowserUtil, Config}
 import Config.baseUrl
 import org.scalatest.selenium.{WebBrowser, Page}
 
-class Checkout(val testUser: TestUser) extends Page with WebBrowser with Util {
+class Checkout(val testUser: TestUser) extends Page with WebBrowser with WebBrowserUtil {
   val url = s"$baseUrl/checkout"
 
   val formErrorClass = ".form-field--error"
@@ -42,9 +42,6 @@ class Checkout(val testUser: TestUser) extends Page with WebBrowser with Util {
       town.value = "town"
       postcode.value = "E8123"
     }
-
-    def emailNotValid(): Boolean =
-      fieldHasError(emailConfirmation)
 
     def continue(): Unit = {
       val selector = cssSelector(".js-checkout-your-details-submit")
@@ -151,12 +148,6 @@ class Checkout(val testUser: TestUser) extends Page with WebBrowser with Util {
       assert(pageHasElement(continueButton))
       click.on(continueButton)
     }
-  }
-
-  private def fieldHasError(elem: Element): Boolean = {
-    elem.attribute("name").map { inputName =>
-      pageHasElement(cssSelector(s"""$formErrorClass *[name="$inputName"]"""), 5)
-    }.isDefined
   }
 
   def fillInPersonalDetails(): Unit = {
