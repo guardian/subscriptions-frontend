@@ -47,11 +47,12 @@ libraryDependencies ++= Seq(
     "com.squareup.okhttp" % "okhttp" % "2.4.0",
     "com.snowplowanalytics" % "snowplow-java-tracker" % "0.5.2-SNAPSHOT",
     "com.github.t3hnar" %% "scala-bcrypt" % "2.4",
-    "org.apache.commons" % "commons-io" % "1.3.2"
+    "org.apache.commons" % "commons-io" % "1.3.2",
+    "com.madgag" %% "play-git-hub" % "2.3"
 )
 
 testOptions in Test ++= Seq(
-    Tests.Argument("-oFD") // display full stack errors and execution times in Scalatest output
+    Tests.Argument("-oD") // display full stack errors and execution times in Scalatest output
 )
 traceLevel in Test := 0
 

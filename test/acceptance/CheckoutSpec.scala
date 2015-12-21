@@ -27,6 +27,9 @@ class CheckoutSpec extends FeatureSpec with WebBrowser with WebBrowserUtil
 
   feature("Guest user subscription checkout") {
     scenario("Guest user subscribes with direct debit", Acceptance) {
+      assume(Dependencies.SubscriptionFrontend.isAvailable,
+        "- Please run local subscriptions-frontend server before running tests.")
+
       val checkout = new Checkout(new TestUser)
       When("I visit the checkout page ")
       go.to(checkout)
