@@ -25,10 +25,15 @@ class CheckoutSpec extends FeatureSpec with WebBrowser with WebBrowserUtil
     Config.driver.quit()
   }
 
+  private def checkDependenciesAreAvailable = {
+      assume(Dependencies.SubscriptionFrontend.isAvailable,
+        s"- ${Dependencies.SubscriptionFrontend.url} unavaliable! " +
+          "\nPlease run subscriptions-frontend server before running tests.")
+  }
+
   feature("Guest user subscription checkout") {
     scenario("Guest user subscribes with direct debit", Acceptance) {
-      assume(Dependencies.SubscriptionFrontend.isAvailable,
-        "- Please run local subscriptions-frontend server before running tests.")
+      checkDependenciesAreAvailable
 
       val checkout = new Checkout(new TestUser)
       When("I visit the checkout page ")
