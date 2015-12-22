@@ -12,19 +12,20 @@ import scala.util.Try
 import scala.language.postfixOps
 
 object Dependencies {
-  object SubscriptionFrontend {
-    val subsFeRequest = new Builder().url(Config.baseUrl).build()
 
-    def isAvailable: Boolean = {
-      Try(Await.result(insecureClient.execute(subsFeRequest), 30 second).isSuccessful).getOrElse(false)
-    }
+  object SubscriptionFrontend extends Availability {
+    val url = Config.baseUrl
   }
 
-  object IdentityFrontend {
-    val subsFeRequest = new Builder().url(Config.identityFrontendUrl).build()
+  object IdentityFrontend extends Availability {
+    val url = s"${Config.identityFrontendUrl}/signin"
+  }
 
+  trait Availability {
+    val url: String
     def isAvailable: Boolean = {
-      Try(Await.result(insecureClient.execute(subsFeRequest), 30 second).isSuccessful).getOrElse(false)
+      val request = new Builder().url(url).build()
+      Try(Await.result(insecureClient.execute(request), 30 second).isSuccessful).getOrElse(false)
     }
   }
 
