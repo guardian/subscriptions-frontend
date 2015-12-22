@@ -2,27 +2,23 @@ package acceptance
 
 import acceptance.pages.{Checkout, ThankYou}
 import acceptance.util._
-import org.scalatest.selenium.WebBrowser
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfter, FeatureSpec, GivenWhenThen}
 import org.slf4j.LoggerFactory
 
-class CheckoutSpec extends FeatureSpec with WebBrowser with WebBrowserUtil
+class CheckoutSpec extends FeatureSpec with Browser
   with GivenWhenThen with BeforeAndAfter with BeforeAndAfterAll  {
 
   def logger = LoggerFactory.getLogger(this.getClass)
 
-  before { // Before each test
-    resetDriver()
-  }
+  before { /* each test */ Driver.reset() }
 
   override def beforeAll() = {
     Screencast.storeId()
     Config.printSummary()
   }
 
-  // After all tests execute, close all windows, and exit the driver
   override def afterAll() = {
-    Config.driver.quit()
+    Driver.quit()
   }
 
   private def checkDependenciesAreAvailable = {
@@ -60,8 +56,7 @@ class CheckoutSpec extends FeatureSpec with WebBrowser with WebBrowserUtil
 
       And("I should have Identity cookies")
       Seq("GU_U", "SC_GU_U", "SC_GU_LA").foreach { idCookie =>
-        assert(cookiesSet.map(_.getName).contains(idCookie))
-      }
+        assert(Driver.cookiesSet.map(_.getName).contains(idCookie)) }
     }
   }
 }

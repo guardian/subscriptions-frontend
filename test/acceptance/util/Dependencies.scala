@@ -39,6 +39,7 @@ object Dependencies {
   * https://stackoverflow.com/questions/25509296/trusting-all-certificates-with-okhttp
   */
   private object InsecureOkHttpClient {
+
    def apply() =
      new OkHttpClient().setSslSocketFactory(SSL.InsecureSocketFactory).setHostnameVerifier(new HostnameVerifier {
        override def verify(hostname: String, sslSession: SSLSession): Boolean = true

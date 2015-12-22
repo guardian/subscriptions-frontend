@@ -1,11 +1,11 @@
 package acceptance.pages
 
-import acceptance.util.{WebBrowserUtil, TestUser, Config}
+import acceptance.util.{Browser, TestUser, Config}
 import Config.baseUrl
 import Config.identityFrontendUrl
-import org.scalatest.selenium.{Page, WebBrowser}
+import org.scalatest.selenium.Page
 
-class Register(testUser: TestUser) extends Page with WebBrowser with WebBrowserUtil {
+class Register(testUser: TestUser) extends Page with Browser {
   val url = s"""${identityFrontendUrl}/register?returnUrl=${baseUrl}/checkout&skipConfirmation=true"""
 
   private object RegisterFields {

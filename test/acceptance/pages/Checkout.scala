@@ -1,10 +1,10 @@
 package acceptance.pages
 
-import acceptance.util.{TestUser, WebBrowserUtil, Config}
+import acceptance.util.{Browser, TestUser, Config}
 import Config.baseUrl
-import org.scalatest.selenium.{WebBrowser, Page}
+import org.scalatest.selenium.Page
 
-class Checkout(val testUser: TestUser) extends Page with WebBrowser with WebBrowserUtil {
+class Checkout(val testUser: TestUser) extends Page with Browser {
   val url = s"$baseUrl/checkout"
 
   val formErrorClass = ".form-field--error"

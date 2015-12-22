@@ -1,11 +1,10 @@
 package acceptance.pages
 
-import acceptance.util.{WebBrowserUtil, Config}
+import acceptance.util.{Browser, Config}
 import Config.baseUrl
-import acceptance.util.Config
-import org.scalatest.selenium.{Page, WebBrowser}
+import org.scalatest.selenium.Page
 
-class ThankYou extends Page with WebBrowser with WebBrowserUtil {
+class ThankYou extends Page with Browser {
   override val url = s"$baseUrl/checkout/thank-you"
 
   object PasswordForm {
