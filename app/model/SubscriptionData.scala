@@ -2,8 +2,8 @@ package model
 
 import com.gu.i18n.Country
 import com.gu.identity.play.IdUser
-import com.gu.memsub.Address
-import com.gu.memsub.services.Name
+import com.gu.memsub.Subscription.ProductRatePlanId
+import com.gu.memsub.{FullName, Address}
 
 sealed trait PaymentType {
   def toKey: String
@@ -32,11 +32,11 @@ case class DirectDebitData(account: String, sortCodeValue: String, holder: Strin
 }
 case class CreditCardData(stripeToken: String) extends PaymentData
 
-case class PersonalData(first: String, last: String, email: String, receiveGnmMarketing: Boolean, address: Address) extends Name {
+case class PersonalData(first: String, last: String, email: String, receiveGnmMarketing: Boolean, address: Address) extends FullName {
   def fullName = s"$first $last"
 }
 
-case class SubscriptionData(personalData: PersonalData, paymentData: PaymentData, ratePlanId: String)
+case class SubscriptionData(personalData: PersonalData, paymentData: PaymentData, productRatePlanId: ProductRatePlanId)
 
 object SubscriptionData {
   def fromIdUser(u: IdUser) = {
@@ -68,7 +68,7 @@ object SubscriptionData {
 
     val blankPaymentData = DirectDebitData("", "", "")
 
-    val blankRatePlanId = ""
+    val blankRatePlanId = ProductRatePlanId("") // this makes me very nervous indeed
 
     SubscriptionData(personalData, blankPaymentData, blankRatePlanId)
   }

@@ -15,14 +15,14 @@ import play.api.libs.json._
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
-
+import com.gu.memsub.Subscription
 trait ExactTargetService extends LazyLogging {
   lazy val etClient: ETClient = ETClient
   def catalogService: CatalogService
   def zuoraService: ZuoraService
 
   def sendETDataExtensionRow(subscribeResult: SubscribeResult, subscriptionData: SubscriptionData): Future[Unit] = {
-    val subscription = zuoraService.getSubscriptionByName(subscribeResult.name)
+    val subscription = zuoraService.getSubscription(Subscription.Name(subscribeResult.name))
 
     val accAndPaymentMethod = for {
       subs <- subscription

@@ -3,7 +3,7 @@ package configuration
 import com.github.nscala_time.time.Imports._
 import com.gocardless.GoCardlessClient
 import com.gocardless.GoCardlessClient.Environment
-import com.gu.config.DigitalPack
+import com.gu.config.DigitalPackRatePlanIds
 import com.gu.googleauth.GoogleAuthConfig
 import com.gu.identity.cookie.{PreProductionKeys, ProductionKeys}
 import com.gu.salesforce.SalesforceConfig
@@ -88,6 +88,6 @@ object Config {
     val welcomeTriggeredSendKey = config.getString("exact-target.triggered-send-keys.welcome")
   }
 
-  def productFamily(env: String) = DigitalPack.fromConfig(
-    config.getConfig(s"touchpoint.backend.environments.$env.zuora.ratePlanIds"))
+  def productFamily(env: String) = DigitalPackRatePlanIds.fromConfig(
+    config.getConfig(s"touchpoint.backend.environments.$env.zuora.ratePlanIds.digitalpack"))
 }

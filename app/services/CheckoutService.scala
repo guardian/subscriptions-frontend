@@ -3,7 +3,6 @@ package services
 import com.gu.identity.play.AuthenticatedIdUser
 import com.gu.salesforce.ContactId
 import com.gu.zuora.api.ZuoraService
-import com.gu.zuora.soap.actions.subscribe.Subscribe
 import com.gu.zuora.soap.models.Results.SubscribeResult
 import com.typesafe.scalalogging.LazyLogging
 import model._
@@ -60,8 +59,8 @@ class CheckoutService(identityService: IdentityService,
       result <- zuoraService.createSubscription(
         subscribeAccount = payment.makeAccount,
         paymentMethod = Some(method),
-        productRatePlanId = subscriptionData.ratePlanId,
-        name = subscriptionData.personalData,
+        productRatePlanId = subscriptionData.productRatePlanId,
+        name = personalData,
         address = personalData.address,
         paymentDelay = Some(zuoraProperties.paymentDelayInDays),
         ipAddressOpt = Some(requestData.ipAddress))

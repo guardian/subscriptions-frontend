@@ -2,6 +2,7 @@ package forms
 
 import com.gu.i18n.Country
 import com.gu.memsub.Address
+import com.gu.memsub.Subscription.ProductRatePlanId
 import model._
 import play.api.data.format.Formats._
 import play.api.data.format.Formatter
@@ -54,6 +55,8 @@ object SubscriptionsForm {
     "address" -> addressDataMapping
   )(PersonalData.apply)(PersonalData.unapply)
 
+  val productRatePlanIdMapping = mapping("ratePlanId" -> text)(ProductRatePlanId.apply)(ProductRatePlanId.unapply)
+
   val directDebitDataMapping = mapping(
     "account" -> text(6, 10),
     "sortcode" -> text(6, 8),
@@ -87,10 +90,18 @@ object SubscriptionsForm {
     }
   }
 
+  implicit val productRatePlanIdFormatter = new Formatter[ProductRatePlanId] {
+    override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], ProductRatePlanId] =
+      Right(ProductRatePlanId(data.getOrElse(key, "")))
+
+    override def unbind(key: String, value: ProductRatePlanId): Map[String, String] =
+      Map(key -> value.get)
+  }
+
   val subsForm = Form(mapping(
     "personal" -> personalDataMapping,
     "payment" -> of[PaymentData],
-    "ratePlanId" -> text
+    "ratePlanId" -> of[ProductRatePlanId]
   )(SubscriptionData.apply)(SubscriptionData.unapply))
 
   def apply() = subsForm
