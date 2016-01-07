@@ -1,9 +1,11 @@
-@(subscriptionProducts: Seq[model.zuora.SubscriptionProduct] = Nil)
+@import com.gu.memsub.Month
+@import com.gu.subscriptions.DigipackPlan
+@import views.support.BillingPeriod._
+@import views.support.Pricing._
 
-@import model.zuora.BillingFrequency
-@import utils.Prices._
+@(defaultPlan: Option[DigipackPlan[Month]])
 
-<div class="basket-preview@if(subscriptionProducts.nonEmpty){ basket-preview--products}">
+<div class="basket-preview  basket-preview--products">
     <h3 class="basket-preview__title">You've chosen:</h3>
     <div class="basket-preview__image">
         <img src="@controllers.CachedAssets.hashedPathFor("images/digital-pack.png")" alt="Digital Pack">
@@ -16,9 +18,9 @@
         <span class="basket-preview__product__caption">
             (Daily Edition / Guardian App Premium Tier)
         </span>
-        @subscriptionProducts.find(_.frequency == BillingFrequency.Month).map { product =>
+        @defaultPlan.map { plan =>
             <span class="basket-preview__product__payment js-option-mirror-value">
-                @product.price.pretty every month
+                @plan.gbpPrice.pretty @plan.billingPeriod.frequencyInMonths
             </span>
         }
     </div>

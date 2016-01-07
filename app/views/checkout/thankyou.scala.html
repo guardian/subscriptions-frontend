@@ -1,9 +1,12 @@
-@import model.zuora.SubscriptionProduct
+@import views.support.BillingPeriod._
+@import views.support.Pricing._
 
+@import com.gu.memsub.BillingPeriod
+@import com.gu.subscriptions.DigipackPlan
 @(subscriptionName: String,
     guestAccountForm: Option[Form[model.GuestAccountData]] = None,
     touchpointBackendResolution: services.TouchpointBackend.Resolution,
-    subscriptionProduct:SubscriptionProduct
+    plan: DigipackPlan[BillingPeriod]
 )(implicit request: RequestHeader)
 
 @import configuration.Config.Identity.webAppProfileUrl
@@ -19,8 +22,8 @@
         source: 'Subscriptions and Membership',
         type: 'GUARDIAN_DIGIPACK',
         eventName: 'purchase',
-        amount: @{subscriptionProduct.price},
-        frequency: @{subscriptionProduct.frequency.numberOfMonths}
+        amount: @{plan.gbpPrice.amount},
+        frequency: @{plan.billingPeriod.numberOfMonths}
     };
 </script>
 
@@ -41,7 +44,7 @@
                 </p>
                 <p>Open times: Lines are open Monday&ndash;Friday 8.00am&ndash;5.30pm. Saturday &amp; Sunday 8.30am&ndash;12.30pm</p>
             </div>
-            @fragments.checkout.reviewPanel(subscriptionName, subscriptionProduct)
+            @fragments.checkout.reviewPanel(subscriptionName, plan)
         </div>
     </section>
 

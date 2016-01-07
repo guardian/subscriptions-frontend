@@ -3,9 +3,8 @@ package tracking.activities
 import java.util.{Map => JMap}
 
 import com.github.t3hnar.bcrypt._
-import com.gu.memsub.Address
+import com.gu.memsub.{BillingPeriod, Address}
 import configuration.Config
-import model.zuora.{BillingFrequency, SubscriptionProduct}
 import model.{CreditCardData, DirectDebitData, PaymentData, SubscriptionData}
 import services.CheckoutService.CheckoutResult
 import tracking.{ActivityTracking, TrackerData}
@@ -13,12 +12,12 @@ import tracking.{ActivityTracking, TrackerData}
 import scala.collection.JavaConversions._
 
 object MemberData {
-  def apply(checkoutResult: CheckoutResult, subscriptionData: SubscriptionData, product: SubscriptionProduct): MemberData = {
+  def apply(checkoutResult: CheckoutResult, subscriptionData: SubscriptionData, billingPeriod: BillingPeriod): MemberData = {
     val address: Address = subscriptionData.personalData.address
     MemberData(address.town,
       address.country.name,
       address.postCode,
-      product.frequency,
+      billingPeriod,
       subscriptionData.personalData.receiveGnmMarketing,
       checkoutResult.salesforceMember.salesforceContactId,
       checkoutResult.userIdData.id.toString,
@@ -27,17 +26,13 @@ object MemberData {
   }
 }
 
-case class MemberData(town: String, country: String, postCode: String, billingFrequency: BillingFrequency, receiveGnmMarketing: Boolean, salesForceContactId: String, userId: String, paymentData: PaymentData) {
+case class MemberData(town: String, country: String, postCode: String, billingPeriod: BillingPeriod, receiveGnmMarketing: Boolean, salesForceContactId: String, userId: String, paymentData: PaymentData) {
 
   def toMap: JMap[String, Any] = {
 
     def bcrypt(string: String) = (string + Config.bcryptPepper).bcrypt(Config.bcryptSalt)
 
-    val subscriptionPlan = Map("subscriptionPlan" -> (billingFrequency match {
-      case BillingFrequency.Month => "monthly"
-      case BillingFrequency.Quarter => "quarterly"
-      case BillingFrequency.Annual => "annual"
-    }))
+    val subscriptionPlan = Map("subscriptionPlan" -> billingPeriod.adjective)
 
     val marketingChoices = Map("marketingChoicesForm" -> ActivityTracking.setSubMap(Map(
       "gnm" -> receiveGnmMarketing,

@@ -1,6 +1,7 @@
 package services
 
 import com.gu.identity.play.AuthenticatedIdUser
+import com.gu.memsub.services.api.CatalogService
 import com.gu.salesforce.ContactId
 import com.gu.zuora.api.ZuoraService
 import com.gu.zuora.soap.models.Results.SubscribeResult

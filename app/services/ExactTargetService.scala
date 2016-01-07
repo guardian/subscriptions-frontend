@@ -18,7 +18,6 @@ import scala.concurrent.duration._
 import com.gu.memsub.Subscription
 trait ExactTargetService extends LazyLogging {
   lazy val etClient: ETClient = ETClient
-  def catalogService: CatalogService
   def zuoraService: ZuoraService
 
   def sendETDataExtensionRow(subscribeResult: SubscribeResult, subscriptionData: SubscriptionData): Future[Unit] = {
