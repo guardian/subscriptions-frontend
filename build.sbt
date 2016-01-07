@@ -36,7 +36,7 @@ libraryDependencies ++= Seq(
     "com.gu" %% "membership-common" % "0.124",
     "com.gu" %% "play-googleauth" % "0.3.1",
     "com.gu" %% "identity-test-users" % "0.5",
-    "com.gu.identity" %% "identity-play-auth" % "0.12",
+    "com.gu.identity" %% "identity-play-auth" % "0.13",
     "com.github.nscala-time" %% "nscala-time" % "2.0.0",
     "net.kencochrane.raven" % "raven-logback" % "6.0.0",
     "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0",
