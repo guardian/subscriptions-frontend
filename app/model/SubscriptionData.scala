@@ -54,13 +54,19 @@ object SubscriptionData {
       def getOrBlank(get: A => Option[String]): String = getOrDefault(get, "")
     }
 
+    val country = for {
+      pf <- u.privateFields
+      code <- pf.country
+      c <- CountryGroup.countryByCode(code)
+    } yield c
+
     val addressData = Address(
       lineOne = u.privateFields.getOrBlank(_.billingAddress1),
       lineTwo = u.privateFields.getOrBlank(_.billingAddress2),
       town = u.privateFields.getOrBlank(_.billingAddress3),
       postCode = u.privateFields.getOrBlank(_.billingPostcode),
       countyOrState = u.privateFields.getOrBlank(_.country),
-      country = Country.UK
+      country = country.getOrElse(Country.UK)
     )
 
     val personalData = PersonalData(
