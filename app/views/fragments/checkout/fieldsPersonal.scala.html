@@ -1,3 +1,7 @@
+@import views.support.CountryOps._
+@import views.support.AddressValidationRulesOps._
+@import com.gu.i18n.Country
+@import com.gu.i18n.CountryGroup
 @(form: Form[model.SubscriptionData], userIsSignedIn: Boolean)
 
 @signedInAttrs = @{ if (userIsSignedIn) "required readonly" else "" }
@@ -36,6 +40,16 @@
 
 @* ===== Address ===== *@
 <div class="js-checkout-full-address">
+    <div class="form-field">
+        <label class="label" for="country">Country</label>
+        <select name="country">
+            <option></option>
+            @for(c <- CountryGroup.countries) {
+                <option value="@c.alpha2" @c.validationRules.toAttributes>@c.name</option>
+            }
+        </select>
+        @fragments.forms.errorMessage("This field is required")
+    </div>
     <div class="form-field js-checkout-house">
         <label class="label" for="address-line-1">Address line 1</label>
         @* Salesforce accepts up to 255 chars but this field gets concatenated with address line 2 *@
