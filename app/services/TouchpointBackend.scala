@@ -1,5 +1,7 @@
 package services
 
+import com.gu.memsub.services.CatalogService
+import com.gu.memsub.services.api
 import com.gu.monitoring.{ServiceMetrics, StatusMetrics}
 import com.gu.stripe.StripeService
 import com.gu.zuora
@@ -15,15 +17,20 @@ import utils.TestUsers._
 
 object TouchpointBackend {
 
+  private implicit val system = Akka.system
+
   def apply(backendType: TouchpointBackendConfig.BackendType): TouchpointBackend = {
     val config = TouchpointBackendConfig.backendType(backendType, Config.config)
     val salesforceService = new SalesforceServiceImp(new SalesforceRepo(config.salesforce))
 
     val soapClient = new soap.ClientWithFeatureSupplier(Set.empty, config.zuoraSoap, new ServiceMetrics(Config.stage, Config.appName, "zuora-soap-client"), Akka.system)
     val restClient = new rest.Client(config.zuoraRest, new ServiceMetrics(Config.stage, Config.appName, "zuora-rest-client"))
+    val digipackRatePlanIds = Config.digipackRatePlanIds(config.environmentName)
 
-    val catalogService = new CatalogService(config.zuoraSoap, config.digitalProductPlan)
-    val zuoraService = new zuora.ZuoraService(soapClient, restClient, Config.productFamily(config.environmentName))
+    val membershipRatePlanIds = Config.membershipRatePlanIds(config.environmentName)
+    val catalogService = CatalogService(restClient, membershipRatePlanIds, digipackRatePlanIds, config.environmentName)
+    val zuoraService = new zuora.ZuoraService(soapClient, restClient, digipackRatePlanIds)
+
     val _stripeService = new StripeService(config.stripe, new TouchpointBackendMetrics with StatusMetrics {
       val backendEnv = config.stripe.envName
       val service = "Stripe"
@@ -68,7 +75,7 @@ object TouchpointBackend {
 
 case class TouchpointBackend(environmentName: String,
                              salesforceService: SalesforceService,
-                             catalogService : CatalogService,
+                             catalogService : api.CatalogService,
                              zuoraService: zuora.api.ZuoraService,
                              paymentService: PaymentService,
                              zuoraProperties: ZuoraProperties) {
@@ -77,7 +84,6 @@ case class TouchpointBackend(environmentName: String,
 
   private val exactTargetService = new ExactTargetService {
     override def zuoraService = that.zuoraService
-    override def catalogService = that.catalogService
   }
 
   val checkoutService =

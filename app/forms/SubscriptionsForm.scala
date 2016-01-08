@@ -104,5 +104,5 @@ object SubscriptionsForm {
     "ratePlanId" -> of[ProductRatePlanId]
   )(SubscriptionData.apply)(SubscriptionData.unapply))
 
-  def apply() = subsForm
+  def apply(): Form[SubscriptionData] = subsForm
 }

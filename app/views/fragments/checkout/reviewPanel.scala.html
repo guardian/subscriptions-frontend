@@ -1,14 +1,15 @@
-@import utils.Prices.RichFloat
-@import model.zuora.SubscriptionProduct
-
-@(subscriptionId: String, subscriptionProduct: SubscriptionProduct)
+@import views.support.BillingPeriod._
+@import views.support.Pricing._
+@import com.gu.memsub.BillingPeriod
+@import com.gu.subscriptions.DigipackPlan
+@(subscriptionId: String, plan: DigipackPlan[BillingPeriod])
 
 <div class="review-panel js-payment-frequency">
     <input type="checkbox" name="subscriptionDetails"
            checked="checked"
            class="u-h"
-           data-amount="@subscriptionProduct.price.pretty"
-           data-number-of-months="@subscriptionProduct.frequency.numberOfMonths">
+           data-amount="@plan.gbpPrice.pretty"
+           data-number-of-months="@plan.billingPeriod.numberOfMonths">
     <div class="review-panel__item">
         <h4 class="review-panel__label">Subscriber ID:</h4>
         <div class="review-panel__details">

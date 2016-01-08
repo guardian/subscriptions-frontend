@@ -5,7 +5,6 @@ import com.gu.salesforce.SalesforceConfig
 import com.gu.stripe.StripeApiConfig
 import com.gu.zuora.{ZuoraRestConfig, ZuoraSoapConfig, ZuoraApiConfig}
 import com.typesafe.scalalogging.LazyLogging
-import model.zuora.DigitalProductPlan
 import org.joda.time.Period
 
 case class TouchpointBackendConfig(
@@ -14,7 +13,6 @@ case class TouchpointBackendConfig(
   zuoraSoap: ZuoraSoapConfig,
   zuoraRest: ZuoraRestConfig,
   zuoraProperties: ZuoraProperties,
-  digitalProductPlan: DigitalProductPlan,
   stripe: StripeApiConfig
 )
 
@@ -51,7 +49,6 @@ object TouchpointBackendConfig extends LazyLogging {
       ZuoraApiConfig.soap(envBackendConf, environmentName),
       ZuoraApiConfig.rest(envBackendConf, environmentName),
       ZuoraProperties.from(envBackendConf, environmentName),
-      DigitalProductPlan(envBackendConf.getString("zuora.digital")),
       StripeApiConfig.from(envBackendConf, environmentName)
     )
   }

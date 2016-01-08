@@ -1,28 +1,31 @@
-@import model.zuora.SubscriptionProduct
+@import views.support.BillingPeriod._
+@import views.support.Pricing._
 @import model.JsVars
 @import configuration.Config.Identity._
 
+@import com.gu.subscriptions.DigipackPlan
+@import com.gu.memsub.BillingPeriod
+@import com.gu.memsub.Month
 @(form: Form[model.SubscriptionData],
     userIsSignedIn: Boolean,
-    products: Seq[SubscriptionProduct],
-    selectedProduct : SubscriptionProduct,
+    plans: Seq[DigipackPlan[BillingPeriod]],
+    defaultPlan : DigipackPlan[Month],
     touchpointBackendResolution: services.TouchpointBackend.Resolution)(implicit request: RequestHeader)
 
-@import model.zuora.BillingFrequency
-@import utils.Prices._
 
-@priceOption(product: model.zuora.SubscriptionProduct, descriptionSuffix: String, numberOfMonths: Int, isChecked: Boolean = false) = {
+@priceOption(plan: DigipackPlan[BillingPeriod]) = {
     <label class="option">
         <span class="option__input">
             <input
             type="radio" name="ratePlanId"
-            data-option-mirror-label="@product.price.pretty @descriptionSuffix"
-            data-amount="@product.price.pretty"
-            data-number-of-months="@numberOfMonths"
-            value="@product.ratePlanId"@if(isChecked){ checked}
+            data-option-mirror-label="@plan.gbpPrice.pretty @plan.billingPeriod.frequencyInMonths"
+            data-amount="@plan.gbpPrice"
+            data-number-of-months="@plan.billingPeriod.numberOfMonths"
+            value="@plan.productRatePlanId.get"
+            @if(plan == defaultPlan){checked}
             >
         </span>
-        <span class="option__label">@product.price.pretty @descriptionSuffix</span>
+        <span class="option__label">@plan.gbpPrice.pretty @plan.billingPeriod.frequencyInMonths</span>
     </label>
 }
 
@@ -41,22 +44,14 @@
             @fragments.checkout.checkoutHeader("Checkout")
 
             <div class="checkout-container__sidebar">
-                @fragments.checkout.basketPreview(products)
+                @fragments.checkout.basketPreview(Some(defaultPlan))
                 <div class="basket-options-toggle">
                     <button class="text-button u-button-reset js-toggle" data-toggle="change-payment-frequency">
                         Change payment frequency
                     </button>
                 </div>
                 <fieldset class="basket-billing-options is-hidden js-payment-frequency js-option-mirror-group" id="change-payment-frequency">
-                    @products.find(_.frequency == BillingFrequency.Month).map { product =>
-                        @priceOption(product, "every month", product.frequency.numberOfMonths, isChecked=true)
-                    }
-                    @products.find(_.frequency == BillingFrequency.Quarter).map { product =>
-                        @priceOption(product, "every 3 months", product.frequency.numberOfMonths)
-                    }
-                    @products.find(_.frequency == BillingFrequency.Annual).map { product =>
-                        @priceOption(product, "every 12 months", product.frequency.numberOfMonths)
-                    }
+                    @plans.map(priceOption)
                 </fieldset>
                 <div class="js-checkout-notices notices-container" data-set="checkout-notices" hidden="true">
                     <div class="js-append">
