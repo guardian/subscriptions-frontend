@@ -1,6 +1,6 @@
 package model
 
-import com.gu.i18n.Country
+import com.gu.i18n.{CountryGroup, Currency, Country}
 import com.gu.identity.play.IdUser
 import com.gu.memsub.Subscription.ProductRatePlanId
 import com.gu.memsub.{FullName, Address}
@@ -34,6 +34,11 @@ case class CreditCardData(stripeToken: String) extends PaymentData
 
 case class PersonalData(first: String, last: String, email: String, receiveGnmMarketing: Boolean, address: Address) extends FullName {
   def fullName = s"$first $last"
+
+  def currency: Currency =
+    CountryGroup.byCountryCode(address.country.alpha2)
+      .map(_.currency)
+      .getOrElse(throw new IllegalStateException(s"Cannot find a country group for country ${address.country}"))
 }
 
 case class SubscriptionData(personalData: PersonalData, paymentData: PaymentData, productRatePlanId: ProductRatePlanId)

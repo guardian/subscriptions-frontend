@@ -1,5 +1,7 @@
 package model.exactTarget
 
+import com.gu.i18n.CountryGroup
+import com.gu.memsub.Address
 import com.gu.zuora.soap.models.Queries._
 import com.typesafe.scalalogging.LazyLogging
 import model.{CreditCardData, DirectDebitData, SubscriptionData}
@@ -58,10 +60,9 @@ object SubscriptionDataExtensionRow extends LazyLogging{
         "Address 2" -> address.lineTwo,
         "City" -> address.town,
         "Post Code" -> address.postCode,
-        //TODO hardcoded!
-        "Country" -> "UK",
+        "Country" -> address.country.name,
         "Date of first payment" -> formatDate(subscription.contractAcceptanceDate),
-        "Currency" -> formatCurrency(account.currency),
+        "Currency" -> personalData.currency.glyph,
         //TODO to remove, hardcoded in the template
         "Trial period" -> "14",
         "Email" -> personalData.email
@@ -92,11 +93,9 @@ object SubscriptionDataExtensionRow extends LazyLogging{
     }
   }
 
-  private def formatPaymentMethod(method: String): String = {
-    method match {
-      case "BankTransfer" => "Direct Debit"
-      case otherMethod => otherMethod
-    }
+  private def formatPaymentMethod(method: String): String = method match {
+    case "BankTransfer" => "Direct Debit"
+    case otherMethod => otherMethod
   }
 
   private def formatAccountNumber(AccountNumber: String): String = {
@@ -104,16 +103,8 @@ object SubscriptionDataExtensionRow extends LazyLogging{
     s"****$lastFour"
   }
 
-  private def formatSortCode(sortCode: String): String = {
+  private def formatSortCode(sortCode: String): String =
     sortCode.filter(_.isDigit).grouped(2).mkString("-")
-  }
-
-  private def formatCurrency(currency: String): String = {
-    currency match {
-      case "GBP" => "£"
-      case other => other
-    }
-  }
 }
 
 trait DataExtensionRow {
