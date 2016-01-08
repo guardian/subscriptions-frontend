@@ -12,7 +12,7 @@ sealed trait PostcodeRule
 case object PostcodeOptional extends PostcodeRule
 case object PostcodeRequired extends PostcodeRule
 
-case class AddressValidationRules(postcodeRequired: PostcodeRule,
+case class AddressValidationRules(postcode: PostcodeRule,
                                   subdivision: SubdivisionRule)
 
 object AddressValidationRules {

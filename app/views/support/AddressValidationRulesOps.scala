@@ -10,7 +10,7 @@ object AddressValidationRulesOps {
       val subdivisionRequired = "data-subdivision-required"
       val subdivisionList = "data-subdivision-list"
 
-      val postcode = rules.postcodeRequired match {
+      val postcode = rules.postcode match {
         case PostcodeRequired => Map(postcodeRequiredAttr -> "true")
         case _ => Map(postcodeRequiredAttr -> "false")
       }
