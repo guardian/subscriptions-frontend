@@ -28,7 +28,7 @@ define([
         $('input', postcode()).replaceWith(newPostcode.input);
         $('label', postcode()).replaceWith(newPostcode.label);
 
-        $('select', subdivision()).replaceWith(newSubdivision.input);
+        $('#address-subdivision', subdivision()).replaceWith(newSubdivision.input);
         $('label', subdivision()).replaceWith(newSubdivision.label);
 
     };
