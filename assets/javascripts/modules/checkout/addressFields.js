@@ -28,6 +28,7 @@ define([], function () {
 
     var textInput = function (required, name) {
         var input = formField(required, name, 'input');
+        input.classList.add('input-text');
         input.type = 'text';
         return input;
     };
@@ -44,27 +45,20 @@ define([], function () {
         return input;
     };
 
-    var container = function() {
-        var elem = document.createElement('div');
-        elem.classList.add('form-field');
-        return elem;
-    };
-
 
     var postcode = function (required, text) {
-        var c = container();
-        c.appendChild(label(required, text, 'postcode'));
-        c.appendChild(textInput(required, 'postcode'));
-        return c;
+        return {
+            label: label(required, text, 'postcode'),
+            input: textInput(required, 'postcode')
+        };
     };
 
     var subdivision = function (required, text, values) {
-        var c = container();
         var name = 'subdivision';
-        c.appendChild(label(required, text, name));
-        var elem = values.length ? selectInput(required, name, values) : textInput(required, name);
-        c.appendChild(elem);
-        return c;
+        return {
+            label: label(required, text, name),
+            input: values.length ? selectInput(required, name, values) : textInput(required, name)
+        };
     };
 
     return {

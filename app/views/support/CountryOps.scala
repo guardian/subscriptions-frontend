@@ -2,6 +2,7 @@ package views.support
 
 import com.gu.i18n.{CountryGroup, Country}
 import model.AddressValidationRules
+import play.twirl.api.Html
 
 object CountryOps {
   implicit class CountryWithAddressFields(country: Country) {
@@ -26,6 +27,8 @@ object CountryOps {
         case _ => "State/County"
       }
     }
+
+    def addressLabels = Html(s"""data-postcode-label="$postcodeLabel" data-subdivision-label="$subdivisionLabel"""")
 
     def validationRules: AddressValidationRules = AddressValidationRules(country)
   }

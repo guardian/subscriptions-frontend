@@ -11,42 +11,48 @@ define(['modules/checkout/addressFields'], function (addressFields) {
     describe('Address fields generator', function() {
 
         it('should generate a compulsory postcode field with the right label', function () {
-            expect(addressFields.postcode(true, 'Postcode').isEqualNode(dom(
-                '<div class="form-field">' +
-                    '<label for="address-postcode" class="label">Postcode</label>' +
-                    '<input type="text" id="address-postcode" name="personal.address.postcode" required="required">' +
-                '</div>'
-                ))
-            ).toBeTruthy();
+            var output = addressFields.postcode(true, 'Postcode');
+
+            expect(output.input.isEqualNode(dom(
+                '<input type="text" id="address-postcode" name="personal.address.postcode" class="input-text" required="required">'
+            ))).toBeTruthy();
+
+            expect(output.label.isEqualNode(dom(
+                '<label for="address-postcode" class="label">Postcode</label>'
+            ))).toBeTruthy();
         });
 
         it('should generate an optional postcode field with the right label', function () {
-            expect(addressFields.postcode(false, 'Zipcode').isEqualNode(dom(
-                '<div class="form-field">' +
-                    '<label for="address-postcode" class="optional-marker label">Zipcode</label>' +
-                    '<input type="text" id="address-postcode" name="personal.address.postcode">' +
-                '</div>'
+            var output = addressFields.postcode(false, 'Zipcode');
+            expect(output.input.isEqualNode(dom(
+                '<input type="text" id="address-postcode" class="input-text" name="personal.address.postcode">'
+            ))).toBeTruthy();
+
+            expect(output.label.isEqualNode(dom(
+                '<label for="address-postcode" class="optional-marker label">Zipcode</label>'
             ))).toBeTruthy();
         });
 
         it('should generate a freeform region box when no list is supplied', function () {
-            expect(addressFields.subdivision(true, 'Province', []).isEqualNode(dom(
-                '<div class="form-field">' +
-                    '<label for="address-subdivision" class="label">Province</label>' +
-                    '<input type="text" id="address-subdivision" name="personal.address.subdivision" required="required">' +
-                '</div>'
+            var output = addressFields.subdivision(true, 'Province', []);
+
+            expect(output.input.isEqualNode(dom(
+                '<input type="text" id="address-subdivision" name="personal.address.subdivision" class="input-text" required="required">'
+            ))).toBeTruthy();
+
+            expect(output.label.isEqualNode(dom(
+                '<label for="address-subdivision" class="label">Province</label>'
             ))).toBeTruthy();
         });
 
         it('should generate a select box when a list is supplied', function () {
-            expect(addressFields.subdivision(true, 'Province', ['Bromley']).isEqualNode(dom(
-                '<div class="form-field">' +
-                    '<label for="address-subdivision" class="label">Province</label>' +
-                    '<select id="address-subdivision" name="personal.address.subdivision" required="required">' +
-                        '<option></option>' +
-                        '<option value="Bromley">Bromley</option>' +
-                    '</select>' +
-                '</div>'
+            var output = addressFields.subdivision(true, 'Province', ['Bromley']);
+
+            expect(output.input.isEqualNode(dom(
+                '<select id="address-subdivision" name="personal.address.subdivision" required="required">' +
+                    '<option></option>' +
+                    '<option value="Bromley">Bromley</option>' +
+                '</select>'
             ))).toBeTruthy();
         });
     });
