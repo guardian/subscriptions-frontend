@@ -93,11 +93,6 @@ object SubscriptionDataExtensionRow extends LazyLogging{
     }
   }
 
-  private def formatPaymentMethod(method: String): String = method match {
-    case "BankTransfer" => "Direct Debit"
-    case otherMethod => otherMethod
-  }
-
   private def formatAccountNumber(AccountNumber: String): String = {
     val lastFour = AccountNumber takeRight 4
     s"****$lastFour"
