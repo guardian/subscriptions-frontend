@@ -36,7 +36,6 @@ define([
 
         $('#address-subdivision', subdivision()).replaceWith(newSubdivision.input);
         $('label', subdivision()).replaceWith(newSubdivision.label);
-
     };
 
     var getCurrentState = function() {

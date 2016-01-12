@@ -34,15 +34,16 @@ define([], function () {
     };
 
     var selectInput = function (required, name, values) {
-        var input = formField(required, name, 'select');
-        input.appendChild(document.createElement('option'));
+        var select = formField(required, name, 'select');
+        select.classList.add('select--wide');
+        select.appendChild(document.createElement('option'));
         values.forEach(function(value) {
             var o = document.createElement('option');
             o.innerHTML = value;
             o.value = value;
-            input.appendChild(o);
+            select.appendChild(o);
         });
-        return input;
+        return select;
     };
 
 

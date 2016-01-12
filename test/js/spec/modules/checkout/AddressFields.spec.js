@@ -49,7 +49,7 @@ define(['modules/checkout/addressFields'], function (addressFields) {
             var output = addressFields.subdivision(true, 'Province', ['Bromley']);
 
             expect(output.input.isEqualNode(dom(
-                '<select id="address-subdivision" name="personal.address.subdivision" required="required">' +
+                '<select id="address-subdivision" name="personal.address.subdivision" class="select--wide" required="required">' +
                     '<option></option>' +
                     '<option value="Bromley">Bromley</option>' +
                 '</select>'
