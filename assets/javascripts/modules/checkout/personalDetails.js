@@ -3,26 +3,20 @@ define([
     'modules/checkout/formElements',
     'modules/checkout/validatePersonal',
     'modules/forms/loader',
+    'modules/checkout/fieldSwitcher',
     'modules/checkout/tracking'
 ], function (
     toggleError,
     formEls,
     validatePersonal,
     loader,
+    fieldSwitcher,
     tracking
 ) {
     'use strict';
 
     var FIELDSET_COMPLETE = 'is-complete';
     var FIELDSET_COLLAPSED = 'is-collapsed';
-
-    var requiredFields = [
-        {input: formEls.$FIRST_NAME, container: formEls.$FIRST_NAME_CONTAINER},
-        {input: formEls.$LAST_NAME, container: formEls.$LAST_NAME_CONTAINER},
-        {input: formEls.$ADDRESS1, container: formEls.$ADDRESS1_CONTAINER},
-        {input: formEls.$ADDRESS3, container: formEls.$ADDRESS3_CONTAINER},
-        {input: formEls.$POSTCODE, container: formEls.$POSTCODE_CONTAINER}
-    ];
 
     function requiredFieldVaues(fields) {
         return fields.map(function(field) {
@@ -31,7 +25,7 @@ define([
     }
 
     function displayErrors(validity) {
-        requiredFields.forEach(function(field) {
+        formEls.requiredPersonalFields().forEach(function(field) {
             var isEmpty = !field.input.val();
             toggleError(field.container, isEmpty);
         });
@@ -77,6 +71,7 @@ define([
     }
 
     function init() {
+        fieldSwitcher.init();
         var $actionEl = formEls.$YOUR_DETAILS_SUBMIT;
         var actionEl = $actionEl[0];
         tracking.personalDetailsTracking();
@@ -84,6 +79,7 @@ define([
         if ($actionEl.length) {
             actionEl.addEventListener('click', function(e) {
                 e.preventDefault();
+                var requiredFields = formEls.requiredPersonalFields();
                 handleValidation({
                     emailAddress: formEls.$EMAIL.val(),
                     emailAddressConfirmed: formEls.$CONFIRM_EMAIL.val(),

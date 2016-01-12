@@ -1,6 +1,17 @@
 define(['$'], function ($) {
     'use strict';
 
+    var requiredPersonalFields = function () {
+        var result = [];
+        $('.form-field', '#yourDetails').deepEach(function (el) {
+            var input = $('input[required], select[required]', el);
+            if (input.length) {
+                result.push({input: input, container: $(el)});
+            }
+        });
+        return result;
+    };
+
     return {
         $CHECKOUT_FORM: $('.js-checkout-form'),
 
@@ -66,6 +77,8 @@ define(['$'], function ($) {
         $REVIEW_CARD_EXPIRY: $('.js-checkout-review-card-expiry'),
 
         $EDIT_YOUR_DETAILS: $('.js-edit-your-details'),
-        $EDIT_PAYMENT_DETAILS: $('.js-edit-payment-details')
+        $EDIT_PAYMENT_DETAILS: $('.js-edit-payment-details'),
+
+        requiredPersonalFields: requiredPersonalFields
     };
 });

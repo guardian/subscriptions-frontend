@@ -4,15 +4,13 @@ define([
     'modules/checkout/personalDetails',
     'modules/checkout/paymentDetails',
     'modules/checkout/editFieldsets',
-    'modules/checkout/reviewDetails',
-    'modules/checkout/fieldSwitcher'
+    'modules/checkout/reviewDetails'
 ], function (
     formElements,
     personalDetails,
     paymentDetails,
     editFieldsets,
-    reviewDetails,
-    fieldSwitcher
+    reviewDetails
 ) {
     'use strict';
 
@@ -22,7 +20,6 @@ define([
             paymentDetails.init();
             editFieldsets.init();
             reviewDetails.init();
-            fieldSwitcher.init();
         }
 
         require('js!stripe').then(function() {

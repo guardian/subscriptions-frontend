@@ -19,8 +19,14 @@ define([
     };
 
     var redraw = function(model) {
-        var newPostcode = addressFields.postcode(model.postcodeRules.required, model.postcodeRules.label);
-        var newSubdivision = addressFields.subdivision(model.subdivisionRules.required, model.subdivisionRules.label, model.subdivisionRules.values);
+        var newPostcode = addressFields.postcode(
+            model.postcodeRules.required,
+            model.postcodeRules.label);
+
+        var newSubdivision = addressFields.subdivision(
+            model.subdivisionRules.required,
+            model.subdivisionRules.label,
+            model.subdivisionRules.values);
 
         newPostcode.input.value = model.postcode;
         newSubdivision.input.value = model.subdivision;
@@ -47,9 +53,11 @@ define([
         };
     };
 
-    bean.on(countrySelect()[0], 'change', function() {
-        redraw(getCurrentState());
-    });
+    if (countrySelect()[0]) {
+        bean.on(countrySelect()[0], 'change', function() {
+            redraw(getCurrentState());
+        });
+    }
 
     return {
         init: function() {
