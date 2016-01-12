@@ -33,21 +33,27 @@ define([
 
     };
 
-    bean.on(countrySelect()[0], 'change', function(e) {
-        var rules = countryChoice.addressRules(e.currentTarget.options[e.currentTarget.selectedIndex]);
+    var getCurrentState = function() {
 
-        var state = {
+        var select = countrySelect()[0];
+        var currentOption = select.options[select.selectedIndex];
+        var rules = countryChoice.addressRules(currentOption);
+
+        return {
             postcode: $('input', postcode()).val(),
             subdivision: $('select', subdivision()).val(),
             postcodeRules: rules.postcode,
             subdivisionRules: rules.subdivision
         };
+    };
 
-        redraw(state);
+    bean.on(countrySelect()[0], 'change', function() {
+        redraw(getCurrentState());
     });
 
     return {
         init: function() {
+            redraw(getCurrentState());
         }
     };
 });

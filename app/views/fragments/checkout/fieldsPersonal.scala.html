@@ -42,10 +42,10 @@
 <div class="js-checkout-full-address">
     <div class="form-field">
         <label class="label" for="country">Country</label>
-        <select name="country" class="js-country">
-            <option></option>
+        <select name="country" class=" select select--wide js-country">
+            <option @Country.UK.addressLabels></option>
             @for(c <- CountryGroup.countries) {
-                <option value="@c.alpha2" @c.validationRules.toAttributes @c.addressLabels>@c.name</option>
+                <option value="@c.alpha2" @c.validationRules.toAttributes @c.addressLabels @c.selectedAttribute(form)>@c.name</option>
             }
         </select>
         @fragments.forms.errorMessage("This field is required")
