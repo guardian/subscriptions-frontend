@@ -2,7 +2,8 @@
 @import views.support.AddressValidationRulesOps._
 @import com.gu.i18n.Country
 @import com.gu.i18n.CountryGroup
-@(form: Form[model.SubscriptionData], userIsSignedIn: Boolean)
+@import views.support.CountryWithCurrency
+@(form: Form[model.SubscriptionData], userIsSignedIn: Boolean, countriesWithCurrency: List[CountryWithCurrency])
 
 @signedInAttrs = @{ if (userIsSignedIn) "required readonly" else "" }
 
@@ -43,9 +44,9 @@
     <div class="form-field">
         <label class="label" for="country">Country</label>
         <select name="country" class=" select select--wide js-country">
-            <option @Country.UK.addressLabels></option>
-            @for(c <- CountryGroup.countries) {
-                <option value="@c.alpha2" @c.validationRules.toAttributes @c.addressLabels @c.selectedAttribute(form)>@c.name</option>
+            <option></option>
+            @for(c <- countriesWithCurrency) {
+                <option value="@c.alpha2" @c.country.validationRules.toAttributes @c.country.addressLabels data-currency-choice="@c.currency">@c.name</option>
             }
         </select>
         @fragments.forms.errorMessage("This field is required")

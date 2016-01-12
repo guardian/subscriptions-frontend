@@ -2,6 +2,7 @@ package controllers
 
 import actions.CommonActions._
 import com.gu.identity.play.ProxiedIP
+import com.gu.i18n.{GBP, CountryGroup}
 import com.gu.memsub.Subscription.ProductRatePlanId
 import com.gu.stripe.Stripe
 import com.gu.zuora.soap
@@ -18,6 +19,7 @@ import tracking.ActivityTracking
 import tracking.activities.{CheckoutReachedActivity, MemberData, SubscriptionRegistrationActivity}
 import utils.TestUsers.{NameEnteredInForm, PreSigninTestCookie}
 import views.html.{checkout => view}
+import views.support.CountryWithCurrency
 
 import scala.Function.const
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -39,7 +41,7 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
   def checkoutService(implicit res: TouchpointBackend.Resolution): CheckoutService =
     res.backend.checkoutService
 
-  def renderCheckout = NoCacheAction.async { implicit request =>
+  def renderCheckout(countryGroup: CountryGroup) = NoCacheAction.async { implicit request =>
 
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
@@ -47,20 +49,30 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
     trackAnon(CheckoutReachedActivity("United Kingdom"))
     val authenticatedUser = authenticatedUserFor(request)
 
-    val authenticatedUserForm = (for {
+    val subscriptionData = (for {
       authUser <- OptionT(Future.successful(authenticatedUser))
       idUser <- OptionT(IdentityService.userLookupByCredentials(authUser.credentials))
-    } yield SubscriptionsForm().fill(SubscriptionData.fromIdUser(idUser))).run
+    } yield SubscriptionData.fromIdUser(idUser)).run
 
-    val form = authenticatedUserForm.map(_.getOrElse(SubscriptionsForm()))
     val plans = catalog.planMap.values.toSeq
     val defaultPlan = catalog.digipackMonthly
 
-    form map { f =>
-      Ok(views.html.checkout.payment(form = f,
+    subscriptionData map { subsData =>
+      val form = subsData.fold(SubscriptionsForm()) { data => SubscriptionsForm().fill(data) }
+      val countryGroupWithDefault =
+        subsData.flatMap { data => CountryGroup.byCountryCode(data.personalData.address.countryCode) }
+                .getOrElse(countryGroup)
+      val desiredCurrency = countryGroupWithDefault.currency
+      val supportedCurrencies = defaultPlan.pricing.underlying.keySet
+      val currency = if (supportedCurrencies.contains(desiredCurrency)) desiredCurrency else GBP
+
+      Ok(views.html.checkout.payment(form = form,
                                      userIsSignedIn = authenticatedUser.isDefined,
                                      plans = plans,
                                      defaultPlan = defaultPlan,
+                                     countryGroup = countryGroupWithDefault,
+                                     currency = currency,
+                                     countriesWithCurrency = CountryWithCurrency.whitelisted(supportedCurrencies, GBP),
                                      touchpointBackendResolution = resolution))
     }
   }

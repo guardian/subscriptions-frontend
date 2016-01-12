@@ -1,4 +1,5 @@
 @import model.DigitalEdition
+@import com.gu.i18n.GBP
 @(edition: DigitalEdition, subscriptionNumberOfMonths: Int = 1)
 
 @main("Select your country | Digital | Subscriptions | The Guardian", bodyClasses = List("is-wide")) {
@@ -9,7 +10,7 @@
         @fragments.checkout.checkoutHeader("Checkout")
 
         <div class="checkout-container__sidebar">
-            @fragments.checkout.basketPreview(None)
+            @fragments.checkout.basketPreview(None, GBP)
         </div>
 
         <div class="checkout-container__form">

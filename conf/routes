@@ -24,7 +24,7 @@ GET         /us/digital                      controllers.DigitalPack.us
 GET         /au/digital                      controllers.DigitalPack.au
 
 # Checkout
-GET         /checkout                        controllers.Checkout.renderCheckout
+GET         /checkout                        controllers.Checkout.renderCheckout(countryGroup: CountryGroup ?= CountryGroup.UK)
 POST        /checkout                        controllers.Checkout.handleCheckout
 GET         /checkout/check-identity         controllers.Checkout.checkIdentity(email: String)
 POST        /checkout/check-account          controllers.Checkout.checkAccount

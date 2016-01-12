@@ -51,7 +51,7 @@ object SubscriptionsForm {
     "town" -> text(0, addressMaxLength),
     "subdivision" -> text,
     "postcode" -> text(0, addressMaxLength),
-    "country" -> country
+    "country" -> country.transform(_.alpha2, { c: String => CountryGroup.countryByCode(c).get })
   )(Address.apply)(Address.unapply).verifying(AddressValidation.validateForCountry _)
 
   val emailMapping = tuple(

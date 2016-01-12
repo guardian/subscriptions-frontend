@@ -79,6 +79,8 @@ define(['$'], function ($) {
         $EDIT_YOUR_DETAILS: $('.js-edit-your-details'),
         $EDIT_PAYMENT_DETAILS: $('.js-edit-payment-details'),
 
+        $BASKET: $('.js-basket'),
+
         requiredPersonalFields: requiredPersonalFields
     };
 });

@@ -2,13 +2,12 @@ define([
     '$',
     'bean',
     'modules/checkout/countryChoice',
-    'modules/checkout/addressFields'
-], function ($, bean, countryChoice, addressFields) {
+    'modules/checkout/addressFields',
+    'modules/checkout/currencySwitcher'
+], function ($, bean, countryChoice, addressFields, currencySwitcher) {
     'use strict';
 
-    var countrySelect = function() {
-        return $('.js-country');
-    };
+    var COUNTRY_SELECT = $('.js-country');
 
     var subdivision = function() {
         return $('.js-checkout-subdivision');
@@ -36,11 +35,12 @@ define([
 
         $('#address-subdivision', subdivision()).replaceWith(newSubdivision.input);
         $('label', subdivision()).replaceWith(newSubdivision.label);
+
+        currencySwitcher.setCurrency(model.currency || guardian.currency);
     };
 
     var getCurrentState = function() {
-
-        var select = countrySelect()[0];
+        var select = COUNTRY_SELECT[0];
         var currentOption = select.options[select.selectedIndex];
         var rules = countryChoice.addressRules(currentOption);
 
@@ -48,19 +48,33 @@ define([
             postcode: $('input', postcode()).val(),
             subdivision: $('select', subdivision()).val(),
             postcodeRules: rules.postcode,
-            subdivisionRules: rules.subdivision
+            subdivisionRules: rules.subdivision,
+            currency: $(currentOption).attr('data-currency-choice')
         };
     };
 
-    if (countrySelect()[0]) {
-        bean.on(countrySelect()[0], 'change', function() {
-            redraw(getCurrentState());
-        });
-    }
+    var refresh = function () {
+        redraw(getCurrentState());
+    };
+
+    var init = function() {
+        if (COUNTRY_SELECT.length) {
+            $('option', COUNTRY_SELECT).each(function (el) {
+                if ($(el).val() === guardian.country) {
+                    el.selected = true;
+                }
+            });
+
+            refresh();
+
+            bean.on(COUNTRY_SELECT[0], 'change', function() {
+                refresh();
+            });
+        }
+
+    };
 
     return {
-        init: function() {
-            redraw(getCurrentState());
-        }
+        init: init
     };
 });

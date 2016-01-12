@@ -6,64 +6,75 @@
 @import com.gu.subscriptions.DigipackPlan
 @import com.gu.memsub.BillingPeriod
 @import com.gu.memsub.Month
+@import com.gu.i18n.Currency
+@import com.gu.i18n.CountryGroup
+@import views.support.CountryWithCurrency
 @(form: Form[model.SubscriptionData],
     userIsSignedIn: Boolean,
     plans: Seq[DigipackPlan[BillingPeriod]],
     defaultPlan : DigipackPlan[Month],
+    countryGroup: CountryGroup,
+    currency: Currency,
+    countriesWithCurrency: List[CountryWithCurrency],
     touchpointBackendResolution: services.TouchpointBackend.Resolution)(implicit request: RequestHeader)
 
 
-@priceOption(plan: DigipackPlan[BillingPeriod]) = {
+@priceOption(plan: DigipackPlan[BillingPeriod], currency: Currency) = {
     <label class="option">
         <span class="option__input">
             <input
             type="radio" name="ratePlanId"
-            data-option-mirror-label="@plan.gbpPrice.pretty @plan.billingPeriod.frequencyInMonths"
-            data-amount="@plan.gbpPrice"
+            data-option-mirror-label="@plan.prettyPricing(currency)"
+            data-amount="@plan.pricing.getPrice(currency).get.amount"
             data-number-of-months="@plan.billingPeriod.numberOfMonths"
             value="@plan.productRatePlanId.get"
             @if(plan == defaultPlan){checked}
             >
         </span>
-        <span class="option__label">@plan.gbpPrice.pretty @plan.billingPeriod.frequencyInMonths</span>
+        <span class="option__label">@plan.prettyPricing(currency)</span>
     </label>
 }
 
 @main(
     title = "Details - name and address | Subscriptions | The Guardian",
-    jsVars = JsVars.default.copy(userIsSignedIn = userIsSignedIn, ignorePageLoadTracking = true),
+    jsVars = JsVars(userIsSignedIn = userIsSignedIn, ignorePageLoadTracking = true, countryGroup = countryGroup, currency = currency),
     bodyClasses = List("is-wide"),
     touchpointBackendResolutionOpt = Some(touchpointBackendResolution)
 ) {
 <main class="page-container gs-container">
 
     <section class="checkout-container">
-        <form class="form js-checkout-form" action="@routes.Checkout.renderCheckout().toString()" method="POST" novalidate>
+        <form class="form js-checkout-form" action="@routes.Checkout.renderCheckout().toString" method="POST" novalidate>
             @helper.CSRF.formField
 
             @fragments.checkout.checkoutHeader("Checkout")
 
-            <div class="checkout-container__sidebar">
-                @fragments.checkout.basketPreview(Some(defaultPlan))
-                <div class="basket-options-toggle">
-                    <button class="text-button u-button-reset js-toggle" data-toggle="change-payment-frequency">
-                        Change payment frequency
-                    </button>
-                </div>
-                <fieldset class="basket-billing-options is-hidden js-payment-frequency js-option-mirror-group" id="change-payment-frequency">
-                    @plans.map(priceOption)
-                </fieldset>
-                <div class="js-checkout-notices notices-container" data-set="checkout-notices" hidden="true">
-                    <div class="js-append">
-                        <div class="js-payment-type-direct-debit">
-                            @fragments.checkout.noticesDirectDebit()
-                        </div>
-                        <div class="js-payment-type-card" hidden="true">
-                            @fragments.checkout.noticesCard()
+            @* ===== Plan selection ===== *@
+            @for(c <- defaultPlan.currencies) {
+                <div class="checkout-container__sidebar js-basket" data-currency="@c">
+                    @fragments.checkout.basketPreview(Some(defaultPlan), c)
+                    <div class="basket-options-toggle">
+                        <button class="text-button u-button-reset js-toggle" data-toggle="change-payment-frequency-@c">
+                            Change payment frequency
+                        </button>
+                    </div>
+                    <fieldset class="basket-billing-options is-hidden js-payment-frequency js-option-mirror-group" id="change-payment-frequency-@c">
+                        @plans.map { p =>
+                            @priceOption(p, c)
+                        }
+                    </fieldset>
+                    <div class="js-checkout-notices notices-container" data-set="checkout-notices" hidden="true">
+                        <div class="js-append">
+                            <div class="js-payment-type-direct-debit">
+                                @fragments.checkout.noticesDirectDebit()
+                            </div>
+                            <div class="js-payment-type-card" hidden="true">
+                                @fragments.checkout.noticesCard()
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            }
 
             <div class="checkout-container__form">
 
@@ -87,7 +98,7 @@
                             <a href="#yourDetails" class="text-button u-button-reset js-edit-your-details" title="Edit your personal details">Edit</a>
                         </div>
                         <div class="field-panel__fields">
-                            @fragments.checkout.fieldsPersonal(form, userIsSignedIn)
+                            @fragments.checkout.fieldsPersonal(form, userIsSignedIn, countriesWithCurrency)
 
                             <div class="actions">
                                 <a href="#paymentDetails" class="button button--primary button--large js-checkout-your-details-submit">Continue</a>

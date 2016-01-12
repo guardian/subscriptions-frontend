@@ -1,9 +1,9 @@
 package model
 
-import com.gu.i18n.{CountryGroup, Currency, Country}
+import com.gu.i18n.CountryGroup
 import com.gu.identity.play.IdUser
 import com.gu.memsub.Subscription.ProductRatePlanId
-import com.gu.memsub.{FullName, Address}
+import com.gu.memsub.{Address, FullName}
 
 sealed trait PaymentType {
   def toKey: String
@@ -32,13 +32,21 @@ case class DirectDebitData(account: String, sortCodeValue: String, holder: Strin
 }
 case class CreditCardData(stripeToken: String) extends PaymentData
 
-case class PersonalData(first: String, last: String, email: String, receiveGnmMarketing: Boolean, address: Address) extends FullName {
+case class PersonalData(first: String,
+                        last: String,
+                        email: String,
+                        receiveGnmMarketing: Boolean,
+                        address: Address
+                        ) extends FullName {
   def fullName = s"$first $last"
 
-  def currency: Currency =
-    CountryGroup.byCountryCode(address.country.alpha2)
+  lazy val currency = {
+    val code = address.countryCode
+    CountryGroup.byCountryCode(code)
       .map(_.currency)
-      .getOrElse(throw new IllegalStateException(s"Cannot find a country group for country ${address.country}"))
+      .getOrElse(throw new NoSuchElementException(s"Could not find a country group with code $code"))
+  }
+
 }
 
 case class SubscriptionData(personalData: PersonalData, paymentData: PaymentData, productRatePlanId: ProductRatePlanId)
@@ -54,19 +62,13 @@ object SubscriptionData {
       def getOrBlank(get: A => Option[String]): String = getOrDefault(get, "")
     }
 
-    val country = for {
-      pf <- u.privateFields
-      code <- pf.country
-      c <- CountryGroup.countryByCode(code)
-    } yield c
-
     val addressData = Address(
       lineOne = u.privateFields.getOrBlank(_.billingAddress1),
       lineTwo = u.privateFields.getOrBlank(_.billingAddress2),
       town = u.privateFields.getOrBlank(_.billingAddress3),
       postCode = u.privateFields.getOrBlank(_.billingPostcode),
       countyOrState = u.privateFields.getOrBlank(_.country),
-      country = country.getOrElse(Country.UK)
+      countryCode = u.privateFields.getOrBlank(_.country)
     )
 
     val personalData = PersonalData(

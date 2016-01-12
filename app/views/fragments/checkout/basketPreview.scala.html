@@ -1,9 +1,8 @@
+@import com.gu.i18n.Currency
 @import com.gu.memsub.Month
 @import com.gu.subscriptions.DigipackPlan
-@import views.support.BillingPeriod._
 @import views.support.Pricing._
-
-@(defaultPlan: Option[DigipackPlan[Month]])
+@(defaultPlan: Option[DigipackPlan[Month]], currency: Currency)
 
 <div class="basket-preview  basket-preview--products">
     <h3 class="basket-preview__title">You've chosen:</h3>
@@ -20,7 +19,7 @@
         </span>
         @defaultPlan.map { plan =>
             <span class="basket-preview__product__payment js-option-mirror-value">
-                @plan.gbpPrice.pretty @plan.billingPeriod.frequencyInMonths
+                @plan.prettyPricing(currency)
             </span>
         }
     </div>

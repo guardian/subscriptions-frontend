@@ -31,9 +31,6 @@ object CountryOps {
 
     def addressLabels = Html(s"""data-postcode-label="$postcodeLabel" data-subdivision-label="$subdivisionLabel"""")
 
-    def selectedAttribute(f: Form[model.SubscriptionData]): Html =
-       f.value.fold(Html(""))(f => if(f.personalData.address.country == country) Html(s"""selected="selected"""") else Html(""))
-
     def validationRules: AddressValidationRules = AddressValidationRules(country)
   }
 }
