@@ -29,7 +29,7 @@ trait ExactTargetService extends LazyLogging {
       pm <- zuoraService.getDefaultPaymentMethod(acc)
     } yield (acc, pm)
 
-    (for {
+    for {
       subs <- subscription
       rpc <- zuoraService.recurringRatePlanCharge(subs)
       (acc, pm) <- accAndPaymentMethod
@@ -50,8 +50,6 @@ trait ExactTargetService extends LazyLogging {
           logger.error(errorMsg)
           throw new ExactTargetException(errorMsg)
       }
-    }) recover { case err: Throwable =>
-      logger.error(s"Error while trying to send an email to ExactTarget", err)
     }
   }
 }
