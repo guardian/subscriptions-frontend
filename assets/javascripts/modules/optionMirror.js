@@ -15,16 +15,15 @@ define(['$'], function ($) {
         }
     }
 
-    var init = function(scope) {
-        var valueElems = $(selectors.MIRROR_VALUE, scope);
-        var options = $(selectors.OPTION_GROUP + ' input', scope);
+    var init = function() {
+        var valueElems = $(selectors.MIRROR_VALUE);
+        var options = $(selectors.OPTION_GROUP + ' input');
         if (valueElems && options.length) {
             options.each(function(option) {
                 option.addEventListener('change', function(e) {
                     mirror(valueElems, e.target);
                 });
             });
-            mirror(valueElems, options[0]);
         }
     };
 

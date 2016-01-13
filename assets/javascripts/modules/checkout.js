@@ -18,9 +18,7 @@ define([
     'use strict';
     function init() {
         if (formElements.$CHECKOUT_FORM.length) {
-            formElements.$BASKET.each(function (el) {
-                optionMirror.init(el);
-            });
+            optionMirror.init();
             personalDetails.init();
             paymentDetails.init();
             editFieldsets.init();

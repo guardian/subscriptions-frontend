@@ -81,6 +81,9 @@ define(['$'], function ($) {
 
         $BASKET: $('.js-basket'),
 
+        $PLAN_SELECT: $('.js-payment-frequency'),
+        $COUNTRY_SELECT: $('.js-country'),
+
         requiredPersonalFields: requiredPersonalFields
     };
 });
