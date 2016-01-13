@@ -2,8 +2,7 @@ package controllers
 
 import actions.CommonActions._
 import com.typesafe.scalalogging.LazyLogging
-import controllers._
-import play.api.mvc.{Headers, Controller, Cookie}
+import play.api.mvc.{Controller, Cookie}
 import utils.TestUsers.testUsers
 
 object Testing extends Controller with LazyLogging {
@@ -27,5 +26,4 @@ object Testing extends Controller with LazyLogging {
   def analyticsOff = CachedAction {
     Ok(s"${analyticsOffCookie.name} cookie dropped").withCookies(analyticsOffCookie)
   }
-
 }
