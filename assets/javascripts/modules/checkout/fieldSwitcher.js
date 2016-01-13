@@ -1,3 +1,4 @@
+/*global guardian*/
 define([
     '$',
     'bean',
@@ -18,7 +19,16 @@ define([
 
     var $PLAN_INPUTS = $('input[type="radio"]', formElements.$PLAN_SELECT);
 
-    var redraw = function(model) {
+    var checkPlanInput = function (ratePlanId) {
+        $PLAN_INPUTS.each(function(input) {
+            if ($(input).val() === ratePlanId && !$(input).attr('disabled')) {
+                $(input).attr('checked', 'checked');
+                bean.fire(input, 'change');
+            }
+        });
+    };
+
+    var redrawAddressFields = function(model) {
         var newPostcode = addressFields.postcode(
             model.postcodeRules.required,
             model.postcodeRules.label);
@@ -36,18 +46,20 @@ define([
 
         $('#address-subdivision', subdivision()).replaceWith(newSubdivision.input);
         $('label', subdivision()).replaceWith(newSubdivision.label);
+    };
 
-        currencySwitcher.setCurrency(model.currency || guardian.currency);
-        $PLAN_INPUTS.each(function(input) {
-            if ($(input).val() === model.ratePlanId && !$(input).attr('disabled')) {
-                $(input).attr('checked', 'checked');
-                bean.fire(input, 'change');
-            }
-        });
+    var switchCurrency = function (currency) {
+        currencySwitcher.setCurrency(currency || guardian.currency);
+    };
+
+    var redraw = function(model) {
+        redrawAddressFields(model);
+        switchCurrency(model.currency);
+        checkPlanInput(model.ratePlanId);
     };
 
     var getRatePlanId = function () {
-        // Don't try to make it smarter: Bonzo has no filter function :(
+        // Bonzo has no filter function :(
         var ratePlanId = null;
         $PLAN_INPUTS.each(function (input) {
             if ($(input).attr('checked')) {
@@ -72,6 +84,14 @@ define([
         };
     };
 
+    var preselectCountry = function() {
+        $('option', formElements.$COUNTRY_SELECT).each(function (el) {
+            if ($(el).val() === guardian.country) {
+                el.selected = true;
+            }
+        });
+    };
+
     var refresh = function () {
         redraw(getCurrentState());
     };
@@ -84,16 +104,10 @@ define([
 
     var init = function() {
         if (formElements.$CHECKOUT_FORM.length) {
-            $('option', formElements.$COUNTRY_SELECT).each(function (el) {
-                if ($(el).val() === guardian.country) {
-                    el.selected = true;
-                }
-            });
-
+            preselectCountry();
             refreshOnChange(formElements.$COUNTRY_SELECT);
             refresh();
         }
-
     };
 
     return {
