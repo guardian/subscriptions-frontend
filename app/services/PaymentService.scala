@@ -38,8 +38,10 @@ trait PaymentService {
         .map(CreditCardReferenceTransaction)
   }
 
-  def makeDirectDebitPayment(paymentData: DirectDebitData, personalData: PersonalData, memberId: ContactId) =
+  def makeDirectDebitPayment(paymentData: DirectDebitData, personalData: PersonalData, memberId: ContactId) = {
+    require(personalData.country == Country.UK, "Direct Debit payment only works in the UK right now")
     new DirectDebitPayment(paymentData, personalData, memberId)
+  }
 
   def makeCreditCardPayment(paymentData: CreditCardData, personalData: PersonalData, userIdData: UserIdData, memberId: ContactId) = {
     new CreditCardPayment(paymentData, personalData.currency, userIdData, memberId = memberId)

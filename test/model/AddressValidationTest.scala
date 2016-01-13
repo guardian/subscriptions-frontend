@@ -7,7 +7,7 @@ import com.gu.i18n.Country._
 class AddressValidationTest extends Specification {
 
   "AddressValidation$Test" should {
-    val address = Address("lineOne", "lineTwo", "town", "", "", UK)
+    val address = Address("lineOne", "lineTwo", "town", "", "", UK.name)
 
     "validateForCountry" should {
       "checks the postcode if required" in {
@@ -17,8 +17,8 @@ class AddressValidationTest extends Specification {
 
       "checks the subdivision if required" in {
         AddressValidation.validateForCountry(address.copy(postCode = "postcode")) should_=== true
-        AddressValidation.validateForCountry(address.copy(postCode = "postcode", countyOrState = "Alaska", country = US)) should_=== true
-        AddressValidation.validateForCountry(address.copy(postCode = "postcode", countyOrState = "Quebec", country = US)) should_=== false
+        AddressValidation.validateForCountry(address.copy(postCode = "postcode", countyOrState = "Alaska", countryName = US.name)) should_=== true
+        AddressValidation.validateForCountry(address.copy(postCode = "postcode", countyOrState = "Quebec", countryName = US.name)) should_=== false
       }
     }
   }

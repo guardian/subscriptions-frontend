@@ -9,6 +9,11 @@ define([
 ], function ($, bean, countryChoice, addressFields, currencySwitcher, formElements) {
     'use strict';
 
+    var check = function(domEl) {
+        $(domEl).attr('checked', 'checked');
+        bean.fire(domEl, 'change');
+    };
+
     var subdivision = function() {
         return $('.js-checkout-subdivision');
     };
@@ -22,8 +27,7 @@ define([
     var checkPlanInput = function (ratePlanId) {
         $PLAN_INPUTS.each(function(input) {
             if ($(input).val() === ratePlanId && !$(input).attr('disabled')) {
-                $(input).attr('checked', 'checked');
-                bean.fire(input, 'change');
+                check(input);
             }
         });
     };
@@ -48,6 +52,16 @@ define([
         $('label', subdivision()).replaceWith(newSubdivision.label);
     };
 
+    // Change the payment method to Direct Debit for UK users,
+    // Credit Card for international users
+    var selectPaymentMethod = function (currency) {
+        if (currency == "GBP") {
+            check(formElements.$DIRECT_DEBIT_TYPE[0]);
+        } else {
+            check(formElements.$CARD_TYPE[0]);
+        }
+    };
+
     var switchCurrency = function (currency) {
         currencySwitcher.setCurrency(currency || guardian.currency);
     };
@@ -56,6 +70,7 @@ define([
         redrawAddressFields(model);
         switchCurrency(model.currency);
         checkPlanInput(model.ratePlanId);
+        selectPaymentMethod(model.currency);
     };
 
     var getRatePlanId = function () {
@@ -76,7 +91,7 @@ define([
 
         return {
             postcode: $('input', postcode()).val(),
-            subdivision: $('select', subdivision()).val(),
+            subdivision: $('select, input', subdivision()).val(),
             postcodeRules: rules.postcode,
             subdivisionRules: rules.subdivision,
             currency: $(currentCountryOption).attr('data-currency-choice'),

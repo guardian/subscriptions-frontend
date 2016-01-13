@@ -60,7 +60,7 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
     subscriptionData map { subsData =>
       val form = subsData.fold(SubscriptionsForm()) { data => SubscriptionsForm().fill(data) }
       val countryGroupWithDefault =
-        subsData.flatMap { data => CountryGroup.byCountryCode(data.personalData.address.countryCode) }
+        subsData.flatMap { data => CountryGroup.byCountryNameOrCode(data.personalData.address.countryName) }
                 .getOrElse(countryGroup)
       val desiredCurrency = countryGroupWithDefault.currency
       val supportedCurrencies = defaultPlan.pricing.underlying.keySet

@@ -97,6 +97,7 @@ class IdentityServiceTest extends FreeSpec {
         "billingAddress1" -> "address1",
         "billingAddress2" -> "address2",
         "billingAddress3" -> "Town",
+        "billingAddress4" -> "United Kingdom",
         "billingPostcode" -> "AAAAAA",
         "billingCountry" -> "United Kingdom"
       ),

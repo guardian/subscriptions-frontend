@@ -1,6 +1,6 @@
 package model
 
-import com.gu.i18n.CountryGroup
+import com.gu.i18n.{Country, CountryGroup}
 import com.gu.identity.play.IdUser
 import com.gu.memsub.Subscription.ProductRatePlanId
 import com.gu.memsub.{Address, FullName}
@@ -40,13 +40,20 @@ case class PersonalData(first: String,
                         ) extends FullName {
   def fullName = s"$first $last"
 
-  lazy val currency = {
-    val code = address.countryCode
-    CountryGroup.byCountryCode(code)
-      .map(_.currency)
-      .getOrElse(throw new NoSuchElementException(s"Could not find a country group with code $code"))
-  }
+  private lazy val countryName = address.countryName
 
+  private lazy val notFound =
+    throw new NoSuchElementException(s"Could not find a country group for country with name $countryName")
+
+  private lazy val countryGroup: CountryGroup =
+    CountryGroup.byCountryNameOrCode(countryName)
+      .getOrElse(notFound)
+
+  lazy val currency = countryGroup.currency
+
+  lazy val country: Country =
+    CountryGroup.countryByNameOrCode(countryName)
+      .getOrElse(notFound)
 }
 
 case class SubscriptionData(personalData: PersonalData, paymentData: PaymentData, productRatePlanId: ProductRatePlanId)
@@ -67,8 +74,8 @@ object SubscriptionData {
       lineTwo = u.privateFields.getOrBlank(_.billingAddress2),
       town = u.privateFields.getOrBlank(_.billingAddress3),
       postCode = u.privateFields.getOrBlank(_.billingPostcode),
-      countyOrState = u.privateFields.getOrBlank(_.country),
-      countryCode = u.privateFields.getOrBlank(_.country)
+      countyOrState = u.privateFields.getOrBlank(_.billingAddress4),
+      countryName = u.privateFields.getOrBlank(_.country)
     )
 
     val personalData = PersonalData(

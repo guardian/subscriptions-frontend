@@ -31,6 +31,7 @@ define(['$'], function ($) {
 
         // Direct Debit
         $ACCOUNT_CONTAINER: $('.js-checkout-account'),
+        $DIRECT_DEBIT_TYPE: $('input[name="payment.type"][value="direct-debit"]'),
         $SORTCODE_CONTAINER: $('.js-checkout-sortcode'),
         $HOLDER_CONTAINER: $('.js-checkout-holder'),
         $CONFIRM_PAYMENT_CONTAINER: $('.js-checkout-confirm-payment'),
@@ -41,6 +42,7 @@ define(['$'], function ($) {
 
         // Credit Card
         $CARD_CONTAINER: $('.js-payment-type-card'),
+        $CARD_TYPE: $('input[name="payment.type"][value="card"]'),
         $CARD_NUMBER_CONTAINER: $('.js-checkout-card-number'),
         $CARD_CVC_CONTAINER: $('.js-checkout-card-cvc'),
         $CARD_EXPIRY_CONTAINER: $('.js-checkout-card-expiry'),

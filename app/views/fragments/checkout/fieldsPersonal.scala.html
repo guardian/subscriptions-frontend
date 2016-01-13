@@ -1,7 +1,5 @@
 @import views.support.CountryOps._
 @import views.support.AddressValidationRulesOps._
-@import com.gu.i18n.Country
-@import com.gu.i18n.CountryGroup
 @import views.support.CountryWithCurrency
 @(form: Form[model.SubscriptionData], userIsSignedIn: Boolean, countriesWithCurrency: List[CountryWithCurrency])
 
@@ -43,7 +41,7 @@
 <div class="js-checkout-full-address">
     <div class="form-field">
         <label class="label" for="country">Country</label>
-        <select name="country" class=" select select--wide js-country">
+        <select name="personal.address.country" class=" select select--wide js-country">
             <option></option>
             @for(c <- countriesWithCurrency) {
                 <option value="@c.alpha2" @c.country.validationRules.toAttributes @c.country.addressLabels data-currency-choice="@c.currency">@c.name</option>

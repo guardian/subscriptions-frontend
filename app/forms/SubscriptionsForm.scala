@@ -51,8 +51,9 @@ object SubscriptionsForm {
     "town" -> text(0, addressMaxLength),
     "subdivision" -> text,
     "postcode" -> text(0, addressMaxLength),
-    "country" -> country.transform(_.alpha2, { c: String => CountryGroup.countryByCode(c).get })
-  )(Address.apply)(Address.unapply).verifying(AddressValidation.validateForCountry _)
+    "country" -> country.transform(_.name, { name: String => CountryGroup.countryByNameOrCode(name).get })
+  )(Address.apply)(Address.unapply)
+    .verifying("address validation failed", AddressValidation.validateForCountry _)
 
   val emailMapping = tuple(
     "email" -> email.verifying("This email is too long", _.length < emailMaxLength + 1),
@@ -118,7 +119,8 @@ object SubscriptionsForm {
     "personal" -> personalDataMapping,
     "payment" -> of[PaymentData],
     "ratePlanId" -> of[ProductRatePlanId]
-  )(SubscriptionData.apply)(SubscriptionData.unapply))
+  )(SubscriptionData.apply)(SubscriptionData.unapply)
+    .verifying("DirectDebit is only available in the UK", PaymentValidation.validateDirectDebit _))
 
   def apply(): Form[SubscriptionData] = subsForm
 }

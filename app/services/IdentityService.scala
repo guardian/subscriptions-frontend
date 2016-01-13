@@ -86,8 +86,9 @@ object PersonalDataJsonSerialiser {
         "billingAddress1" -> personalData.address.lineOne,
         "billingAddress2" -> personalData.address.lineTwo,
         "billingAddress3" -> personalData.address.town,
+        "billingAddress4" -> personalData.address.countyOrState,
         "billingPostcode" -> personalData.address.postCode,
-        "billingCountry" -> "United Kingdom"
+        "billingCountry" -> personalData.country.name
       ),
       "statusFields" ->
         Json.obj("receiveGnmMarketing" -> personalData.receiveGnmMarketing))
