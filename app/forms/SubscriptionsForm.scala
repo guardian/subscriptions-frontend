@@ -29,21 +29,14 @@ object SubscriptionsForm {
   private val addressMaxLength = 255
   private val emailMaxLength = 240
 
-  implicit val countryFormatter: Formatter[Country] = new Formatter[Country] {
-    override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Country] = {
-      val countryCode = data.get(key)
-      lazy val formError = FormError(key, s"Cannot find a country by country code ${countryCode.getOrElse("")}")
-
-      countryCode
-        .flatMap(CountryGroup.countryByCode)
-        .toRight[Seq[FormError]](Seq(formError))
-    }
-
-    override def unbind(key: String, value: Country): Map[String, String] =
-      Map(key -> value.alpha2)
-  }
-
-  private val country = of[Country] as countryFormatter
+  // Unfortunately, the UI wants a country code, but Identity has a country name,
+  // So we need to convert back and forth between them
+  private val countryName: Mapping[String] =
+    text.verifying { code => CountryGroup.countryByCode(code).isDefined }
+      .transform(
+        { code => CountryGroup.countryByCode(code).fold("")(_.name)},
+        { name => CountryGroup.countryByNameOrCode(name).fold("")(_.alpha2)}
+      )
 
   val addressDataMapping = mapping(
     "address1" -> text(0, addressMaxLength),
@@ -51,7 +44,7 @@ object SubscriptionsForm {
     "town" -> text(0, addressMaxLength),
     "subdivision" -> text,
     "postcode" -> text(0, addressMaxLength),
-    "country" -> country.transform(_.name, { name: String => CountryGroup.countryByNameOrCode(name).get })
+    "country" -> countryName
   )(Address.apply)(Address.unapply)
     .verifying("address validation failed", AddressValidation.validateForCountry _)
 
