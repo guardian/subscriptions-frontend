@@ -1,6 +1,7 @@
 package controllers
 
 import actions.CommonActions._
+import com.gu.identity.play.ProxiedIP
 import com.gu.memsub.Subscription.ProductRatePlanId
 import com.gu.stripe.Stripe
 import com.gu.zuora.soap
@@ -76,7 +77,7 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(NameEnteredInForm, formData)
     implicit val tpBackend = resolution.backend
 
-    val requestData = SubscriptionRequestData(request.remoteAddress)
+    val requestData = SubscriptionRequestData(ProxiedIP.getIP(request))
 
     val checkoutResult = checkoutService.processSubscription(formData, idUserOpt, requestData)
 
