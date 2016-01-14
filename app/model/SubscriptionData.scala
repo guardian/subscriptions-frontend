@@ -70,11 +70,11 @@ object SubscriptionData {
     }
 
     val addressData = Address(
-      lineOne = u.privateFields.getOrBlank(_.billingAddress1),
-      lineTwo = u.privateFields.getOrBlank(_.billingAddress2),
-      town = u.privateFields.getOrBlank(_.billingAddress3),
-      postCode = u.privateFields.getOrBlank(_.billingPostcode),
-      countyOrState = u.privateFields.getOrBlank(_.billingAddress4),
+      lineOne = u.privateFields.getOrBlank(_.address1),
+      lineTwo = u.privateFields.getOrBlank(_.address2),
+      town = u.privateFields.getOrBlank(_.address3),
+      postCode = u.privateFields.getOrBlank(_.postcode),
+      countyOrState = u.privateFields.getOrBlank(_.address4),
       countryName = u.privateFields.getOrBlank(_.country)
     )
 
