@@ -73,15 +73,15 @@
         @fragments.forms.errorMessage("This field is required")
     </div>
 </div>
+<div class="form-field js-checkout-subdivision">
+    <label class="label" for="address-subdivision">County</label>
+    <select name="address.subdivision" id="address-subdivision"></select>
+    @fragments.forms.errorMessage("Please enter a valid state/county")
+</div>
 <div class="form-field js-checkout-postcode">
     <label class="label" for="address-postcode">Postcode</label>
     <input type="text" class="input-text js-input input-text input-text--small"
         id="address-postcode" name="personal.address.postcode"
         value="@form.data.get("personal.address.postcode")" maxlength="10" required>
     @fragments.forms.errorMessage("Please enter a valid postal code")
-</div>
-<div class="form-field js-checkout-subdivision">
-    <label class="label" for="address-subdivision">County</label>
-    <select name="address.subdivision" id="address-subdivision"></select>
-    @fragments.forms.errorMessage("Please enter a valid state/county")
 </div>
