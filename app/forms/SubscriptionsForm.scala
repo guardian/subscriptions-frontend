@@ -29,7 +29,7 @@ object SubscriptionsForm {
   private val addressMaxLength = 255
   private val emailMaxLength = 240
 
-  // Unfortunately, the UI wants a country code, but Identity has a country name,
+  // Unfortunately, the UI wants a country code, but Identity has a country name by default (e.g. from their MMA page),
   // So we need to convert back and forth between them
   private val countryName: Mapping[String] =
     text.verifying { code => CountryGroup.countryByCode(code).isDefined }
