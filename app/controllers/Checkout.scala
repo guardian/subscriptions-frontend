@@ -46,7 +46,7 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
 
-    trackAnon(CheckoutReachedActivity("United Kingdom"))
+    trackAnon(CheckoutReachedActivity(countryGroup))
     val authenticatedUser = authenticatedUserFor(request)
 
     val subscriptionData = (for {
