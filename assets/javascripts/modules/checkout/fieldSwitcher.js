@@ -55,7 +55,7 @@ define([
     // Change the payment method to Direct Debit for UK users,
     // Credit Card for international users
     var selectPaymentMethod = function (currency) {
-        if (currency == "GBP") {
+        if (currency == 'GBP') {
             check(formElements.$DIRECT_DEBIT_TYPE[0]);
         } else {
             check(formElements.$CARD_TYPE[0]);
