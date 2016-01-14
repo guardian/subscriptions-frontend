@@ -63,7 +63,7 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
         subsData.flatMap { data => CountryGroup.byCountryNameOrCode(data.personalData.address.countryName) }
                 .getOrElse(countryGroup)
       val desiredCurrency = countryGroupWithDefault.currency
-      val supportedCurrencies = defaultPlan.pricing.underlying.keySet
+      val supportedCurrencies = defaultPlan.currencies
       val currency = if (supportedCurrencies.contains(desiredCurrency)) desiredCurrency else GBP
 
       Ok(views.html.checkout.payment(form = form,
