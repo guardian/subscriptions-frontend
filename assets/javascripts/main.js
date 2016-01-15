@@ -10,7 +10,6 @@ require([
     'modules/password',
     'modules/inputMask',
     'modules/checkout',
-    'modules/country',
     'modules/confirmation',
     'modules/patterns',
     // Add new dependencies ABOVE this
@@ -27,7 +26,6 @@ require([
     password,
     inputMask,
     checkout,
-    country,
     confirmation,
     patterns
 ) {
@@ -44,7 +42,6 @@ require([
     optionSwitch.init();
     password.init();
     inputMask.init();
-    country.init();
     checkout.init();
     confirmation.init();
     patterns.init();

@@ -13,16 +13,8 @@ object DigitalPack extends Controller {
   def us = landingPage(US)
   def au = landingPage(AU)
 
-  def selectUk = country(UK)
-  def selectUs = country(US)
-  def selectAu = country(AU)
-
   def landingPage(digitalEdition: DigitalEdition) = CachedAction {
     Ok(views.html.digitalpack.info(digitalEdition, DigitalEdition.getRedirect(digitalEdition)))
-  }
-
-  def country(digitalEdition: DigitalEdition) = CachedAction {
-    Ok(views.html.digitalpack.country(digitalEdition))
   }
 
 }
