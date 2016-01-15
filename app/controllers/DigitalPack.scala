@@ -13,18 +13,10 @@ object DigitalPack extends Controller {
   def au = landingPage(AU)
   def int = landingPage(INT)
 
-  def selectUk = country(UK)
-  def selectUs = country(US)
-  def selectAu = country(AU)
-  def selectInt = country(INT)
-
   def landingPage(digitalEdition: DigitalEdition) = CachedAction {
     val plan = TouchpointBackend.Normal.catalogService.digipackCatalog.digipackMonthly
     val price = plan.pricing.getPrice(digitalEdition.countryGroup.currency).getOrElse(plan.gbpPrice)
     Ok(views.html.digitalpack.info(digitalEdition, price))
   }
 
-  def country(digitalEdition: DigitalEdition) = CachedAction {
-    Ok(views.html.digitalpack.country(digitalEdition))
-  }
 }
