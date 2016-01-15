@@ -1,4 +1,4 @@
-define(function () {
+define(['$'], function ($) {
     'use strict';
 
     var selectors = {
@@ -6,26 +6,24 @@ define(function () {
         MIRROR_VALUE: '.js-option-mirror-value'
     };
 
-    function mirror(valueElems) {
-        var selected = document.querySelector(selectors.OPTION_GROUP + ' input:checked');
-        var selectedValue = selected.getAttribute('data-option-mirror-label');
+    function mirror(valueElems, input) {
+        var selectedValue = input.getAttribute('data-option-mirror-label');
         if (selectedValue) {
-            [].forEach.call(valueElems, function(valueElem) {
-                valueElem.textContent = selectedValue;
+            valueElems.each(function (el) {
+                el.textContent = selectedValue;
             });
         }
     }
 
     var init = function() {
-        var valueElems = document.querySelectorAll(selectors.MIRROR_VALUE);
-        var options = document.querySelectorAll(selectors.OPTION_GROUP + ' input');
+        var valueElems = $(selectors.MIRROR_VALUE);
+        var options = $(selectors.OPTION_GROUP + ' input');
         if (valueElems && options.length) {
-            [].forEach.call(options, function(option) {
-                option.addEventListener('change', function() {
-                    mirror(valueElems);
+            options.each(function(option) {
+                option.addEventListener('change', function(e) {
+                    mirror(valueElems, e.target);
                 });
             });
-            mirror(valueElems);
         }
     };
 

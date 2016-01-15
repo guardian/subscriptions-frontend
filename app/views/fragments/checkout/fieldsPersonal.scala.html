@@ -1,4 +1,7 @@
-@(form: Form[model.SubscriptionData], userIsSignedIn: Boolean)
+@import views.support.CountryOps._
+@import views.support.AddressValidationRulesOps._
+@import views.support.CountryWithCurrency
+@(form: Form[model.SubscriptionData], userIsSignedIn: Boolean, countriesWithCurrency: List[CountryWithCurrency])
 
 @signedInAttrs = @{ if (userIsSignedIn) "required readonly" else "" }
 
@@ -36,6 +39,19 @@
 
 @* ===== Address ===== *@
 <div class="js-checkout-full-address">
+    <div class="form-field">
+        <label class="label" for="country">Country</label>
+        <select name="personal.address.country" class=" select select--wide js-country">
+            <option></option>
+            @for(c <- countriesWithCurrency) {
+                <option value="@c.alpha2" @c.country.validationRules.toAttributes @c.country.addressLabels data-currency-choice="@c.currency">@c.name</option>
+            }
+        </select>
+        @fragments.forms.errorMessage("This field is required")
+    </div>
+
+    <div class="js-postcode"><!--populated in js--></div>
+
     <div class="form-field js-checkout-house">
         <label class="label" for="address-line-1">Address line 1</label>
         @* Salesforce accepts up to 255 chars but this field gets concatenated with address line 2 *@
@@ -56,6 +72,11 @@
             value="@form.data.get("personal.address.town")" maxlength="40" required>
         @fragments.forms.errorMessage("This field is required")
     </div>
+</div>
+<div class="form-field js-checkout-subdivision">
+    <label class="label" for="address-subdivision">County</label>
+    <select name="address.subdivision" id="address-subdivision"></select>
+    @fragments.forms.errorMessage("Please enter a valid state/county")
 </div>
 <div class="form-field js-checkout-postcode">
     <label class="label" for="address-postcode">Postcode</label>

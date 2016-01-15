@@ -54,7 +54,7 @@ class CheckoutService(identityService: IdentityService,
         case paymentData@DirectDebitData(_, _, _) =>
           paymentService.makeDirectDebitPayment(paymentData, personalData, memberId)
         case paymentData@CreditCardData(_) =>
-          paymentService.makeCreditCardPayment(paymentData, userData, memberId)
+          paymentService.makeCreditCardPayment(paymentData, personalData, userData, memberId)
       }
       method <- payment.makePaymentMethod
       result <- zuoraService.createSubscription(

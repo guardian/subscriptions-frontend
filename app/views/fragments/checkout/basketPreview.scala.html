@@ -1,9 +1,4 @@
-@import com.gu.memsub.Month
-@import com.gu.subscriptions.DigipackPlan
-@import views.support.BillingPeriod._
-@import views.support.Pricing._
-
-@(defaultPlan: Option[DigipackPlan[Month]])
+@()
 
 <div class="basket-preview  basket-preview--products">
     <h3 class="basket-preview__title">You've chosen:</h3>
@@ -18,10 +13,6 @@
         <span class="basket-preview__product__caption">
             (Daily Edition / Guardian App Premium Tier)
         </span>
-        @defaultPlan.map { plan =>
-            <span class="basket-preview__product__payment js-option-mirror-value">
-                @plan.gbpPrice.pretty @plan.billingPeriod.frequencyInMonths
-            </span>
-        }
+        <span class="basket-preview__product__payment js-option-mirror-value"></span>
     </div>
 </div>

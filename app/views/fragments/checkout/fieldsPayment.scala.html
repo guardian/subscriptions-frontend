@@ -2,7 +2,7 @@
 
 @* ===== Payment type ===== *@
 
-<div>
+<div data-currency="GBP">
     <div class="label u-margin-bottom">How would you like to pay?</div>
     <div class="field-group js-checkout-payment-method">
         <div class="field-group__item">
@@ -26,7 +26,7 @@
     </div>
 </div>
 
-<div class="payment-type payment-type--direct-debit js-payment-type-direct-debit">
+<div class="payment-type payment-type--direct-debit js-payment-type-direct-debit" data-currency="GBP">
     @fragments.checkout.fieldsDirectDebit()
 </div>
 

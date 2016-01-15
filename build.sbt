@@ -22,6 +22,10 @@ lazy val root = (project in file(".")).enablePlugins(
     buildInfoPackage := "app",
     buildInfoOptions += BuildInfoOption.ToMap
     )
+  .settings(play.sbt.routes.RoutesKeys.routesImport ++= Seq(
+      "controllers.Binders._",
+      "com.gu.i18n.CountryGroup"
+  ))
 
 scalaVersion := "2.11.6"
 scalacOptions ++= Seq("-feature")
@@ -33,7 +37,7 @@ libraryDependencies ++= Seq(
     ws,
     filters,
     PlayImport.specs2,
-    "com.gu" %% "membership-common" % "0.125",
+    "com.gu" %% "membership-common" % "0.130",
     "com.gu" %% "play-googleauth" % "0.3.1",
     "com.gu" %% "identity-test-users" % "0.5",
     "com.gu.identity" %% "identity-play-auth" % "0.14",

@@ -6,7 +6,6 @@ require([
     'modules/appendAround',
     'modules/profileMenu',
     'modules/userDetails',
-    'modules/optionMirror',
     'modules/optionSwitch',
     'modules/password',
     'modules/inputMask',
@@ -24,7 +23,6 @@ require([
     appendAround,
     profileMenu,
     userDetails,
-    optionMirror,
     optionSwitch,
     password,
     inputMask,
@@ -43,7 +41,6 @@ require([
     appendAround.init();
     profileMenu.init();
     userDetails.init();
-    optionMirror.init();
     optionSwitch.init();
     password.init();
     inputMask.init();
@@ -51,5 +48,4 @@ require([
     checkout.init();
     confirmation.init();
     patterns.init();
-
 });

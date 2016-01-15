@@ -1,6 +1,6 @@
 package services
 
-import com.gu.i18n.{GBP, Country}
+import com.gu.i18n.{Currency, GBP, Country}
 import com.gu.salesforce.ContactId
 import com.gu.stripe.StripeService
 import com.gu.zuora.soap.actions.subscribe._
@@ -31,16 +31,19 @@ trait PaymentService {
       ))
   }
 
-  class CreditCardPayment(val paymentData: CreditCardData, val userIdData: UserIdData, val memberId: ContactId) extends Payment {
-    override def makeAccount = Account.stripe(memberId, GBP, autopay = true)
+  class CreditCardPayment(val paymentData: CreditCardData, val currency: Currency, userIdData: UserIdData, val memberId: ContactId) extends Payment {
+    override def makeAccount = Account.stripe(memberId, currency, autopay = true)
     override def makePaymentMethod =
       stripeService.Customer.create(userIdData.id.id, paymentData.stripeToken)
         .map(CreditCardReferenceTransaction)
   }
 
-  def makeDirectDebitPayment(paymentData: DirectDebitData, personalData: PersonalData, memberId: ContactId) =
+  def makeDirectDebitPayment(paymentData: DirectDebitData, personalData: PersonalData, memberId: ContactId) = {
+    require(personalData.country == Country.UK, "Direct Debit payment only works in the UK right now")
     new DirectDebitPayment(paymentData, personalData, memberId)
+  }
 
-  def makeCreditCardPayment(paymentData: CreditCardData, userIdData: UserIdData, memberId: ContactId) =
-    new CreditCardPayment(paymentData, userIdData, memberId = memberId)
+  def makeCreditCardPayment(paymentData: CreditCardData, personalData: PersonalData, userIdData: UserIdData, memberId: ContactId) = {
+    new CreditCardPayment(paymentData, personalData.currency, userIdData, memberId = memberId)
+  }
 }

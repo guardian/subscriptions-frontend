@@ -1,6 +1,17 @@
 define(['$'], function ($) {
     'use strict';
 
+    var requiredPersonalFields = function () {
+        var result = [];
+        $('.form-field', '#yourDetails').deepEach(function (el) {
+            var input = $('input[required], select[required]', el);
+            if (input.length) {
+                result.push({input: input, container: $(el)});
+            }
+        });
+        return result;
+    };
+
     return {
         $CHECKOUT_FORM: $('.js-checkout-form'),
 
@@ -20,6 +31,7 @@ define(['$'], function ($) {
 
         // Direct Debit
         $ACCOUNT_CONTAINER: $('.js-checkout-account'),
+        $DIRECT_DEBIT_TYPE: $('input[name="payment.type"][value="direct-debit"]'),
         $SORTCODE_CONTAINER: $('.js-checkout-sortcode'),
         $HOLDER_CONTAINER: $('.js-checkout-holder'),
         $CONFIRM_PAYMENT_CONTAINER: $('.js-checkout-confirm-payment'),
@@ -30,6 +42,7 @@ define(['$'], function ($) {
 
         // Credit Card
         $CARD_CONTAINER: $('.js-payment-type-card'),
+        $CARD_TYPE: $('input[name="payment.type"][value="card"]'),
         $CARD_NUMBER_CONTAINER: $('.js-checkout-card-number'),
         $CARD_CVC_CONTAINER: $('.js-checkout-card-cvc'),
         $CARD_EXPIRY_CONTAINER: $('.js-checkout-card-expiry'),
@@ -66,6 +79,13 @@ define(['$'], function ($) {
         $REVIEW_CARD_EXPIRY: $('.js-checkout-review-card-expiry'),
 
         $EDIT_YOUR_DETAILS: $('.js-edit-your-details'),
-        $EDIT_PAYMENT_DETAILS: $('.js-edit-payment-details')
+        $EDIT_PAYMENT_DETAILS: $('.js-edit-payment-details'),
+
+        $BASKET: $('.js-basket'),
+
+        $PLAN_SELECT: $('.js-payment-frequency'),
+        $COUNTRY_SELECT: $('.js-country'),
+
+        requiredPersonalFields: requiredPersonalFields
     };
 });

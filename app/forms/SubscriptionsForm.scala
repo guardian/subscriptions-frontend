@@ -1,6 +1,6 @@
 package forms
 
-import com.gu.i18n.Country
+import com.gu.i18n.{CountryGroup, Country}
 import com.gu.memsub.Address
 import com.gu.memsub.Subscription.ProductRatePlanId
 import model._
@@ -29,14 +29,24 @@ object SubscriptionsForm {
   private val addressMaxLength = 255
   private val emailMaxLength = 240
 
-  def unapplyUkAddress(a: Address) = Some((a.lineOne, a.lineTwo, a.town, a.postCode))
-  def applyUkAddress(lineOne: String, lineTwo: String, town: String, postCode: String) = Address(lineOne, lineTwo, town, "", postCode, Country.UK)
+  // Unfortunately, the UI wants a country code, but Identity has a country name by default (e.g. from their MMA page),
+  // So we need to convert back and forth between them
+  private val countryName: Mapping[String] =
+    text.verifying { code => CountryGroup.countryByCode(code).isDefined }
+      .transform(
+        { code => CountryGroup.countryByCode(code).fold("")(_.name)},
+        { name => CountryGroup.countryByNameOrCode(name).fold("")(_.alpha2)}
+      )
+
   val addressDataMapping = mapping(
     "address1" -> text(0, addressMaxLength),
     "address2" -> text(0, addressMaxLength),
     "town" -> text(0, addressMaxLength),
-    "postcode" -> text(0, addressMaxLength)
-  )(applyUkAddress)(unapplyUkAddress)
+    "subdivision" -> text,
+    "postcode" -> text(0, addressMaxLength),
+    "country" -> countryName
+  )(Address.apply)(Address.unapply)
+    .verifying("address validation failed", AddressValidation.validateForCountry _)
 
   val emailMapping = tuple(
     "email" -> email.verifying("This email is too long", _.length < emailMaxLength + 1),
@@ -102,7 +112,8 @@ object SubscriptionsForm {
     "personal" -> personalDataMapping,
     "payment" -> of[PaymentData],
     "ratePlanId" -> of[ProductRatePlanId]
-  )(SubscriptionData.apply)(SubscriptionData.unapply))
+  )(SubscriptionData.apply)(SubscriptionData.unapply)
+    .verifying("DirectDebit is only available in the UK", PaymentValidation.validateDirectDebit _))
 
   def apply(): Form[SubscriptionData] = subsForm
 }
