@@ -64,7 +64,7 @@ class CheckoutService(identityService: IdentityService,
         name = personalData,
         address = personalData.address,
         paymentDelay = Some(zuoraProperties.paymentDelayInDays),
-        ipAddressOpt = Some(requestData.ipAddress))
+        ipAddressOpt = requestData.ipAddress.map(_.getHostAddress))
 
     } yield {
       updateAuthenticatedUserDetails()
