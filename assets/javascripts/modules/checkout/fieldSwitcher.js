@@ -4,9 +4,9 @@ define([
     'bean',
     'modules/checkout/countryChoice',
     'modules/checkout/addressFields',
-    'modules/checkout/currencySwitcher',
+    'modules/checkout/localizationSwitcher',
     'modules/checkout/formElements'
-], function ($, bean, countryChoice, addressFields, currencySwitcher, formElements) {
+], function ($, bean, countryChoice, addressFields, localizationSwitcher, formElements) {
     'use strict';
 
     var check = function(domEl) {
@@ -54,23 +54,24 @@ define([
 
     // Change the payment method to Direct Debit for UK users,
     // Credit Card for international users
-    var selectPaymentMethod = function (currency) {
-        if (currency == 'GBP') {
+    var selectPaymentMethod = function (country) {
+        if (country == 'GB') {
             check(formElements.$DIRECT_DEBIT_TYPE[0]);
         } else {
             check(formElements.$CARD_TYPE[0]);
         }
     };
 
-    var switchCurrency = function (currency) {
-        currencySwitcher.setCurrency(currency || guardian.currency);
+    var switchLocalization = function (model) {
+        var currency = model.currency || guardian.currency;
+        localizationSwitcher.set(currency, model.country);
     };
 
     var redraw = function(model) {
         redrawAddressFields(model);
-        switchCurrency(model.currency);
+        switchLocalization(model);
         checkPlanInput(model.ratePlanId);
-        selectPaymentMethod(model.currency);
+        selectPaymentMethod(model.country);
     };
 
     var getRatePlanId = function () {
@@ -95,6 +96,7 @@ define([
             postcodeRules: rules.postcode,
             subdivisionRules: rules.subdivision,
             currency: $(currentCountryOption).attr('data-currency-choice'),
+            country: $(currentCountryOption).val(),
             ratePlanId: getRatePlanId()
         };
     };
