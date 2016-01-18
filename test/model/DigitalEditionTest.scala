@@ -1,16 +1,18 @@
 package model
 
-import model.DigitalEdition.{US, UK}
+import model.DigitalEdition.{AU, US, UK}
 import play.api.test.PlaySpecification
 
 class DigitalEditionTest extends PlaySpecification {
   "getRedirect" should {
-    "go to the country select interstitial for UK users" in {
-      DigitalEdition.getRedirect(UK).toString mustEqual "/digital/country"
+    "go straight to the UK checkout" in {
+      DigitalEdition.getRedirect(UK).toString mustEqual "/checkout?countryGroup=uk"
     }
-
-    "go straight to the subscription page for non UK users" in {
-      DigitalEdition.getRedirect(US).toString mustEqual "https://www.guardiansubscriptions.co.uk/digitalsubscriptions/?prom=dga38&CMP=FAB_3062"
+    "go straight to the US checkout" in {
+      DigitalEdition.getRedirect(US).toString mustEqual "/checkout?countryGroup=us"
+    }
+    "go straight to the AU checkout" in {
+      DigitalEdition.getRedirect(AU).toString mustEqual "/checkout?countryGroup=au"
     }
   }
 }

@@ -1,7 +1,8 @@
+@import com.gu.i18n.CountryGroup
 @(
     title: String,
     jsVars: model.JsVars = model.JsVars(),
-    isInternational: Boolean = false,
+    countryGroup: CountryGroup =CountryGroup.UK,
     bodyClasses: Seq[String] = Nil,
     touchpointBackendResolutionOpt: Option[services.TouchpointBackend.Resolution] = None
 )(content: Html)
@@ -35,7 +36,7 @@
             @content
         </div>
 
-        @fragments.global.footer(isInternational)
+        @fragments.global.footer(countryGroup)
         @fragments.global.sessionCam()
         @fragments.footerJavaScript()
     </body>

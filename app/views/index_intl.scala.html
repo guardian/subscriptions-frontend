@@ -2,7 +2,7 @@
 @import com.netaporter.uri.Uri
 @(edition: DigitalEdition, membershipLink: Uri)
 
-@main(s"Subscriptions | ${edition.name} | The Guardian", isInternational=true) {
+@main(s"Subscriptions | ${edition.name} | The Guardian", countryGroup = edition.countryGroup) {
 
 <main class="page-container gs-container">
     <div class="page-header">

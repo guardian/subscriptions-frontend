@@ -1,20 +1,24 @@
 package model
 
+import com.gu.i18n.CountryGroup
 import com.netaporter.uri.Uri
 import com.netaporter.uri.dsl._
 
-case class DigitalEdition(id: String, name: String, price: String, campaign: String)
-
+case class DigitalEdition(price: String, campaign: String, countryGroup: CountryGroup) {
+  def id = countryGroup.id
+  def name = countryGroup.name
+}
 
 object DigitalEdition {
 
-  object UK extends DigitalEdition("uk", "UK", "£11.99", "dis_2408")
-  object US extends DigitalEdition("us", "US", "$19.99", "dis_2378")
-  object AU extends DigitalEdition("au", "Australia", "$21.50", "dis_2379")
+  object UK extends DigitalEdition("£11.99", "dis_2408", CountryGroup.UK)
 
-  def getRedirect(edition: DigitalEdition): Uri = edition match {
-      case UK => "/digital/country"
-      case _ => "https://www.guardiansubscriptions.co.uk/digitalsubscriptions/?prom=dga38&CMP=FAB_3062"
+  object US extends DigitalEdition("$19.99", "dis_2378", CountryGroup.US)
+
+  object AU extends DigitalEdition("$21.50", "dis_2379", CountryGroup.Australia)
+
+  def getRedirect(edition: DigitalEdition): Uri = {
+    "/checkout" ? ("countryGroup" -> edition.countryGroup.id)
   }
 
   def getMembershipLandingPage(edition: DigitalEdition): Uri = {

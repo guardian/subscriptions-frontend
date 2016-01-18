@@ -1,5 +1,6 @@
 @import model.DigitalEdition
 @import com.netaporter.uri.Uri
+@import com.gu.i18n.CountryGroup
 @(edition: DigitalEdition, redirect: Uri)
 
 @import model.Benefits
@@ -21,7 +22,8 @@
 
 @main(
     title = if(edition.id == "uk") "Digital | Subscriptions | The Guardian" else s"Digital - ${edition.name} | Subscriptions | The Guardian",
-    bodyClasses = List("is-wide")
+    bodyClasses = List("is-wide"),
+    countryGroup = edition.countryGroup
 ) {
 
 <main class="page-container gs-container gs-container--slim">
