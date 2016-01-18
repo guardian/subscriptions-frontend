@@ -1,5 +1,6 @@
 @import views.support.BillingPeriod._
 @import views.support.Pricing._
+@import com.gu.i18n.CountryGroup
 
 @import com.gu.memsub.BillingPeriod
 @import com.gu.subscriptions.DigipackPlan
@@ -14,7 +15,14 @@
 @import services.IdentityToken.{paramName => identityTokenParam}
 @import services.UserId.{paramName => userIdParam}
 
-@main("Confirmation | Digital | Subscriptions | The Guardian", bodyClasses=List("is-wide"), touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
+@main(
+    "Confirmation | Digital | Subscriptions | The Guardian",
+    bodyClasses=List("is-wide"),
+    touchpointBackendResolutionOpt = Some(touchpointBackendResolution),
+    countryGroup = CountryGroup.UK
+    //TODO: FIXME
+
+) {
 
 <script type="text/javascript">
     guardian.pageInfo.slug="GuardianDigiPack:Order Complete";

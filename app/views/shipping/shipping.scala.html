@@ -1,8 +1,9 @@
 @(subscription: model.Subscriptions.SubscriptionProduct)
 
 @import utils.Prices._
+@import com.gu.i18n.CountryGroup
 
-@main(s"${subscription.capitalizedTitle} | Choose a Package | Subscriptions | The Guardian", isInternational=true) {
+@main(s"${subscription.capitalizedTitle} | Choose a Package | Subscriptions | The Guardian", countryGroup = CountryGroup.UK) {
 
     <main class="page-container gs-container">
 
