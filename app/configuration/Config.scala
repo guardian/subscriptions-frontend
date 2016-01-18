@@ -88,6 +88,8 @@ object Config {
     val welcomeTriggeredSendKey = config.getString("exact-target.triggered-send-keys.welcome")
   }
 
+  val sessionCamCookieName = "sessioncam-on"
+
   def digipackRatePlanIds(env: String) = DigitalPackRatePlanIds.fromConfig(
     config.getConfig(s"touchpoint.backend.environments.$env.zuora.ratePlanIds.digitalpack"))
 
