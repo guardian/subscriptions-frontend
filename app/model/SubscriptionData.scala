@@ -4,6 +4,7 @@ import com.gu.i18n.{Country, CountryGroup}
 import com.gu.identity.play.IdUser
 import com.gu.memsub.Subscription.ProductRatePlanId
 import com.gu.memsub.{Address, FullName}
+import IdUserOps._
 
 sealed trait PaymentType {
   def toKey: String
@@ -60,31 +61,12 @@ case class SubscriptionData(personalData: PersonalData, paymentData: PaymentData
 
 object SubscriptionData {
   def fromIdUser(u: IdUser) = {
-    implicit class OptField[A](opt: Option[A]) {
-      def getOrDefault[B](get: A => Option[B], orElse: A => Option[B], default: B): B =
-        (for {
-          fieldOpt <- opt
-          fieldValue <- get(fieldOpt) orElse orElse(fieldOpt)
-        } yield fieldValue) getOrElse default
-      def getOrBlank(get: A => Option[String]): String = getOrDefault(get, _ => None, "")
-      def getOrBlank(get: A => Option[String], orElse: A => Option[String]): String = getOrDefault(get, orElse, "")
-    }
-
-    val addressData = Address(
-      lineOne = u.privateFields.getOrBlank(_.billingAddress1, _.address1),
-      lineTwo = u.privateFields.getOrBlank(_.billingAddress2, _.address2),
-      town = u.privateFields.getOrBlank(_.billingAddress3, _.address3),
-      postCode = u.privateFields.getOrBlank(_.postcode),
-      countyOrState = u.privateFields.getOrBlank(_.billingAddress4, _.address4),
-      countryName = u.privateFields.getOrBlank(_.country)
-    )
-
     val personalData = PersonalData(
-      u.privateFields.getOrBlank(_.firstName),
-      u.privateFields.getOrBlank(_.secondName),
-      u.primaryEmailAddress,
-      u.statusFields.getOrDefault(_.receiveGnmMarketing, _ => None, false),
-      addressData
+      first = u.privateFields.flatMap(_.firstName).getOrElse(""),
+      last = u.privateFields.flatMap(_.secondName).getOrElse(""),
+      email = u.primaryEmailAddress,
+      receiveGnmMarketing = u.statusFields.flatMap(_.receiveGnmMarketing).getOrElse(false),
+      address = u.address
     )
 
     val blankPaymentData = DirectDebitData("", "", "")
