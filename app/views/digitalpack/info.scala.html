@@ -1,14 +1,15 @@
-@import model.DigitalEdition
+@import com.gu.memsub.Price
 @import com.netaporter.uri.Uri
-@(edition: DigitalEdition, redirect: Uri)
+@import model.DigitalEdition
+@(edition: DigitalEdition, price: Price, redirect: Uri)
 
 @import model.Benefits
 
-@startTrial(edition: DigitalEdition) = {
+@startTrial(edition: DigitalEdition, price: Price) = {
     <div class="pricing-cta">
         <div class="pricing-cta__pricing">
             <h4 class="pricing-cta__pricing__title">Free for 14 days</h4>
-            <p class="pricing-cta__pricing__value">Then @edition.price/month</p>
+            <p class="pricing-cta__pricing__value">Then @price.pretty/month</p>
         </div>
         <div class="pricing-cta__action">
             <a class="button button--large button--primary"
@@ -29,7 +30,7 @@
     <section class="page-slice">
         <div class="page-slice__content">
             @fragments.page.header("Digital Pack", Some("Digital access to our Daily Edition and Guardian App Premium Tier"))
-            @startTrial(edition)
+            @startTrial(edition, price)
         </div>
     </section>
 
@@ -51,7 +52,7 @@
                 controllers.CachedAssets.hashedPathFor("images/premium-tier.png"),
                 "more-premium-benefits"
             )
-            @startTrial(edition)
+            @startTrial(edition, price)
         </div>
     </section>
 
@@ -75,7 +76,7 @@
                     <p>You can download the Digital Pack on up to 10 devices. Share it with your friends and family or give it as a gift</p>
                 </li>
             </ol>
-            @startTrial(edition)
+            @startTrial(edition, price)
         </div>
     </section>
 
@@ -105,7 +106,7 @@
                     </span>
                 </li>
             </ol>
-            @startTrial(edition)
+            @startTrial(edition, price)
         </div>
     </section>
 </main>
