@@ -2,7 +2,6 @@ define([], function () {
     'use strict';
 
     var addressRules = function (option) {
-        var postcodeRequired = option.getAttribute('data-postcode-required');
         var postcodeLabel = option.getAttribute('data-postcode-label');
 
         var subdivisionLabel = option.getAttribute('data-subdivision-label');
@@ -11,7 +10,7 @@ define([], function () {
         var subdivisionValues = list ? list.split(',') : [];
 
         return {
-            postcode: {required: postcodeRequired === 'true', label: postcodeLabel},
+            postcode: {label: postcodeLabel},
             subdivision: {required: subdivisionRequired === 'true', values: subdivisionValues, label: subdivisionLabel}
         };
     };
