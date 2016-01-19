@@ -4,11 +4,10 @@ import actions.CommonActions.CachedAction
 import model.DigitalEdition
 import model.DigitalEdition.{UK, AU, US}
 import play.api.mvc._
-
+import services.TouchpointBackend
+import views.support.Pricing._
 
 object DigitalPack extends Controller {
-
-
   def uk = landingPage(UK)
   def us = landingPage(US)
   def au = landingPage(AU)
@@ -18,11 +17,12 @@ object DigitalPack extends Controller {
   def selectAu = country(AU)
 
   def landingPage(digitalEdition: DigitalEdition) = CachedAction {
-    Ok(views.html.digitalpack.info(digitalEdition, DigitalEdition.getRedirect(digitalEdition)))
+    val plan = TouchpointBackend.Normal.catalogService.digipackCatalog.digipackMonthly
+    val price = plan.pricing.getPrice(digitalEdition.countryGroup.currency).getOrElse(plan.gbpPrice)
+    Ok(views.html.digitalpack.info(digitalEdition, price, DigitalEdition.getRedirect(digitalEdition)))
   }
 
   def country(digitalEdition: DigitalEdition) = CachedAction {
     Ok(views.html.digitalpack.country(digitalEdition))
   }
-
 }
