@@ -33,9 +33,7 @@ define([
     };
 
     var redrawAddressFields = function(model) {
-        var newPostcode = addressFields.postcode(
-            model.postcodeRules.required,
-            model.postcodeRules.label);
+        var newPostcode = addressFields.postcode(model.postcodeRules.label);
 
         var newSubdivision = addressFields.subdivision(
             model.subdivisionRules.required,
