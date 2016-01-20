@@ -3,13 +3,16 @@ package configuration
 import com.github.nscala_time.time.Imports._
 import com.gocardless.GoCardlessClient
 import com.gocardless.GoCardlessClient.Environment
-import com.gu.config.{ProductFamilyRatePlanIds, MembershipRatePlanIds, DigitalPackRatePlanIds}
+import com.gu.config.{DigitalPackRatePlanIds, MembershipRatePlanIds, ProductFamilyRatePlanIds}
 import com.gu.googleauth.GoogleAuthConfig
 import com.gu.identity.cookie.{PreProductionKeys, ProductionKeys}
-import com.gu.memsub.{Membership, ProductFamily, Digipack}
+import com.gu.memsub.{Digipack, Membership}
+import com.gu.monitoring.StatusMetrics
 import com.gu.salesforce.SalesforceConfig
+import com.gu.subscriptions.{CASApi, CASService}
 import com.netaporter.uri.dsl._
 import com.typesafe.config.ConfigFactory
+import monitoring.Metrics
 import net.kencochrane.raven.dsn.Dsn
 import play.api.mvc.{Call, RequestHeader}
 
@@ -96,4 +99,12 @@ object Config {
 
   def membershipRatePlanIds(env: String) =
     MembershipRatePlanIds.fromConfig(ProductFamilyRatePlanIds.config(Some(config))(env, Membership))
+
+  lazy val casService = {
+    val metrics = new StatusMetrics with Metrics {
+      override val service: String = "CAS service"
+    }
+    val api = new CASApi(config.getString("cas.url"), metrics)
+    new CASService(api)
+  }
 }

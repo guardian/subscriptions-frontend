@@ -44,6 +44,8 @@ GET         /delivery/paper                  controllers.Shipping.viewDeliveryPa
 # Staff signin (note, done by OAuth, in addition to regular signin)
 GET         /staff/login                     controllers.OAuth.login
 GET         /staff/loginAction               controllers.OAuth.loginAction
+GET         /staff/cas                       controllers.CAS.index
+POST        /staff/cas                       controllers.CAS.search
 GET         /sessioncam/on                   controllers.SessionCam.dropSessionCamCookie
 GET         /sessioncam/off                  controllers.SessionCam.removeSessionCamCookie
 GET         /oauth2callback                  controllers.OAuth.oauth2Callback

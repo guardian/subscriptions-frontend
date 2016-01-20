@@ -1,0 +1,49 @@
+@()(implicit request: RequestHeader)
+
+@main("CAS lookup") {
+    @helper.CSRF.formField
+    <main class="page-container gs-container gs-container--slim">
+        <div id="cas-tool">
+            <form action="/staff/cas" id="cas-form" method="POST">
+                <fieldset>
+                    <div class="form-field">
+                        <label class="label" for="cas.number">Subscription Number</label>
+                        <input type="text" class="input-text js-input input-text"
+                        id="cas.number" name="cas.number" required>
+                    </div>
+
+                    <div class="form-field">
+                        <label class="label" for="cas.lastName">Last Name</label>
+                        <input type="text" class="input-text js-input input-text"
+                        d="cas.lastName" name="cas.lastName" required>
+                    </div>
+
+                    <div class="form-field">
+                        <label class="label" for="cas.postcode">Postcode (Optional)</label>
+                        <input type="text" class="input-text js-input input-text"
+                        id="cas.postcode" name="cas.postcode">
+                    </div>
+
+                    <div class="form-field">
+                        <input type="submit" class="input-submit js-input button button--primary button--medium" value="Search">
+                    </div>
+
+                    @for((label, field) <- Map(
+                        "Expiry Type" -> "expiryType",
+                        "Provider" -> "provider",
+                        "Expiry Date" -> "expiryDate",
+                        "Subscription Code" -> "subscriptionCode",
+                        "Content" -> "content")) {
+                        <dl data-cas-result="@field">
+                            <dt>@label</dt>
+                            <dd></dd>
+                        </dl>
+                    }
+
+                    <p class="error" data-cas-error></p>
+                </fieldset>
+            </form>
+        </div>
+    </main>
+}
+

@@ -13,6 +13,7 @@ require([
     'modules/country',
     'modules/confirmation',
     'modules/patterns',
+    'modules/cas/form',
     // Add new dependencies ABOVE this
     'Promise'
 ], function (
@@ -29,6 +30,7 @@ require([
     checkout,
     country,
     confirmation,
+    cas,
     patterns
 ) {
     'use strict';
@@ -47,5 +49,6 @@ require([
     country.init();
     checkout.init();
     confirmation.init();
+    cas.init();
     patterns.init();
 });
