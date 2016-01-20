@@ -41,7 +41,6 @@ define([
             model.subdivisionRules.values);
 
         newPostcode.input.value = model.postcode;
-        newSubdivision.input.value = model.subdivision;
 
         $('input', postcode()).replaceWith(newPostcode.input);
         $('label', postcode()).replaceWith(newPostcode.label);
@@ -90,7 +89,6 @@ define([
 
         return {
             postcode: $('input', postcode()).val(),
-            subdivision: $('select, input', subdivision()).val(),
             postcodeRules: rules.postcode,
             subdivisionRules: rules.subdivision,
             currency: $(currentCountryOption).attr('data-currency-choice'),
