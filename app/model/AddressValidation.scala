@@ -6,10 +6,13 @@ object AddressValidation {
   def validateForCountry(address: Address) = {
     val rules = AddressValidationRules(address.country)
 
-    rules.subdivision match {
+    val postcodeValid = rules.postcode == PostcodeOptional || address.postCode.nonEmpty
+    val subdivisionValid = rules.subdivision match {
       case SubdivisionOptional => true
       case SubdivisionRequired => address.countyOrState.nonEmpty
       case SubdivisionList(s) => s.contains(address.countyOrState)
     }
+
+    postcodeValid && subdivisionValid
   }
 }

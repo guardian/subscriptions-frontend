@@ -9,12 +9,14 @@ define(['modules/checkout/countryChoice'], function (addressRules) {
             option = document.createElement('option');
         });
 
-        it('should parse data-postcode-label from an element', function () {
+        it('should parse data-postcode-required and data-postcode-label from an element', function () {
+            option.setAttribute('data-postcode-required', true);
             option.setAttribute('data-postcode-label', 'postcode');
-            expect(addressRules.addressRules(option).postcode).toEqual({label: 'postcode'});
+            expect(addressRules.addressRules(option).postcode).toEqual({label: 'postcode', required: true});
 
+            option.setAttribute('data-postcode-required', false);
             option.setAttribute('data-postcode-label', 'zip');
-            expect(addressRules.addressRules(option).postcode).toEqual({label: 'zip'});
+            expect(addressRules.addressRules(option).postcode).toEqual({label: 'zip', required: false});
         });
 
         it('should parse data-subdivision-required and data-subdivision-list from an element', function() {
