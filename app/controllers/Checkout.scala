@@ -2,7 +2,9 @@ package controllers
 
 import actions.CommonActions._
 import com.gu.identity.play.ProxiedIP
-import com.gu.i18n.{GBP, CountryGroup}
+import com.gu.i18n.{Country, GBP, CountryGroup}
+import com.gu.memsub.promo.PromoCode
+import com.gu.memsub.promo.Writers._
 import com.gu.memsub.Subscription.ProductRatePlanId
 import com.gu.stripe.Stripe
 import com.gu.zuora.soap
@@ -20,7 +22,6 @@ import tracking.activities.{CheckoutReachedActivity, MemberData, SubscriptionReg
 import utils.TestUsers.{NameEnteredInForm, PreSigninTestCookie}
 import views.html.{checkout => view}
 import views.support.CountryWithCurrency
-
 import scala.Function.const
 import scala.concurrent.ExecutionContext.Implicits.global
 import scalaz.std.scalaFuture._
@@ -28,8 +29,6 @@ import scala.concurrent.Future
 import scalaz.OptionT
 
 object Checkout extends Controller with LazyLogging with ActivityTracking with CatalogProvider {
-
-
   object SessionKeys {
     val SubsName = "newSubs_subscriptionName"
     val RatePlanId = "newSubs_ratePlanId"
@@ -37,11 +36,10 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
     val IdentityGuestPasswordSettingToken = "newSubs_token"
   }
 
-
   def checkoutService(implicit res: TouchpointBackend.Resolution): CheckoutService =
     res.backend.checkoutService
 
-  def renderCheckout(countryGroup: CountryGroup) = NoCacheAction.async { implicit request =>
+  def renderCheckout(countryGroup: CountryGroup, promoCode: Option[PromoCode]) = NoCacheAction.async { implicit request =>
 
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
@@ -52,7 +50,7 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
     val subscriptionData = (for {
       authUser <- OptionT(Future.successful(authenticatedUser))
       idUser <- OptionT(IdentityService.userLookupByCredentials(authUser.credentials))
-    } yield SubscriptionData.fromIdUser(idUser)).run
+    } yield SubscriptionData.fromIdUser(promoCode)(idUser)).run
 
     val plans = catalog.planMap.values.toSeq
     val defaultPlan = catalog.digipackMonthly
@@ -139,7 +137,7 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
     } yield (subsName, ratePlanId)
 
     // TODO If some pieces of information are missing, redirect to an empty form. Is it the expected behaviour?
-    def redirectToEmptyForm = Redirect(routes.Checkout.renderCheckout())
+    def redirectToEmptyForm = Redirect(routes.Checkout.renderCheckout(CountryGroup.UK, None))
 
     sessionInfo.fold(redirectToEmptyForm) { case (subsName, ratePlanId) =>
       val passwordForm = authenticatedUserFor(request).fold {
@@ -154,6 +152,19 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
 
       val plan = catalog.unsafeFindPaid(ProductRatePlanId(ratePlanId))
       Ok(view.thankyou(subsName, passwordForm, resolution, plan))
+    }
+  }
+
+  def validatePromoCode(promoCode: PromoCode, prpId: ProductRatePlanId, country: Country) = NoCacheAction { implicit request =>
+    TouchpointBackend.Normal.promoService.findPromotion(promoCode)
+      .fold(NotFound(Json.obj("errorMessage" -> "Unknown or expired promo code"))){ promo =>
+        val result = promo.validateFor(prpId, country)
+        val body = Json.obj(
+          "promotion" -> Json.toJson(promo),
+          "isValid" -> result.isRight,
+          "errorMessage" -> result.swap.toOption.map(_.msg)
+        )
+        result.fold(_ => NotAcceptable(body), _ => Ok(body))
     }
   }
 

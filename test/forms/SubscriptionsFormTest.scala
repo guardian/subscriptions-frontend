@@ -1,8 +1,9 @@
 package forms
 
 import com.gu.i18n.Country
+import com.gu.memsub.promo.PromoCode
 import com.gu.memsub.Address
-import forms.SubscriptionsForm.{addressDataMapping, paymentFormatter, personalDataMapping}
+import forms.SubscriptionsForm.{addressDataMapping, paymentFormatter, personalDataMapping, promoCodeFormatter}
 import model._
 import org.scalatest.FreeSpec
 import play.api.data.Forms._
@@ -19,7 +20,8 @@ class SubscriptionsFormTest extends FreeSpec {
     "address.town" -> "town",
     "address.postcode" -> "postcode",
     "address.subdivision" -> "Middlesex",
-    "address.country" -> Country.UK.alpha2
+    "address.country" -> Country.UK.alpha2,
+    "promoCode" -> "promo-code"
   )
 
   "PersonalDataMapping" - {
@@ -102,6 +104,16 @@ class SubscriptionsFormTest extends FreeSpec {
         assertResult(Right(paymentData))(mapping.bind(paymentFormData))
         assertResult(Map("payment.type" -> CreditCard.toKey))(mapping.unbind(paymentData))
       }
+    }
+  }
+
+  "PromoCodeFormatter" - {
+    "handles promo code" in {
+      val mapping = single[PromoCode]("promoCode" -> of[PromoCode])
+
+      assert(mapping.bind(Map("promoCode" -> "")).isLeft)
+      assert(mapping.bind(Map("blah" -> "...")).isLeft)
+      assertResult(Right(PromoCode("code")))(mapping.bind(Map("promoCode" -> "code")))
     }
   }
 }

@@ -44,7 +44,7 @@
 <main class="page-container gs-container">
 
     <section class="checkout-container">
-        <form class="form js-checkout-form" action="@routes.Checkout.renderCheckout().toString" method="POST" novalidate>
+        <form class="form js-checkout-form" action="@routes.Checkout.renderCheckout(CountryGroup.UK, None).toString" method="POST" novalidate>
             @helper.CSRF.formField
 
             @fragments.checkout.checkoutHeader("Checkout")
@@ -87,10 +87,10 @@
                         <div class="field-panel__intro">
                             <div class="field-note field-note--offset prose">
                                 @if(userIsSignedIn) {
-                                    <a href="@idWebAppSignOutUrl(routes.Checkout.renderCheckout())">Sign out</a>
+                                    <a href="@idWebAppSignOutUrl(routes.Checkout.renderCheckout(CountryGroup.UK, None))">Sign out</a>
                                 } else {
                                     <span class="field-note__label">Already have a Guardian account?</span>
-                                    <a href="@idWebAppSigninUrl(routes.Checkout.renderCheckout())">Sign in</a>
+                                    <a href="@idWebAppSigninUrl(routes.Checkout.renderCheckout(CountryGroup.UK, None))">Sign in</a>
                                 }
                             </div>
                         </div>
