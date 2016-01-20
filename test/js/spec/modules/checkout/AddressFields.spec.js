@@ -11,7 +11,7 @@ define(['modules/checkout/addressFields'], function (addressFields) {
     describe('Address fields generator', function() {
 
         it('should generate a compulsory postcode field with the right label', function () {
-            var output = addressFields.postcode('Postcode');
+            var output = addressFields.postcode(true, 'Postcode');
 
             expect(output.input.isEqualNode(dom(
                 '<input type="text" id="address-postcode" name="personal.address.postcode" class="input-text" required="required">'
@@ -23,13 +23,13 @@ define(['modules/checkout/addressFields'], function (addressFields) {
         });
 
         it('should generate an optional postcode field with the right label', function () {
-            var output = addressFields.postcode('Zipcode');
+            var output = addressFields.postcode(false, 'Zipcode');
             expect(output.input.isEqualNode(dom(
-                '<input type="text" id="address-postcode" class="input-text" name="personal.address.postcode" required="required">'
+                '<input type="text" id="address-postcode" class="input-text" name="personal.address.postcode">'
             ))).toBeTruthy();
 
             expect(output.label.isEqualNode(dom(
-                '<label for="address-postcode" class="label">Zipcode</label>'
+                '<label for="address-postcode" class="optional-marker label">Zipcode</label>'
             ))).toBeTruthy();
         });
 

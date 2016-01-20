@@ -47,10 +47,10 @@ define([], function () {
     };
 
 
-    var postcode = function (text) {
+    var postcode = function (required, text) {
         return {
-            label: label(true, text, 'postcode'),
-            input: textInput(true, 'postcode')
+            label: label(required, text, 'postcode'),
+            input: textInput(required, 'postcode')
         };
     };
 
