@@ -42,7 +42,7 @@ define([
             ].join(';');
         }
         if (guardian.pageInfo.slug) {
-            s.prop17 = guardian.slug;
+            s.prop17 = guardian.pageInfo.slug;
         }
     }
 
