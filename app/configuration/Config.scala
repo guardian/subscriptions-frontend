@@ -3,6 +3,7 @@ package configuration
 import com.github.nscala_time.time.Imports._
 import com.gocardless.GoCardlessClient
 import com.gocardless.GoCardlessClient.Environment
+import com.gu.cas.PrefixedTokens
 import com.gu.config.{DigitalPackRatePlanIds, MembershipRatePlanIds, ProductFamilyRatePlanIds}
 import com.gu.googleauth.GoogleAuthConfig
 import com.gu.identity.cookie.{PreProductionKeys, ProductionKeys}
@@ -100,11 +101,23 @@ object Config {
   def membershipRatePlanIds(env: String) =
     MembershipRatePlanIds.fromConfig(ProductFamilyRatePlanIds.config(Some(config))(env, Membership))
 
+  object CAS {
+    lazy val casConf = config.getConfig("cas")
+
+    lazy val url = casConf.getString("url")
+    lazy val emergencyEncoder = {
+      val conf = casConf.getConfig("emergency.subscriber.auth")
+      val prefix = conf.getString("prefix")
+      val secret = conf.getString("secret")
+      PrefixedTokens(secretKey = secret, emergencySubscriberAuthPrefix = prefix)
+    }
+  }
+
   lazy val casService = {
     val metrics = new StatusMetrics with Metrics {
       override val service: String = "CAS service"
     }
-    val api = new CASApi(config.getString("cas.url"), metrics)
+    val api = new CASApi(CAS.url, metrics)
     new CASService(api)
   }
 }

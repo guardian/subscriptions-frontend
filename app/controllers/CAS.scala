@@ -14,7 +14,7 @@ object CAS extends Controller {
     Ok(views.html.staff.cas())
   }
 
-  def search = GoogleAuthenticatedStaffAction.async(parse.form(CASForm())) { request =>
+  def search = GoogleAuthenticatedStaffAction.async(parse.form(CASForm.lookup)) { request =>
     val lookup = request.body
     Config.casService.check(lookup.subscriptionNumber, lookup.postcode, lookup.lastName, triggersActivation = false).map {
       case r: CASSuccess => Ok(Json.toJson(r))
