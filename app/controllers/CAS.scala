@@ -10,11 +10,11 @@ import views.support.CASResultOps._
 import play.api.libs.concurrent.Execution.Implicits._
 
 object CAS extends Controller {
-  def index = NoCacheAction { implicit request =>
+  def index = GoogleAuthenticatedStaffAction { implicit request =>
     Ok(views.html.staff.cas())
   }
 
-  def search = NoCacheAction.async(parse.form(CASForm())) { request =>
+  def search = GoogleAuthenticatedStaffAction.async(parse.form(CASForm())) { request =>
     val lookup = request.body
     Config.casService.check(lookup.subscriptionNumber, lookup.postcode, lookup.lastName, triggersActivation = false).map {
       case r: CASSuccess => Ok(Json.toJson(r))
