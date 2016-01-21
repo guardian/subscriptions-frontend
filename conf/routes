@@ -20,10 +20,11 @@ GET         /management/manifest             controllers.Management.manifest
 GET         /digital/country                 controllers.DigitalPack.selectUk
 GET         /us/digital/country              controllers.DigitalPack.selectUs
 GET         /au/digital/country              controllers.DigitalPack.selectAu
+GET         /int/digital/country              controllers.DigitalPack.selectInt
 GET         /digital                         controllers.DigitalPack.uk
 GET         /us/digital                      controllers.DigitalPack.us
 GET         /au/digital                      controllers.DigitalPack.au
-GET         /int/digital                     controllers.Default.redirect(to = "/us/digital")
+GET         /int/digital                     controllers.DigitalPack.int
 
 # Checkout
 GET         /checkout                        controllers.Checkout.renderCheckout(countryGroup: CountryGroup ?= CountryGroup.UK)
