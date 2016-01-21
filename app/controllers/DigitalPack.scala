@@ -19,7 +19,7 @@ object DigitalPack extends Controller {
   def landingPage(digitalEdition: DigitalEdition) = CachedAction {
     val plan = TouchpointBackend.Normal.catalogService.digipackCatalog.digipackMonthly
     val price = plan.pricing.getPrice(digitalEdition.countryGroup.currency).getOrElse(plan.gbpPrice)
-    Ok(views.html.digitalpack.info(digitalEdition, price, DigitalEdition.getRedirect(digitalEdition)))
+    Ok(views.html.digitalpack.info(digitalEdition, price))
   }
 
   def country(digitalEdition: DigitalEdition) = CachedAction {

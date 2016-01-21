@@ -1,6 +1,6 @@
 @import model.DigitalEdition
-@import com.netaporter.uri.Uri
-@(edition: DigitalEdition, membershipLink: Uri)
+@import views.support.DigitalEdition._
+@(edition: DigitalEdition)
 
 @main(s"Subscriptions | ${edition.name} | The Guardian", isInternational=true) {
 
@@ -16,7 +16,7 @@
                     <li class="block__list-item">Access to the daily UK edition, the digital version of the Guardian newspaper</li>
                     <li class="block__list-item">Access to the Guardian App Premium Tier, an advert free experience</li>
                     <li class="block__list-item">Available on Apple, Android and Kindle Fire</li>
-                    <li class="block__list-item"><strong>Save up to 75%</strong></li>
+                    @edition.digitalPackSaving.map {saving => <li class="block__list-item"><strong>Save up to @{saving}%</strong></li>}
                     <li class="block__list-item">14-day free trial</li>
                 </ul>
             </div>
@@ -30,7 +30,7 @@
                 <ul class="block__list">
                     <li class="block__list-item">A selection of international editorial from the Guardian, Observer, Washington Post and Le Monde</li>
                     <li class="block__list-item">A unique blend of international news, politics, culture and comment</li>
-                    <li class="block__list-item"><strong>Save up to @{if(edition.id == "us") 23 else 9 }%</strong> on the retail price</li>
+                    @edition.guardianWeeklySaving.map {saving => <li class="block__list-item"><strong>Save up to @{saving}%</strong> on the retail price</li>}
                     <li class="block__list-item">Free delivery to your door, wherever you are in the world</li>
                 </ul>
             </div>
@@ -41,7 +41,7 @@
     </div>
     <div class="row row--items-1">
         <div class="row__item">
-            @fragments.promos.members(edition.id, membershipLink)
+            @fragments.promos.members(edition.id, edition.membershipLandingPage)
         </div>
     </div>
     <div class="row row--items-1">

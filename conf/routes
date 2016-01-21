@@ -9,6 +9,7 @@ GET         /favicon.ico                     controllers.CacheBustedAssets.at(pa
 GET         /                                controllers.Homepage.index
 GET         /au                              controllers.Homepage.indexAu
 GET         /us                              controllers.Homepage.indexUs
+GET         /int                             controllers.Homepage.indexIntl
 
 # Health check
 GET         /healthcheck                     controllers.Management.healthcheck
@@ -22,6 +23,7 @@ GET         /au/digital/country              controllers.DigitalPack.selectAu
 GET         /digital                         controllers.DigitalPack.uk
 GET         /us/digital                      controllers.DigitalPack.us
 GET         /au/digital                      controllers.DigitalPack.au
+GET         /int/digital                     controllers.Default.redirect(to = "/us/digital")
 
 # Checkout
 GET         /checkout                        controllers.Checkout.renderCheckout(countryGroup: CountryGroup ?= CountryGroup.UK)

@@ -1,7 +1,7 @@
 @import com.gu.memsub.Price
-@import com.netaporter.uri.Uri
 @import model.DigitalEdition
-@(edition: DigitalEdition, price: Price, redirect: Uri)
+@import views.support.DigitalEdition._
+@(edition: DigitalEdition, price: Price)
 
 @import model.Benefits
 
@@ -13,7 +13,7 @@
         </div>
         <div class="pricing-cta__action">
             <a class="button button--large button--primary"
-               href="@redirect"
+               href="@edition.redirect"
                data-test-id="digital-pack-@edition.id-trial-header"
             >Start your free trial</a>
         </div>
