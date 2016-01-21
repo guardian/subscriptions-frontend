@@ -2,7 +2,7 @@ package forms
 
 import com.gu.cas.{SubscriptionCode, TokenPayload}
 import model.CASLookup
-import org.joda.time.{Weeks, Days}
+import org.joda.time.Weeks
 import play.api.data.Forms._
 import play.api.data._
 import play.api.data.format.Formatter
@@ -31,9 +31,8 @@ object CASForm {
 
   val emergencyToken: Form[TokenPayload] = Form(
     "cas" -> mapping(
-      "creationDateOffset" -> number.transform[Days](Days.days, _.getDays),
       "period" -> number(min = 1, max = 13).transform[Weeks](Weeks.weeks, _.getWeeks),
       "subscriptionCode" -> of[SubscriptionCode]
-    )(TokenPayload.apply)(TokenPayload.unapply)
+    )(TokenPayload.apply)(t => Some(t.period, t.subscriptionCode))
   )
 }

@@ -8,7 +8,9 @@ object TokenPayloadOps {
     override def writes(p: TokenPayload) = Json.obj(
       "creationDateOffset" -> p.creationDateOffset.getDays,
       "period" -> p.period.getWeeks,
-      "subscriptionCode" -> p.subscriptionCode.toString
+      "subscriptionCode" -> p.subscriptionCode.toString,
+      "expiryType" -> "sub",
+      "expiryDate" -> TokenPayload.epoch.plusDays(p.creationDateOffset.getDays).plusWeeks(p.period.getWeeks).toLocalDate
     )
   }
 }

@@ -10,7 +10,7 @@
             <form action="/staff/cas/subscription" id="cas-subscription-form" method="POST">
                 <fieldset>
                     <div class="form-field">
-                        <label class="label" for="cas.number">Subscription Number</label>
+                        <label class="label" for="cas.number">Subscription Number / Token</label>
                         <input type="text" class="input-text js-input input-text"
                         id="cas.number" name="cas.number" required>
                     </div>
@@ -55,15 +55,6 @@
                         @for(w <- Range(1, 14)) {
                             <option value="@w">@w</option>
                         })
-                        </select>
-                    </div>
-
-                    <div class="form-field">
-                        <label class="label" for="cas.creationDateOffset">Creation date offset (days)</label>
-                        <select required name="cas.creationDateOffset">
-                            @for(d <- Range(1, 30)) {
-                                <option value="@d">@d</option>
-                            })
                         </select>
                     </div>
 
