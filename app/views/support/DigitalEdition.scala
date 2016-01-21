@@ -17,7 +17,7 @@ object DigitalEdition {
       val params = "INTCMP" -> s"GU_SUBSCRIPTIONS_${edition.id.toUpperCase}_PROMO"
 
       edition match {
-        case INTL => "https://membership.theguardian.com/int/supporter" ? params
+        case INT => "https://membership.theguardian.com/int/supporter" ? params
         case US => "https://membership.theguardian.com/us/supporter" ? params
         case _ => "https://membership.theguardian.com/join" ? params
       }
@@ -25,11 +25,11 @@ object DigitalEdition {
 
     def digitalPackSaving = edition match {
       case US | AU | UK => Some(75)
-      case INTL => None
+      case INT => None
     }
 
     def guardianWeeklySaving = edition match {
-      case INTL | UK => None
+      case INT | UK => None
       case US => Some(23)
       case AU => Some(9)
     }

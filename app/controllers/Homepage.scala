@@ -14,5 +14,5 @@ object Homepage extends Controller {
 
   def indexUs() = index(DigitalEdition.US)
 
-  def indexIntl() = index(DigitalEdition.INTL)
+  def indexInt() = index(DigitalEdition.INT)
 }
