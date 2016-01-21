@@ -1,10 +1,13 @@
+@import com.gu.cas.SubscriptionCode
 @()(implicit request: RequestHeader)
 
 @main("CAS lookup") {
     @helper.CSRF.formField
     <main class="page-container gs-container gs-container--slim">
         <div id="cas-tool">
-            <form action="/staff/cas" id="cas-form" method="POST">
+            <p class="error" data-cas-error></p>
+            <h2>Find a subscription</h2>
+            <form action="/staff/cas/subscription" id="cas-subscription-form" method="POST">
                 <fieldset>
                     <div class="form-field">
                         <label class="label" for="cas.number">Subscription Number</label>
@@ -40,10 +43,47 @@
                         </dl>
                     }
 
-                    <p class="error" data-cas-error></p>
+                </fieldset>
+            </form>
+
+            <h2>Generate a token</h2>
+            <form action="/staff/cas/token" id="cas-generate-token-form" method="POST">
+                <fieldset>
+                    <div class="form-field">
+                        <label class="label" for="cas.period">Validity period (weeks)</label>
+                        <select required name="cas.period" >
+                        @for(w <- Range(1, 14)) {
+                            <option value="@w">@w</option>
+                        })
+                        </select>
+                    </div>
+
+                    <div class="form-field">
+                        <label class="label" for="cas.creationDateOffset">Creation date offset (days)</label>
+                        <select required name="cas.creationDateOffset">
+                            @for(d <- Range(1, 30)) {
+                                <option value="@d">@d</option>
+                            })
+                        </select>
+                    </div>
+
+                    <div class="form-field">
+                        <label class="label" for="cas.subscriptionCode">Subscription code</label>
+                        <select required name="cas.subscriptionCode">
+                            @for(code <- SubscriptionCode.all) {
+                                <option value="@code.toString">@code.toString</option>
+                            })
+                        </select>
+                    </div>
+
+                    <div class="form-field">
+                        <input type="submit" class="input-submit js-input button button--primary button--medium" value="Generate">
+                    </div>
+
+                    <p class="pattern__title" data-cas-token></p>
+
                 </fieldset>
             </form>
         </div>
     </main>
 }
-

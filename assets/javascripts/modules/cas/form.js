@@ -9,33 +9,36 @@ define([
     ajax,
     serializer
 ) {
-    var $FORM = $('#cas-form');
+    var $CONTAINER = $('#cas-tool');
+    var $SUBSCRIPTION_FORM = $('#cas-subscription-form');
+    var $GENERATE_TOKEN_FORM = $('#cas-generate-token-form');
     var $RESULTS = $('dl[data-cas-result]');
-    var $ERROR = $('[data-cas-error]');
+    var $TOKEN_RESULT = $('[data-cas-token]', $CONTAINER);
+    var $ERROR = $('[data-cas-error]', $CONTAINER);
 
-    function submit() {
-        var data = serializer([].slice.call($FORM[0].elements));
+    function submitSubscription() {
+        var data = serializer([].slice.call($SUBSCRIPTION_FORM[0].elements));
         console.log('submitting data', data);
         ajax({
-            url: $FORM[0].action,
+            url: $SUBSCRIPTION_FORM[0].action,
             method: 'post',
             data: data,
             success: function(successData) {
                 console.log(successData);
-                redraw(successData);
+                redrawSubscription(successData);
                 $ERROR.hide();
             },
             error: function(err) {
                 var message = JSON.parse(err.response).message;
                 console.error('Some exception occurred', err);
-                redraw({});
+                redrawSubscription({});
                 $ERROR.text('Failed finding the user: ' + message);
                 $ERROR.show();
             }
         });
     }
 
-    function redraw(model) {
+    function redrawSubscription(model) {
         $RESULTS.each(function(el) {
             var field = $(el).attr('data-cas-result');
 
@@ -48,14 +51,47 @@ define([
         });
     }
 
+    function submitGenerateToken() {
+        var data = serializer([].slice.call($GENERATE_TOKEN_FORM[0].elements));
+        console.log('submitting data', data);
+        ajax({
+            url: $GENERATE_TOKEN_FORM[0].action,
+            method: 'post',
+            data: data,
+            success: function(successData) {
+                console.log(successData);
+                redrawGenerateToken(successData.token);
+                $ERROR.hide();
+            },
+            error: function() {
+                $ERROR.text('Invalid data sent, please ask the Membership team');
+                $ERROR.show();
+            }
+        });
+    }
+
+    function redrawGenerateToken(token) {
+        if (token) {
+            $TOKEN_RESULT.text(token);
+            $TOKEN_RESULT.show();
+        } else {
+            $TOKEN_RESULT.hide();
+        }
+    }
+
+
     function init() {
-        if ($FORM.length) {
-            console.log('cas form');
-            bean.on($FORM[0], 'submit', function (e) {
+        if ($CONTAINER.length) {
+            bean.on($SUBSCRIPTION_FORM[0], 'submit', function (e) {
                 e.preventDefault();
-                submit();
+                submitSubscription();
             });
-            redraw({});
+            redrawSubscription({});
+
+            bean.on($GENERATE_TOKEN_FORM[0], 'submit', function (e) {
+                e.preventDefault();
+                submitGenerateToken();
+            });
         }
     }
 
