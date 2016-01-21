@@ -40,6 +40,9 @@
         padding-left: gs-span(1.5);
     }
 }
+.checkout-container__frequency {
+    cursor: pointer;
+}
 
 /* Country Select
    ========================================================================== */
@@ -209,6 +212,7 @@ $sprite-card-offset-visa:               -355px;
         margin-left: 35%;
     }
 }
+
 
 /* ==========================================================================
    Review Panel

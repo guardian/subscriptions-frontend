@@ -3,8 +3,9 @@
    ========================================================================== */
 
 .u-note {
-    @include fs-textSans(3);
-    color: $c-neutral2;
+    @include fs-textSans(1);
+    color: $c-neutral1;
+    line-height: 18px;
 }
 .u-error {
     @include fs-data(3);

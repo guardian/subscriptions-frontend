@@ -8,7 +8,6 @@
 .basket-preview {
     @include clearfix();
     @include fs-headline(2);
-    margin-bottom: $gs-gutter * 2;
     position: relative;
 
     @include mq($until: tablet) {
@@ -16,14 +15,10 @@
     }
 
     @include mq($from: phablet, $until: tablet) {
-        margin-bottom: 0;
         // Magic number
         min-height: 100px;
     }
 
-    @include mq(tablet) {
-        margin-bottom: $gs-gutter;
-    }
 }
 .basket-preview__image {
     display: none;
@@ -77,13 +72,11 @@
     @include mq(tablet) {
         display: inline-block;
         font-weight: normal;
-        font-style: italic;
     }
 }
 .basket-preview__product__payment {
     @include mq(tablet) {
         display: block;
-        margin: ($gs-baseline / 2) 0;
     }
 }
 
