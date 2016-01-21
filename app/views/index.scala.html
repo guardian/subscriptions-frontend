@@ -1,5 +1,6 @@
-@import com.netaporter.uri.Uri
-@(membershipLink: Uri)
+@import model.DigitalEdition._
+@import views.support.DigitalEdition._
+@()
 
 @main("Subscriptions | The Guardian") {
 
@@ -52,7 +53,7 @@
         </div>
         <div class="row row--items-1">
             <div class="row__item">
-                @fragments.promos.members("uk", membershipLink)
+                @fragments.promos.members("uk", UK.membershipLandingPage)
             </div>
         </div>
         <div class="row row--items-3">
