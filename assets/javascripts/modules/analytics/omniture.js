@@ -30,7 +30,7 @@ define([
         s.pageName = pageInfo.name;
         s.channel = pageInfo.channel;
         s.prop19 = pageInfo.product;
-        s.prop17 = 'GuardianDigiPack:Select Country';
+        s.prop17 = pageInfo.slug;
 
         if (productData) {
             s.products = [
@@ -40,9 +40,6 @@ define([
                 productData.amount,
                 productData.eventName
             ].join(';');
-        }
-        if (guardian.pageInfo.slug) {
-            s.prop17 = guardian.pageInfo.slug;
         }
     }
 
