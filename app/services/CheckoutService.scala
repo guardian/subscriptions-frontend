@@ -54,7 +54,8 @@ class CheckoutService(identityService: IdentityService,
         case paymentData@DirectDebitData(_, _, _) =>
           paymentService.makeDirectDebitPayment(paymentData, personalData, memberId)
         case paymentData@CreditCardData(_) =>
-          paymentService.makeCreditCardPayment(paymentData, personalData, userData, memberId)
+          val plan = catalogService.digipackCatalog.unsafeFind(subscriptionData.productRatePlanId)
+          paymentService.makeCreditCardPayment(paymentData, personalData, userData, memberId, plan)
       }
       method <- payment.makePaymentMethod
       result <- zuoraService.createSubscription(

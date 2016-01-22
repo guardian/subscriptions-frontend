@@ -90,7 +90,6 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
     implicit val tpBackend = resolution.backend
 
     val requestData = SubscriptionRequestData(ProxiedIP.getIP(request))
-
     val checkoutResult = checkoutService.processSubscription(formData, idUserOpt, requestData)
 
     checkoutResult.map { result =>

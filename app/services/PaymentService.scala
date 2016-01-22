@@ -1,8 +1,10 @@
 package services
 
 import com.gu.i18n.{Currency, GBP, Country}
+import com.gu.memsub.{Current, PaidPlan, BillingPeriod}
 import com.gu.salesforce.ContactId
 import com.gu.stripe.StripeService
+import com.gu.subscriptions.DigipackPlan
 import com.gu.zuora.soap.actions.subscribe._
 import model._
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
@@ -43,7 +45,10 @@ trait PaymentService {
     new DirectDebitPayment(paymentData, personalData, memberId)
   }
 
-  def makeCreditCardPayment(paymentData: CreditCardData, personalData: PersonalData, userIdData: UserIdData, memberId: ContactId) = {
-    new CreditCardPayment(paymentData, personalData.currency, userIdData, memberId = memberId)
+  def makeCreditCardPayment(paymentData: CreditCardData, personalData: PersonalData, userIdData: UserIdData, memberId: ContactId, plan: DigipackPlan[BillingPeriod]) = {
+    val desiredCurrency = personalData.currency
+    val currency = if (plan.currencies.contains(desiredCurrency)) desiredCurrency else GBP
+
+    new CreditCardPayment(paymentData, currency, userIdData, memberId = memberId)
   }
 }
