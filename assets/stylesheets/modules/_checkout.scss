@@ -25,13 +25,15 @@
 .checkout-container__form {
     margin-bottom: $gs-baseline;
 
-    @include mq(tablet) {
+    @include mq(desktop) {
         float: left;
         width: 65%
     }
 }
 .checkout-container__sidebar {
-    @include mq(tablet) {
+    position: relative;
+
+    @include mq(desktop) {
         float: right;
         width: 35%;
         padding-left: $gs-gutter;
