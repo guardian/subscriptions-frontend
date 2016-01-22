@@ -32,13 +32,11 @@ object CAS extends Controller with LazyLogging {
     Try(encoder.decode(lookup.subscriptionNumber)) match {
       case Success(Valid(payload)) =>
         Future.successful(Ok(Json.toJson(payload)))
-      case Success(Invalid(_)) =>
+      case _ =>
         Config.casService.check(lookup.subscriptionNumber, lookup.postcode, lookup.lastName, triggersActivation = false).map {
           case r: CASSuccess => Ok(Json.toJson(r))
           case r: CASError => BadRequest(Json.toJson(r))
         }
-      case Failure(_) =>
-        Future.successful(BadRequest(Json.obj("message" -> "The generated token is invalid")))
     }
   }
 
