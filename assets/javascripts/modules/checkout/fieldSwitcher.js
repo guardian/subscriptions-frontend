@@ -9,23 +9,16 @@ define([
 ], function ($, bean, countryChoice, addressFields, localizationSwitcher, formElements) {
     'use strict';
 
+    var $postcode = $('.js-checkout-postcode'),
+        $subdivision = $('.js-checkout-subdivision');
+
     var check = function(domEl) {
         $(domEl).attr('checked', 'checked');
         bean.fire(domEl, 'change');
     };
 
-    var subdivision = function() {
-        return $('.js-checkout-subdivision');
-    };
-
-    var postcode = function() {
-        return $('.js-checkout-postcode');
-    };
-
-    var $PLAN_INPUTS = $('input[type="radio"]', formElements.$PLAN_SELECT);
-
     var checkPlanInput = function (ratePlanId, currency) {
-        $PLAN_INPUTS.each(function(input) {
+        formElements.$PLAN_INPUTS.each(function(input) {
             if ($(input).val() === ratePlanId && $(input).attr('data-currency') === currency) {
                 check(input);
             }
@@ -44,11 +37,11 @@ define([
 
         newPostcode.input.value = model.postcode;
 
-        $('input', postcode()).replaceWith(newPostcode.input);
-        $('label', postcode()).replaceWith(newPostcode.label);
+        $('input', $postcode).replaceWith(newPostcode.input);
+        $('label', $postcode).replaceWith(newPostcode.label);
 
-        $('#address-subdivision', subdivision()).replaceWith(newSubdivision.input);
-        $('label', subdivision()).replaceWith(newSubdivision.label);
+        $('#address-subdivision', $subdivision).replaceWith(newSubdivision.input);
+        $('label', $subdivision).replaceWith(newSubdivision.label);
     };
 
     // Change the payment method to Direct Debit for UK users,
@@ -73,38 +66,18 @@ define([
         selectPaymentMethod(model.country);
     };
 
-    var getRatePlanId = function () {
-        // Bonzo has no filter function :(
-        var ratePlanId = null;
-        $PLAN_INPUTS.each(function (input) {
-            if ($(input).attr('checked')) {
-                ratePlanId = input.value;
-            }
-        });
-        return ratePlanId;
-    };
-
     var getCurrentState = function() {
-        var countrySelect = formElements.$COUNTRY_SELECT[0];
-        var currentCountryOption = countrySelect.options[countrySelect.selectedIndex];
-        var rules = countryChoice.addressRules(currentCountryOption);
+        var currentCountryOption = $(countryChoice.getCurrentCountryOption()),
+            rules = countryChoice.addressRules();
 
         return {
-            postcode: $('input', postcode()).val(),
+            postcode: $('input', $postcode).val(),
             postcodeRules: rules.postcode,
             subdivisionRules: rules.subdivision,
-            currency: $(currentCountryOption).attr('data-currency-choice'),
-            country: $(currentCountryOption).val(),
-            ratePlanId: getRatePlanId()
+            currency: currentCountryOption.attr('data-currency-choice'),
+            country: currentCountryOption.val(),
+            ratePlanId: formElements.getRatePlanId()
         };
-    };
-
-    var preselectCountry = function() {
-        $('option', formElements.$COUNTRY_SELECT).each(function (el) {
-            if ($(el).val() === guardian.country) {
-                el.selected = true;
-            }
-        });
     };
 
     var updateGuardianPageInfo = function(model) {
@@ -129,7 +102,7 @@ define([
 
     var init = function() {
         if (formElements.$CHECKOUT_FORM.length) {
-            preselectCountry();
+            countryChoice.preselectCountry(guardian.country);
             refreshOnChange(formElements.$COUNTRY_SELECT);
             refresh();
         }

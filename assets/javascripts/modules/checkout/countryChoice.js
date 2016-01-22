@@ -1,10 +1,19 @@
-define([], function () {
+define([
+    '$',
+    'modules/checkout/formElements'
+], function ($, formElements) {
     'use strict';
 
-    var addressRules = function (option) {
+    var countrySelect = formElements.$COUNTRY_SELECT[0];
+
+    var getCurrentCountryOption = function () {
+        return countrySelect.options[countrySelect.selectedIndex];
+    };
+
+    var addressRules = function () {
+        var option = getCurrentCountryOption();
         var postcodeRequired = option.getAttribute('data-postcode-required');
         var postcodeLabel = option.getAttribute('data-postcode-label');
-
         var subdivisionLabel = option.getAttribute('data-subdivision-label');
         var subdivisionRequired = option.getAttribute('data-subdivision-required');
         var list = option.getAttribute('data-subdivision-list');
@@ -16,7 +25,17 @@ define([], function () {
         };
     };
 
+    var preselectCountry = function(country) {
+        $('option', countrySelect).each(function (el) {
+            if (el.value === country) {
+                el.selected = true;
+            }
+        });
+    };
+
     return {
-        addressRules: addressRules
+        addressRules: addressRules,
+        getCurrentCountryOption: getCurrentCountryOption,
+        preselectCountry: preselectCountry
     };
 });

@@ -1,8 +1,16 @@
-@import model.DigitalEdition
 @import com.gu.i18n.CountryGroup
+@import model.DigitalEdition
 @(edition: DigitalEdition, subscriptionNumberOfMonths: Int = 1)
 
 @main("Select your country | Digital | Subscriptions | The Guardian", bodyClasses = List("is-wide")) {
+    <script type="text/javascript">
+        guardian.pageInfo.slug = 'GuardianDigiPack:Select Country';
+        guardian.pageInfo.productData = {
+            source: 'Subscriptions and Membership',
+            type: 'GUARDIAN_DIGIPACK',
+            eventName: 'prodView'
+        };
+    </script>
     <main class="page-container gs-container">
 
     <section class="checkout-container">

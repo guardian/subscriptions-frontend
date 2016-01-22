@@ -1,14 +1,11 @@
-@import views.support.BillingPeriod._
-@import views.support.Pricing._
-@import model.JsVars
-@import configuration.Config.Identity._
-
+@import com.gu.i18n.{CountryGroup, Currency}
+@import com.gu.memsub.{BillingPeriod, Month}
 @import com.gu.subscriptions.DigipackPlan
-@import com.gu.memsub.BillingPeriod
-@import com.gu.memsub.Month
-@import com.gu.i18n.Currency
-@import com.gu.i18n.CountryGroup
+@import configuration.Config.Identity._
+@import model.JsVars
+@import views.support.BillingPeriod._
 @import views.support.CountryWithCurrency
+@import views.support.Pricing._
 @(form: Form[model.SubscriptionData],
     userIsSignedIn: Boolean,
     plans: Seq[DigipackPlan[BillingPeriod]],
@@ -75,6 +72,7 @@
                         </div>
                     </div>
                 </div>
+                @fragments.checkout.promoCode(form)
             </div>
 
             <div class="checkout-container__form">

@@ -60,6 +60,14 @@
     }
 }
 
+.button--arrow-right {
+
+    &:after {
+        @extend .icon-arrow-right;
+    }
+}
+
+
 /* Buttons: Disabled
    ========================================================================== */
 
