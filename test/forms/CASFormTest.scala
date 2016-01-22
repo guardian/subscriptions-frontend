@@ -23,6 +23,6 @@ class CASFormTest extends Specification {
       "cas.subscriptionCode" -> "SevenDay"
     )
 
-    CASForm.emergencyToken.bind(formData).get must_=== TokenPayload(Days.days(1), Weeks.weeks(5), SevenDay)
+    CASForm.emergencyToken.bind(formData).get must_=== TokenPayload(Weeks.weeks(5), SevenDay)
   }
 }
