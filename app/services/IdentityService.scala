@@ -184,14 +184,7 @@ object IdentityApiClient extends IdentityApiClient with LazyLogging {
     val endpoint = authoriseCall(WS.url(s"$identityEndpoint/guest"))
 
     guestData => {
-      // When postcode is blank (e.g. Ireland), force-feed identity with a bogus postcode
-      val idSafeGuestData =
-        if (guestData.address.postCode.isEmpty)
-          guestData.copy(address = guestData.address.copy(postCode = "---"))
-        else
-          guestData
-
-      endpoint.post(idSafeGuestData: JsObject)
+      endpoint.post(guestData: JsObject)
         .withWSFailureLogging(endpoint)
         .withCloudwatchMonitoringOfPost
     }
