@@ -52,10 +52,10 @@
             @* ===== Plan selection ===== *@
             <div class="checkout-container__sidebar js-basket">
                 @fragments.checkout.basketPreview()
-                <div class="basket-options-toggle">
-                    <button class="text-button u-button-reset js-toggle" data-toggle="change-payment-frequency">
+                <div class="basket-options-toggle u-note prose">
+                    <a class="js-toggle checkout-container__frequency" data-toggle="change-payment-frequency">
                         Change payment frequency
-                    </button>
+                    </a>
                 </div>
                 <fieldset class="basket-billing-options is-hidden js-payment-frequency js-option-mirror-group" id="change-payment-frequency">
                     @plans.map { p =>
@@ -66,7 +66,7 @@
                 </fieldset>
                 <div class="js-checkout-notices notices-container" data-set="checkout-notices" hidden="true">
                     <div class="js-append">
-                        <div class="js-payment-type-direct-debit">
+                        <div class="js-payment-type-direct-debit u-note">
                             @fragments.checkout.noticesDirectDebit()
                         </div>
                         <div class="js-payment-type-card" hidden="true">
@@ -85,7 +85,7 @@
                             <span class="field-panel__legend__num">1</span> Your details
                         </legend>
                         <div class="field-panel__intro">
-                            <div class="field-note field-note--offset">
+                            <div class="field-note field-note--offset prose">
                                 @if(userIsSignedIn) {
                                     <a href="@idWebAppSignOutUrl(routes.Checkout.renderCheckout())">Sign out</a>
                                 } else {
@@ -147,7 +147,7 @@
 
             </div>
 
-            <div class="u-display-until-tablet" data-set="checkout-notices"></div>
+            <div class="u-display-until-desktop" data-set="checkout-notices"></div>
 
         </form>
 

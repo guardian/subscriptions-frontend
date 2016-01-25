@@ -25,13 +25,15 @@
 .checkout-container__form {
     margin-bottom: $gs-baseline;
 
-    @include mq(tablet) {
+    @include mq(desktop) {
         float: left;
         width: 65%
     }
 }
 .checkout-container__sidebar {
-    @include mq(tablet) {
+    position: relative;
+
+    @include mq(desktop) {
         float: right;
         width: 35%;
         padding-left: $gs-gutter;
@@ -39,6 +41,9 @@
     @include mq(wide) {
         padding-left: gs-span(1.5);
     }
+}
+.checkout-container__frequency {
+    cursor: pointer;
 }
 
 /* Country Select
@@ -209,6 +214,7 @@ $sprite-card-offset-visa:               -355px;
         margin-left: 35%;
     }
 }
+
 
 /* ==========================================================================
    Review Panel
