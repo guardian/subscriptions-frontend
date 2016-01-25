@@ -24,7 +24,7 @@ object TouchpointBackend {
     val config = TouchpointBackendConfig.backendType(backendType, Config.config)
     val salesforceService = new SalesforceServiceImp(new SalesforceRepo(config.salesforce))
 
-    val soapClient = new soap.ClientWithFeatureSupplier(Set.empty, config.zuoraSoap, new ServiceMetrics(Config.stage, Config.appName, "zuora-soap-client"), Akka.system)
+    val soapClient = new soap.ClientWithFeatureSupplier(Set.empty, config.zuoraSoap, new ServiceMetrics(Config.stage, Config.appName, "zuora-soap-client"))
     val restClient = new rest.Client(config.zuoraRest, new ServiceMetrics(Config.stage, Config.appName, "zuora-rest-client"))
 
     val digipackConfig = ProductFamilyRatePlanIds.config(Some(Config.config))(config.environmentName, Membership)

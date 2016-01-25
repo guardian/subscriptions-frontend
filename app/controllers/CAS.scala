@@ -1,9 +1,8 @@
 package controllers
 
 import actions.CommonActions._
-import com.gu.cas.{TokenPayload, Invalid, Valid}
+import com.gu.cas.{TokenPayload, Valid}
 import com.gu.googleauth.UserIdentity
-import com.gu.identity.play.IdUser
 import com.gu.subscriptions.CAS.{CASError, CASSuccess}
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
@@ -16,7 +15,7 @@ import views.support.CASResultOps._
 import views.support.TokenPayloadOps._
 
 import scala.concurrent.Future
-import scala.util.{Failure, Success, Try}
+import scala.util.{Success, Try}
 
 object CAS extends Controller with LazyLogging {
   private implicit val encoder = Config.CAS.emergencyEncoder
@@ -29,11 +28,11 @@ object CAS extends Controller with LazyLogging {
     val lookup = request.body
 
     // The encoder is not safe and can throw IndexOutOfBound exceptions
-    Try(encoder.decode(lookup.subscriptionNumber)) match {
+    Try(encoder.decode(lookup.subscriptionName.get)) match {
       case Success(Valid(payload)) =>
         Future.successful(Ok(Json.toJson(payload)))
       case _ =>
-        Config.casService.check(lookup.subscriptionNumber, lookup.postcode, lookup.lastName, triggersActivation = false).map {
+        Config.casService.check(lookup.subscriptionName, lookup.password, triggersActivation = false).map {
           case r: CASSuccess => Ok(Json.toJson(r))
           case r: CASError => BadRequest(Json.toJson(r))
         }

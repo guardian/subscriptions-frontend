@@ -1,6 +1,7 @@
 package forms
 
 import com.gu.cas.{SubscriptionCode, TokenPayload}
+import com.gu.memsub.Subscription.Name
 import model.CASLookup
 import org.joda.time.Weeks
 import play.api.data.Forms._
@@ -10,9 +11,8 @@ import play.api.data.format.Formatter
 object CASForm {
   val lookup: Form[CASLookup] = Form(
     "cas" -> mapping(
-      "number" -> nonEmptyText,
-      "lastName" -> nonEmptyText,
-      "postcode" -> optional(text)
+      "number" -> nonEmptyText.transform[Name](Name, _.get),
+      "password" -> nonEmptyText
     )(CASLookup.apply)(CASLookup.unapply)
   )
 

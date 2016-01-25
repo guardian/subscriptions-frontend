@@ -1,3 +1,5 @@
 package model
 
-case class CASLookup(subscriptionNumber: String, lastName: String, postcode: Option[String])
+import com.gu.memsub.Subscription
+
+case class CASLookup(subscriptionName: Subscription.Name, password: String)
