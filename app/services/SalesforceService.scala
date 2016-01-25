@@ -2,15 +2,13 @@ package services
 
 import com.gu.salesforce.ContactDeserializer.Keys
 import com.gu.salesforce._
-import com.gu.membership.util.FutureSupplier
+import com.gu.memsub.util.{ScheduledTaskConfig, ScheduledTask, FutureSupplier}
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
 import model.PersonalData
 import play.api.Play.current
 import play.api.libs.concurrent.Akka
 import play.api.libs.json.{JsObject, Json}
-
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
@@ -47,11 +45,16 @@ class SalesforceRepo(salesforceConfig: SalesforceConfig) extends ContactReposito
     override val apiURL =salesforceConfig.apiURL.toString()
     override val stage = salesforceConfig.envName
 
-
     override val authSupplier: FutureSupplier[Authentication] = new FutureSupplier[Authentication](getAuthentication)
 
-    private val actorSystem = Akka.system
-    actorSystem.scheduler.schedule(30.minutes, 30.minutes) { authSupplier.refresh() }
+    implicit private val actorSystem = Akka.system
+
+    private val getAuthenticationTaskConfig =
+      ScheduledTaskConfig[Authentication](
+        "SalesforceRepo - getAuthentication", Authentication("", ""), 30.minutes, 30.minutes)
+
+    private val getAuthenticationTask = ScheduledTask[Authentication](getAuthenticationTaskConfig){ authSupplier.refresh() }
+    getAuthenticationTask.start()
   }
 }
 
