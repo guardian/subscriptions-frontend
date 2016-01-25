@@ -201,7 +201,7 @@ class Checkout(val testUser: TestUser) extends Page with Browser {
   }
 
   def submit(): Unit = {
-    val selector = cssSelector( """input[type="submit"]""")
+    val selector = cssSelector( """.js-checkout-submit""")
     assert(pageHasElement(selector))
     PersonalDetails.receiveGnmMarketing.select()
     click.on(selector)
