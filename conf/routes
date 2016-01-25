@@ -27,13 +27,14 @@ GET         /au/digital                      controllers.DigitalPack.au
 GET         /int/digital                     controllers.DigitalPack.int
 
 # Checkout
-GET         /checkout                        controllers.Checkout.renderCheckout(countryGroup: CountryGroup ?= CountryGroup.UK)
+GET         /checkout                        controllers.Checkout.renderCheckout(countryGroup: CountryGroup ?= CountryGroup.UK, promoCode: Option[PromoCode])
 POST        /checkout                        controllers.Checkout.handleCheckout
 GET         /checkout/check-identity         controllers.Checkout.checkIdentity(email: String)
 POST        /checkout/check-account          controllers.Checkout.checkAccount
 POST        /checkout/register-guest-user    controllers.Checkout.convertGuestUser
 GET         /checkout/thank-you              controllers.Checkout.thankYou
 
+GET         /checkout/lookupPromotion        controllers.Checkout.validatePromoCode(promoCode: PromoCode, productRatePlanId: ProductRatePlanId, country: Country)
 # collection and delivery
 GET         /collection/paper-digital        controllers.Shipping.viewCollectionPaperDigital
 GET         /collection/paper                controllers.Shipping.viewCollectionPaper

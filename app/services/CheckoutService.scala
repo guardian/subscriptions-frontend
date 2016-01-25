@@ -1,6 +1,7 @@
 package services
 
 import com.gu.identity.play.AuthenticatedIdUser
+import com.gu.memsub.services.PromoService
 import com.gu.memsub.services.api.CatalogService
 import com.gu.salesforce.ContactId
 import com.gu.zuora.api.ZuoraService
@@ -22,7 +23,8 @@ class CheckoutService(identityService: IdentityService,
                       catalogService: CatalogService,
                       zuoraService: ZuoraService,
                       exactTargetService: ExactTargetService,
-                      zuoraProperties: ZuoraProperties) extends LazyLogging {
+                      zuoraProperties: ZuoraProperties,
+                      promoService: PromoService) extends LazyLogging {
 
   import CheckoutService.CheckoutResult
 
@@ -47,6 +49,13 @@ class CheckoutService(identityService: IdentityService,
         identityService.registerGuest(personalData)
       }
 
+    val validPromoCode =
+      for {
+        code <- subscriptionData.suppliedPromoCode
+        promotion <- promoService.findPromotion(code)
+        if promotion.validateFor(subscriptionData.productRatePlanId, personalData.address.country).isRight
+      } yield code
+
     for {
       userData <- userOrElseRegisterGuest
       memberId <- salesforceService.createOrUpdateUser(personalData, userData.id)
@@ -64,6 +73,7 @@ class CheckoutService(identityService: IdentityService,
         productRatePlanId = subscriptionData.productRatePlanId,
         name = personalData,
         address = personalData.address,
+        promoCode = validPromoCode,
         paymentDelay = Some(zuoraProperties.paymentDelayInDays),
         ipAddressOpt = requestData.ipAddress.map(_.getHostAddress))
 

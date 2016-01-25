@@ -1,4 +1,5 @@
 @import model.DigitalEdition
+@import com.gu.i18n.CountryGroup
 @(edition: DigitalEdition, subscriptionNumberOfMonths: Int = 1)
 
 @main("Select your country | Digital | Subscriptions | The Guardian", bodyClasses = List("is-wide")) {
@@ -20,7 +21,7 @@
                     <div class="button-group">
                         <a class="button button--primary button--large js-checkout-link" data-link-tracking
                            data-previous-href="https://www.guardiansubscriptions.co.uk/digitalsubscriptions/?prom=DGA38&CMP=@edition.campaign"
-                           href="@routes.Checkout.renderCheckout()">
+                           href="@routes.Checkout.renderCheckout(CountryGroup.UK, None)">
                            United Kingdom
                         </a>
                         <a class="button button--secondary button--large" data-link-tracking

@@ -3,9 +3,10 @@ package configuration
 import com.github.nscala_time.time.Imports._
 import com.gocardless.GoCardlessClient
 import com.gocardless.GoCardlessClient.Environment
-import com.gu.config.{MembershipRatePlanIds, DigitalPackRatePlanIds}
+import com.gu.config.{ProductFamilyRatePlanIds, MembershipRatePlanIds, DigitalPackRatePlanIds}
 import com.gu.googleauth.GoogleAuthConfig
 import com.gu.identity.cookie.{PreProductionKeys, ProductionKeys}
+import com.gu.memsub.{Membership, ProductFamily, Digipack}
 import com.gu.salesforce.SalesforceConfig
 import com.netaporter.uri.dsl._
 import com.typesafe.config.ConfigFactory
@@ -90,9 +91,9 @@ object Config {
 
   val sessionCamCookieName = "sessioncam-on"
 
-  def digipackRatePlanIds(env: String) = DigitalPackRatePlanIds.fromConfig(
-    config.getConfig(s"touchpoint.backend.environments.$env.zuora.ratePlanIds.digitalpack"))
+  def digipackRatePlanIds(env: String): DigitalPackRatePlanIds =
+    DigitalPackRatePlanIds.fromConfig(ProductFamilyRatePlanIds.config(Some(config))(env, Digipack))
 
-  def membershipRatePlanIds(env: String) = MembershipRatePlanIds.fromConfig(
-    config.getConfig(s"touchpoint.backend.environments.$env.zuora.ratePlanIds.membership"))
+  def membershipRatePlanIds(env: String) =
+    MembershipRatePlanIds.fromConfig(ProductFamilyRatePlanIds.config(Some(config))(env, Membership))
 }

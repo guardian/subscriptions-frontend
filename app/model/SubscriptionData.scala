@@ -3,7 +3,9 @@ package model
 import com.gu.i18n.{Country, CountryGroup}
 import com.gu.identity.play.IdUser
 import com.gu.memsub.Subscription.ProductRatePlanId
+import com.gu.memsub.services.PromoService
 import com.gu.memsub.{Address, FullName}
+import com.gu.memsub.promo.PromoCode
 import IdUserOps._
 
 sealed trait PaymentType {
@@ -57,10 +59,13 @@ case class PersonalData(first: String,
       .getOrElse(notFound)
 }
 
-case class SubscriptionData(personalData: PersonalData, paymentData: PaymentData, productRatePlanId: ProductRatePlanId)
+case class SubscriptionData(personalData: PersonalData,
+                            paymentData: PaymentData,
+                            productRatePlanId: ProductRatePlanId,
+                            suppliedPromoCode: Option[PromoCode])
 
 object SubscriptionData {
-  def fromIdUser(u: IdUser) = {
+  def fromIdUser(promoCode: Option[PromoCode])(u: IdUser) = {
     val personalData = PersonalData(
       first = u.privateFields.flatMap(_.firstName).getOrElse(""),
       last = u.privateFields.flatMap(_.secondName).getOrElse(""),
@@ -73,6 +78,8 @@ object SubscriptionData {
 
     val blankRatePlanId = ProductRatePlanId("") // this makes me very nervous indeed
 
-    SubscriptionData(personalData, blankPaymentData, blankRatePlanId)
+    SubscriptionData(personalData, blankPaymentData, blankRatePlanId, promoCode)
+
+
   }
 }

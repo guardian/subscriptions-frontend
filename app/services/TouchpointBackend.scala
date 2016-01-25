@@ -1,16 +1,17 @@
 package services
 
-import com.gu.memsub.services.CatalogService
-import com.gu.memsub.services.api
+import com.gu.config.ProductFamilyRatePlanIds
+import com.gu.memsub.Membership
+import com.gu.memsub.services.{CatalogService, PromoService, api}
 import com.gu.monitoring.{ServiceMetrics, StatusMetrics}
 import com.gu.stripe.StripeService
 import com.gu.zuora
 import com.gu.zuora.{rest, soap}
 import configuration.Config
 import monitoring.TouchpointBackendMetrics
+import play.api.Play.current
 import play.api.libs.concurrent.Akka
 import play.api.mvc.RequestHeader
-import play.api.Play.current
 import touchpoint.TouchpointBackendConfig.BackendType
 import touchpoint.{TouchpointBackendConfig, ZuoraProperties}
 import utils.TestUsers._
@@ -25,12 +26,14 @@ object TouchpointBackend {
 
     val soapClient = new soap.ClientWithFeatureSupplier(Set.empty, config.zuoraSoap, new ServiceMetrics(Config.stage, Config.appName, "zuora-soap-client"), Akka.system)
     val restClient = new rest.Client(config.zuoraRest, new ServiceMetrics(Config.stage, Config.appName, "zuora-rest-client"))
+
+    val digipackConfig = ProductFamilyRatePlanIds.config(Some(Config.config))(config.environmentName, Membership)
     val digipackRatePlanIds = Config.digipackRatePlanIds(config.environmentName)
 
     val membershipRatePlanIds = Config.membershipRatePlanIds(config.environmentName)
     val catalogService = CatalogService(restClient, membershipRatePlanIds, digipackRatePlanIds, config.environmentName)
     val zuoraService = new zuora.ZuoraService(soapClient, restClient, digipackRatePlanIds)
-
+    val promoService = new PromoService(digipackConfig)
     val _stripeService = new StripeService(config.stripe, new TouchpointBackendMetrics with StatusMetrics {
       val backendEnv = config.stripe.envName
       val service = "Stripe"
@@ -45,7 +48,8 @@ object TouchpointBackend {
       catalogService,
       zuoraService,
       paymentService,
-      config.zuoraProperties
+      config.zuoraProperties,
+      promoService
     )
   }
 
@@ -78,7 +82,8 @@ case class TouchpointBackend(environmentName: String,
                              catalogService : api.CatalogService,
                              zuoraService: zuora.api.ZuoraService,
                              paymentService: PaymentService,
-                             zuoraProperties: ZuoraProperties) {
+                             zuoraProperties: ZuoraProperties,
+                             promoService: PromoService) {
 
   private val that = this
 
@@ -93,5 +98,6 @@ case class TouchpointBackend(environmentName: String,
                         catalogService,
                         zuoraService,
                         exactTargetService,
-                        zuoraProperties)
+                        zuoraProperties,
+                        promoService)
 }
