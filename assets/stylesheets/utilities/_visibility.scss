@@ -38,6 +38,13 @@
     }
 }
 
+.u-display-until-desktop {
+    display: block !important;
+    @include mq(desktop) {
+        display: none !important;
+    }
+}
+
 .u-display-from-tablet {
     display: none !important;
     @include mq(tablet) {
