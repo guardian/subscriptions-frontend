@@ -32,6 +32,10 @@ define([
         s.prop19 = pageInfo.product;
         s.prop17 = pageInfo.slug;
 
+        if (pageInfo.billingCountry && pageInfo.billingCurrency) {
+            s.eVar16 = 'billingCountry:' + pageInfo.billingCountry + ',billingCurrency:' + pageInfo.billingCurrency;
+        }
+
         if (productData) {
             s.products = [
                 productData.source,

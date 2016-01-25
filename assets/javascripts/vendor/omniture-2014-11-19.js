@@ -130,7 +130,7 @@ function s_doPlugins(s) {
     }
 
     /* New/Repeat Status */
-    s.prop16=s.eVar16=s.getNewRepeat(365);
+    s.prop16=s.getNewRepeat(365);
 
     /* Set Time Parting Day and Hour Combination - 0 = GMT */
     var tpA = s.getTimeParting('n','+0');

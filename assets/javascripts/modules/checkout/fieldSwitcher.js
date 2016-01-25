@@ -107,8 +107,18 @@ define([
         });
     };
 
+    var updateGuardianPageInfo = function(model) {
+        var pageInfo = guardian.pageInfo;
+        if (pageInfo) {
+            pageInfo.billingCountry = model.country;
+            pageInfo.billingCurrency = model.currency;
+        }
+    };
+
     var refresh = function () {
-        redraw(getCurrentState());
+        var model = getCurrentState();
+        redraw(model);
+        updateGuardianPageInfo(model);
     };
 
     var refreshOnChange = function(el) {
