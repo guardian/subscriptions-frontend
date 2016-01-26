@@ -24,9 +24,9 @@ define([
 
     var $PLAN_INPUTS = $('input[type="radio"]', formElements.$PLAN_SELECT);
 
-    var checkPlanInput = function (ratePlanId) {
+    var checkPlanInput = function (ratePlanId, currency) {
         $PLAN_INPUTS.each(function(input) {
-            if ($(input).val() === ratePlanId && !$(input).attr('disabled')) {
+            if ($(input).val() === ratePlanId && $(input).attr('data-currency') === currency) {
                 check(input);
             }
         });
@@ -69,7 +69,7 @@ define([
     var redraw = function(model) {
         redrawAddressFields(model);
         switchLocalization(model);
-        checkPlanInput(model.ratePlanId);
+        checkPlanInput(model.ratePlanId, model.currency);
         selectPaymentMethod(model.country);
     };
 

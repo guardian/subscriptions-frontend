@@ -17,14 +17,10 @@ define(['$'], function ($) {
                 var $el = $(el);
                 if ($el.attr(dataAttr) === model[param]) {
                     $el.show();
-                    $('input[type="radio"]', $el).each(function(input) {
-                        $(input).removeAttr('disabled');
-                    });
                 } else {
                     $el.hide();
                     $('input[type="radio"]', $el).each(function(input) {
                         $(input).removeAttr('checked');
-                        $(input).attr('disabled', 'disabled');
                     });
                 }
             });
