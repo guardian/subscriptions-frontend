@@ -27,6 +27,7 @@
             data-option-mirror-label="@plan.prettyPricing(currency)"
             data-amount="@plan.pricing.getPrice(currency).get.amount"
             data-number-of-months="@plan.billingPeriod.numberOfMonths"
+            data-currency="@currency"
             value="@plan.productRatePlanId.get"
             @if(plan == defaultPlan){checked}
             >
