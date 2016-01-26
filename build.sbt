@@ -41,7 +41,7 @@ libraryDependencies ++= Seq(
     filters,
     PlayImport.specs2,
     "com.gu" %% "play-googleauth" % "0.3.3",
-    "com.gu" %% "membership-common" % "0.143",
+    "com.gu" %% "membership-common" % "0.145",
     "com.gu" %% "content-authorisation-common" % "0.1",
     "com.gu" %% "identity-test-users" % "0.5",
     "com.gu.identity" %% "identity-play-auth" % "0.14",
