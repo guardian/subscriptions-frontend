@@ -1,7 +1,7 @@
 package services
 
 import com.gu.config.ProductFamilyRatePlanIds
-import com.gu.memsub.Membership
+import com.gu.memsub.Digipack
 import com.gu.memsub.services.{CatalogService, PromoService, api}
 import com.gu.monitoring.{ServiceMetrics, StatusMetrics}
 import com.gu.stripe.StripeService
@@ -27,7 +27,7 @@ object TouchpointBackend {
     val soapClient = new soap.ClientWithFeatureSupplier(Set.empty, config.zuoraSoap, new ServiceMetrics(Config.stage, Config.appName, "zuora-soap-client"))
     val restClient = new rest.Client(config.zuoraRest, new ServiceMetrics(Config.stage, Config.appName, "zuora-rest-client"))
 
-    val digipackConfig = ProductFamilyRatePlanIds.config(Some(Config.config))(config.environmentName, Membership)
+    val digipackConfig = ProductFamilyRatePlanIds.config(Some(Config.config))(config.environmentName, Digipack)
     val digipackRatePlanIds = Config.digipackRatePlanIds(config.environmentName)
 
     val membershipRatePlanIds = Config.membershipRatePlanIds(config.environmentName)
