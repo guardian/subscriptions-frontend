@@ -7,3 +7,14 @@
     color: guss-colour(error);
   }
 }
+
+#catalog-diagnostic {
+  td {
+      ul {
+          list-style: none;
+          padding-bottom: 0.5em;
+          padding-top: 0.5em;
+      }
+
+  }
+}
