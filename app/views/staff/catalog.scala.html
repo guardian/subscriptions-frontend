@@ -23,12 +23,11 @@
                 <td>@cat.productRatePlanId.get</td>
                 <td>
                 <ul>
-                  @for(price <- cat.prices) {
+                  @cat.prices.map { price =>
                     <li>@price.pretty</li>
                   }
                 </ul>
                 </td>
-              </tr>
             }
           </tbody>
         </table>
