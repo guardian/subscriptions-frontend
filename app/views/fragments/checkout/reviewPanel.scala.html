@@ -1,8 +1,9 @@
+@import com.gu.memsub.BillingPeriod
+@import com.gu.memsub.promo.Promotion
+@import com.gu.subscriptions.DigipackPlan
 @import views.support.BillingPeriod._
 @import views.support.Pricing._
-@import com.gu.memsub.BillingPeriod
-@import com.gu.subscriptions.DigipackPlan
-@(subscriptionId: String, plan: DigipackPlan[BillingPeriod])
+@(subscriptionId: String, plan: DigipackPlan[BillingPeriod], promotion: Option[Promotion] = None)
 
 <div class="review-panel js-payment-frequency">
     <input type="checkbox" name="subscriptionDetails"
@@ -22,4 +23,13 @@
             Digital Pack <em>(Daily Edition / Guardian App Premium Tier)</em>
         </div>
     </div>
+    @promotion.map { promo =>
+        <div class="review-panel__promotion">
+            <h4 class="review-panel__label">✓ Promotion applied:</h4>
+            <div class="review-panel__details">
+                <p>@promo.description</p>
+                <p>@promo.redemptionInstructions</p>
+            </div>
+        </div>
+    }
 </div>

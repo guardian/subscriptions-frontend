@@ -74,10 +74,15 @@ define([
 
     return {
         init: function () {
-            bean.on(formElements.$COUNTRY_SELECT[0], 'change', validate);
-            bean.on(formElements.$PROMO_CODE_BTN[0], 'click', validate);
-            if ($inputBox.val() != '') {
-                validate();
+            var $countrySelectBox = formElements.$COUNTRY_SELECT,
+                $promoCodeButton = formElements.$PROMO_CODE_BTN;
+
+            if ($countrySelectBox.length && $promoCodeButton.length) {
+                bean.on($countrySelectBox[0], 'change', validate);
+                bean.on($promoCodeButton[0], 'click', validate);
+                if ($inputBox.val() != '') {
+                    validate();
+                }
             }
         }
     };

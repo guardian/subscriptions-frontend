@@ -10,8 +10,8 @@ define([
         return countrySelect.options[countrySelect.selectedIndex];
     };
 
-    var addressRules = function () {
-        var option = getCurrentCountryOption();
+    var addressRules = function (option) {
+        option = option || getCurrentCountryOption();
         var postcodeRequired = option.getAttribute('data-postcode-required');
         var postcodeLabel = option.getAttribute('data-postcode-label');
         var subdivisionLabel = option.getAttribute('data-subdivision-label');

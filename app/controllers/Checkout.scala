@@ -4,8 +4,8 @@ import actions.CommonActions._
 import com.gu.i18n.{Country, CountryGroup, GBP}
 import com.gu.identity.play.ProxiedIP
 import com.gu.memsub.Subscription.ProductRatePlanId
-import com.gu.memsub.promo.PromoCode
 import com.gu.memsub.promo.Writers._
+import com.gu.memsub.promo.{PromoCode, Promotion}
 import com.gu.stripe.Stripe
 import com.gu.zuora.soap
 import com.typesafe.scalalogging.LazyLogging
@@ -35,6 +35,7 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
     val RatePlanId = "newSubs_ratePlanId"
     val UserId = "newSubs_userId"
     val IdentityGuestPasswordSettingToken = "newSubs_token"
+    val AppliedPromoCode = "newSubs_appliedPromoCode"
   }
 
   def checkoutService(implicit res: TouchpointBackend.Resolution): CheckoutService =
@@ -95,6 +96,12 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
     val checkoutResult = checkoutService.processSubscription(formData, idUserOpt, requestData)
 
     checkoutResult.map { result =>
+
+      val productData = Seq(
+        SessionKeys.SubsName -> result.subscribeResult.name,
+        SessionKeys.RatePlanId -> formData.productRatePlanId.get
+      )
+
       val userSessionFields = result.userIdData match {
         case GuestUser(UserId(userId), IdentityToken(token)) =>
           Seq(
@@ -104,16 +111,15 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
         case _ => Seq()
       }
 
-      val session = (Seq(
-        SessionKeys.SubsName -> result.subscribeResult.name,
-        SessionKeys.RatePlanId -> formData.productRatePlanId.get
-      ) ++ userSessionFields).foldLeft(request.session) { _ + _ }
+      var appliedPromoCode = result.validPromoCode.fold(Seq.empty[(String,String)])(validPromoCode => Seq(SessionKeys.AppliedPromoCode -> validPromoCode.get))
+
+      val session = (productData ++ userSessionFields ++ appliedPromoCode).foldLeft(request.session) { _ + _ }
 
       catalog.find(formData.productRatePlanId).foreach { plan =>
         trackAnon(SubscriptionRegistrationActivity(MemberData(result, formData, plan.billingPeriod)))
       }
 
-      Ok(Json.obj("redirect" -> routes.Checkout.thankYou().url)).withSession(session);
+      Ok(Json.obj("redirect" -> routes.Checkout.thankYou().url)).withSession(session)
     }.recover {
       case err: soap.Error if err.code == "TRANSACTION_FAILED" => Forbidden
       case err: Stripe.Error => Forbidden
@@ -155,12 +161,19 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
       } // Don't display the user registration form if the user is logged in
 
       val plan = catalog.unsafeFindPaid(ProductRatePlanId(ratePlanId))
-      Ok(view.thankyou(subsName, passwordForm, resolution, plan))
+
+      val promotion = session.get(SessionKeys.AppliedPromoCode).fold(Option.empty[Promotion])(code => tpBackend.promoService.findPromotion(PromoCode(code)))
+
+      Ok(view.thankyou(subsName, passwordForm, resolution, plan, promotion))
     }
   }
 
   def validatePromoCode(promoCode: PromoCode, prpId: ProductRatePlanId, country: Country) = NoCacheAction { implicit request =>
-    TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies).backend.promoService.findPromotion(promoCode)
+
+    implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
+    implicit val tpBackend = resolution.backend
+
+    tpBackend.promoService.findPromotion(promoCode)
       .fold(NotFound(Json.obj("errorMessage" -> "Unknown or expired promo code"))){ promo =>
         val result = promo.validateFor(prpId, country)
         val body = Json.obj(
