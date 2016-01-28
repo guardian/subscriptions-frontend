@@ -1,6 +1,6 @@
 package services
 
-import com.gu.config.ProductFamilyRatePlanIds
+import com.gu.config.{DigitalPackRatePlanIds, ProductFamilyRatePlanIds}
 import com.gu.memsub.Digipack
 import com.gu.memsub.services.{CatalogService, PromoService, api}
 import com.gu.monitoring.{ServiceMetrics, StatusMetrics}
@@ -47,6 +47,8 @@ object TouchpointBackend {
       salesforceService,
       catalogService,
       zuoraService,
+      restClient,
+      digipackRatePlanIds,
       paymentService,
       config.zuoraProperties,
       promoService
@@ -56,7 +58,7 @@ object TouchpointBackend {
   val BackendsByType = BackendType.All.map(typ => typ -> TouchpointBackend(typ)).toMap
 
   val Normal = BackendsByType(BackendType.Default)
-
+  val Test = BackendsByType(BackendType.Testing)
   val All = BackendsByType.values.toSeq
 
   case class Resolution(
@@ -81,6 +83,8 @@ case class TouchpointBackend(environmentName: String,
                              salesforceService: SalesforceService,
                              catalogService : api.CatalogService,
                              zuoraService: zuora.api.ZuoraService,
+                             zuoraRestClient: zuora.rest.Client,
+                             digipackIds: DigitalPackRatePlanIds,
                              paymentService: PaymentService,
                              zuoraProperties: ZuoraProperties,
                              promoService: PromoService) {

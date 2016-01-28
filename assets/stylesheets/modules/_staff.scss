@@ -1,9 +1,29 @@
 #cas-tool {
-  padding: 50px;
-  margin: 0 auto;
-  width: 80%;
+    padding: 50px;
+    margin: 0 auto;
+    width: 80%;
 
-  .error {
-    color: guss-colour(error);
-  }
+    .error {
+        color: guss-colour(error);
+    }
+}
+
+#catalog-diagnostic {
+    text-align: center;
+
+    table {
+        margin: 50px auto;
+        tr {
+            border-bottom: solid 1px $c-brand;
+            td {
+                margin: 20px;
+                ul {
+                    list-style: none;
+                    padding-bottom: 0.5em;
+                    padding-top: 0.5em;
+                }
+            }
+
+        }
+    }
 }
