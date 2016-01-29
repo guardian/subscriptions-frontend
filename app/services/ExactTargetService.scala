@@ -1,6 +1,7 @@
 package services
 
 import akka.agent.Agent
+import com.gu.memsub.Subscription
 import com.gu.zuora.api.ZuoraService
 import com.gu.zuora.soap.models.Results.SubscribeResult
 import com.squareup.okhttp.Request.Builder
@@ -8,14 +9,14 @@ import com.squareup.okhttp.{MediaType, OkHttpClient, RequestBody, Response}
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
 import model.SubscriptionData
-import model.exactTarget.{ExactTargetException, SubscriptionDataExtensionRow}
+import model.exactTarget.SubscriptionDataExtensionRow
 import play.api.libs.concurrent.Akka
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json._
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
-import com.gu.memsub.Subscription
+
 trait ExactTargetService extends LazyLogging {
   lazy val etClient: ETClient = ETClient
   def zuoraService: ZuoraService
@@ -75,21 +76,25 @@ object ETClient extends ETClient with LazyLogging {
    * See https://code.exacttarget.com/apis-sdks/rest-api/using-the-api-key-to-authenticate-api-calls.html
    * This call is blocking
    */
-  private def getAccessToken: String = {
-    val payload = Json.obj(
-      "clientId" -> clientId,
-      "clientSecret" -> clientSecret
-    ).toString()
+  private def getAccessToken: String =
+    try {
+      val payload = Json.obj(
+        "clientId" -> clientId,
+        "clientSecret" -> clientSecret
+      ).toString()
 
-    val body = RequestBody.create(jsonMT, payload)
-    val request = new Builder().url(authEndpoint).post(body).build()
-    val response = httpClient.newCall(request).execute()
+      val body = RequestBody.create(jsonMT, payload)
+      val request = new Builder().url(authEndpoint).post(body).build()
+      val response = httpClient.newCall(request).execute()
 
-    val respBody = response.body().string()
+      val respBody = response.body().string()
 
-    logger.info("Got new token: " + (Json.parse(respBody) \ "accessToken").as[String])
-    (Json.parse(respBody) \ "accessToken").as[String]
-  }
+      logger.info("Got new token: " + (Json.parse(respBody) \ "accessToken").as[String])
+      (Json.parse(respBody) \ "accessToken").as[String]
+    } catch { case err: Throwable =>
+      logger.error(s"Failed refreshing the Exact Target token: ", err)
+      throw err;
+    }
 
   Akka.system.scheduler.schedule(initialDelay = 30.minutes, interval = 30.minutes) {
     accessToken send getAccessToken
