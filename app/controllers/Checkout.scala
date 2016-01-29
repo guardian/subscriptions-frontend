@@ -4,8 +4,8 @@ import actions.CommonActions._
 import com.gu.i18n.{Country, CountryGroup, GBP}
 import com.gu.identity.play.ProxiedIP
 import com.gu.memsub.Subscription.ProductRatePlanId
+import com.gu.memsub.promo.PromoCode
 import com.gu.memsub.promo.Writers._
-import com.gu.memsub.promo.{PromoCode, Promotion}
 import com.gu.stripe.Stripe
 import com.gu.zuora.soap
 import com.typesafe.scalalogging.LazyLogging
@@ -111,7 +111,7 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
         case _ => Seq()
       }
 
-      var appliedPromoCode = result.validPromoCode.fold(Seq.empty[(String,String)])(validPromoCode => Seq(SessionKeys.AppliedPromoCode -> validPromoCode.get))
+      val appliedPromoCode = result.validPromoCode.fold(Seq.empty[(String,String)])(validPromoCode => Seq(SessionKeys.AppliedPromoCode -> validPromoCode.get))
 
       val session = (productData ++ userSessionFields ++ appliedPromoCode).foldLeft(request.session) { _ + _ }
 
@@ -162,7 +162,7 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
 
       val plan = catalog.unsafeFindPaid(ProductRatePlanId(ratePlanId))
 
-      val promotion = session.get(SessionKeys.AppliedPromoCode).fold(Option.empty[Promotion])(code => tpBackend.promoService.findPromotion(PromoCode(code)))
+      val promotion = session.get(SessionKeys.AppliedPromoCode).flatMap(code => resolution.backend.promoService.findPromotion(PromoCode(code)))
 
       Ok(view.thankyou(subsName, passwordForm, resolution, plan, promotion))
     }
@@ -170,8 +170,7 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
 
   def validatePromoCode(promoCode: PromoCode, prpId: ProductRatePlanId, country: Country) = NoCacheAction { implicit request =>
 
-    implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
-    implicit val tpBackend = resolution.backend
+    val tpBackend = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies).backend
 
     tpBackend.promoService.findPromotion(promoCode)
       .fold(NotFound(Json.obj("errorMessage" -> "Unknown or expired promo code"))){ promo =>
