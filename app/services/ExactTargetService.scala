@@ -22,7 +22,7 @@ trait ExactTargetService extends LazyLogging {
   def zuoraService: ZuoraService
 
   def sendETDataExtensionRow(subscribeResult: SubscribeResult, subscriptionData: SubscriptionData): Future[Unit] = {
-    val subscription = zuoraService.getSubscription(Subscription.Name(subscribeResult.name))
+    val subscription = zuoraService.getSubscription(Subscription.Name(subscribeResult.subscriptionName))
 
     val accAndPaymentMethod = for {
       subs <- subscription

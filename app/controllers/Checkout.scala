@@ -98,7 +98,7 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
     checkoutResult.map { result =>
 
       val productData = Seq(
-        SessionKeys.SubsName -> result.subscribeResult.name,
+        SessionKeys.SubsName -> result.subscribeResult.subscriptionName,
         SessionKeys.RatePlanId -> formData.productRatePlanId.get
       )
 
