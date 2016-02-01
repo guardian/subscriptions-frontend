@@ -8,9 +8,8 @@ object DigitalEdition {
 
   implicit class DigitalEditionOps(edition: DE) {
 
-    def redirect: Uri = edition match {
-      case UK => "/digital/country"
-      case _ => "https://www.guardiansubscriptions.co.uk/digitalsubscriptions/?prom=dga38&CMP=FAB_3062"
+    def redirect: Uri = {
+      "/checkout" ? ("countryGroup" -> edition.countryGroup.id)
     }
 
     def membershipLandingPage: Uri = {
