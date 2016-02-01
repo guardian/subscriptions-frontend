@@ -98,3 +98,9 @@
     @extend .icon-arrow-white;
     background-image: url(/assets/images/icons/icon-arrow-blue.png);
 }
+
+.icon-arrow-right {
+    @extend .icon-arrow-white;
+    background-image: url(/assets/images/icons/icon-arrow-right.png);
+    height: 20px;
+}

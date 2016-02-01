@@ -6,14 +6,16 @@ define([
     'modules/checkout/personalDetails',
     'modules/checkout/paymentDetails',
     'modules/checkout/editFieldsets',
-    'modules/checkout/reviewDetails'
+    'modules/checkout/reviewDetails',
+    'modules/checkout/promoCode'
 ], function (
     optionMirror,
     formElements,
     personalDetails,
     paymentDetails,
     editFieldsets,
-    reviewDetails
+    reviewDetails,
+    promoCode
 ) {
     'use strict';
     function init() {
@@ -23,6 +25,7 @@ define([
             paymentDetails.init();
             editFieldsets.init();
             reviewDetails.init();
+            promoCode.init();
         }
 
         require('js!stripe').then(function() {

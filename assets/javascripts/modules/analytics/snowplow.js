@@ -40,8 +40,12 @@ define(['lodash/object/merge','modules/analytics/analyticsEnabled'], function (m
         };
 
         if (productData) {
-            data.productBillingFrequency = productData.frequency.toString();
-            data.productBillingAmount = productData.amount;
+            if (productData.frequency) {
+                data.productBillingFrequency = productData.frequency.toString();
+            }
+            if (productData.amount) {
+                data.productBillingAmount = productData.amount;
+            }
             data.productType = productData.type;
         }
 

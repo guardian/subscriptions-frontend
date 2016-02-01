@@ -1,0 +1,31 @@
+/* ==========================================================================
+   Checkout / Promo Codes
+   ========================================================================== */
+.checkout-promo-code {
+    margin-bottom: ($gs-baseline);
+
+    .form-field {
+        margin-bottom: 0;
+    }
+    .col-2 {
+        margin-bottom: ($gs-baseline);
+        overflow: hidden;
+
+        .input-text {
+            float: left;
+            width: 9em;
+        }
+        a.button {
+            float: left;
+            margin-left: 0.5em;
+            min-width: 9em;
+            width: 9em;
+        }
+    }
+    .form-field__error-message {
+        clear: both;
+    }
+    .promo-code-applied {
+        margin-bottom: ($gs-baseline);
+    }
+}

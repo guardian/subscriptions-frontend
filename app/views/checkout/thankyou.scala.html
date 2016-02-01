@@ -1,12 +1,13 @@
+@import com.gu.memsub.BillingPeriod
+@import com.gu.memsub.promo.Promotion
+@import com.gu.subscriptions.DigipackPlan
 @import views.support.BillingPeriod._
 @import views.support.Pricing._
-
-@import com.gu.memsub.BillingPeriod
-@import com.gu.subscriptions.DigipackPlan
 @(subscriptionName: String,
     guestAccountForm: Option[Form[model.GuestAccountData]] = None,
     touchpointBackendResolution: services.TouchpointBackend.Resolution,
-    plan: DigipackPlan[BillingPeriod]
+    plan: DigipackPlan[BillingPeriod],
+    promotion: Option[Promotion] = None
 )(implicit request: RequestHeader)
 
 @import configuration.Config.Identity.webAppProfileUrl
@@ -39,7 +40,7 @@
                 </p>
                 <p>Here are the details of your order, if any of these are incorrect please get in touch with us straight away via email at <a href="mailto:@Details.digitalPackEmail">@Details.digitalPackEmail</a> or on <strong>@Details.digitalPackPhone</strong>. Lines are open BST Monday&ndash;Friday 8.00am&ndash;5.30pm. Saturday &amp; Sunday 8.30am&ndash;12.30pm.</p>
             </div>
-            @fragments.checkout.reviewPanel(subscriptionName, plan)
+            @fragments.checkout.reviewPanel(subscriptionName, plan, promotion)
         </div>
     </section>
 

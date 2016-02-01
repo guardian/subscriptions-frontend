@@ -1,6 +1,7 @@
 package services
 
 import com.gu.identity.play.AuthenticatedIdUser
+import com.gu.memsub.promo.PromoCode
 import com.gu.memsub.services.PromoService
 import com.gu.memsub.services.api.CatalogService
 import com.gu.salesforce.ContactId
@@ -14,7 +15,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 object CheckoutService {
-  case class CheckoutResult(salesforceMember: ContactId, userIdData: UserIdData, subscribeResult: SubscribeResult)
+  case class CheckoutResult(salesforceMember: ContactId, userIdData: UserIdData, subscribeResult: SubscribeResult, validPromoCode: Option[PromoCode])
 }
 
 class CheckoutService(identityService: IdentityService,
@@ -80,7 +81,7 @@ class CheckoutService(identityService: IdentityService,
     } yield {
       updateAuthenticatedUserDetails()
       sendETDataExtensionRow(result)
-      CheckoutResult(memberId, userData, result)
+      CheckoutResult(memberId, userData, result, validPromoCode)
     }
   }
 }

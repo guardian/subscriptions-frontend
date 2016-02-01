@@ -44,6 +44,7 @@
 }
 .basket-preview__product {
     display: inline-block;
+    padding-top: $gs-baseline / 2;
 }
 .basket-preview__product__title {
     font-weight: guss-font-weight(bold);

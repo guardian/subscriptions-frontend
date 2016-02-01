@@ -1,4 +1,5 @@
 define([
+    '$',
     'modules/forms/toggleError',
     'modules/checkout/formElements',
     'modules/checkout/validatePersonal',
@@ -6,6 +7,7 @@ define([
     'modules/checkout/fieldSwitcher',
     'modules/checkout/tracking'
 ], function (
+    $,
     toggleError,
     formEls,
     validatePersonal,
@@ -18,6 +20,18 @@ define([
     var FIELDSET_COMPLETE = 'is-complete';
     var FIELDSET_COLLAPSED = 'is-collapsed';
 
+
+    function requiredPersonalFields() {
+        var result = [];
+        $('.form-field', '#yourDetails').deepEach(function (el) {
+            var input = $('input[required], select[required]', el);
+            if (input.length) {
+                result.push({input: input, container: $(el)});
+            }
+        });
+        return result;
+    }
+
     function requiredFieldVaues(fields) {
         return fields.map(function(field) {
             return field.input.val();
@@ -25,7 +39,7 @@ define([
     }
 
     function displayErrors(validity) {
-        formEls.requiredPersonalFields().forEach(function(field) {
+        requiredPersonalFields().forEach(function(field) {
             var isEmpty = !field.input.val();
             toggleError(field.container, isEmpty);
         });
@@ -79,11 +93,10 @@ define([
         if ($actionEl.length) {
             actionEl.addEventListener('click', function(e) {
                 e.preventDefault();
-                var requiredFields = formEls.requiredPersonalFields();
                 handleValidation({
                     emailAddress: formEls.$EMAIL.val(),
                     emailAddressConfirmed: formEls.$CONFIRM_EMAIL.val(),
-                    requiredFieldValues: requiredFieldVaues(requiredFields)
+                    requiredFieldValues: requiredFieldVaues(requiredPersonalFields())
                 });
             });
         }
