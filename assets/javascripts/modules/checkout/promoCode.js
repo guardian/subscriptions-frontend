@@ -39,7 +39,7 @@ define([
 
     function validate() {
         var promoCode  = $inputBox.val().trim();
-        if (promoCode == '') {
+        if (promoCode === '') {
             return;
         }
 
@@ -80,7 +80,7 @@ define([
             if ($countrySelectBox.length && $promoCodeButton.length) {
                 bean.on($countrySelectBox[0], 'change', validate);
                 bean.on($promoCodeButton[0], 'click', validate);
-                if ($inputBox.val() != '') {
+                if ($inputBox.val() !== '') {
                     validate();
                 }
             }
