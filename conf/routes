@@ -55,3 +55,6 @@ GET         /patterns                        controllers.PatternLibrary.patterns
 GET         /assets/*file                    controllers.CachedAssets.at(path="/public", file)
 
 GET         /test-users                      controllers.Testing.testUser
+
+# Promotions
+GET         /p/:promoCodeStr                 controllers.Promotions.promotionPage(promoCodeStr: String)
