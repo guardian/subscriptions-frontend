@@ -8,6 +8,7 @@ import com.gu.stripe.StripeService
 import com.gu.zuora
 import com.gu.zuora.{rest, soap}
 import configuration.Config
+import configuration.Config._
 import monitoring.TouchpointBackendMetrics
 import play.api.Play.current
 import play.api.libs.concurrent.Akka
@@ -33,7 +34,7 @@ object TouchpointBackend {
     val membershipRatePlanIds = Config.membershipRatePlanIds(config.environmentName)
     val catalogService = CatalogService(restClient, membershipRatePlanIds, digipackRatePlanIds, config.environmentName)
     val zuoraService = new zuora.ZuoraService(soapClient, restClient, digipackRatePlanIds)
-    val promoService = new PromoService(digipackConfig)
+    val promoService = new PromoService(Seq(demoPromo("UAT")))
     val _stripeService = new StripeService(config.stripe, new TouchpointBackendMetrics with StatusMetrics {
       val backendEnv = config.stripe.envName
       val service = "Stripe"

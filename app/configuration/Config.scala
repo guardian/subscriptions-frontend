@@ -7,6 +7,7 @@ import com.gu.cas.PrefixedTokens
 import com.gu.config.{DigitalPackRatePlanIds, MembershipRatePlanIds, ProductFamilyRatePlanIds}
 import com.gu.googleauth.GoogleAuthConfig
 import com.gu.identity.cookie.{PreProductionKeys, ProductionKeys}
+import com.gu.memsub.promo.{AppliesTo, Free25JohnLewisVoucher, PromoCode, Promotion}
 import com.gu.memsub.{Digipack, Membership}
 import com.gu.monitoring.StatusMetrics
 import com.gu.salesforce.SalesforceConfig
@@ -100,6 +101,23 @@ object Config {
 
   def membershipRatePlanIds(env: String) =
     MembershipRatePlanIds.fromConfig(ProductFamilyRatePlanIds.config(Some(config))(env, Membership))
+
+  def demoPromo(env: String) = {
+    val prpIds = digipackRatePlanIds(env)
+    Promotion(
+      landingPageTemplate = Free25JohnLewisVoucher,
+      codes = Set(PromoCode("DGB88"), PromoCode("DGA88")),
+      appliesTo = AppliesTo.ukOnly(Set(
+        prpIds.digitalPackMonthly,
+        prpIds.digitalPackQuaterly,
+        prpIds.digitalPackYearly
+      )),
+      thumbnailUrl = "http://lorempixel.com/400/200/abstract",
+      description = "You'll get a complimentary John Lewis digital gift card worth £25",
+      redemptionInstructions = "We'll send redemption instructions to your registered email address",
+      DateTime.now().plusYears(1)
+    )
+  }
 
   object CAS {
     lazy val casConf = config.getConfig("cas")

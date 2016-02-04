@@ -10,6 +10,7 @@ import com.gu.stripe.Stripe
 import com.gu.zuora.soap
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config.Identity.webAppProfileUrl
+import configuration.Config._
 import forms.{FinishAccountForm, SubscriptionsForm}
 import model.{DirectDebitData, SubscriptionData, SubscriptionRequestData}
 import play.api.data.Form
@@ -98,7 +99,7 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
     checkoutResult.map { result =>
 
       val productData = Seq(
-        SessionKeys.SubsName -> result.subscribeResult.name,
+        SessionKeys.SubsName -> result.subscribeResult.subscriptionName,
         SessionKeys.RatePlanId -> formData.productRatePlanId.get
       )
 
@@ -171,9 +172,10 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
   def validatePromoCode(promoCode: PromoCode, prpId: ProductRatePlanId, country: Country) = NoCacheAction { implicit request =>
 
     val tpBackend = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies).backend
+    val fallabackPromoCode = demoPromo("UAT").codes.last.get
 
     tpBackend.promoService.findPromotion(promoCode)
-      .fold(NotFound(Json.obj("errorMessage" -> "Unknown or expired promo code"))){ promo =>
+      .fold(NotFound(Json.obj("errorMessage" -> s"We can't find that code, why not try: $fallabackPromoCode \uD83D\uDE09?"))){ promo =>
         val result = promo.validateFor(prpId, country)
         val body = Json.obj(
           "promotion" -> Json.toJson(promo),
