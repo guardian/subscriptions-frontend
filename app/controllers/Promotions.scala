@@ -21,7 +21,7 @@ object Promotions extends Controller {
 
     (for {
       promotion <- TouchpointBackend.Normal.promoService.findPromotion(promoCode)
-      html <- findTemplateForPromotion(promoCode, promotion)
+      html <- if (promotion.expires.isBeforeNow) None else findTemplateForPromotion(promoCode, promotion)
     } yield Ok(html)).getOrElse(NotFound(views.html.error404()))
 
   }

@@ -114,7 +114,9 @@ object Config {
       )),
       thumbnailUrl = "http://lorempixel.com/400/200/abstract",
       description = "You'll get a complimentary John Lewis digital gift card worth £25",
-      redemptionInstructions = "We'll send redemption instructions to your registered email address")
+      redemptionInstructions = "We'll send redemption instructions to your registered email address",
+      DateTime.now().plusYears(1)
+    )
   }
 
   object CAS {
