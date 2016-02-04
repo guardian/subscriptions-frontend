@@ -1,6 +1,6 @@
 package controllers
 
-import actions.CommonActions.CachedAction
+import actions.CommonActions._
 import com.gu.memsub.promo.{Free25JohnLewisVoucher, PromoCode, Promotion}
 import model.DigitalEdition
 import play.api.mvc._
@@ -16,7 +16,7 @@ object Promotions extends Controller {
       case _ => None
     }
 
-  def promotionPage(promoCodeStr: String) = CachedAction {
+  def promotionPage(promoCodeStr: String) = GoogleAuthenticatedStaffAction { implicit request =>
     val promoCode = PromoCode(promoCodeStr)
 
     (for {
