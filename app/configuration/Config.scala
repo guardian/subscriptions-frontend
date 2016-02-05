@@ -94,8 +94,6 @@ object Config {
     val welcomeTriggeredSendKey = config.getString("exact-target.triggered-send-keys.welcome")
   }
 
-  val sessionCamCookieName = "sessioncam-on"
-
   def digipackRatePlanIds(env: String): DigitalPackRatePlanIds =
     DigitalPackRatePlanIds.fromConfig(ProductFamilyRatePlanIds.config(Some(config))(env, Digipack))
 

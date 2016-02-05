@@ -44,8 +44,6 @@ GET         /staff/catalog                   controllers.Management.catalog
 GET         /staff/cas                       controllers.CAS.index
 POST        /staff/cas/subscription          controllers.CAS.searchSubscription
 POST        /staff/cas/token                 controllers.CAS.generateToken
-GET         /sessioncam/on                   controllers.SessionCam.dropSessionCamCookie
-GET         /sessioncam/off                  controllers.SessionCam.removeSessionCamCookie
 GET         /oauth2callback                  controllers.OAuth.oauth2Callback
 
 # Pattern Library
