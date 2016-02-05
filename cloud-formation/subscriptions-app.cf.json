@@ -100,7 +100,7 @@
 
                         "mkdir /etc/gu",
 
-                        {"Fn::Join":["", ["aws --region --debug ", { "Ref": "AWS::Region" }, " s3 cp s3://subscriptions-private/", { "Ref" : "Stage" }, "/subscriptions-frontend.conf /etc/gu"]]},
+                        {"Fn::Join":["", ["aws --debug --region ", { "Ref": "AWS::Region" }, " s3 cp s3://subscriptions-private/", { "Ref" : "Stage" }, "/subscriptions-frontend.conf /etc/gu"]]},
                         "chown subscriptions /etc/gu/subscriptions-frontend.conf",
                         "chmod 0600 /etc/gu/subscriptions-frontend.conf",
 
