@@ -125,6 +125,16 @@
     }
 }
 
+.block--digital-tablet-previews {
+    @include mq(tablet) {
+        background-image: url(/assets/images/backgrounds/bg-digital-tablet-previews.png);
+        background-position: bottom right;
+        background-repeat: no-repeat;
+        background-size: contain;
+        min-height: 315px;
+    }
+}
+
 .block--weekly {
     @include mq(tablet) {
         background-image: url(/assets/images/backgrounds/bg-guardian-weekly.png);
@@ -193,7 +203,6 @@
         }
     }
 }
-
 .no-bullets {
     list-style-type: none;
 }

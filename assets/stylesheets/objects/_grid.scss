@@ -23,12 +23,27 @@ $gutter-width-fluid: 2%;
     margin: 0;
     padding: 0;
 }
+
+.grid--flex {
+    display: flex;
+    flex-wrap: wrap;
+}
+
 .grid__item {
     border-color: transparent;
     margin-bottom: ($gs-gutter / 2);
 
     @include mq(mobileLandscape) {
         margin-bottom: ($gs-baseline);
+    }
+}
+
+.grid__item--flex-2-columns {
+    border: 0 !important;
+    flex: 1;
+
+    @include mq(tablet) {
+        flex: 2;
     }
 }
 
@@ -74,6 +89,19 @@ $gutter-width-fluid: 2%;
     }
     .grid__item {
         @include mq(desktop) {
+            @include gridLayout(50%);
+            &:nth-of-type(2n+1) { clear: left; border-left: none; }
+        }
+    }
+}
+
+.grid--2up-step {
+    @include mq(tablet) {
+        width: 100% + $gutter-width-fluid;
+        margin-left: -$gutter-width-fluid;
+    }
+    .grid__item {
+        @include mq(tablet) {
             @include gridLayout(50%);
             &:nth-of-type(2n+1) { clear: left; border-left: none; }
         }

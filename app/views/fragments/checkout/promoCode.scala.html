@@ -11,7 +11,7 @@
       ProductRatePlanId("_"),
       Country.UK).path.replaceFirst("\\?.*", "")) { lookupUrl =>
 
-    @if(touchpointBackendResolution.validTestUserCredentialOpt.isDefined) {
+    @if(touchpointBackendResolution.validTestUserCredentialOpt.isDefined || form.data.get("promoCode").isDefined) {
         <div class="checkout-promo-code js-promo-code">
             <label class="label" for="promo-code">Promo code</label>
             <div class="form-field field-group__item">

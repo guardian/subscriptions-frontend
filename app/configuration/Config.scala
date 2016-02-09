@@ -7,7 +7,7 @@ import com.gu.cas.PrefixedTokens
 import com.gu.config.{DigitalPackRatePlanIds, MembershipRatePlanIds, ProductFamilyRatePlanIds}
 import com.gu.googleauth.GoogleAuthConfig
 import com.gu.identity.cookie.{PreProductionKeys, ProductionKeys}
-import com.gu.memsub.promo.{AppliesTo, Free25JohnLewisVoucher, PromoCode, Promotion}
+import com.gu.memsub.promo._
 import com.gu.memsub.{Digipack, Membership}
 import com.gu.monitoring.StatusMetrics
 import com.gu.salesforce.SalesforceConfig
@@ -103,17 +103,21 @@ object Config {
   def demoPromo(env: String) = {
     val prpIds = digipackRatePlanIds(env)
     Promotion(
-      landingPageTemplate = Free25JohnLewisVoucher,
-      codes = Set(PromoCode("DGB88"), PromoCode("DGA88")),
       appliesTo = AppliesTo.ukOnly(Set(
         prpIds.digitalPackMonthly,
         prpIds.digitalPackQuaterly,
         prpIds.digitalPackYearly
       )),
-      thumbnailUrl = "http://lorempixel.com/400/200/abstract",
-      description = "You'll get a complimentary John Lewis digital gift card worth £25",
+      campaignName = "DigiPack - Free £30 digital gift card",
+      codes = PromoCodeSet(PromoCode("DGA88"), PromoCode("DGB88")),
+      description = "Get £30 to spend with a top retailer of your choice when you subscribe. Use your digital gift card at John Lewis, Amazon, M&S and more. Treat yourself or a friend.",
+      expires = DateTime.now().plusMonths(3),
+      imageUrl = "http://lorempixel.com/460/165/abstract",
+      promotionType = Incentive,
       redemptionInstructions = "We'll send redemption instructions to your registered email address",
-      DateTime.now().plusYears(1)
+      roundelHtml = "Free <span class='roundel__strong'>£30</span> digital gift card",
+      thumbnailUrl = "http://lorempixel.com/46/16/abstract",
+      title = "Free £30 digital gift card when you subscribe"
     )
   }
 

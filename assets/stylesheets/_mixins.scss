@@ -59,3 +59,7 @@
     margin: 0 auto;
     display: block;
 }
+
+@mixin circular {
+    border-radius: 1000px; // Android 2.3 cannot deal with '50%'
+}

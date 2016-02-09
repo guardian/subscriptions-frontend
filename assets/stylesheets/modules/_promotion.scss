@@ -1,0 +1,97 @@
+.promotion__landing-page {
+    section:nth-child(even) {
+        background-color: rgb(231, 231, 231);
+
+        .page-slice {
+            background-color: rgb(241, 241, 241);
+        }
+    }
+    .page-slice {
+        padding-bottom: 0.75rem;
+
+        .page-slice__header {
+            font-weight: bold;
+            white-space: nowrap;
+        }
+    }
+}
+
+.promotion__landing-page__section-head {
+    margin-bottom: $gs-baseline * 2;
+}
+
+.promotion__digipack {
+    float: right;
+    width: auto;
+}
+
+.promotion__digipack-shots {
+    background: url(/assets/images/backgrounds/bg-promo-digital-pack.png) no-repeat center;
+    background-size: contain;
+    min-height: 154px;
+    min-width: 280px;
+
+    @include mq(mobileLandscape) {
+        min-height: 228px;
+        min-width: 440px;
+    }
+    @include mq(phablet) {
+        min-height: 312px;
+        min-width: 595px;
+    }
+    @include mq(tablet) {
+        min-height: 382px;
+        min-width: 700px;
+    }
+    @include mq(desktop) {
+        background-position: top right;
+        margin-right: 15px;
+        min-height: 312px;
+        min-width: 595px;
+    }
+    @include mq(leftCol) {
+        background-position: top right;
+        margin-right: 30px;
+        min-height: 382px;
+        min-width: 700px;
+    }
+}
+
+.promotion__digipack-benefits {
+    width: 100% !important;
+
+    @include mq(desktop) {
+        width: 300px !important;
+    }
+}
+
+.promotion__digipack-benefit {
+    border-color: $c-neutral5;
+    border-style: solid;
+    border-width: 1px 0 0 0;
+    font-size: larger;
+    margin: 0;
+    padding: ($gs-baseline * 1.33) 0;
+}
+
+.promotion__image {
+    background-position: left top;
+    background-repeat: no-repeat;
+    background-size: contain;
+    min-height: 165px;
+}
+
+.promotion__description {
+    font-size: larger;
+}
+
+.promotion__cta__image {
+    background: url(/assets/images/backgrounds/bg-promo-digital-pack.png) no-repeat left;
+    background-size: contain;
+    min-height: 145px;
+
+    @include mq(tablet) {
+        background-position: center;
+    }
+}
+

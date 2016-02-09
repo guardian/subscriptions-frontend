@@ -55,4 +55,4 @@ GET         /assets/*file                    controllers.CachedAssets.at(path="/
 GET         /test-users                      controllers.Testing.testUser
 
 # Promotions
-GET         /p/:promoCodeStr                 controllers.Promotions.promotionPage(promoCodeStr: String)
+GET         /p/:promoCodeStr                 controllers.PromoLandingPage.render(promoCodeStr: String)

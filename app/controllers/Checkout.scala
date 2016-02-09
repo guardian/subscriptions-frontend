@@ -172,10 +172,10 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
   def validatePromoCode(promoCode: PromoCode, prpId: ProductRatePlanId, country: Country) = NoCacheAction { implicit request =>
 
     val tpBackend = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies).backend
-    val fallabackPromoCode = demoPromo("UAT").codes.last.get
+    val fallabackPromoCode = demoPromo(tpBackend.environmentName).codes.webCode
 
     tpBackend.promoService.findPromotion(promoCode)
-      .fold(NotFound(Json.obj("errorMessage" -> s"We can't find that code, why not try: $fallabackPromoCode \uD83D\uDE09?"))){ promo =>
+      .fold(NotFound(Json.obj("errorMessage" -> s"We can't find that code, why not try: ${fallabackPromoCode.get} \uD83D\uDE09?"))){ promo =>
         val result = promo.validateFor(prpId, country)
         val body = Json.obj(
           "promotion" -> Json.toJson(promo),
