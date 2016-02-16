@@ -26,21 +26,21 @@
                 </div>
             </div>
         </section>
-        <section>
+        <section class="section--grey">
             <div class="page-container gs-container gs-container--slim page-slice">
-                <div class="promotion__digipack">
-                <div class="grid grid--3up grid--flex">
-                    <div class="grid__item grid__item--flex-2-columns">
-                        <div class="promotion__digipack-shots">
-                            @fragments.common.roundel(promotion.roundelHtml, Seq("roundel--raised"))
+                <div class="digipack">
+                    <div class="grid grid--3up grid--flex">
+                        <div class="grid__item grid__item--flex-2-columns">
+                            <div class="digipack__shots">
+                                @fragments.common.roundel(promotion.roundelHtml, Seq("roundel--raised"))
+                            </div>
+                        </div>
+                        <div class="grid__item digipack__benefits">
+                            <p class="digipack__benefit">Experience your newspaper in full, on your tablet with the Guardian & Observer daily edition</p>
+                            <p class="digipack__benefit">Enjoy an advert-free experience on The Guardian's app with access to our daily crosswords and exclusive content</p>
+                            @subscribeNow(edition, catalog.digipackMonthly.priceGBP, promoCode)
                         </div>
                     </div>
-                    <div class="grid__item promotion__digipack-benefits">
-                        <p class="promotion__digipack-benefit">Experience your newspaper in full, on your tablet with the Guardian & Observer daily edition</p>
-                        <p class="promotion__digipack-benefit">Enjoy an advert-free experience on The Guardian's app with access to our daily crosswords and exclusive content</p>
-                        @subscribeNow(edition, catalog.digipackMonthly.priceGBP, promoCode)
-                    </div>
-                </div>
                 </div>
             </div>
         </section>
@@ -77,7 +77,7 @@
                 </div>
             </div>
         </section>
-        <section>
+        <section class="section--blue">
             <div class="page-container gs-container gs-container--slim page-slice page-slice">
                 <div class="page-slice__content">
                     <h2 class="promotion__landing-page__section-head">@promotion.title</h2>
@@ -117,7 +117,7 @@
                 </div>
             </div>
         </section>
-        <section>
+        <section class="section--grey">
             <div class="page-container gs-container gs-container--slim page-slice page-slice">
                 <div class="page-slice__content">
                     <div class="promotion__cta">
