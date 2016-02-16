@@ -17,33 +17,32 @@
 
 .roundel__container {
     @include circular();
+    align-content: center;
+    background: rgb(150,215,42);
+    display: flex;
+    flex-direction: column;
+    height: 110px;
+    justify-content: center;
+    margin: 10px;
     position: absolute;
-    z-index: 2;
     right: 0;
     text-align: center;
-    background: rgb(150,215,42);
+    padding: 10px;
     width: 110px;
-    height: 110px;
-    padding: 10px 10px;
-    margin: 10px 10px;
+    z-index: 2;
 
     @include mq(desktop) {
-        width: 140px;
         height: 140px;
-        padding: 20px 20px;
-        margin: 20px 20px;
+        margin: 20px;
+        padding: 20px;
+        width: 140px;
     }
-
-    align-content: center;
-    display: flex;
-    justify-content: center;
-    flex-direction: column;
 }
 
 .roundel__title {
     @include fs-headline(1);
     font-weight: guss-font-weight(ultrablack);
-    line-height: 1.3rem;
+    line-height: 24px;
 
     @include mq(desktop) {
         @include fs-headline(3);
@@ -62,7 +61,7 @@
 
 .roundel__strong {
     display: block;
-    font-size: 2rem;
+    font-size: 32px;
     font-weight: bold;
-    line-height: 1.8rem;
+    line-height: 28px;
 }

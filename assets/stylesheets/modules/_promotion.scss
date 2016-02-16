@@ -1,4 +1,4 @@
-.promotion__landing-page {
+.promo-landing-page {
     .grey {
         background-color: rgb(231, 231, 231);
 
@@ -17,6 +17,10 @@
     }
 }
 
+.promo-landing-page__section-head {
+    margin-bottom: $gs-baseline * 2;
+}
+
 .section--blue {
     background-color: rgb(146, 202, 224);
 
@@ -31,10 +35,6 @@
     .page-slice {
         background-color: rgb(241, 241, 241);
     }
-}
-
-.promotion__landing-page__section-head {
-    margin-bottom: $gs-baseline * 2;
 }
 
 .digipack {
@@ -91,18 +91,18 @@
     padding: ($gs-baseline * 1.33) 0;
 }
 
-.promotion__image {
+.promotion-image {
     background-position: left top;
     background-repeat: no-repeat;
     background-size: contain;
     min-height: 165px;
 }
 
-.promotion__description {
+.promotion-description {
     font-size: larger;
 }
 
-.promotion__cta__image {
+.promotion-cta__image {
     background: url(/assets/images/backgrounds/bg-promo-digital-pack.jpg) no-repeat left;
     background-size: contain;
     min-height: 145px;

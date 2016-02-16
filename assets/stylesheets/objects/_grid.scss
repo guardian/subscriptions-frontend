@@ -39,7 +39,6 @@ $gutter-width-fluid: 2%;
 }
 
 .grid__item--flex-2-columns {
-    border: 0 !important;
     flex: 1;
 
     @include mq(tablet) {
@@ -95,6 +94,9 @@ $gutter-width-fluid: 2%;
     }
 }
 
+/**
+ * Similar to grid--2up-stacked, but make columns at tablet rather than desktop, just like 3up-step does.
+ */
 .grid--2up-step {
     @include mq(tablet) {
         width: 100% + $gutter-width-fluid;

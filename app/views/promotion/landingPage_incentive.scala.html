@@ -18,7 +18,7 @@
     title = "The Digital Pack offer | Subscriptions | The Guardian",
     bodyClasses = Seq("is-wide")
 ) {
-    <main class="promotion__landing-page">
+    <main class="promo-landing-page">
         <section class="page-container gs-container gs-container--slim">
             <div class="page-slice">
                 <div class="page-slice__content">
@@ -47,7 +47,7 @@
         <section class="page-container gs-container gs-container--slim">
             <div class="page-slice">
                 <div class="page-slice__content">
-                    <h2 class="promotion__landing-page__section-head">Discover the Guardian Daily Edition</h2>
+                    <h2 class="promo-landing-page__section-head">Discover the Guardian Daily Edition</h2>
                     <ul class="grid grid--3up grid--bordered grid--flex">
                         <li class="grid__item">
                             @fragments.common.inlineIcon("paper_tablet", Seq("icon--promo"))
@@ -70,7 +70,7 @@
                             <p>The Guide; Cook; Observer Tech; and food Monthly plus our daily crossword tailored for your tablet.</p>
                             @subscribeNow(edition, catalog.digipackMonthly.priceGBP, promoCode)
                         </li>
-                        <li class="grid__item grid__item--flex-2-columns">
+                        <li class="grid__item grid__item--flex-2-columns u-no-border">
                             <div class="block--digital-tablet-previews"></div>
                         </li>
                     </ul>
@@ -80,13 +80,13 @@
         <section class="section--blue">
             <div class="page-container gs-container gs-container--slim page-slice page-slice">
                 <div class="page-slice__content">
-                    <h2 class="promotion__landing-page__section-head">@promotion.title</h2>
+                    <h2 class="promo-landing-page__section-head">@promotion.title</h2>
                     <div class="grid grid--2up-step">
                         <div class="grid__item">
-                            <div class="promotion__image" style="background-image: url(@promotion.imageUrl)"></div>
+                            <div class="promotion-image" style="background-image: url(@promotion.imageUrl)"></div>
                         </div>
                         <div class="grid__item">
-                            <p class="promotion__description">@promotion.description</p>
+                            <p class="promotion-description">@promotion.description</p>
                             <!-- But hurry, offer expires @promotion.expires\.-->
                         </div>
                     </div>
@@ -96,7 +96,7 @@
         <section class="page-container gs-container gs-container--slim">
             <div class="page-slice">
                 <div class="page-slice__content">
-                    <h2 class="promotion__landing-page__section-head">Exclusive benefits for Digital Pack subscribers</h2>
+                    <h2 class="promo-landing-page__section-head">Exclusive benefits for Digital Pack subscribers</h2>
                     <ul class="grid grid--3up grid--bordered grid--flex">
                         <li class="grid__item">
                             @fragments.common.inlineIcon("gifts", Seq("icon--promo"))
@@ -120,14 +120,14 @@
         <section class="section--grey">
             <div class="page-container gs-container gs-container--slim page-slice page-slice">
                 <div class="page-slice__content">
-                    <div class="promotion__cta">
+                    <div class="promotion-cta">
                         <div class="grid grid--3up-step">
                             <div class="grid__item">
-                                <div class="promotion__cta--subscribe">
+                                <div class="promotion-cta--subscribe">
                                     <h2>Subscribe&nbsp;to&nbsp;the Digital&nbsp;Pack</h2>
                                 </div>
                             </div>
-                            <div class="grid__item promotion__cta__image"></div>
+                            <div class="grid__item promotion-cta__image"></div>
                             <div class="grid__item">
                                 <div class="pricing-cta__pricing">
                                     <h4 class="pricing-cta__pricing__title">Free for 14 days</h4>
