@@ -1,0 +1,6 @@
+@(title: String, classes: Seq[String] = Seq.empty)
+<div class="roundel l-constrained @classes.mkString(" ")">
+    <div class="roundel__container">
+        <span class="roundel__title">@Html(title)</span>
+    </div>
+</div>

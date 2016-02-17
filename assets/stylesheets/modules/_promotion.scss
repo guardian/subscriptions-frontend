@@ -1,0 +1,114 @@
+.promo-landing-page {
+    .grey {
+        background-color: rgb(231, 231, 231);
+
+        .page-slice {
+            background-color: rgb(241, 241, 241);
+        }
+    }
+
+    .page-slice {
+        padding-bottom: 0.75rem;
+
+        .page-slice__header {
+            font-weight: bold;
+            white-space: nowrap;
+        }
+    }
+}
+
+.promo-landing-page__section-head {
+    margin-bottom: $gs-baseline * 2;
+}
+
+.section--blue {
+    background-color: rgb(146, 202, 224);
+
+    .page-slice {
+        background-color: rgb(172, 216, 239);
+    }
+}
+
+.section--grey {
+    background-color: rgb(231, 231, 231);
+
+    .page-slice {
+        background-color: rgb(241, 241, 241);
+    }
+}
+
+.digipack {
+    float: right;
+    width: auto;
+}
+
+.digipack__shots {
+    background: url(/assets/images/backgrounds/bg-promo-digital-pack.jpg) no-repeat center;
+    background-size: contain;
+    min-height: 135px;
+    min-width: 280px;
+
+    @include mq(mobileLandscape) {
+        min-height: 211px;
+        min-width: 440px;
+    }
+    @include mq(phablet) {
+        min-height: 286px;
+        min-width: 595px;
+    }
+    @include mq(tablet) {
+        min-height: 336px;
+        min-width: 700px;
+    }
+    @include mq(desktop) {
+        background-position: top right;
+        margin-right: 15px;
+        min-height: 286px;
+        min-width: 595px;
+    }
+    @include mq(leftCol) {
+        background-position: top right;
+        margin-right: 30px;
+        min-height: 336px;
+        min-width: 700px;
+    }
+}
+
+.digipack__benefits {
+    width: 100% !important;
+
+    @include mq(desktop) {
+        width: 300px !important;
+    }
+}
+
+.digipack__benefit {
+    border-color: $c-neutral5;
+    border-style: solid;
+    border-width: 1px 0 0 0;
+    font-size: larger;
+    margin: 0;
+    padding: ($gs-baseline * 1.33) 0;
+}
+
+.promotion-image {
+    background-position: left top;
+    background-repeat: no-repeat;
+    background-size: contain;
+    min-height: 165px;
+}
+
+.promotion-description {
+    font-size: larger;
+}
+
+.promotion-cta__image {
+    background: url(/assets/images/backgrounds/bg-promo-digital-pack.jpg) no-repeat left;
+    background-size: contain;
+    min-height: 145px;
+
+    @include mq(tablet) {
+        background-position: center;
+    }
+}
+
