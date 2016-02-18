@@ -30,7 +30,7 @@ lazy val root = (project in file(".")).enablePlugins(
       "com.gu.memsub.Subscription.ProductRatePlanId"
   ))
 
-scalaVersion := "2.11.7"
+scalaVersion := "2.11.6"
 scalacOptions ++= Seq("-feature")
 
 val scalatestVersion = "2.2.4"
@@ -43,14 +43,14 @@ libraryDependencies ++= Seq(
     "com.gu" %% "membership-common" % "0.159",
     "com.gu" %% "memsub-common-play-auth" % "0.2",
     "com.gu" %% "content-authorisation-common" % "0.1",
-    "com.github.nscala-time" %% "nscala-time" % "2.10.0",
+    "com.github.nscala-time" %% "nscala-time" % "2.0.0",
     "net.kencochrane.raven" % "raven-logback" % "6.0.0",
     "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0",
     "org.scalatest" %% "scalatest" % scalatestVersion % "test",
     "org.scalactic" %% "scalactic" % scalatestVersion % "test",
     "org.seleniumhq.selenium" % "selenium-java" % "2.48.2" % "test",
-    "com.gocardless" % "gocardless-pro" % "1.16.0",
-    "com.squareup.okhttp" % "okhttp" % "2.7.4",
+    "com.gocardless" % "gocardless-pro" % "1.8.0",
+    "com.squareup.okhttp" % "okhttp" % "2.4.0",
     "com.snowplowanalytics" % "snowplow-java-tracker" % "0.5.2-SNAPSHOT",
     "com.github.t3hnar" %% "scala-bcrypt" % "2.4",
     "org.apache.commons" % "commons-io" % "1.3.2",
