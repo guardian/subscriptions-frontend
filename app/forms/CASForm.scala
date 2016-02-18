@@ -31,7 +31,7 @@ object CASForm {
 
   val emergencyToken: Form[TokenPayload] = Form(
     "cas" -> mapping(
-      "period" -> number(min = 1, max = 13).transform[Weeks](Weeks.weeks, _.getWeeks),
+      "period" -> number(min = 1, max = 52).transform[Weeks](Weeks.weeks, _.getWeeks),
       "subscriptionCode" -> of[SubscriptionCode]
     )(TokenPayload.apply)(t => Some(t.period, t.subscriptionCode))
   )
