@@ -1,8 +1,11 @@
 package actions
 
+import actions.OAuthActions._
+import com.gu.googleauth
 import com.typesafe.scalalogging.LazyLogging
 import configuration.QA.passthroughCookie
 import controllers.{Cached, NoCache}
+import play.api.mvc.Security.AuthenticatedRequest
 import play.api.mvc._
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -12,7 +15,18 @@ object CommonActions {
 
   val NoCacheAction = resultModifier(noCache)
 
-  val GoogleAuthenticatedStaffAction = NoCacheAction andThen OAuthActions.AuthAction
+  type GoogleAuthRequest[A] = AuthenticatedRequest[A, googleauth.UserIdentity]
+
+  val GoogleAuthAction: ActionBuilder[GoogleAuthRequest] = AuthAction
+
+  val GoogleAuthenticatedStaffAction = NoCacheAction andThen GoogleAuthAction
+
+  val StaffAuthorisedForCASAction = GoogleAuthenticatedStaffAction andThen OAuthActions.requireGroup[GoogleAuthRequest](Set(
+    "customer.experience@guardian.co.uk",
+    "directteam@guardian.co.uk",
+    "userhelp@guardian.co.uk",
+    "subscriptions.dev@guardian.co.uk"
+  ))
 
   val CachedAction = resultModifier(Cached(_))
 
