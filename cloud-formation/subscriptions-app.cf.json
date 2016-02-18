@@ -88,19 +88,17 @@
 
                         "CONF_DIR=/subscriptions/subscriptions-frontend-1.0-SNAPSHOT/conf",
 
-                        {"Fn::Join":["", ["wget -N --directory-prefix=/home/ubuntu/.ssh https://s3-eu-west-1.amazonaws.com/subscriptions-dist/", { "Ref" : "Stack" }, "/authorized_keys &"]]},
-                        "apt-get -y update",
-                        {"Fn::Join":["", ["echo https://s3-eu-west-1.amazonaws.com/subscriptions-dist/", { "Ref" : "Stack" }, "/", { "Ref" : "Stage" }, "/frontend/app.zip > /etc/gu-artifact-url" ]]},
+                        {"Fn::Join":["", ["aws --region ", { "Ref": "AWS::Region" }, " s3 cp s3://subscriptions-dist/", { "Ref" : "Stack" }, "/authorized_keys /home/ubuntu/.ssh"]]},
 
                         "adduser --system --home /subscriptions --disabled-password subscriptions",
 
-                        "wget -i /etc/gu-artifact-url --directory-prefix=/tmp",
+                        {"Fn::Join":["", ["aws --region ", { "Ref": "AWS::Region" }, " s3 cp s3://subscriptions-dist/", { "Ref" : "Stack" }, "/", { "Ref" : "Stage" }, "/frontend/app.zip /tmp"]]},
 
                         "unzip -d /subscriptions /tmp/app.zip",
 
                         "mkdir /etc/gu",
 
-                        {"Fn::Join":["", ["aws --debug --region ", { "Ref": "AWS::Region" }, " s3 cp s3://subscriptions-private/", { "Ref" : "Stage" }, "/subscriptions-frontend.conf /etc/gu"]]},
+                        {"Fn::Join":["", ["aws --region ", { "Ref": "AWS::Region" }, " s3 cp s3://subscriptions-private/", { "Ref" : "Stage" }, "/subscriptions-frontend.conf /etc/gu"]]},
                         "chown subscriptions /etc/gu/subscriptions-frontend.conf",
                         "chmod 0600 /etc/gu/subscriptions-frontend.conf",
 
