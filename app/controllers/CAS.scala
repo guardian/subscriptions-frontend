@@ -20,11 +20,11 @@ import scala.util.{Success, Try}
 object CAS extends Controller with LazyLogging {
   private implicit val encoder = Config.CAS.emergencyEncoder
 
-  def index = GoogleAuthenticatedStaffAction { implicit request =>
+  def index = StaffAuthorisedForCASAction { implicit request =>
     Ok(views.html.staff.cas())
   }
 
-  def searchSubscription = GoogleAuthenticatedStaffAction.async(parse.form(CASForm.lookup)) { request =>
+  def searchSubscription = StaffAuthorisedForCASAction.async(parse.form(CASForm.lookup)) { request =>
     val lookup = request.body
 
     // The encoder is not safe and can throw IndexOutOfBound exceptions
@@ -39,7 +39,7 @@ object CAS extends Controller with LazyLogging {
     }
   }
 
-  def generateToken = GoogleAuthenticatedStaffAction(parse.form(CASForm.emergencyToken)) { request =>
+  def generateToken = StaffAuthorisedForCASAction(parse.form(CASForm.emergencyToken)) { request =>
     // Some nasty type erasure going there
     val authRequest = request.asInstanceOf[AuthenticatedRequest[TokenPayload, UserIdentity]]
     val tokenPayload = request.body

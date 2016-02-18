@@ -5,8 +5,8 @@ import com.gocardless.GoCardlessClient
 import com.gocardless.GoCardlessClient.Environment
 import com.gu.cas.PrefixedTokens
 import com.gu.config.{DigitalPackRatePlanIds, MembershipRatePlanIds, ProductFamilyRatePlanIds}
-import com.gu.googleauth.GoogleAuthConfig
 import com.gu.identity.cookie.{PreProductionKeys, ProductionKeys}
+import com.gu.memsub.auth.common.MemSub.Google._
 import com.gu.memsub.promo._
 import com.gu.memsub.{Digipack, Membership}
 import com.gu.monitoring.StatusMetrics
@@ -14,7 +14,6 @@ import com.gu.salesforce.SalesforceConfig
 import com.gu.subscriptions.{CASApi, CASService}
 import com.netaporter.uri.dsl._
 import com.typesafe.config.ConfigFactory
-import controllers.Assets.Asset
 import monitoring.Metrics
 import net.kencochrane.raven.dsn.Dsn
 import play.api.mvc.{Call, RequestHeader}
@@ -27,15 +26,9 @@ object Config {
 
   val playSecret = config.getString("play.crypto.secret")
 
-  val googleAuthConfig = {
-    val con = ConfigFactory.load().getConfig("google.oauth")
-    GoogleAuthConfig(
-      clientId = con.getString("client.id"),
-      clientSecret = con.getString("client.secret"),
-      redirectUrl = con.getString("callback"),
-      domain = Some("guardian.co.uk") // Google App domain to restrict login
-    )
-  }
+  lazy val googleAuthConfig = googleAuthConfigFor(config)
+
+  lazy val googleGroupChecker = googleGroupCheckerFor(config)
 
   val stage = config.getString("stage")
   val stageProd: Boolean = stage == "PROD"
