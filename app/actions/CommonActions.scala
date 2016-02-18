@@ -21,7 +21,16 @@ object CommonActions {
 
   val GoogleAuthenticatedStaffAction = NoCacheAction andThen GoogleAuthAction
 
-  val StaffAuthorisedForCASAction = GoogleAuthenticatedStaffAction andThen OAuthActions.requireGroup[GoogleAuthRequest](Set(
+  val AuthorisedTester = GoogleAuthenticatedStaffAction andThen requireGroup[GoogleAuthRequest](Set(
+    "directteam@guardian.co.uk",
+    "subscriptions.dev@guardian.co.uk",
+    "memsubs.dev@guardian.co.uk",
+    "identitydev@guardian.co.uk",
+    "touchpoint@guardian.co.uk",
+    "crm@guardian.co.uk"
+  ))
+
+  val StaffAuthorisedForCASAction = GoogleAuthenticatedStaffAction andThen requireGroup[GoogleAuthRequest](Set(
     "customer.experience@guardian.co.uk",
     "directteam@guardian.co.uk",
     "userhelp@guardian.co.uk",
