@@ -25,7 +25,7 @@
     background-color: rgb(146, 202, 224);
 
     .page-slice {
-        background-color: rgb(172, 216, 239);
+        background-color: guss-colour(news-support-1, $pasteup-palette);
     }
 }
 
@@ -38,8 +38,7 @@
 }
 
 .digipack {
-    float: right;
-    width: auto;
+
 }
 
 .digipack__shots {
@@ -52,33 +51,41 @@
         min-height: 211px;
         min-width: 440px;
     }
-    @include mq(phablet) {
+    @include mq($from: phablet, $until: tablet) {
         min-height: 286px;
         min-width: 595px;
     }
-    @include mq(tablet) {
-        min-height: 336px;
-        min-width: 700px;
-    }
     @include mq(desktop) {
-        background-position: top right;
-        margin-right: 15px;
         min-height: 286px;
         min-width: 595px;
     }
     @include mq(leftCol) {
-        background-position: top right;
-        margin-right: 30px;
         min-height: 336px;
         min-width: 700px;
+    }
+    @include mq(wide) {
+        min-height: 374px;
+        min-width: 780px;
     }
 }
 
 .digipack__benefits {
-    width: 100% !important;
+    @include mq($until: tablet) {
+        width: 100% !important;
+    }
+}
 
-    @include mq(desktop) {
-        width: 300px !important;
+.digipack__benefits--height {
+    @include mq(tablet) {
+        display: table;
+        height: 100%;
+    }
+}
+
+.digipack__benefits--aligned {
+    @include mq(tablet) {
+        display: table-cell;
+        vertical-align: middle;
     }
 }
 
@@ -92,14 +99,13 @@
 }
 
 .promotion-image {
-    background-position: left top;
-    background-repeat: no-repeat;
-    background-size: contain;
-    min-height: 165px;
+
 }
 
 .promotion-description {
-    font-size: larger;
+    @include mq(desktop) {
+        font-size: larger;
+    }
 }
 
 .promotion-cta__image {

@@ -112,7 +112,7 @@ object Config {
       campaignName = "DigiPack - Free £30 digital gift card",
       codes = PromoCodeSet(PromoCode("DGA88"), PromoCode("DGB88")),
       description = "Get £30 to spend with a top retailer of your choice when you subscribe. Use your digital gift card at John Lewis, Amazon, M&S and more. Treat yourself or a friend.",
-      expires = DateTime.now().plusMonths(3),
+      expires = new LocalDate(2016,4,1).toDateTime(LocalTime.Midnight, DateTimeZone.forID("Europe/London")),
       imageUrl = "https://media.guim.co.uk/9ee88fc2f08bc23e69e2e11a4d4964f4120c6725/0_0_850_418/850.jpg",
       promotionType = Incentive,
       redemptionInstructions = "We'll send redemption instructions to your registered email address",
