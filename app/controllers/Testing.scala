@@ -13,7 +13,7 @@ object Testing extends Controller with LazyLogging {
 
   val PreSigninTestCookieName = "pre-signin-test-user"
 
-  def testUser = GoogleAuthenticatedStaffAction { implicit request =>
+  def testUser = AuthorisedTester { implicit request =>
     val headers = request.headers
     logger.info(s"remoteAddress=${request.remoteAddress} $X_FORWARDED_FOR=${headers.getAll(X_FORWARDED_FOR).mkString("_")} $FORWARDED=${headers.getAll(FORWARDED).mkString("_")}")
 
