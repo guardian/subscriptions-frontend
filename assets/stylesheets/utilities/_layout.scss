@@ -38,3 +38,16 @@
 .u-no-border {
     border: 0 !important;
 }
+
+/**
+ * Display
+ */
+.u-vertically-center {
+    display: table;
+    height: 100%;
+}
+
+.u-vertically-centered-item {
+    display: table-cell;
+    vertical-align: middle;
+}

@@ -75,20 +75,6 @@
     }
 }
 
-.digipack__benefits--height {
-    @include mq(tablet) {
-        display: table;
-        height: 100%;
-    }
-}
-
-.digipack__benefits--aligned {
-    @include mq(tablet) {
-        display: table-cell;
-        vertical-align: middle;
-    }
-}
-
 .digipack__benefit {
     border-color: $c-neutral5;
     border-style: solid;
