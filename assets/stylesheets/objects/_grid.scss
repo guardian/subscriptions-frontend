@@ -25,6 +25,9 @@ $gutter-width-fluid: 2%;
 }
 
 .grid--flex {
+    &:before {
+        display: block;
+    }
     display: flex;
     flex-wrap: wrap;
 
