@@ -18,7 +18,7 @@
 .roundel__container {
     @include circular();
     align-content: center;
-    background: rgb(150,215,42);
+    background: guss-colour(news-support-1, $pasteup-palette);
     display: flex;
     flex-direction: column;
     height: 110px;
