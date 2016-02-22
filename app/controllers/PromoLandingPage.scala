@@ -18,9 +18,9 @@ object PromoLandingPage extends Controller {
       case _ => None
     }
 
-  def render(promoCodeStr: String) = NoCacheAction { implicit request =>
+  def render(promoCodeStr: String) = CachedAction { implicit request =>
     val promoCode = PromoCode(promoCodeStr)
-    val tpBackend = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies).backend
+    val tpBackend = TouchpointBackend.Normal
 
     (for {
       promotion <- tpBackend.promoService.findPromotion(promoCode)
