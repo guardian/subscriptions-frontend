@@ -3,15 +3,13 @@
 @import com.gu.memsub.promo.PromoCode
 @import controllers.routes.Checkout.validatePromoCode
 @import services.TouchpointBackend
-@(form: Form[model.SubscriptionData], touchpointBackendResolution: TouchpointBackend.Resolution)
+@(form: Form[model.SubscriptionData])
 @defining(
   // use Play reverse routing to get the action request path
   validatePromoCode(
       PromoCode("_"),
       ProductRatePlanId("_"),
       Country.UK).path.replaceFirst("\\?.*", "")) { lookupUrl =>
-
-    @if(touchpointBackendResolution.validTestUserCredentialOpt.isDefined || form.data.get("promoCode").isDefined) {
         <div class="checkout-promo-code js-promo-code">
             <label class="label" for="promo-code">Promo code</label>
             <div class="form-field field-group__item">
@@ -25,5 +23,4 @@
             <div class="js-promo-code-applied promo-code-applied" style="display:none"><strong>✓&nbsp;</strong>Promotion applied</div>
             <div class="promo-code-snippet js-promo-code-snippet"></div>
         </div>
-    }
 }

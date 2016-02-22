@@ -25,14 +25,17 @@ $gutter-width-fluid: 2%;
 }
 
 .grid--flex {
-    &:before {
-        display: block;
-    }
     display: flex;
     flex-wrap: wrap;
 
     .grid__item {
         max-width: 100%;
+    }
+}
+
+.grid--no-clearfix-before {
+    &:before {
+        display: block;
     }
 }
 
