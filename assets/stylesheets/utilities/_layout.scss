@@ -42,6 +42,12 @@
 /**
  * Display
  */
+.u-vertically-center-flexbox {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
 .u-vertically-center {
     display: table;
     height: 100%;

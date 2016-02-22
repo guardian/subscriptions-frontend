@@ -89,7 +89,7 @@
 }
 
 .promotion-description {
-    @include mq(desktop) {
+    @include mq(tablet) {
         font-size: larger;
     }
 }

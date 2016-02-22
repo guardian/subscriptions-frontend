@@ -39,14 +39,10 @@
                         <div class="grid__item grid__item--flex-2-columns digipack__shots">
                             @fragments.common.roundel(promotion.roundelHtml, Seq("roundel--raised"))
                         </div>
-                        <div class="grid__item digipack__benefits">
-                            <div class="u-vertically-center">
-                                <div class="u-vertically-centered-item">
-                                    <p class="digipack__benefit">Experience your newspaper in full, on your tablet with the Guardian & Observer daily edition</p>
-                                    <p class="digipack__benefit">Enjoy an advert-free experience on The Guardian's app with access to our daily crosswords and exclusive content</p>
-                                    @subscribeNow(edition, catalog.digipackMonthly.priceGBP, promoCode)
-                                </div>
-                            </div>
+                        <div class="grid__item digipack__benefits u-vertically-center-flexbox">
+                            <p class="digipack__benefit">Experience your newspaper in full, on your tablet with the Guardian & Observer daily edition</p>
+                            <p class="digipack__benefit">Enjoy an advert-free experience on The Guardian's app with access to our daily crosswords and exclusive content</p>
+                            @subscribeNow(edition, catalog.digipackMonthly.priceGBP, promoCode)
                         </div>
                     </div>
                 </div>
@@ -94,11 +90,11 @@
             <div class="page-container gs-container gs-container--slim page-slice page-slice">
                 <div class="page-slice__content">
                     <h2 class="promo-landing-page__section-head">@promotion.title</h2>
-                    <div class="grid grid--2up-step">
+                    <div class="grid grid--2up-step grid--flex">
                         <div class="grid__item">
                             <img class="promotion-image" src="@promotion.imageUrl"/>
                         </div>
-                        <div class="grid__item">
+                        <div class="grid__item u-vertically-center-flexbox">
                             <p class="promotion-description">
                                 @promotion.description
                                 <br/><br/>

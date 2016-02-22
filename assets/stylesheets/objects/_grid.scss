@@ -25,8 +25,15 @@ $gutter-width-fluid: 2%;
 }
 
 .grid--flex {
+    &:before {
+        display: block;
+    }
     display: flex;
     flex-wrap: wrap;
+
+    .grid__item {
+        max-width: 100%;
+    }
 }
 
 .grid__item {
@@ -95,15 +102,17 @@ $gutter-width-fluid: 2%;
 }
 
 /**
- * Similar to grid--2up-stacked, but make columns at tablet rather than desktop, just like 3up-step does.
+ * Similar to grid--2up-stacked, but make columns at phablet rather than desktop.
  */
 .grid--2up-step {
-    @include mq(tablet) {
+    @include mq(phablet) {
         width: 100% + $gutter-width-fluid;
         margin-left: -$gutter-width-fluid;
     }
     .grid__item {
-        @include mq(tablet) {
+        width: 100%;
+
+        @include mq(phablet) {
             @include gridLayout(50%);
             &:nth-of-type(2n+1) { clear: left; border-left: none; }
         }
