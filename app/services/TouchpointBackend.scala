@@ -1,6 +1,6 @@
 package services
 
-import com.gu.config.{DigitalPackRatePlanIds, ProductFamilyRatePlanIds}
+import com.gu.config.{DiscountRatePlanIds, DigitalPackRatePlanIds, ProductFamilyRatePlanIds}
 import com.gu.memsub.Digipack
 import com.gu.memsub.services.{CatalogService, PromoService, api}
 import com.gu.monitoring.{ServiceMetrics, StatusMetrics}
@@ -30,11 +30,12 @@ object TouchpointBackend {
 
     val digipackConfig = ProductFamilyRatePlanIds.config(Some(Config.config))(config.environmentName, Digipack)
     val digipackRatePlanIds = Config.digipackRatePlanIds(config.environmentName)
+    val discountPlans = Config.discountRatePlanIds(config.environmentName)
 
     val membershipRatePlanIds = Config.membershipRatePlanIds(config.environmentName)
     val catalogService = CatalogService(restClient, membershipRatePlanIds, digipackRatePlanIds, config.environmentName)
-    val zuoraService = new zuora.ZuoraService(soapClient, restClient, digipackRatePlanIds)
-    val promoService = new PromoService(Seq(demoPromo(config.environmentName)))
+    val promoService = new PromoService(Seq(demoPromo(config.environmentName)) ++ discountPromo(config.environmentName))
+    val zuoraService = new zuora.ZuoraService(soapClient, restClient, digipackRatePlanIds, promoService)
     val _stripeService = new StripeService(config.stripe, new TouchpointBackendMetrics with StatusMetrics {
       val backendEnv = config.stripe.envName
       val service = "Stripe"
@@ -52,7 +53,8 @@ object TouchpointBackend {
       digipackRatePlanIds,
       paymentService,
       config.zuoraProperties,
-      promoService
+      promoService,
+      discountPlans
     )
   }
 
@@ -88,7 +90,8 @@ case class TouchpointBackend(environmentName: String,
                              digipackIds: DigitalPackRatePlanIds,
                              paymentService: PaymentService,
                              zuoraProperties: ZuoraProperties,
-                             promoService: PromoService) {
+                             promoService: PromoService,
+                             discountRatePlanIds: DiscountRatePlanIds) {
 
   private val that = this
 
@@ -104,5 +107,6 @@ case class TouchpointBackend(environmentName: String,
                         zuoraService,
                         exactTargetService,
                         zuoraProperties,
-                        promoService)
+                        promoService,
+                        discountRatePlanIds)
 }
