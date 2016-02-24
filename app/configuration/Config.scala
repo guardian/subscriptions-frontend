@@ -4,7 +4,7 @@ import com.github.nscala_time.time.Imports._
 import com.gocardless.GoCardlessClient
 import com.gocardless.GoCardlessClient.Environment
 import com.gu.cas.PrefixedTokens
-import com.gu.config.{DigitalPackRatePlanIds, MembershipRatePlanIds, ProductFamilyRatePlanIds}
+import com.gu.config.{DiscountRatePlanIds, DigitalPackRatePlanIds, MembershipRatePlanIds, ProductFamilyRatePlanIds}
 import com.gu.identity.cookie.{PreProductionKeys, ProductionKeys}
 import com.gu.memsub.auth.common.MemSub.Google._
 import com.gu.memsub.promo._
@@ -91,6 +91,10 @@ object Config {
   def digipackRatePlanIds(env: String): DigitalPackRatePlanIds =
     DigitalPackRatePlanIds.fromConfig(ProductFamilyRatePlanIds.config(Some(config))(env, Digipack))
 
+  def discountRatePlanIds(env: String): DiscountRatePlanIds =
+    DiscountRatePlanIds.fromConfig(config.getConfig(s"touchpoint.backend.environments.$env.zuora.ratePlanIds")
+  )
+
   def membershipRatePlanIds(env: String) =
     MembershipRatePlanIds.fromConfig(ProductFamilyRatePlanIds.config(Some(config))(env, Membership))
 
@@ -113,6 +117,27 @@ object Config {
       thumbnailUrl = "http://lorempixel.com/46/16/abstract",
       title = "Free £30 digital gift card when you subscribe"
     )
+  }
+
+  def discountPromo(env: String): Option[Promotion] = {
+    val prpIds = digipackRatePlanIds(env)
+    Some(Promotion(
+      appliesTo = AppliesTo.ukOnly(Set(
+        prpIds.digitalPackMonthly,
+        prpIds.digitalPackQuaterly,
+        prpIds.digitalPackYearly
+      )),
+      campaignName = "DigiPack - 17% off for 3 months",
+      codes = PromoCodeSet(PromoCode("17OFF")),
+      description = "Get 17% off for 3 months when you subscribe.",
+      expires = new LocalDate(2016,4,1).toDateTime(LocalTime.Midnight, DateTimeZone.forID("Europe/London")),
+      imageUrl = "https://media.guim.co.uk/9ee88fc2f08bc23e69e2e11a4d4964f4120c6725/0_0_850_418/850.jpg",
+      redemptionInstructions = "We'll send redemption instructions to your registered email address",
+      roundelHtml = "Free <span class='roundel__strong'>17%</span> off",
+      thumbnailUrl = "http://lorempixel.com/46/16/abstract",
+      title = "DigiPack - 17% off for 3 months",
+      promotionType = PercentDiscount(Month, 3, 17)
+    )).filter(_ => env != "PROD")
   }
 
   object CAS {
