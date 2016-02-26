@@ -1,0 +1,19 @@
+@import com.gu.subscriptions.DigipackCatalog
+@import com.gu.memsub.promo.PromoCode
+@import model.DigitalEdition
+
+@import com.gu.memsub.promo.Promotion.AnyPromotion
+@(edition: DigitalEdition, catalog: DigipackCatalog, promoCode: PromoCode, promotion: AnyPromotion)
+<div class="promotion-cta">
+    <div class="grid grid--3up-step">
+        <div class="grid__item">
+            <div class="promotion-cta--subscribe">
+                <h2>Subscribe&nbsp;to&nbsp;the Digital&nbsp;Pack</h2>
+            </div>
+        </div>
+        <div class="grid__item promotion-cta__image"></div>
+        <div class="grid__item">
+            @fragments.promotion.pricingCta(edition, catalog, promoCode, promotion)
+        </div>
+    </div>
+</div>

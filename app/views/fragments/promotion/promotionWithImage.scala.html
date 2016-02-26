@@ -1,0 +1,12 @@
+@import com.gu.memsub.promo.Promotion.AnyPromotion
+
+@(promotion: AnyPromotion, imageUrl: String)
+
+<div class="promotion grid grid--2up-step grid--flex grid--no-clearfix-before">
+    <div class="grid__item">
+        <img class="promotion-image" src="@imageUrl"/>
+    </div>
+    <div class="grid__item u-vertically-center-flexbox">
+        @fragments.promotion.promotionDescription(promotion)
+    </div>
+</div>

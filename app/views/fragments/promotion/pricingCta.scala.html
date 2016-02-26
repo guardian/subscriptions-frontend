@@ -1,0 +1,15 @@
+@import com.gu.subscriptions.DigipackCatalog
+@import com.gu.memsub.promo.Promotion.AnyPromotion
+@import com.gu.memsub.promo.PromoCode
+@import model.DigitalEdition
+
+@(edition: DigitalEdition, catalog: DigipackCatalog, promoCode: PromoCode, promotion: AnyPromotion)
+<div class="pricing-cta__pricing">
+    <h4 class="pricing-cta__pricing__title">Free for 14 days</h4>
+    @promotion.whenIncentive.map { p =>
+        <p class="pricing-cta__pricing__value">Then @catalog.digipackMonthly.priceGBP.pretty/month</p>
+    }
+</div>
+<br/>
+@fragments.promotion.subscribeNow(edition, promoCode)
+

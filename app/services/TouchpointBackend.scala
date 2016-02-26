@@ -1,6 +1,6 @@
 package services
 
-import com.gu.config.{DiscountRatePlanIds, DigitalPackRatePlanIds, ProductFamilyRatePlanIds}
+import com.gu.config.{DigitalPackRatePlanIds, DiscountRatePlanIds, ProductFamilyRatePlanIds}
 import com.gu.memsub.Digipack
 import com.gu.memsub.services.{CatalogService, PromoService, api}
 import com.gu.monitoring.{ServiceMetrics, StatusMetrics}

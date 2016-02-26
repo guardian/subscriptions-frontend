@@ -1,0 +1,4 @@
+@import com.gu.memsub.promo.Promotion.AnyPromotion
+@(promotion: AnyPromotion)
+
+@promotion.whenIncentive.map { p => @Html(p.promotionType.termsAndConditions) }

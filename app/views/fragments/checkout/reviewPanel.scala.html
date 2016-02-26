@@ -1,9 +1,10 @@
 @import com.gu.memsub.BillingPeriod
-@import com.gu.memsub.promo.Promotion
+@import com.gu.memsub.promo.Incentive
 @import com.gu.subscriptions.DigipackPlan
 @import views.support.BillingPeriod._
 @import views.support.Pricing._
-@(subscriptionId: String, plan: DigipackPlan[BillingPeriod], promotion: Option[Promotion] = None)
+@import com.gu.memsub.promo.Promotion.AnyPromotion
+@(subscriptionId: String, plan: DigipackPlan[BillingPeriod], promotion: Option[AnyPromotion] = None)
 
 <div class="review-panel js-payment-frequency">
     <input type="checkbox" name="subscriptionDetails"
@@ -28,7 +29,7 @@
             <h4 class="review-panel__label">✓ Promotion applied:</h4>
             <div class="review-panel__details">
                 <p>@promo.description</p>
-                <p>@promo.redemptionInstructions</p>
+                @promo.whenIncentive.map { p => <p>@Html(p.promotionType.redemptionInstructions)</p> }
             </div>
         </div>
     }
