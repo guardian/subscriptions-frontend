@@ -16,7 +16,7 @@ class IdentityServiceTest extends FreeSpec {
   class TestIdentityApiClient extends IdentityApiClient {
     override def userLookupByCookies: (AccessCredentials.Cookies) => Future[WSResponse] = ???
     override def createGuest: (PersonalData) => Future[WSResponse] = ???
-    override def updateUserDetails: (PersonalData, UserId, AccessCredentials.Cookies) => Future[WSResponse] = ???
+    override def updateUserDetails: (PersonalData, AccessCredentials.Cookies) => Future[WSResponse] = ???
     override def convertGuest: (String, IdentityToken) => Future[WSResponse] = ???
     override def userLookupByEmail: (String) => Future[WSResponse] = ???
   }
@@ -99,7 +99,11 @@ class IdentityServiceTest extends FreeSpec {
         "billingAddress3" -> "Town",
         "billingAddress4" -> "United Kingdom",
         "billingPostcode" -> "AAAAAA",
-        "billingCountry" -> "United Kingdom"
+        "billingCountry"  -> "United Kingdom",
+        "telephoneNumber" -> Json.obj(
+          "countryCode" -> "44",
+          "localNumber" -> "1872123456"
+        )
       ),
       "statusFields" ->
         Json.obj("receiveGnmMarketing" -> true)

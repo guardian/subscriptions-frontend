@@ -10,6 +10,7 @@ object TestPersonalData {
     last = "LastName",
     email = "email@example.com",
     receiveGnmMarketing = true,
-    address = Address("address1","address2","Town", "United Kingdom", "AAAAAA", Country.UK.name)
+    address = Address("address1","address2","Town", "United Kingdom", "AAAAAA", Country.UK.name),
+    telephoneNumber = Some("1872123456")
   )
 }

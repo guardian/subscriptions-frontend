@@ -3,6 +3,7 @@ package services
 import com.amazonaws.regions.{Region, Regions}
 import com.gu.identity.play.{AccessCredentials, CookieBuilder, AuthenticatedIdUser, IdUser}
 import com.gu.monitoring.{AuthenticationMetrics, CloudWatch, RequestMetrics, StatusMetrics}
+import com.gu.memsub.NormalisedTelephoneNumber
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
 import model.PersonalData
@@ -57,7 +58,6 @@ class IdentityService(identityApiClient: => IdentityApiClient) extends LazyLoggi
       case cookies: AccessCredentials.Cookies =>
         identityApiClient.updateUserDetails(
           personalData,
-          UserId(authenticatedUser.user.id),
           cookies
         ).map(_ => Unit)
       case _ => Future.successful(logger.error("ID API only supports forwarded access for Cookies"))
@@ -75,6 +75,7 @@ object PersonalDataJsonSerialiser {
   val publicFields = "publicFields"
 
   implicit def convertToUser(personalData: PersonalData): JsObject = {
+    val telephoneNumber = NormalisedTelephoneNumber.fromStringAndCountry(personalData.telephoneNumber,personalData.address.country)
     Json.obj(
       primaryEmailAddress -> personalData.email,
       publicFields -> Json.obj(
@@ -88,8 +89,13 @@ object PersonalDataJsonSerialiser {
         "billingAddress3" -> personalData.address.town,
         "billingAddress4" -> personalData.address.countyOrState,
         "billingPostcode" -> personalData.address.postCode,
-        "billingCountry" -> personalData.country.name
-      ),
+        "billingCountry"  -> personalData.country.name
+      ).++(
+         telephoneNumber.fold[JsObject](Json.obj()){t =>
+           Json.obj(
+             "telephoneNumber" -> Json.toJson(t)
+           )}
+    ),
       "statusFields" ->
         Json.obj("receiveGnmMarketing" -> personalData.receiveGnmMarketing))
   }
@@ -111,7 +117,7 @@ trait IdentityApiClient {
 
   def userLookupByEmail: Email => Future[WSResponse]
 
-  def updateUserDetails: (PersonalData, UserId, AccessCredentials.Cookies) => Future[WSResponse]
+  def updateUserDetails: (PersonalData, AccessCredentials.Cookies) => Future[WSResponse]
 }
 
 object IdentityApiClient extends IdentityApiClient with LazyLogging {
@@ -201,9 +207,9 @@ object IdentityApiClient extends IdentityApiClient with LazyLogging {
       .withCloudwatchMonitoringOfPut
   }
 
-  override val updateUserDetails: (PersonalData, UserId, AccessCredentials.Cookies) => Future[WSResponse] = { (user, userId, authCookies) =>
-    val endpoint = authoriseCall(WS.url(s"$identityEndpoint/user/${userId.id}"))
-    val userJson: JsObject = user
+  override val updateUserDetails: (PersonalData, AccessCredentials.Cookies) => Future[WSResponse] = { (personalData, authCookies) =>
+    val endpoint = authoriseCall(WS.url(s"$identityEndpoint/user/me"))
+    val userJson: JsObject = personalData
     val updatedFields =
       createOnlyFields.foldLeft(userJson) { (map, field) => map - field }
 

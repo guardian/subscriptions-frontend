@@ -1,7 +1,8 @@
 @import views.support.CountryOps._
 @import views.support.AddressValidationRulesOps._
 @import views.support.CountryWithCurrency
-@(form: Form[model.SubscriptionData], userIsSignedIn: Boolean, countriesWithCurrency: List[CountryWithCurrency])
+
+@(form: Form[model.SubscriptionData], userIsSignedIn: Boolean, countriesWithCurrency: List[CountryWithCurrency], touchpointBackendResolution:  services.TouchpointBackend.Resolution)
 
 @signedInAttrs = @{ if (userIsSignedIn) "required readonly" else "" }
 
@@ -36,6 +37,16 @@
         @fragments.forms.errorMessage("The confirmation email must match your email address")
     }
 </div>
+
+@* ===== Phone ===== *@
+@if(touchpointBackendResolution.validTestUserCredentialOpt){
+  <div class="form-field js-checkout-phone-number">
+    <label class="label" for="phone-number">Phone Number</label>
+    <input type="tel" class="input-text js-input input-text"
+    id="phone-number" name="personal.telephoneNumber"
+    value="@form.data.get("personal.telephoneNumber")" maxlength="20">
+  </div>
+}
 
 @* ===== Address ===== *@
 <div class="js-checkout-full-address">

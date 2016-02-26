@@ -1,10 +1,11 @@
 package utils
 
-import com.gu.identity.play.{PrivateFields, StatusFields, PublicFields, IdUser}
-import play.api.libs.json.Json
+import com.gu.identity.play._
+import play.api.libs.json._
 
 object TestIdUser {
   implicit val writesStatusFields = Json.writes[StatusFields]
+  implicit val writesTelephoneNumber = Json.writes[TelephoneNumber]
   implicit val writesPrivateFields = Json.writes[PrivateFields]
   implicit val writesPublicFields = Json.writes[PublicFields]
   implicit val writesIdUser = Json.writes[IdUser]

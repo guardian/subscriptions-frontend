@@ -63,7 +63,8 @@ object SubscriptionsForm {
     "last" -> text(0, nameMaxLength),
     "emailValidation" -> emailMapping,
     "receiveGnmMarketing" -> booleanCheckbox,
-    "address" -> addressDataMapping
+    "address" -> addressDataMapping,
+    "telephoneNumber" -> optional(text)
   )(PersonalData.apply)(PersonalData.unapply)
 
   val productRatePlanIdMapping = mapping("ratePlanId" -> text)(ProductRatePlanId.apply)(ProductRatePlanId.unapply)
