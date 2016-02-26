@@ -6,9 +6,9 @@ import com.gu.memsub.promo.PromoCode
 import com.gu.memsub.services.PromoService
 import com.gu.memsub.services.api.CatalogService
 import com.gu.salesforce.ContactId
+import com.gu.subscriptions.Discounter
 import com.gu.zuora.api.ZuoraService
 import com.gu.zuora.soap.actions.subscribe.RatePlan
-import com.gu.zuora.soap.actions.subscribe.RatePlanOps._
 import com.gu.zuora.soap.models.Results.SubscribeResult
 import com.typesafe.scalalogging.LazyLogging
 import model._
@@ -16,7 +16,6 @@ import touchpoint.ZuoraProperties
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scalaz.NonEmptyList
 
 object CheckoutService {
   case class CheckoutResult(salesforceMember: ContactId, userIdData: UserIdData, subscribeResult: SubscribeResult, validPromoCode: Option[PromoCode])
@@ -55,18 +54,14 @@ class CheckoutService(identityService: IdentityService,
         identityService.registerGuest(personalData)
       }
 
-    val normalPlans = NonEmptyList(RatePlan(subscriptionData.productRatePlanId.get, None))
+    val plan = RatePlan(subscriptionData.productRatePlanId.get, None)
+    val discounter = new Discounter(promoPlans, promoService, catalogService.digipackCatalog)
 
     val validPromoCode = for {
       code <- subscriptionData.suppliedPromoCode
       promotion <- promoService.findPromotion(code)
       if promotion.validateFor(subscriptionData.productRatePlanId, personalData.address.country).isRight
-    } yield (code, promotion)
-
-    val plansWithDiscount = (for {
-      promo <- validPromoCode.map(_._2)
-      plan <- promo.ratePlan(promoPlans)
-    } yield normalPlans.<::(plan)).getOrElse(normalPlans) // <:: means prepend, of course.
+    } yield code
 
     for {
       userData <- userOrElseRegisterGuest
@@ -82,17 +77,17 @@ class CheckoutService(identityService: IdentityService,
       result <- zuoraService.createSubscription(
         subscribeAccount = payment.makeAccount,
         paymentMethod = Some(method),
-        ratePlans = plansWithDiscount,
+        ratePlans = discounter.applyPromoCode(plan, validPromoCode),
         name = personalData,
         address = personalData.address,
-        promoCode = validPromoCode.map(_._1),
+        promoCode = validPromoCode,
         paymentDelay = Some(zuoraProperties.paymentDelayInDays),
         ipAddressOpt = requestData.ipAddress.map(_.getHostAddress))
 
     } yield {
       updateAuthenticatedUserDetails()
       sendETDataExtensionRow(result)
-      CheckoutResult(memberId, userData, result, validPromoCode.map(_._1))
+      CheckoutResult(memberId, userData, result, validPromoCode)
     }
   }
 }
