@@ -136,7 +136,7 @@ object Config {
       roundelHtml = "Free <span class='roundel__strong'>17%</span> off",
       thumbnailUrl = "http://lorempixel.com/46/16/abstract",
       title = "DigiPack - 17% off for 3 months",
-      promotionType = PercentDiscount(Month, 3, 17)
+      promotionType = PercentDiscount(3, 17)
     )).filter(_ => env != "PROD")
   }
 
