@@ -21,7 +21,7 @@
     margin-bottom: $gs-baseline * 2;
 }
 
-.section--blue {
+.section-blue {
     background-color: rgb(146, 202, 224);
 
     .page-slice {
@@ -29,7 +29,7 @@
     }
 }
 
-.section--grey {
+.section-grey {
     background-color: rgb(231, 231, 231);
 
     .page-slice {
@@ -92,6 +92,14 @@
     @include mq(tablet) {
         font-size: larger;
     }
+}
+
+.promotion-cta {
+
+}
+
+.promotion-cta__subscribe {
+
 }
 
 .promotion-cta__image {

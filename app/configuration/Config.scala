@@ -4,9 +4,10 @@ import com.github.nscala_time.time.Imports._
 import com.gocardless.GoCardlessClient
 import com.gocardless.GoCardlessClient.Environment
 import com.gu.cas.PrefixedTokens
-import com.gu.config.{DiscountRatePlanIds, DigitalPackRatePlanIds, MembershipRatePlanIds, ProductFamilyRatePlanIds}
+import com.gu.config.{DigitalPackRatePlanIds, DiscountRatePlanIds, MembershipRatePlanIds, ProductFamilyRatePlanIds}
 import com.gu.identity.cookie.{PreProductionKeys, ProductionKeys}
 import com.gu.memsub.auth.common.MemSub.Google._
+import com.gu.memsub.promo.Promotion._
 import com.gu.memsub.promo._
 import com.gu.memsub.{Digipack, Membership}
 import com.gu.monitoring.StatusMetrics
@@ -110,16 +111,18 @@ object Config {
       codes = PromoCodeSet(PromoCode("DGA88"), PromoCode("DGB88")),
       description = "Get £30 to spend with a top retailer of your choice when you subscribe. Use your digital gift card at John Lewis, Amazon, M&S and more. Treat yourself or a friend.",
       expires = new LocalDate(2016,4,1).toDateTime(LocalTime.Midnight, DateTimeZone.forID("Europe/London")),
-      imageUrl = "https://media.guim.co.uk/076bb31be49a31dfe82869ed2937fc8254917361/0_0_850_418/850.jpg",
-      promotionType = Incentive,
-      redemptionInstructions = "We'll send redemption instructions to your registered email address",
+      imageUrl = Some("https://media.guim.co.uk/076bb31be49a31dfe82869ed2937fc8254917361/0_0_850_418/850.jpg"),
+      promotionType = Incentive(
+        redemptionInstructions = "We'll send redemption instructions to your registered email address",
+        termsAndConditions = "<h4>Giftcloud £30 gift card terms and conditions</h4><p>Offer only available to customers who subscribe after trial period. Customers are asked to allow up to 35 days from first payment date to receive their gift card redemption email. Offer available to customers who subscribe after trial period only. Once customers have received their gift card redemption email they will have 90 days to claim the £30 gift card by selecting their chosen digital gift card and entering their email or phone number after which time the gift will no longer be available. In the event stock runs out you may be offered an alternative gift of a similar value or a full refund. GNM reserves the right to withdraw this promotion at any time.</p> <p>Amazon.co.uk Gift Cards (“GCs”) sold by Giftcloud, an authorised and independent reseller of Amazon.co.uk Gift Cards. Amazon.co.uk Gift Cards may be redeemed on the Amazon.co.uk website towards the purchase of eligible products listed in our online catalogue and sold byAmazon.co.uk or any other seller selling through Amazon.co.uk. GCs cannot be reloaded, resold, transferred for value, redeemed for cash or applied to any other account. Amazon.co.uk is not responsible if a GC is lost, stolen, destroyed or used without permission. See <a href='http://www.amazon.co.uk/gc-legal' target='_blank'>www.amazon.co.uk/gc-legal</a> for complete terms and conditions. GCs are issued by Amazon EU S.à r.l. All Amazon ®, ™ & © are IP of Amazon.com, Inc. or its affiliates.</p>"
+      ),
       roundelHtml = "Free <span class='roundel__strong'>£30</span> digital gift card",
       thumbnailUrl = "http://lorempixel.com/46/16/abstract",
       title = "Free £30 digital gift card when you subscribe"
     )
   }
 
-  def discountPromo(env: String): Option[Promotion] = {
+  def discountPromo(env: String): Option[AnyPromotion] = {
     val prpIds = digipackRatePlanIds(env)
     Some(Promotion(
       appliesTo = AppliesTo.ukOnly(Set(
@@ -127,16 +130,15 @@ object Config {
         prpIds.digitalPackQuaterly,
         prpIds.digitalPackYearly
       )),
-      campaignName = "DigiPack - 17% off for 3 months",
-      codes = PromoCodeSet(PromoCode("17OFF")),
-      description = "Get 17% off for 3 months when you subscribe.",
+      campaignName = s"DigiPack for just £9.99 a month (~17% discount)",
+      codes = PromoCodeSet(PromoCode("DPA30")),
+      description = "For a limited time you can enjoy the digital pack for just £9.99 a month (usually £11.99). Get every paper delivered to your tablet for less than 35p an edition, plus an ad-free experience on your live news app.",
       expires = new LocalDate(2016,4,1).toDateTime(LocalTime.Midnight, DateTimeZone.forID("Europe/London")),
-      imageUrl = "https://media.guim.co.uk/9ee88fc2f08bc23e69e2e11a4d4964f4120c6725/0_0_850_418/850.jpg",
-      redemptionInstructions = "We'll send redemption instructions to your registered email address",
-      roundelHtml = "Free <span class='roundel__strong'>17%</span> off",
+      imageUrl = None,
+      roundelHtml = "Only £9.99 a month</span><span class='roundel__byline'>usually £11.99",
       thumbnailUrl = "http://lorempixel.com/46/16/abstract",
-      title = "DigiPack - 17% off for 3 months",
-      promotionType = PercentDiscount(None, 17)
+      title = "More of the Guardian, for less",
+      promotionType = PercentDiscount(None, 16.680567139283)
     )).filter(_ => env != "PROD")
   }
 

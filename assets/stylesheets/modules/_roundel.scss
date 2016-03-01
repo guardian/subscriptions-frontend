@@ -3,13 +3,13 @@
    ========================================================================== */
 
 .roundel {
-    position:relative;
+    position: relative;
 }
 
 .roundel--raised {
     top: -53px;
 
-    @include mq(desktop) {
+    @include mq(phablet) {
         top: -58px;
     }
 }
@@ -31,7 +31,7 @@
     width: 110px;
     z-index: 2;
 
-    @include mq(desktop) {
+    @include mq(phablet) {
         height: 140px;
         margin: 20px;
         padding: 20px;
@@ -43,9 +43,17 @@
     @include fs-headline(1);
     font-weight: guss-font-weight(ultrablack);
 
-    @include mq(desktop) {
+    @include mq(phablet) {
         @include fs-headline(3);
         font-weight: guss-font-weight(ultrablack);
+    }
+}
+
+.roundel__byline {
+    @include fs-bodyCopy(1);
+
+    @include mq(phablet) {
+        @include fs-bodyCopy(1);
     }
 }
 

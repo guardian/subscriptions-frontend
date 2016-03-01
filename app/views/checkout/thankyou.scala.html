@@ -1,13 +1,14 @@
 @import com.gu.memsub.BillingPeriod
-@import com.gu.memsub.promo.Promotion
+@import com.gu.memsub.promo.{ Promotion, PromotionType }
 @import com.gu.subscriptions.DigipackPlan
 @import views.support.BillingPeriod._
 @import views.support.Pricing._
+@import com.gu.memsub.promo.Promotion.AnyPromotion
 @(subscriptionName: String,
     guestAccountForm: Option[Form[model.GuestAccountData]] = None,
     touchpointBackendResolution: services.TouchpointBackend.Resolution,
     plan: DigipackPlan[BillingPeriod],
-    promotion: Option[Promotion] = None
+    promotion: Option[AnyPromotion] = None
 )(implicit request: RequestHeader)
 
 @import configuration.Config.Identity.webAppProfileUrl
