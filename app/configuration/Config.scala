@@ -139,7 +139,7 @@ object Config {
       thumbnailUrl = "http://lorempixel.com/46/16/abstract",
       title = "More of the Guardian, for less",
       promotionType = PercentDiscount(None, 16.680567139283)
-    )).filter(_ => env != "PROD")
+    ))
   }
 
   object CAS {
