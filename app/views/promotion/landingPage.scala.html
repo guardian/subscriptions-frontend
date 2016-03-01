@@ -1,4 +1,3 @@
-@import com.github.nscala_time.time.Imports.DateTime
 @import com.gu.memsub.promo.PromoCode
 @import com.gu.memsub.promo.Promotion.AnyPromotion
 @import com.gu.subscriptions.DigipackCatalog
@@ -18,7 +17,7 @@
                 </div>
             </div>
         </section>
-        <section class="section--grey">
+        <section class="section-grey">
             <div class="page-container gs-container gs-container--slim page-slice">
                 @fragments.promotion.digipack(edition, catalog, promoCode, promotion)
             </div>
@@ -31,7 +30,7 @@
                 </div>
             </div>
         </section>
-        <section class="section--blue">
+        <section class="section-blue">
             <div class="page-container gs-container gs-container--slim page-slice page-slice">
                 <div class="page-slice__content">
                     <h2 class="promo-landing-page__section-head">@promotion.title</h2>
@@ -53,7 +52,7 @@
                 </div>
             </div>
         </section>
-        <section class="section--grey">
+        <section class="section-grey">
             <div class="page-container gs-container gs-container--slim page-slice page-slice">
                 <div class="page-slice__content">
                     @fragments.promotion.promotionCta(edition, catalog, promoCode, promotion)

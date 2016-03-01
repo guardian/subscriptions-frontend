@@ -1,10 +1,12 @@
-@import model.DigitalEdition
 @import com.gu.memsub.promo.PromoCode
+@import model.DigitalEdition
 @import views.support.DigitalEdition._
 @(edition: DigitalEdition, promoCode: PromoCode)
-<div class="pricing-cta__action">
-    <a class="button button--large button--primary"
-    href="@edition.redirect&promoCode=@promoCode.get"
-    data-test-id="digital-pack-@edition.id-trial-header"
-    >Subscribe now</a>
+<div class="pricing-cta">
+    <div class="pricing-cta__action">
+        <a class="button button--large button--primary"
+        href="@edition.redirect&promoCode=@promoCode.get"
+        data-test-id="digital-pack-@edition.id-trial-header"
+        >Subscribe now</a>
+    </div>
 </div>

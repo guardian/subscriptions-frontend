@@ -1,5 +1,5 @@
+@import com.github.nscala_time.time.Imports.DateTime
 @import com.gu.memsub.promo.Promotion.AnyPromotion
-@import com.github.nscala_time.time.Imports.{DateTime, DateTimeZone}
 @import views.support.Dates.dayInMonthWithSuffixAndMonth
 
 @(promotion: AnyPromotion)
@@ -10,6 +10,7 @@
 
 <p class="promotion-description">
     @promotion.description
-    <br/><br/>
+</p>
+<p class="promotion-description">
     But hurry! Offer expires @formatExpires(promotion.expires).
 </p>
