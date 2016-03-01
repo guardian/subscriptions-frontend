@@ -7,8 +7,6 @@
 <div class="pricing-cta">
     <div class="pricing-cta__pricing">
         <h4 class="pricing-cta__pricing__title">Free for 14 days</h4>
-        @promotion.whenIncentive.map { p =>
-            <p class="pricing-cta__pricing__value">Then @catalog.digipackMonthly.priceGBP.pretty/month</p>
-        }
+        <p class="pricing-cta__pricing__value">Then @catalog.digipackMonthly.priceGBP.pretty/month</p>
     </div>
 </div>
