@@ -5,12 +5,11 @@ import com.gocardless.GoCardlessClient
 import com.gocardless.GoCardlessClient.Environment
 import com.gu.cas.PrefixedTokens
 import com.gu.config.{DigitalPackRatePlanIds, DiscountRatePlanIds, MembershipRatePlanIds, ProductFamilyRatePlanIds}
-import com.gu.i18n.CountryGroup
 import com.gu.identity.cookie.{PreProductionKeys, ProductionKeys}
 import com.gu.memsub.auth.common.MemSub.Google._
 import com.gu.memsub.promo.Promotion._
 import com.gu.memsub.promo._
-import com.gu.memsub.{Digipack, Membership, Price}
+import com.gu.memsub.{Digipack, Membership}
 import com.gu.monitoring.StatusMetrics
 import com.gu.salesforce.SalesforceConfig
 import com.gu.subscriptions.{CASApi, CASService}
@@ -125,11 +124,6 @@ object Config {
 
   def discountPromo(env: String): Option[AnyPromotion] = {
     val prpIds = digipackRatePlanIds(env)
-    val country = CountryGroup.UK
-    val discountedPrice = Price(9.99f, country.currency)
-    val originalPrice = Price(11.99f, country.currency)
-    val discountedAmount = originalPrice - discountedPrice
-    val discountByPercent = ((discountedAmount / originalPrice) * 100).amount
     Some(Promotion(
       appliesTo = AppliesTo.ukOnly(Set(
         prpIds.digitalPackMonthly,
@@ -144,7 +138,7 @@ object Config {
       roundelHtml = "Only £9.99 a month</span><span class='roundel__byline'>usually £11.99",
       thumbnailUrl = "http://lorempixel.com/46/16/abstract",
       title = "More of the Guardian, for less",
-      promotionType = PercentDiscount(None, discountByPercent)
+      promotionType = PercentDiscount(None, 16.680567139283)
     )).filter(_ => env != "PROD")
   }
 
