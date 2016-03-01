@@ -4,9 +4,20 @@
 @import model.DigitalEdition
 
 @(edition: DigitalEdition, catalog: DigipackCatalog, promoCode: PromoCode, promotion: AnyPromotion)
+
+@formattedPrice = {
+    @{
+        promotion.whenPercentDiscount.fold {
+            catalog.digipackMonthly.priceGBP.pretty
+        } {
+            discountPromotion => catalog.digipackMonthly.priceGBP.*(1 - (discountPromotion.promotionType.amount.toFloat / 100f)).pretty
+        }
+    }
+}
+
 <div class="pricing-cta">
     <div class="pricing-cta__pricing">
         <h4 class="pricing-cta__pricing__title">Free for 14 days</h4>
-        <p class="pricing-cta__pricing__value">Then @catalog.digipackMonthly.priceGBP.pretty/month</p>
+        <p class="pricing-cta__pricing__value">Then @formattedPrice/month</p>
     </div>
 </div>
