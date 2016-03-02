@@ -128,17 +128,21 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
         }
 
         case e: CheckoutStripeError =>
-          logger.warn(s"User ${e.userId} could not subscribe")
-          logger.warn(s"Stripe API error: ${e.paymentError}")
-          Forbidden
+          logger.warn(s"Stripe API error: $e")
+          handleCheckoutError(e.paymentError.getMessage, "CheckoutStripeError", e.userId)
 
         case e: CheckoutZuoraPaymentGatewayError =>
           handlePaymentGatewayError(e.paymentError, e.userId)
 
-        case error: IdentityFailure =>
+        case e: CheckoutGenericFailure =>
+          logger.warn(s"Generic Checkout error: $e")
+          handleCheckoutError("User could not subscribe", "CheckoutGenericFailure", e.userId)
+
+        case e: IdentityFailure =>
           logger.warn(
-            s"User could not subscribe because Identity Service could not register the user: $error")
-          Forbidden
+            s"User could not subscribe because Identity Service could not register the user: $e")
+          Forbidden(Json.obj("type" -> "IdentityFailure",
+                             "message" -> "User could not subscribe because Identity Service could not register the user"))
       }
     }.recover {
       case error =>
@@ -220,32 +224,31 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
     } yield Ok(Json.obj("accountValid" -> isAccountValid))
   }
 
-  private def handlePaymentGatewayError(e: PaymentGatewayError, userId: String) = {
+  private def handleCheckoutError(msg: String, errType: String, userId: String) = {
+    logger.warn(s"User $userId could not subscribe: $msg")
+    Forbidden(Json.obj("type" -> errType, "message" -> msg, "userId" -> userId))
+  }
 
-    def handleError(msg: String, errType: String) = {
-      logger.warn(s"${msg}: \n\t${e} \n\tuser=${userId}")
-      Forbidden(Json.obj("type" -> errType, "message" -> msg))
-    }
+  private def handlePaymentGatewayError(e: PaymentGatewayError, userId: String) = {
 
     // TODO: Does Zuora provide a guarantee the message is safe to display to users directly?
     // For now providing custom message to make sure no sensitive information is revealed.
 
-    logger.warn(s"User ${userId} could not subscribe due to payment gateway failed transaction.")
-
     e.errType match {
       case InsufficientFunds =>
-        handleError("Your card has insufficient funds", "InssufficientFunds")
+        handleCheckoutError("Your card has insufficient funds", "InssufficientFunds", userId)
 
       case TransactionNotAllowed =>
-        handleError("Your card does not support this type of purchase", "TransactionNotAllowed")
+        handleCheckoutError("Your card does not support this type of purchase", "TransactionNotAllowed", userId)
 
       case RevocationOfAuthorization =>
-        handleError(
+        handleCheckoutError(
           "Cardholder has requested all payments to be stopped on this card",
-          "RevocationOfAuthorization")
+          "RevocationOfAuthorization",
+          userId)
 
       case _ =>
-        handleError("Your card was declined", "PaymentGatewayError")
+        handleCheckoutError("Your card was declined", "PaymentGatewayError", userId)
     }
   }
 }

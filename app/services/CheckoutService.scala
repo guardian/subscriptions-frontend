@@ -27,13 +27,9 @@ object CheckoutService {
       subscribeResult: SubscribeResult,
       validPromoCode: Option[PromoCode]) extends CheckoutResult
   case class IdentityFailure(exception: Throwable) extends CheckoutResult
-
-  sealed trait CheckoutFailure extends CheckoutResult
-  case class CheckoutGenericFailure(userId: String, exception: Throwable) extends CheckoutFailure
-
-  sealed trait CheckoutPaymentFailure extends CheckoutFailure
-  case class CheckoutStripeError(userId: String, paymentError: Throwable) extends CheckoutPaymentFailure
-  case class CheckoutZuoraPaymentGatewayError(userId: String, paymentError: PaymentGatewayError) extends CheckoutPaymentFailure
+  case class CheckoutGenericFailure(userId: String, exception: Throwable) extends CheckoutResult
+  case class CheckoutStripeError(userId: String, paymentError: Throwable) extends CheckoutResult
+  case class CheckoutZuoraPaymentGatewayError(userId: String, paymentError: PaymentGatewayError) extends CheckoutResult
 
 }
 
