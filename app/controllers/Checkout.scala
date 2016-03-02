@@ -8,6 +8,7 @@ import com.gu.memsub.promo.PromoCode
 import com.gu.memsub.promo.Writers._
 import com.gu.stripe.Stripe
 import com.gu.zuora.soap
+import com.gu.zuora.soap.models.errors._
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config.Identity.webAppProfileUrl
 import configuration.Config._
@@ -17,6 +18,7 @@ import play.api.data.Form
 import play.api.libs.json._
 import play.api.mvc._
 import services.AuthenticationService.authenticatedUserFor
+import services.CheckoutService._
 import services._
 import tracking.ActivityTracking
 import tracking.activities.{CheckoutReachedActivity, MemberData, SubscriptionRegistrationActivity}
@@ -97,33 +99,55 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
     val checkoutResult = checkoutService.processSubscription(formData, idUserOpt, requestData)
 
     checkoutResult.map { result =>
-
-      val productData = Seq(
-        SessionKeys.SubsName -> result.subscribeResult.subscriptionName,
-        SessionKeys.RatePlanId -> formData.productRatePlanId.get
-      )
-
-      val userSessionFields = result.userIdData match {
-        case GuestUser(UserId(userId), IdentityToken(token)) =>
-          Seq(
-            SessionKeys.UserId -> userId,
-            SessionKeys.IdentityGuestPasswordSettingToken -> token
+      result match {
+        case e@CheckoutSuccess(salesforceMember, userIdData, subscribeResult, validPromoCode) => {
+          val productData = Seq(
+            SessionKeys.SubsName -> subscribeResult.subscriptionName,
+            SessionKeys.RatePlanId -> formData.productRatePlanId.get
           )
-        case _ => Seq()
+
+          val userSessionFields = userIdData match {
+            case GuestUser(UserId(userId), IdentityToken(token)) =>
+              Seq(SessionKeys.UserId -> userId,
+                SessionKeys.IdentityGuestPasswordSettingToken -> token)
+
+            case _ => Seq()
+          }
+
+          val appliedPromoCode = validPromoCode.fold(Seq.empty[(String, String)])(validPromoCode => Seq(SessionKeys.AppliedPromoCode -> validPromoCode.get))
+
+          val session = (productData ++ userSessionFields ++ appliedPromoCode).foldLeft(request.session) {
+            _ + _
+          }
+
+          catalog.find(formData.productRatePlanId).foreach { plan =>
+            trackAnon(SubscriptionRegistrationActivity(MemberData(e, formData, plan.billingPeriod)))
+          }
+
+          Ok(Json.obj("redirect" -> routes.Checkout.thankYou().url)).withSession(session)
+        }
+
+        case e: CheckoutStripeError =>
+          logger.warn(s"Stripe API error: $e")
+          handleCheckoutError(e.paymentError.getMessage, "CheckoutStripeError", e.userId)
+
+        case e: CheckoutZuoraPaymentGatewayError =>
+          handlePaymentGatewayError(e.paymentError, e.userId)
+
+        case e: CheckoutGenericFailure =>
+          logger.warn(s"Generic Checkout error: $e")
+          handleCheckoutError("User could not subscribe", "CheckoutGenericFailure", e.userId)
+
+        case e: IdentityFailure =>
+          logger.warn(
+            s"User could not subscribe because Identity Service could not register the user: $e")
+          Forbidden(Json.obj("type" -> "IdentityFailure",
+                             "message" -> "User could not subscribe because Identity Service could not register the user"))
       }
-
-      val appliedPromoCode = result.validPromoCode.fold(Seq.empty[(String,String)])(validPromoCode => Seq(SessionKeys.AppliedPromoCode -> validPromoCode.get))
-
-      val session = (productData ++ userSessionFields ++ appliedPromoCode).foldLeft(request.session) { _ + _ }
-
-      catalog.find(formData.productRatePlanId).foreach { plan =>
-        trackAnon(SubscriptionRegistrationActivity(MemberData(result, formData, plan.billingPeriod)))
-      }
-
-      Ok(Json.obj("redirect" -> routes.Checkout.thankYou().url)).withSession(session)
     }.recover {
-      case err: soap.Error if err.code == "TRANSACTION_FAILED" => Forbidden
-      case err: Stripe.Error => Forbidden
+      case error =>
+        logger.warn(s"User could not subscribe: ${error}")
+        Forbidden
     }
   }
 
@@ -198,5 +222,33 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
     for {
       isAccountValid <- GoCardlessService.checkBankDetails(request.body)
     } yield Ok(Json.obj("accountValid" -> isAccountValid))
+  }
+
+  private def handleCheckoutError(msg: String, errType: String, userId: String) = {
+    logger.warn(s"User $userId could not subscribe: $msg")
+    Forbidden(Json.obj("type" -> errType, "message" -> msg, "userId" -> userId))
+  }
+
+  private def handlePaymentGatewayError(e: PaymentGatewayError, userId: String) = {
+
+    // TODO: Does Zuora provide a guarantee the message is safe to display to users directly?
+    // For now providing custom message to make sure no sensitive information is revealed.
+
+    e.errType match {
+      case InsufficientFunds =>
+        handleCheckoutError("Your card has insufficient funds", "InssufficientFunds", userId)
+
+      case TransactionNotAllowed =>
+        handleCheckoutError("Your card does not support this type of purchase", "TransactionNotAllowed", userId)
+
+      case RevocationOfAuthorization =>
+        handleCheckoutError(
+          "Cardholder has requested all payments to be stopped on this card",
+          "RevocationOfAuthorization",
+          userId)
+
+      case _ =>
+        handleCheckoutError("Your card was declined", "PaymentGatewayError", userId)
+    }
   }
 }
