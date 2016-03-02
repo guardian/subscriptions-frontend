@@ -34,6 +34,7 @@ object CommonActions {
     "customer.experience@guardian.co.uk",
     "directteam@guardian.co.uk",
     "userhelp@guardian.co.uk",
+    "dig.qa@guardian.co.uk",
     "subscriptions.dev@guardian.co.uk"
   ))
 
