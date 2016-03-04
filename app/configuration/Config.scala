@@ -5,6 +5,7 @@ import com.gocardless.GoCardlessClient
 import com.gocardless.GoCardlessClient.Environment
 import com.gu.cas.PrefixedTokens
 import com.gu.config.{DigitalPackRatePlanIds, DiscountRatePlanIds, MembershipRatePlanIds, ProductFamilyRatePlanIds}
+import com.gu.i18n.{CountryGroup, Country}
 import com.gu.identity.cookie.{PreProductionKeys, ProductionKeys}
 import com.gu.memsub.auth.common.MemSub.Google._
 import com.gu.memsub.promo.Promotion._
@@ -125,11 +126,11 @@ object Config {
   def discountPromo(env: String): Option[AnyPromotion] = {
     val prpIds = digipackRatePlanIds(env)
     Some(Promotion(
-      appliesTo = AppliesTo.ukOnly(Set(
-        prpIds.digitalPackMonthly,
-        prpIds.digitalPackQuaterly,
-        prpIds.digitalPackYearly
-      )),
+      // TODO - create an AppliesTo.All
+      appliesTo = AppliesTo(
+        prpIds.productRatePlanIds,
+        CountryGroup.countries.toSet
+      ),
       campaignName = s"DigiPack for just £9.99 a month (~17% discount)",
       codes = PromoCodeSet(PromoCode("DPA30")),
       description = "For a limited time you can enjoy the digital pack for just £9.99 a month (usually £11.99). Get every paper delivered to your tablet for less than 35p an edition, plus an ad-free experience on your live news app.",

@@ -1,16 +1,16 @@
+@import com.gu.i18n.Currency
 @import com.gu.memsub.BillingPeriod
-@import com.gu.memsub.promo.Incentive
+@import com.gu.memsub.promo.Promotion.AnyPromotion
 @import com.gu.subscriptions.DigipackPlan
 @import views.support.BillingPeriod._
 @import views.support.Pricing._
-@import com.gu.memsub.promo.Promotion.AnyPromotion
-@(subscriptionId: String, plan: DigipackPlan[BillingPeriod], promotion: Option[AnyPromotion] = None)
+@(subscriptionId: String, plan: DigipackPlan[BillingPeriod], promotion: Option[AnyPromotion] = None, currency: Currency)
 
 <div class="review-panel js-payment-frequency">
     <input type="checkbox" name="subscriptionDetails"
            checked="checked"
            class="u-h"
-           data-amount="@plan.gbpPrice.pretty"
+           data-amount="@plan.gbpPrice.amount"
            data-number-of-months="@plan.billingPeriod.numberOfMonths">
     <div class="review-panel__item">
         <h4 class="review-panel__label">Subscriber ID:</h4>
@@ -24,12 +24,22 @@
             Digital Pack <em>(Daily Edition / Guardian App Premium Tier)</em>
         </div>
     </div>
+    <div class="review-panel__item">
+        <h4 class="review-panel__label">Your payment plan:</h4>
+        <div class="review-panel__details">
+            @promotion.fold {
+                @plan.prettyPricing(currency)
+            } { p =>
+                <span>@p.applyDiscountToPrice(plan.unsafePrice(currency)).pretty @plan.billingPeriod.frequencyInMonths</span>
+            }
+        </div>
+    </div>
     @promotion.map { promo =>
         <div class="review-panel__promotion">
             <h4 class="review-panel__label">✓ Promotion applied:</h4>
             <div class="review-panel__details">
                 <p>@promo.description</p>
-                @promo.whenIncentive.map { p => <p>@Html(p.promotionType.redemptionInstructions)</p> }
+                @promo.whenIncentive.map { p => <p>@p.promotionType.redemptionInstructions</p> }
             </div>
         </div>
     }

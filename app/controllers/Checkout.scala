@@ -1,17 +1,16 @@
 package controllers
 
 import actions.CommonActions._
-import com.gu.i18n.{Country, CountryGroup, GBP}
+import com.gu.i18n.{Country, CountryGroup, Currency, GBP}
 import com.gu.identity.play.ProxiedIP
 import com.gu.memsub.Subscription.ProductRatePlanId
 import com.gu.memsub.promo.PromoCode
 import com.gu.memsub.promo.Writers._
-import com.gu.stripe.Stripe
-import com.gu.zuora.soap
 import com.gu.zuora.soap.models.errors._
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config.Identity.webAppProfileUrl
 import configuration.Config._
+import controllers.Checkout.SessionKeys.{AppliedPromoCode, IdentityGuestPasswordSettingToken, RatePlanId, SubsName}
 import forms.{FinishAccountForm, SubscriptionsForm}
 import model.{DirectDebitData, SubscriptionData, SubscriptionRequestData}
 import play.api.data.Form
@@ -39,6 +38,7 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
     val UserId = "newSubs_userId"
     val IdentityGuestPasswordSettingToken = "newSubs_token"
     val AppliedPromoCode = "newSubs_appliedPromoCode"
+    val Currency = "newSubs_currency"
   }
 
   def checkoutService(implicit res: TouchpointBackend.Resolution): CheckoutService =
@@ -98,56 +98,55 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
     val requestData = SubscriptionRequestData(ProxiedIP.getIP(request))
     val checkoutResult = checkoutService.processSubscription(formData, idUserOpt, requestData)
 
-    checkoutResult.map { result =>
-      result match {
-        case e@CheckoutSuccess(salesforceMember, userIdData, subscribeResult, validPromoCode) => {
-          val productData = Seq(
-            SessionKeys.SubsName -> subscribeResult.subscriptionName,
-            SessionKeys.RatePlanId -> formData.productRatePlanId.get
-          )
+    checkoutResult.map {
+      case e@CheckoutSuccess(salesforceMember, userIdData, subscribeResult, validPromoCode) => {
+        val productData = Seq(
+          SubsName -> subscribeResult.subscriptionName,
+          RatePlanId -> formData.productRatePlanId.get,
+          SessionKeys.Currency -> formData.personalData.currency.toString
+        )
 
-          val userSessionFields = userIdData match {
-            case GuestUser(UserId(userId), IdentityToken(token)) =>
-              Seq(SessionKeys.UserId -> userId,
-                SessionKeys.IdentityGuestPasswordSettingToken -> token)
+        val userSessionFields = userIdData match {
+          case GuestUser(UserId(userId), IdentityToken(token)) =>
+            Seq(SessionKeys.UserId -> userId,
+              IdentityGuestPasswordSettingToken -> token)
 
-            case _ => Seq()
-          }
-
-          val appliedPromoCode = validPromoCode.fold(Seq.empty[(String, String)])(validPromoCode => Seq(SessionKeys.AppliedPromoCode -> validPromoCode.get))
-
-          val session = (productData ++ userSessionFields ++ appliedPromoCode).foldLeft(request.session) {
-            _ + _
-          }
-
-          catalog.find(formData.productRatePlanId).foreach { plan =>
-            trackAnon(SubscriptionRegistrationActivity(MemberData(e, formData, plan.billingPeriod)))
-          }
-
-          Ok(Json.obj("redirect" -> routes.Checkout.thankYou().url)).withSession(session)
+          case _ => Seq()
         }
 
-        case e: CheckoutStripeError =>
-          logger.warn(s"CheckoutStripeError: User ${e.userId} could not subscribe: $e")
-          Forbidden(Json.obj("type" -> "CheckoutStripeError",
-                             "message" -> e.paymentError.getMessage,
-                             "userId" -> e.userId))
+        val appliedPromoCode = validPromoCode.fold(Seq.empty[(String, String)])(validPromoCode => Seq(AppliedPromoCode -> validPromoCode.get))
 
-        case e: CheckoutZuoraPaymentGatewayError =>
-          handlePaymentGatewayError(e.paymentError, e.userId)
+        val session = (productData ++ userSessionFields ++ appliedPromoCode).foldLeft(request.session.-(AppliedPromoCode)) {
+          _ + _
+        }
 
-        case e: CheckoutGenericFailure =>
-          logger.error(s"CheckoutGenericFailure: User ${e.userId} could not subscribe: $e")
-          Forbidden(Json.obj("type" -> "CheckoutGenericFailure",
-                             "message" -> "User could not subscribe",
-                             "userId" -> e.userId))
+        catalog.find(formData.productRatePlanId).foreach { plan =>
+          trackAnon(SubscriptionRegistrationActivity(MemberData(e, formData, plan.billingPeriod)))
+        }
 
-        case e: IdentityFailure =>
-          logger.error(
-            s"User could not subscribe because Identity Service could not register the user: $e")
-          Forbidden(Json.obj("type" -> "IdentityFailure",
-                             "message" -> "User could not subscribe because Identity Service could not register the user"))
+        Ok(Json.obj("redirect" -> routes.Checkout.thankYou().url)).withSession(session)
       }
+
+      case e: CheckoutStripeError =>
+        logger.warn(s"CheckoutStripeError: User ${e.userId} could not subscribe: $e")
+        Forbidden(Json.obj("type" -> "CheckoutStripeError",
+          "message" -> e.paymentError.getMessage,
+          "userId" -> e.userId))
+
+      case e: CheckoutZuoraPaymentGatewayError =>
+        handlePaymentGatewayError(e.paymentError, e.userId)
+
+      case e: CheckoutGenericFailure =>
+        logger.error(s"CheckoutGenericFailure: User ${e.userId} could not subscribe: $e")
+        Forbidden(Json.obj("type" -> "CheckoutGenericFailure",
+          "message" -> "User could not subscribe",
+          "userId" -> e.userId))
+
+      case e: IdentityFailure =>
+        logger.error(
+          s"User could not subscribe because Identity Service could not register the user: $e")
+        Forbidden(Json.obj("type" -> "IdentityFailure",
+          "message" -> "User could not subscribe because Identity Service could not register the user"))
     }.recover {
       case e =>
         logger.error(s"User could not subscribe: $e")
@@ -171,18 +170,20 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
     val session = request.session
 
     val sessionInfo = for {
-      subsName <- session.get(SessionKeys.SubsName)
-      ratePlanId <- session.get(SessionKeys.RatePlanId)
-    } yield (subsName, ratePlanId)
+      subsName <- session.get(SubsName)
+      ratePlanId <- session.get(RatePlanId)
+      currencyStr <- session.get(SessionKeys.Currency)
+      currency <- Currency.fromString(currencyStr)
+    } yield (subsName, ratePlanId, currency)
 
     // TODO If some pieces of information are missing, redirect to an empty form. Is it the expected behaviour?
     def redirectToEmptyForm = Redirect(routes.Checkout.renderCheckout(CountryGroup.UK, None))
 
-    sessionInfo.fold(redirectToEmptyForm) { case (subsName, ratePlanId) =>
+    sessionInfo.fold(redirectToEmptyForm) { case (subsName, ratePlanId, currency) =>
       val passwordForm = authenticatedUserFor(request).fold {
         for {
           userId <- session.get(SessionKeys.UserId)
-          token <- session.get(SessionKeys.IdentityGuestPasswordSettingToken)
+          token <- session.get(IdentityGuestPasswordSettingToken)
           form <- GuestUser(UserId(userId), IdentityToken(token)).toGuestAccountForm
         } yield form
       } {
@@ -191,9 +192,9 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
 
       val plan = catalog.unsafeFindPaid(ProductRatePlanId(ratePlanId))
 
-      val promotion = session.get(SessionKeys.AppliedPromoCode).flatMap(code => resolution.backend.promoService.findPromotion(PromoCode(code)))
+      val promotion = session.get(AppliedPromoCode).flatMap(code => resolution.backend.promoService.findPromotion(PromoCode(code)))
 
-      Ok(view.thankyou(subsName, passwordForm, resolution, plan, promotion))
+      Ok(view.thankyou(subsName, passwordForm, resolution, plan, promotion, currency))
     }
   }
 

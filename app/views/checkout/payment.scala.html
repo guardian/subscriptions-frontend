@@ -21,15 +21,19 @@
         <span class="option__input">
             <input
             type="radio" name="ratePlanId"
+            data-option-mirror-label-default="@plan.prettyPricing(currency)"
             data-option-mirror-label="@plan.prettyPricing(currency)"
-            data-amount="@plan.pricing.getPrice(currency).get.amount"
+            data-amount="@plan.gbpPrice.amount"
+            data-amount-in-currency="@plan.pricing.getPrice(currency).get.amount"
+            data-currency-identifier="@currency.identifier"
+            data-frequency="@plan.billingPeriod.frequencyInMonths"
             data-number-of-months="@plan.billingPeriod.numberOfMonths"
             data-currency="@currency"
             value="@plan.productRatePlanId.get"
             @if(plan == defaultPlan){checked}
             >
         </span>
-        <span class="option__label">@plan.prettyPricing(currency)</span>
+        <span class="option__label" id="label-for-@plan.productRatePlanId.get-@currency">@plan.prettyPricing(currency)</span>
     </label>
 }
 
