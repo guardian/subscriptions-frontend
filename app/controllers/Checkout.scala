@@ -176,8 +176,7 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
       currency <- Currency.fromString(currencyStr)
     } yield (subsName, ratePlanId, currency)
 
-    // TODO If some pieces of information are missing, redirect to an empty form. Is it the expected behaviour?
-    def redirectToEmptyForm = Redirect(routes.Checkout.renderCheckout(CountryGroup.UK, None))
+    def redirectToEmptyForm = Redirect(routes.Checkout.renderCheckout(CountryGroup.UK, None)).withNewSession
 
     sessionInfo.fold(redirectToEmptyForm) { case (subsName, ratePlanId, currency) =>
       val passwordForm = authenticatedUserFor(request).fold {

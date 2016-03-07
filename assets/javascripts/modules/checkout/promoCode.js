@@ -23,7 +23,7 @@ define([
         bindExtraKeyListener.alreadyBound = true;
     }
 
-    function unapplyPromotionToRatePlans() {
+    function removePromotionFromRatePlans() {
         $ratePlanFields.each(function(el) {
             var $el = $(el),
                 currency = $el.data('currency'),
@@ -65,7 +65,7 @@ define([
                 }
             });
         } else {
-            unapplyPromotionToRatePlans();
+            removePromotionFromRatePlans();
         }
     }
 
@@ -74,7 +74,7 @@ define([
         $promoCodeSnippet.html('');
         $promoCodeApplied.hide();
         toggleError($promoCodeError.parent(), false);
-        unapplyPromotionToRatePlans();
+        removePromotionFromRatePlans();
     }
 
     function displayError(message) {
