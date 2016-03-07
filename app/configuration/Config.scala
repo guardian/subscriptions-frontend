@@ -125,11 +125,7 @@ object Config {
   def discountPromo(env: String): Option[AnyPromotion] = {
     val prpIds = digipackRatePlanIds(env)
     Some(Promotion(
-      appliesTo = AppliesTo.ukOnly(Set(
-        prpIds.digitalPackMonthly,
-        prpIds.digitalPackQuaterly,
-        prpIds.digitalPackYearly
-      )),
+      appliesTo = AppliesTo.all(prpIds.productRatePlanIds),
       campaignName = s"DigiPack for just £9.99 a month (~17% discount)",
       codes = PromoCodeSet(PromoCode("DPA30")),
       description = "For a limited time you can enjoy the digital pack for just £9.99 a month (usually £11.99). Get every paper delivered to your tablet for less than 35p an edition, plus an ad-free experience on your live news app.",

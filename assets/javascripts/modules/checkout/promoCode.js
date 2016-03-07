@@ -9,6 +9,7 @@ define([
     'use strict';
 
     var $inputBox           = formElements.$PROMO_CODE,
+        $ratePlanFields     = $('input[name="ratePlanId"]'),
         $promoCodeSnippet   = $('.js-promo-code-snippet'),
         $promoCodeError     = $('.js-promo-code .js-error-message'),
         $promoCodeApplied   = $('.js-promo-code-applied'),
@@ -22,24 +23,79 @@ define([
         bindExtraKeyListener.alreadyBound = true;
     }
 
-    function displayError(message) {
-        message = message || 'Invalid promo code, please try again.';
+    function removePromotionFromRatePlans() {
+        $ratePlanFields.each(function(el) {
+            var $el = $(el),
+                currency = $el.data('currency'),
+                $label = $('#label-for-' + $el.val() + '-' + currency),
+                newDisplayPrice = $el.data('option-mirror-label-default');
+
+            $label.html(newDisplayPrice);
+            $el.attr('data-option-mirror-label', newDisplayPrice);
+            if ($el.attr('checked')) {
+                bean.fire(el, 'change');
+            }
+        });
+    }
+
+    function formatMoney(currencyIdentifier, amount) {
+        // rounds any remainder up tp 1p so we always quote a higher price than the user might eventually get charged.
+        var price2dp = Math.ceil(amount * 100) / 100,
+            priceNoDot00 = price2dp.toFixed(2).replace(/\.00$/, '');
+
+        return currencyIdentifier + priceNoDot00;
+    }
+
+    function applyPromotionToRatePlans(promotion) {
+        if (promotion.promotionType.amount > 0) {
+            $ratePlanFields.each(function(el) {
+                var $el = $(el),
+                    amount = Number($el.data('amount-in-currency')),
+                    currency = $el.data('currency'),
+                    currencyIdentifier = $el.data('currency-identifier'),
+                    discountPercent = promotion.promotionType.amount,
+                    frequency = $el.data('frequency'),
+                    $label = $('#label-for-' + $el.val() + '-' + currency),
+                    newDisplayPrice = formatMoney(currencyIdentifier, amount * (1 - (discountPercent / 100))) + ' ' + frequency;
+
+                $label.html(newDisplayPrice);
+                $el.attr('data-option-mirror-label', newDisplayPrice);
+                if ($el.attr('checked')) {
+                    bean.fire(el, 'change');
+                }
+            });
+        } else {
+            removePromotionFromRatePlans();
+        }
+    }
+
+    function clearDown() {
+        $promoCodeError.text('');
         $promoCodeSnippet.html('');
         $promoCodeApplied.hide();
+        toggleError($promoCodeError.parent(), false);
+        removePromotionFromRatePlans();
+    }
+
+    function displayError(message) {
+        clearDown();
+        message = message || 'Invalid promo code, please try again.';
         $promoCodeError.text(message);
         toggleError($promoCodeError.parent(), true);
+
     }
 
     function displayPromotion(promotion) {
-        toggleError($promoCodeError.parent(), false);
-        $promoCodeError.text('');
+        clearDown();
         $promoCodeApplied.show();
         $promoCodeSnippet.html(promotion.description);
+        applyPromotionToRatePlans(promotion);
     }
 
     function validate() {
         var promoCode  = $inputBox.val().trim();
         if (promoCode === '') {
+            clearDown();
             return;
         }
 
