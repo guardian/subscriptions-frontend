@@ -3,8 +3,7 @@ package model
 import com.gu.i18n.{Country, CountryGroup}
 import com.gu.identity.play.IdUser
 import com.gu.memsub.Subscription.ProductRatePlanId
-import com.gu.memsub.services.PromoService
-import com.gu.memsub.{Address, FullName}
+import com.gu.memsub.{FullName, Address}
 import com.gu.memsub.promo.PromoCode
 import IdUserOps._
 
@@ -39,7 +38,8 @@ case class PersonalData(first: String,
                         last: String,
                         email: String,
                         receiveGnmMarketing: Boolean,
-                        address: Address
+                        address: Address,
+                        telephoneNumber: Option[String] = None
                         ) extends FullName {
   def fullName = s"$first $last"
 
@@ -59,10 +59,12 @@ case class PersonalData(first: String,
       .getOrElse(notFound)
 }
 
-case class SubscriptionData(personalData: PersonalData,
-                            paymentData: PaymentData,
-                            productRatePlanId: ProductRatePlanId,
-                            suppliedPromoCode: Option[PromoCode])
+
+case class SubscriptionData(
+                             personalData: PersonalData,
+                             paymentData: PaymentData,
+                             productRatePlanId: ProductRatePlanId,
+                             suppliedPromoCode: Option[PromoCode])
 
 object SubscriptionData {
   def fromIdUser(promoCode: Option[PromoCode])(u: IdUser) = {
@@ -71,7 +73,8 @@ object SubscriptionData {
       last = u.privateFields.flatMap(_.secondName).getOrElse(""),
       email = u.primaryEmailAddress,
       receiveGnmMarketing = u.statusFields.flatMap(_.receiveGnmMarketing).getOrElse(false),
-      address = u.address
+      address = u.address,
+      telephoneNumber = u.privateFields.flatMap(_.telephoneNumber).flatMap(_.localNumber)
     )
 
     val blankPaymentData = DirectDebitData("", "", "")
@@ -82,4 +85,5 @@ object SubscriptionData {
 
 
   }
+
 }
