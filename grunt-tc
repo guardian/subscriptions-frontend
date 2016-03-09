@@ -13,6 +13,8 @@ set -o errexit
 JS_DIR=assets/javascripts
 SCSS_DIR=assets/stylesheets
 
+npm install -g bower
+
 npm install
 
 pushd $JS_DIR
