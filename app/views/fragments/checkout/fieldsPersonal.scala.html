@@ -39,14 +39,13 @@
 </div>
 
 @* ===== Phone ===== *@
-@if(touchpointBackendResolution.validTestUserCredentialOpt){
   <div class="form-field js-checkout-phone-number">
-    <label class="label" for="phone-number">Phone Number</label>
+    <label class="label optional-marker" for="phone-number">Phone Number</label>
     <input type="tel" class="input-text js-input input-text"
     id="phone-number" name="personal.telephoneNumber"
     value="@form.data.get("personal.telephoneNumber")" maxlength="20">
   </div>
-}
+
 
 @* ===== Address ===== *@
 <div class="js-checkout-full-address">
