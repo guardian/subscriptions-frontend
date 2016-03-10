@@ -15,22 +15,64 @@ import com.gu.zuora.soap.models.errors._
 import com.typesafe.scalalogging.LazyLogging
 import model._
 import services.CheckoutService._
+import services.IdentityService.{IdentityFailure, IdentitySuccess, IdentityResult}
 import touchpoint.ZuoraProperties
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 object CheckoutService {
   sealed trait CheckoutResult
+
   case class CheckoutSuccess(
       salesforceMember: ContactId,
       userIdData: UserIdData,
       subscribeResult: SubscribeResult,
       validPromoCode: Option[PromoCode]) extends CheckoutResult
-  case class IdentityFailure(exception: Throwable) extends CheckoutResult
-  case class CheckoutGenericFailure(userId: String, exception: Throwable) extends CheckoutResult
-  case class CheckoutStripeError(userId: String, paymentError: Throwable) extends CheckoutResult
-  case class CheckoutZuoraPaymentGatewayError(userId: String, paymentError: PaymentGatewayError) extends CheckoutResult
 
+  case class CheckoutIdentityFailure(
+      msg: String,
+      requestData: String,
+      errorResponse: Option[String]) extends CheckoutResult with SubsError {
+    override val message = msg
+    override val request = requestData
+    override val response = errorResponse
+  }
+
+  case class CheckoutGenericFailure(
+      userId: String,
+      msg: String,
+      requestData: String,
+      errorResponse: Option[String]) extends CheckoutResult with SubsError {
+    override val message = msg
+    override val request = requestData
+    override val response = errorResponse
+  }
+
+  case class CheckoutStripeError(
+      userId: String,
+      paymentError: Throwable,
+      msg: String,
+      requestData: String,
+      errorResponse: Option[String]) extends CheckoutResult with SubsError {
+    override val message = msg
+    override val request = requestData
+    override val response = errorResponse
+  }
+
+  case class CheckoutZuoraPaymentGatewayError(
+      userId: String,
+      paymentError: PaymentGatewayError,
+      msg: String,
+      requestData: String,
+      errorResponse: Option[String]) extends CheckoutResult with SubsError {
+    override val message = msg
+    override val request = requestData
+    override val response = errorResponse
+  }
+
+  case class ProcessSubscriptionIn(subscriptionData: SubscriptionData,
+                                   authenticatedUserOpt: Option[AuthenticatedIdUser],
+                                   requestData: SubscriptionRequestData)
 }
 
 class CheckoutService(identityService: IdentityService,
@@ -43,28 +85,12 @@ class CheckoutService(identityService: IdentityService,
                       promoService: PromoService,
                       promoPlans: DiscountRatePlanIds) extends LazyLogging {
 
-  import CheckoutService.CheckoutResult
-
   def processSubscription(subscriptionData: SubscriptionData,
                           authenticatedUserOpt: Option[AuthenticatedIdUser],
                           requestData: SubscriptionRequestData
-                         ): Future[CheckoutResult] = {
+                         ): Future[Either[Seq[SubsError], CheckoutSuccess]] = {
 
     val personalData = subscriptionData.personalData
-
-    def updateAuthenticatedUserDetails(): Unit =
-      authenticatedUserOpt.foreach(identityService.updateUserDetails(personalData))
-
-    def sendETDataExtensionRow(subscribeResult: SubscribeResult): Future[Unit] =
-      exactTargetService.sendETDataExtensionRow(subscribeResult, subscriptionData)
-
-    val userOrElseRegisterGuest: Future[UserIdData] =
-      authenticatedUserOpt.map(authenticatedUser => Future {
-        RegisteredUser(authenticatedUser.user)
-      }).getOrElse {
-        logger.info(s"User does not have an Identity account. Creating a guest account")
-        identityService.registerGuest(personalData)
-      }
 
     val plan = RatePlan(subscriptionData.productRatePlanId.get, None)
     val discounter = new Discounter(promoPlans, promoService, catalogService.digipackCatalog)
@@ -75,37 +101,78 @@ class CheckoutService(identityService: IdentityService,
       if promotion.validateFor(subscriptionData.productRatePlanId, personalData.address.country).isRight
     } yield code
 
-    userOrElseRegisterGuest.flatMap { userData =>
-      (for {
-        memberId <- salesforceService.createOrUpdateUser(personalData, userData.id)
-        payment = subscriptionData.paymentData match {
-          case paymentData@DirectDebitData(_, _, _) =>
-            paymentService.makeDirectDebitPayment(paymentData, personalData, memberId)
-          case paymentData@CreditCardData(_) =>
-            val plan = catalogService.digipackCatalog.unsafeFind(subscriptionData.productRatePlanId)
-            paymentService.makeCreditCardPayment(paymentData, personalData, userData, memberId, plan)
+    def updateAuthenticatedUserDetails(): Unit =
+      authenticatedUserOpt.foreach(identityService.updateUserDetails(personalData))
+
+    def sendETDataExtensionRow(subscribeResult: SubscribeResult): Future[Unit] =
+      exactTargetService.sendETDataExtensionRow(subscribeResult, subscriptionData)
+
+    def userBecomesSubscriber(userData: UserIdData): Future[Either[Seq[SubsError], CheckoutSuccess]] = {
+        (for {
+          memberId <- salesforceService.createOrUpdateUser(personalData, userData.id)
+          payment = subscriptionData.paymentData match {
+            case paymentData@DirectDebitData(_, _, _) =>
+              paymentService.makeDirectDebitPayment(paymentData, personalData, memberId)
+            case paymentData@CreditCardData(_) =>
+              val plan = catalogService.digipackCatalog.unsafeFind(subscriptionData.productRatePlanId)
+              paymentService.makeCreditCardPayment(paymentData, personalData, userData, memberId, plan)
+          }
+          method <- payment.makePaymentMethod
+          result <- zuoraService.createSubscription(Subscribe(
+            account = payment.makeAccount,
+            paymentMethod = Some(method),
+            ratePlans = discounter.applyPromoCode(plan, validPromoCode),
+            name = personalData,
+            address = personalData.address,
+            promoCode = validPromoCode,
+            paymentDelay = Some(zuoraProperties.paymentDelayInDays),
+            ipAddress = requestData.ipAddress.map(_.getHostAddress)))
+
+        } yield {
+          updateAuthenticatedUserDetails()
+          sendETDataExtensionRow(result)
+          Right(CheckoutSuccess(memberId, userData, result, validPromoCode))
+        }).recover {
+
+          case e: Stripe.Error => Left(Seq(CheckoutStripeError(
+            userData.id.id,
+            e,
+            s"User ${userData.id.id} could not subscribe during checkout due to Stripe API error",
+            ProcessSubscriptionIn(subscriptionData, authenticatedUserOpt, requestData).toString,
+            None)))
+
+          case e: PaymentGatewayError => Left(Seq(CheckoutZuoraPaymentGatewayError(
+            userData.id.id,
+            e,
+            s"User ${userData.id.id} could not subscribe during checkout due to Zuora Payment Gateway Error",
+            ProcessSubscriptionIn(subscriptionData, authenticatedUserOpt, requestData).toString,
+            None)))
+
+          case e => Left(Seq(CheckoutGenericFailure(
+            userData.id.id,
+            s"User ${userData.id.id} could not subscribe during checkout",
+            ProcessSubscriptionIn(subscriptionData, authenticatedUserOpt, requestData).toString,
+            None)))
         }
-        method <- payment.makePaymentMethod
-        result <- zuoraService.createSubscription(Subscribe(
-          account = payment.makeAccount,
-          paymentMethod = Some(method),
-          ratePlans = discounter.applyPromoCode(plan, validPromoCode),
-          name = personalData,
-          address = personalData.address,
-          promoCode = validPromoCode,
-          paymentDelay = Some(zuoraProperties.paymentDelayInDays),
-          ipAddress = requestData.ipAddress.map(_.getHostAddress)))
-      } yield {
-        updateAuthenticatedUserDetails()
-        sendETDataExtensionRow(result)
-        CheckoutSuccess(memberId, userData, result, validPromoCode)
-      }).recover {
-        case e: Stripe.Error => CheckoutStripeError(userData.id.id, e)
-        case e: PaymentGatewayError => CheckoutZuoraPaymentGatewayError(userData.id.id, e)
-        case e => CheckoutGenericFailure(userData.id.id, e)
-      }
-    }.recover {
-      case e => IdentityFailure(e)
+    }
+
+    authenticatedUserOpt match {
+      case Some(authenticatedIdUser) =>
+        userBecomesSubscriber(RegisteredUser(authenticatedIdUser.user))
+
+      case _ =>
+        logger.info(s"User does not have an Identity account. Creating a guest account")
+        identityService.registerGuest(personalData).flatMap {
+            case Right(IdentitySuccess(guestUser)) => userBecomesSubscriber(guestUser)
+
+            case Left(errSeq) =>
+              Future.successful(
+
+                Left(errSeq.+:(CheckoutIdentityFailure(
+                  "User could not subscribe during checkout becuase Identity guest account could not be created",
+                  ProcessSubscriptionIn(subscriptionData, authenticatedUserOpt, requestData).toString,
+                  None))))
+        }
     }
   }
 }
