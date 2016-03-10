@@ -10,7 +10,6 @@ import com.gu.zuora.soap.models.errors._
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config.Identity.webAppProfileUrl
 import configuration.Config._
-import controllers.Checkout.SessionKeys.{AppliedPromoCode, IdentityGuestPasswordSettingToken, RatePlanId, SubsName}
 import forms.{FinishAccountForm, SubscriptionsForm}
 import model.{DirectDebitData, SubscriptionData, SubscriptionRequestData}
 import play.api.data.Form
@@ -40,6 +39,7 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
     val AppliedPromoCode = "newSubs_appliedPromoCode"
     val Currency = "newSubs_currency"
   }
+  import SessionKeys.{Currency =>_, UserId => _, _}
 
   def checkoutService(implicit res: TouchpointBackend.Resolution): CheckoutService =
     res.backend.checkoutService
