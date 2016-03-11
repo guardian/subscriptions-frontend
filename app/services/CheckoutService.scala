@@ -9,7 +9,7 @@ import com.gu.salesforce.ContactId
 import com.gu.stripe.Stripe
 import com.gu.subscriptions.Discounter
 import com.gu.zuora.api.ZuoraService
-import com.gu.zuora.soap.actions.subscribe.RatePlan
+import com.gu.zuora.soap.models.Commands.{Subscribe, RatePlan}
 import com.gu.zuora.soap.models.Results.SubscribeResult
 import com.gu.zuora.soap.models.errors._
 import com.typesafe.scalalogging.LazyLogging
@@ -86,16 +86,15 @@ class CheckoutService(identityService: IdentityService,
             paymentService.makeCreditCardPayment(paymentData, personalData, userData, memberId, plan)
         }
         method <- payment.makePaymentMethod
-        result <- zuoraService.createSubscription(
-          subscribeAccount = payment.makeAccount,
+        result <- zuoraService.createSubscription(Subscribe(
+          account = payment.makeAccount,
           paymentMethod = Some(method),
           ratePlans = discounter.applyPromoCode(plan, validPromoCode),
           name = personalData,
           address = personalData.address,
           promoCode = validPromoCode,
           paymentDelay = Some(zuoraProperties.paymentDelayInDays),
-          ipAddressOpt = requestData.ipAddress.map(_.getHostAddress))
-
+          ipAddress = requestData.ipAddress.map(_.getHostAddress)))
       } yield {
         updateAuthenticatedUserDetails()
         sendETDataExtensionRow(result)

@@ -5,7 +5,7 @@ import com.gu.memsub.{Current, PaidPlan, BillingPeriod}
 import com.gu.salesforce.ContactId
 import com.gu.stripe.StripeService
 import com.gu.subscriptions.DigipackPlan
-import com.gu.zuora.soap.actions.subscribe._
+import com.gu.zuora.soap.models.Commands.{PaymentMethod, CreditCardReferenceTransaction, BankTransfer, Account}
 import model._
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
@@ -37,7 +37,7 @@ trait PaymentService {
     override def makeAccount = Account.stripe(memberId, currency, autopay = true)
     override def makePaymentMethod =
       stripeService.Customer.create(userIdData.id.id, paymentData.stripeToken)
-        .map(CreditCardReferenceTransaction)
+        .map(a => CreditCardReferenceTransaction(a.card.id, a.id))
   }
 
   def makeDirectDebitPayment(paymentData: DirectDebitData, personalData: PersonalData, memberId: ContactId) = {
