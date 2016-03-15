@@ -11,7 +11,7 @@ import com.typesafe.scalalogging.LazyLogging
 import configuration.Config.Identity.webAppProfileUrl
 import configuration.Config._
 import forms.{FinishAccountForm, SubscriptionsForm}
-import model.{DirectDebitData, SubscriptionData, SubscriptionRequestData}
+import model.{SubsError, DirectDebitData, SubscriptionData, SubscriptionRequestData}
 import play.api.data.Form
 import play.api.libs.json._
 import play.api.mvc._
@@ -130,13 +130,13 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
       case Left(seqErr) => seqErr.head match {
 
         case e: CheckoutIdentityFailure =>
-          logger.error(seqErr.map(_.toStringPretty()).toString())
+          logger.error(SubsError.toStringPretty(seqErr))
 
           Forbidden(Json.obj("type" -> "IdentityFailure",
             "message" -> "User could not subscribe because Identity Service could not register the user"))
 
         case e: CheckoutStripeError =>
-          logger.warn(seqErr.map(_.toStringPretty()).toString())
+          logger.warn(SubsError.toStringPretty(seqErr))
 
           Forbidden(Json.obj(
             "type" -> "CheckoutStripeError",
@@ -144,11 +144,11 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
             "userId" -> e.userId))
 
         case e: CheckoutZuoraPaymentGatewayError =>
-          logger.warn(seqErr.map(_.toStringPretty()).toString())
+          logger.warn(SubsError.toStringPretty(seqErr))
           handlePaymentGatewayError(e.paymentError, e.userId)
 
         case e: CheckoutGenericFailure =>
-          logger.error(seqErr.map(_.toStringPretty()).toString())
+          logger.error(SubsError.toStringPretty(seqErr))
 
           Forbidden(Json.obj("type" -> "CheckoutGenericFailure",
             "message" -> "User could not subscribe",
