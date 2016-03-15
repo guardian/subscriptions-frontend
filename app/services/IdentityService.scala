@@ -6,7 +6,7 @@ import com.gu.monitoring.{AuthenticationMetrics, CloudWatch, RequestMetrics, Sta
 import com.gu.memsub.NormalisedTelephoneNumber
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
-import model.PersonalData
+import model.{SubsError, PersonalData}
 import play.api.Play.current
 import play.api.http.Status
 import play.api.libs.json._
@@ -36,8 +36,17 @@ class IdentityService(identityApiClient: => IdentityApiClient) extends LazyLoggi
     }
   }
 
-  def registerGuest(personalData: PersonalData): Future[GuestUser] = {
-    identityApiClient.createGuest(personalData).map(response => response.json.as[GuestUser])
+  def registerGuest(personalData: PersonalData): Future[Either[Seq[SubsError], IdentitySuccess]] = {
+    identityApiClient.createGuest(personalData).map { response =>
+      response.json.asOpt[GuestUser] match {
+        case Some(guest) => Right(IdentitySuccess(guest))
+        case None => Left(Seq(
+          IdentityFailure(
+          "Guest user could not be registered as Identity user",
+          personalData.toString,
+          Some(response.json.toString()))))
+      }
+    }
   }
 
   def convertGuest(password: String, token: IdentityToken): Future[Seq[Cookie]] = {
@@ -65,6 +74,16 @@ class IdentityService(identityApiClient: => IdentityApiClient) extends LazyLoggi
 }
 
 object IdentityService extends IdentityService(IdentityApiClient) {
+
+  sealed trait IdentityResult
+  case class IdentitySuccess(userData: UserIdData) extends IdentityResult
+  case class IdentityFailure(msg: String,
+                             requestData: String,
+                             errorResponse: Some[String]) extends SubsError with IdentityResult {
+    override val message = msg
+    override val request = requestData
+    override val response = errorResponse
+  }
 
   class IdentityGuestPasswordError(jsonMsg: String) extends RuntimeException(s"Cannot set password for Identity guest user.")
 
@@ -130,7 +149,8 @@ object IdentityApiClient extends IdentityApiClient with LazyLogging {
   implicit class FutureWSLike(eventualResponse: Future[WSResponse]) {
     /**
      * Example of ID API Response: `{"status":"error","errors":[{"message":"Forbidden","description":"Field access denied","context":"privateFields.billingAddress1"}]}`
-     * @return
+      *
+      * @return
      */
     private def applyOnSpecificErrors(reasons: List[String])(block: WSResponse => Unit): Unit = {
       def errorMessageFilter(error: JsValue): Boolean =

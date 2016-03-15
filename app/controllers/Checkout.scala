@@ -99,7 +99,7 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
     val checkoutResult = checkoutService.processSubscription(formData, idUserOpt, requestData)
 
     checkoutResult.map {
-      case e@CheckoutSuccess(salesforceMember, userIdData, subscribeResult, validPromoCode) => {
+      case Right(e@CheckoutSuccess(salesforceMember, userIdData, subscribeResult, validPromoCode)) => {
         val productData = Seq(
           SubsName -> subscribeResult.subscriptionName,
           RatePlanId -> formData.productRatePlanId.get,
@@ -127,26 +127,34 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
         Ok(Json.obj("redirect" -> routes.Checkout.thankYou().url)).withSession(session)
       }
 
-      case e: CheckoutStripeError =>
-        logger.warn(s"CheckoutStripeError: User ${e.userId} could not subscribe: $e")
-        Forbidden(Json.obj("type" -> "CheckoutStripeError",
-          "message" -> e.paymentError.getMessage,
-          "userId" -> e.userId))
+      case Left(seqErr) => seqErr.head match {
 
-      case e: CheckoutZuoraPaymentGatewayError =>
-        handlePaymentGatewayError(e.paymentError, e.userId)
+        case e: CheckoutIdentityFailure =>
+          logger.error(seqErr.map(_.toStringPretty()).toString())
 
-      case e: CheckoutGenericFailure =>
-        logger.error(s"CheckoutGenericFailure: User ${e.userId} could not subscribe: $e")
-        Forbidden(Json.obj("type" -> "CheckoutGenericFailure",
-          "message" -> "User could not subscribe",
-          "userId" -> e.userId))
+          Forbidden(Json.obj("type" -> "IdentityFailure",
+            "message" -> "User could not subscribe because Identity Service could not register the user"))
 
-      case e: IdentityFailure =>
-        logger.error(
-          s"User could not subscribe because Identity Service could not register the user: $e")
-        Forbidden(Json.obj("type" -> "IdentityFailure",
-          "message" -> "User could not subscribe because Identity Service could not register the user"))
+        case e: CheckoutStripeError =>
+          logger.warn(seqErr.map(_.toStringPretty()).toString())
+
+          Forbidden(Json.obj(
+            "type" -> "CheckoutStripeError",
+            "message" -> e.paymentError.getMessage,
+            "userId" -> e.userId))
+
+        case e: CheckoutZuoraPaymentGatewayError =>
+          logger.warn(seqErr.map(_.toStringPretty()).toString())
+          handlePaymentGatewayError(e.paymentError, e.userId)
+
+        case e: CheckoutGenericFailure =>
+          logger.error(seqErr.map(_.toStringPretty()).toString())
+
+          Forbidden(Json.obj("type" -> "CheckoutGenericFailure",
+            "message" -> "User could not subscribe",
+            "userId" -> e.userId))
+      }
+
     }.recover {
       case e =>
         logger.error(s"User could not subscribe: $e")
