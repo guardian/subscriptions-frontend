@@ -6,8 +6,8 @@ import com.github.t3hnar.bcrypt._
 import com.gu.memsub.{BillingPeriod, Address}
 import configuration.Config
 import model.{CreditCardData, DirectDebitData, PaymentData, SubscriptionData}
-import services.CheckoutService.CheckoutSuccess
 import tracking.{ActivityTracking, TrackerData}
+import model.error.CheckoutService._
 
 import scala.collection.JavaConversions._
 
