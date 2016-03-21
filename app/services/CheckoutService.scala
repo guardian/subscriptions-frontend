@@ -7,9 +7,9 @@ import com.gu.memsub.services.PromoService
 import com.gu.memsub.services.api.CatalogService
 import com.gu.salesforce.ContactId
 import com.gu.stripe.Stripe
-import com.gu.subscriptions.Discounter
 import com.gu.zuora.api.ZuoraService
 import com.gu.zuora.soap.models.Commands.{Subscribe, RatePlan}
+import com.gu.zuora.soap.models.Commands.Lenses._
 import com.gu.zuora.soap.models.Results.SubscribeResult
 import com.gu.zuora.soap.models.errors._
 import com.typesafe.scalalogging.LazyLogging
@@ -19,6 +19,7 @@ import services.IdentityService.{IdentityFailure, IdentitySuccess, IdentityResul
 import touchpoint.ZuoraProperties
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scalaz.NonEmptyList
 
 object CheckoutService {
   sealed trait CheckoutResult
@@ -91,15 +92,7 @@ class CheckoutService(identityService: IdentityService,
                          ): Future[Either[Seq[SubsError], CheckoutSuccess]] = {
 
     val personalData = subscriptionData.personalData
-
     val plan = RatePlan(subscriptionData.productRatePlanId.get, None)
-    val discounter = new Discounter(promoPlans, promoService, catalogService.digipackCatalog)
-
-    val validPromoCode = for {
-      code <- subscriptionData.suppliedPromoCode
-      promotion <- promoService.findPromotion(code)
-      if promotion.validateFor(subscriptionData.productRatePlanId, personalData.address.country).isRight
-    } yield code
 
     def updateAuthenticatedUserDetails(): Unit =
       authenticatedUserOpt.foreach(identityService.updateUserDetails(personalData))
@@ -118,20 +111,24 @@ class CheckoutService(identityService: IdentityService,
               paymentService.makeCreditCardPayment(paymentData, personalData, userData, memberId, plan)
           }
           method <- payment.makePaymentMethod
-          result <- zuoraService.createSubscription(Subscribe(
-            account = payment.makeAccount,
-            paymentMethod = Some(method),
-            ratePlans = discounter.applyPromoCode(plan, validPromoCode),
-            name = personalData,
-            address = personalData.address,
-            promoCode = validPromoCode,
-            paymentDelay = Some(zuoraProperties.paymentDelayInDays),
-            ipAddress = requestData.ipAddress.map(_.getHostAddress)))
-
+          subscribe = promoService.applyPromotion(
+            Subscribe(
+              account = payment.makeAccount,
+              paymentMethod = Some(method),
+              ratePlans = NonEmptyList(plan),
+              name = personalData,
+              address = personalData.address,
+              paymentDelay = Some(zuoraProperties.paymentDelayInDays),
+              ipAddress = requestData.ipAddress.map(_.getHostAddress)
+            ),
+            subscriptionData.suppliedPromoCode,
+            Some(personalData.country)
+          )
+          result <- zuoraService.createSubscription(subscribe)
         } yield {
           updateAuthenticatedUserDetails()
           sendETDataExtensionRow(result)
-          Right(CheckoutSuccess(memberId, userData, result, validPromoCode))
+          Right(CheckoutSuccess(memberId, userData, result, subscribe.promoCode))
         }).recover {
 
           case e: Stripe.Error => Left(Seq(CheckoutStripeError(

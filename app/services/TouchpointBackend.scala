@@ -5,6 +5,7 @@ import com.gu.memsub.Digipack
 import com.gu.memsub.services.{CatalogService, PromoService, api}
 import com.gu.monitoring.{ServiceMetrics, StatusMetrics}
 import com.gu.stripe.StripeService
+import com.gu.subscriptions.Discounter
 import com.gu.zuora
 import com.gu.zuora.{rest, soap}
 import configuration.Config
@@ -32,9 +33,10 @@ object TouchpointBackend {
     val digipackRatePlanIds = Config.digipackRatePlanIds(config.environmentName)
     val discountPlans = Config.discountRatePlanIds(config.environmentName)
 
+    val discounter = new Discounter(discountPlans)
     val membershipRatePlanIds = Config.membershipRatePlanIds(config.environmentName)
     val catalogService = CatalogService(restClient, membershipRatePlanIds, digipackRatePlanIds, config.environmentName)
-    val promoService = new PromoService(Seq(demoPromo(config.environmentName)) ++ discountPromo(config.environmentName))
+    val promoService = new PromoService(Seq(demoPromo(config.environmentName)) ++ discountPromo(config.environmentName), catalogService.digipackCatalog, discounter)
     val zuoraService = new zuora.ZuoraService(soapClient, restClient, digipackRatePlanIds, promoService)
     val _stripeService = new StripeService(config.stripe, new TouchpointBackendMetrics with StatusMetrics {
       val backendEnv = config.stripe.envName
