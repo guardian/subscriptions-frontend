@@ -1,57 +1,45 @@
 package model.exactTarget
-
-import com.gu.zuora.soap.models.Queries._
+import com.gu.memsub.Subscription
+import com.gu.memsub.Subscription._
 import com.typesafe.scalalogging.LazyLogging
-import model.{CreditCardData, DirectDebitData, SubscriptionData}
-import org.joda.time.{LocalDate, DateTime}
+import com.gu.memsub.PaymentMethod
+import org.joda.time.LocalDate
+import model.PersonalData
 import utils.Dates
 
 import scala.math.BigDecimal.decimal
 
 object SubscriptionDataExtensionRow extends LazyLogging{
   def apply(
-      subscription: Subscription,
-      subscriptionData: SubscriptionData,
-      ratePlanCharge: RatePlanCharge,
-      paymentMethod: PaymentMethod,
-      account: Account
+      personalData: PersonalData,
+      subscription: Subscription with Paid,
+      paymentMethod: PaymentMethod
       ): SubscriptionDataExtensionRow = {
 
-    val billingPeriod = ratePlanCharge.billingPeriod.getOrElse(
-      throw new ExactTargetException(s"Error while processing $subscription: Could not create a SubscriptionDataExtensionRow without a billing period")
-    )
-
-    val personalData = subscriptionData.personalData
 
     val address = personalData.address
 
-    val paymentFields = subscriptionData.paymentData match {
-      case DirectDebitData(accountNumber, sortCode, holder) =>
-        val mandateParam = paymentMethod.mandateId match {
-          case Some(id) => Seq("MandateID" -> id)
-          case None =>
-            logger.error(s"Expected the payment method for subscription ${subscription.name} to have a mandate id (Direct Debit payment).")
-            Seq()
-        }
-
-        Seq(
-          "Account number" -> formatAccountNumber(accountNumber),
+    val paymentFields = paymentMethod match {
+      case com.gu.memsub.GoCardless(mandateId, accName, accNumber, sortCode) => Seq(
+          "Account number" -> formatAccountNumber(accNumber),
           "Sort Code" -> formatSortCode(sortCode),
-          "Account Name" -> holder,
-          "Default payment method" -> "Direct Debit"
-        ) ++ mandateParam
-
-      case CreditCardData(_) => Seq("Default payment method" -> "Credit/Debit Card")
+          "Account Name" -> accName,
+          "Default payment method" -> "Direct Debit",
+          "MandateID" -> mandateId
+        )
+      case _: com.gu.memsub.PaymentCard => Seq(
+        "Default payment method" -> "Credit/Debit Card"
+      )
     }
 
     SubscriptionDataExtensionRow(
       personalData.email,
       Seq(
-        "ZuoraSubscriberId" -> subscription.name,
+        "ZuoraSubscriberId" -> subscription.name.get,
         "SubscriberKey" -> personalData.email,
         "EmailAddress" -> personalData.email,
-        "Subscription term" -> formatSubscriptionTerm(billingPeriod),
-        "Payment amount" -> formatPrice(ratePlanCharge.price),
+        "Subscription term" -> subscription.plan.billingPeriod.noun,
+        "Payment amount" -> formatPrice(subscription.recurringPrice.amount),
         "First Name" -> personalData.first,
         "Last Name" -> personalData.last,
         "Address 1" -> address.lineOne,
@@ -59,7 +47,7 @@ object SubscriptionDataExtensionRow extends LazyLogging{
         "City" -> address.town,
         "Post Code" -> address.postCode,
         "Country" -> address.country.name,
-        "Date of first payment" -> formatDate(subscription.contractAcceptanceDate),
+        "Date of first payment" -> formatDate(subscription.firstPaymentDate),
         "Currency" -> personalData.currency.glyph,
         //TODO to remove, hardcoded in the template
         "Trial period" -> "14",
