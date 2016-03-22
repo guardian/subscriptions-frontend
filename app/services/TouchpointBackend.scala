@@ -37,7 +37,7 @@ object TouchpointBackend {
     val membershipRatePlanIds = Config.membershipRatePlanIds(config.environmentName)
     val catalogService = CatalogService(restClient, membershipRatePlanIds, digipackRatePlanIds, config.environmentName)
     val promoService = new PromoService(Seq(demoPromo(config.environmentName)) ++ discountPromo(config.environmentName), catalogService.digipackCatalog, discounter)
-    val zuoraService = new zuora.ZuoraService(soapClient, restClient, digipackRatePlanIds, promoService)
+    val zuoraService = new zuora.ZuoraService(soapClient, restClient, digipackRatePlanIds)
     val _stripeService = new StripeService(config.stripe, new TouchpointBackendMetrics with StatusMetrics {
       val backendEnv = config.stripe.envName
       val service = "Stripe"
