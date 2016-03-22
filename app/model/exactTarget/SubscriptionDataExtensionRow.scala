@@ -3,7 +3,7 @@ package model.exactTarget
 import com.gu.zuora.soap.models.Queries._
 import com.typesafe.scalalogging.LazyLogging
 import model.{CreditCardData, DirectDebitData, SubscriptionData}
-import org.joda.time.DateTime
+import org.joda.time.{LocalDate, DateTime}
 import utils.Dates
 
 import scala.math.BigDecimal.decimal
@@ -68,7 +68,7 @@ object SubscriptionDataExtensionRow extends LazyLogging{
     )
   }
 
-  private def formatDate(dateTime: DateTime) = {
+  private def formatDate(dateTime: LocalDate) = {
     val day = dateTime.dayOfMonth.get
 
     val dayWithSuffix = Dates.getOrdinalDay(day)
