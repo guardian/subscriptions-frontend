@@ -108,7 +108,6 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
             "message" -> "User could not subscribe because Identity Service could not register the user"))
 
         case e: CheckoutStripeError =>
-          logger.error(SubsError.header(seqErr))
           logger.warn(SubsError.toStringPretty(seqErr))
 
           Forbidden(Json.obj(
@@ -248,7 +247,7 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
 
     e.errType match {
       case InsufficientFunds =>
-        handleError("Your card has insufficient funds", "InssufficientFunds", userId)
+        handleError("Your card has insufficient funds", "InsufficientFunds", userId)
 
       case TransactionNotAllowed =>
         handleError("Your card does not support this type of purchase", "TransactionNotAllowed", userId)
