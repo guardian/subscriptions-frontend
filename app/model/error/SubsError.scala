@@ -1,4 +1,6 @@
-package model
+package model.error
+
+import scalaz.NonEmptyList
 
 trait SubsError {
   val message: String
@@ -16,7 +18,16 @@ trait SubsError {
 }
 
 object SubsError {
-  def toStringPretty(seqErr: Seq[SubsError]): String = {
-    seqErr.head.message + ":\n" + seqErr.map(_.toStringPretty()).toString()
+  def toStringPretty(seqErr: NonEmptyList[SubsError]): String =
+    seqErr.map(_.toStringPretty()).toString()
+
+  def header(seqErr: NonEmptyList[SubsError]): String = {
+    val head = seqErr.head
+    s"${head.getClass().getSimpleName}: ${seqErr.head.message}"
   }
 }
+
+
+
+
+

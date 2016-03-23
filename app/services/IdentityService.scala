@@ -1,12 +1,13 @@
 package services
 
 import com.amazonaws.regions.{Region, Regions}
-import com.gu.identity.play.{AccessCredentials, CookieBuilder, AuthenticatedIdUser, IdUser}
+import com.gu.identity.play._
 import com.gu.monitoring.{AuthenticationMetrics, CloudWatch, RequestMetrics, StatusMetrics}
 import com.gu.memsub.NormalisedTelephoneNumber
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
-import model.{SubsError, PersonalData}
+import model.PersonalData
+import model.error.SubsError
 import play.api.Play.current
 import play.api.http.Status
 import play.api.libs.json._
@@ -16,6 +17,8 @@ import play.api.mvc.Cookie
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.language.implicitConversions
 import scala.concurrent.Future
+import scalaz.{\/, NonEmptyList}
+import model.error.IdentityService._
 
 class IdentityService(identityApiClient: => IdentityApiClient) extends LazyLogging {
 
@@ -36,11 +39,11 @@ class IdentityService(identityApiClient: => IdentityApiClient) extends LazyLoggi
     }
   }
 
-  def registerGuest(personalData: PersonalData): Future[Either[Seq[SubsError], IdentitySuccess]] = {
+  def registerGuest(personalData: PersonalData): Future[NonEmptyList[SubsError] \/ IdentitySuccess] = {
     identityApiClient.createGuest(personalData).map { response =>
       response.json.asOpt[GuestUser] match {
-        case Some(guest) => Right(IdentitySuccess(guest))
-        case None => Left(Seq(
+        case Some(guest) => \/.right(IdentitySuccess(guest))
+        case None => \/.left(NonEmptyList(
           IdentityFailure(
           "Guest user could not be registered as Identity user",
           personalData.toString,
@@ -62,28 +65,30 @@ class IdentityService(identityApiClient: => IdentityApiClient) extends LazyLoggi
     }
   }
 
-  def updateUserDetails(personalData: PersonalData)(authenticatedUser: AuthenticatedIdUser): Future[Unit] =
+  def updateUserDetails(personalData: PersonalData)(authenticatedUser: AuthenticatedIdUser): Future[NonEmptyList[SubsError] \/ IdentitySuccess] =
     authenticatedUser.credentials match {
       case cookies: AccessCredentials.Cookies =>
         identityApiClient.updateUserDetails(
           personalData,
           cookies
-        ).map(_ => Unit)
-      case _ => Future.successful(logger.error("ID API only supports forwarded access for Cookies"))
+        ).map { response => response.status match {
+            case Status.OK => \/.right(IdentitySuccess(RegisteredUser(IdMinimalUser("", None))))
+            case _ =>
+              \/.left(NonEmptyList(IdentityFailure(
+                "Registered user's details could not be updated in Identity",
+                personalData.toString,
+                Some(response.json.toString()))))
+          }
+        }
+
+      case _ => Future.successful(\/.left(NonEmptyList(IdentityFailure(
+        "ID API only supports forwarded access for Cookies",
+        personalData.toString,
+        None))))
     }
 }
 
 object IdentityService extends IdentityService(IdentityApiClient) {
-
-  sealed trait IdentityResult
-  case class IdentitySuccess(userData: UserIdData) extends IdentityResult
-  case class IdentityFailure(msg: String,
-                             requestData: String,
-                             errorResponse: Some[String]) extends SubsError with IdentityResult {
-    override val message = msg
-    override val request = requestData
-    override val response = errorResponse
-  }
 
   class IdentityGuestPasswordError(jsonMsg: String) extends RuntimeException(s"Cannot set password for Identity guest user.")
 

@@ -11,23 +11,23 @@ import com.typesafe.scalalogging.LazyLogging
 import configuration.Config.Identity.webAppProfileUrl
 import configuration.Config._
 import forms.{FinishAccountForm, SubscriptionsForm}
-import model.{SubsError, DirectDebitData, SubscriptionData, SubscriptionRequestData}
+import model.{DirectDebitData, SubscriptionData, SubscriptionRequestData}
+import model.error.CheckoutService._
+import model.error.SubsError
 import play.api.data.Form
 import play.api.libs.json._
 import play.api.mvc._
 import services.AuthenticationService.authenticatedUserFor
-import services.CheckoutService._
 import services._
 import tracking.ActivityTracking
 import tracking.activities.{CheckoutReachedActivity, MemberData, SubscriptionRegistrationActivity}
 import utils.TestUsers.{NameEnteredInForm, PreSigninTestCookie}
 import views.html.{checkout => view}
 import views.support.CountryWithCurrency
-
 import scala.Function.const
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scalaz.OptionT
+import scalaz.{NonEmptyList, OptionT}
 import scalaz.std.scalaFuture._
 
 object Checkout extends Controller with LazyLogging with ActivityTracking with CatalogProvider {
@@ -98,44 +98,17 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
     val requestData = SubscriptionRequestData(ProxiedIP.getIP(request))
     val checkoutResult = checkoutService.processSubscription(formData, idUserOpt, requestData)
 
-    checkoutResult.map {
-      case Right(e@CheckoutSuccess(salesforceMember, userIdData, subscribeResult, validPromoCode)) => {
-        val productData = Seq(
-          SubsName -> subscribeResult.subscriptionName,
-          RatePlanId -> formData.productRatePlanId.get,
-          SessionKeys.Currency -> formData.personalData.currency.toString
-        )
-
-        val userSessionFields = userIdData match {
-          case GuestUser(UserId(userId), IdentityToken(token)) =>
-            Seq(SessionKeys.UserId -> userId,
-              IdentityGuestPasswordSettingToken -> token)
-
-          case _ => Seq()
-        }
-
-        val appliedPromoCode = validPromoCode.fold(Seq.empty[(String, String)])(validPromoCode => Seq(AppliedPromoCode -> validPromoCode.get))
-
-        val session = (productData ++ userSessionFields ++ appliedPromoCode).foldLeft(request.session.-(AppliedPromoCode)) {
-          _ + _
-        }
-
-        catalog.find(formData.productRatePlanId).foreach { plan =>
-          trackAnon(SubscriptionRegistrationActivity(MemberData(e, formData, plan.billingPeriod)))
-        }
-
-        Ok(Json.obj("redirect" -> routes.Checkout.thankYou().url)).withSession(session)
-      }
-
-      case Left(seqErr) => seqErr.head match {
-
+    def failure(seqErr: NonEmptyList[SubsError]) = {
+      seqErr.head match {
         case e: CheckoutIdentityFailure =>
-          logger.error(SubsError.toStringPretty(seqErr))
+          logger.error(SubsError.header(seqErr))
+          logger.warn(SubsError.toStringPretty(seqErr))
 
-          Forbidden(Json.obj("type" -> "IdentityFailure",
+          Forbidden(Json.obj("type" -> "CheckoutIdentityFailure",
             "message" -> "User could not subscribe because Identity Service could not register the user"))
 
         case e: CheckoutStripeError =>
+          logger.error(SubsError.header(seqErr))
           logger.warn(SubsError.toStringPretty(seqErr))
 
           Forbidden(Json.obj(
@@ -148,18 +121,44 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
           handlePaymentGatewayError(e.paymentError, e.userId)
 
         case e: CheckoutGenericFailure =>
-          logger.error(SubsError.toStringPretty(seqErr))
+          logger.error(SubsError.header(seqErr))
+          logger.warn(SubsError.toStringPretty(seqErr))
 
           Forbidden(Json.obj("type" -> "CheckoutGenericFailure",
             "message" -> "User could not subscribe",
             "userId" -> e.userId))
       }
-
-    }.recover {
-      case e =>
-        logger.error(s"User could not subscribe: $e")
-        Forbidden
     }
+
+    def success(r: CheckoutSuccess) = {
+      val productData = Seq(
+        SubsName -> r.subscribeResult.subscriptionName,
+        RatePlanId -> formData.productRatePlanId.get,
+        SessionKeys.Currency -> formData.personalData.currency.toString
+      )
+
+      val userSessionFields = r.userIdData match {
+        case GuestUser(UserId(userId), IdentityToken(token)) =>
+          Seq(SessionKeys.UserId -> userId,
+            IdentityGuestPasswordSettingToken -> token)
+
+        case _ => Seq()
+      }
+
+      val appliedPromoCode = r.validPromoCode.fold(Seq.empty[(String, String)])(validPromoCode => Seq(AppliedPromoCode -> validPromoCode.get))
+
+      val session = (productData ++ userSessionFields ++ appliedPromoCode).foldLeft(request.session.-(AppliedPromoCode)) {
+        _ + _
+      }
+
+      catalog.find(formData.productRatePlanId).foreach { plan =>
+        trackAnon(SubscriptionRegistrationActivity(MemberData(r, formData, plan.billingPeriod)))
+      }
+
+      Ok(Json.obj("redirect" -> routes.Checkout.thankYou().url)).withSession(session)
+    }
+
+    checkoutResult.map(_.fold(failure, success))
   }
 
   def convertGuestUser = NoCacheAction.async(parse.form(FinishAccountForm())) { implicit request =>
