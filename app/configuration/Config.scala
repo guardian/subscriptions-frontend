@@ -39,6 +39,8 @@ object Config {
   val bcryptSalt = config.getString("activity.tracking.bcrypt.salt")
   val bcryptPepper = config.getString("activity.tracking.bcrypt.pepper")
 
+  val timezone = DateTimeZone.forID("Europe/London")
+
  object Identity {
     private val idConfig = config.getConfig("identity")
 
@@ -110,14 +112,13 @@ object Config {
       campaignName = "DigiPack - £30 digital gift card",
       codes = PromoCodeSet(PromoCode("DGA88"), PromoCode("DGB88")),
       description = "Get £30 to spend with a top retailer of your choice when you subscribe. Use your digital gift card at Amazon.co.uk, M&S and more. Treat yourself or a friend.",
-      expires = new LocalDate(2016,4,1).toDateTime(LocalTime.Midnight, DateTimeZone.forID("Europe/London")),
+      expires = new LocalDate(2016,4,1).toDateTime(LocalTime.Midnight, timezone),
       imageUrl = Some("https://media.guim.co.uk/b26ecf643d6494d60fc32c94e43d8d1483daadac/0_0_720_418/720.jpg"),
       promotionType = Incentive(
         redemptionInstructions = "We'll send redemption instructions to your registered email address",
         termsAndConditions = "<h4>Giftcloud £30 gift card terms and conditions</h4><p>Offer only available to customers who subscribe after trial period. Customers are asked to allow up to 35 days from first payment date to receive their gift card redemption email. Offer available to customers who subscribe after trial period only. Once customers have received their gift card redemption email they will have 90 days to claim the £30 gift card by selecting their chosen digital gift card and entering their email or phone number after which time the gift will no longer be available. In the event stock runs out you may be offered an alternative gift of a similar value or a full refund. GNM reserves the right to withdraw this promotion at any time.</p> <p>Amazon.co.uk Gift Cards (“GCs”) sold by Giftcloud, an authorised and independent reseller of Amazon.co.uk Gift Cards. Amazon.co.uk Gift Cards may be redeemed on the Amazon.co.uk website towards the purchase of eligible products listed in our online catalogue and sold by Amazon.co.uk or any other seller selling through Amazon.co.uk. GCs cannot be reloaded, resold, transferred for value, redeemed for cash or applied to any other account. Amazon.co.uk is not responsible if a GC is lost, stolen, destroyed or used without permission. See <a href='http://www.amazon.co.uk/gc-legal' target='_blank'>www.amazon.co.uk/gc-legal</a> for complete terms and conditions. GCs are issued by Amazon EU S.à r.l. All Amazon ®, ™ & © are IP of Amazon.com, Inc. or its affiliates.</p>"
       ),
       roundelHtml = "<span class='roundel__strong'>£30</span> digital gift card",
-      thumbnailUrl = "http://lorempixel.com/46/16/abstract",
       title = "Free £30 digital gift card when you subscribe"
     )
   }
@@ -129,18 +130,31 @@ object Config {
       campaignName = s"DigiPack for just £9.99 a month (~17% discount)",
       codes = PromoCodeSet(PromoCode("DPA30")),
       description = "For a limited time you can enjoy the digital pack for a special discounted price. Get every issue of The Guardian and The Observer newspapers delivered to your tablet, plus an ad-free experience on The Guardian live news app.",
-      expires = new LocalDate(2016,4,1).toDateTime(LocalTime.Midnight, DateTimeZone.forID("Europe/London")),
+      expires = new LocalDate(2016,4,1).toDateTime(LocalTime.Midnight, timezone),
       imageUrl = None,
       roundelHtml = "Only £9.99 a month</span><span class='roundel__byline'>usually £11.99",
-      thumbnailUrl = "http://lorempixel.com/46/16/abstract",
       title = "More of the Guardian, for less",
       promotionType = PercentDiscount(None, 16.680567139283)
     ))
   }
 
+  def freeTrialPromo(env: String): Option[AnyPromotion] = {
+    val prpIds = digipackRatePlanIds(env)
+    Some(Promotion(
+      appliesTo = AppliesTo.all(prpIds.productRatePlanIds),
+      campaignName = s"DigiPack free for 30 Days",
+      codes = PromoCodeSet(PromoCode("DHA22"), PromoCode("DHB22"), PromoCode("DHA23"), PromoCode("DHB23"), PromoCode("DHA25"), PromoCode("DHB25")),
+      description = "Enjoy the digital pack for free for 30 days without charge. Get every issue of The Guardian and The Observer newspapers delivered to your tablet, plus an ad-free experience on The Guardian live news app.",
+      expires = new LocalDate(2016,9,1).toDateTime(LocalTime.Midnight, timezone),
+      imageUrl = None,
+      roundelHtml = "<span class='roundel__strong'>FREE</span> DigiPack for 30 days",
+      title = "Try the Guardian DigiPack free for 30 Days",
+      promotionType = FreeTrial(durationDays = 30)
+    )).filter(_ => env != "PROD")
+  }
+
   object CAS {
     lazy val casConf = config.getConfig("cas")
-
     lazy val url = casConf.getString("url")
     lazy val emergencyEncoder = {
       val conf = casConf.getConfig("emergency.subscriber.auth")

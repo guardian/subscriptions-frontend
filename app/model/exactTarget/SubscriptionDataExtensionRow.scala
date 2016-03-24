@@ -3,13 +3,14 @@ import com.gu.memsub.Subscription
 import com.gu.memsub.Subscription._
 import com.typesafe.scalalogging.LazyLogging
 import com.gu.memsub.PaymentMethod
-import org.joda.time.LocalDate
+import org.joda.time.{Days, LocalDate}
 import model.PersonalData
 import utils.Dates
 
 import scala.math.BigDecimal.decimal
 
-object SubscriptionDataExtensionRow extends LazyLogging{
+object SubscriptionDataExtensionRow extends LazyLogging {
+
   def apply(
       personalData: PersonalData,
       subscription: Subscription with Paid,
@@ -50,7 +51,7 @@ object SubscriptionDataExtensionRow extends LazyLogging{
         "Date of first payment" -> formatDate(subscription.firstPaymentDate),
         "Currency" -> personalData.currency.glyph,
         //TODO to remove, hardcoded in the template
-        "Trial period" -> "14",
+        "Trial period" -> Days.daysBetween(subscription.startDate, subscription.firstPaymentDate).toString,
         "Email" -> personalData.email
       ) ++ paymentFields
     )

@@ -30,20 +30,22 @@
                 </div>
             </div>
         </section>
-        <section class="section-blue">
-            <div class="page-container gs-container gs-container--slim page-slice page-slice">
-                <div class="page-slice__content">
-                    <h2 class="promo-landing-page__section-head">@promotion.title</h2>
-                    @{
-                        promotion.imageUrl.fold {
-                            fragments.promotion.promotionDescription(promotion)
-                        } {
-                            imageUrl => fragments.promotion.promotionWithImage(promotion, imageUrl)
+        @promotion.whenFreeTrial.fold {
+            <section class="section-blue">
+                <div class="page-container gs-container gs-container--slim page-slice page-slice">
+                    <div class="page-slice__content">
+                        <h2 class="promo-landing-page__section-head">@promotion.title</h2>
+                        @{
+                            promotion.imageUrl.fold {
+                                fragments.promotion.promotionDescription(promotion)
+                            } {
+                                imageUrl => fragments.promotion.promotionWithImage(promotion, imageUrl)
+                            }
                         }
-                    }
+                    </div>
                 </div>
-            </div>
-        </section>
+            </section>
+        } { _ => }
         <section class="page-container gs-container gs-container--slim">
             <div class="page-slice">
                 <div class="page-slice__content">
@@ -61,11 +63,9 @@
         </section>
         <section class="page-container gs-container gs-container--slim">
             <div class="page-slice">
-                <div class="page-slice__header">
-                    Terms and conditions
-                </div>
+                <div class="page-slice__header">Terms and conditions</div>
                 <div class="page-slice__content">
-                    <p>Customers must subscribe by @prettyDate(promotion.expires.minusSeconds(1)) to be eligible for the offer. Offer subject to availability.</p>
+                    <p>Customers must subscribe by @prettyDate(promotion.expires.minusSeconds(1)) to be eligible for the offer. Offer subject to availability. GNM reserves the right to withdraw this promotion at any time.</p>
                     @fragments.promotion.subscriptionTermsAndConditions(catalog, promotion)
                     @fragments.promotion.incentiveTermsAndConditions(promotion)
                     <p>Guardian News & Media Limited – a member of Guardian Media Group PLC. Registered Office: Kings Place, 90 York Way, London, N1 9GU. Registered in England No. 908396</p>

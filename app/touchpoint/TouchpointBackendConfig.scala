@@ -57,10 +57,12 @@ object TouchpointBackendConfig extends LazyLogging {
 object ZuoraProperties {
   def from(config: com.typesafe.config.Config, environmentName: String) = {
     ZuoraProperties(
-      config.getInt("zuora.paymentDelayInDays").days
+      config.getInt("zuora.paymentDelayInDays"),
+      config.getInt("zuora.paymentDelayGracePeriod")
     )
   }
 }
 case class ZuoraProperties(
-  paymentDelayInDays: Period
+  paymentDelayInDays: Int,
+  gracePeriodInDays: Int
 )

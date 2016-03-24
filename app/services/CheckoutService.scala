@@ -167,12 +167,14 @@ class CheckoutService(identityService: IdentityService,
           ratePlans = NonEmptyList(plan),
           name = personalData,
           address = personalData.address,
-          paymentDelay = Some(zuoraProperties.paymentDelayInDays),
+          // TODO remove + zuoraProperties.gracePeriodInDays
+          paymentDelayInDays = Some(zuoraProperties.paymentDelayInDays + zuoraProperties.gracePeriodInDays),
           ipAddress = requestData.ipAddress.map(_.getHostAddress)
         ),
         subscriptionData.suppliedPromoCode,
         Some(personalData.country)
       )
+      // TODO Somehow amend subscribe.paymentDelayInDays at this stage to be += zuoraProperties.gracePeriodInDays          
     } yield {
       \/.right(subscribe)
     }).recover {
