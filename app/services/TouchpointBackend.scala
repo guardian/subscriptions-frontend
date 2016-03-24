@@ -2,7 +2,7 @@ package services
 
 import com.gu.config.{DigitalPackRatePlanIds, DiscountRatePlanIds, ProductFamilyRatePlanIds}
 import com.gu.memsub.Digipack
-import com.gu.memsub.services.{CatalogService, PromoService, api}
+import com.gu.memsub.services.{SubscriptionService, CatalogService, PromoService, api}
 import com.gu.monitoring.{ServiceMetrics, StatusMetrics}
 import com.gu.stripe.StripeService
 import com.gu.subscriptions.Discounter
@@ -13,9 +13,11 @@ import configuration.Config._
 import monitoring.TouchpointBackendMetrics
 import play.api.Play.current
 import play.api.libs.concurrent.Akka
+import play.api.libs.concurrent.Execution.Implicits._
 import play.api.mvc.RequestHeader
 import touchpoint.TouchpointBackendConfig.BackendType
 import touchpoint.{TouchpointBackendConfig, ZuoraProperties}
+import com.gu.memsub.services.{PaymentService => CommonPaymentService}
 import utils.TestUsers._
 
 object TouchpointBackend {
@@ -42,6 +44,11 @@ object TouchpointBackend {
       val backendEnv = config.stripe.envName
       val service = "Stripe"
     })
+
+    val subService = new SubscriptionService(zuoraService, _stripeService, catalogService)
+    val memsubPaymentService = new CommonPaymentService(_stripeService, subService, zuoraService, catalogService)
+
+
     val paymentService = new PaymentService {
       override def stripeService = _stripeService
     }
@@ -51,9 +58,11 @@ object TouchpointBackend {
       salesforceService,
       catalogService,
       zuoraService,
+      subService,
       restClient,
       digipackRatePlanIds,
       paymentService,
+      memsubPaymentService,
       config.zuoraProperties,
       promoService,
       discountPlans
@@ -88,9 +97,11 @@ case class TouchpointBackend(environmentName: String,
                              salesforceService: SalesforceService,
                              catalogService : api.CatalogService,
                              zuoraService: zuora.api.ZuoraService,
+                             subscriptionService: SubscriptionService,
                              zuoraRestClient: zuora.rest.Client,
                              digipackIds: DigitalPackRatePlanIds,
                              paymentService: PaymentService,
+                             commonPaymentService: CommonPaymentService,
                              zuoraProperties: ZuoraProperties,
                              promoService: PromoService,
                              discountRatePlanIds: DiscountRatePlanIds) {
@@ -98,7 +109,8 @@ case class TouchpointBackend(environmentName: String,
   private val that = this
 
   private val exactTargetService = new ExactTargetService {
-    override def zuoraService = that.zuoraService
+    override def subscriptionService = that.subscriptionService
+    override def paymentService = that.commonPaymentService
   }
 
   val checkoutService =

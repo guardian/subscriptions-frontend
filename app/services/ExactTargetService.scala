@@ -1,8 +1,8 @@
 package services
 
 import akka.agent.Agent
-import com.gu.memsub.Subscription
-import com.gu.zuora.api.ZuoraService
+import com.gu.memsub.{Digipack, Subscription}
+import com.gu.memsub.services.SubscriptionService
 import com.gu.zuora.soap.models.Results.SubscribeResult
 import com.squareup.okhttp.Request.Builder
 import com.squareup.okhttp.{MediaType, OkHttpClient, RequestBody, Response}
@@ -12,6 +12,7 @@ import model.SubscriptionData
 import model.exactTarget.SubscriptionDataExtensionRow
 import play.api.libs.concurrent.Akka
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
+import com.gu.memsub.services.{PaymentService => CommonPaymentService}
 import play.api.libs.json._
 
 import scala.concurrent.Future
@@ -19,27 +20,23 @@ import scala.concurrent.duration._
 
 trait ExactTargetService extends LazyLogging {
   lazy val etClient: ETClient = ETClient
-  def zuoraService: ZuoraService
+
+  def subscriptionService: SubscriptionService
+  def paymentService: CommonPaymentService
 
   def sendETDataExtensionRow(subscribeResult: SubscribeResult, subscriptionData: SubscriptionData): Future[Unit] = {
-    val subscription = zuoraService.getSubscription(Subscription.Name(subscribeResult.subscriptionName))
-
-    val accAndPaymentMethod = for {
-      subs <- subscription
-      acc <- zuoraService.getAccount(subs)
-      pm <- zuoraService.getDefaultPaymentMethod(acc)
-    } yield (acc, pm)
+      val subscription = subscriptionService.unsafeGetPaid(Subscription.Name(subscribeResult.subscriptionName))(Digipack)
+      val paymentMethod = paymentService.getPaymentMethod(Subscription.AccountId(subscribeResult.accountId)).map(
+        _.getOrElse(throw new Exception(s"Subscription with no payment method found, ${subscribeResult.subscriptionId}"))
+      )
 
     for {
-      subs <- subscription
-      rpc <- zuoraService.recurringRatePlanCharge(subs)
-      (acc, pm) <- accAndPaymentMethod
+      sub <- subscription
+      pm <- paymentMethod
       row = SubscriptionDataExtensionRow(
-        subscription = subs,
-        subscriptionData = subscriptionData,
-        ratePlanCharge = rpc,
-        paymentMethod = pm,
-        account = acc
+        personalData = subscriptionData.personalData,
+        subscription = sub,
+        paymentMethod = pm
       )
       response <- etClient.sendSubscriptionRow(row)
     } yield {
