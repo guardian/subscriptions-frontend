@@ -30,17 +30,12 @@ trait ExactTargetService extends LazyLogging {
         _.getOrElse(throw new Exception(s"Subscription with no payment method found, ${subscribeResult.subscriptionId}"))
       )
 
-    val accAndPaymentMethod = for {
-      subs <- subscription
-      pm <- paymentMethod
-    } yield (subs, pm)
-
     for {
-      subs <- subscription
-      (acc, pm) <- accAndPaymentMethod
+      sub <- subscription
+      pm <- paymentMethod
       row = SubscriptionDataExtensionRow(
         personalData = subscriptionData.personalData,
-        subscription = subs,
+        subscription = sub,
         paymentMethod = pm
       )
       response <- etClient.sendSubscriptionRow(row)
