@@ -1,10 +1,10 @@
 package acceptance.pages
 
-import acceptance.util.{Browser, Config}
+import acceptance.util.{TestUser, Browser, Config}
 import Config.baseUrl
 import org.scalatest.selenium.Page
 
-class ThankYou extends Page with Browser {
+case class ThankYou(val testUser: TestUser) extends Page with Browser {
   override val url = s"$baseUrl/checkout/thank-you"
 
   object PasswordForm {
@@ -16,17 +16,13 @@ class ThankYou extends Page with Browser {
     click.on(cssSelector(".js-checkout-finish-account-submit"))
   }
 
-  def pageHasLoaded(): Boolean = {
-    pageHasElement(name("subscriptionDetails"))
-  }
+  def pageHasLoaded(): Boolean = pageHasElement(subscriptionDetails)
 
-  def userDisplayName: String = {
-    val selector = cssSelector(".js-user-displayname")
-    assert(pageHasElement(selector))
-    selector.element.text
-  }
+  def userIsSignedIn: Boolean = elementHasText(userDisplayName, testUser.username.toLowerCase)
 
-  def hasMyProfileButton = {
-    pageHasElement(cssSelector(s"a[href='${Config.identityFrontendUrl}/account/edit']"))
-  }
+  def hasMyProfileButton = pageHasElement(myProfileButton)
+
+  private val userDisplayName =  cssSelector(".js-user-displayname")
+  private val subscriptionDetails = name("subscriptionDetails")
+  private val myProfileButton = cssSelector(s"a[href='${Config.identityFrontendUrl}/account/edit']")
 }
