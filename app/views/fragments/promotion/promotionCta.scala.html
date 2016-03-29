@@ -2,7 +2,8 @@
 @import com.gu.memsub.promo.Promotion.AnyPromotion
 @import com.gu.subscriptions.DigipackCatalog
 @import model.DigitalEdition
-@(edition: DigitalEdition, catalog: DigipackCatalog, promoCode: PromoCode, promotion: AnyPromotion)
+@import com.gu.memsub.util.Days
+@(edition: DigitalEdition, catalog: DigipackCatalog, promoCode: PromoCode, promotion: AnyPromotion, defaultTrialDays: Days)
 <div class="promotion-cta">
     <div class="grid grid--3up-step">
         <div class="grid__item">
@@ -12,7 +13,7 @@
         </div>
         <div class="grid__item promotion-cta__image"></div>
         <div class="grid__item">
-            @fragments.promotion.pricingCta(edition, catalog, promoCode, promotion)
+            @fragments.promotion.pricingCta(defaultTrialDays, edition, catalog, promoCode, promotion)
             @fragments.promotion.subscribeNow(edition, promoCode)
         </div>
     </div>

@@ -9,6 +9,7 @@ import com.gu.identity.cookie.{PreProductionKeys, ProductionKeys}
 import com.gu.memsub.auth.common.MemSub.Google._
 import com.gu.memsub.promo.Promotion._
 import com.gu.memsub.promo._
+import com.gu.memsub.util.Days
 import com.gu.memsub.{Digipack, Membership}
 import com.gu.monitoring.StatusMetrics
 import com.gu.salesforce.SalesforceConfig
@@ -71,7 +72,7 @@ object Config {
   object Zuora {
     private val stageConfig = config.getConfig("touchpoint.backend.environments").getConfig(stage)
 
-    val paymentDelay = stageConfig.getInt("zuora.paymentDelayInDays").days
+    val paymentDelay = Days(stageConfig.getInt("zuora.paymentDelayInDays"))
   }
 
   val subscriptionsUrl = config.getString("subscriptions.url")
@@ -149,7 +150,7 @@ object Config {
       imageUrl = None,
       roundelHtml = "<span class='roundel__strong'>FREE</span> DigiPack for 30 days",
       title = "Try the Guardian DigiPack free for 30 Days",
-      promotionType = FreeTrial(durationDays = 30)
+      promotionType = FreeTrial(duration = Days(30))
     )).filter(_ => env != "PROD")
   }
 

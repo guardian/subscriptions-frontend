@@ -3,7 +3,8 @@
 @import com.gu.subscriptions.DigipackCatalog
 @import model.DigitalEdition
 
-@(edition: DigitalEdition, catalog: DigipackCatalog, promoCode: PromoCode, promotion: AnyPromotion)
+@import com.gu.memsub.util.Days
+@(edition: DigitalEdition, catalog: DigipackCatalog, promoCode: PromoCode, promotion: AnyPromotion, defaultTrial: Days)
 <div class="discover">
     <ul class="grid grid--3up grid--bordered grid--flex grid--no-clearfix-before">
         <li class="grid__item">
@@ -25,7 +26,7 @@
             @fragments.common.inlineIcon("every_day", Seq("icon--promo"))
             <h3>Every day; every section; every supplement</h3>
             <p>The Guide; Cook; Observer Tech; and food Monthly plus our daily crossword tailored for your tablet.</p>
-            @fragments.promotion.pricingCta(edition, catalog, promoCode, promotion)
+            @fragments.promotion.pricingCta(defaultTrial, edition, catalog, promoCode, promotion)
             @fragments.promotion.subscribeNow(edition, promoCode)
         </li>
         <li class="grid__item grid__item--flex-2-columns u-no-border">

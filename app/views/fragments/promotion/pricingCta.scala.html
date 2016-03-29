@@ -3,10 +3,11 @@
 @import com.gu.subscriptions.DigipackCatalog
 @import model.DigitalEdition
 @import views.support.Catalog._
-@(defaultFreeTrialDays: Int, edition: DigitalEdition, catalog: DigipackCatalog, promoCode: PromoCode, promotion: AnyPromotion)
+@import com.gu.memsub.util.Days
+@(defaultFreeTrialDays: Days, edition: DigitalEdition, catalog: DigipackCatalog, promoCode: PromoCode, promotion: AnyPromotion)
 <div class="pricing-cta">
     <div class="pricing-cta__pricing">
-        <h4 class="pricing-cta__pricing__title">Free for @promotion.whenFreeTrial.fold(Html(defaultFreeTrialDays.toString)) { p => @Html(p.promotionType.durationDays.toString) } days</h4>
+        <h4 class="pricing-cta__pricing__title">Free for @promotion.whenFreeTrial.fold(Html(defaultFreeTrialDays.get.toString)) { p => @Html(p.promotionType.duration.get.toString) } days</h4>
         <p class="pricing-cta__pricing__value">Then @formatPrice(catalog, promotion)/month</p>
     </div>
 </div>
