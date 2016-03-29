@@ -91,7 +91,9 @@ class CheckoutService(identityService: IdentityService,
     (for {
       memberId <- EitherT(createOrUpdateUser(personalData, userData, subscriptionData))
       subscribe <- EitherT(createSubscribeRequest(personalData, requestData, plan, userData, memberId, subscriptionData))
-      result <- EitherT(createSubscription(subscribe, userData, subscriptionData))
+      withPromo = promoService.applyPromotion(subscribe, subscriptionData.suppliedPromoCode, Some(personalData.country))
+      withGrace = withPromo.copy(paymentDelay = withPromo.paymentDelay.map(_.plus(zuoraProperties.gracePeriodInDays)))
+      result <- EitherT(createSubscription(withGrace, userData, subscriptionData))
       _ <- EitherT(sendETDataExtensionRow(result, subscriptionData))
     } yield {
       CheckoutSuccess(memberId, userData, result, subscribe.promoCode)
