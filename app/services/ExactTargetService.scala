@@ -3,6 +3,7 @@ package services
 import akka.agent.Agent
 import com.gu.memsub.{Digipack, Subscription}
 import com.gu.memsub.services.SubscriptionService
+import com.gu.subscriptions.DigipackCatalog
 import com.gu.zuora.soap.models.Results.SubscribeResult
 import com.squareup.okhttp.Request.Builder
 import com.squareup.okhttp.{MediaType, OkHttpClient, RequestBody, Response}
@@ -21,7 +22,7 @@ import scala.concurrent.duration._
 trait ExactTargetService extends LazyLogging {
   lazy val etClient: ETClient = ETClient
 
-  def subscriptionService: SubscriptionService
+  def subscriptionService: SubscriptionService[DigipackCatalog]
   def paymentService: CommonPaymentService
 
   def sendETDataExtensionRow(subscribeResult: SubscribeResult, subscriptionData: SubscriptionData): Future[Unit] = {
