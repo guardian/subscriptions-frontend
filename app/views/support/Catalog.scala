@@ -1,5 +1,6 @@
 package views.support
 
+import com.gu.memsub.promo.Promotion.AnyPromotion
 import com.gu.memsub.{BillingPeriod => Period, Price}
 import com.gu.memsub.Subscription.ProductRatePlanId
 import com.gu.subscriptions.{DigipackCatalog, DigipackPlan}
@@ -65,5 +66,13 @@ object Catalog {
         ErrorTable(
           env, errs.map { case (bp, msg) => PlanError(bp.adverb, msg)}
         ).some, _ => None)
+  }
+
+  def formatPrice(catalog: DigipackCatalog, promotion: AnyPromotion): String = {
+    promotion.whenPercentDiscount.fold {
+      catalog.digipackMonthly.priceGBP.pretty
+    } {
+      discountPromotion => catalog.digipackMonthly.priceGBP.*(1 - (discountPromotion.promotionType.amount.toFloat / 100f)).pretty
+    }
   }
 }

@@ -1,12 +1,12 @@
 package controllers
 
 import actions.CommonActions._
-import com.gu.memsub.promo.Promotion.AnyPromotion
 import com.gu.memsub.promo._
+import configuration.Config
 import model.DigitalEdition
 import play.api.mvc._
 import services.TouchpointBackend
-import utils.TestUsers.PreSigninTestCookie
+import touchpoint.ZuoraProperties
 
 object PromoLandingPage extends Controller {
 
@@ -18,7 +18,7 @@ object PromoLandingPage extends Controller {
 
     (for {
       promotion <- tpBackend.promoService.findPromotion(promoCode)
-      html <- if (promotion.expires.isBeforeNow) None else Some(views.html.promotion.landingPage(edition, catalog, promoCode, promotion))
+      html <- if (promotion.expires.isBeforeNow) None else Some(views.html.promotion.landingPage(edition, catalog, promoCode, promotion, Config.Zuora.paymentDelay))
     } yield Ok(html)).getOrElse(NotFound(views.html.error404()))
   }
 }

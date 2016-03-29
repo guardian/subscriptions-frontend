@@ -72,7 +72,9 @@ class CheckoutService(identityService: IdentityService,
     (for {
       memberId <- EitherT(createOrUpdateUser(personalData, userData, subscriptionData))
       subscribe <- EitherT(createSubscribeRequest(personalData, requestData, plan, userData, memberId, subscriptionData))
-      result <- EitherT(createSubscription(subscribe, userData, subscriptionData))
+      withPromo = promoService.applyPromotion(subscribe, subscriptionData.suppliedPromoCode, Some(personalData.country))
+      withGrace = withPromo.copy(paymentDelay = withPromo.paymentDelay.map(_.plus(zuoraProperties.gracePeriodInDays)))
+      result <- EitherT(createSubscription(withGrace, userData, subscriptionData))
       _ <- EitherT(updateAuthenticatedUserDetails(authenticatedUserOpt, personalData, subscriptionData))
       _ <- EitherT(sendETDataExtensionRow(result, subscriptionData))
     } yield {
@@ -115,7 +117,7 @@ class CheckoutService(identityService: IdentityService,
       subscriptionData: SubscriptionData): Future[NonEmptyList[SubsError] \/ Unit] =
 
     (for {
-      a <- exactTargetService.sendETDataExtensionRow(subscribeResult, subscriptionData)
+      a <- exactTargetService.sendETDataExtensionRow(subscribeResult, subscriptionData, zuoraProperties.gracePeriodInDays)
     } yield {
       \/.right(())
     }).recover {
@@ -158,24 +160,16 @@ class CheckoutService(identityService: IdentityService,
         paymentService.makeCreditCardPayment(paymentData, personalData, userData, memberId, plan)
     }
 
-    (for {
-      method <- payment.makePaymentMethod
-      subscribe = promoService.applyPromotion(
-        Subscribe(
-          account = payment.makeAccount,
-          paymentMethod = Some(method),
-          ratePlans = NonEmptyList(plan),
-          name = personalData,
-          address = personalData.address,
-          paymentDelay = Some(zuoraProperties.paymentDelayInDays),
-          ipAddress = requestData.ipAddress.map(_.getHostAddress)
-        ),
-        subscriptionData.suppliedPromoCode,
-        Some(personalData.country)
-      )
-    } yield {
-      \/.right(subscribe)
-    }).recover {
+    payment.makePaymentMethod.map { method =>
+      \/.right(Subscribe(
+        account = payment.makeAccount, Some(method),
+        ratePlans = NonEmptyList(plan),
+        name = personalData,
+        address = personalData.address,
+        paymentDelay = Some(zuoraProperties.paymentDelayInDays),
+        ipAddress = requestData.ipAddress.map(_.getHostAddress)
+      ))
+    }.recover {
       case e: Stripe.Error => \/.left(NonEmptyList(CheckoutStripeError(
         userData.id.id,
         e,

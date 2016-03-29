@@ -11,6 +11,7 @@ import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
 import model.SubscriptionData
 import model.exactTarget.SubscriptionDataExtensionRow
+import org.joda.time.Days
 import play.api.libs.concurrent.Akka
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import com.gu.memsub.services.{PaymentService => CommonPaymentService}
@@ -25,7 +26,7 @@ trait ExactTargetService extends LazyLogging {
   def subscriptionService: SubscriptionService[DigipackCatalog]
   def paymentService: CommonPaymentService
 
-  def sendETDataExtensionRow(subscribeResult: SubscribeResult, subscriptionData: SubscriptionData): Future[Unit] = {
+  def sendETDataExtensionRow(subscribeResult: SubscribeResult, subscriptionData: SubscriptionData, gracePeriod: Days): Future[Unit] = {
       val subscription = subscriptionService.unsafeGetPaid(Subscription.Name(subscribeResult.subscriptionName))(Digipack)
       val paymentMethod = paymentService.getPaymentMethod(Subscription.AccountId(subscribeResult.accountId)).map(
         _.getOrElse(throw new Exception(s"Subscription with no payment method found, ${subscribeResult.subscriptionId}"))
@@ -37,7 +38,8 @@ trait ExactTargetService extends LazyLogging {
       row = SubscriptionDataExtensionRow(
         personalData = subscriptionData.personalData,
         subscription = sub,
-        paymentMethod = pm
+        paymentMethod = pm,
+        gracePeriod
       )
       response <- etClient.sendSubscriptionRow(row)
     } yield {

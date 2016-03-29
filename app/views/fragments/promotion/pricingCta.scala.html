@@ -2,22 +2,12 @@
 @import com.gu.memsub.promo.Promotion.AnyPromotion
 @import com.gu.subscriptions.DigipackCatalog
 @import model.DigitalEdition
-
-@(edition: DigitalEdition, catalog: DigipackCatalog, promoCode: PromoCode, promotion: AnyPromotion)
-
-@formattedPrice = {
-    @{
-        promotion.whenPercentDiscount.fold {
-            catalog.digipackMonthly.priceGBP.pretty
-        } {
-            discountPromotion => catalog.digipackMonthly.priceGBP.*(1 - (discountPromotion.promotionType.amount.toFloat / 100f)).pretty
-        }
-    }
-}
-
+@import views.support.Catalog._
+@import org.joda.time.Days
+@(defaultFreeTrialDays: Days, edition: DigitalEdition, catalog: DigipackCatalog, promoCode: PromoCode, promotion: AnyPromotion)
 <div class="pricing-cta">
     <div class="pricing-cta__pricing">
-        <h4 class="pricing-cta__pricing__title">Free for 14 days</h4>
-        <p class="pricing-cta__pricing__value">Then @formattedPrice/month</p>
+        <h4 class="pricing-cta__pricing__title">Free for @promotion.whenFreeTrial.fold(Html(defaultFreeTrialDays.getDays.toString)) { p => @Html(p.promotionType.duration.getDays.toString) } days</h4>
+        <p class="pricing-cta__pricing__value">Then @formatPrice(catalog, promotion)/month</p>
     </div>
 </div>
