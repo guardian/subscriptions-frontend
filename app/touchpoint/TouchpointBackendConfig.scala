@@ -1,11 +1,10 @@
 package touchpoint
 
-import com.gu.memsub.util.Days._
-import com.gu.memsub.util.Days
 import com.gu.salesforce.SalesforceConfig
 import com.gu.stripe.StripeApiConfig
 import com.gu.zuora.{ZuoraRestConfig, ZuoraSoapConfig, ZuoraApiConfig}
 import com.typesafe.scalalogging.LazyLogging
+import org.joda.time.Days
 
 case class TouchpointBackendConfig(
   environmentName: String,
@@ -57,8 +56,8 @@ object TouchpointBackendConfig extends LazyLogging {
 object ZuoraProperties {
   def from(config: com.typesafe.config.Config, environmentName: String) = {
     ZuoraProperties(
-      config.getInt("zuora.paymentDelayInDays").days,
-      config.getInt("zuora.paymentDelayGracePeriod").days
+      Days.days(config.getInt("zuora.paymentDelayInDays")),
+      Days.days(config.getInt("zuora.paymentDelayGracePeriod"))
     )
   }
 }

@@ -4,7 +4,6 @@ import com.gu.config.DiscountRatePlanIds
 import com.gu.identity.play.AuthenticatedIdUser
 import com.gu.memsub.services.PromoService
 import com.gu.memsub.services.api.CatalogService
-import com.gu.memsub.util.Days
 import com.gu.salesforce.ContactId
 import com.gu.stripe.Stripe
 import com.gu.zuora.api.ZuoraService
@@ -22,7 +21,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scalaz.{NonEmptyList, EitherT, \/, -\/, \/-}
 import scalaz.std.scalaFuture._
-import scalaz.syntax.monoid._
 
 class CheckoutService(identityService: IdentityService,
                       salesforceService: SalesforceService,
@@ -75,7 +73,7 @@ class CheckoutService(identityService: IdentityService,
       memberId <- EitherT(createOrUpdateUser(personalData, userData, subscriptionData))
       subscribe <- EitherT(createSubscribeRequest(personalData, requestData, plan, userData, memberId, subscriptionData))
       withPromo = promoService.applyPromotion(subscribe, subscriptionData.suppliedPromoCode, Some(personalData.country))
-      withGrace = withPromo.copy(paymentDelay = withPromo.paymentDelay.map(_ |+| zuoraProperties.gracePeriodInDays))
+      withGrace = withPromo.copy(paymentDelay = withPromo.paymentDelay.map(_.plus(zuoraProperties.gracePeriodInDays)))
       result <- EitherT(createSubscription(withGrace, userData, subscriptionData))
       _ <- EitherT(updateAuthenticatedUserDetails(authenticatedUserOpt, personalData, subscriptionData))
       _ <- EitherT(sendETDataExtensionRow(result, subscriptionData))
@@ -119,7 +117,7 @@ class CheckoutService(identityService: IdentityService,
       subscriptionData: SubscriptionData): Future[NonEmptyList[SubsError] \/ Unit] =
 
     (for {
-      a <- exactTargetService.sendETDataExtensionRow(subscribeResult, subscriptionData)
+      a <- exactTargetService.sendETDataExtensionRow(subscribeResult, subscriptionData, zuoraProperties.gracePeriodInDays)
     } yield {
       \/.right(())
     }).recover {

@@ -2,8 +2,7 @@
 @import com.gu.memsub.promo.Promotion.AnyPromotion
 @import com.gu.subscriptions.DigipackCatalog
 @import model.DigitalEdition
-
-@import com.gu.memsub.util.Days
+@import org.joda.time.Days
 @(edition: DigitalEdition, catalog: DigipackCatalog, promoCode: PromoCode, promotion: AnyPromotion, defaultTrial: Days)
 <div class="discover">
     <ul class="grid grid--3up grid--bordered grid--flex grid--no-clearfix-before">

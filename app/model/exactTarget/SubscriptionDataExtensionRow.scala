@@ -14,11 +14,13 @@ object SubscriptionDataExtensionRow extends LazyLogging {
   def apply(
       personalData: PersonalData,
       subscription: Subscription with Paid,
-      paymentMethod: PaymentMethod
+      paymentMethod: PaymentMethod,
+      gracePeriod: Days
       ): SubscriptionDataExtensionRow = {
 
 
     val address = personalData.address
+    val paymentDelay = Days.daysBetween(subscription.startDate, subscription.firstPaymentDate).minus(gracePeriod)
 
     val paymentFields = paymentMethod match {
       case com.gu.memsub.GoCardless(mandateId, accName, accNumber, sortCode) => Seq(
@@ -50,8 +52,7 @@ object SubscriptionDataExtensionRow extends LazyLogging {
         "Country" -> address.country.name,
         "Date of first payment" -> formatDate(subscription.firstPaymentDate),
         "Currency" -> personalData.currency.glyph,
-        //TODO to remove, hardcoded in the template
-        "Trial period" -> Days.daysBetween(subscription.startDate, subscription.firstPaymentDate).toString,
+        "Trial period" -> paymentDelay.getDays.toString,
         "Email" -> personalData.email
       ) ++ paymentFields
     )
