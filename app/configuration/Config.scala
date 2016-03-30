@@ -140,7 +140,7 @@ object Config {
   }
 
   def freeTrialPromo(env: String): Option[AnyPromotion] = {
-    val prpIds = digipackRatePlanIds(env)
+    val prpIds = digipackRatePlanIds("UAT")
     Some(Promotion(
       appliesTo = AppliesTo.all(prpIds.productRatePlanIds),
       campaignName = s"DigiPack free for 30 Days",
@@ -151,7 +151,7 @@ object Config {
       roundelHtml = "<span class='roundel__strong'>FREE</span> DigiPack for 30 days",
       title = "Try the Guardian DigiPack free for 30 Days",
       promotionType = FreeTrial(duration = Days.days(30))
-    )).filter(_ => env != "PROD")
+    ))
   }
 
   object CAS {
