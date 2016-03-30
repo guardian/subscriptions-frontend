@@ -1,42 +1,31 @@
 package acceptance.pages
 
-import acceptance.util.{Browser, TestUser, Config}
-import Config.baseUrl
-import Config.identityFrontendUrl
-import org.scalatest.selenium.Page
+import acceptance.util.{TestUser, LoadablePage, Browser, Config}
 
-class Register(testUser: TestUser) extends Page with Browser {
-  val url = s"""${identityFrontendUrl}/register?returnUrl=${baseUrl}/checkout&skipConfirmation=true"""
+class Register(val testUser: TestUser) extends LoadablePage with Browser {
+  val url = s"${Config.identityFrontendUrl}/register?skipConfirmation=true"
+
+  def hasLoaded(): Boolean = pageHasElement(createAccountButton)
+
+  def fillInPersonalDetails(): Unit = RegisterFields.fillIn()
+
+  def createAccount(): Unit = clickOn(createAccountButton)
 
   private object RegisterFields {
-    val firstName = textField(id("user_firstName"))
-    val lastName = textField(id("user_secondName"))
-    val email = emailField(id("user_primaryEmailAddress"))
-    val username = textField(id("user_publicFields_username"))
-    val password = pwdField(id("user_password"))
+    val firstName = id("register_field_firstname")
+    val lastName = id("register_field_lastname")
+    val email = id("register_field_email")
+    val username = id("register_field_username")
+    val password = id("register_field_password")
 
-    def fillIn(): Unit = {
-      assert(pageHasElement(id("user_password")))
-
-      firstName.value = testUser.username
-      lastName.value = testUser.username
-      email.value = s"${testUser.username}@gu.com"
-      username.value = testUser.username
-      password.value = testUser.username
+    def fillIn() = {
+      setValue(firstName, testUser.username)
+      setValue(lastName, testUser.username)
+      setValue(email, s"${testUser.username}@gu.com")
+      setValue(username, testUser.username)
+      setValue(password, testUser.username)
     }
   }
 
-  def fillInPersonalDetails(): Unit = {
-    RegisterFields.fillIn()
-  }
-
-  def submit(): Unit = {
-    val selector = className("submit-input")
-    assert(pageHasElement(selector))
-    click.on(selector)
-  }
-
-  def pageHasLoaded(): Boolean = {
-    pageHasElement(className("submit-input"))
-  }
+  private lazy val createAccountButton = id("register_submit")
 }

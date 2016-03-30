@@ -22,41 +22,142 @@ class CheckoutSpec extends FeatureSpec with Browser
   }
 
   private def checkDependenciesAreAvailable = {
-      assume(Dependencies.SubscriptionFrontend.isAvailable,
-        s"- ${Dependencies.SubscriptionFrontend.url} unavaliable! " +
-          "\nPlease run subscriptions-frontend server before running tests.")
+    assume(Dependencies.SubscriptionFrontend.isAvailable,
+      s"- ${Dependencies.SubscriptionFrontend.url} unavaliable! " +
+        "\nPlease run subscriptions-frontend server before running tests.")
+
+    assume(Dependencies.IdentityFrontend.isAvailable,
+      s"- ${Dependencies.IdentityFrontend.url} unavaliable! " +
+        "\nPlease run identity-frontend server before running tests.")
   }
 
-  feature("Guest user subscription checkout") {
-    scenario("Guest user subscribes with direct debit", Acceptance) {
-      checkDependenciesAreAvailable
+  /* Register a new Identity user */
+  def withRegisteredIdentityUserFixture(testFun: TestUser => Any) {
+    checkDependenciesAreAvailable
 
-      val checkout = new Checkout(new TestUser)
-      When("I visit the checkout page ")
+    val testUser = new TestUser
+
+    // When Users visit 'Identity Register' page
+    val register = new pages.Register(testUser)
+    go.to(register)
+    assert(register.hasLoaded())
+
+    // And they fill in personal details
+    register.fillInPersonalDetails()
+
+    // And they submit the form to create Identity account
+    register.createAccount()
+
+    testFun(testUser)
+  }
+
+  feature("Subscription checkout") {
+    scenario("Guest users subscribe with direct debit", Acceptance) {
+      checkDependenciesAreAvailable
+      val testUser = new TestUser
+
+      val checkout = Checkout(testUser)
+      When("Users visit 'Checkout' page ")
       go.to(checkout)
 
-      And("I fill in personal details")
+      Then("section 'Your details' should load.")
+      assert(checkout.yourDetailsSectionHasLoaded)
+
+      When("they fill in personal details,")
       checkout.fillInPersonalDetails()
 
-      And("I fill in direct debit payment details")
+      And("click on 'Continue' button,")
+      checkout.clickPersonalAddressContinueButton()
+
+      Then("section 'Payment Details' should load.")
+      checkout.directDebitSectionHasLoaded()
+
+      When("they fill in direct debit payment details")
       checkout.fillInDirectDebitPaymentDetails()
 
-      And("I submit the form")
+      And("select 'Confirm account holder' checkbox,")
+      checkout.selectConfirmAccountHolder()
+
+      And("click on 'Continue' button,")
+      checkout.clickDebitPaymentContinueButton()
+
+      Then("section 'Confirm and Review' should load.")
+      checkout.reviewSectionHasLoaded()
+
+      When("they submit the form")
       checkout.submit()
 
-      Then("I should land on the Thank You page")
-      assert(pageHasElement(name("subscriptionDetails")))
+      Then("they should land on 'Thank You' page.")
+      val thankYou = ThankYou(testUser)
+      assert(thankYou.pageHasLoaded())
 
-      When("I set a password for my account")
-      val thankYou = new ThankYou
+      When("they set a password for their account,")
       thankYou.setPassword("supers4af3passw0rd")
 
-      Then("I should see 'My Profile' button")
+      Then("they should see 'My Profile' button,")
       assert(thankYou.hasMyProfileButton)
 
-      And("I should have Identity cookies")
+      And("should have Identity cookies.")
       Seq("GU_U", "SC_GU_U", "SC_GU_LA").foreach { idCookie =>
         assert(Driver.cookiesSet.map(_.getName).contains(idCookie)) }
+    }
+
+    scenario("Identity user subscribes with credit card", Acceptance) {
+      withRegisteredIdentityUserFixture { testUser =>
+
+        Given("registered and signed in Identity users want to subscribe by clicking on " +
+          "'Start your free trial'")
+
+        Then("they should land on 'Checkout' page,")
+        val checkout = pages.Checkout(testUser)
+        go.to(checkout)
+        assert(checkout.pageHasLoaded())
+
+        And("should be signed in with their Identity account,")
+        assert(checkout.userIsSignedIn)
+
+        And("first name, last name, and email address should be pre-filled,")
+        assert(checkout.userDetailsArePrefilled)
+
+        And("they should have Identity cookies,")
+        Seq("GU_U", "SC_GU_U", "SC_GU_LA").foreach { idCookie =>
+          assert(Driver.cookiesSet.map(_.getName).contains(idCookie))
+        }
+
+        And("the section 'Your details' should load.")
+        assert(checkout.yourDetailsSectionHasLoaded)
+
+        When("they fill in the address,")
+        checkout.fillInAddressDetails()
+
+        And("click on 'Continue' button,")
+        checkout.clickPersonalAddressContinueButton()
+
+        Then("the section 'Payment Details' should load.")
+        checkout.directDebitSectionHasLoaded()
+
+        When("Users select credit card payment option,")
+        checkout.selectCreditCardPaymentOption()
+
+        And("fill in credit card payment details,")
+        checkout.fillInCreditCardPaymentDetails()
+
+        And("click on 'Continue' button,")
+        checkout.clickCredictCardPaymentContinueButton()
+
+        Then("the section 'Confirm and Review' should load.")
+        checkout.reviewSectionHasLoaded()
+
+        When("they submit the form,")
+        checkout.submit()
+
+        Then("they should land on 'Thank You' page,")
+        val thankYou = ThankYou(testUser)
+        assert(thankYou.pageHasLoaded())
+
+        And("they should still be signed in.")
+        assert(thankYou.userIsSignedIn)
+      }
     }
   }
 }
