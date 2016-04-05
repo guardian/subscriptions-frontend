@@ -71,7 +71,8 @@ class CheckoutService(identityService: IdentityService,
 
     (for {
       memberId <- EitherT(createOrUpdateUser(personalData, userData, subscriptionData))
-      subscribe <- EitherT(createSubscribeRequest(personalData, requestData, plan, userData, memberId, subscriptionData))
+      payment <- EitherT(createPaymentType(personalData, requestData, userData, memberId, subscriptionData))
+      subscribe <- EitherT(createSubscribeRequest(personalData, requestData, plan, userData, memberId, subscriptionData, payment))
       withPromo = promoService.applyPromotion(subscribe, subscriptionData.suppliedPromoCode, Some(personalData.country))
       withGrace = withPromo.copy(paymentDelay = withPromo.paymentDelay.map(_.plus(zuoraProperties.gracePeriodInDays)))
       result <- EitherT(createSubscription(withGrace, userData, subscriptionData))
@@ -90,7 +91,8 @@ class CheckoutService(identityService: IdentityService,
 
     (for {
       memberId <- EitherT(createOrUpdateUser(personalData, userData, subscriptionData))
-      subscribe <- EitherT(createSubscribeRequest(personalData, requestData, plan, userData, memberId, subscriptionData))
+      payment <- EitherT(createPaymentType(personalData, requestData, userData, memberId, subscriptionData))
+      subscribe <- EitherT(createSubscribeRequest(personalData, requestData, plan, userData, memberId, subscriptionData, payment))
       withPromo = promoService.applyPromotion(subscribe, subscriptionData.suppliedPromoCode, Some(personalData.country))
       withGrace = withPromo.copy(paymentDelay = withPromo.paymentDelay.map(_.plus(zuoraProperties.gracePeriodInDays)))
       result <- EitherT(createSubscription(withGrace, userData, subscriptionData))
@@ -148,19 +150,12 @@ class CheckoutService(identityService: IdentityService,
   }
 
   private def createSubscribeRequest(
-     personalData: PersonalData, requestData: SubscriptionRequestData,
-     plan: RatePlan,
-     userData: UserIdData,
-     memberId: ContactId,
-     subscriptionData: SubscriptionData): Future[NonEmptyList[SubsError] \/ Subscribe] = {
-
-    val payment = subscriptionData.paymentData match {
-      case paymentData@DirectDebitData(_, _, _) =>
-        paymentService.makeDirectDebitPayment(paymentData, personalData, memberId)
-      case paymentData@CreditCardData(_) =>
-        val plan = catalogService.digipackCatalog.unsafeFind(subscriptionData.productRatePlanId)
-        paymentService.makeCreditCardPayment(paymentData, personalData, userData, memberId, plan)
-    }
+      personalData: PersonalData, requestData: SubscriptionRequestData,
+      plan: RatePlan,
+      userData: UserIdData,
+      memberId: ContactId,
+      subscriptionData: SubscriptionData,
+      payment: PaymentService#Payment): Future[NonEmptyList[SubsError] \/ Subscribe] = {
 
     payment.makePaymentMethod.map { method =>
       \/.right(Subscribe(
@@ -205,6 +200,30 @@ class CheckoutService(identityService: IdentityService,
         s"User ${userData.id.id} could not subscribe during checkout",
         subscriptionData.toString,
         None)))
+    }
+  }
+
+  private def createPaymentType(
+      personalData: PersonalData, requestData: SubscriptionRequestData,
+      userData: UserIdData,
+      memberId: ContactId,
+      subscriptionData: SubscriptionData): Future[NonEmptyList[SubsError] \/ PaymentService#Payment] = {
+
+    try {
+      val payment = subscriptionData.paymentData match {
+        case paymentData@DirectDebitData(_, _, _) =>
+          paymentService.makeDirectDebitPayment(paymentData, personalData, memberId)
+        case paymentData@CreditCardData(_) =>
+          val digipackPlan = catalogService.digipackCatalog.unsafeFind(subscriptionData.productRatePlanId)
+          paymentService.makeCreditCardPayment(paymentData, personalData, userData, memberId, digipackPlan)
+      }
+      Future.successful(\/.right(payment))
+    } catch {
+      case e: Throwable => Future.successful(\/.left(NonEmptyList(CheckoutPaymentTypeFailure(
+        userData.id.id,
+        s"User ${userData.id.id} could not subscribe during checkout because of a problem with selected payment type",
+        subscriptionData.toString,
+        Some(e.getMessage())))))
     }
   }
 }
