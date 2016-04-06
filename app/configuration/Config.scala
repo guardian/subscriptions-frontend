@@ -105,7 +105,7 @@ object Config {
   def demoPromo(env: String) = {
     val jellyFishPromoCode = PromoCode("DGA85")
     val prpIds = digipackRatePlanIds(env)
-    val promoCodes = (Seq(jellyFishPromoCode) /: (88 to 94))((seq, i) =>  seq :+ PromoCode(s"DGA$i") :+ PromoCode(s"DGB$i"))
+    val promoCodes = (88 to 94).foldLeft(Seq(jellyFishPromoCode))((seq, i) =>  seq :+ PromoCode(s"DGA$i") :+ PromoCode(s"DGB$i"))
 
     Promotion(
       appliesTo = AppliesTo.ukOnly(Set(
@@ -129,7 +129,7 @@ object Config {
 
   def discountPromo(env: String): Option[AnyPromotion] = {
     val prpIds = digipackRatePlanIds(env)
-    val promoCodes = (Seq[PromoCode]() /: (13 to 26))((seq, i ) => seq :+ PromoCode(s"DPA$i") :+ PromoCode(s"DPB$i"))
+    val promoCodes = (13 to 26).foldLeft(Seq[PromoCode]())((seq, i ) => seq :+ PromoCode(s"DPA$i") :+ PromoCode(s"DPB$i"))
     Some(Promotion(
       appliesTo = AppliesTo.all(prpIds.productRatePlanIds),
       campaignName = s"DigiPack for just £9.99 a month (~17% discount)",
