@@ -39,7 +39,7 @@ trait ExactTargetService extends LazyLogging {
         personalData = subscriptionData.personalData,
         subscription = sub,
         paymentMethod = pm,
-        gracePeriod
+        gracePeriod = gracePeriod
       )
       response <- etClient.sendSubscriptionRow(row)
     } yield {

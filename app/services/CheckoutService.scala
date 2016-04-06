@@ -16,6 +16,8 @@ import model._
 import model.error.CheckoutService._
 import model.error.IdentityService._
 import model.error.SubsError
+import org.joda.time.Days
+import org.joda.time.Days.ZERO
 import touchpoint.ZuoraProperties
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -61,6 +63,9 @@ class CheckoutService(identityService: IdentityService,
     }
   }
 
+  private def gracePeriod(withPromo: Subscribe, subscribe: Subscribe) =
+    if (withPromo.paymentDelay == subscribe.paymentDelay) zuoraProperties.gracePeriodInDays else ZERO
+
   private def registeredUserBecomesSubscriber(
        authenticatedUserOpt: Option[AuthenticatedIdUser],
        personalData: PersonalData,
@@ -74,10 +79,9 @@ class CheckoutService(identityService: IdentityService,
       payment <- EitherT(createPaymentType(personalData, requestData, userData, memberId, subscriptionData))
       subscribe <- EitherT(createSubscribeRequest(personalData, requestData, plan, userData, memberId, subscriptionData, payment))
       withPromo = promoService.applyPromotion(subscribe, subscriptionData.suppliedPromoCode, Some(personalData.country))
-      withGrace = withPromo.copy(paymentDelay = withPromo.paymentDelay.map(_.plus(zuoraProperties.gracePeriodInDays)))
-      result <- EitherT(createSubscription(withGrace, userData, subscriptionData))
+      result <- EitherT(createSubscription(withPromo, userData, subscriptionData))
       _ <- EitherT(updateAuthenticatedUserDetails(authenticatedUserOpt, personalData, subscriptionData))
-      _ <- EitherT(sendETDataExtensionRow(result, subscriptionData))
+      _ <- EitherT(sendETDataExtensionRow(result, subscriptionData, gracePeriod(subscribe, withPromo)))
     } yield {
       CheckoutSuccess(memberId, userData, result, subscribe.promoCode)
     }).run
@@ -94,9 +98,8 @@ class CheckoutService(identityService: IdentityService,
       payment <- EitherT(createPaymentType(personalData, requestData, userData, memberId, subscriptionData))
       subscribe <- EitherT(createSubscribeRequest(personalData, requestData, plan, userData, memberId, subscriptionData, payment))
       withPromo = promoService.applyPromotion(subscribe, subscriptionData.suppliedPromoCode, Some(personalData.country))
-      withGrace = withPromo.copy(paymentDelay = withPromo.paymentDelay.map(_.plus(zuoraProperties.gracePeriodInDays)))
-      result <- EitherT(createSubscription(withGrace, userData, subscriptionData))
-      _ <- EitherT(sendETDataExtensionRow(result, subscriptionData))
+      result <- EitherT(createSubscription(withPromo, userData, subscriptionData))
+      _ <- EitherT(sendETDataExtensionRow(result, subscriptionData, gracePeriod(subscribe, withPromo)))
     } yield {
       CheckoutSuccess(memberId, userData, result, subscribe.promoCode)
     }).run
@@ -118,10 +121,11 @@ class CheckoutService(identityService: IdentityService,
 
   private def sendETDataExtensionRow(
       subscribeResult: SubscribeResult,
-      subscriptionData: SubscriptionData): Future[NonEmptyList[SubsError] \/ Unit] =
+      subscriptionData: SubscriptionData,
+      gracePeriodInDays: Days): Future[NonEmptyList[SubsError] \/ Unit] =
 
     (for {
-      a <- exactTargetService.sendETDataExtensionRow(subscribeResult, subscriptionData, zuoraProperties.gracePeriodInDays)
+      a <- exactTargetService.sendETDataExtensionRow(subscribeResult, subscriptionData, gracePeriodInDays)
     } yield {
       \/.right(())
     }).recover {
@@ -163,7 +167,7 @@ class CheckoutService(identityService: IdentityService,
         ratePlans = NonEmptyList(plan),
         name = personalData,
         address = personalData.address,
-        paymentDelay = Some(zuoraProperties.paymentDelayInDays),
+        paymentDelay = Some(zuoraProperties.paymentDelayInDays.plus(zuoraProperties.gracePeriodInDays)),
         ipAddress = requestData.ipAddress.map(_.getHostAddress)
       ))
     }.recover {
