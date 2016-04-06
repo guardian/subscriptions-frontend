@@ -119,6 +119,14 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
           logger.warn(SubsError.toStringPretty(seqErr))
           handlePaymentGatewayError(e.paymentError, e.userId)
 
+        case e: CheckoutPaymentTypeFailure =>
+          logger.error(SubsError.header(seqErr))
+          logger.warn(SubsError.toStringPretty(seqErr))
+
+          Forbidden(Json.obj("type" -> "CheckoutPaymentTypeFailure",
+            "message" -> e.msg,
+            "userId" -> e.userId))
+
         case e: CheckoutGenericFailure =>
           logger.error(SubsError.header(seqErr))
           logger.warn(SubsError.toStringPretty(seqErr))

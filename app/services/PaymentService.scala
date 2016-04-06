@@ -45,7 +45,12 @@ trait PaymentService {
     new DirectDebitPayment(paymentData, personalData, memberId)
   }
 
-  def makeCreditCardPayment(paymentData: CreditCardData, personalData: PersonalData, userIdData: UserIdData, memberId: ContactId, plan: DigipackPlan[BillingPeriod]) = {
+  def makeCreditCardPayment(
+      paymentData: CreditCardData,
+      personalData: PersonalData,
+      userIdData: UserIdData,
+      memberId: ContactId,
+      plan: DigipackPlan[BillingPeriod]) = {
     val desiredCurrency = personalData.currency
     val currency = if (plan.currencies.contains(desiredCurrency)) desiredCurrency else GBP
 
