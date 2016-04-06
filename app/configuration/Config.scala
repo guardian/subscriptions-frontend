@@ -114,7 +114,7 @@ object Config {
         prpIds.digitalPackYearly
       )),
       campaignName = "DigiPack - £30 digital gift card",
-      codes = PromoCodeSet(PromoCode("DGA88"), promoCodes),
+      codes = PromoCodeSet(PromoCode("DGA88"), promoCodes:_*),
       description = "Get £30 to spend with a top retailer of your choice when you subscribe. Use your digital gift card at Amazon.co.uk, M&S and more. Treat yourself or a friend.",
       expires = new LocalDate(2016,4,30).toDateTime(LocalTime.Midnight, timezone),
       imageUrl = Some("https://media.guim.co.uk/b26ecf643d6494d60fc32c94e43d8d1483daadac/0_0_720_418/720.jpg"),
@@ -133,7 +133,7 @@ object Config {
     Some(Promotion(
       appliesTo = AppliesTo.all(prpIds.productRatePlanIds),
       campaignName = s"DigiPack for just £9.99 a month (~17% discount)",
-      codes = PromoCodeSet(PromoCode("DPA13"), promoCodes),
+      codes = PromoCodeSet(PromoCode("DPA13"), promoCodes:_*),
       description = "For a limited time you can enjoy the digital pack for a special discounted price. Get every issue of The Guardian and The Observer newspapers delivered to your tablet, plus an ad-free experience on The Guardian live news app.",
       expires = new LocalDate(2100,4,1).toDateTime(LocalTime.Midnight, timezone), // TODO - change to to Option
       imageUrl = None,
@@ -152,7 +152,7 @@ object Config {
     Some(Promotion(
       appliesTo = AppliesTo.all(prpIds.productRatePlanIds),
       campaignName = s"DigiPack free for 30 Days",
-      codes = PromoCodeSet(PromoCode("DHA22"), promoCodes),
+      codes = PromoCodeSet(PromoCode("DHA22"), promoCodes:_*),
       description = "Enjoy the digital pack for free for 30 days without charge. Get every issue of The Guardian and The Observer newspapers delivered to your tablet, plus an ad-free experience on The Guardian live news app.",
       expires = new LocalDate(2016,6,30).toDateTime(LocalTime.Midnight, timezone),
       imageUrl = None,
