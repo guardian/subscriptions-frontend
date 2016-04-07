@@ -1,15 +1,12 @@
 package controllers
 
-import java.net.URLEncoder
-
 import actions.CommonActions._
 import com.gu.memsub.promo._
+import com.netaporter.uri.dsl._
 import configuration.Config
 import model.DigitalEdition
 import play.api.mvc._
 import services.TouchpointBackend
-import com.netaporter.uri.dsl._
-import com.netaporter.uri.Uri
 
 object PromoLandingPage extends Controller {
 
