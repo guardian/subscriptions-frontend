@@ -8,6 +8,8 @@ import configuration.Config
 import model.DigitalEdition
 import play.api.mvc._
 import services.TouchpointBackend
+import com.netaporter.uri.dsl._
+import com.netaporter.uri.Uri
 
 object PromoLandingPage extends Controller {
 
@@ -20,6 +22,6 @@ object PromoLandingPage extends Controller {
     (for {
       promotion <- tpBackend.promoService.findPromotion(promoCode)
       html <- if (promotion.expires.isBeforeNow) None else Some(views.html.promotion.landingPage(edition, catalog, promoCode, promotion, Config.Zuora.paymentDelay))
-    } yield Ok(html)).getOrElse(Redirect(s"/digital?INTCMP=FROM_P_${URLEncoder.encode(promoCode.get, "UTF-8")}"))
+    } yield Ok(html)).getOrElse(Redirect("/digital" ? ("INTCMP" -> s"FROM_P_${promoCode.get}")))
   }
 }
