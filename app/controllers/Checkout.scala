@@ -47,7 +47,7 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
   def getEmptySubscriptionsForm(promoCode: Option[PromoCode]) =
     SubscriptionsForm().bind(Map("promoCode" -> promoCode.fold("")(_.get)))
 
-  def renderCheckout(countryGroup: CountryGroup, promoCode: Option[PromoCode]) = NoCacheAction.async { implicit request =>
+  def renderCheckout(countryGroup: CountryGroup, promoCode: Option[PromoCode]) = NoSubAction.async { implicit request =>
 
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
@@ -88,7 +88,7 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
     BadRequest
   })
 
-  def handleCheckout = NoCacheAction.async(parseCheckoutForm) { implicit request =>
+  def handleCheckout = NoSubAjaxAction.async(parseCheckoutForm) { implicit request =>
     val formData = request.body
     val idUserOpt = authenticatedUserFor(request)
 
