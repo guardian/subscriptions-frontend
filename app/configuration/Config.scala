@@ -54,7 +54,9 @@ object Config {
 
     val webAppUrl = idConfig.getString("webapp.url")
 
-    val webAppProfileUrl = webAppUrl / "digitalpack" / "edit"
+    val webAppProfileUrl = webAppUrl / "account" / "edit"
+
+    val webAppMMAUrl = webAppUrl / "digitalpack" / "edit"
 
     val sessionDomain = idConfig.getString("sessionDomain")
 

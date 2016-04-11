@@ -16,7 +16,7 @@ object CommonActions {
 
   val NoCacheAction = resultModifier(noCache)
 
-  val NoSubAction = NoCacheAction andThen ActionRefiners.noSubscriptionAction(Redirect(Config.Identity.webAppProfileUrl.toString))
+  val NoSubAction = NoCacheAction andThen ActionRefiners.noSubscriptionAction(Redirect(Config.Identity.webAppMMAUrl.toString))
 
   val NoSubAjaxAction = NoCacheAction andThen ActionRefiners.noSubscriptionAction(Forbidden)
 
