@@ -11,12 +11,14 @@ import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
 import model.SubscriptionData
 import model.exactTarget.SubscriptionDataExtensionRow
+import model.error.ExactTragetService.ExactTargetAuthenticationError
 import org.joda.time.Days
 import play.api.libs.concurrent.Akka
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import com.gu.memsub.services.{PaymentService => CommonPaymentService}
 import play.api.libs.json._
 
+import scala.annotation.tailrec
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
@@ -76,25 +78,33 @@ object ETClient extends ETClient with LazyLogging {
    * See https://code.exacttarget.com/apis-sdks/rest-api/using-the-api-key-to-authenticate-api-calls.html
    * This call is blocking
    */
-  private def getAccessToken: String =
-    try {
-      val payload = Json.obj(
-        "clientId" -> clientId,
-        "clientSecret" -> clientSecret
-      ).toString()
+  private def getAccessToken: String = {
 
-      val body = RequestBody.create(jsonMT, payload)
-      val request = new Builder().url(authEndpoint).post(body).build()
-      val response = httpClient.newCall(request).execute()
+    @tailrec def repeater(count: Int): String =
+      if (count == 0) {
+        val errMsg = s"Error getting Exact Target access token. Welcome emails will not be sent."
+        logger.error(errMsg)
+        throw new ExactTargetAuthenticationError(errMsg)
+      }
+      else
+        try {
+          val payload = Json.obj("clientId" -> clientId, "clientSecret" -> clientSecret).toString()
+          val body = RequestBody.create(jsonMT, payload)
+          val request = new Builder().url(authEndpoint).post(body).build()
+          val response = httpClient.newCall(request).execute()
+          val respBody = response.body().string()
+          val accessToken = (Json.parse(respBody) \ "accessToken").as[String]
+          logger.info(s"Got new ExactTarget access token: $accessToken")
+          accessToken
+        } catch {
+          case e: Throwable =>
+            logger.warn(s"Could not get ExactTarget access token: ${e.getMessage}")
+            logger.warn(s"Trying again to get ExactTarget access token. Remaining attempts ... ${count-1}")
+            repeater(count - 1)
+        }
 
-      val respBody = response.body().string()
-
-      logger.info("Got new token: " + (Json.parse(respBody) \ "accessToken").as[String])
-      (Json.parse(respBody) \ "accessToken").as[String]
-    } catch { case err: Throwable =>
-      logger.error(s"Failed refreshing the Exact Target token: ", err)
-      throw err;
-    }
+    repeater(3)
+  }
 
   Akka.system.scheduler.schedule(initialDelay = 30.minutes, interval = 30.minutes) {
     accessToken send getAccessToken
