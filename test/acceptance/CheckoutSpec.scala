@@ -70,7 +70,7 @@ class CheckoutSpec extends FeatureSpec with Browser
       checkout.clickPersonalAddressContinueButton()
 
       Then("section 'Payment Details' should load.")
-      checkout.directDebitSectionHasLoaded()
+      assert(checkout.directDebitSectionHasLoaded())
 
       When("they fill in direct debit payment details")
       checkout.fillInDirectDebitPaymentDetails()
@@ -82,7 +82,7 @@ class CheckoutSpec extends FeatureSpec with Browser
       checkout.clickDebitPaymentContinueButton()
 
       Then("section 'Confirm and Review' should load.")
-      checkout.reviewSectionHasLoaded()
+      assert(checkout.reviewSectionHasLoaded())
 
       When("they submit the form")
       checkout.submit()
@@ -134,7 +134,7 @@ class CheckoutSpec extends FeatureSpec with Browser
         checkout.clickPersonalAddressContinueButton()
 
         Then("the section 'Payment Details' should load.")
-        checkout.directDebitSectionHasLoaded()
+        assert(checkout.directDebitSectionHasLoaded())
 
         When("Users select credit card payment option,")
         checkout.selectCreditCardPaymentOption()
@@ -146,7 +146,7 @@ class CheckoutSpec extends FeatureSpec with Browser
         checkout.clickCredictCardPaymentContinueButton()
 
         Then("the section 'Confirm and Review' should load.")
-        checkout.reviewSectionHasLoaded()
+        assert(checkout.reviewSectionHasLoaded())
 
         When("they submit the form,")
         checkout.submit()
