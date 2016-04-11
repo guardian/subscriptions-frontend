@@ -79,12 +79,12 @@ class CheckoutService(identityService: IdentityService,
     ).getOrElse(Future.successful(\/.right(Unit))) // just say we succeeded if we did no update
 
     (for {
-      memberId <- EitherT(createOrUpdateUser(personalData, userData, subscriptionData))
+      memberId <- EitherT(createOrUpdateUserInSalesforce(personalData, userData, subscriptionData))
       payment <- EitherT(createPaymentType(personalData, requestData, userData, memberId, subscriptionData))
       subscribe <- EitherT(createSubscribeRequest(personalData, requestData, plan, userData, memberId, subscriptionData, payment))
       withPromo = promoService.applyPromotion(subscribe, subscriptionData.suppliedPromoCode, Some(personalData.country))
       result <- EitherT(createSubscription(withPromo, userData, subscriptionData))
-      _ <- EitherT(sendETDataExtensionRow(result, subscriptionData, gracePeriod(subscribe, withPromo)))
+      _ <- EitherT(sendETDataExtensionRow(result, subscriptionData, gracePeriod(subscribe, withPromo), userData))
       _ <- EitherT(identityUpdate)
     } yield {
       CheckoutSuccess(memberId, userData, result, subscribe.promoCode)
@@ -101,7 +101,7 @@ class CheckoutService(identityService: IdentityService,
 
       case -\/(errSeq) =>
         \/.left(errSeq.<::(CheckoutIdentityFailure(
-          "Registered user could not subscribe during checkout because Identity details could not be updated",
+          s"Registered user ${authenticatedUser.user.id} could not subscribe during checkout because Identity details could not be updated",
           subscriptionData.toString,
           None)))
     }
@@ -109,7 +109,8 @@ class CheckoutService(identityService: IdentityService,
   private def sendETDataExtensionRow(
       subscribeResult: SubscribeResult,
       subscriptionData: SubscriptionData,
-      gracePeriodInDays: Days): Future[NonEmptyList[SubsError] \/ Unit] =
+      gracePeriodInDays: Days,
+      userData: UserIdData): Future[NonEmptyList[SubsError] \/ Unit] =
 
     (for {
       a <- exactTargetService.sendETDataExtensionRow(subscribeResult, subscriptionData, gracePeriodInDays)
@@ -117,12 +118,13 @@ class CheckoutService(identityService: IdentityService,
       \/.right(())
     }).recover {
       case e => \/.left(NonEmptyList(CheckoutExactTargetFailure(
-        s"User could not subscribe during checkout because ExactTarget failed to send the subscription email",
+        userData.id.id,
+        s"ExactTarget failed to send welcome email to subscriber ${userData.id.id}",
         subscriptionData.toString,
         None)))
     }
 
-  private def createOrUpdateUser(
+  private def createOrUpdateUserInSalesforce(
       personalData: PersonalData,
       userData: UserIdData,
       subscriptionData: SubscriptionData): Future[NonEmptyList[SubsError] \/ ContactId] = {

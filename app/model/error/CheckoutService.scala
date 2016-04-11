@@ -68,6 +68,7 @@ object CheckoutService {
   }
 
   case class CheckoutExactTargetFailure(
+      userId: String,
       msg: String,
       requestData: String,
       errorResponse: Option[String]) extends CheckoutResult with SubsError {

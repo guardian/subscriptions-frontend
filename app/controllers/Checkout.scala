@@ -127,6 +127,22 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
             "message" -> e.msg,
             "userId" -> e.userId))
 
+        case e: CheckoutSalesforceFailure =>
+          logger.error(SubsError.header(seqErr))
+          logger.warn(SubsError.toStringPretty(seqErr))
+
+          Forbidden(Json.obj("type" -> "CheckoutSalesforceFailure",
+            "message" -> e.msg,
+            "userId" -> e.userId))
+
+        case e: CheckoutExactTargetFailure =>
+          logger.error(SubsError.header(seqErr))
+          logger.warn(SubsError.toStringPretty(seqErr))
+
+          Forbidden(Json.obj("type" -> "CheckoutExactTargetFailure",
+            "message" -> e.msg,
+            "userId" -> e.userId))
+
         case e: CheckoutGenericFailure =>
           logger.error(SubsError.header(seqErr))
           logger.warn(SubsError.toStringPretty(seqErr))
