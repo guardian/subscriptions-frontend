@@ -9,7 +9,7 @@ case class Checkout(val testUser: TestUser) extends Page with Browser {
 
   def fillInPersonalDetails(): Unit = PersonalDetails.fillIn()
 
-  def clickPersonalAddressContinueButton() = PersonalDetails.continue()
+  def clickPersonalDetailsContinueButton() = PersonalDetails.continue()
 
   def fillInAddressDetails(): Unit = PersonalDetails.fillInAddress()
 

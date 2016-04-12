@@ -59,6 +59,7 @@ class CheckoutSpec extends FeatureSpec with Browser
       val checkout = Checkout(testUser)
       When("Users visit 'Checkout' page ")
       go.to(checkout)
+      assert(checkout.pageHasLoaded())
 
       Then("section 'Your details' should load.")
       assert(checkout.yourDetailsSectionHasLoaded)
@@ -67,7 +68,7 @@ class CheckoutSpec extends FeatureSpec with Browser
       checkout.fillInPersonalDetails()
 
       And("click on 'Continue' button,")
-      checkout.clickPersonalAddressContinueButton()
+      checkout.clickPersonalDetailsContinueButton()
 
       Then("section 'Payment Details' should load.")
       assert(checkout.directDebitSectionHasLoaded())
@@ -85,7 +86,7 @@ class CheckoutSpec extends FeatureSpec with Browser
       assert(checkout.reviewSectionHasLoaded())
 
       When("they submit the form")
-      checkout.submit()
+      checkout.submitPayment()
 
       Then("they should land on 'Thank You' page.")
       val thankYou = ThankYou(testUser)
@@ -131,7 +132,7 @@ class CheckoutSpec extends FeatureSpec with Browser
         checkout.fillInAddressDetails()
 
         And("click on 'Continue' button,")
-        checkout.clickPersonalAddressContinueButton()
+        checkout.clickPersonalDetailsContinueButton()
 
         Then("the section 'Payment Details' should load.")
         assert(checkout.directDebitSectionHasLoaded())
@@ -149,7 +150,7 @@ class CheckoutSpec extends FeatureSpec with Browser
         assert(checkout.reviewSectionHasLoaded())
 
         When("they submit the form,")
-        checkout.submit()
+        checkout.submitPayment()
 
         Then("they should land on 'Thank You' page,")
         val thankYou = ThankYou(testUser)
