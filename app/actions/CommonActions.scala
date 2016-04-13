@@ -3,17 +3,28 @@ package actions
 import actions.OAuthActions._
 import com.gu.googleauth
 import com.typesafe.scalalogging.LazyLogging
+import configuration.Config
 import configuration.QA.passthroughCookie
 import controllers.{Cached, NoCache}
+import play.api.Logger
 import play.api.mvc.Security.AuthenticatedRequest
 import play.api.mvc._
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import play.api.mvc.Results.{Redirect, BadRequest}
 import scala.concurrent.Future
-
 object CommonActions {
 
   val NoCacheAction = resultModifier(noCache)
+
+  val NoSubAction = NoCacheAction andThen ActionRefiners.noSubscriptionAction({ _ =>
+    Redirect(Config.Identity.webAppMMAUrl.toString)
+  })
+
+  val NoSubAjaxAction = NoCacheAction andThen ActionRefiners.noSubscriptionAction({ sub =>
+    Logger.error(s"Attempt to checkout with existing subscription ${sub.name.get}")
+    BadRequest
+  })
 
   type GoogleAuthRequest[A] = AuthenticatedRequest[A, googleauth.UserIdentity]
 

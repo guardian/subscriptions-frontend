@@ -56,6 +56,8 @@ object Config {
 
     val webAppProfileUrl = webAppUrl / "account" / "edit"
 
+    val webAppMMAUrl = webAppUrl / "digitalpack" / "edit"
+
     val sessionDomain = idConfig.getString("sessionDomain")
 
     def idWebAppSigninUrl(returnTo: Call)(implicit request: RequestHeader) = idWebAppUrl("signin", returnTo)
