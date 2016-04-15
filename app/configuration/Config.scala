@@ -118,6 +118,7 @@ object Config {
       campaignName = "DigiPack - £30 digital gift card",
       codes = PromoCodeSet(PromoCode("DGA88"), promoCodes:_*),
       description = "Get £30 to spend with a top retailer of your choice when you subscribe. Use your digital gift card at Amazon.co.uk, M&S and more. Treat yourself or a friend.",
+      starts = new LocalDate(2016,3,1).toDateTime(LocalTime.Midnight, timezone),
       expires = new LocalDate(2016,4,30).toDateTime(LocalTime.Midnight, timezone),
       imageUrl = Some("https://media.guim.co.uk/b26ecf643d6494d60fc32c94e43d8d1483daadac/0_0_720_418/720.jpg"),
       promotionType = Incentive(
@@ -137,7 +138,8 @@ object Config {
       campaignName = s"DigiPack for just £9.99 a month (~17% discount)",
       codes = PromoCodeSet(PromoCode("DPA13"), promoCodes:_*),
       description = "For a limited time you can enjoy the digital pack for a special discounted price. Get every issue of The Guardian and The Observer newspapers delivered to your tablet, plus an ad-free experience on The Guardian live news app.",
-      expires = new LocalDate(2100,4,1).toDateTime(LocalTime.Midnight, timezone), // TODO - change to to Option
+      starts = new LocalDate(2016,3,1).toDateTime(LocalTime.Midnight, timezone),
+      expires = new LocalDate(2100,4,1).toDateTime(LocalTime.Midnight, timezone),
       imageUrl = None,
       roundelHtml = "Only £9.99 a month</span><span class='roundel__byline'>usually £11.99",
       title = "More of the Guardian, for less",
@@ -146,9 +148,6 @@ object Config {
   }
 
   def freeTrialPromo(env: String): Option[AnyPromotion] = {
-    // TODO tag manager
-    // TODO data extension
-    // TODO check we give 16 days to Zuora for normal sub, and 30 days for this and any FreeTrial promotion.
     val prpIds = digipackRatePlanIds(env)
     val promoCodes = (22 to 25) map { i => PromoCode(s"DHA$i") }
     Some(Promotion(
@@ -156,12 +155,13 @@ object Config {
       campaignName = s"DigiPack free for 30 Days",
       codes = PromoCodeSet(PromoCode("DHA22"), promoCodes:_*),
       description = "Enjoy the digital pack for free for 30 days without charge. Get every issue of The Guardian and The Observer newspapers delivered to your tablet, plus an ad-free experience on The Guardian live news app.",
+      starts = new LocalDate(2016,4,1).toDateTime(LocalTime.Midnight, timezone),
       expires = new LocalDate(2016,6,30).toDateTime(LocalTime.Midnight, timezone),
       imageUrl = None,
       roundelHtml = "<span class='roundel__strong'>FREE</span> DigiPack for 30 days",
       title = "Try the Guardian DigiPack free for 30 Days",
       promotionType = FreeTrial(duration = Days.days(30))
-    )).filter(_ => env != "PROD")
+    ))
   }
 
   object CAS {
