@@ -17,19 +17,19 @@ object Shipping extends Controller {
       packageType = "paper-digital",
       options = Seq(
         SubscriptionOption("everyday",
-          "Everyday+", 10.99f, Some("37%"), 47.62f, "Guardian and Observer papers, plus tablet editions and Premium mobile access",
+          "Everyday+", 10.99f, Some("41%"), 47.62f, "Guardian and Observer papers, plus tablet editions and Premium mobile access",
           "https://www.guardiansubscriptions.co.uk/Voucher?prom=faa13&pkgcode=ukx01&title=gv7&skip=1"
         ),
         SubscriptionOption("sixday",
-          "Sixday+", 9.99f, Some("31%"), 43.29f, "Guardian papers, plus tablet editions and Premium mobile access",
+          "Sixday+", 9.99f, Some("36%"), 43.29f, "Guardian papers, plus tablet editions and Premium mobile access",
           "https://www.guardiansubscriptions.co.uk/Voucher?prom=faa13&pkgcode=ukx01&title=gv6&skip=1"
         ),
         SubscriptionOption("weekend",
-          "Weekend+", 6.79f, Some("19%"), 29.42f, "Saturday Guardian and Observer papers, plus tablet editions and Premium mobile access",
+          "Weekend+", 6.79f, Some("22%"), 29.42f, "Saturday Guardian and Observer papers, plus tablet editions and Premium mobile access",
           "https://www.guardiansubscriptions.co.uk/Voucher?prom=faa13&pkgcode=ukx01&title=gv2&skip=1"
         ),
         SubscriptionOption("sunday",
-          "Sunday+", 5.09f, Some("10%"), 22.06f, "Observer paper, plus tablet editions and Premium mobile access",
+          "Sunday+", 5.09f, Some("12%"), 22.06f, "Observer paper, plus tablet editions and Premium mobile access",
           "https://www.guardiansubscriptions.co.uk/Voucher?prom=faa13&pkgcode=ukx01&title=ov1&skip=1"
         )
       )
@@ -43,15 +43,15 @@ object Shipping extends Controller {
       packageType = "paper",
       options = Seq(
         SubscriptionOption("everyday",
-          "Everyday", 9.99f, Some("32%"), 43.29f, "Guardian and Observer papers",
+          "Everyday", 9.99f, Some("37%"), 43.29f, "Guardian and Observer papers",
           "https://www.guardiansubscriptions.co.uk/Voucher?prom=faa13&pkgcode=ukx00&title=gv7&skip=1"
         ),
         SubscriptionOption("sixday",
-          "Sixday", 8.49f, Some("27%"), 36.79f, "Guardian papers",
+          "Sixday", 8.49f, Some("34%"), 36.79f, "Guardian papers",
           "https://www.guardiansubscriptions.co.uk/Voucher?prom=faa13&pkgcode=ukx00&title=gv6&skip=1"
         ),
         SubscriptionOption("weekend",
-          "Weekend", 4.79f, Some("14%"), 20.76f, "Saturday Guardian and Observer papers",
+          "Weekend", 4.79f, Some("19%"), 20.76f, "Saturday Guardian and Observer papers",
           "https://www.guardiansubscriptions.co.uk/Voucher?prom=faa13&pkgcode=ukx00&title=gv2&skip=1"
         )
       )
