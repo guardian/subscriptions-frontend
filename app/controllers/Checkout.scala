@@ -11,7 +11,7 @@ import com.typesafe.scalalogging.LazyLogging
 import configuration.Config.Identity.webAppProfileUrl
 import configuration.Config._
 import forms.{FinishAccountForm, SubscriptionsForm}
-import model.{DirectDebitData, SubscriptionData, SubscriptionRequestData}
+import model.{PurchaserIdentifiers, DirectDebitData, SubscriptionData, SubscriptionRequestData}
 import model.error.CheckoutService._
 import model.error.SubsError
 import play.api.data.Form
@@ -112,44 +112,39 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
 
           Forbidden(Json.obj(
             "type" -> "CheckoutStripeError",
-            "message" -> e.paymentError.getMessage,
-            "userId" -> e.userId))
+            "message" -> e.paymentError.getMessage))
 
         case e: CheckoutZuoraPaymentGatewayError =>
           logger.warn(SubsError.toStringPretty(seqErr))
-          handlePaymentGatewayError(e.paymentError, e.userId)
+          handlePaymentGatewayError(e.paymentError, e.purchaserIds)
 
         case e: CheckoutPaymentTypeFailure =>
           logger.error(SubsError.header(seqErr))
           logger.warn(SubsError.toStringPretty(seqErr))
 
           Forbidden(Json.obj("type" -> "CheckoutPaymentTypeFailure",
-            "message" -> e.msg,
-            "userId" -> e.userId))
+            "message" -> e.msg))
 
         case e: CheckoutSalesforceFailure =>
           logger.error(SubsError.header(seqErr))
           logger.warn(SubsError.toStringPretty(seqErr))
 
           Forbidden(Json.obj("type" -> "CheckoutSalesforceFailure",
-            "message" -> e.msg,
-            "userId" -> e.userId))
+            "message" -> e.msg))
 
         case e: CheckoutExactTargetFailure =>
           logger.error(SubsError.header(seqErr))
           logger.warn(SubsError.toStringPretty(seqErr))
 
           Forbidden(Json.obj("type" -> "CheckoutExactTargetFailure",
-            "message" -> e.msg,
-            "userId" -> e.userId))
+            "message" -> e.msg))
 
         case e: CheckoutGenericFailure =>
           logger.error(SubsError.header(seqErr))
           logger.warn(SubsError.toStringPretty(seqErr))
 
           Forbidden(Json.obj("type" -> "CheckoutGenericFailure",
-            "message" -> "User could not subscribe",
-            "userId" -> e.userId))
+            "message" -> "User could not subscribe"))
       }
     }
 
@@ -259,11 +254,11 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
   }
 
   // PaymentGatewayError should be logged at WARN level
-  private def handlePaymentGatewayError(e: PaymentGatewayError, userId: String) = {
+  private def handlePaymentGatewayError(e: PaymentGatewayError, purchaserIds: PurchaserIdentifiers) = {
 
-    def handleError(msg: String, errType: String, userId: String) = {
-      logger.warn(s"User $userId could not subscribe: $msg")
-      Forbidden(Json.obj("type" -> errType, "message" -> msg, "userId" -> userId))
+    def handleError(msg: String, errType: String) = {
+      logger.warn(s"$purchaserIds could not subscribe: $msg")
+      Forbidden(Json.obj("type" -> errType, "message" -> msg))
     }
 
     // TODO: Does Zuora provide a guarantee the message is safe to display to users directly?
@@ -271,19 +266,18 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
 
     e.errType match {
       case InsufficientFunds =>
-        handleError("Your card has insufficient funds", "InsufficientFunds", userId)
+        handleError("Your card has insufficient funds", "InsufficientFunds")
 
       case TransactionNotAllowed =>
-        handleError("Your card does not support this type of purchase", "TransactionNotAllowed", userId)
+        handleError("Your card does not support this type of purchase", "TransactionNotAllowed")
 
       case RevocationOfAuthorization =>
         handleError(
           "Cardholder has requested all payments to be stopped on this card",
-          "RevocationOfAuthorization",
-          userId)
+          "RevocationOfAuthorization")
 
       case _ =>
-        handleError("Your card was declined", "PaymentGatewayError", userId)
+        handleError("Your card was declined", "PaymentGatewayError")
     }
   }
 }
