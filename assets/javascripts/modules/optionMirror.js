@@ -23,6 +23,9 @@ define(['$'], function ($) {
                 option.addEventListener('change', function(e) {
                     mirror(valueElems, e.target);
                 });
+                if (option.checked) {
+                    mirror(valueElems, option);
+                }
             });
         }
     };

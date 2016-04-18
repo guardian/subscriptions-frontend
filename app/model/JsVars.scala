@@ -1,6 +1,6 @@
 package model
 
-import com.gu.i18n.{GBP, Currency, CountryGroup}
+import com.gu.i18n.{GBP, Currency, Country, CountryGroup}
 import play.api.libs.json._
 
 object JsVars {
@@ -11,16 +11,17 @@ object JsVars {
           "isSignedIn" -> jsVars.userIsSignedIn,
           "ignorePageLoadTracking" -> jsVars.ignorePageLoadTracking
         ),
-        "currency" -> jsVars.currency.toString,
-        "country" -> jsVars.countryGroup.defaultCountry.map(_.alpha2)
+        "currency" -> jsVars.currency.toString
       )
 
-      val optional = jsVars.stripePublicKey match {
+      val optionalCountry = Json.obj("country" -> jsVars.country.map(_.alpha2))
+
+      val optionalStripe = jsVars.stripePublicKey match {
         case Some(stripePublicKey) => Json.obj("stripePublicKey" -> stripePublicKey)
         case None => Json.obj()
       }
 
-      mandatory ++ optional
+      mandatory ++ optionalCountry ++ optionalStripe
     }
   }
 }
@@ -30,5 +31,6 @@ case class JsVars(
   ignorePageLoadTracking: Boolean = false,
   stripePublicKey: Option[String] = None,
   countryGroup: CountryGroup = CountryGroup.UK,
-  currency: Currency = GBP
+  currency: Currency = GBP,
+  country: Option[Country] = None
 )

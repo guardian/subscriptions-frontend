@@ -1,6 +1,7 @@
 package services
 
-import com.gu.i18n.{Country, Currency, GBP}
+import com.gu.i18n.Country.UK
+import com.gu.i18n.{Currency, GBP}
 import com.gu.memsub.BillingPeriod
 import com.gu.salesforce.ContactId
 import com.gu.stripe.StripeService
@@ -29,7 +30,7 @@ trait PaymentService {
         accountHolderName = paymentData.holder,
         firstName = personalData.first,
         lastName = personalData.last,
-        countryCode = Country.UK.alpha2
+        countryCode = UK.alpha2
       ))
   }
 
@@ -42,7 +43,7 @@ trait PaymentService {
   }
 
   def makeDirectDebitPayment(paymentData: DirectDebitData, personalData: PersonalData, memberId: ContactId) = {
-    require(personalData.country == Country.UK, "Direct Debit payment only works in the UK right now")
+    require(personalData.address.country.contains(UK), "Direct Debit payment only works in the UK right now")
     new DirectDebitPayment(paymentData, personalData, memberId)
   }
 

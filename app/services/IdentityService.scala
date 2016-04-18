@@ -113,7 +113,7 @@ object PersonalDataJsonSerialiser {
         "billingAddress3" -> personalData.address.town,
         "billingAddress4" -> personalData.address.countyOrState,
         "billingPostcode" -> personalData.address.postCode,
-        "billingCountry"  -> personalData.country.name
+        "billingCountry"  -> personalData.address.country.fold(personalData.address.countryName)(_.name)
       ).++(
          telephoneNumber.fold[JsObject](Json.obj()){t =>
            Json.obj(

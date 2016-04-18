@@ -1,5 +1,6 @@
 package model
 
+import com.gu.i18n.Country.UK
 import com.gu.i18n.{Country, CountryGroup}
 import com.gu.identity.play.IdUser
 import com.gu.memsub.Subscription.ProductRatePlanId
@@ -43,20 +44,9 @@ case class PersonalData(first: String,
                         ) extends FullName {
   def fullName = s"$first $last"
 
-  private lazy val countryName = address.countryName
+  private lazy val countryGroup = CountryGroup.byCountryNameOrCode(address.country.fold(UK.alpha2)(c => c.alpha2))
 
-  private lazy val notFound =
-    throw new NoSuchElementException(s"Could not find a country group for country with name $countryName")
-
-  private lazy val countryGroup: CountryGroup =
-    CountryGroup.byCountryNameOrCode(countryName)
-      .getOrElse(notFound)
-
-  lazy val currency = countryGroup.currency
-
-  lazy val country: Country =
-    CountryGroup.countryByNameOrCode(countryName)
-      .getOrElse(notFound)
+  lazy val currency = countryGroup.fold(CountryGroup.UK.currency)(_.currency)
 }
 
 
