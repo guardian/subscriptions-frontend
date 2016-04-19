@@ -1,0 +1,18 @@
+@(req: RequestHeader, err: String)
+    @main("Bad Request") {
+        <main class="page-container gs-container">
+          @fragments.page.header("Error 400", Some("Bad Request"))
+            <div class="prose">
+                    <p>
+                        Sorry, there was an error with this page. Please contact support at:<a href="mailto:subscriptions.dev@@theguardian.com">
+                        subscriptions.dev@@theguardian.com</a>.
+                    </p>
+
+                    <p>Please provide the following error code to help identify the issue.</p>
+                    <pre>Error: @err</pre>
+                    <pre>Path: @req.path</pre>
+
+                </div>
+         </main>
+    }
+
