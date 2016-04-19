@@ -1,11 +1,9 @@
 package model.error
 
-import com.gu.identity.play.IdMinimalUser
 import com.gu.memsub.promo.PromoCode
 import com.gu.salesforce.ContactId
 import com.gu.zuora.soap.models.Results.SubscribeResult
 import com.gu.zuora.soap.models.errors.PaymentGatewayError
-import model.PurchaserIdentifiers
 import services.UserIdData
 
 object CheckoutService {
@@ -28,7 +26,7 @@ object CheckoutService {
   }
 
   case class CheckoutGenericFailure(
-      purchaserIds: PurchaserIdentifiers,
+      userId: String,
       msg: String,
       requestData: String,
       errorResponse: Option[String]) extends CheckoutResult with SubsError {
@@ -38,7 +36,7 @@ object CheckoutService {
   }
 
   case class CheckoutStripeError(
-      purchaserIds: PurchaserIdentifiers,
+      userId: String,
       paymentError: Throwable,
       msg: String,
       requestData: String,
@@ -49,7 +47,7 @@ object CheckoutService {
   }
 
   case class CheckoutZuoraPaymentGatewayError(
-      purchaserIds: PurchaserIdentifiers,
+      userId: String,
       paymentError: PaymentGatewayError,
       msg: String,
       requestData: String,
@@ -60,7 +58,7 @@ object CheckoutService {
   }
 
   case class CheckoutSalesforceFailure(
-      identityUser: Option[IdMinimalUser],
+      userId: String,
       msg: String,
       requestData: String,
       errorResponse: Option[String]) extends CheckoutResult with SubsError {
@@ -70,7 +68,7 @@ object CheckoutService {
   }
 
   case class CheckoutExactTargetFailure(
-      purchaserIds: PurchaserIdentifiers,
+      userId: String,
       msg: String,
       requestData: String,
       errorResponse: Option[String]) extends CheckoutResult with SubsError {
@@ -80,7 +78,7 @@ object CheckoutService {
   }
 
   case class CheckoutPaymentTypeFailure(
-      purchaserIds: PurchaserIdentifiers,
+      userId: String,
       msg: String,
       requestData: String,
       errorResponse: Option[String]) extends CheckoutResult with SubsError {
@@ -90,5 +88,3 @@ object CheckoutService {
   }
 
 }
-
-
