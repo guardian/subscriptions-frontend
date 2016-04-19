@@ -32,4 +32,8 @@ class ErrorHandler @Inject() (env: Environment,
   override protected def onProdServerError(request: RequestHeader, exception: UsefulException): Future[Result] = {
     Future.successful(NoCache(InternalServerError(views.html.error500(exception))))
   }
+  override protected def onBadRequest(request: RequestHeader, message: String): Future[Result] = {
+    logServerError(request, new PlayException("Bad request", "A bad request was received."))
+    Future.successful(NoCache(BadRequest(views.html.error400(request, message))))
+  }
 }
