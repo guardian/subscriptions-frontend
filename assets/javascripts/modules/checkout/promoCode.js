@@ -93,8 +93,10 @@ define([
     }
 
     function validate() {
-        var promoCode  = $inputBox.val().trim();
-        if (promoCode === '' || countryChoice.getCurrentCountryOption().value === '') {
+        var country = countryChoice.getCurrentCountryOption().value.trim(),
+            promoCode  = $inputBox.val().trim();
+
+        if (country === '' || promoCode === '') {
             clearDown();
             return;
         }
@@ -106,7 +108,7 @@ define([
             data: {
                 promoCode: promoCode,
                 productRatePlanId: formElements.getRatePlanId(),
-                country: countryChoice.getCurrentCountryOption().value
+                country: country
             }
         }).then(function (a) {
             if (a.isValid) {
