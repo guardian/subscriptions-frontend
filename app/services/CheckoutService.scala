@@ -1,7 +1,7 @@
 package services
 
 import com.gu.config.DiscountRatePlanIds
-import com.gu.identity.play.AuthenticatedIdUser
+import com.gu.identity.play.{IdMinimalUser, AuthenticatedIdUser}
 import com.gu.memsub.services.PromoService
 import com.gu.memsub.services.api.CatalogService
 import com.gu.salesforce.ContactId
@@ -42,67 +42,67 @@ class CheckoutService(identityService: IdentityService,
     val personalData = subscriptionData.personalData
     val plan = RatePlan(subscriptionData.productRatePlanId.get, None)
 
-    authenticatedUserOpt match {
-      case Some(authenticatedIdUser) => userBecomesSubscriber(
-        authenticatedUserOpt, personalData, RegisteredUser(authenticatedIdUser.user), requestData, plan, subscriptionData)
-
-      case _ =>
-        logger.info(s"User does not have an Identity account. Creating a guest account")
-
-        def success(personalData: PersonalData, requestData: SubscriptionRequestData,
-                    plan: RatePlan, subscriptionData: SubscriptionData)(identity: IdentitySuccess) =
-          userBecomesSubscriber(None, personalData, identity.userData, requestData, plan, subscriptionData)
-
-        def failure(errSeq: NonEmptyList[SubsError]) = Future.successful(\/.left(errSeq.<::(CheckoutIdentityFailure(
-          "User could not subscribe during checkout because Identity guest account could not be created",
-          subscriptionData.toString,
-          None))))
-
-        identityService.registerGuest(personalData).flatMap{_.fold(
-          failure, success(personalData, requestData, plan, subscriptionData))}
-    }
+    userBecomesSubscriber(authenticatedUserOpt, personalData, requestData, plan, subscriptionData)
   }
 
   private def gracePeriod(withPromo: Subscribe, subscribe: Subscribe) =
     if (withPromo.paymentDelay == subscribe.paymentDelay) zuoraProperties.gracePeriodInDays else ZERO
 
+
   private def userBecomesSubscriber(
        authenticatedUserOpt: Option[AuthenticatedIdUser],
        personalData: PersonalData,
-       userData: UserIdData,
        requestData: SubscriptionRequestData,
        plan: RatePlan,
        subscriptionData: SubscriptionData): Future[NonEmptyList[SubsError] \/ CheckoutSuccess] = {
 
-    val identityUpdate = authenticatedUserOpt.map(
-      updateAuthenticatedUserDetails(_, personalData, subscriptionData)
-    ).getOrElse(Future.successful(\/.right(Unit))) // just say we succeeded if we did no update
+    val idMinimalUser = authenticatedUserOpt.map(_.user)
 
     (for {
-      memberId <- EitherT(createOrUpdateUserInSalesforce(personalData, userData, subscriptionData))
-      payment <- EitherT(createPaymentType(personalData, requestData, userData, memberId, subscriptionData))
-      subscribe <- EitherT(createSubscribeRequest(personalData, requestData, plan, userData, memberId, subscriptionData, payment))
+      memberId <- EitherT(createOrUpdateUserInSalesforce(personalData, idMinimalUser, subscriptionData))
+      purchaserIds = PurchaserIdentifiers(memberId, idMinimalUser)
+      payment <- EitherT(createPaymentType(personalData, requestData, purchaserIds, subscriptionData))
+      subscribe <- EitherT(createSubscribeRequest(personalData, requestData, plan, purchaserIds, subscriptionData, payment))
       withPromo = promoService.applyPromotion(subscribe, subscriptionData.suppliedPromoCode, Some(personalData.country))
-      result <- EitherT(createSubscription(withPromo, userData, subscriptionData))
-      _ <- EitherT(sendETDataExtensionRow(result, subscriptionData, gracePeriod(subscribe, withPromo), userData))
-      _ <- EitherT(identityUpdate)
-    } yield {
-      CheckoutSuccess(memberId, userData, result, subscribe.promoCode)
-    }).run
+      result <- EitherT(createSubscription(withPromo, purchaserIds, subscriptionData))
+      _ <- EitherT(sendETDataExtensionRow(result, subscriptionData, gracePeriod(subscribe, withPromo), purchaserIds))
+      identitySuccess <- storeIdentityDetails(personalData, authenticatedUserOpt, memberId)
+    } yield CheckoutSuccess(memberId, identitySuccess.userData, result, subscribe.promoCode)).run
+  }
+
+  private def storeIdentityDetails(personalData: PersonalData, authenticatedUserOpt: Option[AuthenticatedIdUser], memberId: ContactId): EitherT[Future, NonEmptyList[SubsError], IdentitySuccess] = {
+    authenticatedUserOpt match {
+      case Some(authenticatedIdUser) => {
+        EitherT(updateAuthenticatedUserDetails(authenticatedIdUser, memberId, personalData))
+      }
+      case None => {
+        logger.info(s"User does not have an Identity account. Creating a guest account")
+        for (identitySuccess <- EitherT(identityService.registerGuest(personalData))) yield {
+          val identityId = identitySuccess.userData.id.id
+          val salesforceResult = salesforceService.repo.updateIdentityId(memberId, identityId)
+          for (err <- EitherT(salesforceResult).swap) yield {
+            // Swallow salesforce update errors, but log them
+            logger.error(s"Error updating salesforce contact $memberId with identity id $identityId: ${err.getMessage()}")
+          }
+
+          identitySuccess
+        }
+      }
+    }
   }
 
   private def updateAuthenticatedUserDetails(
       authenticatedUser: AuthenticatedIdUser,
-      personalData: PersonalData,
-      subscriptionData: SubscriptionData): Future[NonEmptyList[SubsError] \/ IdentitySuccess] =
+      memberId: ContactId,
+      personalData: PersonalData): Future[NonEmptyList[SubsError] \/ IdentitySuccess] =
 
     identityService.updateUserDetails(personalData)(authenticatedUser).map {
       case \/-(IdentitySuccess(user)) => \/.right(IdentitySuccess(user))
 
       case -\/(errSeq) =>
         \/.left(errSeq.<::(CheckoutIdentityFailure(
-          s"Registered user ${authenticatedUser.user.id} could not subscribe during checkout because Identity details could not be updated",
-          subscriptionData.toString,
+          s"Could not update identity details for subscribed user ${authenticatedUser.user.id}",
+          memberId.toString,
           None)))
     }
 
@@ -110,7 +110,7 @@ class CheckoutService(identityService: IdentityService,
       subscribeResult: SubscribeResult,
       subscriptionData: SubscriptionData,
       gracePeriodInDays: Days,
-      userData: UserIdData): Future[NonEmptyList[SubsError] \/ Unit] =
+      purchaserIds: PurchaserIdentifiers): Future[NonEmptyList[SubsError] \/ Unit] =
 
     (for {
       a <- exactTargetService.sendETDataExtensionRow(subscribeResult, subscriptionData, gracePeriodInDays)
@@ -118,25 +118,25 @@ class CheckoutService(identityService: IdentityService,
       \/.right(())
     }).recover {
       case e => \/.left(NonEmptyList(CheckoutExactTargetFailure(
-        userData.id.id,
-        s"ExactTarget failed to send welcome email to subscriber ${userData.id.id}",
+        purchaserIds,
+        s"ExactTarget failed to send welcome email to subscriber $purchaserIds",
         subscriptionData.toString,
         None)))
     }
 
   private def createOrUpdateUserInSalesforce(
       personalData: PersonalData,
-      userData: UserIdData,
+      userData: Option[IdMinimalUser],
       subscriptionData: SubscriptionData): Future[NonEmptyList[SubsError] \/ ContactId] = {
 
     (for {
-      memberId <- salesforceService.createOrUpdateUser(personalData, userData.id)
+      memberId <- salesforceService.createOrUpdateUser(personalData, userData)
     } yield {
       \/.right(memberId)
     }).recover {
       case e => \/.left(NonEmptyList(CheckoutSalesforceFailure(
-        userData.id.id,
-        s"User ${userData.id.id} could not subscribe during checkout because his details could not be updated in Salesforce",
+        userData,
+        s"${userData} could not subscribe during checkout because his details could not be updated in Salesforce",
         subscriptionData.toString,
         None)))
     }
@@ -145,8 +145,7 @@ class CheckoutService(identityService: IdentityService,
   private def createSubscribeRequest(
       personalData: PersonalData, requestData: SubscriptionRequestData,
       plan: RatePlan,
-      userData: UserIdData,
-      memberId: ContactId,
+      purchaserIds: PurchaserIdentifiers,
       subscriptionData: SubscriptionData,
       payment: PaymentService#Payment): Future[NonEmptyList[SubsError] \/ Subscribe] = {
 
@@ -161,15 +160,15 @@ class CheckoutService(identityService: IdentityService,
       ))
     }.recover {
       case e: Stripe.Error => \/.left(NonEmptyList(CheckoutStripeError(
-        userData.id.id,
+        purchaserIds,
         e,
-        s"User ${userData.id.id} could not subscribe during checkout due to Stripe API error",
+        s"${purchaserIds} could not subscribe during checkout due to Stripe API error",
         subscriptionData.toString,
         None)))
 
       case e => \/.left(NonEmptyList(CheckoutGenericFailure(
-        userData.id.id,
-        s"User ${userData.id.id} could not subscribe during checkout",
+        purchaserIds,
+        s"${purchaserIds} could not subscribe during checkout",
         subscriptionData.toString,
         None)))
     }
@@ -177,20 +176,20 @@ class CheckoutService(identityService: IdentityService,
 
   private def createSubscription(
       subscribe: Subscribe,
-      userData: UserIdData,
+      purchaserIds: PurchaserIdentifiers,
       subscriptionData: SubscriptionData): Future[NonEmptyList[SubsError] \/ SubscribeResult] = {
 
     zuoraService.createSubscription(subscribe).map(\/.right).recover {
       case e: PaymentGatewayError => \/.left(NonEmptyList(CheckoutZuoraPaymentGatewayError(
-        userData.id.id,
+        purchaserIds,
         e,
-        s"User ${userData.id.id} could not subscribe during checkout due to Zuora Payment Gateway Error",
+        s"$purchaserIds could not subscribe during checkout due to Zuora Payment Gateway Error",
         subscriptionData.toString,
         None)))
 
       case e => \/.left(NonEmptyList(CheckoutGenericFailure(
-        userData.id.id,
-        s"User ${userData.id.id} could not subscribe during checkout",
+        purchaserIds,
+        s"$purchaserIds could not subscribe during checkout",
         subscriptionData.toString,
         None)))
     }
@@ -198,23 +197,22 @@ class CheckoutService(identityService: IdentityService,
 
   private def createPaymentType(
       personalData: PersonalData, requestData: SubscriptionRequestData,
-      userData: UserIdData,
-      memberId: ContactId,
+      purchaserIds: PurchaserIdentifiers,
       subscriptionData: SubscriptionData): Future[NonEmptyList[SubsError] \/ PaymentService#Payment] = {
 
     try {
       val payment = subscriptionData.paymentData match {
         case paymentData@DirectDebitData(_, _, _) =>
-          paymentService.makeDirectDebitPayment(paymentData, personalData, memberId)
+          paymentService.makeDirectDebitPayment(paymentData, personalData, purchaserIds.memberId)
         case paymentData@CreditCardData(_) =>
           val digipackPlan = catalogService.digipackCatalog.unsafeFind(subscriptionData.productRatePlanId)
-          paymentService.makeCreditCardPayment(paymentData, personalData, userData, memberId, digipackPlan)
+          paymentService.makeCreditCardPayment(paymentData, personalData, purchaserIds, digipackPlan)
       }
       Future.successful(\/.right(payment))
     } catch {
       case e: Throwable => Future.successful(\/.left(NonEmptyList(CheckoutPaymentTypeFailure(
-        userData.id.id,
-        s"User ${userData.id.id} could not subscribe during checkout because of a problem with selected payment type",
+        purchaserIds,
+        s"$purchaserIds could not subscribe during checkout because of a problem with selected payment type",
         subscriptionData.toString,
         Some(e.getMessage())))))
     }

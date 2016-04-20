@@ -1,5 +1,6 @@
 package services
 
+import com.gu.identity.play.IdMinimalUser
 import com.gu.memsub.util.FutureSupplier
 import com.gu.salesforce.ContactDeserializer.Keys
 import com.gu.salesforce._
@@ -17,7 +18,7 @@ import scala.concurrent.duration._
 trait SalesforceService extends LazyLogging {
   def repo: SalesforceRepo
 
-  def createOrUpdateUser(personalData: PersonalData, userId: UserId): Future[ContactId]
+  def createOrUpdateUser(personalData: PersonalData, userId: Option[IdMinimalUser]): Future[ContactId]
 
   def createSalesforceUserData(personalData: PersonalData): JsObject = Json.obj(
       Keys.EMAIL -> personalData.email,
@@ -32,8 +33,8 @@ trait SalesforceService extends LazyLogging {
 }
 
 class SalesforceServiceImp(val repo: SalesforceRepo) extends SalesforceService {
-  override def createOrUpdateUser(personalData: PersonalData, userId: UserId): Future[ContactId] =
-    repo.upsert(userId.id, createSalesforceUserData(personalData))
+  override def createOrUpdateUser(personalData: PersonalData, userId: Option[IdMinimalUser]): Future[ContactId] =
+    repo.upsert(userId.map(_.id), createSalesforceUserData(personalData))
 }
 
 class SalesforceRepo(salesforceConfig: SalesforceConfig) extends ContactRepository {
