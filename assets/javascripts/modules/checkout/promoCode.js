@@ -94,7 +94,7 @@ define([
 
     function validate() {
         var promoCode  = $inputBox.val().trim();
-        if (promoCode === '') {
+        if (promoCode === '' || countryChoice.getCurrentCountryOption().value === '') {
             clearDown();
             return;
         }
