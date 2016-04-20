@@ -15,7 +15,7 @@ object Benefits {
 
   val digitalPack = BenefitPackage("Daily Edition", Seq(
     BenefitItem("The full experience", "Your daily newspaper optimised for tablet"),
-    BenefitItem("Complete supplements", "Including The Guide, Cook, Observer Tech and Food Monthly"),
+    BenefitItem("Complete supplements", "Including The Guide, Cook and Food Monthly"),
     BenefitItem("Video and audio content", "Embedded audio, video and image galleries — plus all our crosswords"),
     BenefitItem("Available offline", "Downloaded automatically by 4am every morning. Perfect for travel"),
     BenefitItem("Designed for tablets", "Specially adapted to your device, whether you're using iPad, Android or Kindle Fire"),
