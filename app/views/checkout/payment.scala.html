@@ -1,4 +1,4 @@
-@import com.gu.i18n.{CountryGroup, Currency}
+@import com.gu.i18n.{Country, CountryGroup, Currency}
 @import com.gu.memsub.{BillingPeriod, Month}
 @import com.gu.subscriptions.DigipackPlan
 @import configuration.Config.Identity._
@@ -10,8 +10,9 @@
     userIsSignedIn: Boolean,
     plans: Seq[DigipackPlan[BillingPeriod]],
     defaultPlan : DigipackPlan[Month],
+    country: Option[Country],
     countryGroup: CountryGroup,
-    currency: Currency,
+    defaultCurrency: Currency,
     countriesWithCurrency: List[CountryWithCurrency],
     touchpointBackendResolution: services.TouchpointBackend.Resolution)(implicit request: RequestHeader)
 
@@ -30,7 +31,7 @@
             data-number-of-months="@plan.billingPeriod.numberOfMonths"
             data-currency="@currency"
             value="@plan.productRatePlanId.get"
-            @if(plan == defaultPlan){checked}
+            @if(plan == defaultPlan && currency == defaultCurrency){checked}
             >
         </span>
         <span class="option__label" id="label-for-@plan.productRatePlanId.get-@currency">@plan.prettyPricing(currency)</span>
@@ -39,7 +40,7 @@
 
 @main(
     title = "Details - name and address | Subscriptions | The Guardian",
-    jsVars = JsVars(userIsSignedIn = userIsSignedIn, ignorePageLoadTracking = true, countryGroup = countryGroup, currency = currency),
+    jsVars = JsVars(userIsSignedIn = userIsSignedIn, ignorePageLoadTracking = true, countryGroup = countryGroup, currency = defaultCurrency, country = country),
     bodyClasses = List("is-wide"),
     touchpointBackendResolutionOpt = Some(touchpointBackendResolution)
 ) {

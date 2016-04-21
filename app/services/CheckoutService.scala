@@ -1,14 +1,14 @@
 package services
 
 import com.gu.config.DiscountRatePlanIds
-import com.gu.identity.play.{IdMinimalUser, AuthenticatedIdUser}
+import com.gu.identity.play.{AuthenticatedIdUser, IdMinimalUser}
 import com.gu.memsub.services.PromoService
 import com.gu.memsub.services.api.CatalogService
 import com.gu.salesforce.ContactId
 import com.gu.stripe.Stripe
 import com.gu.zuora.api.ZuoraService
-import com.gu.zuora.soap.models.Commands.{Subscribe, RatePlan}
 import com.gu.zuora.soap.models.Commands.Lenses._
+import com.gu.zuora.soap.models.Commands.{RatePlan, Subscribe}
 import com.gu.zuora.soap.models.Results.SubscribeResult
 import com.gu.zuora.soap.models.errors._
 import com.typesafe.scalalogging.LazyLogging
@@ -19,10 +19,11 @@ import model.error.SubsError
 import org.joda.time.Days
 import org.joda.time.Days.ZERO
 import touchpoint.ZuoraProperties
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scalaz.{NonEmptyList, EitherT, \/, -\/, \/-}
 import scalaz.std.scalaFuture._
+import scalaz.{-\/, EitherT, NonEmptyList, \/, \/-}
 
 class CheckoutService(identityService: IdentityService,
                       salesforceService: SalesforceService,
@@ -48,7 +49,6 @@ class CheckoutService(identityService: IdentityService,
   private def gracePeriod(withPromo: Subscribe, subscribe: Subscribe) =
     if (withPromo.paymentDelay == subscribe.paymentDelay) zuoraProperties.gracePeriodInDays else ZERO
 
-
   private def userBecomesSubscriber(
        authenticatedUserOpt: Option[AuthenticatedIdUser],
        personalData: PersonalData,
@@ -63,7 +63,7 @@ class CheckoutService(identityService: IdentityService,
       purchaserIds = PurchaserIdentifiers(memberId, idMinimalUser)
       payment <- EitherT(createPaymentType(personalData, requestData, purchaserIds, subscriptionData))
       subscribe <- EitherT(createSubscribeRequest(personalData, requestData, plan, purchaserIds, subscriptionData, payment))
-      withPromo = promoService.applyPromotion(subscribe, subscriptionData.suppliedPromoCode, Some(personalData.country))
+      withPromo = promoService.applyPromotion(subscribe, subscriptionData.suppliedPromoCode, personalData.address.country)
       result <- EitherT(createSubscription(withPromo, purchaserIds, subscriptionData))
       _ <- EitherT(sendETDataExtensionRow(result, subscriptionData, gracePeriod(subscribe, withPromo), purchaserIds))
       identitySuccess <- storeIdentityDetails(personalData, authenticatedUserOpt, memberId)

@@ -1,13 +1,9 @@
 define(['$'], function ($) {
+    'use strict';
+
     var model = {
        currency: null,
        country: null
-    };
-
-    var set = function (currency, country) {
-        model.currency = currency;
-        model.country = country;
-        refresh();
     };
 
     var refresh = function () {
@@ -28,7 +24,13 @@ define(['$'], function ($) {
 
     };
 
+    var set = function (currency, country) {
+        model.currency = currency;
+        model.country = country;
+        refresh();
+    };
+
     return {
         set: set
-    }
+    };
 });

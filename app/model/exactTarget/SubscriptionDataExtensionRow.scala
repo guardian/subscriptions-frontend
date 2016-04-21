@@ -49,7 +49,7 @@ object SubscriptionDataExtensionRow extends LazyLogging {
         "Address 2" -> address.lineTwo,
         "City" -> address.town,
         "Post Code" -> address.postCode,
-        "Country" -> address.country.name,
+        "Country" -> address.country.fold(address.countryName)(_.name),
         "Date of first payment" -> formatDate(subscription.firstPaymentDate),
         "Currency" -> personalData.currency.glyph,
         "Trial period" -> paymentDelay.getDays.toString,

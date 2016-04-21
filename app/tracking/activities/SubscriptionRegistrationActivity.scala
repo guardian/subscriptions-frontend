@@ -15,7 +15,7 @@ object MemberData {
   def apply(checkoutResult: CheckoutSuccess, subscriptionData: SubscriptionData, billingPeriod: BillingPeriod): MemberData = {
     val address: Address = subscriptionData.personalData.address
     MemberData(address.town,
-      address.country.name,
+      address.country.fold(address.countryName)(_.name),
       address.postCode,
       billingPeriod,
       subscriptionData.personalData.receiveGnmMarketing,

@@ -6,7 +6,7 @@ object PaymentValidation {
   def validateDirectDebit(subscriptionData: SubscriptionData): Boolean = {
     subscriptionData.paymentData match {
       case _: DirectDebitData =>
-        subscriptionData.personalData.country == Country.UK
+        subscriptionData.personalData.address.country.contains(Country.UK)
       case _ => true
     }
   }

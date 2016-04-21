@@ -65,19 +65,20 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
 
     subscriptionData map { subsData =>
       val form = subsData.fold(getEmptySubscriptionsForm(promoCode)) { data => SubscriptionsForm().fill(data) }
-      val countryGroupWithDefault =
-        subsData.flatMap { data => CountryGroup.byCountryNameOrCode(data.personalData.address.countryName) }
-                .getOrElse(countryGroup)
+      val countryOpt = subsData.flatMap(data => data.personalData.address.country)
+      val countryGroupWithDefault = countryOpt.fold(countryGroup)(c => CountryGroup.byCountryCode(c.alpha2).getOrElse(countryGroup))
+      val country = countryOpt orElse countryGroupWithDefault.defaultCountry
       val desiredCurrency = countryGroupWithDefault.currency
       val supportedCurrencies = defaultPlan.currencies
-      val currency = if (supportedCurrencies.contains(desiredCurrency)) desiredCurrency else GBP
+      val defaultCurrency = if (supportedCurrencies.contains(desiredCurrency)) desiredCurrency else GBP
 
       Ok(views.html.checkout.payment(form = form,
                                      userIsSignedIn = authenticatedUser.isDefined,
                                      plans = plans,
                                      defaultPlan = defaultPlan,
+                                     country = country,
                                      countryGroup = countryGroupWithDefault,
-                                     currency = currency,
+                                     defaultCurrency = defaultCurrency,
                                      countriesWithCurrency = CountryWithCurrency.whitelisted(supportedCurrencies, GBP),
                                      touchpointBackendResolution = resolution))
     }
