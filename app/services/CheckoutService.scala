@@ -119,7 +119,7 @@ class CheckoutService(identityService: IdentityService,
     }).recover {
       case e => \/.left(NonEmptyList(CheckoutExactTargetFailure(
         purchaserIds,
-        s"ExactTarget failed to send welcome email to subscriber $purchaserIds",
+        s"ExactTarget failed to send welcome email to subscriber ${purchaserIds.description}",
         subscriptionData.toString,
         None)))
     }
@@ -162,13 +162,13 @@ class CheckoutService(identityService: IdentityService,
       case e: Stripe.Error => \/.left(NonEmptyList(CheckoutStripeError(
         purchaserIds,
         e,
-        s"${purchaserIds} could not subscribe during checkout due to Stripe API error",
+        s"${purchaserIds.description} could not subscribe during checkout due to Stripe API error",
         subscriptionData.toString,
         None)))
 
       case e => \/.left(NonEmptyList(CheckoutGenericFailure(
         purchaserIds,
-        s"${purchaserIds} could not subscribe during checkout",
+        s"${purchaserIds.description} could not subscribe during checkout",
         subscriptionData.toString,
         None)))
     }
@@ -183,13 +183,13 @@ class CheckoutService(identityService: IdentityService,
       case e: PaymentGatewayError => \/.left(NonEmptyList(CheckoutZuoraPaymentGatewayError(
         purchaserIds,
         e,
-        s"$purchaserIds could not subscribe during checkout due to Zuora Payment Gateway Error",
+        s"${purchaserIds.description} could not subscribe during checkout due to Zuora Payment Gateway Error",
         subscriptionData.toString,
         None)))
 
       case e => \/.left(NonEmptyList(CheckoutGenericFailure(
         purchaserIds,
-        s"$purchaserIds could not subscribe during checkout",
+        s"${purchaserIds.description} could not subscribe during checkout",
         subscriptionData.toString,
         None)))
     }
@@ -212,7 +212,7 @@ class CheckoutService(identityService: IdentityService,
     } catch {
       case e: Throwable => Future.successful(\/.left(NonEmptyList(CheckoutPaymentTypeFailure(
         purchaserIds,
-        s"$purchaserIds could not subscribe during checkout because of a problem with selected payment type",
+        s"${purchaserIds.description} could not subscribe during checkout because of a problem with selected payment type",
         subscriptionData.toString,
         Some(e.getMessage())))))
     }
