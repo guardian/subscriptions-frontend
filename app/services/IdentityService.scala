@@ -43,10 +43,9 @@ class IdentityService(identityApiClient: => IdentityApiClient) extends LazyLoggi
     identityApiClient.createGuest(personalData).map { response =>
       response.json.asOpt[GuestUser] match {
         case Some(guest) => \/.right(IdentitySuccess(guest))
-        case None => \/.left(NonEmptyList(
-          IdentityFailure(
+        case None => \/.left(NonEmptyList(IdentityFailure(
           "Guest user could not be registered as Identity user",
-          personalData.toString,
+          Some(personalData.toStringSanitized),
           Some(response.json.toString()))))
       }
     }
@@ -76,15 +75,14 @@ class IdentityService(identityApiClient: => IdentityApiClient) extends LazyLoggi
             case _ =>
               \/.left(NonEmptyList(IdentityFailure(
                 "Registered user's details could not be updated in Identity",
-                personalData.toString,
+                Some(personalData.toStringSanitized),
                 Some(response.json.toString()))))
           }
         }
 
       case _ => Future.successful(\/.left(NonEmptyList(IdentityFailure(
         "ID API only supports forwarded access for Cookies",
-        personalData.toString,
-        None))))
+        Some(personalData.toStringSanitized)))))
     }
 }
 

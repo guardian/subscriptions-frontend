@@ -47,6 +47,8 @@ case class PersonalData(first: String,
   private lazy val countryGroup = CountryGroup.byCountryNameOrCode(address.country.fold(UK.alpha2)(c => c.alpha2))
 
   lazy val currency = countryGroup.fold(CountryGroup.UK.currency)(_.currency)
+
+  def toStringSanitized: String = s"${first.head}. $last, ${email.head}**@**${email.last}, ${address.country}"
 }
 
 

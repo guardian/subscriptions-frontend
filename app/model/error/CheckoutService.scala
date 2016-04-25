@@ -20,8 +20,8 @@ object CheckoutService {
 
   case class CheckoutIdentityFailure(
       msg: String,
-      requestData: String,
-      errorResponse: Option[String]) extends CheckoutResult with SubsError {
+      requestData: Option[String] = None,
+      errorResponse: Option[String] = None) extends CheckoutResult with SubsError {
     override val message = msg
     override val request = requestData
     override val response = errorResponse
@@ -30,8 +30,8 @@ object CheckoutService {
   case class CheckoutGenericFailure(
       purchaserIds: PurchaserIdentifiers,
       msg: String,
-      requestData: String,
-      errorResponse: Option[String]) extends CheckoutResult with SubsError {
+      requestData: Option[String] = None,
+      errorResponse: Option[String] = None) extends CheckoutResult with SubsError {
     override val message = msg
     override val request = requestData
     override val response = errorResponse
@@ -41,8 +41,8 @@ object CheckoutService {
       purchaserIds: PurchaserIdentifiers,
       paymentError: Throwable,
       msg: String,
-      requestData: String,
-      errorResponse: Option[String]) extends CheckoutResult with SubsError {
+      requestData: Option[String] = None,
+      errorResponse: Option[String] = None) extends CheckoutResult with SubsError {
     override val message = msg
     override val request = requestData
     override val response = errorResponse
@@ -52,8 +52,8 @@ object CheckoutService {
       purchaserIds: PurchaserIdentifiers,
       paymentError: PaymentGatewayError,
       msg: String,
-      requestData: String,
-      errorResponse: Option[String]) extends CheckoutResult with SubsError {
+      requestData: Option[String] = None,
+      errorResponse: Option[String] = None) extends CheckoutResult with SubsError {
     override val message = msg
     override val request = requestData
     override val response = errorResponse
@@ -62,8 +62,8 @@ object CheckoutService {
   case class CheckoutSalesforceFailure(
       identityUser: Option[IdMinimalUser],
       msg: String,
-      requestData: String,
-      errorResponse: Option[String]) extends CheckoutResult with SubsError {
+      requestData: Option[String] = None,
+      errorResponse: Option[String] = None) extends CheckoutResult with SubsError {
     override val message = msg
     override val request = requestData
     override val response = errorResponse
@@ -72,8 +72,8 @@ object CheckoutService {
   case class CheckoutExactTargetFailure(
       purchaserIds: PurchaserIdentifiers,
       msg: String,
-      requestData: String,
-      errorResponse: Option[String]) extends CheckoutResult with SubsError {
+      requestData: Option[String] = None,
+      errorResponse: Option[String] = None) extends CheckoutResult with SubsError {
     override val message = msg
     override val request = requestData
     override val response = errorResponse
@@ -82,8 +82,8 @@ object CheckoutService {
   case class CheckoutPaymentTypeFailure(
       purchaserIds: PurchaserIdentifiers,
       msg: String,
-      requestData: String,
-      errorResponse: Option[String]) extends CheckoutResult with SubsError {
+      requestData: Option[String] = None,
+      errorResponse: Option[String] = None) extends CheckoutResult with SubsError {
     override val message = msg
     override val request = requestData
     override val response = errorResponse

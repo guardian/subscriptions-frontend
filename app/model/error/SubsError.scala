@@ -4,7 +4,7 @@ import scalaz.NonEmptyList
 
 trait SubsError {
   val message: String
-  val request: String
+  val request: Option[String]
   val response: Option[String]
 
   def toStringPretty(): String = {
