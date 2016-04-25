@@ -77,16 +77,29 @@ class CheckoutService(identityService: IdentityService,
 
     authenticatedUserOpt match {
       case Some(authenticatedIdUser) => {
-        EitherT(updateAuthenticatedUserDetails(authenticatedIdUser, memberId, personalData))
+
+        def addErrContext(errSeq: NonEmptyList[SubsError]): NonEmptyList[SubsError] =
+          errSeq.<::(CheckoutIdentityFailure(
+            s"Registered user ${authenticatedIdUser.user.id} could not become subscriber",
+            Some(s"SF Account ID = ${memberId.salesforceAccountId}, SF Contact ID = ${memberId.salesforceContactId}")))
+
+        EitherT(identityService.updateUserDetails(personalData)(authenticatedIdUser).map { _.leftMap(addErrContext(_)) })
       }
+
       case None => {
         logger.info(s"User does not have an Identity account. Creating a guest account")
-        for (identitySuccess <- EitherT(identityService.registerGuest(personalData))) yield {
+
+        def addErrContext(errSeq: NonEmptyList[SubsError]): NonEmptyList[SubsError] =
+          errSeq.<::(CheckoutIdentityFailure(
+            s"Guest user (${personalData.toStringSanitized} could not become subscriber",
+            Some(s"SF Account ID = ${memberId.salesforceAccountId}, SF Contact ID = ${memberId.salesforceContactId}")))
+
+        for (identitySuccess <- EitherT(identityService.registerGuest(personalData).map { _.leftMap(addErrContext(_)) })) yield {
           val identityId = identitySuccess.userData.id.id
           val salesforceResult = salesforceService.repo.updateIdentityId(memberId, identityId)
           for (err <- EitherT(salesforceResult).swap) yield {
             // Swallow salesforce update errors, but log them
-            logger.error(s"Error updating salesforce contact $memberId with identity id $identityId: ${err.getMessage()}")
+            logger.error(s"Error updating salesforce contact ${memberId.salesforceContactId} with identity id $identityId: ${err.getMessage()}")
           }
 
           identitySuccess
@@ -94,20 +107,6 @@ class CheckoutService(identityService: IdentityService,
       }
     }
   }
-
-  private def updateAuthenticatedUserDetails(
-      authenticatedUser: AuthenticatedIdUser,
-      memberId: ContactId,
-      personalData: PersonalData): Future[NonEmptyList[SubsError] \/ IdentitySuccess] =
-
-    identityService.updateUserDetails(personalData)(authenticatedUser).map {
-      case \/-(IdentitySuccess(user)) => \/.right(IdentitySuccess(user))
-
-      case -\/(errSeq) =>
-        \/.left(errSeq.<::(CheckoutIdentityFailure(
-          s"Could not update identity details for subscribed user ${authenticatedUser.user.id}",
-          Some(s"SF Account ID = ${memberId.salesforceAccountId}, SF Contact ID = ${memberId.salesforceContactId}"))))
-    }
 
   private def sendETDataExtensionRow(
       subscribeResult: SubscribeResult,
