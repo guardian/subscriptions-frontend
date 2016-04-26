@@ -4,45 +4,45 @@
 @import model.DigitalEdition
 @import org.joda.time.Days
 @(edition: DigitalEdition, catalog: DigipackCatalog, promoCode: PromoCode, promotion: AnyPromotion, defaultTrial: Days)
-<div class="discover">
-    <div class="discover__screenshots hide-above-phablet">
+<div>
+    <div class="digital-tablet-previews hide-above-phablet">
         <img src="@controllers.CachedAssets.hashedPathFor("images/backgrounds/bg-digital-tablet-previews.jpg")"/>
     </div>
     <ul class="grid grid--3up-step-phablet grid--bordered grid--flex grid--no-clearfix-before">
         <li class="grid__item">
-            <div class="discover__item">
-                <div class="discover__item__icon">@fragments.common.inlineIcon("paper_tablet", Seq("icon--promo"))</div>
-                <div class="discover__item__text">
+            <div class="feature">
+                <div class="feature__icon">@fragments.common.inlineIcon("paper_tablet", Seq("icon--feature"))</div>
+                <div class="feature__text">
                     <h3>If it's in the paper it's on your tablet</h3>
                     <p>The paper you love specially delivered to your tablet from 4am every morning, ready to read offline 7 days a week.</p>
                 </div>
             </div>
         </li>
         <li class="grid__item">
-            <div class="discover__item">
-                <div class="discover__item__icon">@fragments.common.inlineIcon("share", Seq("icon--promo"))</div>
-                <div class="discover__item__text">
+            <div class="feature">
+                <div class="feature__icon">@fragments.common.inlineIcon("share", Seq("icon--feature"))</div>
+                <div class="feature__text">
                     <h3>Share with friends and family</h3>
                     <p>You can download the daily edition on up to 10 devices. Designed for iPad, Android tablet and Kindle Fire.</p>
                 </div>
             </div>
         </li>
         <li class="grid__item">
-            <div class="discover__item">
-                <div class="discover__item__icon">@fragments.common.inlineIcon("photo_video", Seq("icon--promo"))</div>
-                <div class="discover__item__text">
+            <div class="feature">
+                <div class="feature__icon">@fragments.common.inlineIcon("photo_video", Seq("icon--feature"))</div>
+                <div class="feature__text">
                     <h3>Stunning photography and videos</h3>
                     <p>The Guardian's image galleries are available in full HD plus embedded audio and video galleries.</p>
                 </div>
             </div>
         </li>
         <li class="grid__item">
-            <div class="discover__item">
-                <div class="discover__item__icon">@fragments.common.inlineIcon("every_day", Seq("icon--promo"))</div>
-                <div class="discover__item__text">
+            <div class="feature">
+                <div class="feature__icon">@fragments.common.inlineIcon("every_day", Seq("icon--feature"))</div>
+                <div class="feature__text">
                     <h3>Every day; every section; every supplement</h3>
                     <p>The Guide; Cook; and food Monthly plus our daily crossword tailored for your tablet.</p>
-                    <div class="discover__item__cta">
+                    <div class="feature__cta">
                         @fragments.promotion.pricingCta(defaultTrial, edition, catalog, promoCode, promotion)
                         @fragments.promotion.subscribeNow(edition, promoCode)
                     </div>
@@ -50,7 +50,7 @@
             </div>
         </li>
         <li class="grid__item grid__item--flex-2-columns u-no-border hide-below-phablet">
-            <div class="discover__screenshots discover__screenshots--in-grid">
+            <div class="digital-tablet-previews digital-tablet-previews--in-grid">
                 <img src="@controllers.CachedAssets.hashedPathFor("images/backgrounds/bg-digital-tablet-previews.jpg")"/>
             </div>
         </li>

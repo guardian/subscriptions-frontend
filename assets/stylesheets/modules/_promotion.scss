@@ -125,23 +125,19 @@
     padding: ($gs-baseline / 3) 0;
 }
 
-.discover {
-
-}
-
-.discover__screenshots {
+.digital-tablet-previews {
     padding: 18px 0 22px 0;
 }
 
-.discover__screenshots--in-grid {
+.digital-tablet-previews--in-grid {
     padding: 0;
 }
 
-.discover__item {
+.feature {
     position: relative;
 }
 
-.discover__item__icon {
+.feature__icon {
     position: absolute;
 
     @include mq(phablet) {
@@ -149,7 +145,7 @@
     }
 }
 
-.discover__item__text {
+.feature__text {
     border-color: $c-neutral3;
     border-style: dotted;
     border-width: 1px 0 0 0;
@@ -176,7 +172,7 @@
     }
 }
 
-.discover__item__cta {
+.feature__cta {
     border-color: $c-neutral3;
     border-style: dotted;
     border-width: 1px 0 0 0;
