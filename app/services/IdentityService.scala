@@ -94,7 +94,7 @@ object IdentityService extends IdentityService(IdentityApiClient) {
 
 }
 
-object PersonalDataJsonSerialiser {
+object  PersonalDataJsonSerialiser {
   val primaryEmailAddress = "primaryEmailAddress"
   val publicFields = "publicFields"
 
@@ -106,20 +106,23 @@ object PersonalDataJsonSerialiser {
         "displayName" -> s"${personalData.first} ${personalData.last}"
       ),
       "privateFields" -> Json.obj(
-        "firstName" -> personalData.first,
-        "secondName" -> personalData.last,
-        "billingAddress1" -> personalData.address.lineOne,
-        "billingAddress2" -> personalData.address.lineTwo,
-        "billingAddress3" -> personalData.address.town,
-        "billingAddress4" -> personalData.address.countyOrState,
-        "billingPostcode" -> personalData.address.postCode,
-        "billingCountry"  -> personalData.address.country.fold(personalData.address.countryName)(_.name)
+      "firstName" -> personalData.first,
+      "secondName" -> personalData.last,
+      "billingAddress1" -> personalData.address.lineOne,
+      "billingAddress2" -> personalData.address.lineTwo,
+      "billingAddress3" -> personalData.address.town,
+      "billingAddress4" -> personalData.address.countyOrState,
+      "billingPostcode" -> personalData.address.postCode,
+      "billingCountry"  -> personalData.address.country.fold(personalData.address.countryName)(_.name)
+      ).++(
+        personalData.title.fold(Json.obj())(title =>
+          Json.obj("title" -> title.title))
       ).++(
          telephoneNumber.fold[JsObject](Json.obj()){t =>
            Json.obj(
              "telephoneNumber" -> Json.toJson(t)
            )}
-    ),
+      ),
       "statusFields" ->
         Json.obj("receiveGnmMarketing" -> personalData.receiveGnmMarketing))
   }

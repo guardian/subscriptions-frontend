@@ -1,12 +1,24 @@
 @import views.support.CountryOps._
 @import views.support.AddressValidationRulesOps._
 @import views.support.CountryWithCurrency
+@import com.gu.i18n.Title
 
 @(form: Form[model.SubscriptionData], userIsSignedIn: Boolean, countriesWithCurrency: List[CountryWithCurrency], touchpointBackendResolution:  services.TouchpointBackend.Resolution)
 
 @signedInAttrs = @{ if (userIsSignedIn) "required readonly" else "" }
 
 @* ===== Name ===== *@
+<div class="form-field js-checkout-title">
+    <label class="label" for="title">Title</label>
+    <select class="select select--wide js-country js-input" name="personal.title" id="title"
+    value="@form.data.get("personal.title")" >
+            <option value=""></option>
+    @for(title <- Title.all){
+            <option value="@title.title" @if(form.data.get("personal.title").mkString == title.title){selected} >@title.title</option>
+        }
+            <option value="">Other</option>
+    </select>
+</div>
 <div class="form-field js-checkout-first">
     <label class="label" for="first">First name</label>
     @* Zuora's PaymentMethod request is the limiting factor for maxlength here *@

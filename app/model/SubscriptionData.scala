@@ -1,7 +1,7 @@
 package model
 
 import com.gu.i18n.Country.UK
-import com.gu.i18n.{Country, CountryGroup}
+import com.gu.i18n.{Title, Country, CountryGroup}
 import com.gu.identity.play.IdUser
 import com.gu.memsub.Subscription.ProductRatePlanId
 import com.gu.memsub.{FullName, Address}
@@ -40,7 +40,8 @@ case class PersonalData(first: String,
                         email: String,
                         receiveGnmMarketing: Boolean,
                         address: Address,
-                        telephoneNumber: Option[String] = None
+                        telephoneNumber: Option[String] = None,
+                        title: Option[Title] = None
                         ) extends FullName {
   def fullName = s"$first $last"
 
@@ -59,6 +60,7 @@ case class SubscriptionData(
 object SubscriptionData {
   def fromIdUser(promoCode: Option[PromoCode])(u: IdUser) = {
     val personalData = PersonalData(
+      title = u.privateFields.flatMap(_.title).flatMap(Title.fromString(_)),
       first = u.privateFields.flatMap(_.firstName).getOrElse(""),
       last = u.privateFields.flatMap(_.secondName).getOrElse(""),
       email = u.primaryEmailAddress,

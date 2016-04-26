@@ -1,6 +1,6 @@
 package forms
 
-import com.gu.i18n.{CountryGroup, Country}
+import com.gu.i18n.{Title, CountryGroup, Country}
 import com.gu.memsub.promo.PromoCode
 import com.gu.memsub.Address
 import com.gu.memsub.Subscription.ProductRatePlanId
@@ -39,6 +39,16 @@ object SubscriptionsForm {
         { name => CountryGroup.countryByNameOrCode(name).fold("")(_.alpha2)}
       )
 
+
+  private val titleFormatter = new Formatter[Option[Title]] {
+    override def bind(key: String, data: Map[String, String]): Either[Seq[FormError],Option[Title]] =
+      Right(data.get(key).flatMap(Title.fromString))
+
+    override def unbind(key: String, value: Option[Title]) =
+      Map(key->value.fold("")(_.title))
+  }
+
+
   val addressDataMapping = mapping(
     "address1" -> text(0, addressMaxLength),
     "address2" -> text(0, addressMaxLength),
@@ -64,7 +74,8 @@ object SubscriptionsForm {
     "emailValidation" -> emailMapping,
     "receiveGnmMarketing" -> booleanCheckbox,
     "address" -> addressDataMapping,
-    "telephoneNumber" -> optional(text)
+    "telephoneNumber" -> optional(text),
+    "title"-> of(titleFormatter)
   )(PersonalData.apply)(PersonalData.unapply)
 
   val productRatePlanIdMapping = mapping("ratePlanId" -> text)(ProductRatePlanId.apply)(ProductRatePlanId.unapply)
