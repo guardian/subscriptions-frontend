@@ -7,11 +7,7 @@
 }
 
 .roundel--raised {
-    top: -53px;
-
-    @include mq(phablet) {
-        top: -58px;
-    }
+    top: -20px;
 }
 
 
@@ -21,32 +17,27 @@
     background: guss-colour(news-support-1, $pasteup-palette);
     display: flex;
     flex-direction: column;
-    height: 110px;
+    height: 120px;
     justify-content: center;
-    margin: 10px;
+    margin: 0;
     position: absolute;
     right: 0;
     text-align: center;
     padding: 10px;
-    width: 110px;
+    width: 120px;
     z-index: 2;
 
-    @include mq(phablet) {
+    @include mq(tablet) {
         height: 140px;
-        margin: 20px;
         padding: 20px;
         width: 140px;
     }
 }
 
 .roundel__title {
-    @include fs-headline(1);
-    font-weight: guss-font-weight(ultrablack);
-
-    @include mq(phablet) {
-        @include fs-headline(3);
-        font-weight: guss-font-weight(ultrablack);
-    }
+    font-size: 16px;
+    line-height: 17px;
+    font-weight: 900;
 }
 
 .roundel__byline {
@@ -59,7 +50,7 @@
 
 .roundel__strong {
     display: block;
-    font-size: 32px;
-    font-weight: bold;
-    line-height: 28px;
+    font-size: 36px;
+    font-weight: 900;
+    line-height: 36px;
 }

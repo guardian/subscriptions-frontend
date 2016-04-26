@@ -5,16 +5,17 @@
 @import org.joda.time.Days
 @(edition: DigitalEdition, catalog: DigipackCatalog, promoCode: PromoCode, promotion: AnyPromotion, defaultTrialDays: Days)
 <div class="promotion-cta">
-    <div class="grid grid--3up-step">
-        <div class="grid__item">
-            <div class="promotion-cta__subscribe">
-                <h2>Subscribe&nbsp;to&nbsp;the Digital&nbsp;Pack</h2>
+    <div class="grid grid--3up-step-phablet grid--flex">
+        <div class="grid__item grid__item--flex-2-columns">
+            <div class="promotion-cta__image">
+                <img src="@controllers.CachedAssets.hashedPathFor("images/backgrounds/bg-promo-digital-pack.jpg")"/>
             </div>
         </div>
-        <div class="grid__item promotion-cta__image"></div>
-        <div class="grid__item">
-            @fragments.promotion.pricingCta(defaultTrialDays, edition, catalog, promoCode, promotion)
-            @fragments.promotion.subscribeNow(edition, promoCode)
+        <div class="grid__item u-vertically-center-flexbox">
+            <div class="promotion-cta__pricing">
+                @fragments.promotion.pricingCta(defaultTrialDays, edition, catalog, promoCode, promotion)
+                @fragments.promotion.subscribeNow(edition, promoCode)
+            </div>
         </div>
     </div>
 </div>

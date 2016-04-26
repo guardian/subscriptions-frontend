@@ -10,21 +10,21 @@
     title = "The Digital Pack offer | Subscriptions | The Guardian",
     bodyClasses = Seq("is-wide")
 ) {
-    <main class="promo-landing-page">
-        <section class="page-container gs-container gs-container--slim">
-            <div class="page-slice">
+    <main class="page-container promo-landing-page">
+        <section class="section-white section--dark-sides">
+            <div class="gs-container gs-container--slim page-slice">
                 <div class="page-slice__content">
                 @fragments.page.header("The Digital Pack offer", None)
                 </div>
             </div>
         </section>
-        <section class="section-grey">
-            <div class="page-container gs-container gs-container--slim page-slice">
+        <section class="section-grey section--dark-sides">
+            <div class="gs-container gs-container--slim page-slice">
                 @fragments.promotion.digipack(edition, catalog, promoCode, promotion)
             </div>
         </section>
-        <section class="page-container gs-container gs-container--slim">
-            <div class="page-slice">
+        <section class="section-white section--dark-sides">
+            <div class="gs-container gs-container--slim page-slice">
                 <div class="page-slice__content">
                     <h2 class="promo-landing-page__section-head">Discover the Guardian Daily Edition</h2>
                     @fragments.promotion.discover(edition, catalog, promoCode, promotion, defaultTrial)
@@ -32,8 +32,8 @@
             </div>
         </section>
         @promotion.whenFreeTrial.fold {
-            <section class="section-blue">
-                <div class="page-container gs-container gs-container--slim page-slice page-slice">
+            <section class="section-blue section--dark-sides">
+                <div class="gs-container gs-container--slim page-slice page-slice">
                     <div class="page-slice__content">
                         <h2 class="promo-landing-page__section-head">@promotion.title</h2>
                         @{
@@ -47,25 +47,26 @@
                 </div>
             </section>
         } { _ => }
-        <section class="page-container gs-container gs-container--slim">
-            <div class="page-slice">
+        <section class="section-white section--dark-sides">
+            <div class="gs-container gs-container--slim page-slice">
                 <div class="page-slice__content">
                     <h2 class="promo-landing-page__section-head">Exclusive benefits for Digital Pack subscribers</h2>
                     @fragments.promotion.benefits()
                 </div>
             </div>
         </section>
-        <section class="section-grey">
-            <div class="page-container gs-container gs-container--slim page-slice page-slice">
+        <section class="section-grey section--dark-sides">
+            <div class="gs-container gs-container--slim page-slice page-slice">
                 <div class="page-slice__content">
+                    <h2 class="promo-landing-page__section-head">Subscribe&nbsp;to&nbsp;the Digital&nbsp;Pack</h2>
                     @fragments.promotion.promotionCta(edition, catalog, promoCode, promotion, defaultTrial)
                 </div>
             </div>
         </section>
-        <section class="page-container gs-container gs-container--slim">
-            <div class="page-slice">
-                <div class="page-slice__header">Terms and conditions</div>
+        <section class="section-white section--dark-sides promotion-terms">
+            <div class="gs-container gs-container--slim page-slice">
                 <div class="page-slice__content">
+                    <h4>Terms and conditions</h4>
                     <p>Customers must subscribe by @prettyDate(promotion.expires.minusSeconds(1)) to be eligible for the offer. Offer subject to availability. GNM reserves the right to withdraw this promotion at any time.</p>
                     @fragments.promotion.subscriptionTermsAndConditions(defaultTrial, catalog, promotion)
                     @fragments.promotion.incentiveTermsAndConditions(promotion)
