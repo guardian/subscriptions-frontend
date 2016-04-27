@@ -229,7 +229,7 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
     val fallabackPromoCode = demoPromo(tpBackend.environmentName).codes.webCode
 
     tpBackend.promoService.findPromotion(promoCode)
-      .fold(NotFound(Json.obj("errorMessage" -> s"We can't find that code, why not try: ${fallabackPromoCode.get} \uD83D\uDE09?"))){ promo =>
+      .fold(NotFound(Json.obj("errorMessage" -> s"Sorry, we can't find that code."))){ promo =>
         val result = promo.validateFor(prpId, country)
         val body = Json.obj(
           "promotion" -> Json.toJson(promo),
