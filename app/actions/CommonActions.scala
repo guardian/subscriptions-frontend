@@ -38,7 +38,8 @@ object CommonActions {
     "memsubs.dev@guardian.co.uk",
     "identitydev@guardian.co.uk",
     "touchpoint@guardian.co.uk",
-    "crm@guardian.co.uk"
+    "crm@guardian.co.uk",
+    "membership.testusers@guardian.co.uk"
   ))
 
   val StaffAuthorisedForCASAction = GoogleAuthenticatedStaffAction andThen requireGroup[GoogleAuthRequest](Set(
