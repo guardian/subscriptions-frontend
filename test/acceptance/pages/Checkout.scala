@@ -48,7 +48,8 @@ case class Checkout(val testUser: TestUser) extends Page with Browser {
   private val userDisplayName = cssSelector(".js-user-displayname")
   private val submitPaymentButton = cssSelector(".js-checkout-submit")
 
-  private object PersonalDetails {
+  private object
+  PersonalDetails {
     val firstName = id("first")
     val lastName = id("last")
     val email = id("email")

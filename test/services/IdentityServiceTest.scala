@@ -54,8 +54,8 @@ class IdentityServiceTest extends FreeSpec {
   }
 
   "userLookupByScGuUCookie" - {
-    val validCookies = AccessCredentials.Cookies("valid_cookie", "foo")
-    val invalidCookies = AccessCredentials.Cookies("invalid_cookie", "bar")
+    val validCookies = AccessCredentials.Cookies("valid_cookie")
+    val invalidCookies = AccessCredentials.Cookies("invalid_cookie")
 
     val client = new TestIdentityApiClient {
       override val userLookupByCookies = (cookies: AccessCredentials.Cookies) =>
