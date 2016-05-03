@@ -67,7 +67,7 @@ class CheckoutService(identityService: IdentityService,
       result <- EitherT(createSubscription(withPromo, purchaserIds, subscriptionData))
       _ <- EitherT(sendETDataExtensionRow(result, subscriptionData, gracePeriod(subscribe, withPromo), purchaserIds))
       identitySuccess <- storeIdentityDetails(personalData, authenticatedUserOpt, memberId)
-    } yield CheckoutSuccess(memberId, identitySuccess.userData, result, subscribe.promoCode)).run
+    } yield CheckoutSuccess(memberId, identitySuccess.userData, result, withPromo.promoCode)).run
   }
 
   private def storeIdentityDetails(
