@@ -111,7 +111,7 @@
    ========================================================================== */
 
 .pricing-cta {
-    margin: $gs-baseline 0;
+    margin: ($gs-baseline / 4) 0;
 
     @include mq(tablet) {
         margin: $gs-gutter 0;
@@ -134,11 +134,15 @@
     }
 }
 .pricing-cta__pricing__title {
-    @include fs-header(5);
+    @include fs-header(2);
     color: $c-neutral1;
+
+    @include mq(tablet) {
+        @include fs-header(4);
+    }
 }
 .pricing-cta__pricing__value {
-    @include fs-headline(2);
+    @include fs-textSans(2);
     color: $c-neutral2;
     margin-bottom: 0;
 }

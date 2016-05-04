@@ -1,28 +1,81 @@
 .promo-landing-page {
-    .grey {
-        background-color: rgb(231, 231, 231);
+    font-size: 18px;
+    line-height: 22px;
 
-        .page-slice {
-            background-color: rgb(241, 241, 241);
-        }
+    h3, h4 {
+        font-size: 1em;
+        font-weight: 900;
+    }
+
+    @include mq(tablet) {
+        font-size: 20px;
+        line-height: 24px;
     }
 
     .page-slice {
-        padding-bottom: 0.75rem;
+        padding-top: 0;
+        padding-bottom: $gs-baseline / 2;
 
         .page-slice__header {
             font-weight: bold;
             white-space: nowrap;
         }
     }
+
+    .hide-above-phablet {
+        @include mq($from: phablet) {
+            display: none;
+        }
+    }
+
+    .hide-below-phablet {
+        @include mq($until: phablet) {
+            display: none;
+        }
+    }
+}
+
+.page-slice__content {
+    max-width: gs-span(12);
+
+    @include mq(desktop) {
+        min-width: gs-span(12);
+        float: right;
+    }
+
+    @include mq(leftCol) {
+        float: none;
+        margin: 0 0 0 (gs-span(2) + $gs-gutter);
+    }
+
+    @include mq(wide) {
+        margin: 0 auto;
+    }
 }
 
 .promo-landing-page__section-head {
-    margin-bottom: $gs-baseline * 2;
+    font-size: 20px;
+    font-weight: 900;
+    line-height: 24px;
+    margin: $gs-baseline 0;
+
+    @include mq(tablet) {
+        font-size: 28px;
+        line-height: 32px;
+    }
+
+}
+
+.section-white {
+    background-color: white;
+
+    .page-slice {
+        background-color: white;
+    }
 }
 
 .section-blue {
-    background-color: rgb(146, 202, 224);
+    background-color: guss-colour(news-support-1, $pasteup-palette);
 
     .page-slice {
         background-color: guss-colour(news-support-1, $pasteup-palette);
@@ -30,85 +83,147 @@
 }
 
 .section-grey {
-    background-color: rgb(231, 231, 231);
+    background-color: guss-colour(neutral-7, $pasteup-palette);
 
     .page-slice {
-        background-color: rgb(241, 241, 241);
+        background-color: guss-colour(neutral-7, $pasteup-palette);
+    }
+}
+
+.section--dark-sides {
+    position: relative;
+
+    &:before {
+        background-color: rgba(51, 51, 51, 0.05);
+        content: '';
+        height: 100%;
+        position: absolute;
+        width: 100%;
+    }
+}
+
+.section-separator {
+    border-top: 1px solid $c-neutral3;
+    margin-top: ($gs-baseline / 2);
+
+    .promo-landing-page__section-head {
+        margin: ($gs-baseline / 2) 0 $gs-baseline 0;
     }
 }
 
 .digipack {
+    max-width: gs-span(14);
+    margin: 0 auto;
+    overflow: visible;
+    padding-top: $gs-baseline * 2;
+}
 
+.digipack__roundel {
+    width: 100%;
 }
 
 .digipack__shots {
-    background: url(/assets/images/backgrounds/bg-promo-digital-pack.jpg) no-repeat center;
-    background-size: contain;
-    min-height: 135px;
-    min-width: 280px;
-
-    @include mq(mobileLandscape) {
-        min-height: 211px;
-        min-width: 440px;
-    }
-    @include mq($from: phablet, $until: tablet) {
-        min-height: 286px;
-        min-width: 595px;
-    }
-    @include mq(desktop) {
-        min-height: 286px;
-        min-width: 595px;
-    }
-    @include mq(leftCol) {
-        min-height: 336px;
-        min-width: 700px;
-    }
-    @include mq(wide) {
-        min-height: 374px;
-        min-width: 780px;
-    }
-}
-
-.digipack__benefits {
-    @include mq($until: tablet) {
-        width: 100% !important;
-    }
+    max-width: 780px;
+    overflow: hidden;
+    width: 100%;
 }
 
 .digipack__benefit {
-    border-color: $c-neutral5;
-    border-style: solid;
+    border-color: $c-neutral3;
+    border-style: dotted;
     border-width: 1px 0 0 0;
-    font-size: larger;
-    margin: 0;
-    padding: ($gs-baseline * 1.33) 0;
+    margin-bottom: $gs-baseline;
+    padding: ($gs-baseline / 3) 0;
 }
 
-.promotion-image {
+.digital-tablet-previews {
+    padding: 18px 0 22px 0;
+}
 
+.digital-tablet-previews--in-grid {
+    padding: 0;
+}
+
+.feature {
+    position: relative;
+}
+
+.feature__icon {
+    position: absolute;
+
+    @include mq(phablet) {
+        position: relative;
+    }
+}
+
+.feature__block {
+    border-color: $c-neutral3;
+    border-style: dotted;
+    border-width: 1px 0 0 0;
+    margin-left: 70px;
+    padding-top: ($gs-baseline / 3);
+    margin-bottom: ($gs-baseline / 3);
+
+    @include mq(phablet) {
+        border: 0;
+        margin-left: 0;
+    }
+}
+
+.feature__text {
+    @include f-textSans();
+    color: $c-neutral2;
+    font-size: 14px;
+    line-height: 18px;
+    padding-top: ($gs-baseline / 3);
+
+    @include mq(tablet) {
+        @include f-bodyCopy();
+        color: $c-neutral1;
+        font-size: 16px;
+        line-height: 20px;
+    }
+}
+
+.feature__cta {
+    border-color: $c-neutral3;
+    border-style: dotted;
+    border-width: 1px 0 0 0;
+    margin-top: 16px;
+
+    @include mq(phablet) {
+        border: 0;
+    }
 }
 
 .promotion-description {
-    @include mq(tablet) {
-        font-size: larger;
-    }
-}
-
-.promotion-cta {
-
-}
-
-.promotion-cta__subscribe {
-
+    border-color: $c-neutral2;
+    border-style: dotted;
+    border-width: 1px 0 0 0;
+    padding-top: ($gs-baseline / 3);
 }
 
 .promotion-cta__image {
-    background: url(/assets/images/backgrounds/bg-promo-digital-pack.jpg) no-repeat left;
-    background-size: contain;
-    min-height: 145px;
+    max-width: 610px;
 
-    @include mq(tablet) {
-        background-position: center;
+    @include mq(phablet) {
+        float: right;
+        max-width: 406px;
+    }
+}
+.promotion-cta__pricing {
+    margin-left: 70px;
+
+    @include mq(phablet) {
+        margin-left: 0;
     }
 }
 
+.promotion-terms {
+    @include fs-textSans(2);
+    color: $c-neutral2;
+
+    .page-slice__content {
+        margin-top: $gs-baseline * 2;
+    }
+}
