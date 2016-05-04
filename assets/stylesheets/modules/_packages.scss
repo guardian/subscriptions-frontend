@@ -136,9 +136,13 @@
 .pricing-cta__pricing__title {
     @include fs-header(2);
     color: $c-neutral1;
+
+    @include mq(tablet) {
+        @include fs-header(4);
+    }
 }
 .pricing-cta__pricing__value {
-    @include fs-headline(1);
+    @include fs-textSans(2);
     color: $c-neutral2;
     margin-bottom: 0;
 }

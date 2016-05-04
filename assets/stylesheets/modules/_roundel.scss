@@ -7,9 +7,8 @@
 }
 
 .roundel--raised {
-    top: -20px;
+    top: -40px;
 }
-
 
 .roundel__container {
     @include circular();
@@ -38,12 +37,17 @@
     font-size: 16px;
     line-height: 17px;
     font-weight: 900;
+
+    @include mq(tablet) {
+        font-size: 20px;
+        line-height: 21px;
+    }
 }
 
 .roundel__byline {
     @include fs-bodyCopy(1);
 
-    @include mq(phablet) {
+    @include mq(tablet) {
         @include fs-bodyCopy(1);
     }
 }
@@ -53,4 +57,9 @@
     font-size: 36px;
     font-weight: 900;
     line-height: 36px;
+
+    @include mq(tablet) {
+        font-size: 42px;
+        line-height: 42px;
+    }
 }

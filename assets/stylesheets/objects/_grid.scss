@@ -48,6 +48,11 @@ $gutter-width-fluid: 2%;
     }
 }
 
+.grid__item--flex-wrapped {
+    display: flex;
+    flex-wrap: wrap;
+}
+
 .grid--bordered {
     .grid__item {
         border-color: $c-neutral5;

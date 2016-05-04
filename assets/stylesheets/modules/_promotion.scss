@@ -1,5 +1,16 @@
 .promo-landing-page {
+    font-size: 18px;
     line-height: 22px;
+
+    h3, h4 {
+        font-size: 1em;
+        font-weight: 900;
+    }
+
+    @include mq(tablet) {
+        font-size: 20px;
+        line-height: 24px;
+    }
 
     .page-slice {
         padding-top: 0;
@@ -47,6 +58,12 @@
     font-weight: 900;
     line-height: 24px;
     margin: $gs-baseline 0;
+
+    @include mq(tablet) {
+        font-size: 28px;
+        line-height: 32px;
+    }
+
 }
 
 .section-white {
@@ -85,10 +102,20 @@
     }
 }
 
+.section-separator {
+    border-top: 1px solid $c-neutral3;
+    margin-top: ($gs-baseline / 2);
+
+    .promo-landing-page__section-head {
+        margin: ($gs-baseline / 2) 0 $gs-baseline 0;
+    }
+}
+
 .digipack {
     max-width: gs-span(14);
     margin: 0 auto;
     overflow: visible;
+    padding-top: $gs-baseline * 2;
 }
 
 .digipack__roundel {
@@ -97,31 +124,15 @@
 
 .digipack__shots {
     max-width: 780px;
-
-    @include mq(tablet) {
-        float: left;
-        padding-top: 0;
-        margin: 0 ($gs-baseline * 2) $gs-baseline 0;
-        width: 65%;
-    }
-
-    img {
-        padding-top: 60px;
-        @include mq(tablet) {
-            padding-top: $gs-baseline;
-        }
-    }
-}
-
-.digipack__benefits {
-    margin-top: $gs-baseline * 2;
+    overflow: hidden;
+    width: 100%;
 }
 
 .digipack__benefit {
     border-color: $c-neutral3;
     border-style: dotted;
     border-width: 1px 0 0 0;
-    margin-bottom: 0;
+    margin-bottom: $gs-baseline;
     padding: ($gs-baseline / 3) 0;
 }
 
@@ -145,30 +156,32 @@
     }
 }
 
-.feature__text {
+.feature__block {
     border-color: $c-neutral3;
     border-style: dotted;
     border-width: 1px 0 0 0;
     margin-left: 70px;
     padding-top: ($gs-baseline / 3);
+    margin-bottom: ($gs-baseline / 3);
 
     @include mq(phablet) {
         border: 0;
         margin-left: 0;
     }
+}
 
-    > h3 {
-        font-size: 18px;
-        font-weight: 900;
-    }
+.feature__text {
+    @include f-textSans();
+    color: $c-neutral2;
+    font-size: 14px;
+    line-height: 18px;
+    padding-top: ($gs-baseline / 3);
 
-    > p {
-        @include f-textSans();
-        color: $c-neutral2;
-        font-size: 14px;
-        line-height: 18px;
-        margin-bottom: 7px;
-        padding-top: ($gs-baseline / 3);
+    @include mq(tablet) {
+        @include f-bodyCopy();
+        color: $c-neutral1;
+        font-size: 16px;
+        line-height: 20px;
     }
 }
 
@@ -187,7 +200,6 @@
     border-color: $c-neutral2;
     border-style: dotted;
     border-width: 1px 0 0 0;
-    font-size: 18px;
     padding-top: ($gs-baseline / 3);
 }
 
@@ -210,9 +222,8 @@
 .promotion-terms {
     @include fs-textSans(2);
     color: $c-neutral2;
-    padding-top: $gs-baseline;
 
-    h4 {
-        font-weight: 900;
+    .page-slice__content {
+        margin-top: $gs-baseline * 2;
     }
 }
