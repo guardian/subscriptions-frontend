@@ -119,7 +119,7 @@ object Config {
       codes = PromoCodeSet(PromoCode("DGA88"), promoCodes:_*),
       description = "Get £30 to spend with a top retailer of your choice when you subscribe. Use your digital gift card at Amazon.co.uk, M&S and more. Treat yourself or a friend.",
       starts = new LocalDate(2016,3,1).toDateTime(LocalTime.Midnight, timezone),
-      expires = new LocalDate(2016,5,31).toDateTime(LocalTime.Midnight, timezone),
+      expires = new LocalDate(2016,6,1).toDateTime(LocalTime.Midnight, timezone),
       imageUrl = Some("https://media.guim.co.uk/b26ecf643d6494d60fc32c94e43d8d1483daadac/0_0_720_418/720.jpg"),
       promotionType = Incentive(
         redemptionInstructions = "We'll send redemption instructions to your registered email address",
