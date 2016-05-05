@@ -104,64 +104,99 @@ object Config {
   def membershipRatePlanIds(env: String) =
     MembershipRatePlanIds.fromConfig(ProductFamilyRatePlanIds.config(Some(config))(env, Membership))
 
-  def demoPromo(env: String) = {
-    val jellyFishPromoCode = PromoCode("DGA85")
+  def getPromotions(env: String) : Seq[AnyPromotion] = {
     val prpIds = digipackRatePlanIds(env)
-    val promoCodes = (88 to 94).flatMap(i =>  Seq(PromoCode(s"DGA$i"), PromoCode(s"DGB$i"))) ++ Seq(jellyFishPromoCode)
-
-    Promotion(
-      appliesTo = AppliesTo.ukOnly(Set(
-        prpIds.digitalPackMonthly,
-        prpIds.digitalPackQuaterly,
-        prpIds.digitalPackYearly
-      )),
-      campaignName = "DigiPack - £30 digital gift card",
-      codes = PromoCodeSet(PromoCode("DGA88"), promoCodes:_*),
-      description = "Get £30 to spend with a top retailer of your choice when you subscribe. Use your digital gift card at Amazon.co.uk, M&S and more. Treat yourself or a friend.",
-      starts = new LocalDate(2016,3,1).toDateTime(LocalTime.Midnight, timezone),
-      expires = new LocalDate(2016,6,1).toDateTime(LocalTime.Midnight, timezone),
-      imageUrl = Some("https://media.guim.co.uk/b26ecf643d6494d60fc32c94e43d8d1483daadac/0_0_720_418/720.jpg"),
-      promotionType = Incentive(
-        redemptionInstructions = "We'll send redemption instructions to your registered email address",
-        termsAndConditions = "<h4>Giftcloud £30 gift card terms and conditions</h4><p>Offer only available to customers who subscribe after trial period. Customers are asked to allow up to 35 days from first payment date to receive their gift card redemption email. Offer available to customers who subscribe after trial period only. Once customers have received their gift card redemption email they will have 90 days to claim the £30 gift card by selecting their chosen digital gift card and entering their email or phone number after which time the gift will no longer be available. In the event stock runs out you may be offered an alternative gift of a similar value or a full refund. GNM reserves the right to withdraw this promotion at any time.</p> <p>Amazon.co.uk Gift Cards (“GCs”) sold by Giftcloud, an authorised and independent reseller of Amazon.co.uk Gift Cards. Amazon.co.uk Gift Cards may be redeemed on the Amazon.co.uk website towards the purchase of eligible products listed in our online catalogue and sold by Amazon.co.uk or any other seller selling through Amazon.co.uk. GCs cannot be reloaded, resold, transferred for value, redeemed for cash or applied to any other account. Amazon.co.uk is not responsible if a GC is lost, stolen, destroyed or used without permission. See <a class='u-link' href='http://www.amazon.co.uk/gc-legal' target='_blank'>www.amazon.co.uk/gc-legal</a> for complete terms and conditions. GCs are issued by Amazon EU S.à r.l. All Amazon ®, ™ & © are IP of Amazon.com, Inc. or its affiliates.</p>"
-      ),
-      roundelHtml = "<span class='roundel__strong'>£30</span> digital gift card",
-      title = "Free £30 digital gift card when you subscribe"
+    Seq({
+      val jellyFishPromoCode = PromoCode("DGA85")
+      val promoCodes = (88 to 94).flatMap(i => Seq(PromoCode(s"DGA$i"), PromoCode(s"DGB$i"))) ++ Seq(jellyFishPromoCode)
+      Promotion(
+        appliesTo = AppliesTo.ukOnly(Set(
+          prpIds.digitalPackMonthly,
+          prpIds.digitalPackQuaterly,
+          prpIds.digitalPackYearly
+        )),
+        campaignName = "DigiPack - £30 digital gift card",
+        codes = PromoCodeSet(PromoCode("DGA88"), promoCodes: _*),
+        description = "Get £30 to spend with a top retailer of your choice when you subscribe. Use your digital gift card at Amazon.co.uk, M&S and more. Treat yourself or a friend.",
+        starts = new LocalDate(2016, 3, 1).toDateTime(LocalTime.Midnight, timezone),
+        expires = new LocalDate(2016, 6, 1).toDateTime(LocalTime.Midnight, timezone),
+        imageUrl = Some("https://media.guim.co.uk/b26ecf643d6494d60fc32c94e43d8d1483daadac/0_0_720_418/720.jpg"),
+        promotionType = Incentive(
+          redemptionInstructions = "We'll send redemption instructions to your registered email address",
+          termsAndConditions = "<h4>Giftcloud £30 gift card terms and conditions</h4><p>Offer only available to customers who subscribe after trial period. Customers are asked to allow up to 35 days from first payment date to receive their gift card redemption email. Offer available to customers who subscribe after trial period only. Once customers have received their gift card redemption email they will have 90 days to claim the £30 gift card by selecting their chosen digital gift card and entering their email or phone number after which time the gift will no longer be available. In the event stock runs out you may be offered an alternative gift of a similar value or a full refund. GNM reserves the right to withdraw this promotion at any time.</p> <p>Amazon.co.uk Gift Cards (“GCs”) sold by Giftcloud, an authorised and independent reseller of Amazon.co.uk Gift Cards. Amazon.co.uk Gift Cards may be redeemed on the Amazon.co.uk website towards the purchase of eligible products listed in our online catalogue and sold by Amazon.co.uk or any other seller selling through Amazon.co.uk. GCs cannot be reloaded, resold, transferred for value, redeemed for cash or applied to any other account. Amazon.co.uk is not responsible if a GC is lost, stolen, destroyed or used without permission. See <a class='u-link' href='http://www.amazon.co.uk/gc-legal' target='_blank'>www.amazon.co.uk/gc-legal</a> for complete terms and conditions. GCs are issued by Amazon EU S.à r.l. All Amazon ®, ™ & © are IP of Amazon.com, Inc. or its affiliates.</p>"
+        ),
+        roundelHtml = "<span class='roundel__strong'>£30</span> digital gift card",
+        title = "Free £30 digital gift card when you subscribe"
+      )
+    }, {
+      val promoCodes = (13 to 26).flatMap(i => Seq(PromoCode(s"DPA$i"), PromoCode(s"DPB$i")))
+      Promotion(
+        appliesTo = AppliesTo.all(prpIds.productRatePlanIds),
+        campaignName = s"DigiPack for just £9.99 a month (~17% discount)",
+        codes = PromoCodeSet(PromoCode("DPA13"), promoCodes: _*),
+        description = "For a limited time you can enjoy the digital pack for a special discounted price. Get every issue of The Guardian and The Observer newspapers delivered to your tablet, plus an ad-free experience on The Guardian live news app.",
+        starts = new LocalDate(2016, 3, 1).toDateTime(LocalTime.Midnight, timezone),
+        expires = new LocalDate(2100, 4, 1).toDateTime(LocalTime.Midnight, timezone),
+        imageUrl = None,
+        roundelHtml = "Only £9.99 a month</span><span class='roundel__byline'>usually £11.99",
+        title = "More of the Guardian, for less",
+        promotionType = PercentDiscount(None, 16.680567139283)
+      )
+    }, {
+      val promoCodes = (22 to 25) map { i => PromoCode(s"DHA$i") }
+      Promotion(
+        appliesTo = AppliesTo.all(prpIds.productRatePlanIds),
+        campaignName = s"DigiPack free for 30 Days",
+        codes = PromoCodeSet(PromoCode("DHA22"), promoCodes: _*),
+        description = "Enjoy the digital pack for free for 30 days without charge. Get every issue of The Guardian and The Observer newspapers delivered to your tablet, plus an ad-free experience on The Guardian live news app.",
+        starts = new LocalDate(2016, 4, 1).toDateTime(LocalTime.Midnight, timezone),
+        expires = new LocalDate(2016, 6, 30).toDateTime(LocalTime.Midnight, timezone),
+        imageUrl = None,
+        roundelHtml = "<span class='roundel__strong'>FREE</span> DigiPack for 30 days",
+        title = "Try the Guardian DigiPack free for 30 Days",
+        promotionType = FreeTrial(duration = Days.days(30))
+      )
+    }, {
+      val promoCodes = (1 to 15).flatMap(i => Seq(PromoCode(f"DSA$i%02d"), PromoCode(f"DSB$i%02d")))
+      Promotion(
+        appliesTo = AppliesTo.ukOnly(Set(
+          prpIds.digitalPackMonthly,
+          prpIds.digitalPackQuaterly,
+          prpIds.digitalPackYearly
+        )),
+        campaignName = "Student offer codes",
+        codes = PromoCodeSet(PromoCode("DSA01"), promoCodes: _*),
+        description = "Student offer - £7.49 per month",
+        starts = new LocalDate(2016, 5, 5).toDateTime(LocalTime.Midnight, timezone),
+        expires = new LocalDate(2016, 6, 1).toDateTime(LocalTime.Midnight, timezone),
+        imageUrl = None,
+        promotionType = PercentDiscount(durationMonths = None, amount = 37.531276063386),
+        roundelHtml = "Student price £7.49 per month",
+        title = ""
+      )
+    }, {
+      val promoCodes = (95 to 99) map { i => PromoCode(s"DGA$i") }
+      Promotion(
+        appliesTo = AppliesTo.ukOnly(Set(
+          prpIds.digitalPackMonthly,
+          prpIds.digitalPackQuaterly,
+          prpIds.digitalPackYearly
+        )),
+        campaignName = "Pact coffee campaign",
+        codes = PromoCodeSet(PromoCode("DGA95"), promoCodes: _*),
+        description = "Let the paper and the coffee come to you. Get a free world coffee pack from Pact when you subscribe. Enjoy a selection of 3 80g bags of coffee from around the world delivered to your door. So you can sit back and enjoy your morning read without having to leave the house.\nPact deliver coffees from around the world through your letter box, ground and packed within 7 days of roasting for optimal freshness. Their coffees are sourced through Direct Trade so Pact can get the best quality beans and pay farmers a better price.",
+        starts = new LocalDate(2016, 5, 2).toDateTime(LocalTime.Midnight, timezone),
+        expires = new LocalDate(2016, 6, 1).toDateTime(LocalTime.Midnight, timezone),
+        imageUrl = None,
+        promotionType = Incentive(
+          redemptionInstructions = "We'll send redemption instructions to your registered email address. Redemption of Pact coffee world pack will require customers to create an account with Pact coffee to enable delivery.",
+          termsAndConditions = "<h4>Pact Coffee world pack terms and conditions</h4><p>Offer available in the UK only. Offer of free Pact coffee world pack available to new digital pack subscribers only. Redemption of Pact coffee world pack will require customers to create an account with Pact coffee to enable delivery.</p>"
+        ),
+        roundelHtml = "Free <span class='roundel__strong'>PACT</span> Coffee!",
+        title = "Enjoy a free coffee world pack from Pact"
+      )
+    }
     )
-  }
-
-  def discountPromo(env: String): Option[AnyPromotion] = {
-    val prpIds = digipackRatePlanIds(env)
-    val promoCodes = (13 to 26).flatMap(i => Seq(PromoCode(s"DPA$i"), PromoCode(s"DPB$i")))
-    Some(Promotion(
-      appliesTo = AppliesTo.all(prpIds.productRatePlanIds),
-      campaignName = s"DigiPack for just £9.99 a month (~17% discount)",
-      codes = PromoCodeSet(PromoCode("DPA13"), promoCodes:_*),
-      description = "For a limited time you can enjoy the digital pack for a special discounted price. Get every issue of The Guardian and The Observer newspapers delivered to your tablet, plus an ad-free experience on The Guardian live news app.",
-      starts = new LocalDate(2016,3,1).toDateTime(LocalTime.Midnight, timezone),
-      expires = new LocalDate(2100,4,1).toDateTime(LocalTime.Midnight, timezone),
-      imageUrl = None,
-      roundelHtml = "Only £9.99 a month</span><span class='roundel__byline'>usually £11.99",
-      title = "More of the Guardian, for less",
-      promotionType = PercentDiscount(None, 16.680567139283)
-    ))
-  }
-
-  def freeTrialPromo(env: String): Option[AnyPromotion] = {
-    val prpIds = digipackRatePlanIds(env)
-    val promoCodes = (22 to 25) map { i => PromoCode(s"DHA$i") }
-    Some(Promotion(
-      appliesTo = AppliesTo.all(prpIds.productRatePlanIds),
-      campaignName = s"DigiPack free for 30 Days",
-      codes = PromoCodeSet(PromoCode("DHA22"), promoCodes:_*),
-      description = "Enjoy the digital pack for free for 30 days without charge. Get every issue of The Guardian and The Observer newspapers delivered to your tablet, plus an ad-free experience on The Guardian live news app.",
-      starts = new LocalDate(2016,4,1).toDateTime(LocalTime.Midnight, timezone),
-      expires = new LocalDate(2016,6,30).toDateTime(LocalTime.Midnight, timezone),
-      imageUrl = None,
-      roundelHtml = "<span class='roundel__strong'>FREE</span> DigiPack for 30 days",
-      title = "Try the Guardian DigiPack free for 30 Days",
-      promotionType = FreeTrial(duration = Days.days(30))
-    ))
   }
 
   object CAS {

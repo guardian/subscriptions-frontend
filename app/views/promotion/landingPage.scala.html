@@ -67,14 +67,12 @@
             <div class="gs-container gs-container--slim page-slice">
                 <div class="page-slice__content">
                     <h4>Terms and conditions</h4>
-                    <p>Customers must subscribe by @prettyDate(promotion.expires.minusSeconds(1)) to be eligible for the offer. Offer subject to availability. GNM reserves the right to withdraw this promotion at any time.</p>
+                    <p>@Some(promotion.expires).map { e => Customers must subscribe by @prettyDate(e.minusSeconds(1)) to be eligible for the offer. } Offer subject to availability. Guardian News and Media Limited ("GNM") reserves the right to withdraw this promotion at any time.</p>
                     @fragments.promotion.subscriptionTermsAndConditions(defaultTrial, catalog, promotion)
                     @fragments.promotion.incentiveTermsAndConditions(promotion)
-                    <p>Guardian News & Media Limited – a member of Guardian Media Group PLC. Registered Office: Kings Place, 90 York Way, London, N1 9GU. Registered in England No. 908396</p>
+                    <p>Guardian News and Media Limited – a member of Guardian Media Group plc. Registered office: Kings Place, 90 York Way, London, N1 9GU. Registered in England No. 908396</p>
                 </div>
             </div>
         </section>
     </main>
-
-    @fragments.analytics.jellyfish.remarketing()
 }

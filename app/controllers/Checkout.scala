@@ -226,7 +226,6 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
   def validatePromoCode(promoCode: PromoCode, prpId: ProductRatePlanId, country: Country) = NoCacheAction { implicit request =>
 
     val tpBackend = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies).backend
-    val fallabackPromoCode = demoPromo(tpBackend.environmentName).codes.webCode
 
     tpBackend.promoService.findPromotion(promoCode)
       .fold(NotFound(Json.obj("errorMessage" -> s"Sorry, we can't find that code."))){ promo =>

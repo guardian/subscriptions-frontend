@@ -197,10 +197,13 @@
 }
 
 .promotion-description {
+    padding-top: ($gs-baseline / 3);
+}
+
+.promotion-description--bordered {
     border-color: $c-neutral2;
     border-style: dotted;
     border-width: 1px 0 0 0;
-    padding-top: ($gs-baseline / 3);
 }
 
 .promotion-cta__image {
