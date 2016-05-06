@@ -1,13 +1,12 @@
-@import com.gu.memsub.promo.Promotion.AnyPromotion
 @import com.gu.subscriptions.DigipackCatalog
 @import com.gu.memsub.promo.PromoCode
 @import model.DigitalEdition
 
-@(edition: DigitalEdition, catalog: DigipackCatalog, promoCode: PromoCode, promotion: AnyPromotion)
+@(edition: DigitalEdition, catalog: DigipackCatalog, promoCode: PromoCode, roundelHtml: Option[String])
 <div class="digipack">
     <div class="grid grid--3up-step-phablet grid--flex grid--no-clearfix-before">
         <div class="grid__item grid__item--flex-2-columns grid__item--flex-wrapped">
-            <div class="digipack__roundel">@fragments.common.roundel(promotion.roundelHtml, Seq("roundel--raised"))</div>
+            @roundelHtml.map { h => <div class="digipack__roundel">@fragments.common.roundel(h, Seq("roundel--raised"))</div> }
             <div class="digipack__shots">
                 <img src="@controllers.CachedAssets.hashedPathFor("images/backgrounds/bg-promo-digital-pack.jpg")"/>
             </div>

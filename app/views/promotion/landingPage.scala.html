@@ -1,15 +1,17 @@
 @import com.gu.memsub.promo.PromoCode
-@import com.gu.memsub.promo.Promotion.AnyPromotion
+@import com.gu.memsub.promo.Promotion.AnyPromotionWithLandingPage
 @import com.gu.subscriptions.DigipackCatalog
 @import model.DigitalEdition
 @import views.support.Dates._
 @import org.joda.time.Days
-@(edition: DigitalEdition, catalog: DigipackCatalog, promoCode: PromoCode, promotion: AnyPromotion, defaultTrial: Days)
+@(edition: DigitalEdition, catalog: DigipackCatalog, promoCode: PromoCode, promotion: AnyPromotionWithLandingPage, defaultTrial: Days)
+@anyPromotion = @{promotion.copy(landingPage = Option(promotion.landingPage))}
 
 @main(
     title = "The Digital Pack offer | Subscriptions | The Guardian",
     bodyClasses = Seq("is-wide")
 ) {
+
     <main class="page-container promo-landing-page">
         <section class="section-white section--dark-sides">
             <div class="gs-container gs-container--slim page-slice">
@@ -20,14 +22,14 @@
         </section>
         <section class="section-grey section--dark-sides">
             <div class="gs-container gs-container--slim page-slice">
-                @fragments.promotion.digipack(edition, catalog, promoCode, promotion)
+                @fragments.promotion.digipack(edition, catalog, promoCode, promotion.landingPage.roundelHtml)
             </div>
         </section>
         <section class="section-white section--dark-sides">
             <div class="gs-container gs-container--slim page-slice">
                 <div class="page-slice__content">
                     <h2 class="promo-landing-page__section-head">Discover the Guardian Daily Edition</h2>
-                    @fragments.promotion.discover(edition, catalog, promoCode, promotion, defaultTrial)
+                    @fragments.promotion.discover(edition, catalog, promoCode, anyPromotion, defaultTrial)
                 </div>
             </div>
         </section>
@@ -35,12 +37,12 @@
             <section class="section-blue section--dark-sides">
                 <div class="gs-container gs-container--slim page-slice page-slice">
                     <div class="page-slice__content">
-                        <h2 class="promo-landing-page__section-head">@promotion.title</h2>
+                        <h2 class="promo-landing-page__section-head">@promotion.landingPage.title.getOrElse(promotion.name)</h2>
                         @{
-                            promotion.imageUrl.fold {
+                            promotion.landingPage.imageUrl.fold {
                                 fragments.promotion.promotionDescription(promotion)
                             } {
-                                imageUrl => fragments.promotion.promotionWithImage(promotion, imageUrl)
+                                imageUrl => fragments.promotion.promotionWithImage(promotion, imageUrl.toString)
                             }
                         }
                     </div>
@@ -59,7 +61,7 @@
             <div class="gs-container gs-container--slim page-slice page-slice">
                 <div class="page-slice__content">
                     <h2 class="promo-landing-page__section-head">Subscribe&nbsp;to&nbsp;the Digital&nbsp;Pack</h2>
-                    @fragments.promotion.promotionCta(edition, catalog, promoCode, promotion, defaultTrial)
+                    @fragments.promotion.promotionCta(edition, catalog, promoCode, anyPromotion, defaultTrial)
                 </div>
             </div>
         </section>
@@ -67,14 +69,12 @@
             <div class="gs-container gs-container--slim page-slice">
                 <div class="page-slice__content">
                     <h4>Terms and conditions</h4>
-                    <p>Customers must subscribe by @prettyDate(promotion.expires.minusSeconds(1)) to be eligible for the offer. Offer subject to availability. GNM reserves the right to withdraw this promotion at any time.</p>
-                    @fragments.promotion.subscriptionTermsAndConditions(defaultTrial, catalog, promotion)
-                    @fragments.promotion.incentiveTermsAndConditions(promotion)
-                    <p>Guardian News & Media Limited – a member of Guardian Media Group PLC. Registered Office: Kings Place, 90 York Way, London, N1 9GU. Registered in England No. 908396</p>
+                    <p>@promotion.expires.map { e => Customers must subscribe by @prettyDate(e.minusSeconds(1)) to be eligible for the offer. } Offer subject to availability. Guardian News and Media Limited ("GNM") reserves the right to withdraw this promotion at any time.</p>
+                    @fragments.promotion.subscriptionTermsAndConditions(defaultTrial, catalog, anyPromotion)
+                    @fragments.promotion.incentiveTermsAndConditions(anyPromotion)
+                    <p>Guardian News and Media Limited – a member of Guardian Media Group plc. Registered office: Kings Place, 90 York Way, London, N1 9GU. Registered in England No. 908396</p>
                 </div>
             </div>
         </section>
     </main>
-
-    @fragments.analytics.jellyfish.remarketing()
 }

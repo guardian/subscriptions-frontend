@@ -20,6 +20,9 @@ define(['utils/cookie',
         ga('set', 'dimension1', identitySignedIn.toString());
         ga('set', 'dimension2', identitySignedOut.toString());
         ga('send', 'pageview');
+
+        ga('create', 'UA-44575989-1', 'auto', 'jellyfishGA');
+        ga('jellyfishGA.send', 'pageview');
     }
 
 

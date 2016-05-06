@@ -9,7 +9,6 @@ import com.gu.subscriptions.{DigipackCatalog, Discounter}
 import com.gu.zuora
 import com.gu.zuora.{rest, soap}
 import configuration.Config
-import configuration.Config._
 import monitoring.TouchpointBackendMetrics
 import play.api.Play.current
 import play.api.libs.concurrent.Akka
@@ -38,7 +37,7 @@ object TouchpointBackend {
     val discounter = new Discounter(discountPlans)
     val membershipRatePlanIds = Config.membershipRatePlanIds(config.environmentName)
     val catalogService = CatalogService(restClient, membershipRatePlanIds, digipackRatePlanIds, config.environmentName)
-    val promoService = new PromoService(Seq(demoPromo(config.environmentName)) ++ discountPromo(config.environmentName) ++ freeTrialPromo(config.environmentName), catalogService.digipackCatalog, discounter)
+    val promoService = new PromoService(Config.getPromotions(config.environmentName), catalogService.digipackCatalog, discounter)
     val zuoraService = new zuora.ZuoraService(soapClient, restClient, digipackRatePlanIds)
     val _stripeService = new StripeService(config.stripe, new TouchpointBackendMetrics with StatusMetrics {
       val backendEnv = config.stripe.envName
