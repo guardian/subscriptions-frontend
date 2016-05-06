@@ -13,6 +13,8 @@ import views.support.Catalog._
 import play.api.Play.current
 import play.api.libs.concurrent.Akka
 
+import scala.concurrent.Future
+
 object Management extends Controller with LazyLogging {
   implicit val as = Akka.system
 
@@ -28,7 +30,8 @@ object Management extends Controller with LazyLogging {
 
   def healthcheck = Action.async {
       (for {
-        sfAuth <- TouchpointBackend.Normal.salesforceService.repo.salesforce.getAuthentication
+        _ <- TouchpointBackend.Normal.salesforceService.repo.salesforce.getAuthentication
+        _ <- Future(TouchpointBackend.Normal.promos.all.headOption.getOrElse(throw new IllegalStateException("No promos")))
       } yield Ok("OK"))
       .recover { case t: Throwable =>
         logger.warn("Health check failed", t)
