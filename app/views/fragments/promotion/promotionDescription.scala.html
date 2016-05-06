@@ -1,13 +1,13 @@
-@import com.gu.memsub.promo.Promotion.AnyPromotion
+@import com.gu.memsub.promo.Promotion.AnyPromotionWithLandingPage
 @import org.joda.time.DateTime.now
 @import views.support.Dates.dayInMonthWithSuffixAndMonth
 
-@(promotion: AnyPromotion)
-<p class="promotion-description @promotion.imageUrl.map { _ => promotion-description--bordered }">
-    @promotion.description
+@(promotion: AnyPromotionWithLandingPage)
+<p class="promotion-description @promotion.landingPage.imageUrl.map { _ => promotion-description--bordered }">
+    @promotion.landingPage.description.getOrElse(promotion.description)
 </p>
-@Some(promotion.expires).filter(now.plusMonths(1).isAfter).map { e =>
-    <p class="promotion-description @promotion.imageUrl.map { _ => promotion-description--bordered }">
+@promotion.expires.filter(now.plusMonths(1).isAfter).map { e =>
+    <p class="promotion-description @promotion.landingPage.imageUrl.map { _ => promotion-description--bordered }">
         But hurry! Offer expires @dayInMonthWithSuffixAndMonth(e.minusSeconds(1)).
     </p>
 }

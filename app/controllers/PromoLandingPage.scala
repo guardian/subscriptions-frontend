@@ -19,7 +19,8 @@ object PromoLandingPage extends Controller {
 
     (for {
       promotion <- tpBackend.promoService.findPromotion(promoCode)
-      html <- if ((evaluateStarts && promotion.starts.isAfterNow) || promotion.expires.isBeforeNow) None else Some(views.html.promotion.landingPage(edition, catalog, promoCode, promotion, Config.Zuora.paymentDelay))
+      promotionWithLandingPage <- Promotion.withLandingPage(promotion)
+      html <- if ((evaluateStarts && promotionWithLandingPage.starts.isAfterNow) || promotionWithLandingPage.expires.exists(_.isBeforeNow)) None else Some(views.html.promotion.landingPage(edition, catalog, promoCode, promotionWithLandingPage, Config.Zuora.paymentDelay))
     } yield Ok(html)).getOrElse(Redirect("/digital" ? ("INTCMP" -> s"FROM_P_${promoCode.get}")))
   }
 }
