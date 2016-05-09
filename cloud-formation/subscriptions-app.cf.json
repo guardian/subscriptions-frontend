@@ -232,7 +232,8 @@
                 "ConnectionDrainingPolicy": {
                     "Enabled" : "true",
                     "Timeout" : "60"
-                }
+                },
+                "CrossZone": "true"
             }
         },
         "LoadBalancerSecurityGroup" : {
