@@ -57,11 +57,12 @@
     font-size: 20px;
     font-weight: 900;
     line-height: 24px;
-    margin: $gs-baseline 0;
+    margin: $gs-baseline 0 30px 0;
 
     @include mq(tablet) {
         font-size: 28px;
         line-height: 32px;
+        margin-bottom: 36px;
     }
 
 }
@@ -137,11 +138,11 @@
 }
 
 .digital-tablet-previews {
-    padding: 18px 0 22px 0;
+    margin: 18px 0 22px 0;
 }
 
 .digital-tablet-previews--in-grid {
-    padding: 0;
+    margin: 0;
 }
 
 .feature {

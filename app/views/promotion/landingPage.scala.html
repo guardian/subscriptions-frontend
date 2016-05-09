@@ -1,12 +1,13 @@
 @import com.gu.memsub.promo.PromoCode
+@import com.gu.memsub.promo.Promotion.asAnyPromotion
 @import com.gu.memsub.promo.Promotion.AnyPromotionWithLandingPage
 @import com.gu.subscriptions.DigipackCatalog
 @import model.DigitalEdition
 @import views.support.Dates._
+@import views.support.LandingPageOps._
 @import org.joda.time.Days
 @(edition: DigitalEdition, catalog: DigipackCatalog, promoCode: PromoCode, promotion: AnyPromotionWithLandingPage, defaultTrial: Days)
-@anyPromotion = @{promotion.copy(landingPage = Option(promotion.landingPage))}
-
+@anyPromotion = @{asAnyPromotion(promotion)}
 @main(
     title = "The Digital Pack offer | Subscriptions | The Guardian",
     bodyClasses = Seq("is-wide")
@@ -34,9 +35,9 @@
             </div>
         </section>
         @promotion.whenFreeTrial.fold {
-            <section class="section-blue section--dark-sides">
+            <section class="@promotion.landingPageSectionColour section--dark-sides">
                 <div class="gs-container gs-container--slim page-slice page-slice">
-                    <div class="page-slice__content">
+                    <div class="page-slice__content @promotion.getSectionSeparator">
                         <h2 class="promo-landing-page__section-head">@promotion.landingPage.title.getOrElse(promotion.name)</h2>
                         @{
                             promotion.landingPage.imageUrl.fold {
@@ -51,7 +52,7 @@
         } { _ => }
         <section class="section-white section--dark-sides">
             <div class="gs-container gs-container--slim page-slice">
-                <div class="page-slice__content @promotion.whenFreeTrial.map { _ => section-separator }">
+                <div class="page-slice__content @promotion.getSectionSeparator">
                     <h2 class="promo-landing-page__section-head">Exclusive benefits for Digital Pack subscribers</h2>
                     @fragments.promotion.benefits()
                 </div>
