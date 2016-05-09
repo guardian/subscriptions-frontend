@@ -2,6 +2,7 @@ package services
 
 import com.gu.config.{DigitalPackRatePlanIds, DiscountRatePlanIds, ProductFamilyRatePlanIds}
 import com.gu.memsub.Digipack
+import com.gu.memsub.promo.{PromotionCollection, DynamoPromoCollection}
 import com.gu.memsub.services.{SubscriptionService, CatalogService, PromoService, api}
 import com.gu.monitoring.{ServiceMetrics, StatusMetrics}
 import com.gu.stripe.StripeService
@@ -37,7 +38,9 @@ object TouchpointBackend {
     val discounter = new Discounter(discountPlans)
     val membershipRatePlanIds = Config.membershipRatePlanIds(config.environmentName)
     val catalogService = CatalogService(restClient, membershipRatePlanIds, digipackRatePlanIds, config.environmentName)
-    val promoService = new PromoService(Config.getPromotions(config.environmentName), catalogService.digipackCatalog, discounter)
+    val promoCollection = DynamoPromoCollection.forStage(Config.config, config.environmentName)
+
+    val promoService = new PromoService(promoCollection, catalogService.digipackCatalog, discounter)
     val zuoraService = new zuora.ZuoraService(soapClient, restClient, digipackRatePlanIds)
     val _stripeService = new StripeService(config.stripe, new TouchpointBackendMetrics with StatusMetrics {
       val backendEnv = config.stripe.envName
@@ -64,6 +67,7 @@ object TouchpointBackend {
       memsubPaymentService,
       config.zuoraProperties,
       promoService,
+      promoCollection,
       discountPlans
     )
   }
@@ -103,6 +107,7 @@ case class TouchpointBackend(environmentName: String,
                              commonPaymentService: CommonPaymentService,
                              zuoraProperties: ZuoraProperties,
                              promoService: PromoService,
+                             promos: PromotionCollection,
                              discountRatePlanIds: DiscountRatePlanIds) {
 
   private val that = this
