@@ -51,6 +51,16 @@
             "Type": "String"
         }
     },
+    "Mappings": {
+        "StageVariables": {
+            "PROD": {
+                "DynamoDBTables": [
+                    "arn:aws:dynamodb:*:*:table/MembershipSub-Promotions-PROD",
+                    "arn:aws:dynamodb:*:*:table/MembershipSub-Promotions-UAT"
+                ]
+            }
+        }
+    },
     "Resources" : {
 
         "FrontendAutoScalingGroup" : {
@@ -171,6 +181,26 @@
                         }
                         ]
                     }
+                },
+                {
+                    "PolicyName": "DynamoPromotions",
+                    "PolicyDocument": {
+                        "Statement": [
+                            {
+                                "Effect": "Allow",
+                                "Action": [
+                                    "dynamodb:GetItem",
+                                    "dynamodb:Scan",
+                                    "dynamodb:Query"
+                                ],
+                                "Resource": {
+                                    "Fn::FindInMap": ["StageVariables", {
+                                        "Ref": "Stage"
+                                    }, "DynamoDBTables"]
+                                }
+                            }
+                        ]
+                    }
                 }]
             }
         },
@@ -205,7 +235,8 @@
                 "ConnectionDrainingPolicy": {
                     "Enabled" : "true",
                     "Timeout" : "60"
-                }
+                },
+                "CrossZone": "true"
             }
         },
         "LoadBalancerSecurityGroup" : {
