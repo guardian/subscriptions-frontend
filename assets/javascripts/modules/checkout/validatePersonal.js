@@ -1,15 +1,15 @@
-/* global Raven */
 define([
     'utils/ajax',
-    'modules/forms/regex'
-], function (ajax, regex) {
+    'modules/forms/regex',
+    'raven'
+], function (ajax, regex, raven) {
     'use strict';
 
     function emailCheck(email) {
         return ajax({ url: '/checkout/check-identity?email=' + encodeURIComponent(email) }).then(function (response) {
             return response.emailInUse;
         }).fail(function (err) {
-            Raven.captureException(err);
+            raven.Raven.captureException(err);
         });
     }
 

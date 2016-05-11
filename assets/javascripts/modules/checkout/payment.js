@@ -1,9 +1,10 @@
-/* global Raven, Stripe */
+/* global Stripe */
 define([
     'utils/ajax',
     'modules/forms/regex',
-    'modules/checkout/validatePaymentFormat'
-], function (ajax, regex, validatePaymentFormat) {
+    'modules/checkout/validatePaymentFormat',
+    'raven'
+], function (ajax, regex, validatePaymentFormat, raven) {
     'use strict';
 
     var ACCOUNT_CHECK_ENDPOINT = '/checkout/check-account';
@@ -22,7 +23,7 @@ define([
         }).then(function (response) {
             return response.accountValid;
         }).fail(function (err){
-            Raven.captureException(err);
+            raven.Raven.captureException(err);
         });
     }
 
@@ -38,7 +39,7 @@ define([
                     // Since we've already validated the card details clientside using Stripe's
                     // library, an error during token creation is unexpected. For simplicity we
                     // just log the error and display a message against the card number in such cases.
-                    Raven.captureMessage(response.error.code + ' ' + response.error.message);
+                    raven.Raven.captureMessage(response.error.code + ' ' + response.error.message);
                     resolve(false);
                 } else {
                     stripeToken = response.id;

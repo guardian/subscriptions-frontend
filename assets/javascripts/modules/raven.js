@@ -35,6 +35,7 @@ define(['lodash/object/pick', 'utils/user', 'raven'], function (pick, userUtil, 
 
     return {
         init: init,
-        getTags: getTags
+        getTags: getTags,
+        raven: raven
     };
 });
