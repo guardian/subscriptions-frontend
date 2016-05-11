@@ -1,14 +1,15 @@
-/* global Raven */
 define([
     '$',
     'bean',
     'utils/ajax',
-    'modules/forms/toggleError'
+    'modules/forms/toggleError',
+    'raven'
 ], function (
     $,
     bean,
     ajax,
-    toggleError
+    toggleError,
+    raven
 ) {
     'use strict';
 
@@ -48,7 +49,7 @@ define([
                     }).catch(function (err) {
                         $FINISH_ACCOUNT_FORM.addClass(IS_HIDDEN);
                         $FINISH_ACCOUNT_ERROR.removeClass(IS_HIDDEN);
-                        Raven.captureException(err);
+                        raven.Raven.captureException(err);
                     });
                 }
             });

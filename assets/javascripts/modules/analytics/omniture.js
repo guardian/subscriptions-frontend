@@ -1,9 +1,10 @@
-/*global Raven, s_gi, guardian */
+/*global s_gi, guardian */
 define([
     '$',
     'bean',
-    'modules/analytics/analyticsEnabled'
-], function ($, bean, analyticsEnabled) {
+    'modules/analytics/analyticsEnabled',
+    'raven'
+], function ($, bean, analyticsEnabled, raven) {
     'use strict';
 
     var omniture, s;
@@ -71,7 +72,7 @@ define([
     function init() {
         omniture = omniture || require(['js!omniture'])
                 .then(onSuccess, function (err) {
-                    Raven.captureException(err);
+                    raven.Raven.captureException(err);
                 });
         return omniture;
     }
