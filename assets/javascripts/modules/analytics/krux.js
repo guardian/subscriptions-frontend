@@ -1,4 +1,4 @@
-define(['modules/analytics/analyticsEnabled', 'raven'], function(analyticsEnabled, raven) {
+define(['modules/analytics/analyticsEnabled', 'modules/raven'], function(analyticsEnabled, raven) {
     'use strict';
 
     var KRUX_ID = 'Jglpp88U';

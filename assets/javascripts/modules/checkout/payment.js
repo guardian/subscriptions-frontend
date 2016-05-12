@@ -3,7 +3,7 @@ define([
     'utils/ajax',
     'modules/forms/regex',
     'modules/checkout/validatePaymentFormat',
-    'raven'
+    'modules/raven'
 ], function (ajax, regex, validatePaymentFormat, raven) {
     'use strict';
 

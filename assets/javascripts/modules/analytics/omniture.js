@@ -3,7 +3,7 @@ define([
     '$',
     'bean',
     'modules/analytics/analyticsEnabled',
-    'raven'
+    'modules/raven'
 ], function ($, bean, analyticsEnabled, raven) {
     'use strict';
 

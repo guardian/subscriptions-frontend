@@ -1,17 +1,17 @@
-define(['lodash/object/pick', 'utils/user', 'raven'], function (pick, userUtil, raven) {
+define(['lodash/object/pick', 'utils/user', 'raven'], function (pick, userUtil, Raven) {
     'use strict';
 
     function getTags(buildNumber, user) {
         return pick({
           build_number: buildNumber,
-          userIdentityId: (user) ? user.id : undefined
+          userIdentityId: user ? user.id : undefined
         }, function(val) {
           return val !== undefined;
         });
     }
 
     function init(dsn) {
-        raven.config(dsn, {
+        Raven.config(dsn, {
             whitelistUrls: [
                 /subscribe\.theguardian\.com\/assets/,
                 /sub\.thegulocal\.com/,
@@ -36,6 +36,6 @@ define(['lodash/object/pick', 'utils/user', 'raven'], function (pick, userUtil, 
     return {
         init: init,
         getTags: getTags,
-        raven: raven
+        Raven: Raven
     };
 });
