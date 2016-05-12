@@ -46,7 +46,7 @@ define(['raven'], function (raven) {
         try {
             decoded = decodeURIComponent(escape(new AtoB()(str.replace(/-/g, '+').replace(/_/g, '/').replace(/,/g, '='))));
         } catch(e){
-            raven.Raven.captureException(e, {tags: { level: 'info' }});
+            raven.captureException(e, {tags: { level: 'info' }});
         }
         return decoded;
     }

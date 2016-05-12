@@ -3,7 +3,7 @@ define([
     'bean',
     'utils/ajax',
     'modules/forms/toggleError',
-    'raven'
+    'modules/raven'
 ], function (
     $,
     bean,

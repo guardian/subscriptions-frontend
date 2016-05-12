@@ -1,7 +1,7 @@
 define([
     'utils/ajax',
     'modules/forms/regex',
-    'raven'
+    'modules/raven'
 ], function (ajax, regex, raven) {
     'use strict';
 
