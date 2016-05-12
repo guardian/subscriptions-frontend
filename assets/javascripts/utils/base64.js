@@ -1,5 +1,5 @@
 /*global escape*/
-define(['modules/raven'], function (raven) {
+define(['raven'], function (raven) {
     'use strict';
 
     function AtoB(){
@@ -46,7 +46,7 @@ define(['modules/raven'], function (raven) {
         try {
             decoded = decodeURIComponent(escape(new AtoB()(str.replace(/-/g, '+').replace(/_/g, '/').replace(/,/g, '='))));
         } catch(e){
-            raven.Raven.captureException(e, {tags: { level: 'info' }});
+            raven.captureException(e, {tags: { level: 'info' }});
         }
         return decoded;
     }
