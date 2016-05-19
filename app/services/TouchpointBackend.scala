@@ -2,8 +2,9 @@ package services
 
 import com.gu.config.{DigitalPackRatePlanIds, DiscountRatePlanIds, ProductFamilyRatePlanIds}
 import com.gu.memsub.Digipack
-import com.gu.memsub.promo.{PromotionCollection, DynamoPromoCollection}
-import com.gu.memsub.services.{SubscriptionService, CatalogService, PromoService, api}
+import com.gu.memsub.promo.Promotion._
+import com.gu.memsub.promo.{DynamoPromoCollection, DynamoTables, PromotionCollection}
+import com.gu.memsub.services.{PaymentService => CommonPaymentService, _}
 import com.gu.monitoring.{ServiceMetrics, StatusMetrics}
 import com.gu.stripe.StripeService
 import com.gu.subscriptions.{DigipackCatalog, Discounter}
@@ -17,8 +18,9 @@ import play.api.libs.concurrent.Execution.Implicits._
 import play.api.mvc.RequestHeader
 import touchpoint.TouchpointBackendConfig.BackendType
 import touchpoint.{TouchpointBackendConfig, ZuoraProperties}
-import com.gu.memsub.services.{PaymentService => CommonPaymentService}
 import utils.TestUsers._
+
+import scala.concurrent.Future
 
 object TouchpointBackend {
 
@@ -38,7 +40,9 @@ object TouchpointBackend {
     val discounter = new Discounter(discountPlans)
     val membershipRatePlanIds = Config.membershipRatePlanIds(config.environmentName)
     val catalogService = CatalogService(restClient, membershipRatePlanIds, digipackRatePlanIds, config.environmentName)
-    val promoCollection = DynamoPromoCollection.forStage(Config.config, config.environmentName)
+
+    val promoStorage = JsonDynamoService.forTable[AnyPromotion](DynamoTables.promotions(Config.config, config.environmentName))
+    val promoCollection = new DynamoPromoCollection(promoStorage)
 
     val promoService = new PromoService(promoCollection, catalogService.digipackCatalog, discounter)
     val zuoraService = new zuora.ZuoraService(soapClient, restClient, digipackRatePlanIds)
@@ -68,6 +72,7 @@ object TouchpointBackend {
       config.zuoraProperties,
       promoService,
       promoCollection,
+      promoStorage,
       discountPlans
     )
   }
@@ -108,6 +113,7 @@ case class TouchpointBackend(environmentName: String,
                              zuoraProperties: ZuoraProperties,
                              promoService: PromoService,
                              promos: PromotionCollection,
+                             promoStorage: JsonDynamoService[AnyPromotion, Future],
                              discountRatePlanIds: DiscountRatePlanIds) {
 
   private val that = this
