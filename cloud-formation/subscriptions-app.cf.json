@@ -191,7 +191,8 @@
                                 "Action": [
                                     "dynamodb:GetItem",
                                     "dynamodb:Scan",
-                                    "dynamodb:Query"
+                                    "dynamodb:Query",
+                                    "dynamodb:DescribeTable"
                                 ],
                                 "Resource": {
                                     "Fn::FindInMap": ["StageVariables", {
