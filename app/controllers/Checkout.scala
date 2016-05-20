@@ -5,7 +5,7 @@ import com.gu.i18n.{Country, CountryGroup, Currency, GBP}
 import com.gu.identity.play.ProxiedIP
 import com.gu.memsub.Subscription.ProductRatePlanId
 import com.gu.memsub.promo.PromoCode
-import com.gu.memsub.promo.Formatters._
+import com.gu.memsub.promo.Formatters.PromotionFormatters._
 import com.gu.zuora.soap.models.errors._
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config.Identity.webAppProfileUrl

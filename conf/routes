@@ -56,3 +56,4 @@ GET         /test-users                      controllers.Testing.testUser
 
 # Promotions
 GET         /p/:promoCodeStr                 controllers.PromoLandingPage.render(promoCodeStr: String)
+GET         /q/:uuid                         controllers.PromoLandingPage.preview(uuid: String)
