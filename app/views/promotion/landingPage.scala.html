@@ -71,8 +71,8 @@
                 <div class="page-slice__content">
                     <h4>Terms and conditions</h4>
                     <p>@promotion.expires.map { e => Customers must subscribe by @prettyDate(e.minusSeconds(1)) to be eligible for the offer. } Offer subject to availability. Guardian News and Media Limited ("GNM") reserves the right to withdraw this promotion at any time.</p>
-                    @fragments.promotion.subscriptionTermsAndConditions(defaultTrial, catalog, anyPromotion)
                     @fragments.promotion.incentiveTermsAndConditions(anyPromotion)
+                    @fragments.promotion.subscriptionTermsAndConditions(defaultTrial, catalog, anyPromotion)
                     <p>Guardian News and Media Limited – a member of Guardian Media Group plc. Registered office: Kings Place, 90 York Way, London, N1 9GU. Registered in England No. 908396</p>
                 </div>
             </div>
