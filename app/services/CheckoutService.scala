@@ -65,9 +65,13 @@ class CheckoutService(identityService: IdentityService,
       subscribe <- EitherT(createSubscribeRequest(personalData, requestData, plan, purchaserIds, payment))
       withPromo = promoService.applyPromotion(subscribe, subscriptionData.suppliedPromoCode, personalData.address.country)
       result <- EitherT(createSubscription(withPromo, purchaserIds, subscriptionData))
-      _ <- EitherT(sendETDataExtensionRow(result, subscriptionData, gracePeriod(subscribe, withPromo), purchaserIds))
       identitySuccess <- storeIdentityDetails(personalData, authenticatedUserOpt, memberId)
-    } yield CheckoutSuccess(memberId, identitySuccess.userData, result, withPromo.promoCode)).run
+
+      // exact target errors are non fatal so we can return what happened along with the checkout success
+      result <- EitherT(sendETDataExtensionRow(result, subscriptionData, gracePeriod(subscribe, withPromo), purchaserIds).map( f =>
+        \/.right(CheckoutSuccess(memberId, identitySuccess.userData, result, withPromo.promoCode, f.swap.toOption.map(_.head)))
+      ))
+    } yield result).run
   }
 
   private def storeIdentityDetails(
