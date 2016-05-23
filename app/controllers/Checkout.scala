@@ -133,13 +133,6 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
           Forbidden(Json.obj("type" -> "CheckoutSalesforceFailure",
             "message" -> e.msg))
 
-        case e: CheckoutExactTargetFailure =>
-          logger.error(SubsError.header(seqErr))
-          logger.warn(SubsError.toStringPretty(seqErr))
-
-          Forbidden(Json.obj("type" -> "CheckoutExactTargetFailure",
-            "message" -> e.msg))
-
         case e: CheckoutGenericFailure =>
           logger.error(SubsError.header(seqErr))
           logger.warn(SubsError.toStringPretty(seqErr))
@@ -150,6 +143,12 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
     }
 
     def success(r: CheckoutSuccess) = {
+
+      r.emailStatus.foreach { e =>
+        logger.error(SubsError.header(NonEmptyList(e)))
+        logger.warn(SubsError.toStringPretty(NonEmptyList(e)))
+      }
+
       val productData = Seq(
         SubsName -> r.subscribeResult.subscriptionName,
         RatePlanId -> formData.productRatePlanId.get,

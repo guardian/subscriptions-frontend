@@ -16,7 +16,8 @@ object CheckoutService {
       salesforceMember: ContactId,
       userIdData: UserIdData,
       subscribeResult: SubscribeResult,
-      validPromoCode: Option[PromoCode]) extends CheckoutResult
+      validPromoCode: Option[PromoCode],
+      emailStatus: Option[SubsError]) extends CheckoutResult
 
   case class CheckoutIdentityFailure(
       msg: String,
