@@ -1,4 +1,4 @@
-import filters.{AddGuIdentityHeaders, AddEC2InstanceHeader, CheckCacheHeadersFilter}
+import filters.{AddEC2InstanceHeader, AddGuIdentityHeaders, HandleXFrameOptionsOverrideHeader, CheckCacheHeadersFilter}
 import monitoring.SentryLogging
 import play.api.Application
 import play.api.mvc.WithFilters
@@ -6,6 +6,7 @@ import play.filters.csrf.CSRFFilter
 import play.filters.headers.{SecurityHeadersConfig, SecurityHeadersFilter}
 
 object Global extends WithFilters(
+  HandleXFrameOptionsOverrideHeader,
   CheckCacheHeadersFilter,
   SecurityHeadersFilter(SecurityHeadersConfig(
     frameOptions=Some("SAMEORIGIN"),

@@ -120,4 +120,6 @@ object Config {
     val api = new CASApi(CAS.url, metrics)
     new CASService(api)
   }
+
+  val previewXFrameOptionsOverride = config.getString("subscriptions.preview-x-frame-options-override")
 }
