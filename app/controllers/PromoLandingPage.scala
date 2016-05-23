@@ -10,6 +10,7 @@ import com.gu.memsub.promo.Formatters.Common._
 import scalaz.std.scalaFuture._
 import com.netaporter.uri.dsl._
 import configuration.Config
+import filters.HandleXFrameOptionsOverrideHeader
 import model.DigitalEdition
 import play.api.mvc._
 import services.TouchpointBackend
@@ -41,6 +42,6 @@ object PromoLandingPage extends Controller {
       promo <- OptionT(TouchpointBackend.Normal.promoStorage.find(uuid).map(_.headOption))
       withPage <- OptionT(Future.successful(Promotion.withLandingPage(promo)))
     } yield views.html.promotion.landingPage(edition, catalog, promo.codes.head, withPage, Config.Zuora.paymentDelay))
-      .run.map(_.fold[Result](NotFound)(h => Ok(h).withHeaders("X-Frame-Options-Override" -> s"ALLOW ${Config.previewXFrameOptionsOverride}")))
+      .run.map(_.fold[Result](NotFound)(h => Ok(h).withHeaders(HandleXFrameOptionsOverrideHeader.HEADER_KEY -> s"ALLOW ${Config.previewXFrameOptionsOverride}")))
   }
 }
