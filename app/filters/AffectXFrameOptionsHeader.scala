@@ -13,7 +13,7 @@ object AffectXFrameOptionsHeader extends Filter {
   def apply(nextFilter: RequestHeader => Future[Result])(requestHeader: RequestHeader): Future[Result] = {
     nextFilter(requestHeader).map { result =>
       if (requestHeader.path.startsWith("/q/")) {
-        result.withHeaders("X-Frame-Options" -> "")
+        result.withHeaders("X-Frame-Options" -> s"ALLOW ${Config.previewXFrameOptionsOverride}")
       } else {
         result
       }
