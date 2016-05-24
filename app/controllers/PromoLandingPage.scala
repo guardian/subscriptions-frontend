@@ -31,7 +31,7 @@ object PromoLandingPage extends Controller {
 
   def preview(json: Option[String]) = GoogleAuthenticatedStaffAction { implicit request =>
     json.flatMap(j => Json.fromJson[AnyPromotion](Json.parse(j)).asOpt).flatMap(Promotion.withLandingPage)
-      .map(p => views.html.promotion.landingPage(edition, catalog, p.codes.head, p, Config.Zuora.paymentDelay))
+      .map(p => views.html.promotion.landingPage(edition, catalog, p.codes.headOption.getOrElse(PromoCode("")), p, Config.Zuora.paymentDelay))
       .fold[Result](NotFound)(p => Ok(p).withHeaders(HandleXFrameOptionsOverrideHeader.HEADER_KEY -> s"ALLOW ${Config.previewXFrameOptionsOverride}"))
   }
 }
