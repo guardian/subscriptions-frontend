@@ -7,7 +7,7 @@
 @(defaultFreeTrialDays: Days, edition: DigitalEdition, catalog: DigipackCatalog, promoCode: PromoCode, promotion: AnyPromotion)
 <div class="pricing-cta">
     <div class="pricing-cta__pricing">
-        <h4 class="pricing-cta__pricing__title">Free for @promotion.whenFreeTrial.fold(Html(defaultFreeTrialDays.getDays.toString)) { p => @Html(p.promotionType.duration.getDays.toString) } days</h4>
+        <h4 class="pricing-cta__pricing__title">Free for @promotion.asFreeTrial.fold(Html(defaultFreeTrialDays.getDays.toString)) { p => @Html(p.promotionType.duration.getDays.toString) } days</h4>
         <p class="pricing-cta__pricing__value">Then @formatPrice(catalog, promotion)/month</p>
     </div>
 </div>

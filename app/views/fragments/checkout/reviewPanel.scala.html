@@ -1,9 +1,13 @@
 @import com.gu.i18n.Currency
 @import com.gu.memsub.BillingPeriod
-@import com.gu.memsub.promo.Promotion.AnyPromotion
+@import com.gu.memsub.promo._
+@import com.gu.memsub.promo.Promotion._
+@import com.gu.memsub.promo.PercentDiscount._
 @import com.gu.subscriptions.DigipackPlan
 @import views.support.BillingPeriod._
 @import views.support.Pricing._
+@import com.gu.memsub.promo.SubscriptionsLandingPage
+@import scalaz.Id._
 @(subscriptionId: String, plan: DigipackPlan[BillingPeriod], promotion: Option[AnyPromotion] = None, currency: Currency)
 
 <div class="review-panel js-payment-frequency">
@@ -27,10 +31,10 @@
     <div class="review-panel__item">
         <h4 class="review-panel__label">Payment frequency:</h4>
         <div class="review-panel__details">
-            @promotion.fold {
+            @promotion.flatMap(_.asDiscount).fold {
                 @plan.prettyPricing(currency)
             } { p =>
-                <span>@p.applyDiscountToPrice(plan.unsafePrice(currency)).pretty @plan.billingPeriod.frequencyInMonths</span>
+                <span>@p.promotionType.applyDiscount(plan.unsafePrice(currency), plan.billingPeriod).pretty @plan.billingPeriod.frequencyInMonths</span>
             }
         </div>
     </div>
@@ -39,7 +43,7 @@
             <h4 class="review-panel__label">✓ Promotion applied:</h4>
             <div class="review-panel__details">
                 <p>@promo.description</p>
-                @promo.whenIncentive.map { p => <p>@p.promotionType.redemptionInstructions</p> }
+                @promo.asIncentive.map { p => <p>@p.promotionType.redemptionInstructions</p> }
             </div>
         </div>
     }

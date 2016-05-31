@@ -1,25 +1,26 @@
 package views.support
 
-import com.gu.memsub.promo.Promotion.{AnyPromotion, AnyPromotionWithLandingPage}
+import com.gu.memsub.promo.Promotion.AnyPromotion
 import com.gu.memsub.promo._
 import org.joda.time.DateTime.now
+import scalaz.Id._
 
 object LandingPageOps {
 
-  private def getSectionColour(promotion: AnyPromotionWithLandingPage) = promotion.landingPage.sectionColour.getOrElse(Blue)
+  private def getSectionColour(landingPage: SubscriptionsLandingPage) = landingPage.sectionColour.getOrElse(Blue)
 
-  implicit class ForPromotionsWithALandingPage(promotion: AnyPromotionWithLandingPage) {
+  implicit class ForPromotionsWithALandingPage(promotion: Promotion[PromotionType, Id, SubscriptionsLandingPage]) {
     def landingPageSectionColour: String = {
-      getSectionColour(promotion) match {
+      getSectionColour(promotion.landingPage) match {
         case Blue => "section-blue"
         case Grey => "section-grey"
         case White => "section-white"
       }
     }
     def getSectionSeparator: String = {
-      getSectionColour(promotion) match {
+      getSectionColour(promotion.landingPage) match {
         case White => "section-separator"
-        case _ => if (promotion.whenFreeTrial.isDefined) "section-separator" else ""
+        case _ => if (promotion.asFreeTrial.isDefined) "section-separator" else ""
       }
     }
     def getDescriptionBorder: String = {
@@ -32,7 +33,7 @@ object LandingPageOps {
 
   implicit class ForAnyPromotions(promotion: AnyPromotion) {
     def getIncentiveTermsAndConditions: String = {
-      promotion.whenIncentive.fold("") { p => p.promotionType.termsAndConditions.mkString }
+      promotion.asIncentive.fold("") { p => p.promotionType.termsAndConditions.mkString }
     }
   }
 
