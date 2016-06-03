@@ -1,12 +1,13 @@
 @import com.gu.memsub.promo.PromoCode
 @import com.gu.memsub.promo.Promotion.asAnyPromotion
-@import com.gu.memsub.promo.Promotion.AnyPromotionWithLandingPage
+@import com.gu.memsub.promo._
 @import com.gu.subscriptions.DigipackCatalog
 @import model.DigitalEdition
 @import views.support.Dates._
 @import views.support.LandingPageOps._
+@import scalaz.Id._
 @import org.joda.time.Days
-@(edition: DigitalEdition, catalog: DigipackCatalog, promoCode: PromoCode, promotion: AnyPromotionWithLandingPage, defaultTrial: Days)
+@(edition: DigitalEdition, catalog: DigipackCatalog, promoCode: PromoCode, promotion: Promotion[PromotionType, Id, SubscriptionsLandingPage], defaultTrial: Days)
 @anyPromotion = @{asAnyPromotion(promotion)}
 @main(
     title = "The Digital Pack offer | Subscriptions | The Guardian",
@@ -34,7 +35,7 @@
                 </div>
             </div>
         </section>
-        @promotion.whenFreeTrial.fold {
+        @promotion.asFreeTrial.fold {
             <section class="@promotion.landingPageSectionColour section--dark-sides">
                 <div class="gs-container gs-container--slim page-slice page-slice">
                     <div class="page-slice__content @promotion.getSectionSeparator">

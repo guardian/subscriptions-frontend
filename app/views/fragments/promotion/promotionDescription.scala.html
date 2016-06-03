@@ -1,9 +1,8 @@
-@import com.gu.memsub.promo.Promotion.AnyPromotionWithLandingPage
 @import org.joda.time.DateTime.now
 @import views.support.Dates.dayInMonthWithSuffixAndMonth
-@import views.support.LandingPageOps._
-
-@(promotion: AnyPromotionWithLandingPage)
+@import views.support.LandingPageOps.ForPromotionsWithALandingPage
+@import com.gu.memsub.promo.Promotion.PromoWithDigipackLandingPage
+@(promotion: PromoWithDigipackLandingPage)
 <p class="promotion-description @promotion.getDescriptionBorder">
     @Html(promotion.landingPage.description.getOrElse(promotion.description))
 </p>
