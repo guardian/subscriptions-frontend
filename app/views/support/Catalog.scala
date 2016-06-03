@@ -1,13 +1,11 @@
 package views.support
 
 import com.gu.memsub.Subscription.ProductRatePlanId
-import com.gu.memsub.promo.{Promotion, PromotionType, SubscriptionsLandingPage}
 import com.gu.memsub.promo.PercentDiscount._
 import com.gu.memsub.promo.Promotion.AnyPromotion
 import com.gu.memsub.{Price, BillingPeriod => Period}
 import com.gu.subscriptions.{DigipackCatalog, DigipackPlan}
 
-import scalaz.Id._
 import scalaz.NonEmptyList
 import scalaz.std.option._
 import scalaz.syntax.applicative._
@@ -74,5 +72,10 @@ object Catalog {
   def formatPrice(catalog: DigipackCatalog, promotion: AnyPromotion): String = {
     import catalog.digipackMonthly._
     promotion.asDiscount.map(p => p.promotionType.applyDiscount(priceGBP, billingPeriod).pretty).getOrElse(priceGBP.pretty)
+  }
+
+  def formatPrice(catalog: DigipackCatalog): String = {
+    import catalog.digipackMonthly._
+    priceGBP.pretty
   }
 }
