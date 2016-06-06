@@ -24,7 +24,7 @@ object LandingPageOps {
       }
     }
     def getDescriptionBorder: String = {
-      if (promotion.landingPage.imageUrl.isDefined && promotion.expires.exists(now.plusMonths(1).isAfter))
+      if (promotion.landingPage.image.isDefined && promotion.expires.exists(now.plusMonths(1).isAfter))
         "promotion-description--bordered"
       else
         ""
