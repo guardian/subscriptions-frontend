@@ -1,17 +1,20 @@
 package services
 
 import com.gu.config.DiscountRatePlanIds
+import com.gu.i18n.Country
 import com.gu.identity.play.{AuthenticatedIdUser, IdMinimalUser}
+import com.gu.memsub.promo.PromotionApplicator._
+import com.gu.memsub.promo._
 import com.gu.memsub.services.PromoService
 import com.gu.memsub.services.api.CatalogService
 import com.gu.salesforce.ContactId
 import com.gu.stripe.Stripe
 import com.gu.zuora.api.ZuoraService
-import com.gu.zuora.soap.models.Commands.Lenses._
 import com.gu.zuora.soap.models.Commands.{RatePlan, Subscribe}
 import com.gu.zuora.soap.models.Results.SubscribeResult
 import com.gu.zuora.soap.models.errors._
 import com.typesafe.scalalogging.LazyLogging
+import controllers.Checkout._
 import model._
 import model.error.CheckoutService._
 import model.error.IdentityService._
@@ -23,7 +26,7 @@ import touchpoint.ZuoraProperties
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scalaz.std.scalaFuture._
-import scalaz.{-\/, EitherT, NonEmptyList, \/, \/-}
+import scalaz.{EitherT, NonEmptyList, \/}
 
 class CheckoutService(identityService: IdentityService,
                       salesforceService: SalesforceService,
@@ -54,7 +57,7 @@ class CheckoutService(identityService: IdentityService,
        personalData: PersonalData,
        requestData: SubscriptionRequestData,
        plan: RatePlan,
-       subscriptionData: SubscriptionData): Future[NonEmptyList[SubsError] \/ CheckoutSuccess] = {
+       subscriptionData: SubscriptionData)(implicit p: PromotionApplicator[NewUsers, Subscribe]): Future[NonEmptyList[SubsError] \/ CheckoutSuccess] = {
 
     val idMinimalUser = authenticatedUserOpt.map(_.user)
 
@@ -63,12 +66,15 @@ class CheckoutService(identityService: IdentityService,
       purchaserIds = PurchaserIdentifiers(memberId, idMinimalUser)
       payment <- EitherT(createPaymentType(personalData, requestData, purchaserIds, subscriptionData))
       subscribe <- EitherT(createSubscribeRequest(personalData, requestData, plan, purchaserIds, payment))
-      withPromo = promoService.applyPromotion(subscribe, subscriptionData.suppliedPromoCode, personalData.address.country)
+
+      validPromotion = subscriptionData.suppliedPromoCode.flatMap(promoService.validate[NewUsers](_, personalData.address.country.getOrElse(Country.UK), subscriptionData.productRatePlanId).toOption)
+      withPromo = validPromotion.map(v => p.apply(v, subscribe, catalogService.digipackCatalog.unsafeFindPaid, promoPlans)).getOrElse(subscribe)
+
       result <- EitherT(createSubscription(withPromo, purchaserIds, subscriptionData))
       identitySuccess <- storeIdentityDetails(personalData, authenticatedUserOpt, memberId)
 
       // exact target errors are non fatal so we can return what happened along with the checkout success
-      result <- EitherT(sendETDataExtensionRow(result, subscriptionData, gracePeriod(subscribe, withPromo), purchaserIds).map( f =>
+      result <- EitherT(sendETDataExtensionRow(result, subscriptionData, gracePeriod(subscribe, withPromo), purchaserIds, validPromotion).map( f =>
         \/.right(CheckoutSuccess(memberId, identitySuccess.userData, result, withPromo.promoCode, f.swap.toOption.map(_.head)))
       ))
     } yield result).run
@@ -116,10 +122,11 @@ class CheckoutService(identityService: IdentityService,
       subscribeResult: SubscribeResult,
       subscriptionData: SubscriptionData,
       gracePeriodInDays: Days,
-      purchaserIds: PurchaserIdentifiers): Future[NonEmptyList[SubsError] \/ Unit] =
+      purchaserIds: PurchaserIdentifiers,
+      validPromotion: Option[ValidPromotion[NewUsers]]): Future[NonEmptyList[SubsError] \/ Unit] =
 
     (for {
-      a <- exactTargetService.sendETDataExtensionRow(subscribeResult, subscriptionData, gracePeriodInDays)
+      a <- exactTargetService.sendETDataExtensionRow(subscribeResult, subscriptionData, gracePeriodInDays, validPromotion)
     } yield {
       \/.right(())
     }).recover {
