@@ -41,10 +41,10 @@
                     <div class="page-slice__content @promotion.getSectionSeparator">
                         <h2 class="promo-landing-page__section-head">@promotion.landingPage.title.getOrElse(promotion.name)</h2>
                         @{
-                            promotion.landingPage.imageUrl.fold {
+                            promotion.landingPage.image.fold {
                                 fragments.promotion.promotionDescription(promotion)
                             } {
-                                imageUrl => fragments.promotion.promotionWithImage(promotion, imageUrl.toString)
+                                img => fragments.promotion.promotionWithImage(promotion, img)
                             }
                         }
                     </div>
