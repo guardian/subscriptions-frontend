@@ -47,10 +47,24 @@ trait ExactTargetService extends LazyLogging {
     } yield {
       response.code() match {
         case 202 =>
-          logger.info(s"Successfully sent an email to confirm the subscription: $subscribeResult")
-        case _ =>
-          logger.error(
-            s"Failed to send the subscription email $subscribeResult. Code: ${response.code()}, Message: ${response.body.string()}")
+          response.body().close()
+          logger.info(s"Successfully sent ${subscribeResult.subscriptionName} welcome email.")
+        case 401 =>
+          logger.warn(s"Failed to send ${subscribeResult.subscriptionName} welcome email due to failed authorization. Refreshing access token and re-trying.")
+          retrySendingEmail(row ,subscribeResult)
+        case _ => logger.error(s"Failed to send ${subscribeResult.subscriptionName} welcome email. Code: ${response.code()}, Message: ${response.body.string()}")
+      }
+    }
+  }
+
+  private def retrySendingEmail(row: SubscriptionDataExtensionRow, subscribeResult: SubscribeResult) {
+    etClient.forceAccessTokenRefresh()
+    etClient.sendSubscriptionRow(row).map { response =>
+      response.code() match {
+        case 202 =>
+          logger.info(s"Successfully sent ${subscribeResult.subscriptionName} welcome email.")
+          response.body().close()
+        case _ => logger.error(s"Failed to send ${subscribeResult.subscriptionName} welcome email. Code: ${response.code()}, Message: ${response.body.string()}")
       }
     }
   }
@@ -58,6 +72,7 @@ trait ExactTargetService extends LazyLogging {
 
 trait ETClient {
   def sendSubscriptionRow(row: SubscriptionDataExtensionRow): Future[Response]
+  def forceAccessTokenRefresh()
 }
 
 object ETClient extends ETClient with LazyLogging {
@@ -94,7 +109,8 @@ object ETClient extends ETClient with LazyLogging {
           val response = httpClient.newCall(request).execute()
           val respBody = response.body().string()
           val accessToken = (Json.parse(respBody) \ "accessToken").as[String]
-          logger.info(s"Got new ExactTarget access token: $accessToken")
+          val expiresIn = (Json.parse(respBody) \ "expiresIn").as[Int]
+          logger.info(s"Got new ExactTarget access token: ${accessToken.take(4)}... which expires in $expiresIn s")
           accessToken
         } catch {
           case e: Throwable =>
@@ -140,4 +156,6 @@ object ETClient extends ETClient with LazyLogging {
     }
 
   }
+
+  override def forceAccessTokenRefresh() { accessToken send getAccessToken }
 }
