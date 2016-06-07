@@ -83,7 +83,8 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
                                      countryGroup = countryGroupWithDefault,
                                      defaultCurrency = defaultCurrency,
                                      countriesWithCurrency = CountryWithCurrency.whitelisted(supportedCurrencies, GBP),
-                                     touchpointBackendResolution = resolution))
+                                     touchpointBackendResolution = resolution,
+                                     promoCode = promoCode))
     }
   }
 
