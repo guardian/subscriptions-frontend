@@ -50,7 +50,7 @@
         <form class="form js-checkout-form" action="@routes.Checkout.renderCheckout(CountryGroup.UK, None).toString" method="POST" novalidate>
             @helper.CSRF.formField
 
-            @fragments.checkout.checkoutHeader("Checkout")
+            @fragments.checkout.checkoutHeader("Digital Pack")
 
             @* ===== Plan selection ===== *@
             <div class="checkout-container__sidebar js-basket">

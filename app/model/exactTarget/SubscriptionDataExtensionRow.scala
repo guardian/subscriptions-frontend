@@ -37,7 +37,7 @@ object SubscriptionDataExtensionRow extends LazyLogging {
       )
     }
 
-    val promotionFields = promotionDescription.map("Promotion description" -> _)
+    val promotionFields = promotionDescription.map(d => "Promotion description" -> d.substring(0, Math.min(d.length, 255)))
 
     SubscriptionDataExtensionRow(
       personalData.email,

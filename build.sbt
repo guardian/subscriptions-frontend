@@ -40,7 +40,7 @@ libraryDependencies ++= Seq(
     ws,
     filters,
     PlayImport.specs2,
-    "com.gu" %% "membership-common" % "0.215-SNAPSHOT",
+    "com.gu" %% "membership-common" % "0.215",
     "com.gu" %% "memsub-common-play-auth" % "0.8",
     "com.gu" %% "content-authorisation-common" % "0.1",
     "com.github.nscala-time" %% "nscala-time" % "2.0.0",
