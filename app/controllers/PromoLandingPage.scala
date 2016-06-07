@@ -8,6 +8,7 @@ import com.netaporter.uri.dsl._
 import configuration.Config
 import filters.HandleXFrameOptionsOverrideHeader
 import model.DigitalEdition
+import play.api.data.{Form, Forms}
 import play.api.libs.json.Json
 import play.api.mvc._
 import services.TouchpointBackend
@@ -29,9 +30,11 @@ object PromoLandingPage extends Controller {
     } yield Ok(html)).getOrElse(Redirect("/digital" ? ("INTCMP" -> s"FROM_P_${promoCode.get}")))
   }
 
-  def preview(json: Option[String]) = GoogleAuthenticatedStaffAction { implicit request =>
-    json.flatMap(j => Json.fromJson[AnyPromotion](Json.parse(j)).asOpt).flatMap(_.asDigipack)
+  def preview() = GoogleAuthenticatedStaffAction { implicit request =>
+    Form(Forms.single("promoJson" -> Forms.text)).bindFromRequest().fold(_ => NotFound, { jsString =>
+      Json.fromJson[AnyPromotion](Json.parse(jsString)).asOpt.flatMap(_.asDigipack)
       .map(p => views.html.promotion.landingPage(edition, catalog, p.codes.headOption.getOrElse(PromoCode("")), p, Config.Zuora.paymentDelay))
       .fold[Result](NotFound)(p => Ok(p).withHeaders(HandleXFrameOptionsOverrideHeader.HEADER_KEY -> s"ALLOW-FROM ${Config.previewXFrameOptionsOverride}"))
+    })
   }
 }
