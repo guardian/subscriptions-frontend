@@ -12,11 +12,13 @@ import scala.math.BigDecimal.decimal
 object SubscriptionDataExtensionRow extends LazyLogging {
 
   def apply(
-      personalData: PersonalData,
-      subscription: Subscription with Paid,
-      paymentMethod: PaymentMethod,
-      gracePeriod: Days
-      ): SubscriptionDataExtensionRow = {
+             personalData: PersonalData,
+             subscription: Subscription with Paid,
+             paymentMethod: PaymentMethod,
+             gracePeriod: Days,
+             subscriptionDetails: String,
+             promotionDescription: Option[String] = None
+  ): SubscriptionDataExtensionRow = {
 
 
     val address = personalData.address
@@ -34,6 +36,8 @@ object SubscriptionDataExtensionRow extends LazyLogging {
         "Default payment method" -> "Credit/Debit Card"
       )
     }
+
+    val promotionFields = promotionDescription.map(d => "Promotion description" -> d.substring(0, Math.min(d.length, 255)))
 
     SubscriptionDataExtensionRow(
       personalData.email,
@@ -53,8 +57,9 @@ object SubscriptionDataExtensionRow extends LazyLogging {
         "Date of first payment" -> formatDate(subscription.firstPaymentDate),
         "Currency" -> personalData.currency.glyph,
         "Trial period" -> paymentDelay.getDays.toString,
-        "Email" -> personalData.email
-      ) ++ paymentFields
+        "Email" -> personalData.email,
+        "Subscription details" -> subscriptionDetails
+      ) ++ paymentFields ++ promotionFields
     )
   }
 
@@ -72,13 +77,6 @@ object SubscriptionDataExtensionRow extends LazyLogging {
 
   private def formatPrice(price: Float): String = {
     decimal(price).bigDecimal.stripTrailingZeros.toPlainString
-  }
-
-  private def formatSubscriptionTerm(term: String): String = {
-    term match {
-      case "Annual" => "year"
-      case otherTerm => otherTerm.toLowerCase
-    }
   }
 
   private def formatAccountNumber(AccountNumber: String): String = {

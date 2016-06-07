@@ -1,21 +1,26 @@
 package services
 
 import akka.agent.Agent
-import com.gu.memsub.{Digipack, Subscription}
-import com.gu.memsub.services.SubscriptionService
-import com.gu.subscriptions.DigipackCatalog
+import com.gu.i18n.Currency
+import com.gu.memsub.Subscription.ProductRatePlanId
+import com.gu.memsub.promo.Promotion._
+import com.gu.memsub.promo._
+import com.gu.memsub.services.api.CatalogService
+import com.gu.memsub.services.{SubscriptionService, PaymentService => CommonPaymentService}
+import com.gu.memsub.{BillingPeriod, Digipack, Subscription}
+import com.gu.subscriptions.{DigipackCatalog, DigipackPlan}
 import com.gu.zuora.soap.models.Results.SubscribeResult
 import com.squareup.okhttp.Request.Builder
 import com.squareup.okhttp.{MediaType, OkHttpClient, RequestBody, Response}
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
+import controllers.Checkout._
 import model.SubscriptionData
-import model.exactTarget.SubscriptionDataExtensionRow
 import model.error.ExactTragetService.ExactTargetAuthenticationError
+import model.exactTarget.SubscriptionDataExtensionRow
 import org.joda.time.Days
 import play.api.libs.concurrent.Akka
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
-import com.gu.memsub.services.{PaymentService => CommonPaymentService}
 import play.api.libs.json._
 
 import scala.annotation.tailrec
@@ -27,12 +32,26 @@ trait ExactTargetService extends LazyLogging {
 
   def subscriptionService: SubscriptionService[DigipackCatalog]
   def paymentService: CommonPaymentService
+  def catalogService: CatalogService
 
-  def sendETDataExtensionRow(subscribeResult: SubscribeResult, subscriptionData: SubscriptionData, gracePeriod: Days): Future[Unit] = {
-      val subscription = subscriptionService.unsafeGetPaid(Subscription.Name(subscribeResult.subscriptionName))(Digipack)
-      val paymentMethod = paymentService.getPaymentMethod(Subscription.AccountId(subscribeResult.accountId)).map(
-        _.getOrElse(throw new Exception(s"Subscription with no payment method found, ${subscribeResult.subscriptionId}"))
-      )
+  private def getPlanDescription(validPromotion: Option[ValidPromotion[NewUsers]], currency: Currency, ratePlanId: ProductRatePlanId): String = {
+    import views.support.Pricing._
+    val plan = catalogService.digipackCatalog.findPaid(ratePlanId).getOrElse(throw new Exception(s"Rate plan not found in catalog: $ratePlanId"))
+    (for {
+      vp <- validPromotion
+      discountPromotion <- vp.promotion.asDiscount
+    } yield {
+      plan.prettyPricingForDiscountedPeriod(discountPromotion, currency)
+    }).getOrElse(plan.prettyPricing(currency))
+  }
+
+  def sendETDataExtensionRow(subscribeResult: SubscribeResult, subscriptionData: SubscriptionData, gracePeriod: Days, validPromotion: Option[ValidPromotion[NewUsers]]): Future[Unit] = {
+    val subscription = subscriptionService.unsafeGetPaid(Subscription.Name(subscribeResult.subscriptionName))(Digipack)
+    val paymentMethod = paymentService.getPaymentMethod(Subscription.AccountId(subscribeResult.accountId)).map(
+      _.getOrElse(throw new Exception(s"Subscription with no payment method found, ${subscribeResult.subscriptionId}"))
+    )
+    val subscriptionDetails = getPlanDescription(validPromotion, subscriptionData.personalData.currency, subscriptionData.productRatePlanId)
+    val promotionDescription = validPromotion.filterNot(_.promotion.promotionType == Tracking).map(_.promotion.description)
 
     for {
       sub <- subscription
@@ -41,7 +60,9 @@ trait ExactTargetService extends LazyLogging {
         personalData = subscriptionData.personalData,
         subscription = sub,
         paymentMethod = pm,
-        gracePeriod = gracePeriod
+        gracePeriod = gracePeriod,
+        subscriptionDetails = subscriptionDetails,
+        promotionDescription = promotionDescription
       )
       response <- etClient.sendSubscriptionRow(row)
     } yield {

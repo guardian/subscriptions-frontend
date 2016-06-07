@@ -6,6 +6,7 @@
 @import views.support.BillingPeriod._
 @import views.support.CountryWithCurrency
 @import views.support.Pricing._
+@import com.gu.memsub.promo.PromoCode
 @(form: Form[model.SubscriptionData],
     userIsSignedIn: Boolean,
     plans: Seq[DigipackPlan[BillingPeriod]],
@@ -14,8 +15,8 @@
     countryGroup: CountryGroup,
     defaultCurrency: Currency,
     countriesWithCurrency: List[CountryWithCurrency],
-    touchpointBackendResolution: services.TouchpointBackend.Resolution)(implicit request: RequestHeader)
-
+    touchpointBackendResolution: services.TouchpointBackend.Resolution,
+    promoCode: Option[PromoCode])(implicit request: RequestHeader)
 
 @priceOption(plan: DigipackPlan[BillingPeriod], currency: Currency) = {
     <label class="option" data-currency="@currency">
@@ -25,9 +26,6 @@
             data-option-mirror-label-default="@plan.prettyPricing(currency)"
             data-option-mirror-label="@plan.prettyPricing(currency)"
             data-amount="@plan.gbpPrice.amount"
-            data-amount-in-currency="@plan.pricing.getPrice(currency).get.amount"
-            data-currency-identifier="@currency.identifier"
-            data-frequency="@plan.billingPeriod.frequencyInMonths"
             data-number-of-months="@plan.billingPeriod.numberOfMonths"
             data-currency="@currency"
             value="@plan.productRatePlanId.get"
@@ -53,7 +51,7 @@
         <form class="form js-checkout-form" action="@routes.Checkout.renderCheckout(CountryGroup.UK, None).toString" method="POST" novalidate>
             @helper.CSRF.formField
 
-            @fragments.checkout.checkoutHeader("Checkout")
+            @fragments.checkout.checkoutHeader("Digital Pack", promoCode.exists(_.get == "DGA85"))
 
             @* ===== Plan selection ===== *@
             <div class="checkout-container__sidebar js-basket">

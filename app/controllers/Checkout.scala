@@ -3,17 +3,19 @@ package controllers
 import actions.CommonActions._
 import com.gu.i18n.{Country, CountryGroup, Currency, GBP}
 import com.gu.identity.play.ProxiedIP
+import com.gu.memsub.BillingPeriod
 import com.gu.memsub.Subscription.ProductRatePlanId
-import com.gu.memsub.promo.PromoCode
 import com.gu.memsub.promo.Formatters.PromotionFormatters._
+import com.gu.memsub.promo.PromoCode
+import com.gu.memsub.promo.Promotion.AnyPromotion
+import com.gu.subscriptions.DigipackPlan
 import com.gu.zuora.soap.models.errors._
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config.Identity.webAppProfileUrl
-import configuration.Config._
 import forms.{FinishAccountForm, SubscriptionsForm}
-import model.{PurchaserIdentifiers, DirectDebitData, SubscriptionData, SubscriptionRequestData}
 import model.error.CheckoutService._
 import model.error.SubsError
+import model.{DirectDebitData, PurchaserIdentifiers, SubscriptionData, SubscriptionRequestData}
 import play.api.data.Form
 import play.api.libs.json._
 import play.api.mvc._
@@ -24,11 +26,12 @@ import tracking.activities.{CheckoutReachedActivity, MemberData, SubscriptionReg
 import utils.TestUsers.{NameEnteredInForm, PreSigninTestCookie}
 import views.html.{checkout => view}
 import views.support.CountryWithCurrency
+
 import scala.Function.const
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scalaz.{NonEmptyList, OptionT}
 import scalaz.std.scalaFuture._
+import scalaz.{NonEmptyList, OptionT}
 
 object Checkout extends Controller with LazyLogging with ActivityTracking with CatalogProvider {
   object SessionKeys {
@@ -39,7 +42,7 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
     val AppliedPromoCode = "newSubs_appliedPromoCode"
     val Currency = "newSubs_currency"
   }
-  import SessionKeys.{Currency =>_, UserId => _, _}
+  import SessionKeys.{Currency => _, UserId => _, _}
 
   def checkoutService(implicit res: TouchpointBackend.Resolution): CheckoutService =
     res.backend.checkoutService
@@ -80,7 +83,8 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
                                      countryGroup = countryGroupWithDefault,
                                      defaultCurrency = defaultCurrency,
                                      countriesWithCurrency = CountryWithCurrency.whitelisted(supportedCurrencies, GBP),
-                                     touchpointBackendResolution = resolution))
+                                     touchpointBackendResolution = resolution,
+                                     promoCode = promoCode))
     }
   }
 
@@ -224,17 +228,33 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
 
   def validatePromoCode(promoCode: PromoCode, prpId: ProductRatePlanId, country: Country) = NoCacheAction { implicit request =>
 
-    val tpBackend = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies).backend
+    implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
+    implicit val tpBackend = resolution.backend
 
-    tpBackend.promoService.findPromotion(promoCode)
-      .fold(NotFound(Json.obj("errorMessage" -> s"Sorry, we can't find that code."))){ promo =>
-        val result = promo.validateFor(prpId, country)
-        val body = Json.obj(
-          "promotion" -> Json.toJson(promo),
-          "isValid" -> result.isRight,
-          "errorMessage" -> result.swap.toOption.map(_.msg)
-        )
-        result.fold(_ => NotAcceptable(body), _ => Ok(body))
+    import com.gu.memsub.Subscription.ProductRatePlanId
+    import views.support.Pricing._
+
+    def getAdjustedRatePlans(promo: AnyPromotion): Option[Map[String, String]] = {
+      case class RatePlanPrice(ratePlanId: ProductRatePlanId, plan: DigipackPlan[BillingPeriod])
+      promo.asDiscount.map { discountPromo =>
+        catalog.planMap.map { case (key, value) => RatePlanPrice(key, value) }.map { ratePlanPrice =>
+          val currency = CountryGroup.byCountryCode(country.alpha2).getOrElse(CountryGroup.UK).currency
+          ratePlanPrice.ratePlanId.get -> ratePlanPrice.plan.prettyPricingForDiscountedPeriod(discountPromo, currency)
+        }.toMap
+      }
+    }
+
+    tpBackend.promoService.findPromotion(promoCode).fold {
+      NotFound(Json.obj("errorMessage" -> s"Sorry, we can't find that code."))
+    } { promo =>
+      val result = promo.validateFor(prpId, country)
+      val body = Json.obj(
+        "promotion" -> Json.toJson(promo),
+        "adjustedRatePlans" -> Json.toJson(getAdjustedRatePlans(promo)),
+        "isValid" -> result.isRight,
+        "errorMessage" -> result.swap.toOption.map(_.msg)
+      )
+      result.fold(_ => NotAcceptable(body), _ => Ok(body))
     }
   }
 

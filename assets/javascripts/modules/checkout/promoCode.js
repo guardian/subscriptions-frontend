@@ -29,7 +29,6 @@ define([
                 currency = $el.data('currency'),
                 $label = $('#label-for-' + $el.val() + '-' + currency),
                 newDisplayPrice = $el.data('option-mirror-label-default');
-
             $label.html(newDisplayPrice);
             $el.attr('data-option-mirror-label', newDisplayPrice);
             if ($el.attr('checked')) {
@@ -38,30 +37,20 @@ define([
         });
     }
 
-    function formatMoney(currencyIdentifier, amount) {
-        // rounds any remainder up tp 1p so we always quote a higher price than the user might eventually get charged.
-        var price2dp = Math.ceil(amount * 100) / 100,
-            priceNoDot00 = price2dp.toFixed(2).replace(/\.00$/, '');
-
-        return currencyIdentifier + priceNoDot00;
-    }
-
-    function applyPromotionToRatePlans(promotion) {
-        if (promotion.promotionType.amount > 0) {
+    function applyPromotionToRatePlans(adjustedRatePlans) {
+        if (adjustedRatePlans) {
             $ratePlanFields.each(function(el) {
                 var $el = $(el),
-                    amount = Number($el.data('amount-in-currency')),
+                    ratePlanId = $el.val(),
                     currency = $el.data('currency'),
-                    currencyIdentifier = $el.data('currency-identifier'),
-                    discountPercent = promotion.promotionType.amount,
-                    frequency = $el.data('frequency'),
-                    $label = $('#label-for-' + $el.val() + '-' + currency),
-                    newDisplayPrice = formatMoney(currencyIdentifier, amount * (1 - (discountPercent / 100))) + ' ' + frequency;
+                    $label = $('#label-for-' + ratePlanId + '-' + currency);
 
-                $label.html(newDisplayPrice);
-                $el.attr('data-option-mirror-label', newDisplayPrice);
-                if ($el.attr('checked')) {
-                    bean.fire(el, 'change');
+                if (adjustedRatePlans[ratePlanId]) {
+                    $label.html(adjustedRatePlans[ratePlanId]);
+                    $el.attr('data-option-mirror-label', adjustedRatePlans[ratePlanId]);
+                    if ($el.attr('checked')) {
+                        bean.fire(el, 'change');
+                    }
                 }
             });
         } else {
@@ -85,11 +74,11 @@ define([
 
     }
 
-    function displayPromotion(promotion) {
+    function displayPromotion(response) {
         clearDown();
         $promoCodeApplied.show();
-        $promoCodeSnippet.html(promotion.description);
-        applyPromotionToRatePlans(promotion);
+        $promoCodeSnippet.html(response.promotion.description);
+        applyPromotionToRatePlans(response.adjustedRatePlans);
     }
 
     function validate() {
@@ -112,7 +101,7 @@ define([
             }
         }).then(function (a) {
             if (a.isValid) {
-                displayPromotion(a.promotion);
+                displayPromotion(a);
                 bindExtraKeyListener();
             } else {
                 displayError(a.errorMessage);
