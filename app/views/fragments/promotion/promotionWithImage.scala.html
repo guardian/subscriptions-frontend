@@ -1,6 +1,8 @@
 @import com.gu.memsub.promo.Promotion.PromoWithDigipackLandingPage
 @import com.gu.memsub.images.ResponsiveImageGroup
-@(promotion: PromoWithDigipackLandingPage, img: ResponsiveImageGroup)
+@import org.pegdown.PegDownProcessor
+@import views.support.MarkdownRenderer
+@(promotion: PromoWithDigipackLandingPage, img: ResponsiveImageGroup, md: MarkdownRenderer)
 
 <div class="promotion grid grid--2up-step grid--flex grid--no-clearfix-before">
     <div class="grid__item u-vertically-center-flexbox">
@@ -9,6 +11,6 @@
         </div>
     </div>
     <div class="grid__item u-vertically-center-flexbox">
-        @fragments.promotion.promotionDescription(promotion)
+        @fragments.promotion.promotionDescription(promotion, md)
     </div>
 </div>

@@ -54,7 +54,8 @@ libraryDependencies ++= Seq(
     "com.snowplowanalytics" % "snowplow-java-tracker" % "0.5.2-SNAPSHOT",
     "com.github.t3hnar" %% "scala-bcrypt" % "2.4",
     "org.apache.commons" % "commons-io" % "1.3.2",
-    "org.scalaz" %% "scalaz-core" % "7.1.3"
+    "org.scalaz" %% "scalaz-core" % "7.1.3",
+    "org.pegdown" % "pegdown" % "1.6.0"
 )
 
 testOptions in Test ++= Seq(

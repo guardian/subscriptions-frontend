@@ -52,7 +52,8 @@
     }
 }
 
-.roundel__strong {
+/* The nested strong is for markdown */
+.roundel__strong, .roundel__title strong {
     display: block;
     font-size: 36px;
     font-weight: 900;
@@ -62,4 +63,9 @@
         font-size: 42px;
         line-height: 42px;
     }
+}
+
+/* For markdown */
+.roundel__title p {
+    margin: 0;
 }
