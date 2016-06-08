@@ -52,6 +52,12 @@ trait ExactTargetService extends LazyLogging {
     )
     val subscriptionDetails = getPlanDescription(validPromotion, subscriptionData.personalData.currency, subscriptionData.productRatePlanId)
     val promotionDescription = validPromotion.filterNot(_.promotion.promotionType == Tracking).map(_.promotion.description)
+    val redemptionInstructions = for {
+      vp <- validPromotion
+      p <- vp.promotion.asIncentive
+    } yield {
+      p.promotionType.redemptionInstructions
+    }
 
     for {
       sub <- subscription
@@ -62,7 +68,8 @@ trait ExactTargetService extends LazyLogging {
         paymentMethod = pm,
         gracePeriod = gracePeriod,
         subscriptionDetails = subscriptionDetails,
-        promotionDescription = promotionDescription
+        promotionDescription = promotionDescription,
+        redemptionInstructions = redemptionInstructions
       )
       response <- etClient.sendSubscriptionRow(row)
     } yield {
