@@ -34,38 +34,36 @@
 }
 
 .roundel__title {
-    font-size: 16px;
-    line-height: 17px;
-    font-weight: 900;
 
-    @include mq(tablet) {
-        font-size: 20px;
-        line-height: 21px;
+    // We use markdown to generate HTML
+    // so cannot apply BEM classnames to the output
+    // but the scope is very narrow
+
+    h3 {
+        font-size: 16px;
+        line-height: 17px;
+        font-weight: 900;
+
+        @include mq(tablet) {
+            font-size: 20px;
+            line-height: 21px;
+        }
     }
-}
 
-.roundel__byline {
-    @include fs-bodyCopy(1);
+    strong {
+        display: block;
+        font-size: 36px;
+        font-weight: 900;
+        line-height: 36px;
 
-    @include mq(tablet) {
+        @include mq(tablet) {
+            font-size: 42px;
+            line-height: 42px;
+        }
+    }
+
+    p {
+        margin: 0;
         @include fs-bodyCopy(1);
     }
-}
-
-/* The nested strong is for markdown */
-.roundel__strong, .roundel__title strong {
-    display: block;
-    font-size: 36px;
-    font-weight: 900;
-    line-height: 36px;
-
-    @include mq(tablet) {
-        font-size: 42px;
-        line-height: 42px;
-    }
-}
-
-/* For markdown */
-.roundel__title p {
-    margin: 0;
 }
