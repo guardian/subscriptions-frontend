@@ -7,7 +7,10 @@
 @import views.support.LandingPageOps._
 @import scalaz.Id._
 @import org.joda.time.Days
-@(edition: DigitalEdition, catalog: DigipackCatalog, promoCode: PromoCode, promotion: Promotion[PromotionType, Id, SubscriptionsLandingPage], defaultTrial: Days)
+@import org.pegdown.PegDownProcessor
+@import views.support.MarkdownRenderer
+
+@(edition: DigitalEdition, catalog: DigipackCatalog, promoCode: PromoCode, promotion: Promotion[PromotionType, Id, SubscriptionsLandingPage], defaultTrial: Days, md: MarkdownRenderer)
 @anyPromotion = @{asAnyPromotion(promotion)}
 @main(
     title = "The Digital Pack offer | Subscriptions | The Guardian",
@@ -24,7 +27,7 @@
         </section>
         <section class="section-grey section--dark-sides">
             <div class="gs-container gs-container--slim page-slice">
-                @fragments.promotion.digipack(edition, catalog, promoCode, promotion.landingPage.roundelHtml)
+                @fragments.promotion.digipack(edition, catalog, promoCode, promotion.landingPage.roundelHtml.map(md.render))
             </div>
         </section>
         <section class="section-white section--dark-sides">
@@ -42,9 +45,9 @@
                         <h2 class="promo-landing-page__section-head">@promotion.landingPage.title.getOrElse(promotion.name)</h2>
                         @{
                             promotion.landingPage.image.fold {
-                                fragments.promotion.promotionDescription(promotion)
+                                fragments.promotion.promotionDescription(promotion, md)
                             } {
-                                img => fragments.promotion.promotionWithImage(promotion, img)
+                                img => fragments.promotion.promotionWithImage(promotion, img, md)
                             }
                         }
                     </div>
@@ -72,7 +75,7 @@
                 <div class="page-slice__content">
                     <h4>Terms and conditions</h4>
                     <p>@promotion.expires.map { e => Customers must subscribe by @prettyDate(e.minusSeconds(1)) to be eligible for the offer. } Offer subject to availability. Guardian News and Media Limited ("GNM") reserves the right to withdraw this promotion at any time.</p>
-                    @fragments.promotion.incentiveTermsAndConditions(anyPromotion)
+                    @fragments.promotion.incentiveTermsAndConditions(anyPromotion, md)
                     @fragments.promotion.subscriptionTermsAndConditions(defaultTrial, catalog, anyPromotion)
                     <p>Guardian News and Media Limited – a member of Guardian Media Group plc. Registered office: Kings Place, 90 York Way, London, N1 9GU. Registered in England No. 908396</p>
                 </div>
