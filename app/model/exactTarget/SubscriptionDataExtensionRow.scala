@@ -17,7 +17,8 @@ object SubscriptionDataExtensionRow extends LazyLogging {
              paymentMethod: PaymentMethod,
              gracePeriod: Days,
              subscriptionDetails: String,
-             promotionDescription: Option[String] = None
+             promotionDescription: Option[String] = None,
+             redemptionInstructions: Option[String] = None
   ): SubscriptionDataExtensionRow = {
 
 
@@ -37,7 +38,9 @@ object SubscriptionDataExtensionRow extends LazyLogging {
       )
     }
 
-    val promotionFields = promotionDescription.map(d => "Promotion description" -> d.substring(0, Math.min(d.length, 255)))
+    val promotionFields =
+      promotionDescription.map(d => "Promotion description" -> d.substring(0, Math.min(d.length, 255))) ++
+        redemptionInstructions.map(i => "Redemption instructions" -> i.substring(0, Math.min(i.length, 255)))
 
     SubscriptionDataExtensionRow(
       personalData.email,
