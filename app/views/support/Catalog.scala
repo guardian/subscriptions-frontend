@@ -71,7 +71,7 @@ object Catalog {
 
   def formatPrice(catalog: DigipackCatalog, promotion: AnyPromotion): String = {
     import catalog.digipackMonthly._
-    promotion.asDiscount.map(p => p.promotionType.applyDiscount(priceGBP, billingPeriod).pretty).getOrElse(priceGBP.pretty)
+    promotion.asDiscount.fold(priceGBP.pretty)(_.promotionType.applyDiscount(priceGBP, billingPeriod).pretty)
   }
 
   def formatPrice(catalog: DigipackCatalog): String = {
