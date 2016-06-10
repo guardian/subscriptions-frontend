@@ -6,9 +6,13 @@
 @import views.support.MarkdownRenderer
 
 @(promotion: PromoWithDigipackLandingPage, md: MarkdownRenderer)
-<p class="promotion-description @promotion.getDescriptionBorder">
-    @Html(promotion.landingPage.description.map(md.render).getOrElse(promotion.description))
-</p>
+<div class="promotion-description @promotion.getDescriptionBorder">
+    @promotion.landingPage.description.fold {
+        <p>@promotion.description</p>
+    } { d =>
+        @Html(md.render(d))
+    }
+</div>
 @promotion.expires.filter(now.plusMonths(1).isAfter).map { e =>
     <p class="promotion-description @promotion.getDescriptionBorder">
         But hurry! Offer expires @dayInMonthWithSuffixAndMonth(e.minusSeconds(1)).

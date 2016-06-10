@@ -7,16 +7,15 @@
 @(defaultFreeTrialDays: Days, edition: DigitalEdition, catalog: DigipackCatalog, promoCode: PromoCode, promotion: AnyPromotion)
 <div class="pricing-cta">
     <div class="pricing-cta__pricing">
-        <h4 class="pricing-cta__pricing__title">Free for @promotion.asFreeTrial.fold(Html(defaultFreeTrialDays.getDays.toString)) { p => @Html(p.promotionType.duration.getDays.toString) } days</h4>
+        <h4 class="pricing-cta__pricing__title">Free for @promotion.asFreeTrial.fold(defaultFreeTrialDays.getDays)(_.promotionType.duration.getDays) days</h4>
         <p class="pricing-cta__pricing__value">
             @promotion.asDiscount.find(_.promotionType.durationMonths.isDefined).fold {
                 Then @formatPrice(catalog, promotion)/month
             } { p =>
-                Then @formatPrice(catalog, promotion) for
                 @if(p.promotionType.durationMonths.get > 1) {
-                    @p.promotionType.durationMonths.get months
+                    Then @formatPrice(catalog, promotion)/month for @p.promotionType.durationMonths.get months
                 } else {
-                    1 month
+                    Then @formatPrice(catalog, promotion) for 1 month
                 }
                 <br/>
                 Then @formatPrice(catalog) every month thereafter
