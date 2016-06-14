@@ -1,5 +1,5 @@
 /*global escape*/
-define(['raven'], function (raven) {
+define(['raven-js'], function (raven) {
     'use strict';
 
     function AtoB(){

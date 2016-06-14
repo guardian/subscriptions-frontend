@@ -137,30 +137,22 @@ module.exports = function(grunt) {
             dist: { src: '<%= dirs.public.stylesheets %>/*.css' }
         },
 
-        requirejs: {
-            compile: {
-                options: {
-                    name: 'main',
-                    include: [
-                        'requireLib'
-                    ],
-                    baseUrl: '<%= dirs.assets.javascripts %>',
-                    paths: {
-                        '$': 'utils/$',
-                        'Promise': 'bower_components/promise-polyfill/Promise',
-                        'bean': 'bower_components/bean/bean',
-                        'bonzo': 'bower_components/bonzo/bonzo',
-                        'lodash': 'bower_components/lodash-amd/modern',
-                        'qwery': 'bower_components/qwery/qwery',
-                        'raven': 'bower_components/raven-js/dist/raven',
-                        'requireLib': 'bower_components/requirejs/require',
-                        'reqwest': 'bower_components/reqwest/reqwest',
-                        'domready': 'bower_components/domready/ready'
-                    },
-                    optimize: isDev ? 'none' : 'uglify2',
-                    generateSourceMaps: isDev ? 'true' : 'false',
-                    preserveLicenseComments: false,
-                    out: '<%= dirs.public.javascripts %>/main.min.js'
+        /***********************************************************************
+         * Webpack
+         ***********************************************************************/
+
+        webpack: {
+            options: require('./webpack.conf.js')(isDev),
+            frontend: {
+                output: {
+                    path: 'public/',
+                    chunkFilename:  'webpack/[chunkhash].js',
+                    filename: "javascripts/[name].min.js",
+                    publicPath: '/assets/'
+                },
+
+                entry: {
+                    main: "./main"
                 }
             }
         },
@@ -275,7 +267,7 @@ module.exports = function(grunt) {
             grunt.task.run(['validate']);
         }
         grunt.task.run([
-            'requirejs',
+            'webpack',
             'copy:jsVendor',
             'copy:zxcvbn'
         ]);

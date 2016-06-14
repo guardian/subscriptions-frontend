@@ -3,18 +3,15 @@ module.exports = function(config) {
 
         // base path that will be used to resolve all patterns (eg. files, exclude)
         basePath: '',
-
-
+        
         // frameworks to use
         // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-        frameworks: ['jasmine', 'requirejs'],
+        frameworks: ['jasmine'],
 
 
         // list of files / patterns to load in the browser
         files: [
-            {pattern: 'assets/javascripts/**/*.js', included: false},
-            {pattern: 'test/js/spec/**/*.spec.js', included: false},
-            'test/js/spec/test-main.js'
+            {pattern: 'test/js/spec/**/*.spec.js'}
         ],
 
 
@@ -22,13 +19,15 @@ module.exports = function(config) {
         exclude: [
             'assets/javascripts/src/main.js'
         ],
-
-
+        
         // preprocess matching files before serving them to the browser
         // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
         preprocessors: {
-            'assets/javascripts/src/**/*.js': ['coverage']
+            'test/js/spec/**/*.js': ['webpack', 'coverage']
         },
+
+        webpack: require('./webpack.conf.js')(true),
+
 
         coverageReporter: {
             type : 'html',

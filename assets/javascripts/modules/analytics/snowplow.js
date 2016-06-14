@@ -14,7 +14,7 @@ define(['lodash/object/merge','modules/analytics/analyticsEnabled'], function (m
                 appId: 'subscriptions-frontend'
             });
         }
-        return require('js!snowplow');
+        return curl('js!snowplow');
     }
 
     function trackActivity(source, data) {

@@ -28,7 +28,7 @@ define([
             promoCode.init();
         }
 
-        require('js!stripe').then(function() {
+        curl('js!stripe').then(function() {
             Stripe.setPublishableKey(guardian.stripePublicKey);
         });
     }

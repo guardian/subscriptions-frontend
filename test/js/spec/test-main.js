@@ -15,24 +15,7 @@ requirejs.config({
      * Karma serves files from '/base'
      */
     baseUrl: '/base/assets/javascripts/',
-
-    /**
-     * Keep these in sync with the paths
-     * found in the requirejs Grunt config
-     * in Gruntfile.js
-     */
-    paths: {
-        '$': 'utils/$',
-        'Promise': 'bower_components/native-promise-only/lib/npo.src',
-        'bean': 'bower_components/bean/bean',
-        'bonzo': 'bower_components/bonzo/bonzo',
-        'lodash': 'bower_components/lodash-amd/modern',
-        'qwery': 'bower_components/qwery/qwery',
-        'raven': 'bower_components/raven-js/dist/raven',
-        'requireLib': 'bower_components/requirejs/require',
-        'reqwest': 'bower_components/reqwest/reqwest'
-    },
-
+    
     /**
      * Ask require.js to load these files (all our tests)
      */
