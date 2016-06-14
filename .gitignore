@@ -38,6 +38,7 @@ node_modules
 conf/assets.map
 
 public/dist
+public/webpack
 public/images
 public/javascripts
 public/stylesheets

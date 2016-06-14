@@ -14,7 +14,7 @@ require([
     'modules/patterns',
     'modules/cas/form',
     // Add new dependencies ABOVE this
-    'Promise'
+    'promise-polyfill'
 ], function (
     ajax,
     raven,
