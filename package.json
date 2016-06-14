@@ -37,9 +37,7 @@
     "reqwest": "^2.0.5",
     "time-grunt": "^1.2.1",
     "webpack": "^1.12.15",
-    "zxcvbn": "^4.3.0"
-  },
-  "dependencies": {
+    "zxcvbn": "^4.3.0",
     "grunt-webpack": "^1.0.11",
     "karma-webpack": "^1.7.0",
     "lodash": "^4.13.1",
