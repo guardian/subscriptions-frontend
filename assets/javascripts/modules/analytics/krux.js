@@ -4,7 +4,7 @@ define(['modules/analytics/analyticsEnabled', 'modules/raven'], function(analyti
     var KRUX_ID = 'Jglpp88U';
 
     function init() {
-        curl(['js!https://cdn.krxd.net/controltag?confid=' + KRUX_ID]).then(null, function(err) {
+        require(['js!https://cdn.krxd.net/controltag?confid=' + KRUX_ID]).then(null, function(err) {
             raven.Raven.captureException(err);
         });
     }

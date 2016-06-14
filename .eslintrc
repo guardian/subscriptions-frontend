@@ -6,8 +6,7 @@
         "node": true
     },
     "globals"   : {
-        "guardian": true,
-        "curl": true
+        "guardian": true
     },
     "rules": {
         "curly": [2, "all"],

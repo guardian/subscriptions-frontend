@@ -70,7 +70,7 @@ define([
     }
 
     function init() {
-        omniture = omniture || curl(['js!omniture'])
+        omniture = omniture || require(['js!omniture'])
                 .then(onSuccess, function (err) {
                     raven.Raven.captureException(err);
                 });
