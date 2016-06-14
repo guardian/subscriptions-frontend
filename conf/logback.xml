@@ -17,7 +17,7 @@ https://www.playframework.com/documentation/2.4.x/SettingsLogger#Using-a-configu
         </rollingPolicy>
 
         <encoder>
-            <pattern>%date [%thread] %-5level %logger{36} - %msg%n%xException{3}</pattern>
+            <pattern>%date [%.-30thread] %logger[%file:%L] %highlight(%level: %msg%n%xException{3})</pattern>
         </encoder>
     </appender>
 
