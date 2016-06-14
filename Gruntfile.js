@@ -43,7 +43,7 @@ module.exports = function(grunt) {
 
         clean: {
             assets: ['<%= dirs.public.javascripts %>','<%= dirs.public.stylesheets %>', '<%= dirs.public.images %>'],
-            dist: ['<%= dirs.public.root %>/dist/', 'conf/assets.map'],
+            dist: ['<%= dirs.public.root %>/dist/', 'conf/assets.map', '<%= dirs.public.root %>/webpack/'],
             icons: ['<%= dirs.assets.images %>/inline-svgs/compressed/*.svg'],
         },
 
