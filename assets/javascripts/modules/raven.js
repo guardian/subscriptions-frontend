@@ -1,4 +1,4 @@
-define(['lodash/object/pick', 'utils/user', 'raven-js'], function (pick, userUtil, Raven) {
+define(['lodash/object/pick', 'utils/user', 'raven'], function (pick, userUtil, Raven) {
     'use strict';
 
     function getTags(buildNumber, user) {
