@@ -9,8 +9,8 @@ define([
 ], function ($, bean, countryChoice, addressFields, localizationSwitcher, formElements) {
     'use strict';
 
-    var $postcode = $('.js-checkout-postcode'),
-        $subdivision = $('.js-checkout-subdivision');
+    var $postcode = formElements.$POSTCODE_CONTAINER,
+        $subdivision = formElements.$SUBDIVISION_CONTAINER;
 
     var check = function(domEl) {
         $(domEl).attr('checked', 'checked');

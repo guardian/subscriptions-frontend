@@ -16,16 +16,8 @@
 }
 
 .basket-preview__image {
-    display: none;
-    @include mq(tablet) {
-        display: block;
-    }
-
-    @include mq($from: tablet, $until: desktop) {
-        bottom: -$gs-baseline;
-        position: absolute;
+    @include mq($until: desktop) {
         width: 150px;
-        right: 0;
     }
 
 }

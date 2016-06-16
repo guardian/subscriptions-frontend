@@ -25,7 +25,18 @@
     .form-field__error-message {
         clear: both;
     }
-    .promo-code-applied {
-        margin-bottom: ($gs-baseline);
+}
+.promo-code-applied {
+    font-weight: guss-font-weight(bold);
+
+    @include mq($until: desktop) {
+        @include fs-textSans(3);
+    }
+}
+.promo-code-snippet {
+    margin-bottom: ($gs-baseline);
+
+    @include mq($until: desktop) {
+        @include fs-textSans(3);
     }
 }

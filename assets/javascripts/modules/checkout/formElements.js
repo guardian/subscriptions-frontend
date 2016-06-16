@@ -64,6 +64,7 @@ define(['$'], function ($) {
         $ADDRESS1_CONTAINER: $('.js-checkout-house'),
         $ADDRESS2_CONTAINER: $('.js-checkout-street'),
         $ADDRESS3_CONTAINER: $('.js-checkout-town'),
+        $SUBDIVISION_CONTAINER: $('.js-checkout-subdivision'),
         $POSTCODE_CONTAINER: $('.js-checkout-postcode'),
         $MANUAL_ADDRESS_CONTAINER: $('.js-checkout-manual-address'),
         $FULL_ADDRESS_CONTAINER: $('.js-checkout-full-address'),
