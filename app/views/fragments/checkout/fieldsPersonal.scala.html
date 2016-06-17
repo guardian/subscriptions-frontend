@@ -71,9 +71,6 @@
         </select>
         @fragments.forms.errorMessage("This field is required")
     </div>
-
-    <div class="js-postcode"><!--populated in js--></div>
-
     <div class="form-field js-checkout-house">
         <label class="label" for="address-line-1">Address line 1</label>
         @* Salesforce accepts up to 255 chars but this field gets concatenated with address line 2 *@
@@ -94,16 +91,16 @@
             value="@form.data.get("personal.address.town")" maxlength="40" required>
         @fragments.forms.errorMessage("This field is required")
     </div>
-</div>
-<div class="form-field js-checkout-subdivision">
-    <label class="label" for="address-subdivision">County</label>
-    <select name="address.subdivision" id="address-subdivision"></select>
-    @fragments.forms.errorMessage("Please enter a valid state/county")
-</div>
-<div class="form-field js-checkout-postcode">
-    <label class="label" for="address-postcode">Postcode</label>
-    <input type="text" class="input-text js-input input-text input-text--small"
+    <div class="form-field js-checkout-subdivision">
+        <label class="label" for="address-subdivision">County</label>
+        <select name="address.subdivision" id="address-subdivision"></select>
+        @fragments.forms.errorMessage("Please enter a valid state/county")
+    </div>
+    <div class="form-field js-checkout-postcode">
+        <label class="label" for="address-postcode">Postcode</label>
+        <input type="text" class="input-text js-input input-text input-text--small"
         id="address-postcode" name="personal.address.postcode"
         value="@form.data.get("personal.address.postcode")" maxlength="10" required>
-    @fragments.forms.errorMessage("Please enter a valid postal code")
+        @fragments.forms.errorMessage("Please enter a valid postal code")
+    </div>
 </div>

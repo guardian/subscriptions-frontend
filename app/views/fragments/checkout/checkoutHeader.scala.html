@@ -1,13 +1,4 @@
-@(extra: String, showDetails: Boolean = false)
-
+@(product: String)
 <div class="checkout-header">
-    <h1 class="checkout-header__title">Subscribe to the @extra</h1>
-    @if(showDetails) {
-        <ul>
-            <li>14-day free trial</li>
-            <li>Access to the Daily Edition and Guardian App Premium Tier</li>
-            <li>Available on Apple, Android and Kindle Fire</li>
-            <li>Use on up to 10 devices</li>
-        </ul>
-    }
+    <h1 class="checkout-header__title">Subscribe to the @product</h1>
 </div>

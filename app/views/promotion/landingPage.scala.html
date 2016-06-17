@@ -38,7 +38,7 @@
                 </div>
             </div>
         </section>
-        @promotion.asFreeTrial.fold {
+        @if(promotion.asFreeTrial.isEmpty && promotion.asTracking.isEmpty){
             <section class="@promotion.landingPageSectionColour section--dark-sides">
                 <div class="gs-container gs-container--slim page-slice page-slice">
                     <div class="page-slice__content @promotion.getSectionSeparator">
@@ -53,7 +53,7 @@
                     </div>
                 </div>
             </section>
-        } { _ => }
+        }
         <section class="section-white section--dark-sides">
             <div class="gs-container gs-container--slim page-slice">
                 <div class="page-slice__content @promotion.getSectionSeparator">
