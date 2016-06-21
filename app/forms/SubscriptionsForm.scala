@@ -78,6 +78,11 @@ object SubscriptionsForm {
     "title"-> of(titleFormatter)
   )(PersonalData.apply)(PersonalData.unapply)
 
+  val deliveryDataMapping = mapping(
+    "address" -> addressDataMapping,
+    "instructions" -> text
+  )(DeliveryData.apply)(DeliveryData.unapply)
+
   val productRatePlanIdMapping = mapping("ratePlanId" -> text)(ProductRatePlanId.apply)(ProductRatePlanId.unapply)
 
   val directDebitDataMapping = mapping(
@@ -133,8 +138,17 @@ object SubscriptionsForm {
     "payment" -> of[PaymentData],
     "ratePlanId" -> of[ProductRatePlanId],
     "promoCode" -> optional(of[PromoCode])
-  )(SubscriptionData.apply)(SubscriptionData.unapply)
+  )(DigipackData.apply)(DigipackData.unapply)
     .verifying("DirectDebit is only available in the UK", PaymentValidation.validateDirectDebit _))
 
-  def apply(): Form[SubscriptionData] = subsForm
+  val paperForm = Form(mapping(
+    "personal" -> personalDataMapping,
+    "payment" -> of[PaymentData],
+    "delivery" -> deliveryDataMapping,
+    "ratePlanId" -> of[ProductRatePlanId],
+    "promoCode" -> optional(of[PromoCode])
+  )(PaperData.apply)(PaperData.unapply)
+    .verifying("DirectDebit is only available in the UK", PaymentValidation.validateDirectDebit _))
+
+  def apply(): Form[DigipackData] = subsForm
 }

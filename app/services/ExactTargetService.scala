@@ -15,7 +15,7 @@ import com.squareup.okhttp.{MediaType, OkHttpClient, RequestBody, Response}
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
 import controllers.Checkout._
-import model.SubscriptionData
+import model.{DigipackData$, SubsFormData}
 import model.error.ExactTragetService.ExactTargetAuthenticationError
 import model.exactTarget.SubscriptionDataExtensionRow
 import org.joda.time.Days
@@ -45,7 +45,7 @@ trait ExactTargetService extends LazyLogging {
     }).getOrElse(plan.prettyPricing(currency))
   }
 
-  def sendETDataExtensionRow(subscribeResult: SubscribeResult, subscriptionData: SubscriptionData, gracePeriod: Days, validPromotion: Option[ValidPromotion[NewUsers]]): Future[Unit] = {
+  def sendETDataExtensionRow(subscribeResult: SubscribeResult, subscriptionData: SubsFormData, gracePeriod: Days, validPromotion: Option[ValidPromotion[NewUsers]]): Future[Unit] = {
     val subscription = subscriptionService.unsafeGetPaid(Subscription.Name(subscribeResult.subscriptionName))(Digipack)
     val paymentMethod = paymentService.getPaymentMethod(Subscription.AccountId(subscribeResult.accountId)).map(
       _.getOrElse(throw new Exception(s"Subscription with no payment method found, ${subscribeResult.subscriptionId}"))

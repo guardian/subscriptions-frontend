@@ -3,16 +3,16 @@ package tracking.activities
 import java.util.{Map => JMap}
 
 import com.github.t3hnar.bcrypt._
-import com.gu.memsub.{BillingPeriod, Address}
+import com.gu.memsub.{Address, BillingPeriod}
 import configuration.Config
-import model.{CreditCardData, DirectDebitData, PaymentData, SubscriptionData}
+import model._
 import tracking.{ActivityTracking, TrackerData}
 import model.error.CheckoutService._
 
 import scala.collection.JavaConversions._
 
 object MemberData {
-  def apply(checkoutResult: CheckoutSuccess, subscriptionData: SubscriptionData, billingPeriod: BillingPeriod): MemberData = {
+  def apply(checkoutResult: CheckoutSuccess, subscriptionData: SubsFormData, billingPeriod: BillingPeriod): MemberData = {
     val address: Address = subscriptionData.personalData.address
     MemberData(address.town,
       address.country.fold(address.countryName)(_.name),

@@ -15,8 +15,9 @@ import configuration.Config.Identity.webAppProfileUrl
 import forms.{FinishAccountForm, SubscriptionsForm}
 import model.error.CheckoutService._
 import model.error.SubsError
-import model.{DirectDebitData, PurchaserIdentifiers, SubscriptionData, SubscriptionRequestData}
+import model._
 import play.api.data.Form
+import play.api.libs.iteratee.Iteratee
 import play.api.libs.json._
 import play.api.mvc._
 import services.AuthenticationService.authenticatedUserFor
@@ -31,7 +32,7 @@ import scala.Function.const
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scalaz.std.scalaFuture._
-import scalaz.{NonEmptyList, OptionT}
+import scalaz.{NonEmptyList, OptionT, \/}
 
 object Checkout extends Controller with LazyLogging with ActivityTracking with CatalogProvider {
   object SessionKeys {
@@ -61,7 +62,7 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
     val subscriptionData = (for {
       authUser <- OptionT(Future.successful(authenticatedUser))
       idUser <- OptionT(IdentityService.userLookupByCredentials(authUser.credentials))
-    } yield SubscriptionData.fromIdUser(promoCode)(idUser)).run
+    } yield DigipackData.fromIdUser(promoCode)(idUser)).run
 
     val plans = catalog.planMap.values.toSeq
     val defaultPlan = catalog.digipackMonthly
@@ -88,12 +89,15 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
     }
   }
 
-  val parseCheckoutForm: BodyParser[SubscriptionData] = parse.form[SubscriptionData](SubscriptionsForm.subsForm, onErrors = formWithErrors => {
-    logger.error(s"Backend form validation failed. Please make sure that the front-end and the backend validations are in sync (validation errors: ${formWithErrors.errors}})")
-    BadRequest
-  })
 
-  def handleCheckout = NoSubAjaxAction.async(parseCheckoutForm) { implicit request =>
+  val formDataParser = parse.urlFormEncoded.validate[SubsFormData] { data =>
+    val paperData = SubscriptionsForm.paperForm.bindFromRequest(data).fold(e => \/.left(e.errors), e => \/.right(e: SubsFormData))
+    val subsData = SubscriptionsForm.subsForm.bindFromRequest(data).fold(e => \/.left(e.errors), e => \/.right(e: SubsFormData))
+    (paperData orElse subsData).fold(errs => Left(BadRequest), o => Right(o))
+  }
+
+  def handleCheckout = NoSubAjaxAction.async(formDataParser) { implicit request =>
+
     val formData = request.body
     val idUserOpt = authenticatedUserFor(request)
 

@@ -38,27 +38,13 @@ class CheckoutService(identityService: IdentityService,
                       promoService: PromoService,
                       promoPlans: DiscountRatePlanIds) extends LazyLogging {
 
-  def processSubscription(subscriptionData: SubscriptionData,
+  def processSubscription(subscriptionData: SubsFormData,
                           authenticatedUserOpt: Option[AuthenticatedIdUser],
                           requestData: SubscriptionRequestData
-                         ): Future[NonEmptyList[SubsError] \/ CheckoutSuccess] = {
+                         )(implicit p: PromotionApplicator[NewUsers, Subscribe]): Future[NonEmptyList[SubsError] \/ CheckoutSuccess] = {
 
     val personalData = subscriptionData.personalData
     val plan = RatePlan(subscriptionData.productRatePlanId.get, None)
-
-    userBecomesSubscriber(authenticatedUserOpt, personalData, requestData, plan, subscriptionData)
-  }
-
-  private def gracePeriod(withPromo: Subscribe, subscribe: Subscribe) =
-    if (withPromo.paymentDelay == subscribe.paymentDelay) zuoraProperties.gracePeriodInDays else ZERO
-
-  private def userBecomesSubscriber(
-       authenticatedUserOpt: Option[AuthenticatedIdUser],
-       personalData: PersonalData,
-       requestData: SubscriptionRequestData,
-       plan: RatePlan,
-       subscriptionData: SubscriptionData)(implicit p: PromotionApplicator[NewUsers, Subscribe]): Future[NonEmptyList[SubsError] \/ CheckoutSuccess] = {
-
     val idMinimalUser = authenticatedUserOpt.map(_.user)
 
     (for {
@@ -79,6 +65,9 @@ class CheckoutService(identityService: IdentityService,
       ))
     } yield result).run
   }
+
+  private def gracePeriod(withPromo: Subscribe, subscribe: Subscribe) =
+    if (withPromo.paymentDelay == subscribe.paymentDelay) zuoraProperties.gracePeriodInDays else ZERO
 
   private def storeIdentityDetails(
       personalData: PersonalData,
@@ -119,11 +108,11 @@ class CheckoutService(identityService: IdentityService,
   }
 
   private def sendETDataExtensionRow(
-      subscribeResult: SubscribeResult,
-      subscriptionData: SubscriptionData,
-      gracePeriodInDays: Days,
-      purchaserIds: PurchaserIdentifiers,
-      validPromotion: Option[ValidPromotion[NewUsers]]): Future[NonEmptyList[SubsError] \/ Unit] =
+                                      subscribeResult: SubscribeResult,
+                                      subscriptionData: SubsFormData,
+                                      gracePeriodInDays: Days,
+                                      purchaserIds: PurchaserIdentifiers,
+                                      validPromotion: Option[ValidPromotion[NewUsers]]): Future[NonEmptyList[SubsError] \/ Unit] =
 
     (for {
       a <- exactTargetService.sendETDataExtensionRow(subscribeResult, subscriptionData, gracePeriodInDays, validPromotion)
@@ -138,7 +127,7 @@ class CheckoutService(identityService: IdentityService,
   private def createOrUpdateUserInSalesforce(
       personalData: PersonalData,
       userData: Option[IdMinimalUser],
-      subscriptionData: SubscriptionData): Future[NonEmptyList[SubsError] \/ ContactId] = {
+      subscriptionData: SubsFormData): Future[NonEmptyList[SubsError] \/ ContactId] = {
 
     (for {
       memberId <- salesforceService.createOrUpdateUser(personalData, userData)
@@ -182,7 +171,7 @@ class CheckoutService(identityService: IdentityService,
   private def createSubscription(
       subscribe: Subscribe,
       purchaserIds: PurchaserIdentifiers,
-      subscriptionData: SubscriptionData): Future[NonEmptyList[SubsError] \/ SubscribeResult] = {
+      subscriptionData: SubsFormData): Future[NonEmptyList[SubsError] \/ SubscribeResult] = {
 
     zuoraService.createSubscription(subscribe).map(\/.right).recover {
       case e: PaymentGatewayError => \/.left(NonEmptyList(CheckoutZuoraPaymentGatewayError(
@@ -200,7 +189,7 @@ class CheckoutService(identityService: IdentityService,
       personalData: PersonalData,
       requestData: SubscriptionRequestData,
       purchaserIds: PurchaserIdentifiers,
-      subscriptionData: SubscriptionData): Future[NonEmptyList[SubsError] \/ PaymentService#Payment] = {
+      subscriptionData: SubsFormData): Future[NonEmptyList[SubsError] \/ PaymentService#Payment] = {
 
     try {
       val payment = subscriptionData.paymentData match {

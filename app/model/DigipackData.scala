@@ -52,14 +52,33 @@ case class PersonalData(first: String,
   def toStringSanitized: String = s"${first.head}. $last, ${email.head}**@**${email.last}, ${address.country}"
 }
 
+case class DeliveryData(address: Address, instructions: String)
 
-case class SubscriptionData(
-                             personalData: PersonalData,
-                             paymentData: PaymentData,
-                             productRatePlanId: ProductRatePlanId,
-                             suppliedPromoCode: Option[PromoCode])
 
-object SubscriptionData {
+sealed trait SubsFormData {
+  def personalData: PersonalData
+  def paymentData: PaymentData
+  def productRatePlanId: ProductRatePlanId
+  def suppliedPromoCode: Option[PromoCode]
+}
+
+case class PaperData(
+  personalData: PersonalData,
+  paymentData: PaymentData,
+  deliveryData: DeliveryData,
+  productRatePlanId: ProductRatePlanId,
+  suppliedPromoCode: Option[PromoCode]
+) extends SubsFormData
+
+case class DigipackData(
+   personalData: PersonalData,
+   paymentData: PaymentData,
+   productRatePlanId: ProductRatePlanId,
+   suppliedPromoCode: Option[PromoCode]
+) extends SubsFormData
+
+object DigipackData {
+
   def fromIdUser(promoCode: Option[PromoCode])(u: IdUser) = {
     val personalData = PersonalData(
       title = u.privateFields.flatMap(_.title).flatMap(Title.fromString(_)),
@@ -72,12 +91,7 @@ object SubscriptionData {
     )
 
     val blankPaymentData = DirectDebitData("", "", "")
-
     val blankRatePlanId = ProductRatePlanId("") // this makes me very nervous indeed
-
-    SubscriptionData(personalData, blankPaymentData, blankRatePlanId, promoCode)
-
-
+    DigipackData(personalData, blankPaymentData, blankRatePlanId, promoCode)
   }
-
 }

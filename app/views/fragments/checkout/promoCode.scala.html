@@ -2,7 +2,7 @@
 @import com.gu.memsub.Subscription.ProductRatePlanId
 @import com.gu.memsub.promo.PromoCode
 @import controllers.routes.Checkout.validatePromoCode
-@(form: Form[model.SubscriptionData])
+@(form: Form[model.DigipackData])
 @if(form.data.get("promoCode").contains("DGA85")) {
     <div class="promo-code-applied">✓&nbsp; Promotion applied</div>
     <div class="promo-code-snippet">
