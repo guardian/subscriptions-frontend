@@ -2,19 +2,20 @@
 @import views.support.AddressValidationRulesOps._
 @import views.support.CountryWithCurrency
 @import com.gu.i18n.Title
+@import model.PersonalData
 
-@(form: Form[model.SubscriptionData], userIsSignedIn: Boolean, countriesWithCurrency: List[CountryWithCurrency], touchpointBackendResolution:  services.TouchpointBackend.Resolution)
+@(form: Option[PersonalData], countriesWithCurrency: List[CountryWithCurrency])
 
-@signedInAttrs = @{ if (userIsSignedIn) "required readonly" else "" }
+@signedInAttrs = @{ if (form.isDefined) "required readonly" else "" }
 
 @* ===== Name ===== *@
 <div class="form-field js-checkout-title">
     <label class="label" for="title">Title</label>
     <select class="select select--wide js-input" name="personal.title" id="title"
-    value="@form.data.get("personal.title")" >
+    value="@form.map(_.title)" >
             <option value=""></option>
     @for(title <- Title.all){
-            <option value="@title.title" @if(form.data.get("personal.title").mkString == title.title){selected} >@title.title</option>
+            <option value="@title.title" @if(form.map(_.title).mkString == title.title){selected} >@title.title</option>
         }
             <option value="">Other</option>
     </select>
@@ -23,29 +24,29 @@
     <label class="label" for="first">First name</label>
     @* Zuora's PaymentMethod request is the limiting factor for maxlength here *@
     <input type="text" class="input-text js-input" name="personal.first" id="first"
-        value="@form.data.get("personal.first")" maxlength="30" required>
+        value="@form.map(_.first)" maxlength="30" required>
     @fragments.forms.errorMessage("This field is required")
 </div>
 <div class="form-field js-checkout-last">
     <label class="label" for="last">Last name</label>
     <input type="text" class="input-text js-input" name="personal.last" id="last"
-        value="@form.data.get("personal.last")" maxlength="50" required>
+        value="@form.map(_.last)" maxlength="50" required>
     @fragments.forms.errorMessage("This field is required")
 </div>
 
 @* ===== Email ===== *@
-<div class="form-field @if(!userIsSignedIn) {js-checkout-email}">
+<div class="form-field @if(form.isEmpty) {js-checkout-email}">
     <label class="label" for="email">Email address</label>
     <input type="email" class="input-text js-input" name="personal.emailValidation.email" id="email"
-        value="@form.data.get("personal.emailValidation.email")" maxlength="80" @signedInAttrs>
+        value="@form.map(_.email)" maxlength="80" @signedInAttrs>
     @fragments.forms.errorMessage("")
 </div>
-<div class="form-field @if(!userIsSignedIn) {js-checkout-confirm-email}">
-    @if(userIsSignedIn) {
-        <input type="hidden" name="personal.emailValidation.confirm" id="confirm" value="@form.data.get("personal.emailValidation.confirm")">
+<div class="form-field @if(form.isDefined) {js-checkout-confirm-email}">
+    @if(form.isEmpty) {
+        <input type="hidden" name="personal.emailValidation.confirm" id="confirm" value="@form.map(_.email)">
     } else {
         <label class="label" for="confirm">Confirm email address</label>
-        <input type="email" class="input-text js-input" name="personal.emailValidation.confirm" id="confirm" value="@form.data.get("personal.emailValidation.confirm")" required>
+        <input type="email" class="input-text js-input" name="personal.emailValidation.confirm" id="confirm" value="@form.map(_.email)" required>
         @fragments.forms.errorMessage("The confirmation email must match your email address")
     }
 </div>
@@ -55,7 +56,7 @@
     <label class="label optional-marker" for="phone-number">Phone Number</label>
     <input type="tel" class="input-text js-input input-text"
     id="phone-number" name="personal.telephoneNumber"
-    value="@form.data.get("personal.telephoneNumber")" maxlength="20">
+    value="@form.map(_.telephoneNumber)" maxlength="20">
   </div>
 
 
@@ -75,20 +76,20 @@
         <label class="label" for="address-line-1">Address line 1</label>
         @* Salesforce accepts up to 255 chars but this field gets concatenated with address line 2 *@
         <input type="text" class="input-text js-input" id="address-line-1" name="personal.address.address1"
-            value="@form.data.get("personal.address.address1")" maxlength="126" required>
+            value="@form.map(_.address.lineOne)" maxlength="126" required>
         @fragments.forms.errorMessage("This field is required")
     </div>
     <div class="form-field js-checkout-street">
         <label class="label optional-marker" for="address-line-2">Address line 2</label>
         @* Salesforce accepts up to 255 chars but this field gets concatenated with address line 1 *@
         <input type="text" class="input-text js-input" id="address-line-2" name="personal.address.address2"
-            value="@form.data.get("personal.address.address2")" maxlength="126">
+            value="@form.map(_.address.lineTwo)" maxlength="126">
         @fragments.forms.errorMessage("This field is required")
     </div>
     <div class="form-field js-checkout-town">
         <label class="label" for="address-town">Town/City</label>
         <input type="text" class="input-text js-input" id="address-town" name="personal.address.town"
-            value="@form.data.get("personal.address.town")" maxlength="40" required>
+            value="@form.map(_.address.town)" maxlength="40" required>
         @fragments.forms.errorMessage("This field is required")
     </div>
     <div class="form-field js-checkout-subdivision">
@@ -100,7 +101,6 @@
         <label class="label" for="address-postcode">Postcode</label>
         <input type="text" class="input-text js-input input-text input-text--small"
         id="address-postcode" name="personal.address.postcode"
-        value="@form.data.get("personal.address.postcode")" maxlength="10" required>
-        @fragments.forms.errorMessage("Please enter a valid postal code")
-    </div>
+        value="@form.map(_.address.postCode)" maxlength="10" required>
+    @fragments.forms.errorMessage("Please enter a valid postal code")
 </div>

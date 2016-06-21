@@ -1,0 +1,167 @@
+@import com.gu.i18n.{Country, CountryGroup, Currency}
+@import com.gu.memsub.{BillingPeriod, Month}
+@import com.gu.subscriptions.DigipackPlan
+@import configuration.Config.Identity._
+@import model.JsVars
+@import views.support.BillingPeriod._
+@import views.support.CountryWithCurrency
+@import views.support.Pricing._
+@import com.gu.memsub.promo.PromoCode
+
+@import model.PersonalData
+@(
+    form: Option[PersonalData],
+    paper: Form[model.PaperData],
+    plans: Seq[DigipackPlan[BillingPeriod]],
+    defaultPlan : DigipackPlan[Month],
+    country: Option[Country],
+    countryGroup: CountryGroup,
+    defaultCurrency: Currency,
+    countriesWithCurrency: List[CountryWithCurrency],
+    touchpointBackendResolution: services.TouchpointBackend.Resolution,
+    promoCode: Option[PromoCode])(implicit request: RequestHeader)
+
+@priceOption(plan: DigipackPlan[BillingPeriod], currency: Currency) = {
+    <label class="option" data-currency="@currency">
+        <span class="option__input">
+            <input
+            type="radio" name="ratePlanId"
+            data-option-mirror-label-default="@plan.prettyPricing(currency)"
+            data-option-mirror-label="@plan.prettyPricing(currency)"
+            data-amount="@plan.gbpPrice.amount"
+            data-number-of-months="@plan.billingPeriod.numberOfMonths"
+            data-currency="@currency"
+            value="@plan.productRatePlanId.get"
+            @if(plan == defaultPlan && currency == defaultCurrency){checked}
+            >
+        </span>
+        <span class="option__label" id="label-for-@plan.productRatePlanId.get-@currency">@plan.prettyPricing(currency)</span>
+    </label>
+}
+
+@main(
+    title = "Details - name and address | Subscriptions | The Guardian",
+    jsVars = JsVars(userIsSignedIn = form.isDefined, ignorePageLoadTracking = true, countryGroup = countryGroup, currency = defaultCurrency, country = country),
+    bodyClasses = List("is-wide"),
+    touchpointBackendResolutionOpt = Some(touchpointBackendResolution)
+) {
+
+    @fragments.analytics.tagmanager()
+
+<main class="page-container gs-container">
+
+    <section class="checkout-container">
+        <form class="form js-checkout-form" action="@routes.Checkout.renderPaperCheckout(CountryGroup.UK, None).toString" method="POST" novalidate>
+            @helper.CSRF.formField
+
+            @fragments.checkout.checkoutHeader("Digital Pack")
+
+            @* ===== Plan selection ===== *@
+            <div class="checkout-container__sidebar js-basket">
+                @fragments.checkout.basketPreview()
+                <div class="basket-options-toggle u-note prose">
+                    <a class="js-toggle checkout-container__frequency" data-toggle="change-payment-frequency">
+                        Change payment frequency
+                    </a>
+                </div>
+                <fieldset class="basket-billing-options is-hidden js-payment-frequency js-option-mirror-group" id="change-payment-frequency">
+                    @plans.map { p =>
+                        @p.currencies.map { c =>
+                            @priceOption(p, c)
+                        }
+                    }
+                </fieldset>
+                <div class="js-checkout-notices notices-container" data-set="checkout-notices" hidden="true">
+                    <div class="js-append">
+                        <div class="js-payment-type-direct-debit u-note">
+                            @fragments.checkout.noticesDirectDebit()
+                        </div>
+                        <div class="js-payment-type-card" hidden="true">
+                            @fragments.checkout.noticesCard()
+                        </div>
+                    </div>
+                </div>
+                @fragments.checkout.promoCode(promoCode)
+            </div>
+
+            <div class="checkout-container__form">
+
+                @* ===== Your details ===== *@
+                <div id="yourDetails" class="field-panel js-fieldset-your-details">
+                    <fieldset>
+                        <legend class="field-panel__legend">
+                            <span class="field-panel__legend__num">1</span> Your details
+                        </legend>
+                        <div class="field-panel__intro">
+                            <div class="field-note field-note--offset prose">
+                                @if(form.isDefined) {
+                                    <a href="@idWebAppSignOutUrl(routes.Checkout.renderPaperCheckout(CountryGroup.UK, None))">Sign out</a>
+                                } else {
+                                    <span class="field-note__label">Already have a Guardian account?</span>
+                                    <a href="@idWebAppSigninUrl(routes.Checkout.renderPaperCheckout(CountryGroup.UK, None))">Sign in</a>
+                                }
+                            </div>
+                        </div>
+                        <div class="field-panel__edit">
+                            <a href="#yourDetails" class="text-button u-button-reset js-edit-your-details" title="Edit your personal details">Edit</a>
+                        </div>
+                        <div class="field-panel__fields">
+
+                            @fragments.checkout.fieldsPersonal(form, countriesWithCurrency)
+                            @fragments.checkout.fieldsPaper(paper, countriesWithCurrency)
+
+                            <div class="actions">
+                                <a href="#paymentDetails" class="button button--primary button--large js-checkout-your-details-submit">Continue</a>
+                                <div class="loader js-personal-details-validating">Validating...</div>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+
+                @* ===== Payment ===== *@
+                <div id="paymentDetails" class="field-panel is-collapsed js-fieldset-payment-details">
+                    <fieldset>
+                        <legend class="field-panel__legend">
+                            <span class="field-panel__legend__num">2</span> Payment details
+                        </legend>
+                        <div class="field-panel__intro">
+                            <div class="field-note field-note--offset">
+                                @fragments.forms.securityNote()
+                            </div>
+                        </div>
+                        <div class="field-panel__edit">
+                            <a href="#paymentDetails" class="text-button u-button-reset js-edit-payment-details" title="Edit your payment details">Edit</a>
+                        </div>
+                        <div class="field-panel__fields">
+                            @fragments.checkout.fieldsPayment()
+
+                            <div class="actions">
+                                <a href="#formReview" class="button button--primary button--large js-checkout-payment-details-submit">Continue</a>
+                                <div class="loader js-payment-details-validating">Validating...</div>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+
+                @* ===== Review ===== *@
+                <div id="formReview" class="field-panel field-panel--single is-collapsed js-fieldset-review">
+                    <fieldset>
+                        <legend class="field-panel__legend">
+                            <span class="field-panel__legend__num">3</span> Review and confirm
+                        </legend>
+                        <div class="field-panel__fields">
+                            @fragments.checkout.reviewDetails(form)
+                        </div>
+                    </fieldset>
+                </div>
+
+            </div>
+
+            <div class="u-display-until-desktop" data-set="checkout-notices"></div>
+
+        </form>
+
+    </section>
+
+</main>
+}

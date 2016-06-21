@@ -2,8 +2,8 @@
 @import com.gu.memsub.Subscription.ProductRatePlanId
 @import com.gu.memsub.promo.PromoCode
 @import controllers.routes.Checkout.validatePromoCode
-@(form: Form[model.SubscriptionData])
-@if(form.data.get("promoCode").contains("DGA85")) {
+@(promoCode: Option[PromoCode])
+@if(promoCode.exists(_.get.contains("DGA85"))) {
     <div class="promo-code-applied">✓&nbsp; Promotion applied</div>
     <div class="promo-code-snippet">
         <ul>
@@ -13,7 +13,7 @@
             <li>Ad free experience on the live news app</li>
         </ul>
     </div>
-    <input name="promoCode" type="hidden" value="@form.data.get("promoCode")"/>
+    <input name="promoCode" type="hidden" value="@promoCode"/>
 } else {
     @defining(
         // use Play reverse routing to get the action request path
@@ -25,8 +25,9 @@
             <label class="label" for="promo-code">Promo code</label>
             <div class="form-field field-group__item">
                 <div class="col-2">
-                    <input id="promo-code" name="promoCode" value="@form.data.get("promoCode")" class="input-text js-input" data-lookup-url="@lookupUrl"/>
-                    <a class="button button--primary button--large button--arrow-right js-promo-code-validate">Apply</a>
+                    <input id="promo-code" name="promoCode" value="@promoCode" class="input-text js-input" data-lookup-url="@lookupUrl"/>
+                    <a class="button button--primary button--large button--arrow-right js-promo-code-validate">
+                        Apply</a>
                 </div>
                 @fragments.forms.errorMessage("Please enter a valid promo code.")
             </div>

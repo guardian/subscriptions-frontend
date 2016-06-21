@@ -7,8 +7,10 @@
 @import views.support.CountryWithCurrency
 @import views.support.Pricing._
 @import com.gu.memsub.promo.PromoCode
-@(form: Form[model.SubscriptionData],
-    userIsSignedIn: Boolean,
+@import model.PersonalData
+
+@(
+    form: Option[PersonalData],
     plans: Seq[DigipackPlan[BillingPeriod]],
     defaultPlan : DigipackPlan[Month],
     country: Option[Country],
@@ -38,7 +40,7 @@
 
 @main(
     title = "Details - name and address | Subscriptions | The Guardian",
-    jsVars = JsVars(userIsSignedIn = userIsSignedIn, ignorePageLoadTracking = true, countryGroup = countryGroup, currency = defaultCurrency, country = country),
+    jsVars = JsVars(userIsSignedIn = form.isDefined, ignorePageLoadTracking = true, countryGroup = countryGroup, currency = defaultCurrency, country = country),
     bodyClasses = List("is-wide"),
     touchpointBackendResolutionOpt = Some(touchpointBackendResolution)
 ) {
@@ -48,7 +50,7 @@
 <main class="page-container gs-container">
 
     <section class="checkout-container">
-        <form class="form js-checkout-form" action="@routes.Checkout.renderCheckout(CountryGroup.UK, None).toString" method="POST" novalidate>
+        <form class="form js-checkout-form" action="@routes.Checkout.renderDigipackCheckout(CountryGroup.UK, None).toString" method="POST" novalidate>
             @helper.CSRF.formField
 
             @fragments.checkout.checkoutHeader("Digital Pack")
@@ -68,7 +70,7 @@
                         }
                     }
                 </fieldset>
-                @fragments.checkout.promoCode(form)
+                @fragments.checkout.promoCode(promoCode)
                 <div class="js-checkout-notices notices-container" data-set="checkout-notices" hidden="true">
                     <div class="js-append">
                         <div class=u-note">
@@ -87,6 +89,7 @@
                         </div>
                     </div>
                 </div>
+                @fragments.checkout.promoCode(promoCode)
             </div>
 
             <div class="checkout-container__form">
@@ -102,11 +105,11 @@
                                 @fragments.forms.securityNote()
                             </div>
                             <div class="field-note field-note--offset prose">
-                                @if(userIsSignedIn) {
-                                    <a class="u-nowrap" href="@idWebAppSignOutUrl(routes.Checkout.renderCheckout(CountryGroup.UK, None))">Sign out</a>
+                                @if(form.isDefined) {
+                                    <a href="@idWebAppSignOutUrl(routes.Checkout.renderDigipackCheckout(CountryGroup.UK, None))">Sign out</a>
                                 } else {
                                     <span class="field-note__label">Already have a Guardian account?</span>
-                                    <a class="u-nowrap" href="@idWebAppSigninUrl(routes.Checkout.renderCheckout(CountryGroup.UK, None))">Sign in</a>
+                                    <a href="@idWebAppSigninUrl(routes.Checkout.renderDigipackCheckout(CountryGroup.UK, None))">Sign in</a>
                                 }
                             </div>
                         </div>
@@ -114,7 +117,7 @@
                             <a href="#yourDetails" class="text-button u-button-reset js-edit-your-details" title="Edit your personal details">Edit</a>
                         </div>
                         <div class="field-panel__fields">
-                            @fragments.checkout.fieldsPersonal(form, userIsSignedIn, countriesWithCurrency, touchpointBackendResolution)
+                            @fragments.checkout.fieldsPersonal(form, countriesWithCurrency)
 
                             <div class="actions">
                                 <a href="#paymentDetails" class="button button--primary button--large js-checkout-your-details-submit">Continue</a>
@@ -139,7 +142,7 @@
                             <a href="#paymentDetails" class="text-button u-button-reset js-edit-payment-details" title="Edit your payment details">Edit</a>
                         </div>
                         <div class="field-panel__fields">
-                            @fragments.checkout.fieldsPayment(form, touchpointBackendResolution)
+                            @fragments.checkout.fieldsPayment()
 
                             <div class="actions">
                                 <a href="#formReview" class="button button--primary button--large js-checkout-payment-details-submit">Continue</a>

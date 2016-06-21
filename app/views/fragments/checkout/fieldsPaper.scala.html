@@ -1,0 +1,55 @@
+@import views.support.CountryOps._
+@import views.support.AddressValidationRulesOps._
+@import views.support.CountryWithCurrency
+@import com.gu.i18n.Title
+
+@(form: Form[model.PaperData], countriesWithCurrency: List[CountryWithCurrency])
+
+@* ===== Address ===== *@
+<div class="js-checkout-full-delivery-address">
+    <div class="form-field">
+        <label class="label" for="country">Country</label>
+        <select name="deliveryAddress.country" class=" select select--wide js-country" required>
+            <option data-currency-choice="USD"></option>
+            @for(c <- countriesWithCurrency) {
+                <option value="@c.alpha2" @c.country.validationRules.toAttributes @c.country.addressLabels data-currency-choice="@c.currency">@c.name</option>
+            }
+        </select>
+        @fragments.forms.errorMessage("This field is required")
+    </div>
+
+    <div class="js-postcode"><!--populated in js--></div>
+
+    <div class="form-field js-checkout-house">
+        <label class="label" for="address-line-1">Address line 1</label>
+        @* Salesforce accepts up to 255 chars but this field gets concatenated with address line 2 *@
+        <input type="text" class="input-text js-input" id="delivery-address-line-1" name="deliveryAddress.address1"
+            value="@form.data.get("deliveryAddress.address1")" maxlength="126" required>
+        @fragments.forms.errorMessage("This field is required")
+    </div>
+    <div class="form-field js-checkout-street">
+        <label class="label optional-marker" for="address-line-2">Address line 2</label>
+        @* Salesforce accepts up to 255 chars but this field gets concatenated with address line 1 *@
+        <input type="text" class="input-text js-input" id="delivery-address-line-2" name="deliveryAddress.address2"
+            value="@form.data.get("deliveryAddress.address2")" maxlength="126">
+        @fragments.forms.errorMessage("This field is required")
+    </div>
+    <div class="form-field js-checkout-town">
+        <label class="label" for="address-town">Town/City</label>
+        <input type="text" class="input-text js-input" id="delivery-address-town" name="deliveryAddress.town"
+            value="@form.data.get("deliveryAddress.town")" maxlength="40" required>
+        @fragments.forms.errorMessage("This field is required")
+    </div>
+</div>
+<div class="form-field js-checkout-subdivision">
+    <label class="label" for="address-subdivision">County</label>
+    <select name="deliveryAddress.subdivision" id="delivery-address-subdivision"></select>
+    @fragments.forms.errorMessage("Please enter a valid state/county")
+</div>
+<div class="form-field js-checkout-postcode">
+    <label class="label" for="address-postcode">Postcode</label>
+    <input type="text" class="input-text js-input input-text input-text--small"
+        id="address-postcode" name="deliveryAddress.postcode"
+        value="@form.data.get("deliveryAddress.postcode")" maxlength="10" required>
+    @fragments.forms.errorMessage("Please enter a valid postal code")
+</div>
