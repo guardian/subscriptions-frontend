@@ -1,30 +1,70 @@
 package forms
 
-import com.gu.i18n.{Title, CountryGroup, Country}
+import com.gu.i18n.{Country, CountryGroup, Title}
 import com.gu.memsub.promo.PromoCode
-import com.gu.memsub.Address
+import com.gu.memsub.{Address, BillingPeriod}
 import com.gu.memsub.Subscription.ProductRatePlanId
+import com.gu.memsub.services.CatalogService
+import com.gu.subscriptions.DigipackPlan
 import model._
 import play.api.data.format.Formats._
 import play.api.data.format.Formatter
+import play.api.data.Forms._
+import play.api.data.{Form, _}
+import SubscriptionsForm._
+import play.api.mvc.{AnyContent, Request}
+
+import scalaz.\/
+
+class SubscriptionsForm(catalogService: CatalogService) {
+
+  implicit val pf = new Formatter[DigipackPlan[BillingPeriod]] {
+    override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], DigipackPlan[BillingPeriod]] =
+      data.get(key).map(ProductRatePlanId).flatMap(catalogService.digipackCatalog.findPaid).toRight(Seq(FormError(key, "Bad plan")))
+    override def unbind(key: String, value: DigipackPlan[BillingPeriod]): Map[String, String] =
+      Map(key -> value.productRatePlanId.get)
+  }
+
+  val digipackForm = Form(mapping(
+    "ratePlanId" -> of[DigipackPlan[BillingPeriod]])
+  (DigipackData)(DigipackData.unapply))
+
+  val paperForm = Form(mapping(
+    "startDate" -> jodaLocalDate,
+    "deliveryAddress" -> addressDataMapping,
+    "deliveryInstructions" -> optional(text),
+    "plan" -> of[ProductRatePlanId],
+    "digipack" -> of[Boolean],
+    "delivery" -> of[Boolean]
+  )(PaperData)(PaperData.unapply))
+
+  implicit class FormOps[A](in: Form[A]) {
+    def asEither: Either[Seq[FormError], A] = in.fold(e => Left(e.errors), Right(_))
+  }
+
+  def bindFromRequest(implicit r: Request[AnyContent]): Seq[FormError] \/ SubscribeRequest = {
+    (subsForm.bindFromRequest().asEither, digipackForm.bindFromRequest().asEither, paperForm.bindFromRequest().asEither) match {
+      case(Right(a), Right(d), Left(_)) => \/.right(SubscribeRequest(a, Right(d)))
+      case(Right(a), Left(_), Right(p)) => \/.right(SubscribeRequest(a, Left(p)))
+      case(a, b, c) => \/.left(a.left.toOption.toSeq.flatten ++ b.left.toOption.toSeq.flatten ++ c.left.toOption.toSeq.flatten)
+    }
+  }
+}
+
 
 object SubscriptionsForm {
-  import play.api.data.Forms._
-  import play.api.data._
 
   /**
    *  Define a more convenient checkbox mapping than the default one bundled into Play.
-   *
    *  When the input is present and a value is supplied it will map to true, will map to false otherwise.
    */
   private val booleanCheckboxFormatter = new Formatter[Boolean] {
-    override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Boolean] =
-      Right(data.get(key).isDefined)
-
-    override def unbind(key: String, value: Boolean) =
-      if (value) Map(key -> "on") else Map.empty
+    override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Boolean] = Right(data.get(key).isDefined)
+    override def unbind(key: String, value: Boolean) = if (value) Map(key -> "on") else Map.empty
   }
-  private val booleanCheckbox: Mapping[Boolean] = of[Boolean] as booleanCheckboxFormatter
+
+  private val booleanCheckbox: Mapping[Boolean] =
+    of[Boolean] as booleanCheckboxFormatter
 
   private val nameMaxLength = 50
   private val addressMaxLength = 255
@@ -77,11 +117,6 @@ object SubscriptionsForm {
     "telephoneNumber" -> optional(text),
     "title"-> of(titleFormatter)
   )(PersonalData.apply)(PersonalData.unapply)
-
-  val deliveryDataMapping = mapping(
-    "address" -> addressDataMapping,
-    "instructions" -> text
-  )(DeliveryData.apply)(DeliveryData.unapply)
 
   val productRatePlanIdMapping = mapping("ratePlanId" -> text)(ProductRatePlanId.apply)(ProductRatePlanId.unapply)
 
@@ -136,19 +171,7 @@ object SubscriptionsForm {
   val subsForm = Form(mapping(
     "personal" -> personalDataMapping,
     "payment" -> of[PaymentData],
-    "ratePlanId" -> of[ProductRatePlanId],
     "promoCode" -> optional(of[PromoCode])
-  )(DigipackData.apply)(DigipackData.unapply)
+  )(SubscriptionData.apply)(SubscriptionData.unapply)
     .verifying("DirectDebit is only available in the UK", PaymentValidation.validateDirectDebit _))
-
-  val paperForm = Form(mapping(
-    "personal" -> personalDataMapping,
-    "payment" -> of[PaymentData],
-    "delivery" -> deliveryDataMapping,
-    "ratePlanId" -> of[ProductRatePlanId],
-    "promoCode" -> optional(of[PromoCode])
-  )(PaperData.apply)(PaperData.unapply)
-    .verifying("DirectDebit is only available in the UK", PaymentValidation.validateDirectDebit _))
-
-  def apply(): Form[DigipackData] = subsForm
 }

@@ -3,7 +3,7 @@
 @import views.support.CountryWithCurrency
 @import com.gu.i18n.Title
 
-@(form: Form[model.DigipackData], userIsSignedIn: Boolean, countriesWithCurrency: List[CountryWithCurrency], touchpointBackendResolution:  services.TouchpointBackend.Resolution)
+@(form: Form[model.SubscriptionData], userIsSignedIn: Boolean, countriesWithCurrency: List[CountryWithCurrency], touchpointBackendResolution:  services.TouchpointBackend.Resolution)
 
 @signedInAttrs = @{ if (userIsSignedIn) "required readonly" else "" }
 

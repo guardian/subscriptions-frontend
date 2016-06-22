@@ -12,16 +12,16 @@ import model.error.CheckoutService._
 import scala.collection.JavaConversions._
 
 object MemberData {
-  def apply(checkoutResult: CheckoutSuccess, subscriptionData: SubsFormData, billingPeriod: BillingPeriod): MemberData = {
-    val address: Address = subscriptionData.personalData.address
+  def apply(checkoutResult: CheckoutSuccess, subscriptionData: SubscribeRequest, billingPeriod: BillingPeriod): MemberData = {
+    val address: Address = subscriptionData.genericData.personalData.address
     MemberData(address.town,
       address.country.fold(address.countryName)(_.name),
       address.postCode,
       billingPeriod,
-      subscriptionData.personalData.receiveGnmMarketing,
+      subscriptionData.genericData.personalData.receiveGnmMarketing,
       checkoutResult.salesforceMember.salesforceContactId,
       checkoutResult.userIdData.id.toString,
-      subscriptionData.paymentData
+      subscriptionData.genericData.paymentData
     )
   }
 }

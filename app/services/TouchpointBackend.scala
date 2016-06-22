@@ -12,6 +12,7 @@ import com.gu.subscriptions.{DigipackCatalog, Discounter}
 import com.gu.zuora
 import com.gu.zuora.{rest, soap}
 import configuration.Config
+import forms.SubscriptionsForm
 import monitoring.TouchpointBackendMetrics
 import play.api.Play.current
 import play.api.libs.concurrent.Akka
@@ -54,6 +55,7 @@ object TouchpointBackend {
 
     val subService = new SubscriptionService(zuoraService, _stripeService, catalogService.digipackCatalog)
     val memsubPaymentService = new CommonPaymentService(_stripeService, zuoraService, catalogService)
+    val form = new forms.SubscriptionsForm(catalogService)
 
 
     val paymentService = new PaymentService {
@@ -74,7 +76,8 @@ object TouchpointBackend {
       promoService,
       promoCollection,
       promoStorage,
-      discountPlans
+      discountPlans,
+      subsForm = form
     )
   }
 
@@ -115,7 +118,8 @@ case class TouchpointBackend(environmentName: String,
                              promoService: PromoService,
                              promos: PromotionCollection,
                              promoStorage: JsonDynamoService[AnyPromotion, Future],
-                             discountRatePlanIds: DiscountRatePlanIds) {
+                             discountRatePlanIds: DiscountRatePlanIds,
+                             subsForm: SubscriptionsForm) {
 
   private val that = this
 
