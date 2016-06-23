@@ -7,15 +7,14 @@ import com.gu.memsub.promo.Promotion._
 import com.gu.memsub.promo._
 import com.gu.memsub.services.api.CatalogService
 import com.gu.memsub.services.{SubscriptionService, PaymentService => CommonPaymentService}
-import com.gu.memsub.{BillingPeriod, Digipack, Subscription}
-import com.gu.subscriptions.{DigipackCatalog, DigipackPlan}
+import com.gu.memsub.{Digipack, Subscription}
+import com.gu.subscriptions.DigipackCatalog
 import com.gu.zuora.soap.models.Results.SubscribeResult
 import com.squareup.okhttp.Request.Builder
 import com.squareup.okhttp.{MediaType, OkHttpClient, RequestBody, Response}
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
-import controllers.Checkout._
-import model.SubscriptionData
+import model.SubscribeRequest
 import model.error.ExactTragetService.ExactTargetAuthenticationError
 import model.exactTarget.SubscriptionDataExtensionRow
 import org.joda.time.Days
@@ -45,19 +44,19 @@ trait ExactTargetService extends LazyLogging {
     }).getOrElse(plan.prettyPricing(currency))
   }
 
-  def sendETDataExtensionRow(subscribeResult: SubscribeResult, subscriptionData: SubscriptionData, gracePeriod: Days, validPromotion: Option[ValidPromotion[NewUsers]]): Future[Unit] = {
+  def sendETDataExtensionRow(subscribeResult: SubscribeResult, subscriptionData: SubscribeRequest, gracePeriod: Days, validPromotion: Option[ValidPromotion[NewUsers]]): Future[Unit] = {
     val subscription = subscriptionService.unsafeGetPaid(Subscription.Name(subscribeResult.subscriptionName))(Digipack)
     val paymentMethod = paymentService.getPaymentMethod(Subscription.AccountId(subscribeResult.accountId)).map(
       _.getOrElse(throw new Exception(s"Subscription with no payment method found, ${subscribeResult.subscriptionId}"))
     )
-    val subscriptionDetails = getPlanDescription(validPromotion, subscriptionData.personalData.currency, subscriptionData.productRatePlanId)
+    val subscriptionDetails = getPlanDescription(validPromotion, subscriptionData.genericData.personalData.currency, subscriptionData.productRatePlanId)
     val promotionDescription = validPromotion.filterNot(_.promotion.promotionType == Tracking).map(_.promotion.description)
 
     for {
       sub <- subscription
       pm <- paymentMethod
       row = SubscriptionDataExtensionRow(
-        personalData = subscriptionData.personalData,
+        personalData = subscriptionData.genericData.personalData,
         subscription = sub,
         paymentMethod = pm,
         gracePeriod = gracePeriod,

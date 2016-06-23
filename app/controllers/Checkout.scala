@@ -15,8 +15,9 @@ import configuration.Config.Identity.webAppProfileUrl
 import forms.{FinishAccountForm, SubscriptionsForm}
 import model.error.CheckoutService._
 import model.error.SubsError
-import model.{DirectDebitData, PurchaserIdentifiers, SubscriptionData, SubscriptionRequestData}
-import play.api.data.Form
+import model._
+import play.api.data.{Form, FormError}
+import play.api.libs.iteratee.Iteratee
 import play.api.libs.json._
 import play.api.mvc._
 import services.AuthenticationService.authenticatedUserFor
@@ -31,7 +32,7 @@ import scala.Function.const
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scalaz.std.scalaFuture._
-import scalaz.{NonEmptyList, OptionT}
+import scalaz.{NonEmptyList, OptionT, \/}
 
 object Checkout extends Controller with LazyLogging with ActivityTracking with CatalogProvider {
   object SessionKeys {
@@ -42,13 +43,16 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
     val AppliedPromoCode = "newSubs_appliedPromoCode"
     val Currency = "newSubs_currency"
   }
+
   import SessionKeys.{Currency => _, UserId => _, _}
+
+
 
   def checkoutService(implicit res: TouchpointBackend.Resolution): CheckoutService =
     res.backend.checkoutService
 
-  def getEmptySubscriptionsForm(promoCode: Option[PromoCode]) =
-    SubscriptionsForm().bind(Map("promoCode" -> promoCode.fold("")(_.get)))
+  def getEmptySubscriptionsForm(promoCode: Option[PromoCode])(implicit res: TouchpointBackend.Resolution) =
+    SubscriptionsForm.subsForm.bind(Map("promoCode" -> promoCode.fold("")(_.get)))
 
   def renderCheckout(countryGroup: CountryGroup, promoCode: Option[PromoCode]) = NoSubAction.async { implicit request =>
 
@@ -67,7 +71,7 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
     val defaultPlan = catalog.digipackMonthly
 
     subscriptionData map { subsData =>
-      val form = subsData.fold(getEmptySubscriptionsForm(promoCode)) { data => SubscriptionsForm().fill(data) }
+      val form = subsData.fold(getEmptySubscriptionsForm(promoCode)) { data => SubscriptionsForm.subsForm.fill(data) }
       val countryOpt = subsData.flatMap(data => data.personalData.address.country)
       val countryGroupWithDefault = countryOpt.fold(countryGroup)(c => CountryGroup.byCountryCode(c.alpha2).getOrElse(countryGroup))
       val country = countryOpt orElse countryGroupWithDefault.defaultCountry
@@ -88,20 +92,24 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
     }
   }
 
-  val parseCheckoutForm: BodyParser[SubscriptionData] = parse.form[SubscriptionData](SubscriptionsForm.subsForm, onErrors = formWithErrors => {
-    logger.error(s"Backend form validation failed. Please make sure that the front-end and the backend validations are in sync (validation errors: ${formWithErrors.errors}})")
-    BadRequest
-  })
 
-  def handleCheckout = NoSubAjaxAction.async(parseCheckoutForm) { implicit request =>
-    val formData = request.body
+  def handleCheckout = NoSubAjaxAction.async{ implicit request =>
+
+    //there's an annoying circular dependency going on here
+    val tempData = SubscriptionsForm.subsForm.bindFromRequest().value
+    implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(NameEnteredInForm, tempData)
+    implicit val tpBackend = resolution.backend
     val idUserOpt = authenticatedUserFor(request)
 
-    implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(NameEnteredInForm, formData)
-    implicit val tpBackend = resolution.backend
+
+    val srEither = tpBackend.subsForm.bindFromRequest
+    val subscribeRequest = srEither.valueOr {
+      e => throw new Exception(s"Backend validation failed ${e.map(err => s"${err.key}: ${err.message}").mkString(", ")}")
+    }
+
 
     val requestData = SubscriptionRequestData(ProxiedIP.getIP(request))
-    val checkoutResult = checkoutService.processSubscription(formData, idUserOpt, requestData)
+    val checkoutResult = checkoutService.processSubscription(subscribeRequest, idUserOpt, requestData)
 
     def failure(seqErr: NonEmptyList[SubsError]) = {
       seqErr.head match {
@@ -155,8 +163,8 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
 
       val productData = Seq(
         SubsName -> r.subscribeResult.subscriptionName,
-        RatePlanId -> formData.productRatePlanId.get,
-        SessionKeys.Currency -> formData.personalData.currency.toString
+        RatePlanId -> subscribeRequest.productRatePlanId.get,
+        SessionKeys.Currency -> subscribeRequest.genericData.personalData.currency.toString
       )
 
       val userSessionFields = r.userIdData match {
@@ -173,8 +181,8 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
         _ + _
       }
 
-      catalog.find(formData.productRatePlanId).foreach { plan =>
-        trackAnon(SubscriptionRegistrationActivity(MemberData(r, formData, plan.billingPeriod)))
+      catalog.find(subscribeRequest.productRatePlanId).foreach { plan =>
+        trackAnon(SubscriptionRegistrationActivity(MemberData(r, subscribeRequest, plan.billingPeriod)))
       }
 
       Ok(Json.obj("redirect" -> routes.Checkout.thankYou().url)).withSession(session)

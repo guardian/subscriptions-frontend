@@ -1,7 +1,7 @@
 package utils
 
 import com.github.nscala_time.time.Imports._
-import com.gu.identity.play.{IdMinimalUser, AuthenticatedIdUser}
+import com.gu.identity.play.IdMinimalUser
 import com.gu.identity.testing.usernames.TestUsernames
 import configuration.Config
 import controllers.Testing
@@ -29,8 +29,8 @@ object TestUsers {
     def token(cookies: Cookies) = cookies.get(Testing.PreSigninTestCookieName).map(_.value)
   }
 
-  object NameEnteredInForm extends TestUserCredentialType[SubscriptionData] {
-    def token(formData: SubscriptionData) = Some(formData.personalData.first)
+  object NameEnteredInForm extends TestUserCredentialType[Option[SubscriptionData]] {
+    def token(formData: Option[SubscriptionData]) = formData.map(_.personalData.first)
   }
 
   object SignedInUsername extends TestUserCredentialType[IdMinimalUser] {

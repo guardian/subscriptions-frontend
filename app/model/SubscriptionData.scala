@@ -1,12 +1,14 @@
 package model
 
 import com.gu.i18n.Country.UK
-import com.gu.i18n.{Title, Country, CountryGroup}
+import com.gu.i18n.{Country, CountryGroup, Title}
 import com.gu.identity.play.IdUser
 import com.gu.memsub.Subscription.ProductRatePlanId
-import com.gu.memsub.{FullName, Address}
+import com.gu.memsub.{Address, BillingPeriod, FullName}
 import com.gu.memsub.promo.PromoCode
 import IdUserOps._
+import com.gu.subscriptions.DigipackPlan
+import org.joda.time.LocalDate
 
 sealed trait PaymentType {
   def toKey: String
@@ -52,12 +54,24 @@ case class PersonalData(first: String,
   def toStringSanitized: String = s"${first.head}. $last, ${email.head}**@**${email.last}, ${address.country}"
 }
 
-
 case class SubscriptionData(
-                             personalData: PersonalData,
-                             paymentData: PaymentData,
-                             productRatePlanId: ProductRatePlanId,
-                             suppliedPromoCode: Option[PromoCode])
+ personalData: PersonalData,
+ paymentData: PaymentData,
+ suppliedPromoCode: Option[PromoCode]
+)
+
+case class DigipackData(
+   plan: DigipackPlan[BillingPeriod]
+)
+
+case class PaperData(
+  startDate: LocalDate,
+  deliveryAddress: Address,
+  deliveryInstructions: Option[String],
+  plan: ProductRatePlanId,
+  includesDigipack: Boolean,
+  isHomeDelivery: Boolean
+)
 
 object SubscriptionData {
   def fromIdUser(promoCode: Option[PromoCode])(u: IdUser) = {
@@ -72,12 +86,10 @@ object SubscriptionData {
     )
 
     val blankPaymentData = DirectDebitData("", "", "")
-
-    val blankRatePlanId = ProductRatePlanId("") // this makes me very nervous indeed
-
-    SubscriptionData(personalData, blankPaymentData, blankRatePlanId, promoCode)
-
-
+    SubscriptionData(personalData, blankPaymentData, promoCode)
   }
+}
 
+case class SubscribeRequest(genericData: SubscriptionData, productData: Either[PaperData, DigipackData]) {
+  def productRatePlanId = productData.right.map(_.plan.productRatePlanId).right.getOrElse(throw new Exception("Paper subscription detected"))
 }

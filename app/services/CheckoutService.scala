@@ -38,39 +38,25 @@ class CheckoutService(identityService: IdentityService,
                       promoService: PromoService,
                       promoPlans: DiscountRatePlanIds) extends LazyLogging {
 
-  def processSubscription(subscriptionData: SubscriptionData,
+  def processSubscription(subscriptionData: SubscribeRequest,
                           authenticatedUserOpt: Option[AuthenticatedIdUser],
                           requestData: SubscriptionRequestData
-                         ): Future[NonEmptyList[SubsError] \/ CheckoutSuccess] = {
+                         )(implicit p: PromotionApplicator[NewUsers, Subscribe]): Future[NonEmptyList[SubsError] \/ CheckoutSuccess] = {
 
-    val personalData = subscriptionData.personalData
+    import subscriptionData.genericData._
     val plan = RatePlan(subscriptionData.productRatePlanId.get, None)
-
-    userBecomesSubscriber(authenticatedUserOpt, personalData, requestData, plan, subscriptionData)
-  }
-
-  private def gracePeriod(withPromo: Subscribe, subscribe: Subscribe) =
-    if (withPromo.paymentDelay == subscribe.paymentDelay) zuoraProperties.gracePeriodInDays else ZERO
-
-  private def userBecomesSubscriber(
-       authenticatedUserOpt: Option[AuthenticatedIdUser],
-       personalData: PersonalData,
-       requestData: SubscriptionRequestData,
-       plan: RatePlan,
-       subscriptionData: SubscriptionData)(implicit p: PromotionApplicator[NewUsers, Subscribe]): Future[NonEmptyList[SubsError] \/ CheckoutSuccess] = {
-
     val idMinimalUser = authenticatedUserOpt.map(_.user)
 
     (for {
-      memberId <- EitherT(createOrUpdateUserInSalesforce(personalData, idMinimalUser, subscriptionData))
+      memberId <- EitherT(createOrUpdateUserInSalesforce(personalData, idMinimalUser))
       purchaserIds = PurchaserIdentifiers(memberId, idMinimalUser)
       payment <- EitherT(createPaymentType(personalData, requestData, purchaserIds, subscriptionData))
       subscribe <- EitherT(createSubscribeRequest(personalData, requestData, plan, purchaserIds, payment))
 
-      validPromotion = subscriptionData.suppliedPromoCode.flatMap(promoService.validate[NewUsers](_, personalData.address.country.getOrElse(Country.UK), subscriptionData.productRatePlanId).toOption)
+      validPromotion = suppliedPromoCode.flatMap(promoService.validate[NewUsers](_, personalData.address.country.getOrElse(Country.UK), subscriptionData.productRatePlanId).toOption)
       withPromo = validPromotion.map(v => p.apply(v, subscribe, catalogService.digipackCatalog.unsafeFindPaid, promoPlans)).getOrElse(subscribe)
 
-      result <- EitherT(createSubscription(withPromo, purchaserIds, subscriptionData))
+      result <- EitherT(createSubscription(withPromo, purchaserIds))
       identitySuccess <- storeIdentityDetails(personalData, authenticatedUserOpt, memberId)
 
       // exact target errors are non fatal so we can return what happened along with the checkout success
@@ -79,6 +65,9 @@ class CheckoutService(identityService: IdentityService,
       ))
     } yield result).run
   }
+
+  private def gracePeriod(withPromo: Subscribe, subscribe: Subscribe) =
+    if (withPromo.paymentDelay == subscribe.paymentDelay) zuoraProperties.gracePeriodInDays else ZERO
 
   private def storeIdentityDetails(
       personalData: PersonalData,
@@ -119,11 +108,11 @@ class CheckoutService(identityService: IdentityService,
   }
 
   private def sendETDataExtensionRow(
-      subscribeResult: SubscribeResult,
-      subscriptionData: SubscriptionData,
-      gracePeriodInDays: Days,
-      purchaserIds: PurchaserIdentifiers,
-      validPromotion: Option[ValidPromotion[NewUsers]]): Future[NonEmptyList[SubsError] \/ Unit] =
+                                      subscribeResult: SubscribeResult,
+                                      subscriptionData: SubscribeRequest,
+                                      gracePeriodInDays: Days,
+                                      purchaserIds: PurchaserIdentifiers,
+                                      validPromotion: Option[ValidPromotion[NewUsers]]): Future[NonEmptyList[SubsError] \/ Unit] =
 
     (for {
       a <- exactTargetService.sendETDataExtensionRow(subscribeResult, subscriptionData, gracePeriodInDays, validPromotion)
@@ -135,11 +124,7 @@ class CheckoutService(identityService: IdentityService,
         s"ExactTarget failed to send welcome email to subscriber $purchaserIds")))
     }
 
-  private def createOrUpdateUserInSalesforce(
-      personalData: PersonalData,
-      userData: Option[IdMinimalUser],
-      subscriptionData: SubscriptionData): Future[NonEmptyList[SubsError] \/ ContactId] = {
-
+  private def createOrUpdateUserInSalesforce(personalData: PersonalData, userData: Option[IdMinimalUser]): Future[NonEmptyList[SubsError] \/ ContactId] = {
     (for {
       memberId <- salesforceService.createOrUpdateUser(personalData, userData)
     } yield {
@@ -181,8 +166,7 @@ class CheckoutService(identityService: IdentityService,
 
   private def createSubscription(
       subscribe: Subscribe,
-      purchaserIds: PurchaserIdentifiers,
-      subscriptionData: SubscriptionData): Future[NonEmptyList[SubsError] \/ SubscribeResult] = {
+      purchaserIds: PurchaserIdentifiers): Future[NonEmptyList[SubsError] \/ SubscribeResult] = {
 
     zuoraService.createSubscription(subscribe).map(\/.right).recover {
       case e: PaymentGatewayError => \/.left(NonEmptyList(CheckoutZuoraPaymentGatewayError(
@@ -200,10 +184,10 @@ class CheckoutService(identityService: IdentityService,
       personalData: PersonalData,
       requestData: SubscriptionRequestData,
       purchaserIds: PurchaserIdentifiers,
-      subscriptionData: SubscriptionData): Future[NonEmptyList[SubsError] \/ PaymentService#Payment] = {
+      subscriptionData: SubscribeRequest): Future[NonEmptyList[SubsError] \/ PaymentService#Payment] = {
 
     try {
-      val payment = subscriptionData.paymentData match {
+      val payment = subscriptionData.genericData.paymentData match {
         case paymentData@DirectDebitData(_, _, _) =>
           paymentService.makeDirectDebitPayment(paymentData, personalData, purchaserIds.memberId)
         case paymentData@CreditCardData(_) =>
