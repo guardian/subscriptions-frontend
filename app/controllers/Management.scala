@@ -9,11 +9,12 @@ import play.api.libs.concurrent.Execution.Implicits._
 import play.api.mvc._
 import services.TouchpointBackend
 import actions.CommonActions._
+import com.gu.monitoring.CloudWatchHealth
+import play.api.Logger._
 import views.support.Catalog._
 import play.api.Play.current
 import play.api.libs.concurrent.Akka
-
-import scala.concurrent.Future
+import com.github.nscala_time.time.Imports._
 
 object Management extends Controller with LazyLogging {
   implicit val as = Akka.system
@@ -27,17 +28,33 @@ object Management extends Controller with LazyLogging {
     }
   }
 
+  import TouchpointBackend.Normal._
 
-  def healthcheck = Action.async {
-      (for {
-        _ <- TouchpointBackend.Normal.salesforceService.repo.salesforce.getAuthentication
-        _ <- Future(TouchpointBackend.Normal.promos.all.headOption.getOrElse(throw new IllegalStateException("No promos")))
-      } yield Ok("OK"))
-      .recover { case t: Throwable =>
-        logger.warn("Health check failed", t)
+  trait Test {
+    def ok: Boolean
+    def messages: Seq[String] = Nil
+  }
+
+  class BoolTest(name: String, exec: () => Boolean) extends Test {
+    override def messages = List(s"Test $name failed, health check will fail")
+    override def ok = exec()
+  }
+
+  private def tests = Seq(
+    new BoolTest("CloudWatch", () => CloudWatchHealth.hasPushedMetricSuccessfully),
+    new BoolTest("ZuoraPing", () => zuoraService.lastPingTimeWithin(2.minutes)),
+    new BoolTest("Promotions", () => promos.all.nonEmpty))
+
+  def healthcheck() = Action {
+    Cached(1) {
+      val failures = tests.filterNot(_.ok)
+      if (failures.isEmpty) {
+        Ok("OK")
+      } else {
+        failures.flatMap(_.messages).foreach(msg => warn(msg))
         ServiceUnavailable("Service Unavailable")
       }
-      .map(Cached(1)(_))
+    }
   }
 
   def manifest() = Action {

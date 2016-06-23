@@ -6,6 +6,7 @@ import com.gu.memsub.promo.Promotion._
 import com.gu.memsub.promo.{DynamoPromoCollection, DynamoTables, PromotionCollection}
 import com.gu.memsub.services.{PaymentService => CommonPaymentService, _}
 import com.gu.monitoring.{ServiceMetrics, StatusMetrics}
+import com.gu.salesforce.SimpleContactRepository
 import com.gu.stripe.StripeService
 import com.gu.subscriptions.{DigipackCatalog, Discounter}
 import com.gu.zuora
@@ -28,7 +29,7 @@ object TouchpointBackend {
 
   def apply(backendType: TouchpointBackendConfig.BackendType): TouchpointBackend = {
     val config = TouchpointBackendConfig.backendType(backendType, Config.config)
-    val salesforceService = new SalesforceServiceImp(new SalesforceRepo(config.salesforce))
+    val salesforceService = new SalesforceServiceImp(new SimpleContactRepository(config.salesforce, system.scheduler, Config.appName))
 
     val soapClient = new soap.ClientWithFeatureSupplier(Set.empty, config.zuoraSoap, new ServiceMetrics(Config.stage, Config.appName, "zuora-soap-client"))
     val restClient = new rest.Client(config.zuoraRest, new ServiceMetrics(Config.stage, Config.appName, "zuora-rest-client"))
