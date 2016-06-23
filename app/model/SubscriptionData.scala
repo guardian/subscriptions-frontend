@@ -91,5 +91,5 @@ object SubscriptionData {
 }
 
 case class SubscribeRequest(genericData: SubscriptionData, productData: Either[PaperData, DigipackData]) {
-  def productRatePlanId = productData.fold[ProductRatePlanId](_.plan, _.plan.productRatePlanId)
+  def productRatePlanId = productData.right.map(_.plan.productRatePlanId).right.getOrElse(throw new Exception("Paper subscription detected"))
 }
