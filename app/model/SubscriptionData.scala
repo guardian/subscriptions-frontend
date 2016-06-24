@@ -73,19 +73,6 @@ case class PaperData(
   isHomeDelivery: Boolean
 )
 
-case class DigipackData(
-   plan: DigipackPlan[BillingPeriod]
-)
-
-case class PaperData(
-  startDate: LocalDate,
-  deliveryAddress: Address,
-  deliveryInstructions: Option[String],
-  plan: ProductRatePlanId,
-  includesDigipack: Boolean,
-  isHomeDelivery: Boolean
-)
-
 object PaperData {
   def fromIdUser(u: IdUser) = PaperData(
     LocalDate.now().plusDays(5),
