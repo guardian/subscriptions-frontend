@@ -14,10 +14,10 @@ object CheckoutService {
 
   case class CheckoutSuccess(
       salesforceMember: ContactId,
-      userIdData: UserIdData,
+      userIdData: Option[UserIdData],
       subscribeResult: SubscribeResult,
       validPromoCode: Option[PromoCode],
-      emailStatus: Option[SubsError]) extends CheckoutResult
+      nonFatalErrors: Seq[SubsError]) extends CheckoutResult
 
   case class CheckoutIdentityFailure(
       msg: String,

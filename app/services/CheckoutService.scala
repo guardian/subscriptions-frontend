@@ -14,7 +14,6 @@ import com.gu.zuora.soap.models.Commands.{RatePlan, Subscribe}
 import com.gu.zuora.soap.models.Results.SubscribeResult
 import com.gu.zuora.soap.models.errors._
 import com.typesafe.scalalogging.LazyLogging
-import controllers.Checkout._
 import model._
 import model.error.CheckoutService._
 import model.error.IdentityService._
@@ -24,9 +23,13 @@ import org.joda.time.Days.ZERO
 import touchpoint.ZuoraProperties
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scalaz.{EitherT, Monad, NonEmptyList, \/}
+import com.gu.memsub.promo.Promotion._
+
 import scala.concurrent.Future
 import scalaz.std.scalaFuture._
-import scalaz.{EitherT, Monad, NonEmptyList, ValidationNel, \/}
+import scalaz.syntax.monad._
+import scalaz.std.option._
 
 class CheckoutService(identityService: IdentityService,
                       salesforceService: SalesforceService,
@@ -38,6 +41,11 @@ class CheckoutService(identityService: IdentityService,
                       promoService: PromoService,
                       promoPlans: DiscountRatePlanIds) extends LazyLogging {
 
+  type NonFatalErrors = Seq[SubsError]
+  type PostSubscribeResult = (Option[UserIdData], NonFatalErrors)
+  type SubNel[A] = EitherT[Future, NonEmptyList[SubsError], A]
+  type FatalErrors = NonEmptyList[SubsError]
+
   def processSubscription(subscriptionData: SubscribeRequest,
                           authenticatedUserOpt: Option[AuthenticatedIdUser],
                           requestData: SubscriptionRequestData
@@ -46,32 +54,40 @@ class CheckoutService(identityService: IdentityService,
     import subscriptionData.genericData._
     val plan = RatePlan(subscriptionData.productRatePlanId.get, None)
     def emailError: SubNel[Unit] = EitherT(Future.successful(\/.left(NonEmptyList(CheckoutIdentityFailure("Email in use")))))
-    type SubNel[A] = EitherT[Future, NonEmptyList[SubsError], A]
     val idMinimalUser = authenticatedUserOpt.map(_.user)
 
     (for {
-      userExists <- EitherT(IdentityService.doesUserExist(personalData.email).map(\/.right))
+      userExists <- EitherT(IdentityService.doesUserExist(personalData.email).map(\/.right[FatalErrors, Boolean]))
       _ <- Monad[SubNel].whenM(userExists && authenticatedUserOpt.isEmpty)(emailError)
       memberId <- EitherT(createOrUpdateUserInSalesforce(personalData, idMinimalUser))
       purchaserIds = PurchaserIdentifiers(memberId, idMinimalUser)
       payment <- EitherT(createPaymentType(personalData, requestData, purchaserIds, subscriptionData))
       subscribe <- EitherT(createSubscribeRequest(personalData, requestData, plan, purchaserIds, payment))
-
       validPromotion = suppliedPromoCode.flatMap(promoService.validate[NewUsers](_, personalData.address.country.getOrElse(Country.UK), subscriptionData.productRatePlanId).toOption)
       withPromo = validPromotion.map(v => p.apply(v, subscribe, catalogService.digipackCatalog.unsafeFindPaid, promoPlans)).getOrElse(subscribe)
-
       result <- EitherT(createSubscription(withPromo, purchaserIds))
-      identitySuccess <- storeIdentityDetails(personalData, authenticatedUserOpt, memberId)
-
-      // exact target errors are non fatal so we can return what happened along with the checkout success
-      result <- EitherT(sendETDataExtensionRow(result, subscriptionData, gracePeriod(subscribe, withPromo), purchaserIds, validPromotion).map( f =>
-        \/.right(CheckoutSuccess(memberId, identitySuccess.userData, result, withPromo.promoCode, f.swap.toOption.map(_.head)))
-      ))
-    } yield result).run
+      out <- postSubscribeSteps(authenticatedUserOpt, memberId, result, subscriptionData, validPromotion)
+    } yield CheckoutSuccess(memberId, out._1, result, validPromotion.map(_.code), out._2)).run
   }
 
-  private def gracePeriod(withPromo: Subscribe, subscribe: Subscribe) =
-    if (withPromo.paymentDelay == subscribe.paymentDelay) zuoraProperties.gracePeriodInDays else ZERO
+  def postSubscribeSteps(user: Option[AuthenticatedIdUser],
+                         contactId: ContactId,
+                         result: SubscribeResult,
+                         subscriptionData: SubscribeRequest,
+                         promotion: Option[ValidPromotion[NewUsers]]): SubNel[PostSubscribeResult] = {
+
+    val purchaserIds = PurchaserIdentifiers(contactId, user.map(_.user))
+    val res = (
+      storeIdentityDetails(subscriptionData.genericData.personalData, user, contactId).run |@|
+      sendETDataExtensionRow(result, subscriptionData, gracePeriod(promotion), purchaserIds, promotion)
+    ) { case(id, email) =>
+      (id.toOption.map(_.userData), id.swap.toOption.toSeq.flatMap(_.list) ++ email.swap.toOption.toSeq.flatMap(_.list))
+    }
+    EitherT(res.map(\/.right[FatalErrors, PostSubscribeResult]))
+  }
+
+  private def gracePeriod(promo: Option[ValidPromotion[NewUsers]]) =
+    promo.flatMap(_.promotion.asDiscount).fold(zuoraProperties.gracePeriodInDays)(_ => ZERO)
 
   private def storeIdentityDetails(
       personalData: PersonalData,
@@ -88,7 +104,6 @@ class CheckoutService(identityService: IdentityService,
 
         EitherT(identityService.updateUserDetails(personalData)(authenticatedIdUser).map { _.leftMap(addErrContext(_)) })
       }
-
       case None => {
         logger.info(s"User does not have an Identity account. Creating a guest account")
 

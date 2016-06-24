@@ -20,7 +20,7 @@ object MemberData {
       billingPeriod,
       subscriptionData.genericData.personalData.receiveGnmMarketing,
       checkoutResult.salesforceMember.salesforceContactId,
-      checkoutResult.userIdData.id.toString,
+      checkoutResult.userIdData.map(_.id).mkString,
       subscriptionData.genericData.paymentData
     )
   }
