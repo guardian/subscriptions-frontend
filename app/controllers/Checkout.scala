@@ -114,40 +114,40 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
     def failure(seqErr: NonEmptyList[SubsError]) = {
       seqErr.head match {
         case e: CheckoutIdentityFailure =>
-          logger.error(SubsError.header(seqErr))
-          logger.warn(SubsError.toStringPretty(seqErr))
+          logger.error(SubsError.header(e))
+          logger.warn(SubsError.toStringPretty(e))
 
           Forbidden(Json.obj("type" -> "CheckoutIdentityFailure",
             "message" -> "User could not subscribe because Identity Service could not register the user"))
 
         case e: CheckoutStripeError =>
-          logger.warn(SubsError.toStringPretty(seqErr))
+          logger.warn(SubsError.toStringPretty(e))
 
           Forbidden(Json.obj(
             "type" -> "CheckoutStripeError",
             "message" -> e.paymentError.getMessage))
 
         case e: CheckoutZuoraPaymentGatewayError =>
-          logger.warn(SubsError.toStringPretty(seqErr))
+          logger.warn(SubsError.toStringPretty(e))
           handlePaymentGatewayError(e.paymentError, e.purchaserIds)
 
         case e: CheckoutPaymentTypeFailure =>
-          logger.error(SubsError.header(seqErr))
-          logger.warn(SubsError.toStringPretty(seqErr))
+          logger.error(SubsError.header(e))
+          logger.warn(SubsError.toStringPretty(e))
 
           Forbidden(Json.obj("type" -> "CheckoutPaymentTypeFailure",
             "message" -> e.msg))
 
         case e: CheckoutSalesforceFailure =>
-          logger.error(SubsError.header(seqErr))
-          logger.warn(SubsError.toStringPretty(seqErr))
+          logger.error(SubsError.header(e))
+          logger.warn(SubsError.toStringPretty(e))
 
           Forbidden(Json.obj("type" -> "CheckoutSalesforceFailure",
             "message" -> e.msg))
 
         case e: CheckoutGenericFailure =>
-          logger.error(SubsError.header(seqErr))
-          logger.warn(SubsError.toStringPretty(seqErr))
+          logger.error(SubsError.header(e))
+          logger.warn(SubsError.toStringPretty(e))
 
           Forbidden(Json.obj("type" -> "CheckoutGenericFailure",
             "message" -> "User could not subscribe"))
@@ -156,9 +156,10 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
 
     def success(r: CheckoutSuccess) = {
 
-      r.emailStatus.foreach { e =>
-        logger.error(SubsError.header(NonEmptyList(e)))
-        logger.warn(SubsError.toStringPretty(NonEmptyList(e)))
+      r.nonFatalErrors.map(e => SubsError.header(e) -> SubsError.toStringPretty(e)).foreach {
+        case (h, m) =>
+          logger.warn(h)
+          logger.error(m)
       }
 
       val productData = Seq(
@@ -168,15 +169,12 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
       )
 
       val userSessionFields = r.userIdData match {
-        case GuestUser(UserId(userId), IdentityToken(token)) =>
-          Seq(SessionKeys.UserId -> userId,
-            IdentityGuestPasswordSettingToken -> token)
-
+        case Some(GuestUser(UserId(userId), IdentityToken(token))) =>
+          Seq(SessionKeys.UserId -> userId, IdentityGuestPasswordSettingToken -> token)
         case _ => Seq()
       }
 
       val appliedPromoCode = r.validPromoCode.fold(Seq.empty[(String, String)])(validPromoCode => Seq(AppliedPromoCode -> validPromoCode.get))
-
       val session = (productData ++ userSessionFields ++ appliedPromoCode).foldLeft(request.session.-(AppliedPromoCode)) {
         _ + _
       }

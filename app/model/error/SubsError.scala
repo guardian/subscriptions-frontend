@@ -18,12 +18,11 @@ trait SubsError {
 }
 
 object SubsError {
-  def toStringPretty(seqErr: NonEmptyList[SubsError]): String =
-    seqErr.map(_.toStringPretty()).toString()
+  def toStringPretty(seqErr: SubsError): String =
+    seqErr.toStringPretty().toString
 
-  def header(seqErr: NonEmptyList[SubsError]): String = {
-    val head = seqErr.head
-    s"${head.getClass().getSimpleName}: ${seqErr.head.message}"
+  def header(seqErr: SubsError): String = {
+    s"${seqErr.getClass.getSimpleName}: ${seqErr.message}"
   }
 }
 
