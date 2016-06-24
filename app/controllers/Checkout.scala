@@ -104,7 +104,7 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
 
     val srEither = tpBackend.subsForm.bindFromRequest
     val subscribeRequest = srEither.valueOr {
-      e => throw new Exception(s"Backend validation failed ${e.map(err => s"${err.key}: ${err.message}").mkString(", ")}")
+      e => throw new Exception(s"Backend validation failed ${idUserOpt.map(_.user.id).mkString} ${e.map(err => s"${err.key}: ${err.message}").mkString(", ")}")
     }
 
 
