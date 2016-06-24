@@ -26,7 +26,7 @@ import touchpoint.ZuoraProperties
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scalaz.std.scalaFuture._
-import scalaz.{EitherT, NonEmptyList, \/}
+import scalaz.{EitherT, Monad, NonEmptyList, ValidationNel, \/}
 
 class CheckoutService(identityService: IdentityService,
                       salesforceService: SalesforceService,
@@ -45,9 +45,13 @@ class CheckoutService(identityService: IdentityService,
 
     import subscriptionData.genericData._
     val plan = RatePlan(subscriptionData.productRatePlanId.get, None)
+    def emailError: SubNel[Unit] = EitherT(Future.successful(\/.left(NonEmptyList(CheckoutIdentityFailure("Email in use")))))
+    type SubNel[A] = EitherT[Future, NonEmptyList[SubsError], A]
     val idMinimalUser = authenticatedUserOpt.map(_.user)
 
     (for {
+      userExists <- EitherT(IdentityService.doesUserExist(personalData.email).map(\/.right))
+      _ <- Monad[SubNel].whenM(userExists && authenticatedUserOpt.isEmpty)(emailError)
       memberId <- EitherT(createOrUpdateUserInSalesforce(personalData, idMinimalUser))
       purchaserIds = PurchaserIdentifiers(memberId, idMinimalUser)
       payment <- EitherT(createPaymentType(personalData, requestData, purchaserIds, subscriptionData))
