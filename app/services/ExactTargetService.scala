@@ -105,8 +105,6 @@ object ETClient extends ETClient with LazyLogging {
   private val httpClient = new OkHttpClient()
   private val authEndpoint = "https://auth.exacttargetapis.com/v1/requestToken"
   private val restEndpoint = "https://www.exacttargetapis.com/messaging/v1"
-
-  private val accessToken = Agent(getAccessToken)
   import play.api.Play.current
 
   /**
@@ -172,7 +170,7 @@ object ETClient extends ETClient with LazyLogging {
       val request = new Builder()
                           .url(endpoint)
                           .post(body)
-                          .header("Authorization", s"Bearer ${accessToken.get()}")
+                          .header("Authorization", s"Bearer ${task.get()}")
                           .build()
       val response = httpClient.newCall(request).execute()
 
