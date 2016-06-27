@@ -81,7 +81,7 @@ define([
             if (validity.allValid) {
                 nextStep();
             }
-        })
+        });
     }
 
     function init() {
