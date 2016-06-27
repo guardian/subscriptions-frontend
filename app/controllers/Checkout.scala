@@ -101,12 +101,12 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
     implicit val tpBackend = resolution.backend
     val idUserOpt = authenticatedUserFor(request)
 
-
     val srEither = tpBackend.subsForm.bindFromRequest
     val subscribeRequest = srEither.valueOr {
-      e => throw new Exception(s"Backend validation failed ${idUserOpt.map(_.user.id).mkString} ${e.map(err => s"${err.key}: ${err.message}").mkString(", ")}")
+      e => throw new Exception(s"Backend validation failed: identityId=${idUserOpt.map(_.user.id).mkString};" +
+        s" JavaScriptEnabled=${request.headers.toMap.contains("X-Requested-With")};" +
+        s" ${e.map(err => s"${err.key} ${err.message}").mkString(", ")}")
     }
-
 
     val requestData = SubscriptionRequestData(ProxiedIP.getIP(request))
     val checkoutResult = checkoutService.processSubscription(subscribeRequest, idUserOpt, requestData)
