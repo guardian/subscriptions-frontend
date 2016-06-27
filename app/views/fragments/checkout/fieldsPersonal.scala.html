@@ -41,8 +41,8 @@
         value="@form.map(_.email)" maxlength="80" @signedInAttrs>
     @fragments.forms.errorMessage("")
 </div>
-<div class="form-field @if(form.isDefined) {js-checkout-confirm-email}">
-    @if(form.isEmpty) {
+<div class="form-field @if(form.isEmpty) {js-checkout-confirm-email}">
+    @if(form.isDefined) {
         <input type="hidden" name="personal.emailValidation.confirm" id="confirm" value="@form.map(_.email)">
     } else {
         <label class="label" for="confirm">Confirm email address</label>
