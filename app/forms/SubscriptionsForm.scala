@@ -36,7 +36,7 @@ class SubscriptionsForm(catalogService: CatalogService) {
     "plan" -> of[ProductRatePlanId],
     "digipack" -> of[Boolean],
     "delivery" -> of[Boolean]
-  )(PaperData)(PaperData.unapply))
+  )(PaperData.apply)(PaperData.unapply))
 
   implicit class FormOps[A](in: Form[A]) {
     def asEither: Either[Seq[FormError], A] = in.fold(e => Left(e.errors), Right(_))

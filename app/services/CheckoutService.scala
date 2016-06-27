@@ -89,6 +89,9 @@ class CheckoutService(identityService: IdentityService,
   private def gracePeriod(promo: Option[ValidPromotion[NewUsers]]) =
     promo.flatMap(_.promotion.asDiscount).fold(zuoraProperties.gracePeriodInDays)(_ => ZERO)
 
+  private def gracePeriod(withPromo: Subscribe, subscribe: Subscribe) =
+    if (withPromo.paymentDelay == subscribe.paymentDelay) zuoraProperties.gracePeriodInDays else ZERO
+
   private def storeIdentityDetails(
       personalData: PersonalData,
       authenticatedUserOpt: Option[AuthenticatedIdUser],

@@ -1,4 +1,5 @@
-@(form: Form[model.SubscriptionData])
+@import model.PersonalData
+@(personalData: Option[PersonalData])
 
 @import configuration.Links
 
@@ -37,12 +38,12 @@
         </p>
 
         <label class="option u-pad-bottom" for="receive-gnm-marketing">
-        @defining(form.data.get("personal.receiveGnmMarketing")) { gnmMarketingOpt =>
+        @defining(personalData.exists(_.receiveGnmMarketing)) { gnmMarketingOpt =>
             <span class="option__input">
                 <input type="checkbox"
                     name="personal.receiveGnmMarketing"
                     id="receive-gnm-marketing"
-                    @if(gnmMarketingOpt.contains("on")) { checked="checked" }
+                    @if(gnmMarketingOpt) { checked="checked" }
                     >
             </span>
         }

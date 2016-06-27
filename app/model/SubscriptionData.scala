@@ -73,10 +73,21 @@ case class PaperData(
   isHomeDelivery: Boolean
 )
 
-object SubscriptionData {
-  def fromIdUser(promoCode: Option[PromoCode])(u: IdUser) = {
+object PaperData {
+  def fromIdUser(u: IdUser) = PaperData(
+    LocalDate.now().plusDays(5),
+    u.address,
+    deliveryInstructions = None,
+    plan = ProductRatePlanId(""),
+    includesDigipack = false,
+    isHomeDelivery = false
+  )
+}
+
+object PersonalData {
+  def fromIdUser(u: IdUser) = {
     val personalData = PersonalData(
-      title = u.privateFields.flatMap(_.title).flatMap(Title.fromString(_)),
+      title = u.privateFields.flatMap(_.title).flatMap(Title.fromString),
       first = u.privateFields.flatMap(_.firstName).getOrElse(""),
       last = u.privateFields.flatMap(_.secondName).getOrElse(""),
       email = u.primaryEmailAddress,
@@ -84,11 +95,10 @@ object SubscriptionData {
       address = u.address,
       telephoneNumber = u.privateFields.flatMap(_.telephoneNumber).flatMap(_.localNumber)
     )
-
-    val blankPaymentData = DirectDebitData("", "", "")
-    SubscriptionData(personalData, blankPaymentData, promoCode)
+    personalData
   }
 }
+
 
 case class SubscribeRequest(genericData: SubscriptionData, productData: Either[PaperData, DigipackData]) {
   def productRatePlanId = productData.right.map(_.plan.productRatePlanId).right.getOrElse(throw new Exception("Paper subscription detected"))
