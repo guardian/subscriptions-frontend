@@ -41,7 +41,8 @@ object TouchpointBackend {
 
     val discounter = new Discounter(discountPlans)
     val membershipRatePlanIds = Config.membershipRatePlanIds(config.environmentName)
-    val catalogService = CatalogService(restClient, membershipRatePlanIds, digipackRatePlanIds, config.environmentName)
+    val paperRatePlanIds = Config.paperRatePlanIds(config.environmentName)
+    val catalogService = CatalogService(restClient, membershipRatePlanIds, digipackRatePlanIds, paperRatePlanIds, config.environmentName)
 
     val promoStorage = JsonDynamoService.forTable[AnyPromotion](DynamoTables.promotions(Config.config, config.environmentName))
     val promoCollection = new DynamoPromoCollection(promoStorage)
