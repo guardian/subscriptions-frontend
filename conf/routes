@@ -23,8 +23,7 @@ GET         /au/digital                      controllers.DigitalPack.au
 GET         /int/digital                     controllers.DigitalPack.int
 
 # Checkout
-GET         /checkout                        controllers.Checkout.renderDigipackCheckout(countryGroup: CountryGroup ?= CountryGroup.UK, promoCode: Option[PromoCode])
-GET         /checkout/paper                  controllers.Checkout.renderPaperCheckout(countryGroup: CountryGroup ?= CountryGroup.UK, promoCode: Option[PromoCode])
+GET         /checkout                        controllers.Checkout.renderCheckout(countryGroup: CountryGroup ?= CountryGroup.UK, promoCode: Option[PromoCode])
 POST        /checkout                        controllers.Checkout.handleCheckout
 GET         /checkout/check-identity         controllers.Checkout.checkIdentity(email: String)
 POST        /checkout/check-account          controllers.Checkout.checkAccount

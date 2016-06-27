@@ -10,7 +10,7 @@
 @import model.PersonalData
 
 @(
-    form: Option[PersonalData],
+    personalData: Option[PersonalData],
     plans: Seq[DigipackPlan[BillingPeriod]],
     defaultPlan : DigipackPlan[Month],
     country: Option[Country],
@@ -40,7 +40,7 @@
 
 @main(
     title = "Details - name and address | Subscriptions | The Guardian",
-    jsVars = JsVars(userIsSignedIn = form.isDefined, ignorePageLoadTracking = true, countryGroup = countryGroup, currency = defaultCurrency, country = country),
+    jsVars = JsVars(userIsSignedIn = personalData.isDefined, ignorePageLoadTracking = true, countryGroup = countryGroup, currency = defaultCurrency, country = country),
     bodyClasses = List("is-wide"),
     touchpointBackendResolutionOpt = Some(touchpointBackendResolution)
 ) {
@@ -50,7 +50,7 @@
 <main class="page-container gs-container">
 
     <section class="checkout-container">
-        <form class="form js-checkout-form" action="@routes.Checkout.renderDigipackCheckout(CountryGroup.UK, None).toString" method="POST" novalidate>
+        <form class="form js-checkout-form" action="@routes.Checkout.renderCheckout(CountryGroup.UK, None).toString" method="POST" novalidate>
             @helper.CSRF.formField
 
             @fragments.checkout.checkoutHeader("Digital Pack")
@@ -105,11 +105,11 @@
                                 @fragments.forms.securityNote()
                             </div>
                             <div class="field-note field-note--offset prose">
-                                @if(form.isDefined) {
-                                    <a href="@idWebAppSignOutUrl(routes.Checkout.renderDigipackCheckout(CountryGroup.UK, None))">Sign out</a>
+                                @if(personalData.isDefined) {
+                                    <a href="@idWebAppSignOutUrl(routes.Checkout.renderCheckout(CountryGroup.UK, None))">Sign out</a>
                                 } else {
                                     <span class="field-note__label">Already have a Guardian account?</span>
-                                    <a href="@idWebAppSigninUrl(routes.Checkout.renderDigipackCheckout(CountryGroup.UK, None))">Sign in</a>
+                                    <a href="@idWebAppSigninUrl(routes.Checkout.renderCheckout(CountryGroup.UK, None))">Sign in</a>
                                 }
                             </div>
                         </div>
@@ -117,7 +117,7 @@
                             <a href="#yourDetails" class="text-button u-button-reset js-edit-your-details" title="Edit your personal details">Edit</a>
                         </div>
                         <div class="field-panel__fields">
-                            @fragments.checkout.fieldsPersonal(form, countriesWithCurrency)
+                            @fragments.checkout.fieldsPersonal(personalData, countriesWithCurrency)
 
                             <div class="actions">
                                 <a href="#paymentDetails" class="button button--primary button--large js-checkout-your-details-submit">Continue</a>
@@ -159,7 +159,7 @@
                             <span class="field-panel__legend__num">3</span> Review and confirm
                         </legend>
                         <div class="field-panel__fields">
-                            @fragments.checkout.reviewDetails(form)
+                            @fragments.checkout.reviewDetails(personalData)
                         </div>
                     </fieldset>
                 </div>

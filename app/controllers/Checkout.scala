@@ -54,12 +54,7 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
   def getEmptySubscriptionsForm(promoCode: Option[PromoCode])(implicit res: TouchpointBackend.Resolution) =
     SubscriptionsForm.subsForm.bind(Map("promoCode" -> promoCode.fold("")(_.get)))
 
-  def renderDigipackCheckout(countryGroup: CountryGroup, promoCode: Option[PromoCode]) = renderCheckout(countryGroup, promoCode, false)
-
-  def renderPaperCheckout(countryGroup: CountryGroup, promoCode: Option[PromoCode]) = renderCheckout(countryGroup, promoCode, true)
-
-  def renderCheckout(countryGroup: CountryGroup, promoCode: Option[PromoCode], isPaper: Boolean = false) = NoSubAction.async { implicit request =>
-
+  def renderCheckout(countryGroup: CountryGroup, promoCode: Option[PromoCode]) = NoSubAction.async { implicit request =>
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
 
@@ -84,30 +79,16 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
       val supportedCurrencies = defaultPlan.currencies
       val defaultCurrency = if (supportedCurrencies.contains(desiredCurrency)) desiredCurrency else GBP
 
-      if(isPaper) {
-        Ok(views.html.checkout.paymentPaper(
-          form = personalData,
-          paper = user.map(PaperData.fromIdUser).fold(tpBackend.subsForm.paperForm)(tpBackend.subsForm.paperForm.fill),
-          plans = plans,
-          defaultPlan = defaultPlan,
-          country = country,
-          countryGroup = countryGroupWithDefault,
-          defaultCurrency = defaultCurrency,
-          countriesWithCurrency = CountryWithCurrency.whitelisted(supportedCurrencies, GBP),
-          touchpointBackendResolution = resolution,
-          promoCode = promoCode))
-      } else {
-        Ok(views.html.checkout.paymentDigipack(
-          form = personalData,
-          plans = plans,
-          defaultPlan = defaultPlan,
-          country = country,
-          countryGroup = countryGroupWithDefault,
-          defaultCurrency = defaultCurrency,
-          countriesWithCurrency = CountryWithCurrency.whitelisted(supportedCurrencies, GBP),
-          touchpointBackendResolution = resolution,
-          promoCode = promoCode))
-      }
+      Ok(views.html.checkout.payment(
+        personalData = personalData,
+        plans = plans,
+        defaultPlan = defaultPlan,
+        country = country,
+        countryGroup = countryGroupWithDefault,
+        defaultCurrency = defaultCurrency,
+        countriesWithCurrency = CountryWithCurrency.whitelisted(supportedCurrencies, GBP),
+        touchpointBackendResolution = resolution,
+        promoCode = promoCode))
     }
   }
 
@@ -220,7 +201,6 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
 
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
-
     val session = request.session
 
     val sessionInfo = for {
@@ -230,7 +210,7 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
       currency <- Currency.fromString(currencyStr)
     } yield (subsName, ratePlanId, currency)
 
-    def redirectToEmptyForm = Redirect(routes.Checkout.renderDigipackCheckout(CountryGroup.UK, None)).withNewSession
+    def redirectToEmptyForm = Redirect(routes.Checkout.renderCheckout(CountryGroup.UK, None)).withNewSession
 
     sessionInfo.fold(redirectToEmptyForm) { case (subsName, ratePlanId, currency) =>
       val passwordForm = authenticatedUserFor(request).fold {
