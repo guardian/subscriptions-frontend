@@ -7,6 +7,7 @@ import com.gu.memsub.promo.Promotion._
 import com.gu.memsub.promo._
 import com.gu.memsub.services.api.CatalogService
 import com.gu.memsub.services.{SubscriptionService, PaymentService => CommonPaymentService}
+import com.gu.memsub.util.ScheduledTask
 import com.gu.memsub.{Digipack, Subscription}
 import com.gu.subscriptions.DigipackCatalog
 import com.gu.zuora.soap.models.Results.SubscribeResult
@@ -142,9 +143,12 @@ object ETClient extends ETClient with LazyLogging {
     repeater(3)
   }
 
-  Akka.system.scheduler.schedule(initialDelay = 30.minutes, interval = 30.minutes) {
-    accessToken send getAccessToken
-  }
+  implicit val as = Akka.system
+  val task = ScheduledTask("emails", "", 0.seconds, 30.minutes)(Future {
+    getAccessToken
+  })
+  task.start()
+
 
   /**
    * See https://code.exacttarget.com/apis-sdks/rest-api/v1/messaging/messageDefinitionSends.html
@@ -177,5 +181,5 @@ object ETClient extends ETClient with LazyLogging {
 
   }
 
-  override def forceAccessTokenRefresh() { accessToken send getAccessToken }
+  override def forceAccessTokenRefresh() {}
 }
