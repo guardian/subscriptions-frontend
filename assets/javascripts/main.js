@@ -29,9 +29,11 @@ require([
     checkout,
     confirmation,
     cas,
-    patterns
+    patterns,
+    promise
 ) {
     'use strict';
+    window.Promise = window.Promise || promise;
 
     ajax.init({page: {ajaxUrl: ''}});
     raven.init('https://6dd79da86ec54339b403277d8baac7c8@app.getsentry.com/47380');
