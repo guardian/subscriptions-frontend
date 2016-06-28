@@ -2,10 +2,10 @@ package forms
 
 import com.gu.i18n.{Country, CountryGroup, Title}
 import com.gu.memsub.promo.PromoCode
-import com.gu.memsub.{Address, BillingPeriod}
+import com.gu.memsub.{Address, BillingPeriod, Current, Status}
 import com.gu.memsub.Subscription.ProductRatePlanId
 import com.gu.memsub.services.CatalogService
-import com.gu.subscriptions.DigipackPlan
+import com.gu.subscriptions.{Day, DigipackPlan, PaperPlan}
 import model._
 import play.api.data.format.Formats._
 import play.api.data.format.Formatter
@@ -18,12 +18,20 @@ import scalaz.\/
 
 class SubscriptionsForm(catalogService: CatalogService) {
 
-  implicit val pf = new Formatter[DigipackPlan[BillingPeriod]] {
+  implicit val pf1 = new Formatter[DigipackPlan[BillingPeriod]] {
     override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], DigipackPlan[BillingPeriod]] =
       data.get(key).map(ProductRatePlanId).flatMap(catalogService.digipackCatalog.findPaid).toRight(Seq(FormError(key, "Bad plan")))
     override def unbind(key: String, value: DigipackPlan[BillingPeriod]): Map[String, String] =
       Map(key -> value.productRatePlanId.get)
   }
+
+  implicit val pf2 = new Formatter[PaperPlan[Current, Day]] {
+    override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], PaperPlan[Current, Day]] =
+      data.get(key).map(ProductRatePlanId).flatMap(id => catalogService.paperCatalog.flatMap(_.findCurrent(id))).toRight(Seq(FormError(key, "Bad plan")))
+    override def unbind(key: String, value: PaperPlan[Current, Day]): Map[String, String] =
+      Map(key -> value.productRatePlanId.get)
+  }
+
 
   val digipackForm = Form(mapping(
     "ratePlanId" -> of[DigipackPlan[BillingPeriod]])
@@ -31,11 +39,11 @@ class SubscriptionsForm(catalogService: CatalogService) {
 
   val paperForm = Form(mapping(
     "startDate" -> jodaLocalDate,
-    "deliveryAddress" -> addressDataMapping,
+    "delivery" -> addressDataMapping,
     "deliveryInstructions" -> optional(text),
-    "plan" -> of[ProductRatePlanId],
+    "ratePlanId" -> of[PaperPlan[Current, Day]],
     "digipack" -> of[Boolean],
-    "delivery" -> of[Boolean]
+    "voucher" -> of[Boolean]
   )(PaperData.apply)(PaperData.unapply))
 
   implicit class FormOps[A](in: Form[A]) {

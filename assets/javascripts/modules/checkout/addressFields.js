@@ -17,7 +17,7 @@ define([], function () {
     var formField = function(required, name, element) {
         var e = document.createElement(element);
         e.id = 'address-' + name;
-        e.name = 'personal.address.' + name;
+        e.name = name;
 
         if (required) {
             e.setAttribute('required', 'required');
@@ -47,15 +47,14 @@ define([], function () {
     };
 
 
-    var postcode = function (required, text) {
+    var postcode = function (name, required, text) {
         return {
-            label: label(required, text, 'postcode'),
-            input: textInput(required, 'postcode')
+            label: label(required, text, name),
+            input: textInput(required, name)
         };
     };
 
-    var subdivision = function (required, text, values) {
-        var name = 'subdivision';
+    var subdivision = function (name, required, text, values) {
         return {
             label: label(required, text, name),
             input: values.length ? selectInput(required, name, values) : textInput(required, name)

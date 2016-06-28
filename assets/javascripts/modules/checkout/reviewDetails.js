@@ -38,10 +38,10 @@ define([
             ], ' '));
 
             formEls.$REVIEW_ADDRESS.text(textUtils.mergeValues([
-                formEls.$ADDRESS1.val(),
-                formEls.$ADDRESS2.val(),
-                formEls.$ADDRESS3.val(),
-                formEls.$POSTCODE.val()
+                formEls.BILLING.$ADDRESS1.val(),
+                formEls.BILLING.$ADDRESS2.val(),
+                formEls.BILLING.$ADDRESS3.val(),
+                formEls.BILLING.$POSTCODE.val()
             ], ', '));
 
             formEls.$REVIEW_EMAIL.text(formEls.$EMAIL.val());

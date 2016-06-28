@@ -61,46 +61,4 @@
 
 
 @* ===== Address ===== *@
-<div class="js-checkout-full-address">
-    <div class="form-field">
-        <label class="label" for="country">Country</label>
-        <select name="personal.address.country" class=" select select--wide js-country" required>
-            <option data-currency-choice="USD"></option>
-            @for(c <- countriesWithCurrency) {
-                <option value="@c.alpha2" @c.country.validationRules.toAttributes @c.country.addressLabels data-currency-choice="@c.currency">@c.name</option>
-            }
-        </select>
-        @fragments.forms.errorMessage("This field is required")
-    </div>
-    <div class="form-field js-checkout-house">
-        <label class="label" for="address-line-1">Address line 1</label>
-        @* Salesforce accepts up to 255 chars but this field gets concatenated with address line 2 *@
-        <input type="text" class="input-text js-input" id="address-line-1" name="personal.address.address1"
-            value="@form.map(_.address.lineOne)" maxlength="126" required>
-        @fragments.forms.errorMessage("This field is required")
-    </div>
-    <div class="form-field js-checkout-street">
-        <label class="label optional-marker" for="address-line-2">Address line 2</label>
-        @* Salesforce accepts up to 255 chars but this field gets concatenated with address line 1 *@
-        <input type="text" class="input-text js-input" id="address-line-2" name="personal.address.address2"
-            value="@form.map(_.address.lineTwo)" maxlength="126">
-        @fragments.forms.errorMessage("This field is required")
-    </div>
-    <div class="form-field js-checkout-town">
-        <label class="label" for="address-town">Town/City</label>
-        <input type="text" class="input-text js-input" id="address-town" name="personal.address.town"
-            value="@form.map(_.address.town)" maxlength="40" required>
-        @fragments.forms.errorMessage("This field is required")
-    </div>
-    <div class="form-field js-checkout-subdivision">
-        <label class="label" for="address-subdivision">County</label>
-        <select name="address.subdivision" id="address-subdivision"></select>
-        @fragments.forms.errorMessage("Please enter a valid state/county")
-    </div>
-    <div class="form-field js-checkout-postcode">
-        <label class="label" for="address-postcode">Postcode</label>
-        <input type="text" class="input-text js-input input-text input-text--small"
-        id="address-postcode" name="personal.address.postcode"
-        value="@form.map(_.address.postCode)" maxlength="10" required>
-    @fragments.forms.errorMessage("Please enter a valid postal code")
-</div>
+@address(form.map(_.address), "personal.address", countriesWithCurrency)
