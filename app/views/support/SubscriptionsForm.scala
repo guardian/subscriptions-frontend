@@ -1,5 +1,5 @@
 package views.support
-import com.gu.memsub.{Address, BillingPeriod, Current, PaidPlan}
+import com.gu.memsub._
 import com.gu.subscriptions.{Day, DigipackPlan, PaperPlan}
 
 case class PlanList[+A](default: A, others: A*) {
@@ -9,16 +9,21 @@ case class PlanList[+A](default: A, others: A*) {
 
 sealed trait SubscriptionsForm {
   def plans: PlanList[PaidPlan[Current, BillingPeriod]]
+  def family: ProductFamily
 }
 
 case class DigipackSubscriptionsForm(
   plans: PlanList[DigipackPlan[BillingPeriod]]
-) extends SubscriptionsForm
+) extends SubscriptionsForm {
+  val family = Digipack
+}
 
 case class PaperSubscriptionsForm(
   deliveryAddress: Option[Address],
   plans: PlanList[PaperPlan[Current, Day]]
-) extends SubscriptionsForm
+) extends SubscriptionsForm {
+  val family = Paper
+}
 
 object SubscriptionsForm {
   implicit class EitherySubscriptionsForm(in: SubscriptionsForm) {

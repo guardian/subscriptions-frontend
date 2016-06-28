@@ -38,7 +38,7 @@
             data-number-of-months="@plan.asPaidPlan.billingPeriod.numberOfMonths"
             data-currency="@currency"
             value="@plan.productRatePlanId.get"
-            @if(plan == productData.plans.default && currency == defaultCurrency){checked}
+            @if(plan.fold(identity, identity) == productData.plans.default && currency == defaultCurrency){checked}
             >
         </span>
         <span class="option__label" id="label-for-@plan.productRatePlanId.get-@currency">@plan.asPaidPlan.name @plan.asPaidPlan.prettyPricing(currency)</span>
@@ -60,7 +60,7 @@
         <form class="form js-checkout-form" action="@routes.Checkout.renderCheckout(CountryGroup.UK, None).toString" method="POST" novalidate>
             @helper.CSRF.formField
 
-            @fragments.checkout.checkoutHeader("Digital Pack")
+            @fragments.checkout.checkoutHeader(productData.family.id)
 
             @* ===== Plan selection ===== *@
             <div class="checkout-container__sidebar js-basket">

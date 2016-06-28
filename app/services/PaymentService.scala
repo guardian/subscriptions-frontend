@@ -2,7 +2,7 @@ package services
 
 import com.gu.i18n.Country.UK
 import com.gu.i18n.{Currency, GBP}
-import com.gu.memsub.BillingPeriod
+import com.gu.memsub.{BillingPeriod, Current, PaidPlan}
 import com.gu.salesforce.ContactId
 import com.gu.stripe.StripeService
 import com.gu.subscriptions.DigipackPlan
@@ -51,7 +51,7 @@ trait PaymentService {
      paymentData: CreditCardData,
      personalData: PersonalData,
      purchaserIds: PurchaserIdentifiers,
-     plan: DigipackPlan[BillingPeriod]) = {
+     plan: PaidPlan[Current, BillingPeriod]) = {
     val desiredCurrency = personalData.currency
     val currency = if (plan.currencies.contains(desiredCurrency)) desiredCurrency else GBP
 

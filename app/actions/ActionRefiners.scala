@@ -18,7 +18,7 @@ object ActionRefiners {
         val tp = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)(request).backend
         (for {
           sf <- OptionT(tp.salesforceService.repo.get(user.id))
-          sub <- OptionT(tp.subscriptionService.get(sf)(Digipack))
+          sub <- OptionT(tp.subscriptionService.get(sf))
         } yield onSubscription(sub)).run
       }
     }

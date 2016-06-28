@@ -14,7 +14,7 @@ object Pricing {
     def asPaidPlan: PaidPlan[Current, BP] = in.fold(identity, identity)
   }
 
-  implicit class PlanWithPricing(digipackPlan: PaidPlan[Current, BP]) {
+  implicit class PlanWithPricing(digipackPlan: PaidPlan[Status, BP]) {
     lazy val gbpPrice = digipackPlan.pricing.getPrice(GBP).get
 
     def unsafePrice(currency: Currency) = digipackPlan.pricing.getPrice(currency).getOrElse(

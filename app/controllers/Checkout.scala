@@ -233,7 +233,12 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
         const(None)
       } // Don't display the user registration form if the user is logged in
 
-      val plan = catalog.unsafeFindPaid(ProductRatePlanId(ratePlanId))
+
+      val prpId = ProductRatePlanId(ratePlanId)
+
+      val plan =
+        (tpBackend.catalogService.digipackCatalog.findPaid(prpId) orElse
+        tpBackend.catalogService.paperCatalog.flatMap(_.findCurrent(prpId))).get
 
       val promotion = session.get(AppliedPromoCode).flatMap(code => resolution.backend.promoService.findPromotion(PromoCode(code)))
 

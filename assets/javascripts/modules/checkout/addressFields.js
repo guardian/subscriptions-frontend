@@ -16,7 +16,7 @@ define([], function () {
 
     var formField = function(required, name, element) {
         var e = document.createElement(element);
-        e.id = 'address-' + name;
+        e.id = name.split('.').join('-');
         e.name = name;
 
         if (required) {

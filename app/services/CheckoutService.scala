@@ -61,7 +61,7 @@ class CheckoutService(identityService: IdentityService,
       _ <- Monad[SubNel].whenM(userExists && authenticatedUserOpt.isEmpty)(emailError)
       memberId <- EitherT(createOrUpdateUserInSalesforce(personalData, idMinimalUser))
       purchaserIds = PurchaserIdentifiers(memberId, idMinimalUser)
-      payment <- EitherT(createPaymentType(personalData, requestData, purchaserIds, subscriptionData))
+      payment <- EitherT(createPaymentType(requestData, purchaserIds, subscriptionData))
       subscribe <- EitherT(createSubscribeRequest(personalData, requestData, plan, purchaserIds, payment))
       validPromotion = suppliedPromoCode.flatMap(promoService.validate[NewUsers](_, personalData.address.country.getOrElse(Country.UK), subscriptionData.productRatePlanId).toOption)
       withPromo = validPromotion.map(v => p.apply(v, subscribe, catalogService.digipackCatalog.unsafeFindPaid, promoPlans)).getOrElse(subscribe)
@@ -203,7 +203,6 @@ class CheckoutService(identityService: IdentityService,
   }
 
   private def createPaymentType(
-      personalData: PersonalData,
       requestData: SubscriptionRequestData,
       purchaserIds: PurchaserIdentifiers,
       subscriptionData: SubscribeRequest): Future[NonEmptyList[SubsError] \/ PaymentService#Payment] = {
@@ -211,10 +210,9 @@ class CheckoutService(identityService: IdentityService,
     try {
       val payment = subscriptionData.genericData.paymentData match {
         case paymentData@DirectDebitData(_, _, _) =>
-          paymentService.makeDirectDebitPayment(paymentData, personalData, purchaserIds.memberId)
+          paymentService.makeDirectDebitPayment(paymentData, subscriptionData.genericData.personalData, purchaserIds.memberId)
         case paymentData@CreditCardData(_) =>
-          val digipackPlan = catalogService.digipackCatalog.unsafeFind(subscriptionData.productRatePlanId)
-          paymentService.makeCreditCardPayment(paymentData, personalData, purchaserIds, digipackPlan)
+          paymentService.makeCreditCardPayment(paymentData, subscriptionData.genericData.personalData, purchaserIds, subscriptionData.productData.fold(_.plan, _.plan))
       }
       Future.successful(\/.right(payment))
     } catch {

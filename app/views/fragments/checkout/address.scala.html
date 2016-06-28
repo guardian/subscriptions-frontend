@@ -9,7 +9,7 @@
 
 
 @attrs(field: String) = @{
-    Html(s"id='${namePrefix.replace('.', '-')}-${field}' name='${namePrefix}.${field}'")
+    Html(s"id='${(namePrefix + "-" + field).replace('.', '-')}' name='${namePrefix}.${field}'")
 }
 
 @* ===== Address ===== *@
