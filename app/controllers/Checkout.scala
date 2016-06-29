@@ -34,6 +34,8 @@ import scala.concurrent.Future
 import scalaz.std.scalaFuture._
 import scalaz.{NonEmptyList, OptionT, \/}
 import model.IdUserOps._
+import touchpoint.TouchpointBackendConfig.BackendType
+import utils.TestUsers
 
 object Checkout extends Controller with LazyLogging with ActivityTracking with CatalogProvider {
   object SessionKeys {
@@ -54,6 +56,10 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
 
   def getEmptySubscriptionsForm(promoCode: Option[PromoCode])(implicit res: TouchpointBackend.Resolution) =
     SubscriptionsForm.subsForm.bind(Map("promoCode" -> promoCode.fold("")(_.get)))
+
+  def renderPaperCheckout(countryGroup: CountryGroup, promoCode: Option[PromoCode], productFamily: ProductFamily = Digipack) = Action.async { req =>
+    renderCheckout(countryGroup, promoCode, productFamily = Paper).apply(req)
+  }
 
   def renderCheckout(countryGroup: CountryGroup, promoCode: Option[PromoCode], productFamily: ProductFamily = Digipack) = NoSubAction.async { implicit request =>
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
@@ -102,8 +108,11 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
     }
   }
 
+  def handlePaperCheckout = AuthorisedTester.async { req =>
+    handleCheckout(allowPaper = true).apply(req)
+  }
 
-  def handleCheckout = NoSubAjaxAction.async{ implicit request =>
+  def handleCheckout(allowPaper: Boolean = false) = NoSubAjaxAction.async { implicit request =>
 
     //there's an annoying circular dependency going on here
     val tempData = SubscriptionsForm.subsForm.bindFromRequest().value
@@ -112,10 +121,15 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
     val idUserOpt = authenticatedUserFor(request)
 
     val srEither = tpBackend.subsForm.bindFromRequest
+
     val subscribeRequest = srEither.valueOr {
       e => throw new Exception(s"Backend validation failed: identityId=${idUserOpt.map(_.user.id).mkString};" +
         s" JavaScriptEnabled=${request.headers.toMap.contains("X-Requested-With")};" +
         s" ${e.map(err => s"${err.key} ${err.message}").mkString(", ")}")
+    }
+
+    subscribeRequest.productData.left.foreach { _ =>
+      if (!allowPaper) throw new Exception("paper not allowed")
     }
 
     val requestData = SubscriptionRequestData(ProxiedIP.getIP(request))

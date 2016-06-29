@@ -57,10 +57,10 @@
 <main class="page-container gs-container">
 
     <section class="checkout-container">
-        <form class="form js-checkout-form" action="@routes.Checkout.renderCheckout(CountryGroup.UK, None).toString" method="POST" novalidate>
+        <form class="form js-checkout-form" action="" method="POST" novalidate>
             @helper.CSRF.formField
 
-            @fragments.checkout.checkoutHeader(productData.family.id)
+            @fragments.checkout.checkoutHeader("Digital Pack")
 
             @* ===== Plan selection ===== *@
             <div class="checkout-container__sidebar js-basket">
