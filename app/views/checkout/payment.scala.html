@@ -41,7 +41,7 @@
             @if(plan.fold(identity, identity) == productData.plans.default && currency == defaultCurrency){checked}
             >
         </span>
-        <span class="option__label" id="label-for-@plan.productRatePlanId.get-@currency">@plan.asPaidPlan.name @plan.asPaidPlan.prettyPricing(currency)</span>
+        <span class="option__label" id="label-for-@plan.productRatePlanId.get-@currency">@plan.asPaidPlan.prettyPricing(currency)</span>
     </label>
 }
 
