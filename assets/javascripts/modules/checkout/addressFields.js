@@ -3,7 +3,7 @@ define([], function () {
 
     var label = function (required, text, forAttr) {
         var labelElement = document.createElement('label');
-        labelElement.setAttribute('for', 'address-' + forAttr);
+        labelElement.setAttribute('for', forAttr.split('.').join('-'));
 
         if(!required) {
             labelElement.classList.add('optional-marker');
