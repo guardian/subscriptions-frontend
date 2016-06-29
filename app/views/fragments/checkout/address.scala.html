@@ -12,10 +12,14 @@
     Html(s"id='${(namePrefix + "-" + field).replace('.', '-')}' name='${namePrefix}.${field}'")
 }
 
+@labelFor(field: String) = @{
+    Html(s"for='${(namePrefix + "-" + field).replace('.', '-')}'")
+}
+
 @* ===== Address ===== *@
 <div class="js-checkout-@{namePrefix.replace('.', '-')}">
     <div class="form-field">
-        <label class="label" for="country">Country</label>
+        <label class="label" @labelFor("country")>Country</label>
         <select @attrs("country") class=" select select--wide js-country" required>
             <option data-currency-choice="USD"></option>
             @for(c <- countriesWithCurrency) {
@@ -25,32 +29,32 @@
         @fragments.forms.errorMessage("This field is required")
     </div>
     <div class="form-field js-checkout-house">
-        <label class="label" for="address-line-1">Address line 1</label>
+        <label class="label" @labelFor("address1")>Address line 1</label>
         @* Salesforce accepts up to 255 chars but this field gets concatenated with address line 2 *@
         <input type="text" class="input-text js-input" @attrs("address1")
             value="@address.map(_.lineOne)" maxlength="126" required>
         @fragments.forms.errorMessage("This field is required")
     </div>
     <div class="form-field js-checkout-street">
-        <label class="label optional-marker" for="address-line-2">Address line 2</label>
+        <label class="label optional-marker" @labelFor("address2")>Address line 2</label>
         @* Salesforce accepts up to 255 chars but this field gets concatenated with address line 1 *@
         <input type="text" class="input-text js-input" @attrs("address2")
             value="@address.map(_.lineTwo)" maxlength="126">
         @fragments.forms.errorMessage("This field is required")
     </div>
     <div class="form-field js-checkout-town">
-        <label class="label" for="address-town">Town/City</label>
+        <label class="label" @labelFor("town")>Town/City</label>
         <input type="text" class="input-text js-input" @attrs("town")
             value="@address.map(_.town)" maxlength="40" required>
         @fragments.forms.errorMessage("This field is required")
     </div>
     <div class="form-field js-checkout-subdivision">
-        <label class="label" for="address-subdivision">County</label>
+        <label class="label" @labelFor("subdivision")>County</label>
         <select @attrs("subdivision")></select>
         @fragments.forms.errorMessage("Please enter a valid state/county")
     </div>
     <div class="form-field js-checkout-postcode">
-        <label class="label" for="address-postcode">Postcode</label>
+        <label class="label" @labelFor("postcode")>Postcode</label>
         <input type="text" class="input-text js-input input-text input-text--small" @attrs("postcode")
         value="@address.map(_.postCode)" maxlength="10" required>
         @fragments.forms.errorMessage("Please enter a valid postal code")

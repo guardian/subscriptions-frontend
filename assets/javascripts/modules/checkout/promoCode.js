@@ -81,7 +81,7 @@ define([
     }
 
     function validate() {
-        var country = guardian.country.value.trim(),
+        var country = formElements.BILLING.$COUNTRY_SELECT.val().trim(),
             promoCode = $inputBox.val().trim();
 
         if (country === '' || promoCode === '') {
