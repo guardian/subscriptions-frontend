@@ -78,7 +78,7 @@ define([
                 }
 
                 ajax({
-                    url: form.action,
+                    url: window.location.href,
                     method: 'post',
                     data: data,
                     success: function(successData) {
