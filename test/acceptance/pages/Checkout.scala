@@ -54,10 +54,10 @@ case class Checkout(val testUser: TestUser) extends Page with Browser {
     val lastName = id("last")
     val email = id("email")
     val emailConfirm = id("confirm")
-    val address1 = id("address-line-1")
-    val address2 = id("address-line-2")
-    val town = id("address-town")
-    val postcode = id("address-postcode")
+    val address1 = id("personal-address-address1")
+    val address2 = id("personal-address-address2")
+    val town = id("personal-address-town")
+    val postcode = id("personal-address-postcode")
     val continueButton = cssSelector(".js-checkout-your-details-submit")
 
     def fillIn(): Unit = {

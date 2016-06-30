@@ -1,15 +1,12 @@
 package services
-
-import akka.agent.Agent
+import views.support.Pricing._
 import com.gu.i18n.Currency
-import com.gu.memsub.Subscription.ProductRatePlanId
 import com.gu.memsub.promo.Promotion._
 import com.gu.memsub.promo._
-import com.gu.memsub.services.api.CatalogService
 import com.gu.memsub.services.{SubscriptionService, PaymentService => CommonPaymentService}
 import com.gu.memsub.util.ScheduledTask
-import com.gu.memsub.{Digipack, Subscription}
-import com.gu.subscriptions.DigipackCatalog
+import com.gu.memsub._
+import com.gu.subscriptions.{DigipackCatalog, PaperCatalog}
 import com.gu.zuora.soap.models.Results.SubscribeResult
 import com.squareup.okhttp.Request.Builder
 import com.squareup.okhttp.{MediaType, OkHttpClient, RequestBody, Response}
@@ -30,13 +27,11 @@ import scala.concurrent.duration._
 trait ExactTargetService extends LazyLogging {
   lazy val etClient: ETClient = ETClient
 
-  def subscriptionService: SubscriptionService[DigipackCatalog]
+  def digiSubscriptionService: SubscriptionService[DigipackCatalog]
+  def paperSubscriptionService: Option[SubscriptionService[PaperCatalog]]
   def paymentService: CommonPaymentService
-  def catalogService: CatalogService
 
-  private def getPlanDescription(validPromotion: Option[ValidPromotion[NewUsers]], currency: Currency, ratePlanId: ProductRatePlanId): String = {
-    import views.support.Pricing._
-    val plan = catalogService.digipackCatalog.findPaid(ratePlanId).getOrElse(throw new Exception(s"Rate plan not found in catalog: $ratePlanId"))
+  private def getPlanDescription(validPromotion: Option[ValidPromotion[NewUsers]], currency: Currency, plan: PaidPlan[Status, BillingPeriod]): String = {
     (for {
       vp <- validPromotion
       discountPromotion <- vp.promotion.asDiscount
@@ -46,11 +41,17 @@ trait ExactTargetService extends LazyLogging {
   }
 
   def sendETDataExtensionRow(subscribeResult: SubscribeResult, subscriptionData: SubscribeRequest, gracePeriod: Days, validPromotion: Option[ValidPromotion[NewUsers]]): Future[Unit] = {
-    val subscription = subscriptionService.unsafeGetPaid(Subscription.Name(subscribeResult.subscriptionName))(Digipack)
+
+    val subscription = subscriptionData.productData.fold({ paper =>
+      paperSubscriptionService.get.unsafeGetPaid(Subscription.Name(subscribeResult.subscriptionName))
+    }, {digipack =>
+      digiSubscriptionService.unsafeGetPaid(Subscription.Name(subscribeResult.subscriptionName))
+    })
+
     val paymentMethod = paymentService.getPaymentMethod(Subscription.AccountId(subscribeResult.accountId)).map(
       _.getOrElse(throw new Exception(s"Subscription with no payment method found, ${subscribeResult.subscriptionId}"))
     )
-    val subscriptionDetails = getPlanDescription(validPromotion, subscriptionData.genericData.personalData.currency, subscriptionData.productRatePlanId)
+
     val promotionDescription = validPromotion.filterNot(_.promotion.promotionType == Tracking).map(_.promotion.description)
 
     for {
@@ -61,7 +62,7 @@ trait ExactTargetService extends LazyLogging {
         subscription = sub,
         paymentMethod = pm,
         gracePeriod = gracePeriod,
-        subscriptionDetails = subscriptionDetails,
+        subscriptionDetails = getPlanDescription(validPromotion, subscriptionData.genericData.personalData.currency, sub.plan),
         promotionDescription = promotionDescription
       )
       response <- etClient.sendSubscriptionRow(row)

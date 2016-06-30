@@ -9,9 +9,16 @@
 @import com.gu.memsub.promo.PromoCode
 @import model.PersonalData
 
+@import views.support.SubscriptionsForm
+@import views.support.SubscriptionsForm._
+@import com.gu.memsub.Current
+@import com.gu.subscriptions.PaperPlan
+@import com.gu.subscriptions.Day
+@import com.gu.i18n.Currency
+@import com.gu.i18n.Country
 @(
     personalData: Option[PersonalData],
-    plans: Seq[DigipackPlan[BillingPeriod]],
+    productData: SubscriptionsForm,
     defaultPlan : DigipackPlan[Month],
     country: Option[Country],
     countryGroup: CountryGroup,
@@ -20,21 +27,21 @@
     touchpointBackendResolution: services.TouchpointBackend.Resolution,
     promoCode: Option[PromoCode])(implicit request: RequestHeader)
 
-@priceOption(plan: DigipackPlan[BillingPeriod], currency: Currency) = {
+@priceOption(plan: Either[DigipackPlan[BillingPeriod], PaperPlan[Current, Day]], currency: Currency) = {
     <label class="option" data-currency="@currency">
         <span class="option__input">
             <input
             type="radio" name="ratePlanId"
-            data-option-mirror-label-default="@plan.prettyPricing(currency)"
-            data-option-mirror-label="@plan.prettyPricing(currency)"
-            data-amount="@plan.gbpPrice.amount"
-            data-number-of-months="@plan.billingPeriod.numberOfMonths"
+            data-option-mirror-label-default="@plan.asPaidPlan.prettyPricing(currency)"
+            data-option-mirror-label="@plan.asPaidPlan.prettyPricing(currency)"
+            data-amount="@plan.asPaidPlan.gbpPrice.amount"
+            data-number-of-months="@plan.asPaidPlan.billingPeriod.numberOfMonths"
             data-currency="@currency"
             value="@plan.productRatePlanId.get"
-            @if(plan == defaultPlan && currency == defaultCurrency){checked}
+            @if(plan.fold(identity, identity) == productData.plans.default && currency == defaultCurrency){checked}
             >
         </span>
-        <span class="option__label" id="label-for-@plan.productRatePlanId.get-@currency">@plan.prettyPricing(currency)</span>
+        <span class="option__label" id="label-for-@plan.productRatePlanId.get-@currency">@plan.asPaidPlan.prettyPricing(currency)</span>
     </label>
 }
 
@@ -50,7 +57,7 @@
 <main class="page-container gs-container">
 
     <section class="checkout-container">
-        <form class="form js-checkout-form" action="@routes.Checkout.renderCheckout(CountryGroup.UK, None).toString" method="POST" novalidate>
+        <form class="form js-checkout-form" action="" method="POST" novalidate>
             @helper.CSRF.formField
 
             @fragments.checkout.checkoutHeader("Digital Pack")
@@ -64,8 +71,8 @@
                     </a>
                 </div>
                 <fieldset class="basket-billing-options is-hidden js-payment-frequency js-option-mirror-group" id="change-payment-frequency">
-                    @plans.map { p =>
-                        @p.currencies.map { c =>
+                    @productData.toPlanEither.list.map { p =>
+                        @p.asPaidPlan.currencies.map { c =>
                             @priceOption(p, c)
                         }
                     }
@@ -117,6 +124,9 @@
                         </div>
                         <div class="field-panel__fields">
                             @fragments.checkout.fieldsPersonal(personalData, countriesWithCurrency)
+                            @for(p <- productData.paper) {
+                                @fragments.checkout.fieldsPaper(p, countriesWithCurrency)
+                            }
 
                             <div class="actions">
                                 <a href="#paymentDetails" class="button button--primary button--large js-checkout-your-details-submit">Continue</a>

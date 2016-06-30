@@ -14,20 +14,45 @@ define(['$'], function ($) {
         return ratePlanId;
     };
 
+    var addressFields = function(relativeTo) {
+
+        var container = $(relativeTo)[0];
+        var $ADDRESS1_CONTAINER = $('.js-checkout-house', container);
+        var $ADDRESS2_CONTAINER = $('.js-checkout-street', container);
+        var $ADDRESS3_CONTAINER = $('.js-checkout-town', container);
+        var $SUBDIVISION_CONTAINER = $('.js-checkout-subdivision', container);
+        var $POSTCODE_CONTAINER = $('.js-checkout-postcode', container);
+        var $MANUAL_ADDRESS_CONTAINER = $('.js-checkout-manual-address', container); //wat
+
+        return {
+            $ADDRESS1_CONTAINER: $ADDRESS1_CONTAINER,
+            $ADDRESS2_CONTAINER: $ADDRESS2_CONTAINER,
+            $ADDRESS3_CONTAINER: $ADDRESS3_CONTAINER,
+            $SUBDIVISION_CONTAINER: $SUBDIVISION_CONTAINER,
+            $POSTCODE_CONTAINER: $POSTCODE_CONTAINER,
+            $MANUAL_ADDRESS_CONTAINER: $MANUAL_ADDRESS_CONTAINER, //wat
+
+            $ADDRESS1: $('.js-input', $ADDRESS1_CONTAINER[0]),
+            $ADDRESS2: $('.js-input', $ADDRESS2_CONTAINER[0]),
+            $ADDRESS3: $('.js-input', $ADDRESS3_CONTAINER[0]),
+            $POSTCODE: $('.js-input', $POSTCODE_CONTAINER[0]),
+            $SUBDIVISION: $('select', $SUBDIVISION_CONTAINER[0]),
+            $COUNTRY_SELECT: $('.js-country', container)
+        };
+    };
+
     return {
         $CHECKOUT_FORM: $('.js-checkout-form'),
-
         $NOTICES: $('.js-checkout-notices'),
+
+        BILLING: addressFields('.js-checkout-personal-address'),
+        DELIVERY: addressFields('.js-checkout-delivery'),
 
         $FIRST_NAME: $('.js-checkout-first .js-input'),
         $LAST_NAME: $('.js-checkout-last .js-input'),
         $EMAIL: $('.js-checkout-email .js-input'),
         $CONFIRM_EMAIL: $('.js-checkout-confirm-email .js-input'),
         $EMAIL_ERROR: $('.js-checkout-email .js-error-message'),
-        $ADDRESS1: $('.js-checkout-house .js-input'),
-        $ADDRESS2: $('.js-checkout-street .js-input'),
-        $ADDRESS3: $('.js-checkout-town .js-input'),
-        $POSTCODE: $('.js-checkout-postcode .js-input'),
 
         // Promo Code:
         $PROMO_CODE : $('.js-promo-code .js-input'),
@@ -61,13 +86,6 @@ define(['$'], function ($) {
         $LAST_NAME_CONTAINER: $('.js-checkout-last'),
         $EMAIL_CONTAINER: $('.js-checkout-email'),
         $CONFIRM_EMAIL_CONTAINER: $('.js-checkout-confirm-email'),
-        $ADDRESS1_CONTAINER: $('.js-checkout-house'),
-        $ADDRESS2_CONTAINER: $('.js-checkout-street'),
-        $ADDRESS3_CONTAINER: $('.js-checkout-town'),
-        $SUBDIVISION_CONTAINER: $('.js-checkout-subdivision'),
-        $POSTCODE_CONTAINER: $('.js-checkout-postcode'),
-        $MANUAL_ADDRESS_CONTAINER: $('.js-checkout-manual-address'),
-        $FULL_ADDRESS_CONTAINER: $('.js-checkout-full-address'),
 
         $YOUR_DETAILS_SUBMIT: $('.js-checkout-your-details-submit'),
         $PAYMENT_DETAILS_SUBMIT: $('.js-checkout-payment-details-submit'),
@@ -89,8 +107,6 @@ define(['$'], function ($) {
         $EDIT_PAYMENT_DETAILS: $('.js-edit-payment-details'),
 
         $BASKET: $('.js-basket'),
-
-        $COUNTRY_SELECT: $('.js-country'),
         $PLAN_INPUTS :_PLAN_INPUTS,
 
         getRatePlanId: getRatePlanId

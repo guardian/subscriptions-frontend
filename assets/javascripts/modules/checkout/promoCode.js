@@ -3,9 +3,8 @@ define([
     'bean',
     'modules/forms/toggleError',
     'utils/ajax',
-    'modules/checkout/formElements',
-    'modules/checkout/countryChoice'
-], function ($, bean, toggleError, ajax, formElements, countryChoice) {
+    'modules/checkout/formElements'
+], function ($, bean, toggleError, ajax, formElements) {
     'use strict';
 
     var $inputBox           = formElements.$PROMO_CODE,
@@ -82,8 +81,8 @@ define([
     }
 
     function validate() {
-        var country = countryChoice.getCurrentCountryOption().value.trim(),
-            promoCode  = $inputBox.val().trim();
+        var country = formElements.BILLING.$COUNTRY_SELECT.val().trim(),
+            promoCode = $inputBox.val().trim();
 
         if (country === '' || promoCode === '') {
             clearDown();
@@ -121,7 +120,7 @@ define([
 
     return {
         init: function () {
-            var $countrySelectBox = formElements.$COUNTRY_SELECT,
+            var $countrySelectBox = formElements.BILLING.$COUNTRY_SELECT,
                 $promoCodeButton = formElements.$PROMO_CODE_BTN;
 
             if ($countrySelectBox.length && $promoCodeButton.length) {

@@ -4,10 +4,10 @@ import com.gu.i18n.Country.UK
 import com.gu.i18n.{Country, CountryGroup, Title}
 import com.gu.identity.play.IdUser
 import com.gu.memsub.Subscription.ProductRatePlanId
-import com.gu.memsub.{Address, BillingPeriod, FullName}
+import com.gu.memsub.{Address, BillingPeriod, Current, FullName}
 import com.gu.memsub.promo.PromoCode
 import IdUserOps._
-import com.gu.subscriptions.DigipackPlan
+import com.gu.subscriptions.{Day, DigipackPlan, PaperPlan}
 import org.joda.time.LocalDate
 
 sealed trait PaymentType {
@@ -68,21 +68,10 @@ case class PaperData(
   startDate: LocalDate,
   deliveryAddress: Address,
   deliveryInstructions: Option[String],
-  plan: ProductRatePlanId,
+  plan: PaperPlan[Current, Day],
   includesDigipack: Boolean,
   isHomeDelivery: Boolean
 )
-
-object PaperData {
-  def fromIdUser(u: IdUser) = PaperData(
-    LocalDate.now().plusDays(5),
-    u.address,
-    deliveryInstructions = None,
-    plan = ProductRatePlanId(""),
-    includesDigipack = false,
-    isHomeDelivery = false
-  )
-}
 
 object PersonalData {
   def fromIdUser(u: IdUser) = {
@@ -101,5 +90,5 @@ object PersonalData {
 
 
 case class SubscribeRequest(genericData: SubscriptionData, productData: Either[PaperData, DigipackData]) {
-  def productRatePlanId = productData.right.map(_.plan.productRatePlanId).right.getOrElse(throw new Exception("Paper subscription detected"))
+  def productRatePlanId = productData.fold(_.plan.productRatePlanId, _.plan.productRatePlanId)
 }

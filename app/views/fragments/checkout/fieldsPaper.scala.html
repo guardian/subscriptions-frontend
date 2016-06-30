@@ -1,0 +1,26 @@
+@import views.support.CountryOps._
+@import views.support.AddressValidationRulesOps._
+@import views.support.CountryWithCurrency
+@import com.gu.i18n.Title
+@import model.PersonalData
+@import views.support.PaperSubscriptionsForm
+
+@(data: PaperSubscriptionsForm, countriesWithCurrency: List[CountryWithCurrency])
+
+@address(data.deliveryAddress, "delivery", countriesWithCurrency)
+
+<div class="js-checkout-delivery-data">
+    <div class="form-field js-checkout-delivery">
+        <label class="label" for="address-town">Delivery instructions</label>
+        <textarea class="input-text js-input" id="delivery-instructions" name="deliveryInstructions"></textarea>
+    </div>
+    <div class="form-field js-checkout-delivery">
+        <label class="label" for="address-town">Date of first paper</label>
+        <input class="input-text js-input" id="delivery-instructions" name="startDate"/>
+    </div>
+    <input type="hidden" name="voucher" value="false">
+    <input type="hidden" name="digipack" value="false">
+</div>
+
+
+

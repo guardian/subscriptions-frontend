@@ -3,7 +3,7 @@ package controllers
 import actions.CommonActions._
 import com.gu.i18n.{Country, CountryGroup, Currency, GBP}
 import com.gu.identity.play.ProxiedIP
-import com.gu.memsub.BillingPeriod
+import com.gu.memsub.{BillingPeriod, Digipack, Paper, ProductFamily}
 import com.gu.memsub.Subscription.ProductRatePlanId
 import com.gu.memsub.promo.Formatters.PromotionFormatters._
 import com.gu.memsub.promo.PromoCode
@@ -26,13 +26,16 @@ import tracking.ActivityTracking
 import tracking.activities.{CheckoutReachedActivity, MemberData, SubscriptionRegistrationActivity}
 import utils.TestUsers.{NameEnteredInForm, PreSigninTestCookie}
 import views.html.{checkout => view}
-import views.support.CountryWithCurrency
+import views.support.{CountryWithCurrency, DigipackSubscriptionsForm, PaperSubscriptionsForm, PlanList}
 
 import scala.Function.const
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scalaz.std.scalaFuture._
 import scalaz.{NonEmptyList, OptionT, \/}
+import model.IdUserOps._
+import touchpoint.TouchpointBackendConfig.BackendType
+import utils.TestUsers
 
 object Checkout extends Controller with LazyLogging with ActivityTracking with CatalogProvider {
   object SessionKeys {
@@ -54,7 +57,11 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
   def getEmptySubscriptionsForm(promoCode: Option[PromoCode])(implicit res: TouchpointBackend.Resolution) =
     SubscriptionsForm.subsForm.bind(Map("promoCode" -> promoCode.fold("")(_.get)))
 
-  def renderCheckout(countryGroup: CountryGroup, promoCode: Option[PromoCode]) = NoSubAction.async { implicit request =>
+  def renderPaperCheckout(countryGroup: CountryGroup, promoCode: Option[PromoCode], productFamily: ProductFamily = Digipack) = Action.async { req =>
+    renderCheckout(countryGroup, promoCode, productFamily = Paper).apply(req)
+  }
+
+  def renderCheckout(countryGroup: CountryGroup, promoCode: Option[PromoCode], productFamily: ProductFamily = Digipack) = NoSubAction.async { implicit request =>
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
 
@@ -71,6 +78,15 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
 
     idUser map { user =>
 
+      val productData: views.support.SubscriptionsForm = productFamily match {
+        case Paper =>
+          val catalog = tpBackend.catalogService.paperCatalog.get
+          PaperSubscriptionsForm(user.map(_.address), PlanList(catalog.everyday, catalog.sixday, catalog.weekend))
+        case _ =>
+          val catalog = tpBackend.catalogService.digipackCatalog
+          DigipackSubscriptionsForm(PlanList(catalog.digipackMonthly, catalog.digipackQuarterly, catalog.digipackYearly))
+      }
+
       val personalData = user.map(PersonalData.fromIdUser)
       val countryOpt = personalData.flatMap(data => data.address.country)
       val countryGroupWithDefault = countryOpt.fold(countryGroup)(c => CountryGroup.byCountryCode(c.alpha2).getOrElse(countryGroup))
@@ -81,7 +97,7 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
 
       Ok(views.html.checkout.payment(
         personalData = personalData,
-        plans = plans,
+        productData = productData,
         defaultPlan = defaultPlan,
         country = country,
         countryGroup = countryGroupWithDefault,
@@ -92,8 +108,11 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
     }
   }
 
+  def handlePaperCheckout = AuthorisedTester.async { req =>
+    handleCheckout(allowPaper = true).apply(req)
+  }
 
-  def handleCheckout = NoSubAjaxAction.async{ implicit request =>
+  def handleCheckout(allowPaper: Boolean = false) = NoSubAjaxAction.async { implicit request =>
 
     //there's an annoying circular dependency going on here
     val tempData = SubscriptionsForm.subsForm.bindFromRequest().value
@@ -102,10 +121,15 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
     val idUserOpt = authenticatedUserFor(request)
 
     val srEither = tpBackend.subsForm.bindFromRequest
+
     val subscribeRequest = srEither.valueOr {
       e => throw new Exception(s"Backend validation failed: identityId=${idUserOpt.map(_.user.id).mkString};" +
         s" JavaScriptEnabled=${request.headers.toMap.contains("X-Requested-With")};" +
         s" ${e.map(err => s"${err.key} ${err.message}").mkString(", ")}")
+    }
+
+    subscribeRequest.productData.left.foreach { _ =>
+      if (!allowPaper) throw new Exception("paper not allowed")
     }
 
     val requestData = SubscriptionRequestData(ProxiedIP.getIP(request))
@@ -223,7 +247,12 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
         const(None)
       } // Don't display the user registration form if the user is logged in
 
-      val plan = catalog.unsafeFindPaid(ProductRatePlanId(ratePlanId))
+
+      val prpId = ProductRatePlanId(ratePlanId)
+
+      val plan =
+        (tpBackend.catalogService.digipackCatalog.findPaid(prpId) orElse
+        tpBackend.catalogService.paperCatalog.flatMap(_.findCurrent(prpId))).get
 
       val promotion = session.get(AppliedPromoCode).flatMap(code => resolution.backend.promoService.findPromotion(PromoCode(code)))
 

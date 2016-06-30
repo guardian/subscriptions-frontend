@@ -8,7 +8,7 @@ import com.gu.memsub.services.{PaymentService => CommonPaymentService, _}
 import com.gu.monitoring.{ServiceMetrics, StatusMetrics}
 import com.gu.salesforce.SimpleContactRepository
 import com.gu.stripe.StripeService
-import com.gu.subscriptions.{DigipackCatalog, Discounter}
+import com.gu.subscriptions.{DigipackCatalog, Discounter, PaperCatalog}
 import com.gu.zuora
 import com.gu.zuora.{rest, soap}
 import configuration.Config
@@ -55,6 +55,7 @@ object TouchpointBackend {
     })
 
     val subService = new SubscriptionService(zuoraService, _stripeService, catalogService.digipackCatalog)
+    val subServicePaper = catalogService.paperCatalog.map(c => new SubscriptionService(zuoraService, _stripeService, c))
     val memsubPaymentService = new CommonPaymentService(_stripeService, zuoraService, catalogService)
     val form = new forms.SubscriptionsForm(catalogService)
 
@@ -69,6 +70,7 @@ object TouchpointBackend {
       catalogService,
       zuoraService,
       subService,
+      subServicePaper,
       restClient,
       digipackRatePlanIds,
       paymentService,
@@ -111,6 +113,7 @@ case class TouchpointBackend(environmentName: String,
                              catalogService : api.CatalogService,
                              zuoraService: zuora.api.ZuoraService,
                              subscriptionService: SubscriptionService[DigipackCatalog],
+                             subscriptionServicePaper: Option[SubscriptionService[PaperCatalog]],
                              zuoraRestClient: zuora.rest.Client,
                              digipackIds: DigitalPackRatePlanIds,
                              paymentService: PaymentService,
@@ -125,9 +128,9 @@ case class TouchpointBackend(environmentName: String,
   private val that = this
 
   private val exactTargetService = new ExactTargetService {
-    override def subscriptionService = that.subscriptionService
+    override def digiSubscriptionService = that.subscriptionService
+    override def paperSubscriptionService = that.subscriptionServicePaper
     override def paymentService = that.commonPaymentService
-    override def catalogService = that.catalogService
   }
 
   val checkoutService =

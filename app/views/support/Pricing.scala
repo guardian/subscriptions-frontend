@@ -3,12 +3,18 @@ package views.support
 import com.gu.i18n.{Currency, GBP}
 import com.gu.memsub.promo.PercentDiscount.getDiscountScaledToPeriod
 import com.gu.memsub.promo.{LandingPage, PercentDiscount, Promotion}
-import com.gu.memsub.{Month, Quarter, Year, BillingPeriod => BP}
-import com.gu.subscriptions.DigipackPlan
+import com.gu.memsub.{BillingPeriod => BP, _}
+import com.gu.subscriptions.{Day, DigipackPlan, PaperPlan}
 import views.support.BillingPeriod._
 
 object Pricing {
-  implicit class PlanWithPricing(digipackPlan: DigipackPlan[BP]) {
+
+  implicit class EitherPlanPlan(in: Either[DigipackPlan[BP], PaperPlan[Current, Day]]) {
+    def productRatePlanId = in.fold(_.productRatePlanId, _.productRatePlanId)
+    def asPaidPlan: PaidPlan[Current, BP] = in.fold(identity, identity)
+  }
+
+  implicit class PlanWithPricing(digipackPlan: PaidPlan[Status, BP]) {
     lazy val gbpPrice = digipackPlan.pricing.getPrice(GBP).get
 
     def unsafePrice(currency: Currency) = digipackPlan.pricing.getPrice(currency).getOrElse(

@@ -1,6 +1,9 @@
-define(['modules/checkout/countryChoice'], function (addressRules) {
+define(['modules/checkout/countryChoice', '$'], function (countryChoice, $) {
 
     'use strict';
+    var addressRules = countryChoice({
+        $COUNTRY_SELECT: $(document.createElement('div'))
+    });
 
     describe('CountryChoice option-parser', function() {
 
