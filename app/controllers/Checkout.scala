@@ -57,6 +57,18 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
   def getEmptySubscriptionsForm(promoCode: Option[PromoCode])(implicit res: TouchpointBackend.Resolution) =
     SubscriptionsForm.subsForm.bind(Map("promoCode" -> promoCode.fold("")(_.get)))
 
+  def getCheckoutRouteForProductFamily(countryGroup: CountryGroup, promoCode: Option[PromoCode], product: ProductFamily) = {
+    product match {
+      case Paper => routes.Checkout.renderPaperCheckout(countryGroup, promoCode)
+      case Digipack => routes.Checkout.renderDigipackCheckout(countryGroup, promoCode)
+      case _ => routes.Homepage.index()
+    }
+  }
+
+  def renderProductCheckout(countryGroup: CountryGroup, promoCode: Option[PromoCode], product: ProductFamily) = AuthorisedTester.async { req =>
+    renderCheckout(countryGroup, promoCode, product).apply(req)
+  }
+
   def renderPaperCheckout(countryGroup: CountryGroup, promoCode: Option[PromoCode]) = AuthorisedTester.async { req =>
     renderCheckout(countryGroup, promoCode, product = Paper).apply(req)
   }
@@ -243,13 +255,9 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
       currency <- Currency.fromString(currencyStr)
     } yield (subsName, ratePlanId, currency)
 
-    def redirectToEmptyForm = product match {
-      case Paper => Redirect(routes.Checkout.renderPaperCheckout(CountryGroup.UK, None)).withNewSession
-      case Digipack => Redirect(routes.Checkout.renderDigipackCheckout(CountryGroup.UK, None)).withNewSession
-      case Digipack => Redirect(routes.Homepage.index()).withNewSession
-    }
-
-    sessionInfo.fold(redirectToEmptyForm) { case (subsName, ratePlanId, currency) =>
+    sessionInfo.fold {
+      Redirect(getCheckoutRouteForProductFamily(CountryGroup.UK, None, product)).withNewSession
+    } { case (subsName, ratePlanId, currency) =>
       val passwordForm = authenticatedUserFor(request).fold {
         for {
           userId <- session.get(SessionKeys.UserId)

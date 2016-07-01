@@ -23,12 +23,12 @@ GET         /au/digital                      controllers.DigitalPack.au
 GET         /int/digital                     controllers.DigitalPack.int
 
 # Checkout
-GET         /checkout/:product               controllers.Checkout.renderCheckout(countryGroup: CountryGroup ?= CountryGroup.UK, promoCode: Option[PromoCode], product: com.gu.memsub.ProductFamily)
-GET         /checkout/:product/thank-you     controllers.Checkout.thankYou(product: com.gu.memsub.ProductFamily)
-GET         /checkout/paper                  controllers.Checkout.renderPaperCheckout(countryGroup: CountryGroup ?= CountryGroup.UK, promoCode: Option[PromoCode])
-POST        /checkout/paper                  controllers.Checkout.handlePaperCheckout
+
 GET         /checkout                        controllers.Checkout.renderDigipackCheckout(countryGroup: CountryGroup ?= CountryGroup.UK, promoCode: Option[PromoCode])
 POST        /checkout                        controllers.Checkout.handleCheckout(allowPaper: Boolean = false)
+GET         /checkout/paper                  controllers.Checkout.renderPaperCheckout(countryGroup: CountryGroup ?= CountryGroup.UK, promoCode: Option[PromoCode])
+POST        /checkout/paper                  controllers.Checkout.handlePaperCheckout
+GET         /checkout/:product/thank-you     controllers.Checkout.thankYou(product: com.gu.memsub.ProductFamily)
 
 GET         /checkout/check-identity         controllers.Checkout.checkIdentity(email: String)
 POST        /checkout/check-account          controllers.Checkout.checkAccount
