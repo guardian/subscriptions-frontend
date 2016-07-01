@@ -3,7 +3,7 @@ package forms
 import com.gu.i18n.Country
 import com.gu.memsub.promo.PromoCode
 import com.gu.memsub.Address
-import forms.SubscriptionsForm.{addressDataMapping, paymentFormatter, personalDataMapping, promoCodeFormatter}
+import forms.SubscriptionsForm._
 import model._
 import org.scalatest.FreeSpec
 import play.api.data.Forms._
@@ -23,6 +23,41 @@ class SubscriptionsFormTest extends FreeSpec {
     "address.country" -> Country.UK.alpha2,
     "promoCode" -> "promo-code"
   )
+
+  "DeliveryAddressMapping" - {
+
+    val withDelivery = Map(
+      "delivery.address1" -> "DELIVERY ADDR 1",
+      "delivery.address2" -> "DELIVERY ADDR 2",
+      "delivery.town" -> "DELIVERY TOWN",
+      "delivery.postcode" -> "DELIVERY OSTCODE",
+      "delivery.subdivision" -> "DELIVERY SUBDIVISION",
+      "delivery.country" -> Country.UK.alpha2
+    ) ++ formData
+
+    "Reads from delivery if available" in {
+      assertResult(Right(Address(
+        lineOne = "DELIVERY ADDR 1",
+        lineTwo = "DELIVERY ADDR 2",
+        town = "DELIVERY TOWN",
+        countyOrState = "DELIVERY SUBDIVISION",
+        postCode = "DELIVERY OSTCODE",
+        countryName = Country.UK.name
+      )))(deliveryAddressFormat(fallbackKey = "address").bind("delivery", withDelivery))
+    }
+
+    "Falls back to the fallback if it fails to read delivery" in {
+      assertResult(Right(Address(
+        lineOne = "address1",
+        lineTwo = "address2",
+        town = "town",
+        countyOrState = "Middlesex",
+        postCode = "postcode",
+        countryName = Country.UK.name
+      )))(deliveryAddressFormat(fallbackKey = "address").bind("delivery", withDelivery.drop(1)))
+    }
+
+  }
 
   "PersonalDataMapping" - {
     "maps form submissions to PersonalData" in {
