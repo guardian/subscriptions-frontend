@@ -8,7 +8,8 @@ define([
     'modules/checkout/editFieldsets',
     'modules/checkout/reviewDetails',
     'modules/checkout/promoCode',
-    'modules/checkout/paperDeliveryAddress'
+    'modules/checkout/paperDeliveryAddress',
+    'modules/checkout/datePicker'
 ], function (
     optionMirror,
     formElements,
@@ -17,7 +18,8 @@ define([
     editFieldsets,
     reviewDetails,
     promoCode,
-    paperDeliveryAddress
+    paperDeliveryAddress,
+    datePicker
 ) {
     'use strict';
     function init() {
@@ -29,6 +31,7 @@ define([
             reviewDetails.init();
             promoCode.init();
             paperDeliveryAddress.init();
+            datePicker.default.init();
         }
 
         curl('js!stripe').then(function() {

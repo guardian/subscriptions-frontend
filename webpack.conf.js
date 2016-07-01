@@ -3,7 +3,7 @@ var Uglify = require("webpack/lib/optimize/UglifyJsPlugin");
 module.exports = function(debug) { return {
     resolve: {
         root: ["assets/javascripts", "assets/../node_modules/", "test/"],
-        extensions: ["", ".js", ".es6"],
+        extensions: ["", ".js", ".es6", '.jsx'],
         alias: {
             '$$': 'utils/$',
             'lodash': 'lodash-amd/modern',
@@ -29,13 +29,25 @@ module.exports = function(debug) { return {
                     presets: ['es2015'],
                     cacheDirectory: ''
                 }
+            },
+            {
+                test: /\.jsx?$/,
+                exclude: /node_modules/,
+                loader: 'babel-loader',
+                query: {
+                    presets: ['es2015', 'react']
+                }
+            },
+            {
+                test: /\.css$/,
+                loader: "style-loader!css-loader"
             }
         ]
     },
 
     plugins: !debug ? [
         new Uglify({compress: {warnings: false}})
-    ] : [],
+    ] : [new webpack.ContextReplacementPlugin(/moment[\\\/]locale$/, /^\.\/(en)$/)],
 
     progress: true,
     failOnError: true,

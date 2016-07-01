@@ -1,5 +1,7 @@
 require([
     'utils/ajax',
+    'react',
+    'react-dom',
     'modules/raven',
     'modules/analytics/setup',
     'modules/toggle',
@@ -17,6 +19,8 @@ require([
     'promise-polyfill'
 ], function (
     ajax,
+    react,
+    reactDOM,
     raven,
     analytics,
     toggle,
