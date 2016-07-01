@@ -1,6 +1,8 @@
 define(['$', 'modules/analytics/omniture', 'modules/analytics/snowplow'], function ($, omniture, snowplow) {
     'use strict';
 
+    //TODO make this product aware
+
     function subscriptionProducts(eventName) {
         var selectedFrequency = $('.js-payment-frequency input:checked');
         if (selectedFrequency.length && eventName) {

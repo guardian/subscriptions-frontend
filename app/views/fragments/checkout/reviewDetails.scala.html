@@ -1,8 +1,7 @@
 @import model.PersonalData
-@(personalData: Option[PersonalData])
-
 @import configuration.Links
 
+@(personalData: Option[PersonalData])
 <div class="review-details">
     <div class="review-details__item">
         <span class="review-details__heading">Your details</span>
@@ -10,18 +9,27 @@
             <ul class="o-unstyled-list">
                 <li class="js-checkout-review-name sessioncamhidetext"></li>
                 <li class="js-checkout-review-address sessioncamhidetext"></li>
-                <li class="js-checkout-review-email sessioncamhidetext"></li>
+                <li>Email: <span class="js-checkout-review-email sessioncamhidetext"></span></li>
+                <li>Phone: <span class="js-checkout-review-phone sessioncamhidetext"></span></li>
             </ul>
         </div>
     </div>
+    // TODO carry through the product so we know to remove this.
+    @if(true) {
+        <div class="review-details__item">
+            <span class="review-details__heading">Delivery details</span>
+            <div class="js-checkout-review-delivery-address sessioncamhidetext"></div>
+            <div>Delivery instructions: <span class="js-checkout-review-delivery-instructions sessioncamhidetext"></span></div>
+        </div>
+    }
     <div class="review-details__item">
         <span class="review-details__heading">Payment details</span>
         <div class="review-details__list js-payment-type-direct-debit">
             <ul class="o-unstyled-list">
                 <li><span class="review-details__detail">Payment method:</span> Direct Debit</li>
                 <li><span class="review-details__detail">Bank account:</span> <span class="js-checkout-review-account sessioncamhidetext"></span></li>
-                <li><span class="review-details__detail">Sort code:</span> <span class=" js-checkout-review-sortcode sessioncamhidetext"></span></li>
-                <li><span class="review-details__detail">Account holder:</span> <span class=" js-checkout-review-holder sessioncamhidetext"></span></li>
+                <li><span class="review-details__detail">Sort code:</span> <span class="js-checkout-review-sortcode sessioncamhidetext"></span></li>
+                <li><span class="review-details__detail">Account holder:</span> <span class="js-checkout-review-holder sessioncamhidetext"></span></li>
             </ul>
         </div>
         <div class="review-details__list js-payment-type-card" hidden="true">
@@ -32,9 +40,16 @@
             </ul>
         </div>
     </div>
+    <div class="review-details__item">
+        <span class="review-details__heading">Subscription details</span>
+        <h4 class="js-option-mirror-package-display"></h4>
+        <div class="js-option-mirror-payment-display"></div>
+        <div>Date of first paper: <span class="js-checkout-review-delivery-start-date sessioncamhidetext"></span></div>
+    </div>
     <div class="review-details__actions">
         <p class="u-note">
-            Your subscription includes a range of exclusive benefits which will be sent to you from Guardian Subscriptions. These may include special offers from other companies, but your data will not be shared with these companies.
+            Your subscription includes a range of exclusive benefits which will be sent to you from Guardian Subscriptions.
+            These may include special offers from other companies, but your data will not be shared with these companies.
         </p>
 
         <label class="option u-pad-bottom" for="receive-gnm-marketing">
@@ -62,7 +77,6 @@
             Our <a href="@Links.privacyPolicy.href" target="_blank">@Links.privacyPolicy.title</a>
             explains in further detail how we use your information and you can find out why your data matters to us
             <a href="@Links.whyYourDataMattersToUs.href" target="_blank">here</a>.
-
         </p>
 
         <p class="u-note prose">
