@@ -9,32 +9,27 @@ import views.support.BillingPeriod._
 
 object Pricing {
 
-  implicit class EitherPlanPlan(in: Either[DigipackPlan[BP], PaperPlan[Current, Day]]) {
-    def productRatePlanId = in.fold(_.productRatePlanId, _.productRatePlanId)
-    def asPaidPlan: PaidPlan[Current, BP] = in.fold(identity, identity)
-  }
+  implicit class PlanWithPricing(plan: PaidPlan[Status, BP]) {
+    lazy val gbpPrice = plan.pricing.getPrice(GBP).get
 
-  implicit class PlanWithPricing(digipackPlan: PaidPlan[Status, BP]) {
-    lazy val gbpPrice = digipackPlan.pricing.getPrice(GBP).get
-
-    def unsafePrice(currency: Currency) = digipackPlan.pricing.getPrice(currency).getOrElse(
-      throw new NoSuchElementException(s"Could not find a price in $currency for plan ${digipackPlan.name}")
+    def unsafePrice(currency: Currency) = plan.pricing.getPrice(currency).getOrElse(
+      throw new NoSuchElementException(s"Could not find a price in $currency for plan ${plan.name}")
     )
 
     def prettyPricing(currency: Currency) =
-      s"${unsafePrice(currency).pretty} ${digipackPlan.billingPeriod.frequencyInMonths}"
+      s"${unsafePrice(currency).pretty} ${plan.billingPeriod.frequencyInMonths}"
 
     def amount(currency: Currency) =
       unsafePrice(currency).amount
 
     def prettyPricingForDiscountedPeriod(discountPromo: Promotion[PercentDiscount, Option, LandingPage], currency: Currency) = {
       val originalAmount = unsafePrice(currency)
-      val discountAmount = discountPromo.promotionType.applyDiscount(originalAmount, digipackPlan.billingPeriod)
+      val discountAmount = discountPromo.promotionType.applyDiscount(originalAmount, plan.billingPeriod)
 
       discountPromo.promotionType.durationMonths.fold {
-        s"${discountAmount.pretty} ${digipackPlan.billingPeriod.frequencyInMonths}"
+        s"${discountAmount.pretty} ${plan.billingPeriod.frequencyInMonths}"
       } { durationMonths =>
-        digipackPlan.billingPeriod match {
+        plan.billingPeriod match {
           case m: Month =>
             val span = durationMonths
             if (span > 1) {
@@ -59,5 +54,16 @@ object Pricing {
         }
       }
     }
+  }
+
+  implicit class EitherPlanPlan(in: Either[DigipackPlan[BP], PaperPlan[Current, Day]]) {
+
+    implicit val planWithPricing = new PlanWithPricing(asPaidPlan)
+
+    import Pricing._
+
+    def productRatePlanId = in.fold(_.productRatePlanId, _.productRatePlanId)
+    def asPaidPlan: PaidPlan[Current, BP] = in.fold(identity, identity)
+    def prettyName(currency: Currency): String = in.fold(_ => planWithPricing.prettyPricing(currency), p => s"${p.name} ${planWithPricing.prettyPricing(currency)}")
   }
 }

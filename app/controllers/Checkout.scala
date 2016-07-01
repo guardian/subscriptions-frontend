@@ -26,7 +26,7 @@ import tracking.ActivityTracking
 import tracking.activities.{CheckoutReachedActivity, MemberData, SubscriptionRegistrationActivity}
 import utils.TestUsers.{NameEnteredInForm, PreSigninTestCookie}
 import views.html.{checkout => view}
-import views.support.{CountryWithCurrency, DigipackSubscriptionsForm, PaperSubscriptionsForm, PlanList}
+import views.support.{CountryWithCurrency, DigipackProductPopulationData, PaperProductPopulationData, PlanList}
 
 import scala.Function.const
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -78,13 +78,13 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
 
     idUser map { user =>
 
-      val productData: views.support.SubscriptionsForm = productFamily match {
+      val productData: views.support.ProductPopulationData = productFamily match {
         case Paper =>
           val catalog = tpBackend.catalogService.paperCatalog.get
-          PaperSubscriptionsForm(user.map(_.address), PlanList(catalog.everyday, catalog.sixday, catalog.weekend))
+          PaperProductPopulationData(user.map(_.address), PlanList(catalog.everyday, catalog.sixday, catalog.weekend))
         case _ =>
           val catalog = tpBackend.catalogService.digipackCatalog
-          DigipackSubscriptionsForm(PlanList(catalog.digipackMonthly, catalog.digipackQuarterly, catalog.digipackYearly))
+          DigipackProductPopulationData(PlanList(catalog.digipackMonthly, catalog.digipackQuarterly, catalog.digipackYearly))
       }
 
       val personalData = user.map(PersonalData.fromIdUser)

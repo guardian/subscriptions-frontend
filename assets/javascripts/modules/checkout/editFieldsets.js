@@ -14,9 +14,13 @@ define([
     function collapseFieldsetsExcept(leaveOpen) {
         [
             formEls.$FIELDSET_YOUR_DETAILS,
+            formEls.$FIELDSET_DELIVERY_DETAILS,
             formEls.$FIELDSET_PAYMENT_DETAILS,
             formEls.$FIELDSET_REVIEW
         ].forEach(function(item) {
+            if (!item.length) {
+                return;
+            }
             if (item === leaveOpen) {
                 item.removeClass(FIELDSET_COLLAPSED);
             } else {
@@ -28,6 +32,7 @@ define([
     function init() {
         var $editDetails = formEls.$EDIT_YOUR_DETAILS;
         var $editPayment = formEls.$EDIT_PAYMENT_DETAILS;
+        var $editDelivery = formEls.$EDIT_DELIVERY_DETAILS;
 
         if ($editDetails.length && $editPayment.length) {
             bean.on($editDetails[0], 'click', function(e) {
@@ -45,6 +50,15 @@ define([
                 formEls.$FIELDSET_PAYMENT_DETAILS.removeClass(FIELDSET_COMPLETE);
                 tracking.paymentDetailsTracking();
             });
+
+            if ($editDelivery.length) {
+                bean.on($editDelivery[0], 'click', function(e) {
+                    e.preventDefault();
+                    collapseFieldsetsExcept(formEls.$FIELDSET_DELIVERY_DETAILS);
+                    formEls.$FIELDSET_DELIVERY_DETAILS.removeClass(FIELDSET_COMPLETE);
+                    //tracking.deliveryDetailsTracking();
+                });
+            }
         }
     }
 

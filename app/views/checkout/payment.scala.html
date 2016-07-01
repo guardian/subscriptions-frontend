@@ -9,8 +9,9 @@
 @import com.gu.memsub.promo.PromoCode
 @import model.PersonalData
 
-@import views.support.SubscriptionsForm
-@import views.support.SubscriptionsForm._
+@import views.support.ProductPopulationData
+@import views.support.ProductPopulationData._
+@import views.support.ProductFamilyOps._
 @import com.gu.memsub.Current
 @import com.gu.subscriptions.PaperPlan
 @import com.gu.subscriptions.Day
@@ -18,7 +19,7 @@
 @import com.gu.i18n.Country
 @(
     personalData: Option[PersonalData],
-    productData: SubscriptionsForm,
+    productData: ProductPopulationData,
     defaultPlan : DigipackPlan[Month],
     country: Option[Country],
     countryGroup: CountryGroup,
@@ -41,8 +42,15 @@
             @if(plan.fold(identity, identity) == productData.plans.default && currency == defaultCurrency){checked}
             >
         </span>
-        <span class="option__label" id="label-for-@plan.productRatePlanId.get-@currency">@plan.asPaidPlan.prettyPricing(currency)</span>
+        <span class="option__label" id="label-for-@plan.productRatePlanId.get-@currency">@plan.prettyName(currency)</span>
     </label>
+}
+
+@continueButton(goto: String, listenerName: String) = {
+    <div class="actions">
+        <a href="@goto" class="button button--primary button--large @listenerName">Continue</a>
+        <div class="loader js-personal-details-validating">Validating...</div>
+    </div>
 }
 
 @main(
@@ -60,14 +68,14 @@
         <form class="form js-checkout-form" action="" method="POST" novalidate>
             @helper.CSRF.formField
 
-            @fragments.checkout.checkoutHeader("Digital Pack")
+            @fragments.checkout.checkoutHeader(productData.family.title)
 
             @* ===== Plan selection ===== *@
             <div class="checkout-container__sidebar js-basket">
-                @fragments.checkout.basketPreview()
+                @fragments.checkout.basketPreview(productData.family)
                 <div class="basket-options-toggle u-note prose">
                     <a class="js-toggle checkout-container__frequency" data-toggle="change-payment-frequency">
-                        Change payment frequency
+                        @productData.family.changeRatePlanText
                     </a>
                 </div>
                 <fieldset class="basket-billing-options is-hidden js-payment-frequency js-option-mirror-group" id="change-payment-frequency">
@@ -104,7 +112,7 @@
                 <div id="yourDetails" class="field-panel js-fieldset-your-details">
                     <fieldset>
                         <legend class="field-panel__legend">
-                            <span class="field-panel__legend__num">1</span> Your details
+                            Your details
                         </legend>
                         <div class="field-panel__intro">
                             <div class="field-note field-note--offset">
@@ -124,23 +132,35 @@
                         </div>
                         <div class="field-panel__fields">
                             @fragments.checkout.fieldsPersonal(personalData, countriesWithCurrency)
-                            @for(p <- productData.paper) {
-                                @fragments.checkout.fieldsPaper(p, countriesWithCurrency)
-                            }
-
-                            <div class="actions">
-                                <a href="#paymentDetails" class="button button--primary button--large js-checkout-your-details-submit">Continue</a>
-                                <div class="loader js-personal-details-validating">Validating...</div>
-                            </div>
+                            @continueButton(productData.fold(_ => "#deliveryDetails")(_ => "#paymentDetails"), "js-checkout-your-details-submit")
                         </div>
                     </fieldset>
                 </div>
+
+                @* ===== Delivery details ===== *@
+                @productData.paper.map { p =>
+                        <div id="deliveryDetails" class="field-panel is-collapsed js-fieldset-delivery-details">
+                            <fieldset>
+                                <legend class="field-panel__legend">
+                                    Delivery details
+                                </legend>
+                                <div class="field-panel__fields">
+                                    @fragments.checkout.fieldsPaper(p, countriesWithCurrency)
+                                    @continueButton("#paymentDetails", "js-checkout-delivery-details-submit")
+                                </div>
+                                <div class="field-panel__edit">
+                                    <a href="#deliveryDetails" class="text-button u-button-reset js-edit-your-delivery-details" title="Edit your delivery details">Edit</a>
+                                </div>
+                            </fieldset>
+                        </div>
+                }
+
 
                 @* ===== Payment ===== *@
                 <div id="paymentDetails" class="field-panel is-collapsed js-fieldset-payment-details">
                     <fieldset>
                         <legend class="field-panel__legend">
-                            <span class="field-panel__legend__num">2</span> Payment details
+                            Payment details
                         </legend>
                         <div class="field-panel__intro">
                             <div class="field-note field-note--offset">
@@ -165,7 +185,7 @@
                 <div id="formReview" class="field-panel field-panel--single is-collapsed js-fieldset-review">
                     <fieldset>
                         <legend class="field-panel__legend">
-                            <span class="field-panel__legend__num">3</span> Review and confirm
+                                Review and confirm
                         </legend>
                         <div class="field-panel__fields">
                             @fragments.checkout.reviewDetails(personalData)

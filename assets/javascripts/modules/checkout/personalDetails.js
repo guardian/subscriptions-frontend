@@ -55,8 +55,10 @@ define([
     }
 
     function nextStep() {
-        formEls.$FIELDSET_PAYMENT_DETAILS
-            .removeClass(FIELDSET_COLLAPSED);
+        var fieldset = formEls.$FIELDSET_DELIVERY_DETAILS.length ?
+            formEls.$FIELDSET_DELIVERY_DETAILS : formEls.$FIELDSET_PAYMENT_DETAILS;
+
+        fieldset.removeClass(FIELDSET_COLLAPSED);
 
         formEls.$FIELDSET_YOUR_DETAILS
             .addClass(FIELDSET_COLLAPSED)
