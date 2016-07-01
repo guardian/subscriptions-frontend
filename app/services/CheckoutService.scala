@@ -3,6 +3,7 @@ package services
 import com.gu.config.DiscountRatePlanIds
 import com.gu.i18n.Country
 import com.gu.identity.play.{AuthenticatedIdUser, IdMinimalUser}
+import com.gu.memsub.Address
 import com.gu.memsub.promo.PromotionApplicator._
 import com.gu.memsub.promo._
 import com.gu.memsub.services.PromoService
@@ -30,6 +31,7 @@ import scala.concurrent.Future
 import scalaz.std.scalaFuture._
 import scalaz.syntax.monad._
 import scalaz.std.option._
+import scalaz.syntax.std.option._
 
 class CheckoutService(identityService: IdentityService,
                       salesforceService: SalesforceService,
@@ -59,7 +61,7 @@ class CheckoutService(identityService: IdentityService,
     (for {
       userExists <- EitherT(IdentityService.doesUserExist(personalData.email).map(\/.right[FatalErrors, Boolean]))
       _ <- Monad[SubNel].whenM(userExists && authenticatedUserOpt.isEmpty)(emailError)
-      memberId <- EitherT(createOrUpdateUserInSalesforce(personalData, idMinimalUser))
+      memberId <- EitherT(createOrUpdateUserInSalesforce(subscriptionData, idMinimalUser))
       purchaserIds = PurchaserIdentifiers(memberId, idMinimalUser)
       payment <- EitherT(createPaymentType(requestData, purchaserIds, subscriptionData))
       subscribe <- EitherT(createSubscribeRequest(personalData, requestData, plan, purchaserIds, payment))
@@ -78,7 +80,7 @@ class CheckoutService(identityService: IdentityService,
 
     val purchaserIds = PurchaserIdentifiers(contactId, user.map(_.user))
     val res = (
-      storeIdentityDetails(subscriptionData.genericData.personalData, user, contactId).run |@|
+      storeIdentityDetails(subscriptionData, user, contactId).run |@|
       sendETDataExtensionRow(result, subscriptionData, gracePeriod(promotion), purchaserIds, promotion)
     ) { case(id, email) =>
       (id.toOption.map(_.userData), id.swap.toOption.toSeq.flatMap(_.list) ++ email.swap.toOption.toSeq.flatMap(_.list))
@@ -93,7 +95,7 @@ class CheckoutService(identityService: IdentityService,
     if (withPromo.paymentDelay == subscribe.paymentDelay) zuoraProperties.gracePeriodInDays else ZERO
 
   private def storeIdentityDetails(
-      personalData: PersonalData,
+      subscribeRequest: SubscribeRequest,
       authenticatedUserOpt: Option[AuthenticatedIdUser],
       memberId: ContactId): EitherT[Future, NonEmptyList[SubsError], IdentitySuccess] = {
 
@@ -105,17 +107,17 @@ class CheckoutService(identityService: IdentityService,
             s"Registered user ${authenticatedIdUser.user.id} could not become subscriber",
             Some(s"SF Account ID = ${memberId.salesforceAccountId}, SF Contact ID = ${memberId.salesforceContactId}")))
 
-        EitherT(identityService.updateUserDetails(personalData)(authenticatedIdUser).map { _.leftMap(addErrContext(_)) })
+        EitherT(identityService.updateUserDetails(subscribeRequest.genericData.personalData)(authenticatedIdUser).map { _.leftMap(addErrContext(_)) })
       }
       case None => {
         logger.info(s"User does not have an Identity account. Creating a guest account")
 
         def addErrContext(errSeq: NonEmptyList[SubsError]): NonEmptyList[SubsError] =
           errSeq.<::(CheckoutIdentityFailure(
-            s"Guest user (${personalData.toStringSanitized} could not become subscriber",
+            s"Guest user (${subscribeRequest.genericData.personalData.toStringSanitized} could not become subscriber",
             Some(s"SF Account ID = ${memberId.salesforceAccountId}, SF Contact ID = ${memberId.salesforceContactId}")))
 
-        for (identitySuccess <- EitherT(identityService.registerGuest(personalData).map { _.leftMap(addErrContext(_)) })) yield {
+        for (identitySuccess <- EitherT(identityService.registerGuest(subscribeRequest.genericData.personalData, subscribeRequest.productData.fold[Option[Address]](_.deliveryAddress.some, _ => None)).map { _.leftMap(addErrContext(_)) })) yield {
           val identityId = identitySuccess.userData.id.id
           val salesforceResult = salesforceService.repo.updateIdentityId(memberId, identityId)
           for (err <- EitherT(salesforceResult).swap) yield {
@@ -130,11 +132,12 @@ class CheckoutService(identityService: IdentityService,
   }
 
   private def sendETDataExtensionRow(
-                                      subscribeResult: SubscribeResult,
-                                      subscriptionData: SubscribeRequest,
-                                      gracePeriodInDays: Days,
-                                      purchaserIds: PurchaserIdentifiers,
-                                      validPromotion: Option[ValidPromotion[NewUsers]]): Future[NonEmptyList[SubsError] \/ Unit] =
+    subscribeResult: SubscribeResult,
+    subscriptionData: SubscribeRequest,
+    gracePeriodInDays: Days,
+    purchaserIds: PurchaserIdentifiers,
+    validPromotion: Option[ValidPromotion[NewUsers]]
+  ): Future[NonEmptyList[SubsError] \/ Unit] =
 
     (for {
       a <- exactTargetService.sendETDataExtensionRow(subscribeResult, subscriptionData, gracePeriodInDays, validPromotion)
@@ -146,9 +149,13 @@ class CheckoutService(identityService: IdentityService,
         s"ExactTarget failed to send welcome email to subscriber $purchaserIds")))
     }
 
-  private def createOrUpdateUserInSalesforce(personalData: PersonalData, userData: Option[IdMinimalUser]): Future[NonEmptyList[SubsError] \/ ContactId] = {
+  private def createOrUpdateUserInSalesforce(subscribeRequest: SubscribeRequest, userData: Option[IdMinimalUser]): Future[NonEmptyList[SubsError] \/ ContactId] = {
     (for {
-      memberId <- salesforceService.createOrUpdateUser(personalData, userData)
+      memberId <- salesforceService.createOrUpdateUser(
+        subscribeRequest.genericData.personalData,
+        subscribeRequest.productData.fold[Option[Address]](_.deliveryAddress.some, _ => None),
+        userData
+      )
     } yield {
       \/.right(memberId)
     }).recover {
