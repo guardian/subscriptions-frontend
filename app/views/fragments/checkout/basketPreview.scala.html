@@ -1,17 +1,19 @@
-@()
+@import com.gu.memsub.ProductFamily
+@import views.support.ProductFamilyOps._
+@(productFamily: ProductFamily)
 
 <div class="basket-preview  basket-preview--products">
     <h3 class="basket-preview__title">You've chosen:</h3>
     <div class="basket-preview__image">
-        <img src="@controllers.CachedAssets.hashedPathFor("images/digital-pack.png")" alt="Digital Pack">
+        <img src="@controllers.CachedAssets.hashedPathFor(productFamily.packImage)" alt="">
     </div>
 
     <div class="basket-preview__product">
         <span class="basket-preview__product__title">
-            The Guardian Digital Pack
+            @productFamily.title
         </span>
         <span class="basket-preview__product__caption">
-            (Daily Edition + Guardian App Premium Tier)
+            @productFamily.subtitle
         </span>
         <span class="basket-preview__product__payment js-option-mirror-value"></span>
     </div>

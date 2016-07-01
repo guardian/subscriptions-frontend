@@ -2,6 +2,10 @@
    Forms
    ========================================================================== */
 
+body {
+    counter-reset: section;
+}
+
 legend {
     padding: 0;
     display: table;
@@ -36,10 +40,13 @@ body:not(:-moz-handler-blocked) fieldset {
     @include fs-header(3);
     margin-bottom: $gs-baseline / 2;
 }
-.field-panel__legend__num {
+.field-panel__legend::before {
     color: lighten($c-neutral1, 20%);
     display: inline-block;
     width: $gs-gutter;
+    counter-increment: section;
+    content: counter(section);
+
 }
 .field-panel__intro {
     @include mq(tablet) {

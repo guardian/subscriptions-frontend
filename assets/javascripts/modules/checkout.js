@@ -7,7 +7,8 @@ define([
     'modules/checkout/paymentDetails',
     'modules/checkout/editFieldsets',
     'modules/checkout/reviewDetails',
-    'modules/checkout/promoCode'
+    'modules/checkout/promoCode',
+    'modules/checkout/paperDeliveryAddress'
 ], function (
     optionMirror,
     formElements,
@@ -15,7 +16,8 @@ define([
     paymentDetails,
     editFieldsets,
     reviewDetails,
-    promoCode
+    promoCode,
+    paperDeliveryAddress
 ) {
     'use strict';
     function init() {
@@ -26,6 +28,7 @@ define([
             editFieldsets.init();
             reviewDetails.init();
             promoCode.init();
+            paperDeliveryAddress.init();
         }
 
         curl('js!stripe').then(function() {
