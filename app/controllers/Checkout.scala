@@ -58,10 +58,14 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
     SubscriptionsForm.subsForm.bind(Map("promoCode" -> promoCode.fold("")(_.get)))
 
   def renderPaperCheckout(countryGroup: CountryGroup, promoCode: Option[PromoCode]) = AuthorisedTester.async { req =>
-    renderCheckout(countryGroup, promoCode, productFamily = Paper).apply(req)
+    renderCheckout(countryGroup, promoCode, product = Paper).apply(req)
   }
 
-  def renderCheckout(countryGroup: CountryGroup, promoCode: Option[PromoCode], productFamily: ProductFamily = Digipack) = NoSubAction.async { implicit request =>
+  def renderDigipackCheckout(countryGroup: CountryGroup, promoCode: Option[PromoCode]) = NoSubAction.async { req =>
+    renderCheckout(countryGroup, promoCode, product = Digipack).apply(req)
+  }
+
+  def renderCheckout(countryGroup: CountryGroup, promoCode: Option[PromoCode], product: ProductFamily) = NoSubAction.async { implicit request =>
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
 
@@ -78,7 +82,7 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
 
     idUser map { user =>
 
-      val productData: views.support.ProductPopulationData = productFamily match {
+      val productData: views.support.ProductPopulationData = product match {
         case Paper =>
           val catalog = tpBackend.catalogService.paperCatalog.get
           PaperProductPopulationData(user.map(_.address), PlanList(catalog.everyday, catalog.sixday, catalog.weekend))
@@ -207,7 +211,12 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
         trackAnon(SubscriptionRegistrationActivity(MemberData(r, subscribeRequest, plan.billingPeriod)))
       }
 
-      Ok(Json.obj("redirect" -> routes.Checkout.thankYou().url)).withSession(session)
+      val thankYouUrl = subscribeRequest.productData match {
+        case Left(x) => routes.Checkout.thankYou(Paper).url
+        case Right(y) => routes.Checkout.thankYou(Digipack).url
+      }
+
+      Ok(Json.obj("redirect" -> thankYouUrl)).withSession(session)
     }
 
     checkoutResult.map(_.fold(failure, success))
@@ -221,7 +230,7 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
     }
   }
 
-  def thankYou = NoCacheAction { implicit request =>
+  def thankYou(product: ProductFamily) = NoCacheAction { implicit request =>
 
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
@@ -234,7 +243,11 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
       currency <- Currency.fromString(currencyStr)
     } yield (subsName, ratePlanId, currency)
 
-    def redirectToEmptyForm = Redirect(routes.Checkout.renderCheckout(CountryGroup.UK, None)).withNewSession
+    def redirectToEmptyForm = product match {
+      case Paper => Redirect(routes.Checkout.renderPaperCheckout(CountryGroup.UK, None)).withNewSession
+      case Digipack => Redirect(routes.Checkout.renderDigipackCheckout(CountryGroup.UK, None)).withNewSession
+      case Digipack => Redirect(routes.Homepage.index()).withNewSession
+    }
 
     sessionInfo.fold(redirectToEmptyForm) { case (subsName, ratePlanId, currency) =>
       val passwordForm = authenticatedUserFor(request).fold {

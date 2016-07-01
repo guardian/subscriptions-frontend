@@ -23,16 +23,20 @@ GET         /au/digital                      controllers.DigitalPack.au
 GET         /int/digital                     controllers.DigitalPack.int
 
 # Checkout
+GET         /checkout/:product               controllers.Checkout.renderCheckout(countryGroup: CountryGroup ?= CountryGroup.UK, promoCode: Option[PromoCode], product: com.gu.memsub.ProductFamily)
+GET         /checkout/:product/thank-you     controllers.Checkout.thankYou(product: com.gu.memsub.ProductFamily)
 GET         /checkout/paper                  controllers.Checkout.renderPaperCheckout(countryGroup: CountryGroup ?= CountryGroup.UK, promoCode: Option[PromoCode])
-GET         /checkout                        controllers.Checkout.renderCheckout(countryGroup: CountryGroup ?= CountryGroup.UK, promoCode: Option[PromoCode], product: com.gu.memsub.ProductFamily = com.gu.memsub.Digipack)
 POST        /checkout/paper                  controllers.Checkout.handlePaperCheckout
+GET         /checkout                        controllers.Checkout.renderDigipackCheckout(countryGroup: CountryGroup ?= CountryGroup.UK, promoCode: Option[PromoCode])
 POST        /checkout                        controllers.Checkout.handleCheckout(allowPaper: Boolean = false)
+
 GET         /checkout/check-identity         controllers.Checkout.checkIdentity(email: String)
 POST        /checkout/check-account          controllers.Checkout.checkAccount
 POST        /checkout/register-guest-user    controllers.Checkout.convertGuestUser
-GET         /checkout/thank-you              controllers.Checkout.thankYou
+GET         /checkout/thank-you              controllers.Checkout.thankYou(product: com.gu.memsub.ProductFamily = com.gu.memsub.Digipack)
 
 GET         /checkout/lookupPromotion        controllers.Checkout.validatePromoCode(promoCode: PromoCode, productRatePlanId: ProductRatePlanId, country: Country)
+
 # collection and delivery
 GET         /collection/paper-digital        controllers.Shipping.viewCollectionPaperDigital
 GET         /collection/paper                controllers.Shipping.viewCollectionPaper
