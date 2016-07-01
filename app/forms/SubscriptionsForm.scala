@@ -32,14 +32,13 @@ class SubscriptionsForm(catalogService: CatalogService) {
       Map(key -> value.productRatePlanId.get)
   }
 
-
   val digipackForm = Form(mapping(
     "ratePlanId" -> of[DigipackPlan[BillingPeriod]])
   (DigipackData)(DigipackData.unapply))
 
   val paperForm = Form(mapping(
     "startDate" -> jodaLocalDate,
-    "delivery" -> addressDataMapping,
+    "delivery" -> of[Address](deliveryAddressFormat(fallbackKey = "personal.address")),
     "deliveryInstructions" -> optional(text),
     "ratePlanId" -> of[PaperPlan[Current, Day]],
     "digipack" -> of[Boolean],
@@ -125,6 +124,15 @@ object SubscriptionsForm {
     "telephoneNumber" -> optional(text),
     "title"-> of(titleFormatter)
   )(PersonalData.apply)(PersonalData.unapply)
+
+  def deliveryAddressFormat(fallbackKey: String): Formatter[Address] = new Formatter[Address] {
+    override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Address] = (
+      \/.fromEither(addressDataMapping.withPrefix(key).bind(data)) orElse
+      \/.fromEither(addressDataMapping.withPrefix(fallbackKey).bind(data))
+    ).toEither
+    override def unbind(key: String, value: Address): Map[String, String] =
+      addressDataMapping.withPrefix(key).unbind(value)
+  }
 
   val productRatePlanIdMapping = mapping("ratePlanId" -> text)(ProductRatePlanId.apply)(ProductRatePlanId.unapply)
 
