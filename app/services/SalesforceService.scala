@@ -25,11 +25,10 @@ trait SalesforceService extends LazyLogging {
       Keys.BILLING_COUNTRY -> personalData.address.countryName,
       Keys.ALLOW_GU_RELATED_MAIL -> personalData.receiveGnmMarketing
   ) ++ deliveryAddress.fold(Json.obj())(addr => Json.obj(
-      Keys.MAILING_STREET -> personalData.address.line,
-      Keys.MAILING_CITY -> personalData.address.town,
-      Keys.MAILING_POSTCODE -> personalData.address.postCode,
-      Keys.MAILING_COUNTRY -> personalData.address.countryName,
-      Keys.ALLOW_GU_RELATED_MAIL -> personalData.receiveGnmMarketing
+      Keys.MAILING_STREET -> addr.line,
+      Keys.MAILING_CITY -> addr.town,
+      Keys.MAILING_POSTCODE -> addr.postCode,
+      Keys.MAILING_COUNTRY -> addr.countryName
   ))
 }
 

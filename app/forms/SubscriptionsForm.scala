@@ -40,9 +40,7 @@ class SubscriptionsForm(catalogService: CatalogService) {
     "startDate" -> jodaLocalDate,
     "delivery" -> of[Address](deliveryAddressFormat(fallbackKey = "personal.address")),
     "deliveryInstructions" -> optional(text),
-    "ratePlanId" -> of[PaperPlan[Current, Day]],
-    "digipack" -> of[Boolean],
-    "voucher" -> of[Boolean]
+    "ratePlanId" -> of[PaperPlan[Current, Day]]
   )(PaperData.apply)(PaperData.unapply))
 
   implicit class FormOps[A](in: Form[A]) {

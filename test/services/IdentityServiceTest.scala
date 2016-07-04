@@ -1,6 +1,7 @@
 package services
 
 import com.gu.identity.play.AccessCredentials
+import com.gu.memsub.Address
 import model.PersonalData
 import org.scalatest.FreeSpec
 import play.api.libs.json._
@@ -15,8 +16,8 @@ import scala.concurrent.Future
 class IdentityServiceTest extends FreeSpec {
   class TestIdentityApiClient extends IdentityApiClient {
     override def userLookupByCookies: (AccessCredentials.Cookies) => Future[WSResponse] = ???
-    override def createGuest: (PersonalData) => Future[WSResponse] = ???
-    override def updateUserDetails: (PersonalData, AccessCredentials.Cookies) => Future[WSResponse] = ???
+    override def createGuest: (PersonalData, Option[Address]) => Future[WSResponse] = ???
+    override def updateUserDetails: (PersonalData, Option[Address], AccessCredentials.Cookies) => Future[WSResponse] = ???
     override def convertGuest: (String, IdentityToken) => Future[WSResponse] = ???
     override def userLookupByEmail: (String) => Future[WSResponse] = ???
   }
@@ -110,7 +111,7 @@ class IdentityServiceTest extends FreeSpec {
     )
 
     assertResult(expectedJson)(
-      PersonalDataJsonSerialiser.convertToUser(testPersonalData)
+      PersonalDataJsonSerialiser.convertToUser(testPersonalData, None)
     )
   }
 }
