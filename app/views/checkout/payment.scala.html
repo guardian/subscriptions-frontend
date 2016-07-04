@@ -53,7 +53,7 @@
 }
 
 @main(
-    title = s"Details - name and address | Subscribe to ${productData.family.title(productData.plans.default)} | The Guardian",
+    title = s"Details - name and address | Subscribe to the ${productData.family.title(productData.plans.default)} | The Guardian",
     jsVars = JsVars(userIsSignedIn = personalData.isDefined, ignorePageLoadTracking = true, countryGroup = countryGroup, currency = defaultCurrency, country = country),
     bodyClasses = List("is-wide"),
     touchpointBackendResolutionOpt = Some(touchpointBackendResolution)

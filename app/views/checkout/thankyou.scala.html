@@ -21,7 +21,7 @@
 @import services.IdentityToken.{paramName => identityTokenParam}
 @import services.UserId.{paramName => userIdParam}
 
-@main(s"Confirmation | Subscribe to ${productFamily.title(plan)} | The Guardian", bodyClasses=List("is-wide"), touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
+@main(s"Confirmation | Subscribe to the ${productFamily.title(plan)} | The Guardian", bodyClasses=List("is-wide"), touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
 
     @fragments.analytics.tagmanager()
 
