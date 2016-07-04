@@ -1,25 +1,27 @@
 @import com.gu.i18n.Currency
 @import com.gu.memsub.BillingPeriod
 @import com.gu.memsub.promo.Promotion.AnyPromotion
-@import com.gu.subscriptions.DigipackPlan
 @import views.support.BillingPeriod._
 @import views.support.Pricing._
 @import com.gu.memsub.Current
 @import com.gu.memsub.PaidPlan
+@import com.gu.memsub.ProductFamily
+@import views.support.ProductFamilyOps._
+
 @(subscriptionName: String,
     guestAccountForm: Option[Form[model.GuestAccountData]] = None,
     touchpointBackendResolution: services.TouchpointBackend.Resolution,
     plan: PaidPlan[Current, BillingPeriod],
     promotion: Option[AnyPromotion] = None,
-    currency: Currency
+    currency: Currency,
+    productFamily: ProductFamily
 )(implicit request: RequestHeader)
 
 @import configuration.Config.Identity.webAppProfileUrl
-@import configuration.Details
 @import services.IdentityToken.{paramName => identityTokenParam}
 @import services.UserId.{paramName => userIdParam}
 
-@main("Confirmation | Digital | Subscriptions | The Guardian", bodyClasses=List("is-wide"), touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
+@main(s"Confirmation | Subscribe to ${productFamily.title(plan)} | The Guardian", bodyClasses=List("is-wide"), touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
 
     @fragments.analytics.tagmanager()
 
@@ -44,9 +46,9 @@
                     We have received your request and are now processing your subscription,
                     you'll receive email confirmation of this shortly.
                 </p>
-                <p>Here are the details of your order, if any of these are incorrect please get in touch with us straight away via email at <a href="mailto:@Details.digitalPackEmail">@Details.digitalPackEmail</a> or on <strong>@Details.digitalPackPhone</strong>. Lines are open BST Monday&ndash;Friday 8.00am&ndash;8.00pm. Saturday &amp; Sunday 8.00am&ndash;6.00pm.</p>
+                <p>Here are the details of your order, if any of these are incorrect please get in touch with us straight away via email at <a href="mailto:@productFamily.email">@productFamily.email</a> or on <strong>@productFamily.phone</strong>. Lines are open BST Monday&ndash;Friday 8.00am&ndash;8.00pm. Saturday &amp; Sunday 8.00am&ndash;6.00pm.</p>
             </div>
-            @fragments.checkout.reviewPanel(subscriptionName, plan, promotion, currency)
+            @fragments.checkout.reviewPanel(subscriptionName, plan, promotion, currency, productFamily)
         </div>
     </section>
 

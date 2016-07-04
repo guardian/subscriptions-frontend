@@ -1,7 +1,8 @@
-@()
-
-@import configuration.Details
 @import controllers.CachedAssets.hashedPathFor
+@import com.gu.memsub.ProductFamily
+@import views.support.ProductFamilyOps._
+
+@(productFamily: ProductFamily)
 
 @fragments.checkout.notice("Advanced Notice") {
     <p>
@@ -19,8 +20,8 @@
     </address>
 
     <ul class="o-unstyled-list">
-        <li>Tel: @Details.digitalPackPhone</li>
-        <li><a href="mailto:@Details.digitalPackEmail">@Details.digitalPackEmail</a></li>
+        <li>Tel: @productFamily.phone</li>
+        <li><a href="mailto:@productFamily.email">@productFamily.email</a></li>
     </ul>
 
     <aside class="direct-debit">

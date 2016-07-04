@@ -8,10 +8,10 @@
 @import views.support.Pricing._
 @import com.gu.memsub.promo.PromoCode
 @import model.PersonalData
+@import views.support.ProductFamilyOps._
 
 @import views.support.ProductPopulationData
 @import views.support.ProductPopulationData._
-@import views.support.ProductFamilyOps._
 @import com.gu.memsub.Current
 @import com.gu.subscriptions.PaperPlan
 @import com.gu.subscriptions.Day
@@ -20,7 +20,6 @@
 @(
     personalData: Option[PersonalData],
     productData: ProductPopulationData,
-    defaultPlan : DigipackPlan[Month],
     country: Option[Country],
     countryGroup: CountryGroup,
     defaultCurrency: Currency,
@@ -54,7 +53,7 @@
 }
 
 @main(
-    title = "Details - name and address | Subscriptions | The Guardian",
+    title = s"Details - name and address | Subscribe to ${productData.family.title(productData.plans.default)} | The Guardian",
     jsVars = JsVars(userIsSignedIn = personalData.isDefined, ignorePageLoadTracking = true, countryGroup = countryGroup, currency = defaultCurrency, country = country),
     bodyClasses = List("is-wide"),
     touchpointBackendResolutionOpt = Some(touchpointBackendResolution)
@@ -68,11 +67,11 @@
         <form class="form js-checkout-form" action="" method="POST" novalidate>
             @helper.CSRF.formField
 
-            @fragments.checkout.checkoutHeader(productData.family.title)
+            @fragments.checkout.checkoutHeader(productData.family.title(productData.plans.default))
 
             @* ===== Plan selection ===== *@
             <div class="checkout-container__sidebar js-basket">
-                @fragments.checkout.basketPreview(productData.family)
+                @fragments.checkout.basketPreview(productData.family, productData.plans.default)
                 <div class="basket-options-toggle u-note prose">
                     <a class="js-toggle checkout-container__frequency" data-toggle="change-payment-frequency">
                         @productData.family.changeRatePlanText
@@ -97,7 +96,7 @@
                         }
                         </div>
                         <div class="js-payment-type-direct-debit u-note">
-                            @fragments.checkout.noticesDirectDebit()
+                            @fragments.checkout.noticesDirectDebit(productData.family)
                         </div>
                         <div class="js-payment-type-card" hidden="true">
                             @fragments.checkout.noticesCard()

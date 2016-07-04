@@ -1,5 +1,6 @@
 @import com.gu.i18n.CountryGroup
 @import com.gu.memsub.Digipack
+@import com.gu.memsub.Paper
 @import com.gu.i18n.CountryGroup.UK
 @import controllers.Checkout.getCheckoutRouteForProductFamily
 @(userString: String)(implicit request: RequestHeader)
@@ -19,8 +20,13 @@
         </div>
 
         <div class="actions">
-            <a href="@idWebAppRegisterUrl(getCheckoutRouteForProductFamily(UK, None, Digipack))" class="button button--primary button--large">Register an Identity user</a>
-            <a href="@getCheckoutRouteForProductFamily(CountryGroup.UK, None, Digipack)" class="button button--primary button--large">Subscribe as a guest user</a>
+            <a href="@idWebAppRegisterUrl(getCheckoutRouteForProductFamily(UK, None, Digipack))" class="button button--primary button--large">Register for Digipack an Identity user</a>
+            <a href="@getCheckoutRouteForProductFamily(CountryGroup.UK, None, Digipack)" class="button button--primary button--large">Subscribe to Digipack as a guest user</a>
+        </div>
+        <hr/>
+        <div class="actions">
+            <a href="@idWebAppRegisterUrl(getCheckoutRouteForProductFamily(UK, None, Paper))" class="button button--primary button--large">Register for Paper an Identity user</a>
+            <a href="@getCheckoutRouteForProductFamily(CountryGroup.UK, None, Paper)" class="button button--primary button--large">Subscribe to Paper as a guest user</a>
         </div>
 
     </main>

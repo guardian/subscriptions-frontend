@@ -13,7 +13,7 @@
 @(edition: DigitalEdition, catalog: DigipackCatalog, promoCode: PromoCode, promotion: Promotion[PromotionType, Id, SubscriptionsLandingPage], defaultTrial: Days, md: MarkdownRenderer)
 @anyPromotion = @{asAnyPromotion(promotion)}
 @main(
-    title = "The Digital Pack offer | Subscriptions | The Guardian",
+    title = "Subscribe to the Guardian Digital Pack offer | The Guardian (${edition.name})",
     bodyClasses = Seq("is-wide")
 ) {
 
