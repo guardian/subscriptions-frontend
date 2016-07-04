@@ -2,7 +2,7 @@ package acceptance.util
 
 import java.net.URL
 import org.openqa.selenium.firefox.FirefoxDriver
-import org.openqa.selenium.{Cookie, Platform, WebDriver}
+import org.openqa.selenium.{Cookie, WebDriver}
 import org.openqa.selenium.remote.{RemoteWebDriver, DesiredCapabilities}
 import scala.collection.JavaConverters._
 
@@ -16,25 +16,29 @@ object Driver {
 
   def reset() = {
     Driver.manage().deleteAllCookies()
-    Driver.get("about:blank")
     Driver.get(Config.baseUrl)
   }
 
   def cookiesSet: Set[Cookie] = manage().getCookies.asScala.toSet
 
-  def addCookie(name: String, value: String) = {
-    manage().addCookie(new Cookie(name, value))
+  def addCookie(name: String, value: String) = manage().addCookie(new Cookie(name, value))
+
+  private lazy val driver: WebDriver =
+    if (Config.webDriverRemoteUrl.isEmpty)
+      instantiateLocalBrowser()
+    else
+      instantiateRemoteBrowser()
+
+  private def instantiateLocalBrowser(): WebDriver = {
+    val capabilities = DesiredCapabilities.firefox()
+    capabilities.setCapability("marionette", true)
+    new FirefoxDriver(capabilities)
   }
 
-  private lazy val driver: WebDriver = {
-    if (Config.webDriverRemoteUrl.isEmpty)
-      new FirefoxDriver
-    else {
-      val url = new URL(Config.webDriverRemoteUrl)
-      val capabilities = DesiredCapabilities.firefox()
-      capabilities.setCapability("platform", Platform.WIN8)
-      capabilities.setCapability("name", "subscriptions-frontend")
-      new RemoteWebDriver(url, capabilities)
-    }
+  private def instantiateRemoteBrowser(): WebDriver = {
+    val caps = DesiredCapabilities.chrome()
+    caps.setCapability("platform", "Windows 8.1")
+    caps.setCapability("name", "subscription-frontend")
+    new RemoteWebDriver(new URL(Config.webDriverRemoteUrl), caps)
   }
 }
