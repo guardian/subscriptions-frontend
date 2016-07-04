@@ -47,7 +47,7 @@ module.exports = function(debug) { return {
 
     plugins: !debug ? [
         new Uglify({compress: {warnings: false}})
-    ] : [new webpack.ContextReplacementPlugin(/moment[\\\/]locale$/, /^\.\/(en)$/)],
+    ] : [],
 
     progress: true,
     failOnError: true,
