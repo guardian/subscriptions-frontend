@@ -1,8 +1,9 @@
-@(showInternationalMessage: Boolean = false)
-
 @import configuration.Links
 @import org.joda.time.DateTime
-@import configuration.Details
+@import com.gu.memsub.ProductFamily
+@import views.support.ProductFamilyOps._
+
+@(showInternationalMessage: Boolean = false, productFamily: ProductFamily)
 
 <footer class="global-footer">
 
@@ -21,7 +22,7 @@
                 </p>
             } else {
                 <p>
-                  For help with Guardian and Observer subscription services please email <a href="mailto:@Details.digitalPackEmail">@Details.digitalPackEmail</a> or call @Details.digitalPackPhone. Open BST 8am to 8pm, Monday to Sunday.
+                  For help with Guardian and Observer subscription services please email <a href="mailto:@productFamily.email">@productFamily.email</a> or call @productFamily.phone. Open BST 8am to 8pm, Monday to Sunday.
                 </p>
                 <p>
                     You may also find help in our
