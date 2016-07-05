@@ -109,6 +109,11 @@ define(['$'], function ($) {
         $EDIT_DELIVERY_DETAILS: $('.js-edit-your-delivery-details'),
         $EDIT_PAYMENT_DETAILS: $('.js-edit-payment-details'),
 
+        // Paper checkout date picker
+        $PAPER_CHECKOUT_DATE_PICKER: $('#deliveryDatePicker'),
+        PAPER_CHECKOUT_DATE_PICKER_ID: 'deliveryDatePicker',
+        PAPER_CHECKOUT_DATE_PICKER_FORM_FIELD_NAME: 'startDate',
+
         $BASKET: $('.js-basket'),
         $PLAN_INPUTS :_PLAN_INPUTS,
 

@@ -8,8 +8,7 @@ define([
     'modules/checkout/editFieldsets',
     'modules/checkout/reviewDetails',
     'modules/checkout/promoCode',
-    'modules/checkout/paperDeliveryAddress',
-    'modules/checkout/datePicker'
+    'modules/checkout/paperDeliveryAddress'
 ], function (
     optionMirror,
     formElements,
@@ -18,8 +17,7 @@ define([
     editFieldsets,
     reviewDetails,
     promoCode,
-    paperDeliveryAddress,
-    datePicker
+    paperDeliveryAddress
 ) {
     'use strict';
     function init() {
@@ -31,7 +29,11 @@ define([
             reviewDetails.init();
             promoCode.init();
             paperDeliveryAddress.init();
-            datePicker.default.init();
+            if (formElements.$PAPER_CHECKOUT_DATE_PICKER != null) {
+                require(['modules/checkout/datePicker'], function(datePicker) {
+                    datePicker.default.init();
+                });
+            }
         }
 
         curl('js!stripe').then(function() {
