@@ -15,8 +15,8 @@ define(['$'], function ($) {
     };
 
     var addressFields = function(relativeTo) {
-
-        var container = $(relativeTo)[0];
+        var $CONTAINER = $(relativeTo);
+        var container = $CONTAINER[0];
         var $ADDRESS1_CONTAINER = $('.js-checkout-house', container);
         var $ADDRESS2_CONTAINER = $('.js-checkout-street', container);
         var $ADDRESS3_CONTAINER = $('.js-checkout-town', container);
@@ -25,6 +25,7 @@ define(['$'], function ($) {
         var $MANUAL_ADDRESS_CONTAINER = $('.js-checkout-manual-address', container); //wat
 
         return {
+            $CONTAINER: $CONTAINER,
             $ADDRESS1_CONTAINER: $ADDRESS1_CONTAINER,
             $ADDRESS2_CONTAINER: $ADDRESS2_CONTAINER,
             $ADDRESS3_CONTAINER: $ADDRESS3_CONTAINER,

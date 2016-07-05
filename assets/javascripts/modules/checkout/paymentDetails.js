@@ -1,6 +1,7 @@
 define([
     'bean',
     'utils/ajax',
+    'modules/forms/checkFields',
     'modules/forms/toggleError',
     'modules/checkout/formElements',
     'modules/checkout/displayCardImg',
@@ -12,6 +13,7 @@ define([
 ], function (
     bean,
     ajax,
+    checkFields,
     toggleError,
     formEls,
     displayCardImg,
@@ -52,6 +54,9 @@ define([
     }
 
     function handleValidation() {
+        if (!checkFields.checkRequiredFields(formEls.BILLING.$CONTAINER)) {
+            return;
+        }
         var paymentMethod = find(formEls.$PAYMENT_METHOD, function(elem) {return elem.checked}).value;
         var paymentDetails = {paymentMethod: paymentMethod};
 

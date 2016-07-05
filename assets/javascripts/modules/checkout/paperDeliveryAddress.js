@@ -1,10 +1,10 @@
 define([
-    'modules/forms/toggleError',
+    'modules/forms/checkFields',
     'modules/checkout/formElements',
     '$',
     'bean'
 ], function (
-    toggleError,
+    checkFields,
     formEls,
     $,
     bean) {
@@ -18,23 +18,11 @@ define([
 
     function disableOrEnableDeliveryAddress() {
         var $elems = $('input, select', $DELIVERY_ADDRESS[0]);
-
         if ($DELIVERY_ADDRESS.hasClass('is-hidden')) {
             $elems.attr('disabled', 'disabled');
         } else {
             $elems.removeAttr('disabled');
         }
-    }
-
-    function checkRequiredFields() {
-        return $('input[required]:not([disabled]), select[required]:not([disabled])', $DELIVERY_ADDRESS[0]).map(function(f) {
-            return $(f);
-        }).map(function($field) {
-            toggleError($field.parent(), !$field.val());
-            return $field.val();
-        }).reduce(function(f1, f2) {
-            return f1 && f2;
-        }, true);
     }
 
     return {
@@ -53,7 +41,7 @@ define([
             bean.on(formEls.$DELIVERY_DETAILS_SUBMIT[0], 'click', function(e) {
 
                 e.preventDefault();
-                if (!checkRequiredFields()) {
+                if (!checkFields.checkRequiredFields($DELIVERY_ADDRESS)) {
                     return;
                 }
 

@@ -1,4 +1,9 @@
-@()
+@import com.gu.memsub.Address
+@import views.support.CountryWithCurrency
+@(billingAddress: Option[Address], countriesWithCurrency: List[CountryWithCurrency])
+
+@* ===== Address ===== *@
+@address(billingAddress, "personal.address", countriesWithCurrency)
 
 @* ===== Payment type ===== *@
 
