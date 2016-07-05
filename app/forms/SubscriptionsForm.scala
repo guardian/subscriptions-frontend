@@ -38,7 +38,7 @@ class SubscriptionsForm(catalogService: CatalogService) {
 
   val paperForm = Form(mapping(
     "startDate" -> jodaLocalDate,
-    "delivery" -> of[Address](addressWithFallback(fallbackKey = "personal.address")),
+    "delivery" -> addressDataMapping,
     "deliveryInstructions" -> optional(text),
     "ratePlanId" -> of[PaperPlan[Current, Day]]
   )(PaperData.apply)(PaperData.unapply))
