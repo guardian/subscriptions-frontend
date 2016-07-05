@@ -29,6 +29,11 @@ define([
             reviewDetails.init();
             promoCode.init();
             paperDeliveryAddress.init();
+            if (formElements.$PAPER_CHECKOUT_DATE_PICKER != null) {
+                require(['modules/checkout/datePicker'], function(datePicker) {
+                    datePicker.default.init();
+                });
+            }
         }
 
         curl('js!stripe').then(function() {

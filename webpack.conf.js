@@ -1,9 +1,16 @@
 var Uglify = require("webpack/lib/optimize/UglifyJsPlugin");
 
+var path = require('path');
+
 module.exports = function(debug) { return {
     resolve: {
-        root: ["assets/javascripts", "assets/../node_modules/", "test/"],
-        extensions: ["", ".js", ".es6"],
+        root: [
+          path.join(__dirname, "node_modules"),
+          path.join(__dirname, "assets", "javascripts"),
+          path.join(__dirname, "assets", "..", "node_modules"),
+          path.join(__dirname, "test")
+        ],
+        extensions: ["", ".js", ".es6", '.jsx'],
         alias: {
             '$$': 'utils/$',
             'lodash': 'lodash-amd/modern',
@@ -29,6 +36,18 @@ module.exports = function(debug) { return {
                     presets: ['es2015'],
                     cacheDirectory: ''
                 }
+            },
+            {
+                test: /\.jsx?$/,
+                exclude: /node_modules/,
+                loader: 'babel-loader',
+                query: {
+                    presets: ['es2015', 'react']
+                }
+            },
+            {
+                test: /\.css$/,
+                loader: "style-loader!css-loader"
             }
         ]
     },
@@ -50,7 +69,7 @@ module.exports = function(debug) { return {
         colors: true
     },
 
-    context: 'assets/javascripts',
+    context: path.join(__dirname, 'assets', 'javascripts'),
     debug: true,
     devtool: 'source-map'
 }};
