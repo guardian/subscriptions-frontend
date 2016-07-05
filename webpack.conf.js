@@ -1,8 +1,15 @@
 var Uglify = require("webpack/lib/optimize/UglifyJsPlugin");
 
+var path = require('path');
+
 module.exports = function(debug) { return {
     resolve: {
-        root: ["assets/javascripts", "assets/../node_modules/", "test/"],
+        root: [
+          path.join(__dirname, "node_modules"),
+          path.join(__dirname, "assets", "javascripts"),
+          path.join(__dirname, "assets", "..", "node_modules"),
+          path.join(__dirname, "test")
+        ],
         extensions: ["", ".js", ".es6", '.jsx'],
         alias: {
             '$$': 'utils/$',
@@ -62,7 +69,7 @@ module.exports = function(debug) { return {
         colors: true
     },
 
-    context: 'assets/javascripts',
+    context: path.join(__dirname, 'assets', 'javascripts'),
     debug: true,
     devtool: 'source-map'
 }};
