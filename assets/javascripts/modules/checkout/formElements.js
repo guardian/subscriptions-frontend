@@ -46,7 +46,7 @@ define(['$'], function ($) {
         $CHECKOUT_FORM: $('.js-checkout-form'),
         $NOTICES: $('.js-checkout-notices'),
 
-        BILLING: addressFields('.js-checkout-personal-address'),
+        BILLING: addressFields('.js-billing-address'),
         DELIVERY: addressFields('.js-checkout-delivery'),
 
         $FIRST_NAME: $('.js-checkout-first .js-input'),
@@ -59,6 +59,7 @@ define(['$'], function ($) {
         $PROMO_CODE : $('.js-promo-code .js-input'),
         $PROMO_CODE_BTN: $('.js-promo-code-validate'),
 
+        $DELIVERY_AS_BILLING: $('.js-checkout-use-delivery'),
         $PAYMENT_METHOD: $('.js-checkout-payment-method .js-option-switch'),
 
         // Direct Debit

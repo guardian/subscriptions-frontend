@@ -2,6 +2,7 @@ define([
     '$',
     'modules/forms/toggleError',
     'modules/checkout/formElements',
+    'modules/forms/checkFields',
     'modules/checkout/validatePersonal',
     'modules/forms/loader',
     'modules/checkout/fieldSwitcher',
@@ -10,6 +11,7 @@ define([
     $,
     toggleError,
     formEls,
+    checkFields,
     validatePersonal,
     loader,
     fieldSwitcher,
@@ -21,29 +23,7 @@ define([
     var FIELDSET_COLLAPSED = 'is-collapsed';
 
 
-    function requiredPersonalFields() {
-        var result = [];
-        $('.form-field', '#yourDetails').deepEach(function (el) {
-            var input = $('input[required], select[required]', el);
-            if (input.length) {
-                result.push({input: input, container: $(el)});
-            }
-        });
-        return result;
-    }
-
-    function requiredFieldVaues(fields) {
-        return fields.map(function(field) {
-            return field.input.val();
-        });
-    }
-
     function displayErrors(validity) {
-        requiredPersonalFields().forEach(function(field) {
-            var isEmpty = !field.input.val();
-            toggleError(field.container, isEmpty);
-        });
-
         toggleError(formEls.$EMAIL_CONTAINER, !validity.hasValidEmail);
         toggleError(formEls.$CONFIRM_EMAIL_CONTAINER, validity.hasValidEmail && !validity.hasConfirmedEmail);
         toggleError(formEls.$EMAIL_CONTAINER, validity.isEmailInUse);
@@ -71,6 +51,8 @@ define([
     }
 
     function handleValidation(personalDetails) {
+        
+        var basicValidity = checkFields.checkRequiredFields(formEls.$FIELDSET_YOUR_DETAILS)
         loader.setLoaderElem(document.querySelector('.js-personal-details-validating'));
         loader.startLoader();
 
@@ -80,7 +62,7 @@ define([
         ).then(function (validity) {
             loader.stopLoader();
             displayErrors(validity);
-            if (validity.allValid) {
+            if (validity.allValid && basicValidity) {
                 nextStep();
             }
         });
@@ -97,8 +79,7 @@ define([
                 e.preventDefault();
                 handleValidation({
                     emailAddress: formEls.$EMAIL.val(),
-                    emailAddressConfirmed: formEls.$CONFIRM_EMAIL.val(),
-                    requiredFieldValues: requiredFieldVaues(requiredPersonalFields())
+                    emailAddressConfirmed: formEls.$CONFIRM_EMAIL.val()
                 });
             });
         }

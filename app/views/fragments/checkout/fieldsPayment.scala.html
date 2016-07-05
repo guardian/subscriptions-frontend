@@ -1,9 +1,24 @@
 @import com.gu.memsub.Address
 @import views.support.CountryWithCurrency
-@(billingAddress: Option[Address], countriesWithCurrency: List[CountryWithCurrency])
+@(billingAddress: Option[Address], canBeHidden: Boolean, countriesWithCurrency: List[CountryWithCurrency])
+
+@if(canBeHidden) {
+    <div class="js-checkout-use-delivery">
+        <label class="option">
+            <span class="option__input">
+                <input type="checkbox" class="js-input js-checkout-delivery-sames-as-billing" checked="true">
+            </span>
+            <span class="option__label">
+                Deliver the paper to my billing address
+            </span>
+        </label>
+    </div>
+}
 
 @* ===== Address ===== *@
-@address(billingAddress, "personal.address", countriesWithCurrency)
+<div class="js-billing-address @{if(canBeHidden) "is-hidden" else ""}">
+    @address(billingAddress, "personal.address", countriesWithCurrency)
+</div>
 
 @* ===== Payment type ===== *@
 

@@ -17,6 +17,7 @@
 @import com.gu.subscriptions.Day
 @import com.gu.i18n.Currency
 @import com.gu.i18n.Country
+@import com.gu.memsub.Paper
 @(
     personalData: Option[PersonalData],
     productData: ProductPopulationData,
@@ -171,7 +172,7 @@
                             <a href="#paymentDetails" class="text-button u-button-reset js-edit-payment-details" title="Edit your payment details">Edit</a>
                         </div>
                         <div class="field-panel__fields">
-                            @fragments.checkout.fieldsPayment(personalData.map(_.address), countriesWithCurrency)
+                            @fragments.checkout.fieldsPayment(personalData.map(_.address), canBeHidden = productData.family == Paper, countriesWithCurrency)
 
                             <div class="actions">
                                 <a href="#formReview" class="button button--primary button--large js-checkout-payment-details-submit">Continue</a>
