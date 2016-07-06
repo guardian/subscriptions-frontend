@@ -17,6 +17,7 @@
 @import com.gu.subscriptions.Day
 @import com.gu.i18n.Currency
 @import com.gu.i18n.Country
+@import com.gu.memsub.Paper
 @(
     personalData: Option[PersonalData],
     productData: ProductPopulationData,
@@ -142,7 +143,7 @@
                         <div id="deliveryDetails" class="field-panel is-collapsed js-fieldset-delivery-details">
                             <fieldset>
                                 <legend class="field-panel__legend">
-                                    Delivery details
+                                    Delivery address
                                 </legend>
                                 <div class="field-panel__fields">
                                     @fragments.checkout.fieldsPaper(p, countriesWithCurrency)
@@ -155,6 +156,21 @@
                         </div>
                 }
 
+                @* ===== Billing details ===== *@
+                <div id="billingAddress" class="field-panel is-collapsed js-fieldset-billing-address">
+                    <fieldset>
+                        <legend class="field-panel__legend">
+                            Billing address
+                        </legend>
+                        <div class="field-panel__edit">
+                            <a href="#yourDetails" class="text-button u-button-reset js-edit-billing-address" title="Edit your personal details">Edit</a>
+                        </div>
+                        <div class="field-panel__fields">
+                            @fragments.checkout.fieldsBilling(personalData.map(_.address), canBeHidden = productData.family == Paper, countriesWithCurrency)
+                            @continueButton(productData.fold(_ => "#deliveryDetails")(_ => "#paymentDetails"), "js-checkout-billing-address-submit")
+                        </div>
+                    </fieldset>
+                </div>
 
                 @* ===== Payment ===== *@
                 <div id="paymentDetails" class="field-panel is-collapsed js-fieldset-payment-details">

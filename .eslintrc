@@ -12,7 +12,7 @@
     "rules": {
         "curly": [2, "all"],
         "no-console": 0,
-        "no-trailing-spaces": 2,
+        "no-trailing-spaces": 0,
         "quotes": [2, "single"],
         "wrap-iife": 2
     }

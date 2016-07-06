@@ -38,7 +38,7 @@ class SubscriptionsForm(catalogService: CatalogService) {
 
   val paperForm = Form(mapping(
     "startDate" -> jodaLocalDate,
-    "delivery" -> of[Address](deliveryAddressFormat(fallbackKey = "personal.address")),
+    "delivery" -> addressDataMapping,
     "deliveryInstructions" -> optional(text),
     "ratePlanId" -> of[PaperPlan[Current, Day]]
   )(PaperData.apply)(PaperData.unapply))
@@ -118,12 +118,12 @@ object SubscriptionsForm {
     "last" -> text(0, nameMaxLength),
     "emailValidation" -> emailMapping,
     "receiveGnmMarketing" -> booleanCheckbox,
-    "address" -> addressDataMapping,
+    "address" -> of[Address](addressWithFallback("delivery")),
     "telephoneNumber" -> optional(text),
     "title"-> of(titleFormatter)
   )(PersonalData.apply)(PersonalData.unapply)
 
-  def deliveryAddressFormat(fallbackKey: String): Formatter[Address] = new Formatter[Address] {
+  def addressWithFallback(fallbackKey: String): Formatter[Address] = new Formatter[Address] {
     override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Address] = (
       \/.fromEither(addressDataMapping.withPrefix(key).bind(data)) orElse
       \/.fromEither(addressDataMapping.withPrefix(fallbackKey).bind(data))

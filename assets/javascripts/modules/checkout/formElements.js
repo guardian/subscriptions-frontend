@@ -15,8 +15,8 @@ define(['$'], function ($) {
     };
 
     var addressFields = function(relativeTo) {
-
-        var container = $(relativeTo)[0];
+        var $CONTAINER = $(relativeTo);
+        var container = $CONTAINER[0];
         var $ADDRESS1_CONTAINER = $('.js-checkout-house', container);
         var $ADDRESS2_CONTAINER = $('.js-checkout-street', container);
         var $ADDRESS3_CONTAINER = $('.js-checkout-town', container);
@@ -25,6 +25,7 @@ define(['$'], function ($) {
         var $MANUAL_ADDRESS_CONTAINER = $('.js-checkout-manual-address', container); //wat
 
         return {
+            $CONTAINER: $CONTAINER,
             $ADDRESS1_CONTAINER: $ADDRESS1_CONTAINER,
             $ADDRESS2_CONTAINER: $ADDRESS2_CONTAINER,
             $ADDRESS3_CONTAINER: $ADDRESS3_CONTAINER,
@@ -45,7 +46,7 @@ define(['$'], function ($) {
         $CHECKOUT_FORM: $('.js-checkout-form'),
         $NOTICES: $('.js-checkout-notices'),
 
-        BILLING: addressFields('.js-checkout-personal-address'),
+        BILLING: addressFields('.js-billing-address'),
         DELIVERY: addressFields('.js-checkout-delivery'),
 
         $FIRST_NAME: $('.js-checkout-first .js-input'),
@@ -58,6 +59,7 @@ define(['$'], function ($) {
         $PROMO_CODE : $('.js-promo-code .js-input'),
         $PROMO_CODE_BTN: $('.js-promo-code-validate'),
 
+        $DELIVERY_AS_BILLING: $('.js-checkout-use-delivery'),
         $PAYMENT_METHOD: $('.js-checkout-payment-method .js-option-switch'),
 
         // Direct Debit
@@ -87,6 +89,8 @@ define(['$'], function ($) {
         $EMAIL_CONTAINER: $('.js-checkout-email'),
         $CONFIRM_EMAIL_CONTAINER: $('.js-checkout-confirm-email'),
 
+
+        $BILLING_ADDRESS_SUBMIT: $('.js-checkout-billing-address-submit'),
         $YOUR_DETAILS_SUBMIT: $('.js-checkout-your-details-submit'),
         $PAYMENT_DETAILS_SUBMIT: $('.js-checkout-payment-details-submit'),
         $DELIVERY_DETAILS_SUBMIT: $('.js-checkout-delivery-details-submit'),
@@ -97,6 +101,7 @@ define(['$'], function ($) {
         $REVIEW_ADDRESS: $('.js-checkout-review-address'),
         $REVIEW_EMAIL: $('.js-checkout-review-email'),
 
+        $FIELDSET_BILLING_ADDRESS: $('.js-fieldset-billing-address'),
         $FIELDSET_PAYMENT_DETAILS: $('.js-fieldset-payment-details'),
         $FIELDSET_DELIVERY_DETAILS: $('.js-fieldset-delivery-details'),
         $REVIEW_ACCOUNT: $('.js-checkout-review-account'),
@@ -108,6 +113,7 @@ define(['$'], function ($) {
         $EDIT_YOUR_DETAILS: $('.js-edit-your-details'),
         $EDIT_DELIVERY_DETAILS: $('.js-edit-your-delivery-details'),
         $EDIT_PAYMENT_DETAILS: $('.js-edit-payment-details'),
+        $EDIT_BILLING_ADDRESS: $('.js-edit-billing-address'),
 
         // Paper checkout date picker
         $PAPER_CHECKOUT_DATE_PICKER: $('#deliveryDatePicker'),

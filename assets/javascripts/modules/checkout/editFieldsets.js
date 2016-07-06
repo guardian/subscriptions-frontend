@@ -15,6 +15,7 @@ define([
         [
             formEls.$FIELDSET_YOUR_DETAILS,
             formEls.$FIELDSET_DELIVERY_DETAILS,
+            formEls.$FIELDSET_BILLING_ADDRESS,
             formEls.$FIELDSET_PAYMENT_DETAILS,
             formEls.$FIELDSET_REVIEW
         ].forEach(function(item) {
@@ -33,6 +34,7 @@ define([
         var $editDetails = formEls.$EDIT_YOUR_DETAILS;
         var $editPayment = formEls.$EDIT_PAYMENT_DETAILS;
         var $editDelivery = formEls.$EDIT_DELIVERY_DETAILS;
+        var $editBilling = formEls.$EDIT_BILLING_ADDRESS;
 
         if ($editDetails.length && $editPayment.length) {
             bean.on($editDetails[0], 'click', function(e) {
@@ -56,7 +58,15 @@ define([
                     e.preventDefault();
                     collapseFieldsetsExcept(formEls.$FIELDSET_DELIVERY_DETAILS);
                     formEls.$FIELDSET_DELIVERY_DETAILS.removeClass(FIELDSET_COMPLETE);
-                    //tracking.deliveryDetailsTracking();
+                });
+            }
+
+            if ($editBilling.length) {
+                bean.on($editBilling[0], 'click', function(e) {
+                    e.preventDefault();
+                    collapseFieldsetsExcept(formEls.$FIELDSET_BILLING_ADDRESS);
+                    formEls.$FIELDSET_BILLING_ADDRESS.removeClass(FIELDSET_COMPLETE);
+                    tracking.billingDetailsTracking();
                 });
             }
         }

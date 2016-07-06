@@ -26,6 +26,7 @@ define([
     var FIELDSET_COMPLETE = 'is-complete';
     var FIELDSET_COLLAPSED = 'is-collapsed';
 
+
     function displayErrors(validity) {
         toggleError(formEls.$ACCOUNT_CONTAINER, !validity.accountNumberValid);
         toggleError(formEls.$HOLDER_CONTAINER, !validity.accountHolderNameValid);

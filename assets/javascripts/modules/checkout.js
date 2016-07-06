@@ -8,7 +8,9 @@ define([
     'modules/checkout/editFieldsets',
     'modules/checkout/reviewDetails',
     'modules/checkout/promoCode',
-    'modules/checkout/paperDeliveryAddress'
+    'modules/checkout/billingDetails',
+    'modules/checkout/deliveryDetails',
+    'modules/checkout/deliveryAsBilling'
 ], function (
     optionMirror,
     formElements,
@@ -17,7 +19,9 @@ define([
     editFieldsets,
     reviewDetails,
     promoCode,
-    paperDeliveryAddress
+    billingAddress,
+    deliveryDetails,
+    deliveryAsBilling
 ) {
     'use strict';
     function init() {
@@ -28,7 +32,9 @@ define([
             editFieldsets.init();
             reviewDetails.init();
             promoCode.init();
-            paperDeliveryAddress.init();
+            deliveryDetails.init();
+            deliveryAsBilling.init();
+            billingAddress.init();
             if (formElements.$PAPER_CHECKOUT_DATE_PICKER.length) {
                 require(['modules/checkout/datePicker'], function(datePicker) {
                     datePicker.default.init();

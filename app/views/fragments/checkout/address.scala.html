@@ -18,16 +18,6 @@
 
 @* ===== Address ===== *@
 <div class="js-checkout-@{namePrefix.replace('.', '-')}">
-    <div class="form-field">
-        <label class="label" @labelFor("country")>Country</label>
-        <select @attrs("country") class=" select select--wide js-country" required>
-            <option data-currency-choice="USD"></option>
-            @for(c <- countriesWithCurrency) {
-                <option value="@c.alpha2" @c.country.validationRules.toAttributes @c.country.addressLabels data-currency-choice="@c.currency">@c.name</option>
-            }
-        </select>
-        @fragments.forms.errorMessage("This field is required")
-    </div>
     <div class="form-field js-checkout-house">
         <label class="label" @labelFor("address1")>Address line 1</label>
         @* Salesforce accepts up to 255 chars but this field gets concatenated with address line 2 *@
@@ -58,6 +48,16 @@
         <input type="text" class="input-text js-input input-text input-text--small" @attrs("postcode")
         value="@address.map(_.postCode)" maxlength="10" required>
         @fragments.forms.errorMessage("Please enter a valid postal code")
+    </div>
+    <div class="form-field">
+        <label class="label" @labelFor("country")>Country</label>
+        <select @attrs("country") class=" select select--wide js-country" required>
+            <option data-currency-choice="USD"></option>
+            @for(c <- countriesWithCurrency) {
+                <option value="@c.alpha2" @c.country.validationRules.toAttributes @c.country.addressLabels data-currency-choice="@c.currency">@c.name</option>
+            }
+        </select>
+        @fragments.forms.errorMessage("This field is required")
     </div>
 </div>
 

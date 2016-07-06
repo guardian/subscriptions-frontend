@@ -33,12 +33,6 @@ define([
             var hasValidEmail = regex.isValidEmail(emailValue);
             var hasConfirmedEmail = emailValue === confirmedEmailValue;
 
-            var emptyFields = data.requiredFieldValues.filter(function (field) {
-                return !field;
-            });
-
-            var hasBasicValidity = !emptyFields.length;
-
             var hasBasicEmailValidity = (
                 hasValidEmail &&
                 hasConfirmedEmail
@@ -46,56 +40,46 @@ define([
 
             var validity = {
                 allValid: false,
-                emptyFields: emptyFields,
                 requiredFieldValues: data.requiredFieldValues,
                 hasValidEmail: hasValidEmail,
                 hasConfirmedEmail: hasConfirmedEmail,
                 emailMessage: (hasValidEmail) ? false : MESSAGES.emailInvalid,
                 isEmailInUse: false
             };
-
-            if (hasBasicValidity) {
-
-                /**
-                 * If the user is signed in we do not need to
-                 * validate their email address
-                 */
-                if (isSignedIn) {
-                    validity.allValid = true;
-                    resolve(validity);
-                }
-
-                /**
-                 * If the user is anonymous / signed-out we need to:
-                 * a) validate their email address
-                 * b) confirm their email address is not in use
-                 */
-                if (!isSignedIn && hasBasicEmailValidity) {
-                    emailCheck(emailValue).then(function(isEmailInUse) {
-                        if(isEmailInUse) {
-                            validity.isEmailInUse = true;
-                            validity.emailMessage = MESSAGES.emailTaken;
-                            resolve(validity);
-                        } else {
-                            validity.allValid = true;
-                            validity.emailMessage = false;
-                            resolve(validity);
-                        }
-                    }).fail(function() {
-                        validity.emailMessage = MESSAGES.emailFailure;
-                        resolve(validity);
-                    });
-                } else {
-                    resolve(validity);
-                }
-
-            } else {
+            
+            
+            /**
+             * If the user is signed in we do not need to
+             * validate their email address
+             */
+            if (isSignedIn) {
+                validity.allValid = true;
                 resolve(validity);
             }
 
-
-
+            /**
+             * If the user is anonymous / signed-out we need to:
+             * a) validate their email address
+             * b) confirm their email address is not in use
+             */
+            if (!isSignedIn && hasBasicEmailValidity) {
+                emailCheck(emailValue).then(function(isEmailInUse) {
+                    if(isEmailInUse) {
+                        validity.isEmailInUse = true;
+                        validity.emailMessage = MESSAGES.emailTaken;
+                        resolve(validity);
+                    } else {
+                        validity.allValid = true;
+                        validity.emailMessage = false;
+                        resolve(validity);
+                    }
+                }).fail(function() {
+                    validity.emailMessage = MESSAGES.emailFailure;
+                    resolve(validity);
+                });
+            } else {
+                resolve(validity);
+            }
         });
     };
-
 });

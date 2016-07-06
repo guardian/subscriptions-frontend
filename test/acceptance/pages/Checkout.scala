@@ -11,7 +11,9 @@ case class Checkout(val testUser: TestUser) extends Page with Browser {
 
   def clickPersonalDetailsContinueButton() = PersonalDetails.continue()
 
-  def fillInAddressDetails(): Unit = PersonalDetails.fillInAddress()
+  def clickBillingDetailsContinueButton() = BillingDetails.continue()
+
+  def fillInBillingAddress(): Unit = BillingDetails.fillIn()
 
   def fillInDirectDebitPaymentDetails(): Unit = DebitCardPaymentDetails.fillIn()
 
@@ -33,6 +35,8 @@ case class Checkout(val testUser: TestUser) extends Page with Browser {
 
   def directDebitSectionHasLoaded(): Boolean = pageHasElement(DebitCardPaymentDetails.continueButton)
 
+  def billingDetailsSectionHasLoaded(): Boolean = pageHasElement(BillingDetails.continueButton)
+
   def cardSectionHasLoaded(): Boolean = pageHasElement(CreditCardPaymentDetails.continueButton)
 
   def reviewSectionHasLoaded(): Boolean = pageHasElement(ReviewSection.submitPaymentButton)
@@ -48,16 +52,11 @@ case class Checkout(val testUser: TestUser) extends Page with Browser {
   private val userDisplayName = cssSelector(".js-user-displayname")
   private val submitPaymentButton = cssSelector(".js-checkout-submit")
 
-  private object
-  PersonalDetails {
+  private object PersonalDetails {
     val firstName = id("first")
     val lastName = id("last")
     val email = id("email")
     val emailConfirm = id("confirm")
-    val address1 = id("personal-address-address1")
-    val address2 = id("personal-address-address2")
-    val town = id("personal-address-town")
-    val postcode = id("personal-address-postcode")
     val continueButton = cssSelector(".js-checkout-your-details-submit")
 
     def fillIn(): Unit = {
@@ -65,13 +64,19 @@ case class Checkout(val testUser: TestUser) extends Page with Browser {
       setValue(lastName, s"${testUser.username}")
       setValue(email, s"${testUser.username}@gu.com")
       setValue(emailConfirm, s"${testUser.username}@gu.com")
-      setValue(address1, "address 1")
-      setValue(address2, "address 2")
-      setValue(town, "town")
-      setValue(postcode, "E8123")
     }
 
-    def fillInAddress(): Unit = {
+    def continue(): Unit = clickOn(continueButton)
+  }
+
+  private object BillingDetails {
+    val address1 = id("personal-address-address1")
+    val address2 = id("personal-address-address2")
+    val town = id("personal-address-town")
+    val postcode = id("personal-address-postcode")
+    val continueButton = cssSelector(".js-checkout-billing-address-submit")
+
+    def fillIn(): Unit = {
       setValue(address1, "address 1")
       setValue(address2, "address 2")
       setValue(town, "town")
@@ -80,6 +85,7 @@ case class Checkout(val testUser: TestUser) extends Page with Browser {
 
     def continue(): Unit = clickOn(continueButton)
   }
+
 
   private object DebitCardPaymentDetails {
     val account = id("payment-account")

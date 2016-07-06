@@ -43,7 +43,7 @@ class SubscriptionsFormTest extends FreeSpec {
         countyOrState = "DELIVERY SUBDIVISION",
         postCode = "DELIVERY OSTCODE",
         countryName = Country.UK.name
-      )))(deliveryAddressFormat(fallbackKey = "address").bind("delivery", withDelivery))
+      )))(addressWithFallback(fallbackKey = "address").bind("delivery", withDelivery))
     }
 
     "Falls back to the fallback if it fails to read delivery" in {
@@ -54,7 +54,7 @@ class SubscriptionsFormTest extends FreeSpec {
         countyOrState = "Middlesex",
         postCode = "postcode",
         countryName = Country.UK.name
-      )))(deliveryAddressFormat(fallbackKey = "address").bind("delivery", withDelivery.drop(1)))
+      )))(addressWithFallback(fallbackKey = "address").bind("delivery", withDelivery.drop(1)))
     }
 
   }
