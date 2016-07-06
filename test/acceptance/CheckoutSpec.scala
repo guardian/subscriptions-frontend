@@ -62,13 +62,22 @@ class CheckoutSpec extends FeatureSpec with Browser
       assert(checkout.pageHasLoaded())
 
       Then("section 'Your details' should load.")
-      assert(checkout.yourDetailsSectionHasLoaded)
+      assert(checkout.yourDetailsSectionHasLoaded())
 
       When("they fill in personal details,")
       checkout.fillInPersonalDetails()
 
       And("click on 'Continue' button,")
       checkout.clickPersonalDetailsContinueButton()
+
+      Then("section 'Billing Details' should load.")
+      assert(checkout.billingDetailsSectionHasLoaded())
+
+      When("they fill in their billing address")
+      checkout.fillInBillingAddress()
+
+      And("click on 'Continue' button,")
+      checkout.clickBillingDetailsContinueButton()
 
       Then("section 'Payment Details' should load.")
       assert(checkout.directDebitSectionHasLoaded())
@@ -126,13 +135,16 @@ class CheckoutSpec extends FeatureSpec with Browser
         }
 
         And("the section 'Your details' should load.")
-        assert(checkout.yourDetailsSectionHasLoaded)
+        assert(checkout.yourDetailsSectionHasLoaded())
+
+        Then("Go along to the address details")
+        checkout.clickPersonalDetailsContinueButton()
 
         When("they fill in the address,")
-        checkout.fillInAddressDetails()
+        checkout.fillInBillingAddress()
 
         And("click on 'Continue' button,")
-        checkout.clickPersonalDetailsContinueButton()
+        checkout.clickBillingDetailsContinueButton()
 
         Then("the section 'Payment Details' should load.")
         assert(checkout.directDebitSectionHasLoaded())
