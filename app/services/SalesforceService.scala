@@ -29,11 +29,13 @@ object SalesforceService {
     Keys.BILLING_CITY -> personalData.address.town,
     Keys.BILLING_POSTCODE -> personalData.address.postCode,
     Keys.BILLING_COUNTRY -> personalData.address.countryName,
+    Keys.BILLING_STATE -> personalData.address.countyOrState,
     Keys.ALLOW_GU_RELATED_MAIL -> personalData.receiveGnmMarketing
   ) ++ deliveryAddress.fold(Json.obj())(addr => Json.obj(
     Keys.MAILING_STREET -> addr.line,
     Keys.MAILING_CITY -> addr.town,
     Keys.MAILING_POSTCODE -> addr.postCode,
+    Keys.MAILING_STATE -> addr.countyOrState,
     Keys.MAILING_COUNTRY -> addr.countryName
   ))
 }
