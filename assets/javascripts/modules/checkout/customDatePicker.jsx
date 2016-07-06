@@ -26,7 +26,7 @@ export default React.createClass({
 
     render () {
         return <DatePicker
-                    dateFormat="DD/MM/YYYY"
+                    dateFormat="D MMMM YYYY"
                     locale="en"
                     selected={this.state.startDate}
                     onChange={this.handleChange}
