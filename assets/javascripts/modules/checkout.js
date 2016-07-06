@@ -8,6 +8,7 @@ define([
     'modules/checkout/editFieldsets',
     'modules/checkout/reviewDetails',
     'modules/checkout/promoCode',
+    'modules/checkout/billingDetails',
     'modules/checkout/deliveryDetails',
     'modules/checkout/deliveryAsBilling'
 ], function (
@@ -18,6 +19,7 @@ define([
     editFieldsets,
     reviewDetails,
     promoCode,
+    billingAddress,
     deliveryDetails,
     deliveryAsBilling
 ) {
@@ -32,7 +34,8 @@ define([
             promoCode.init();
             deliveryDetails.init();
             deliveryAsBilling.init();
-            if (formElements.$PAPER_CHECKOUT_DATE_PICKER != null) {
+            billingAddress.init();
+            if (formElements.$PAPER_CHECKOUT_DATE_PICKER.length) {
                 require(['modules/checkout/datePicker'], function(datePicker) {
                     datePicker.default.init();
                 });

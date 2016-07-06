@@ -36,7 +36,7 @@ define([
 
     function nextStep() {
         var fieldset = formEls.$FIELDSET_DELIVERY_DETAILS.length ?
-            formEls.$FIELDSET_DELIVERY_DETAILS : formEls.$FIELDSET_PAYMENT_DETAILS;
+            formEls.$FIELDSET_DELIVERY_DETAILS : formEls.$FIELDSET_BILLING_ADDRESS;
 
         fieldset.removeClass(FIELDSET_COLLAPSED);
 
@@ -52,7 +52,7 @@ define([
 
     function handleValidation(personalDetails) {
         
-        var basicValidity = checkFields.checkRequiredFields(formEls.$FIELDSET_YOUR_DETAILS)
+        var basicValidity = checkFields.checkRequiredFields(formEls.$FIELDSET_YOUR_DETAILS);
         loader.setLoaderElem(document.querySelector('.js-personal-details-validating'));
         loader.startLoader();
 

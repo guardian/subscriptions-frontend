@@ -26,7 +26,7 @@ define([
                     return;
                 }
 
-                formEls.$FIELDSET_PAYMENT_DETAILS.removeClass(FIELDSET_COLLAPSED);
+                formEls.$FIELDSET_BILLING_ADDRESS.removeClass(FIELDSET_COLLAPSED);
 
                 formEls.$FIELDSET_DELIVERY_DETAILS
                     .addClass(FIELDSET_COLLAPSED)

@@ -89,6 +89,8 @@ define(['$'], function ($) {
         $EMAIL_CONTAINER: $('.js-checkout-email'),
         $CONFIRM_EMAIL_CONTAINER: $('.js-checkout-confirm-email'),
 
+
+        $BILLING_ADDRESS_SUBMIT: $('.js-checkout-billing-address-submit'),
         $YOUR_DETAILS_SUBMIT: $('.js-checkout-your-details-submit'),
         $PAYMENT_DETAILS_SUBMIT: $('.js-checkout-payment-details-submit'),
         $DELIVERY_DETAILS_SUBMIT: $('.js-checkout-delivery-details-submit'),
@@ -99,6 +101,7 @@ define(['$'], function ($) {
         $REVIEW_ADDRESS: $('.js-checkout-review-address'),
         $REVIEW_EMAIL: $('.js-checkout-review-email'),
 
+        $FIELDSET_BILLING_ADDRESS: $('.js-fieldset-billing-address'),
         $FIELDSET_PAYMENT_DETAILS: $('.js-fieldset-payment-details'),
         $FIELDSET_DELIVERY_DETAILS: $('.js-fieldset-delivery-details'),
         $REVIEW_ACCOUNT: $('.js-checkout-review-account'),
@@ -110,6 +113,7 @@ define(['$'], function ($) {
         $EDIT_YOUR_DETAILS: $('.js-edit-your-details'),
         $EDIT_DELIVERY_DETAILS: $('.js-edit-your-delivery-details'),
         $EDIT_PAYMENT_DETAILS: $('.js-edit-payment-details'),
+        $EDIT_BILLING_ADDRESS: $('.js-edit-billing-address'),
 
         // Paper checkout date picker
         $PAPER_CHECKOUT_DATE_PICKER: $('#deliveryDatePicker'),
