@@ -58,7 +58,6 @@ define([
                     e.preventDefault();
                     collapseFieldsetsExcept(formEls.$FIELDSET_DELIVERY_DETAILS);
                     formEls.$FIELDSET_DELIVERY_DETAILS.removeClass(FIELDSET_COMPLETE);
-                    //tracking.deliveryDetailsTracking();
                 });
             }
 
@@ -67,7 +66,7 @@ define([
                     e.preventDefault();
                     collapseFieldsetsExcept(formEls.$FIELDSET_BILLING_ADDRESS);
                     formEls.$FIELDSET_BILLING_ADDRESS.removeClass(FIELDSET_COMPLETE);
-                    //tracking.deliveryDetailsTracking();
+                    tracking.billingDetailsTracking();
                 });
             }
         }

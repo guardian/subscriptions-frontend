@@ -46,8 +46,7 @@ define([
             .scrollIntoView();
 
         formEls.$NOTICES.removeAttr('hidden');
-
-        tracking.paymentDetailsTracking();
+        tracking.billingDetailsTracking();
     }
 
     function handleValidation(personalDetails) {

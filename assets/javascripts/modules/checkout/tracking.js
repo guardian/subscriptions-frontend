@@ -17,33 +17,22 @@ define(['$', 'modules/analytics/omniture', 'modules/analytics/snowplow'], functi
         return undefined;
     }
 
-    function personalDetailsTracking() {
-        guardian.pageInfo.slug = 'GuardianDigiPack:Name and address';
-        guardian.pageInfo.productData = subscriptionProducts('scOpen');
-        omniture.triggerPageLoadEvent();
-        snowplow.trackPageLoad();
-    }
-
-    function paymentDetailsTracking() {
-        guardian.pageInfo.slug = 'GuardianDigiPack:Payment Details';
-        guardian.pageInfo.name = 'Details - payment details | Digital | Subscriptions | The Guardian';
-        guardian.pageInfo.productData = subscriptionProducts('scOpen');
-        omniture.triggerPageLoadEvent();
-        snowplow.trackPageLoad();
-    }
-
-    function paymentReviewTracking() {
-        guardian.pageInfo.slug = 'GuardianDigiPack:Review and confirm';
-        guardian.pageInfo.name = 'Payment submission/signup | Digital | Subscriptions | The Guardian';
-        guardian.pageInfo.productData = subscriptionProducts('scCheckout');
-        omniture.triggerPageLoadEvent();
-        snowplow.trackPageLoad();
+    function tracking(slugName, pageInfoName) {
+        return function() {
+            if (pageInfoName !== undefined) {
+                guardian.pageInfo.name = 'Details - ' + pageInfoName + ' | Digital | Subscriptions | The Guardian';
+            }
+            guardian.pageInfo.slug = 'GuardianDigiPack:'+slugName;
+            guardian.pageInfo.productData = subscriptionProducts('scOpen');
+            omniture.triggerPageLoadEvent();
+            snowplow.trackPageLoad();            
+        };
     }
 
     return {
-        personalDetailsTracking: personalDetailsTracking,
-        paymentDetailsTracking: paymentDetailsTracking,
-        paymentReviewTracking: paymentReviewTracking
+        personalDetailsTracking: tracking('Name and address'),
+        paymentDetailsTracking: tracking('Payment Details', 'payment details'),
+        billingDetailsTracking: tracking('Billing Details', 'billing details'),
+        paymentReviewTracking: tracking('Review and confirm', 'submission/signup')
     };
-
 });
