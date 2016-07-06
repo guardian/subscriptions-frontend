@@ -68,9 +68,7 @@ case class PaperData(
   startDate: LocalDate,
   deliveryAddress: Address,
   deliveryInstructions: Option[String],
-  plan: PaperPlan[Current, Day],
-  includesDigipack: Boolean,
-  isHomeDelivery: Boolean
+  plan: PaperPlan[Current, Day]
 )
 
 object PersonalData {
