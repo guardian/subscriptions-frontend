@@ -18,7 +18,6 @@ case class MemberData(checkoutResult: CheckoutSuccess, subscriptionData: Subscri
     def bcrypt(string: String) = (string + Config.bcryptPepper).bcrypt(Config.bcryptSalt)
 
     val billingAddress = subscriptionData.genericData.personalData.address
-    val deliveryAddress = subscriptionData.genericData.personalData.address // TODO change to deliveryAddress once merged
 
     // TODO test that the billing period is correctly carried through, now that we are not getting plan from the catalog
     val subscriptionPlan = Map("subscriptionPlan" -> subscriptionData.productData.fold(_.plan.name, _.plan.billingPeriod.adjective))
@@ -36,7 +35,7 @@ case class MemberData(checkoutResult: CheckoutSuccess, subscriptionData: Subscri
 
     val addressData = Map(
       "billingPostcode" -> truncatePostcode(billingAddress.postCode),
-      "deliveryPostcode" -> truncatePostcode(deliveryAddress.postCode),
+      "deliveryPostcode" -> truncatePostcode(subscriptionData.productData.fold(_.deliveryAddress.postCode, _ => billingAddress.postCode)),
       "city" -> billingAddress.town,
       "country" -> billingAddress.country
     )
