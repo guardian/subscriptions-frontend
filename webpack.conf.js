@@ -1,5 +1,7 @@
 var Uglify = require("webpack/lib/optimize/UglifyJsPlugin");
 
+var webpack = require("webpack");
+
 var path = require('path');
 
 module.exports = function(debug) { return {
@@ -53,6 +55,11 @@ module.exports = function(debug) { return {
     },
 
     plugins: !debug ? [
+        new webpack.DefinePlugin({
+            'process.env':{
+                'NODE_ENV': JSON.stringify('production')
+            }
+        }),
         new Uglify({compress: {warnings: false}})
     ] : [],
 
