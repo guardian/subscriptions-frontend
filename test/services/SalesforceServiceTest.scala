@@ -24,7 +24,8 @@ class SalesforceServiceTest extends Specification {
         BILLING_CITY -> data.address.town,
         BILLING_POSTCODE -> data.address.postCode,
         BILLING_COUNTRY -> data.address.countryName,
-        ALLOW_GU_RELATED_MAIL -> data.receiveGnmMarketing
+        ALLOW_GU_RELATED_MAIL -> data.receiveGnmMarketing,
+        BILLING_STATE -> data.address.countyOrState
       )
     }
 
@@ -35,6 +36,7 @@ class SalesforceServiceTest extends Specification {
       (salesforceInfo \ MAILING_CITY).get mustEqual JsString(delivery.town)
       (salesforceInfo \ MAILING_POSTCODE).get mustEqual JsString(delivery.postCode)
       (salesforceInfo \ MAILING_COUNTRY).get mustEqual JsString(delivery.countryName)
+      (salesforceInfo \ MAILING_STATE).get mustEqual JsString(delivery.countyOrState)
     }
   }
 }
