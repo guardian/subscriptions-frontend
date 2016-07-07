@@ -14,7 +14,7 @@ define(['modules/checkout/addressFields'], function (addressFields) {
             var output = addressFields.postcode('personal.address.postcode', true, 'Postcode');
 
             expect(output.input.isEqualNode(dom(
-                '<input type="text" id="personal-address-postcode" name="personal.address.postcode" class="input-text" required="required">'
+                '<input type="text" id="personal-address-postcode" name="personal.address.postcode" class="input-text js-input" required="required">'
             ))).toBeTruthy();
 
             expect(output.label.isEqualNode(dom(
@@ -25,7 +25,7 @@ define(['modules/checkout/addressFields'], function (addressFields) {
         it('should generate an optional postcode field with the right label', function () {
             var output = addressFields.postcode('personal.address.postcode', false, 'Zipcode');
             expect(output.input.isEqualNode(dom(
-                '<input type="text" id="personal-address-postcode" class="input-text" name="personal.address.postcode">'
+                '<input type="text" id="personal-address-postcode" class="input-text js-input" name="personal.address.postcode">'
             ))).toBeTruthy();
 
             expect(output.label.isEqualNode(dom(
@@ -37,7 +37,7 @@ define(['modules/checkout/addressFields'], function (addressFields) {
             var output = addressFields.subdivision('personal.address.subdivision', true, 'Province', []);
 
             expect(output.input.isEqualNode(dom(
-                '<input type="text" id="personal-address-subdivision" name="personal.address.subdivision" class="input-text" required="required">'
+                '<input type="text" id="personal-address-subdivision" name="personal.address.subdivision" class="input-text js-input" required="required">'
             ))).toBeTruthy();
 
             expect(output.label.isEqualNode(dom(
@@ -49,7 +49,7 @@ define(['modules/checkout/addressFields'], function (addressFields) {
             var output = addressFields.subdivision('personal.address.subdivision', true, 'Province', ['Bromley']);
 
             expect(output.input.isEqualNode(dom(
-                '<select id="personal-address-subdivision" name="personal.address.subdivision" class="select--wide" required="required">' +
+                '<select id="personal-address-subdivision" name="personal.address.subdivision" class="select--wide js-input" required="required">' +
                     '<option></option>' +
                     '<option value="Bromley">Bromley</option>' +
                 '</select>'
