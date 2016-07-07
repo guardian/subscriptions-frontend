@@ -38,18 +38,7 @@
             value="@address.map(_.town)" maxlength="40" required>
         @fragments.forms.errorMessage("This field is required")
     </div>
-    <div class="form-field js-checkout-subdivision">
-        <label class="label" @labelFor("subdivision")>County</label>
-        <select @attrs("subdivision")></select>
-        @fragments.forms.errorMessage("Please enter a valid state/county")
-    </div>
-    <div class="form-field js-checkout-postcode">
-        <label class="label" @labelFor("postcode")>Postcode</label>
-        <input type="text" class="input-text js-input input-text input-text--small" @attrs("postcode")
-        value="@address.map(_.postCode)" maxlength="10" required>
-        @fragments.forms.errorMessage("Please enter a valid postal code")
-    </div>
-    <div class="form-field">
+    <div class="form-field js-checkout-country">
         <label class="label" @labelFor("country")>Country</label>
         <select @attrs("country") class=" select select--wide js-country" required>
             <option data-currency-choice="USD"></option>
@@ -58,6 +47,17 @@
             }
         </select>
         @fragments.forms.errorMessage("This field is required")
+    </div>
+    <div class="form-field js-checkout-subdivision">
+        <label class="label" @labelFor("subdivision")>County</label>
+        <select @attrs("subdivision") class="js-input"></select>
+        @fragments.forms.errorMessage("Please enter a valid state/county")
+    </div>
+    <div class="form-field js-checkout-postcode">
+        <label class="label" @labelFor("postcode")>Postcode</label>
+        <input type="text" class="input-text js-input input-text input-text--small" @attrs("postcode")
+        value="@address.map(_.postCode)" maxlength="10" required>
+        @fragments.forms.errorMessage("Please enter a valid postal code")
     </div>
 </div>
 

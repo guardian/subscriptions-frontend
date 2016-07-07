@@ -39,22 +39,27 @@ define([
             ], ' '));
 
             var BILLING_COUNTRY_SELECT = formEls.BILLING.$COUNTRY_SELECT[0];
-
-            formEls.$REVIEW_ADDRESS.text(textUtils.mergeValues([
-                formEls.BILLING.$ADDRESS1.val(),
-                formEls.BILLING.$ADDRESS2.val(),
-                formEls.BILLING.$ADDRESS3.val(),
-                formEls.BILLING.$POSTCODE.val(),
-                BILLING_COUNTRY_SELECT.options[BILLING_COUNTRY_SELECT.selectedIndex].text
-            ], ', '));
-
+            if (BILLING_COUNTRY_SELECT.disabled) {
+                formEls.$REVIEW_ADDRESS.text('Same as Delivery address');
+            } else {
+                formEls.$REVIEW_ADDRESS.text(textUtils.mergeValues([
+                    formEls.BILLING.$ADDRESS1.val(),
+                    formEls.BILLING.$ADDRESS2.val(),
+                    formEls.BILLING.$TOWN.val(),
+                    formEls.BILLING.getSubdivision$().val(),
+                    formEls.BILLING.getPostcode$().val(),
+                    BILLING_COUNTRY_SELECT.options[BILLING_COUNTRY_SELECT.selectedIndex].text
+                ], ', '));
+            }
+            
             var DELIVERY_COUNTRY_SELECT = formEls.DELIVERY.$COUNTRY_SELECT[0];
 
             formEls.$REVIEW_DELIVERY_ADDRESS.text(textUtils.mergeValues([
                 formEls.DELIVERY.$ADDRESS1.val(),
                 formEls.DELIVERY.$ADDRESS2.val(),
-                formEls.DELIVERY.$ADDRESS3.val(),
-                formEls.DELIVERY.$POSTCODE.val(),
+                formEls.DELIVERY.$TOWN.val(),
+                formEls.DELIVERY.getSubdivision$().val(),
+                formEls.DELIVERY.getPostcode$().val(),
                 DELIVERY_COUNTRY_SELECT.options[DELIVERY_COUNTRY_SELECT.selectedIndex].text
             ], ', '));
 

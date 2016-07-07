@@ -20,7 +20,8 @@ define(['$'], function ($) {
         var container = $CONTAINER[0];
         var $ADDRESS1_CONTAINER = $('.js-checkout-house', container);
         var $ADDRESS2_CONTAINER = $('.js-checkout-street', container);
-        var $ADDRESS3_CONTAINER = $('.js-checkout-town', container);
+        var $TOWN_CONTAINER = $('.js-checkout-town', container);
+        var $COUNTRY_CONTAINER = $('.js-checkout-country', container);
         var $SUBDIVISION_CONTAINER = $('.js-checkout-subdivision', container);
         var $POSTCODE_CONTAINER = $('.js-checkout-postcode', container);
 
@@ -28,16 +29,17 @@ define(['$'], function ($) {
             $CONTAINER: $CONTAINER,
             $ADDRESS1_CONTAINER: $ADDRESS1_CONTAINER,
             $ADDRESS2_CONTAINER: $ADDRESS2_CONTAINER,
-            $ADDRESS3_CONTAINER: $ADDRESS3_CONTAINER,
+            $TOWN_CONTAINER: $TOWN_CONTAINER,
+            $COUNTRY_CONTAINER: $COUNTRY_CONTAINER,
             $SUBDIVISION_CONTAINER: $SUBDIVISION_CONTAINER,
             $POSTCODE_CONTAINER: $POSTCODE_CONTAINER,
 
             $ADDRESS1: $('.js-input', $ADDRESS1_CONTAINER[0]),
             $ADDRESS2: $('.js-input', $ADDRESS2_CONTAINER[0]),
-            $ADDRESS3: $('.js-input', $ADDRESS3_CONTAINER[0]),
-            $POSTCODE: $('.js-input', $POSTCODE_CONTAINER[0]),
-            $SUBDIVISION: $('select', $SUBDIVISION_CONTAINER[0]),
-            $COUNTRY_SELECT: $('.js-country', container)
+            $TOWN: $('.js-input', $TOWN_CONTAINER[0]),
+            $COUNTRY_SELECT: $('.js-country', $COUNTRY_CONTAINER[0]),
+            getPostcode$: function() { return $('.js-input', $POSTCODE_CONTAINER[0]); },
+            getSubdivision$: function() { return $('.js-input', $SUBDIVISION_CONTAINER[0]); }
         };
     };
 
