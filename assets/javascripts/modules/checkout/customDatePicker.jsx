@@ -7,7 +7,7 @@ import formElements from './formElements'
 var NUMBER_OF_DAYS_IN_ADVANCE = 5;
 var FIRST_SELECTABLE_DATE = moment().add(NUMBER_OF_DAYS_IN_ADVANCE, 'days');
 
-var NUMBER_OF_DAYS_AVAILABLE = 14;
+var NUMBER_OF_DAYS_AVAILABLE = 21;
 var LAST_SELECTABLE_DATE = moment().add(NUMBER_OF_DAYS_IN_ADVANCE, 'days').add(NUMBER_OF_DAYS_AVAILABLE, 'days');
 
 export default React.createClass({
