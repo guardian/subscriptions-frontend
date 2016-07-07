@@ -1,7 +1,9 @@
 @import model.PersonalData
 @import configuration.Links
+@import views.support.ProductPopulationData
+@import views.support.ProductPopulationData._
 
-@(personalData: Option[PersonalData])
+@(personalData: Option[PersonalData], productData: ProductPopulationData)
 <div class="review-details">
     <div class="review-details__item">
         <span class="review-details__heading">Your details</span>
@@ -9,17 +11,17 @@
             <ul class="o-unstyled-list">
                 <li class="js-checkout-review-name sessioncamhidetext"></li>
                 <li class="js-checkout-review-address sessioncamhidetext"></li>
-                <li>Email: <span class="js-checkout-review-email sessioncamhidetext"></span></li>
-                <li>Phone: <span class="js-checkout-review-phone sessioncamhidetext"></span></li>
+                <li><span class="review-details__detail">Email:</span> <span class="js-checkout-review-email sessioncamhidetext"></span></li>
+                <li><span class="review-details__detail">Phone:</span> <span class="js-checkout-review-phone sessioncamhidetext"></span></li>
             </ul>
         </div>
     </div>
-    // TODO carry through the product so we know to remove this.
-    @if(true) {
+    @productData.paper.map { p =>
         <div class="review-details__item">
             <span class="review-details__heading">Delivery details</span>
             <div class="js-checkout-review-delivery-address sessioncamhidetext"></div>
-            <div>Delivery instructions: <span class="js-checkout-review-delivery-instructions sessioncamhidetext"></span></div>
+            <div><span class="review-details__detail">Delivery instructions:</span> <span class="js-checkout-review-delivery-instructions sessioncamhidetext"></span></div>
+            <div><span class="review-details__detail">Date of first paper delivery:</span> <span class="js-checkout-review-delivery-start-date"></span></div>
         </div>
     }
     <div class="review-details__item">
@@ -42,9 +44,8 @@
     </div>
     <div class="review-details__item">
         <span class="review-details__heading">Subscription details</span>
-        <h4 class="js-option-mirror-package-display"></h4>
+        <div class="js-option-mirror-package-display"></div>
         <div class="js-option-mirror-payment-display"></div>
-        <div>Date of first paper: <span class="js-checkout-review-delivery-start-date sessioncamhidetext"></span></div>
     </div>
     <div class="review-details__actions">
         <p class="u-note">
@@ -79,6 +80,7 @@
             <a href="@Links.whyYourDataMattersToUs.href" target="_blank">here</a>.
         </p>
 
+        <!-- TODO confirm whether these T&Cs apply to paper-only packages too -->
         <p class="u-note prose">
             By proceeding you agree to the
             <a href="@Links.terms.href" target="_blank">@Links.terms.title</a>
