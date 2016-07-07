@@ -1,11 +1,15 @@
+@import com.gu.memsub.ProductFamily
+@import com.gu.memsub.Digipack
+@import utils.TestUsers.{PreSigninTestCookie, NameEnteredInForm, SignedInUsername}
+
 @(
     title: String,
     jsVars: model.JsVars = model.JsVars(),
     isInternational: Boolean = false,
     bodyClasses: Seq[String] = Nil,
-    touchpointBackendResolutionOpt: Option[services.TouchpointBackend.Resolution] = None
+    touchpointBackendResolutionOpt: Option[services.TouchpointBackend.Resolution] = None,
+    productFamily: ProductFamily = Digipack
 )(content: Html)
-@import utils.TestUsers.{PreSigninTestCookie, NameEnteredInForm, SignedInUsername}
 
 <!DOCTYPE html>
 <html lang="en-GB">
@@ -35,7 +39,7 @@
             @content
         </div>
 
-        @fragments.global.footer(isInternational)
+        @fragments.global.footer(isInternational, productFamily)
         @fragments.global.sessionCam()
         @fragments.footerJavaScript()
     </body>

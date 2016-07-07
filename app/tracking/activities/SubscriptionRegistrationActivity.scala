@@ -11,53 +11,44 @@ import model.error.CheckoutService._
 
 import scala.collection.JavaConversions._
 
-object MemberData {
-  def apply(checkoutResult: CheckoutSuccess, subscriptionData: SubscribeRequest, billingPeriod: BillingPeriod): MemberData = {
-    val address: Address = subscriptionData.genericData.personalData.address
-    MemberData(address.town,
-      address.country.fold(address.countryName)(_.name),
-      address.postCode,
-      billingPeriod,
-      subscriptionData.genericData.personalData.receiveGnmMarketing,
-      checkoutResult.salesforceMember.salesforceContactId,
-      checkoutResult.userIdData.map(_.id).mkString,
-      subscriptionData.genericData.paymentData
-    )
-  }
-}
-
-case class MemberData(town: String, country: String, postCode: String, billingPeriod: BillingPeriod, receiveGnmMarketing: Boolean, salesForceContactId: String, userId: String, paymentData: PaymentData) {
+case class MemberData(checkoutResult: CheckoutSuccess, subscriptionData: SubscribeRequest) {
 
   def toMap: JMap[String, Any] = {
 
     def bcrypt(string: String) = (string + Config.bcryptPepper).bcrypt(Config.bcryptSalt)
 
-    val subscriptionPlan = Map("subscriptionPlan" -> billingPeriod.adjective)
+    val billingAddress = subscriptionData.genericData.personalData.address
+
+    // TODO test that the billing period is correctly carried through, now that we are not getting plan from the catalog
+    val subscriptionPlan = Map("subscriptionPlan" -> subscriptionData.productData.fold(_.plan.name, _.plan.billingPeriod.adjective))
 
     val marketingChoices = Map("marketingChoicesForm" -> ActivityTracking.setSubMap(Map(
-      "gnm" -> receiveGnmMarketing,
+      "gnm" -> subscriptionData.genericData.personalData.receiveGnmMarketing,
       "membership" -> false,
       "thirdParty" -> false
     )))
 
     val identityData = Map(
-      "salesforceContactId" -> bcrypt(salesForceContactId),
-      "identityId" -> bcrypt(userId)
+      "salesforceContactId" -> bcrypt(checkoutResult.salesforceMember.salesforceContactId),
+      "identityId" -> bcrypt(checkoutResult.userIdData.map(_.id).mkString)
     )
 
     val addressData = Map(
-      "billingPostcode" -> truncatePostcode(postCode),
-      "deliveryPostcode" -> truncatePostcode(postCode),
-      "city" -> town,
-      "country" -> country
+      "billingPostcode" -> truncatePostcode(billingAddress.postCode),
+      "deliveryPostcode" -> truncatePostcode(subscriptionData.productData.fold(_.deliveryAddress.postCode, _ => billingAddress.postCode)),
+      "city" -> billingAddress.town,
+      "country" -> billingAddress.country
     )
 
     val tierData = Map(
-      "tier" -> "digital"
+      "tier" -> subscriptionData.productData.fold(
+        x => "paper", // TODO change to s"${if (is a bundle) "bundle" else "paper"}-${if (home delivery) "delivery" else "voucher"}"
+        _ => "digital"
+      )
     )
 
     val paymentMethodData = Map(
-      "paymentMethod" -> (paymentData match {
+      "paymentMethod" -> (subscriptionData.genericData.paymentData match {
         case d: DirectDebitData => "direct-debit"
         case c: CreditCardData => "credit-card"
       })

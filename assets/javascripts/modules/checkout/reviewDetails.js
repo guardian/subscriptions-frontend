@@ -33,18 +33,33 @@ define([
     function populateDetails() {
         clickHelper(formEls.$PAYMENT_DETAILS_SUBMIT, function() {
             formEls.$REVIEW_NAME.text(textUtils.mergeValues([
+                formEls.$TITLE.val(),
                 formEls.$FIRST_NAME.val(),
                 formEls.$LAST_NAME.val()
             ], ' '));
+
+            var BILLING_COUNTRY_SELECT = formEls.BILLING.$COUNTRY_SELECT[0];
 
             formEls.$REVIEW_ADDRESS.text(textUtils.mergeValues([
                 formEls.BILLING.$ADDRESS1.val(),
                 formEls.BILLING.$ADDRESS2.val(),
                 formEls.BILLING.$ADDRESS3.val(),
-                formEls.BILLING.$POSTCODE.val()
+                formEls.BILLING.$POSTCODE.val(),
+                BILLING_COUNTRY_SELECT.options[BILLING_COUNTRY_SELECT.selectedIndex].text
+            ], ', '));
+
+            var DELIVERY_COUNTRY_SELECT = formEls.DELIVERY.$COUNTRY_SELECT[0];
+
+            formEls.$REVIEW_DELIVERY_ADDRESS.text(textUtils.mergeValues([
+                formEls.DELIVERY.$ADDRESS1.val(),
+                formEls.DELIVERY.$ADDRESS2.val(),
+                formEls.DELIVERY.$ADDRESS3.val(),
+                formEls.DELIVERY.$POSTCODE.val(),
+                DELIVERY_COUNTRY_SELECT.options[DELIVERY_COUNTRY_SELECT.selectedIndex].text
             ], ', '));
 
             formEls.$REVIEW_EMAIL.text(formEls.$EMAIL.val());
+            formEls.$REVIEW_PHONE.text(formEls.$PHONE.val());
             formEls.$REVIEW_ACCOUNT.text(formEls.$ACCOUNT.val());
             formEls.$REVIEW_SORTCODE.text(formEls.$SORTCODE.val());
             formEls.$REVIEW_HOLDER.text(formEls.$HOLDER.val());
@@ -55,6 +70,9 @@ define([
                 formEls.$CARD_EXPIRY_MONTH.val(),
                 formEls.$CARD_EXPIRY_YEAR.val()
             ], '/'));
+
+            formEls.$REVIEW_DELIVERY_INSTRUCTIONS.text(formEls.$DELIVERY_INSTRUCTIONS.val());
+            formEls.$REVIEW_DELIVERY_START_DATE.text(formEls.getPaperCheckoutField().val());
         });
     }
 
@@ -78,7 +96,7 @@ define([
                 }
 
                 ajax({
-                    url: window.location.href,
+                    url: '/checkout',
                     method: 'post',
                     data: data,
                     success: function(successData) {
@@ -99,7 +117,7 @@ define([
 
                         toggleError(formEls.$CARD_CONTAINER, true);
                     }
-                })
+                });
             }, false);
         }
 

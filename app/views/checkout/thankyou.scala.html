@@ -1,25 +1,26 @@
 @import com.gu.i18n.Currency
 @import com.gu.memsub.BillingPeriod
 @import com.gu.memsub.promo.Promotion.AnyPromotion
-@import com.gu.subscriptions.DigipackPlan
 @import views.support.BillingPeriod._
 @import views.support.Pricing._
 @import com.gu.memsub.Current
+@import com.gu.memsub.Digipack
 @import com.gu.memsub.PaidPlan
+@import com.gu.memsub.ProductFamily
+@import views.support.ProductFamilyOps._
+@import com.gu.memsub.Paper
+
 @(subscriptionName: String,
     guestAccountForm: Option[Form[model.GuestAccountData]] = None,
     touchpointBackendResolution: services.TouchpointBackend.Resolution,
     plan: PaidPlan[Current, BillingPeriod],
     promotion: Option[AnyPromotion] = None,
-    currency: Currency
+    currency: Currency,
+    productFamily: ProductFamily,
+    isBundle: Boolean
 )(implicit request: RequestHeader)
 
-@import configuration.Config.Identity.webAppProfileUrl
-@import configuration.Details
-@import services.IdentityToken.{paramName => identityTokenParam}
-@import services.UserId.{paramName => userIdParam}
-
-@main("Confirmation | Digital | Subscriptions | The Guardian", bodyClasses=List("is-wide"), touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
+@main(s"Confirmation | Subscribe to the ${productFamily.title(plan)} | The Guardian", bodyClasses=List("is-wide"), touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
 
     @fragments.analytics.tagmanager()
 
@@ -35,7 +36,7 @@
 </script>
 
 <main class="page-container gs-container gs-container--slim">
-    @fragments.page.header("Thank you for your order", None, List("l-padded"))
+    @fragments.page.header("Thank you for subscribing", None, List("l-padded"))
 
     <section class="section-slice section-slice--bleed section-slice--limited">
         <div class="section-slice__content">
@@ -44,9 +45,9 @@
                     We have received your request and are now processing your subscription,
                     you'll receive email confirmation of this shortly.
                 </p>
-                <p>Here are the details of your order, if any of these are incorrect please get in touch with us straight away via email at <a href="mailto:@Details.digitalPackEmail">@Details.digitalPackEmail</a> or on <strong>@Details.digitalPackPhone</strong>. Lines are open BST Monday&ndash;Friday 8.00am&ndash;8.00pm. Saturday &amp; Sunday 8.00am&ndash;6.00pm.</p>
+                <p>Here are the details of your subscription, if any of these are incorrect please get in touch with us straight away via email at <a href="mailto:@productFamily.email">@productFamily.email</a> or on <strong>@productFamily.phone</strong>. Lines are open BST Monday&ndash;Friday 8.00am&ndash;8.00pm. Saturday &amp; Sunday 8.00am&ndash;6.00pm.</p>
             </div>
-            @fragments.checkout.reviewPanel(subscriptionName, plan, promotion, currency)
+            @fragments.checkout.reviewPanel(subscriptionName, plan, promotion, currency, productFamily)
         </div>
     </section>
 
@@ -54,57 +55,16 @@
         <div class="section-slice__content">
 
             <h2 class="section-title">What happens now?</h2>
-            @fragments.confirmation.appSteps()
 
-            @guestAccountForm.map { form =>
+            @{
+                productFamily match {
+                    case Digipack => fragments.confirmation.appSteps()
+                    case Paper => fragments.confirmation.deliverySteps(isBundle)
+                }
+            }
 
-                <h3 class="section-divider">Register for an account</h3>
-                <div class="prose prose--full">
-                    <p>Some features of your subscription require you to be signed in to theguardian.com before you can make use of them.</p>
-                </div>
+            @fragments.confirmation.registerGuestAccount(guestAccountForm)
 
-                <form action="@routes.Checkout.convertGuestUser" method="POST" class="form js-finish-account" autocomplete="off">
-                    @helper.CSRF.formField
-
-                    <div class="form-field js-checkout-finish-account-password">
-
-                        <input name="@userIdParam" type="hidden" value="@form.data.get(userIdParam)">
-                        <input name="@identityTokenParam" type="hidden" value="@form.data.get(identityTokenParam)">
-
-                        <label class="label" for="password">
-                            Enter a password to finish creating your account:
-                        </label>
-                        <input
-                            class="input-text js-input js-password-strength"
-                            id="password"
-                            name="password"
-                            type="password"
-                            minlength="6"
-                            maxlength="20"
-                            value=""
-                           required
-                        />
-                        @fragments.forms.errorMessage("Password too short")
-
-                    </div>
-                    @fragments.forms.passwordStrengthIndicator()
-
-                    <div class="actions">
-                        <button class="button button--primary button--large js-checkout-finish-account-submit">Confirm</button>
-                    </div>
-                </form>
-
-                <div class="js-finish-account-success is-hidden">
-                    <p>All done!</p>
-                    <p>You can edit your details as well as manage your subscription in your Profile area</p>
-                    <div class="actions">
-                        <a href="@webAppProfileUrl" class="button button--primary button--large">My profile</a>
-                    </div>
-                </div>
-                <div class="js-finish-account-error is-hidden finish-account-error">
-                    <p>An internal server error occurred while trying to set a password for your account. Please try again later.</p>
-                </div>
-        }
         </div>
     </section>
 </main>

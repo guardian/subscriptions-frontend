@@ -2,6 +2,7 @@ define(['$'], function ($) {
     'use strict';
     var _PLAN_SELECT = $('.js-payment-frequency');
     var _PLAN_INPUTS = $('input[type="radio"]', _PLAN_SELECT);
+    var _PAPER_CHECKOUT_DATE_PICKER_FORM_FIELD_NAME = 'startDate';
 
     var getRatePlanId = function () {
         // Bonzo has no filter function :(
@@ -22,7 +23,6 @@ define(['$'], function ($) {
         var $ADDRESS3_CONTAINER = $('.js-checkout-town', container);
         var $SUBDIVISION_CONTAINER = $('.js-checkout-subdivision', container);
         var $POSTCODE_CONTAINER = $('.js-checkout-postcode', container);
-        var $MANUAL_ADDRESS_CONTAINER = $('.js-checkout-manual-address', container); //wat
 
         return {
             $CONTAINER: $CONTAINER,
@@ -31,7 +31,6 @@ define(['$'], function ($) {
             $ADDRESS3_CONTAINER: $ADDRESS3_CONTAINER,
             $SUBDIVISION_CONTAINER: $SUBDIVISION_CONTAINER,
             $POSTCODE_CONTAINER: $POSTCODE_CONTAINER,
-            $MANUAL_ADDRESS_CONTAINER: $MANUAL_ADDRESS_CONTAINER, //wat
 
             $ADDRESS1: $('.js-input', $ADDRESS1_CONTAINER[0]),
             $ADDRESS2: $('.js-input', $ADDRESS2_CONTAINER[0]),
@@ -42,6 +41,10 @@ define(['$'], function ($) {
         };
     };
 
+    var getPaperCheckoutField = function() {
+        return $('[name="' + _PAPER_CHECKOUT_DATE_PICKER_FORM_FIELD_NAME + '"]');
+    };
+
     return {
         $CHECKOUT_FORM: $('.js-checkout-form'),
         $NOTICES: $('.js-checkout-notices'),
@@ -49,11 +52,15 @@ define(['$'], function ($) {
         BILLING: addressFields('.js-billing-address'),
         DELIVERY: addressFields('.js-checkout-delivery'),
 
+        $DELIVERY_INSTRUCTIONS: $('textarea[name="deliveryInstructions"]'),
+
+        $TITLE: $('.js-checkout-title .js-input'),
         $FIRST_NAME: $('.js-checkout-first .js-input'),
         $LAST_NAME: $('.js-checkout-last .js-input'),
         $EMAIL: $('.js-checkout-email .js-input'),
         $CONFIRM_EMAIL: $('.js-checkout-confirm-email .js-input'),
         $EMAIL_ERROR: $('.js-checkout-email .js-error-message'),
+        $PHONE: $('.js-checkout-phone-number .js-input'),
 
         // Promo Code:
         $PROMO_CODE : $('.js-promo-code .js-input'),
@@ -100,6 +107,7 @@ define(['$'], function ($) {
         $REVIEW_NAME: $('.js-checkout-review-name'),
         $REVIEW_ADDRESS: $('.js-checkout-review-address'),
         $REVIEW_EMAIL: $('.js-checkout-review-email'),
+        $REVIEW_PHONE: $('.js-checkout-review-phone'),
 
         $FIELDSET_BILLING_ADDRESS: $('.js-fieldset-billing-address'),
         $FIELDSET_PAYMENT_DETAILS: $('.js-fieldset-payment-details'),
@@ -110,6 +118,9 @@ define(['$'], function ($) {
         $REVIEW_CARD_NUMBER: $('.js-checkout-review-card-number'),
         $REVIEW_CARD_EXPIRY: $('.js-checkout-review-card-expiry'),
 
+        $REVIEW_DELIVERY_ADDRESS: $('.js-checkout-review-delivery-address'),
+        $REVIEW_DELIVERY_INSTRUCTIONS: $('.js-checkout-review-delivery-instructions'),
+        $REVIEW_DELIVERY_START_DATE: $('.js-checkout-review-delivery-start-date'),
         $EDIT_YOUR_DETAILS: $('.js-edit-your-details'),
         $EDIT_DELIVERY_DETAILS: $('.js-edit-your-delivery-details'),
         $EDIT_PAYMENT_DETAILS: $('.js-edit-payment-details'),
@@ -118,11 +129,12 @@ define(['$'], function ($) {
         // Paper checkout date picker
         $PAPER_CHECKOUT_DATE_PICKER: $('#deliveryDatePicker'),
         PAPER_CHECKOUT_DATE_PICKER_ID: 'deliveryDatePicker',
-        PAPER_CHECKOUT_DATE_PICKER_FORM_FIELD_NAME: 'startDate',
+        PAPER_CHECKOUT_DATE_PICKER_FORM_FIELD_NAME: _PAPER_CHECKOUT_DATE_PICKER_FORM_FIELD_NAME,
 
         $BASKET: $('.js-basket'),
         $PLAN_INPUTS :_PLAN_INPUTS,
 
-        getRatePlanId: getRatePlanId
+        getRatePlanId: getRatePlanId,
+        getPaperCheckoutField: getPaperCheckoutField
     };
 });

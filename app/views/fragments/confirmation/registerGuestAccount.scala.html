@@ -1,0 +1,55 @@
+@(guestAccountForm: Option[Form[model.GuestAccountData]])(implicit request: RequestHeader)
+
+@import configuration.Config.Identity.webAppProfileUrl
+@import services.IdentityToken.{paramName => identityTokenParam}
+@import services.UserId.{paramName => userIdParam}
+
+@guestAccountForm.map { form =>
+
+    <h3 class="section-divider">Register for an account</h3>
+    <div class="prose prose--full">
+        <p>Some features of your subscription require you to be signed in to theguardian.com before you can make use of them.</p>
+    </div>
+
+    <form action="@routes.Checkout.convertGuestUser" method="POST" class="form js-finish-account" autocomplete="off">
+        @helper.CSRF.formField
+
+        <div class="form-field js-checkout-finish-account-password">
+
+            <input name="@userIdParam" type="hidden" value="@form.data.get(userIdParam)">
+            <input name="@identityTokenParam" type="hidden" value="@form.data.get(identityTokenParam)">
+
+            <label class="label" for="password">
+                Enter a password to finish creating your account:
+            </label>
+            <input
+            class="input-text js-input js-password-strength"
+            id="password"
+            name="password"
+            type="password"
+            minlength="6"
+            maxlength="20"
+            value=""
+            required
+            />
+            @fragments.forms.errorMessage("Password too short")
+
+        </div>
+        @fragments.forms.passwordStrengthIndicator()
+
+        <div class="actions">
+            <button class="button button--primary button--large js-checkout-finish-account-submit">Confirm</button>
+        </div>
+    </form>
+
+    <div class="js-finish-account-success is-hidden">
+        <p>All done!</p>
+        <p>You can edit your details as well as manage your subscription in your Profile area</p>
+        <div class="actions">
+            <a href="@webAppProfileUrl" class="button button--primary button--large">My profile</a>
+        </div>
+    </div>
+    <div class="js-finish-account-error is-hidden finish-account-error">
+        <p>An internal server error occurred while trying to set a password for your account. Please try again later.</p>
+    </div>
+}

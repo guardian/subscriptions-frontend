@@ -10,7 +10,10 @@
 @import scalaz.Id._
 @import com.gu.memsub.Current
 @import com.gu.memsub.PaidPlan
-@(subscriptionId: String, plan: PaidPlan[Current, BillingPeriod], promotion: Option[AnyPromotion] = None, currency: Currency)
+@import com.gu.memsub.ProductFamily
+@import views.support.ProductFamilyOps._
+
+@(subscriptionId: String, plan: PaidPlan[Current, BillingPeriod], promotion: Option[AnyPromotion] = None, currency: Currency, productFamily: ProductFamily)
 
 <div class="review-panel js-payment-frequency">
     <input type="checkbox" name="subscriptionDetails"
@@ -27,7 +30,8 @@
     <div class="review-panel__item">
         <h4 class="review-panel__label">Your subscription:</h4>
         <div class="review-panel__details">
-            The Guardian Digital Pack <em>(Daily Edition + Guardian App Premium Tier)</em>
+            <div>@productFamily.title(plan)</div>
+            <em>(@productFamily.subtitle(plan))</em>
         </div>
     </div>
     <div class="review-panel__item">
@@ -36,7 +40,7 @@
             @promotion.flatMap(_.asDiscount).fold {
                 @plan.prettyPricing(currency)
             } { discountPromo =>
-                @plan.prettyPricingForDiscountedPeriod(discountPromo, currency)
+                @Html(plan.prettyPricingForDiscountedPeriod(discountPromo, currency))
             }
         </div>
     </div>

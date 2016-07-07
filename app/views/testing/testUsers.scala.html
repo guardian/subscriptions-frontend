@@ -1,8 +1,11 @@
 @import com.gu.i18n.CountryGroup
+@import com.gu.memsub.Digipack
+@import com.gu.memsub.Paper
+@import com.gu.i18n.CountryGroup.UK
+@import controllers.Checkout.getCheckoutRouteForProductFamily
 @(userString: String)(implicit request: RequestHeader)
 
 @import configuration.Config.Identity.idWebAppRegisterUrl
-@import routes.Checkout.renderCheckout
 
 @main(title = "Test users") {
     <main class="page-container gs-container">
@@ -17,9 +20,33 @@
         </div>
 
         <div class="actions">
-            <a href="@idWebAppRegisterUrl(renderCheckout(CountryGroup.UK, None))" class="button button--primary button--large">Register an Identity user</a>
-            <a href="@renderCheckout(CountryGroup.UK, None)" class="button button--primary button--large">Subscribe as a guest user</a>
+            <h3>Register as an Identity user, redirecting to checkout for:</h3>
+            <a href="@idWebAppRegisterUrl(getCheckoutRouteForProductFamily(Digipack))" class="button button--primary button--large">Digital Pack</a>
+            <a href="@idWebAppRegisterUrl(getCheckoutRouteForProductFamily(Paper))" class="button button--primary button--large">Everyday package</a>
+            <a href="@idWebAppRegisterUrl(getCheckoutRouteForProductFamily(Paper, forThisPlan = "everyday+"))" class="button button--primary button--large">Everyday+ package</a>
         </div>
+
+        <hr/>
+
+        <div class="actions">
+            <h3>Subscribe as a <em>guest</em> user to:</h3>
+            <dl>
+                <a href="@getCheckoutRouteForProductFamily(Digipack)" class="button button--primary button--large">Digital Pack</a>
+            </dl>
+            <dl>
+                <a href="@getCheckoutRouteForProductFamily(Paper)" class="button button--primary button--large">Everyday package</a>
+                <a href="@getCheckoutRouteForProductFamily(Paper, forThisPlan = "sixday")" class="button button--primary button--large">Sixday package</a>
+                <a href="@getCheckoutRouteForProductFamily(Paper, forThisPlan = "weekend")" class="button button--primary button--large">Weekend package</a>
+            </dl>
+            <dl>
+                <a href="@getCheckoutRouteForProductFamily(Paper, forThisPlan = "everyday+")" class="button button--primary button--large">Everyday+ package</a>
+                <a href="@getCheckoutRouteForProductFamily(Paper, forThisPlan = "sixday+")" class="button button--primary button--large">Sixday+ package</a>
+                <a href="@getCheckoutRouteForProductFamily(Paper, forThisPlan = "weekend+")" class="button button--primary button--large">Weekend+ package</a>
+                <a href="@getCheckoutRouteForProductFamily(Paper, forThisPlan = "sunday+")" class="button button--primary button--large">Sunday+ package</a>
+            </dl>
+        </div>
+
+        <hr/>
 
     </main>
 }

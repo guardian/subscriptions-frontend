@@ -1,6 +1,6 @@
 package views.support
 import com.gu.memsub._
-import com.gu.subscriptions.{Day, DigipackPlan, PaperPlan}
+import com.gu.subscriptions.{ChargeName, DigipackPlan, PaperPlan}
 
 case class PlanList[+A](default: A, others: A*) {
   def map[B](f: A => B): PlanList[B] = PlanList(f(default), others.map(f):_*)
@@ -20,14 +20,14 @@ case class DigipackProductPopulationData(
 
 case class PaperProductPopulationData(
   deliveryAddress: Option[Address],
-  plans: PlanList[PaperPlan[Current, Day]]
+  plans: PlanList[PaperPlan[Current, ChargeName]]
 ) extends ProductPopulationData {
   val family = Paper
 }
 
 object ProductPopulationData {
   implicit class EitherySubscriptionsForm(in: ProductPopulationData) {
-    def toPlanEither: PlanList[Either[DigipackPlan[BillingPeriod], PaperPlan[Current, Day]]] = in match {
+    def toPlanEither: PlanList[Either[DigipackPlan[BillingPeriod], PaperPlan[Current, ChargeName]]] = in match {
       case DigipackProductPopulationData(plans) => plans.map(Left(_))
       case PaperProductPopulationData(_, plans) => plans.map(Right(_))
     }
