@@ -17,7 +17,6 @@ import monitoring.Metrics
 import net.kencochrane.raven.dsn.Dsn
 import org.joda.time.Days
 import play.api.mvc.{Call, RequestHeader}
-
 import scala.util.Try
 
 object Config {
@@ -87,12 +86,6 @@ object Config {
     val client = GoCardlessClient.create(token, Environment.SANDBOX)
   }
 
-  object ExactTarget {
-    val clientId = config.getString("exact-target.client-id")
-    val clientSecret = config.getString("exact-target.client-secret")
-    val welcomeTriggeredSendKey = config.getString("exact-target.triggered-send-keys.welcome")
-  }
-
   def digipackRatePlanIds(env: String): DigitalPackRatePlanIds =
     DigitalPackRatePlanIds.fromConfig(ProductFamilyRatePlanIds.config(Some(config))(env, Digipack))
 
@@ -125,4 +118,6 @@ object Config {
   }
 
   val previewXFrameOptionsOverride = config.getString("subscriptions.preview-x-frame-options-override")
+
+  val welcomeEmailQueue = config.getString("aws.queue.welcome-email")
 }
