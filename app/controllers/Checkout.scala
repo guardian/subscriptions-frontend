@@ -258,7 +258,7 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
       }
 
       val promotion = session.get(AppliedPromoCode).flatMap(code => resolution.backend.promoService.findPromotion(PromoCode(code)))
-      val isBundle = tpBackend.catalogService.paperCatalog.get.bundles.contains(plan)
+      val isBundle = tpBackend.catalogService.paperCatalog.exists(_.bundles.contains(plan))
       // TODO val isHomeDelivery = ...
 
       Ok(view.thankyou(subsName, passwordForm, resolution, plan, promotion, currency, product, isBundle))
