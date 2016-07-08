@@ -251,7 +251,7 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
       def plan = {
         val prpId = ProductRatePlanId(ratePlanId)
         product match {
-          case Digipack => tpBackend.catalogService.digipackCatalog.findPaid(prpId).get
+          case Digipack => tpBackend.catalogService.digipackCatalog.unsafeFindPaid(prpId)
           case Paper => tpBackend.catalogService.paperCatalog.flatMap(_.findCurrent(prpId)).get
           case _ => throw new Exception("Unknown product")
         }
