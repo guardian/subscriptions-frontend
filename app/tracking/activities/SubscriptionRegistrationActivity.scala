@@ -37,7 +37,7 @@ case class MemberData(checkoutResult: CheckoutSuccess, subscriptionData: Subscri
       "billingPostcode" -> truncatePostcode(billingAddress.postCode),
       "deliveryPostcode" -> truncatePostcode(subscriptionData.productData.fold(_.deliveryAddress.postCode, _ => billingAddress.postCode)),
       "city" -> billingAddress.town,
-      "country" -> billingAddress.country
+      "country" -> billingAddress.countryName
     )
 
     val tierData = Map(
