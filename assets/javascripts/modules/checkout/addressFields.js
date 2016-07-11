@@ -29,6 +29,7 @@ define([], function () {
     var textInput = function (required, name) {
         var input = formField(required, name, 'input');
         input.classList.add('input-text');
+        input.classList.add('js-input');
         input.type = 'text';
         return input;
     };
@@ -36,6 +37,7 @@ define([], function () {
     var selectInput = function (required, name, values) {
         var select = formField(required, name, 'select');
         select.classList.add('select--wide');
+        select.classList.add('js-input');
         select.appendChild(document.createElement('option'));
         values.forEach(function(value) {
             var o = document.createElement('option');

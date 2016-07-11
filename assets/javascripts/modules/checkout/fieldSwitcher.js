@@ -28,26 +28,35 @@ define([
             });
         };
 
+        var redrawAddressField = function($container, newField, modelValue) {
+
+            $('.js-input', $container).replaceWith(newField.input);
+            $('label', $container).replaceWith(newField.label);
+
+            if (newField.label.textContent === '') {
+                newField.input.value = '';
+                $container.hide();
+            } else {
+                newField.input.value = modelValue;
+                $container.show();
+            }
+        };
+
         var redrawAddressFields = function(model) {
 
             var newPostcode = addressFields.postcode(
-                addressObject.$POSTCODE.attr('name'),
+                addressObject.getPostcode$().attr('name'),
                 model.postcodeRules.required,
                 model.postcodeRules.label);
 
             var newSubdivision = addressFields.subdivision(
-                $('input, select', $subdivision).attr('name'),
+                addressObject.getSubdivision$().attr('name'),
                 model.subdivisionRules.required,
                 model.subdivisionRules.label,
                 model.subdivisionRules.values);
 
-            newPostcode.input.value = model.postcode;
-
-            $('input', $postcode).replaceWith(newPostcode.input);
-            $('label', $postcode).replaceWith(newPostcode.label);
-
-            $('input, select', $subdivision).replaceWith(newSubdivision.input);
-            $('label', $subdivision).replaceWith(newSubdivision.label);
+            redrawAddressField($postcode, newPostcode, model.postcode);
+            redrawAddressField($subdivision, newSubdivision, model.subdivision);
         };
 
         // Change the payment method to Direct Debit for UK users,
@@ -79,6 +88,7 @@ define([
             return {
                 postcode: $('input', $postcode).val(),
                 postcodeRules: rules.postcode,
+                subdivision: $('input', $subdivision).val(),
                 subdivisionRules: rules.subdivision,
                 currency: currentCountryOption.attr('data-currency-choice'),
                 country: currentCountryOption.val(),

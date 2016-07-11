@@ -10,7 +10,6 @@
         <div class="review-details__list">
             <ul class="o-unstyled-list">
                 <li class="js-checkout-review-name sessioncamhidetext"></li>
-                <li class="js-checkout-review-address sessioncamhidetext"></li>
                 <li><span class="review-details__detail">Email:</span> <span class="js-checkout-review-email sessioncamhidetext"></span></li>
                 <li><span class="review-details__detail">Phone:</span> <span class="js-checkout-review-phone sessioncamhidetext"></span></li>
             </ul>
@@ -18,12 +17,20 @@
     </div>
     @productData.paper.map { p =>
         <div class="review-details__item">
-            <span class="review-details__heading">Delivery details</span>
+            <span class="review-details__heading">Deliver to</span>
             <div class="js-checkout-review-delivery-address sessioncamhidetext"></div>
             <div><span class="review-details__detail">Delivery instructions:</span> <span class="js-checkout-review-delivery-instructions sessioncamhidetext"></span></div>
-            <div><span class="review-details__detail">Date of first paper delivery:</span> <span class="js-checkout-review-delivery-start-date"></span></div>
+            <div><span class="review-details__detail">Date of first paper:</span> <span class="js-checkout-review-delivery-start-date"></span></div>
         </div>
     }
+    <div class="review-details__item">
+        <span class="review-details__heading">Billing address</span>
+        <div class="review-details__list">
+            <ul class="o-unstyled-list">
+                <li class="js-checkout-review-address sessioncamhidetext"></li>
+            </ul>
+        </div>
+    </div>
     <div class="review-details__item">
         <span class="review-details__heading">Payment details</span>
         <div class="review-details__list js-payment-type-direct-debit">
