@@ -51,7 +51,7 @@ define([
                     BILLING_COUNTRY_SELECT.options[BILLING_COUNTRY_SELECT.selectedIndex].text
                 ], ', '));
             }
-            
+
             var DELIVERY_COUNTRY_SELECT = formEls.DELIVERY.$COUNTRY_SELECT[0];
 
             formEls.$REVIEW_DELIVERY_ADDRESS.text(textUtils.mergeValues([
@@ -76,7 +76,7 @@ define([
                 formEls.$CARD_EXPIRY_YEAR.val()
             ], '/'));
 
-            formEls.$REVIEW_DELIVERY_INSTRUCTIONS.text(formEls.$DELIVERY_INSTRUCTIONS.val());
+            formEls.$REVIEW_DELIVERY_INSTRUCTIONS.text(formEls.getDeliveryInstructions().val());
             formEls.$REVIEW_DELIVERY_START_DATE.text(formEls.getPaperCheckoutField().val());
         });
     }

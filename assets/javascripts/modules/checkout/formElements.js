@@ -3,6 +3,7 @@ define(['$'], function ($) {
     var _PLAN_SELECT = $('.js-payment-frequency');
     var _PLAN_INPUTS = $('input[type="radio"]', _PLAN_SELECT);
     var _PAPER_CHECKOUT_DATE_PICKER_FORM_FIELD_NAME = 'startDate';
+    var _PAPER_CHECKOUT_DELIVERY_INSTRUCTIONS_FIELD_NAME = 'deliveryInstructions';
 
     var getRatePlanId = function () {
         // Bonzo has no filter function :(
@@ -47,14 +48,16 @@ define(['$'], function ($) {
         return $('[name="' + _PAPER_CHECKOUT_DATE_PICKER_FORM_FIELD_NAME + '"]');
     };
 
+    var getDeliveryInstructions = function() {
+        return $('[name="' + _PAPER_CHECKOUT_DELIVERY_INSTRUCTIONS_FIELD_NAME + '"]');
+    };
+
     return {
         $CHECKOUT_FORM: $('.js-checkout-form'),
         $NOTICES: $('.js-checkout-notices'),
 
         BILLING: addressFields('.js-billing-address'),
         DELIVERY: addressFields('.js-checkout-delivery'),
-
-        $DELIVERY_INSTRUCTIONS: $('textarea[name="deliveryInstructions"]'),
 
         $TITLE: $('.js-checkout-title .js-input'),
         $FIRST_NAME: $('.js-checkout-first .js-input'),
@@ -128,15 +131,16 @@ define(['$'], function ($) {
         $EDIT_PAYMENT_DETAILS: $('.js-edit-payment-details'),
         $EDIT_BILLING_ADDRESS: $('.js-edit-billing-address'),
 
-        // Paper checkout date picker
-        $PAPER_CHECKOUT_DATE_PICKER: $('#deliveryDatePicker'),
+        // Paper checkout delivery details counter and date picker
+        $PAPER_FIELDS: $('#paperFields'),
+        DELIVERY_INSTRUCTIONS_ID: 'deliveryInstructionsCharacterCountedTextArea',
         PAPER_CHECKOUT_DATE_PICKER_ID: 'deliveryDatePicker',
-        PAPER_CHECKOUT_DATE_PICKER_FORM_FIELD_NAME: _PAPER_CHECKOUT_DATE_PICKER_FORM_FIELD_NAME,
 
         $BASKET: $('.js-basket'),
         $PLAN_INPUTS :_PLAN_INPUTS,
 
         getRatePlanId: getRatePlanId,
-        getPaperCheckoutField: getPaperCheckoutField
+        getPaperCheckoutField: getPaperCheckoutField,
+        getDeliveryInstructions: getDeliveryInstructions
     };
 });

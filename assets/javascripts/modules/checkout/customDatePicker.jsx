@@ -26,13 +26,11 @@ export default React.createClass({
 
     render () {
         return <DatePicker
-                    dateFormat="D MMMM YYYY"
                     locale="en"
                     selected={this.state.startDate}
                     onChange={this.handleChange}
                     minDate={FIRST_SELECTABLE_DATE}
                     maxDate={LAST_SELECTABLE_DATE}
-                    className="input-text"
-                    name={formElements.PAPER_CHECKOUT_DATE_PICKER_FORM_FIELD_NAME} />
+                    {...this.props} />
     }
 })

@@ -9,10 +9,10 @@
 
 @address(data.deliveryAddress, "delivery", countriesWithCurrency)
 
-<div class="js-checkout-delivery-data">
+<div class="js-checkout-delivery-data" id="paperFields">
     <div class="form-field js-checkout-delivery">
         <label class="label" for="address-town">Delivery instructions</label>
-        <textarea class="input-text js-input" id="delivery-instructions" name="deliveryInstructions"></textarea>
+        <div id="deliveryInstructionsCharacterCountedTextArea"></div>
     </div>
     <div class="form-field js-checkout-delivery">
         <label class="label" for="address-town">Date of first paper</label>
