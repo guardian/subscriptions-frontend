@@ -35,9 +35,9 @@ define([
             deliveryDetails.init();
             deliveryAsBilling.init();
             billingAddress.init();
-            if (formElements.$PAPER_CHECKOUT_DATE_PICKER.length) {
-                require(['modules/checkout/datePicker'], function(datePicker) {
-                    datePicker.default.init();
+            if (formElements.$PAPER_FIELDS.length) {
+                require(['modules/checkout/paperFields'], function(paperFields) {
+                    paperFields.default.init();
                 });
             }
         }
