@@ -1,9 +1,12 @@
 @import configuration.Links
 @import org.joda.time.DateTime
-@import com.gu.memsub.ProductFamily
-@import views.support.ProductFamilyOps._
+@import views.support.PlanOps._
 
-@(showInternationalMessage: Boolean = false, productFamily: ProductFamily)
+@import com.gu.memsub.BillingPeriod
+@import com.gu.memsub.Status
+@import com.gu.memsub.PaidPlan
+@import com.gu.memsub.Current
+@(showInternationalMessage: Boolean = false, plan: Option[PaidPlan[Current, BillingPeriod]])
 
 <footer class="global-footer">
 
@@ -22,7 +25,8 @@
                 </p>
             } else {
                 <p>
-                  For help with Guardian and Observer subscription services please email <a href="mailto:@productFamily.email">@productFamily.email</a> or call @productFamily.phone. Open BST 8am to 8pm, Monday to Sunday.
+                  For help with Guardian and Observer subscription services please email
+                      <a href="mailto:@plan.fold("digitalpack@theguardian.com")(_.email)">@plan.fold("digitalpack@theguardian.com")(_.email)</a> or call @plan.fold("+44 (0) 330 333 6767.")(_.phone). Open BST 8am to 8pm, Monday to Sunday.
                 </p>
                 <p>
                     You may also find help in our

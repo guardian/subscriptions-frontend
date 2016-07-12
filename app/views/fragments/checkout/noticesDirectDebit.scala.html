@@ -1,8 +1,12 @@
 @import controllers.CachedAssets.hashedPathFor
-@import com.gu.memsub.ProductFamily
-@import views.support.ProductFamilyOps._
+@import views.support.PlanOps._
 
-@(productFamily: ProductFamily)
+@import views.support.PlanList
+@import com.gu.memsub.BillingPeriod
+@import com.gu.memsub.Current
+@import com.gu.memsub.PaidPlan
+
+@(plans: PlanList[PaidPlan[Current, BillingPeriod]])
 
 @fragments.checkout.notice("Advanced Notice") {
     <p>
@@ -20,8 +24,8 @@
     </address>
 
     <ul class="o-unstyled-list">
-        <li>Tel: @productFamily.phone</li>
-        <li><a href="mailto:@productFamily.email">@productFamily.email</a></li>
+        <li>Tel: @plans.default.phone</li>
+        <li><a href="mailto:@plans.default.email">@plans.default.email</a></li>
     </ul>
 
     <aside class="direct-debit">

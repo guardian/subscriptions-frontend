@@ -2,8 +2,8 @@ package controllers
 
 import actions.CommonActions._
 import com.gu.i18n.{Country, CountryGroup, Currency, GBP}
-import com.gu.identity.play.{IdUser, ProxiedIP}
-import com.gu.memsub.{BillingPeriod, Digipack, Paper, ProductFamily}
+import com.gu.identity.play.ProxiedIP
+import com.gu.memsub.{BillingPeriod, ProductFamily}
 import com.gu.memsub.Subscription.ProductRatePlanId
 import com.gu.memsub.promo.Formatters.PromotionFormatters._
 import com.gu.memsub.promo.PromoCode
@@ -25,8 +25,7 @@ import tracking.ActivityTracking
 import tracking.activities.{CheckoutReachedActivity, MemberData, SubscriptionRegistrationActivity}
 import utils.TestUsers.{NameEnteredInForm, PreSigninTestCookie}
 import views.html.{checkout => view}
-import views.support.{CountryWithCurrency, DigipackProductPopulationData, PaperProductPopulationData, PlanList}
-
+import views.support.{BillingPeriod => _, _}
 import scala.Function.const
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -35,6 +34,7 @@ import scalaz.{NonEmptyList, OptionT}
 import model.IdUserOps._
 
 object Checkout extends Controller with LazyLogging with ActivityTracking with CatalogProvider {
+
   object SessionKeys {
     val SubsName = "newSubs_subscriptionName"
     val RatePlanId = "newSubs_ratePlanId"
@@ -56,17 +56,15 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
 
   def getCheckoutRouteForProductFamily(product: ProductFamily, countryGroup: CountryGroup = CountryGroup.UK, promoCode: Option[PromoCode] = None, forThisPlan: String = "everyday") = {
     product match {
-      case Paper => routes.Checkout.renderPaperCheckout(countryGroup, promoCode, forThisPlan)
-      case Digipack => routes.Checkout.renderCheckout(countryGroup, promoCode)
       case _ => routes.Homepage.index()
     }
   }
 
   def renderPaperCheckout(countryGroup: CountryGroup, promoCode: Option[PromoCode], forThisPlan: String) = AuthorisedTester.async { req =>
-    renderCheckout(countryGroup, promoCode, product = Paper, if (forThisPlan.trim.isEmpty) None else Some(forThisPlan)).apply(req)
+    renderCheckout(countryGroup, promoCode, if (forThisPlan.trim.isEmpty) None else Some(forThisPlan)).apply(req)
   }
 
-  def renderCheckout(countryGroup: CountryGroup, promoCode: Option[PromoCode], product: ProductFamily = Digipack, forThisPlan: Option[String] = None) = NoSubAction.async { implicit request =>
+  def renderCheckout(countryGroup: CountryGroup, promoCode: Option[PromoCode], forThisPlan: Option[String] = None) = NoSubAction.async { implicit request =>
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
 
@@ -80,16 +78,10 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
 
     idUser map { user =>
 
-      val productData = product match {
-        case Paper =>
-          val catalog = tpBackend.catalogService.paperCatalog.get
-          val chosenPlan = forThisPlan.flatMap(planName => catalog.current.find(_.name.toLowerCase == planName)).getOrElse(catalog.everyday)
-          val upsellablePlans = catalog.bundles.filter(_.name.replace("+", "") == chosenPlan.name)
-          PaperProductPopulationData(user.map(_.address), PlanList(chosenPlan, upsellablePlans : _*))
-        case _ =>
-          val catalog = tpBackend.catalogService.digipackCatalog
-          DigipackProductPopulationData(PlanList(catalog.digipackMonthly, catalog.digipackQuarterly, catalog.digipackYearly))
-      }
+      val catalog = tpBackend.catalogService.paperCatalog.get
+      val chosenPlan = catalog.forName(forThisPlan.mkString).getOrElse(catalog.digipack.cheapest)
+      val betterPlans = catalog.group(chosenPlan).toList.map(_.betterThan(chosenPlan)).flatMap(_.productPlans).sortBy(_.priceGBP.amount)
+      val productData = ProductPopulationData(user.map(_.address), PlanList(chosenPlan, betterPlans : _*))
 
       val personalData = user.map(PersonalData.fromIdUser)
       val countryOpt = personalData.flatMap(data => data.address.country)
@@ -199,10 +191,7 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
       }
 
       trackAnon(SubscriptionRegistrationActivity(MemberData(r, subscribeRequest)))
-
-      val thankYouUrl = subscribeRequest.productData.fold(_ => routes.Checkout.thankYouPaper().url, _ => routes.Checkout.thankYouDigipack().url)
-
-      Ok(Json.obj("redirect" -> thankYouUrl)).withSession(session)
+      Ok(Json.obj("redirect" -> routes.Checkout.thankYou().url)).withSession(session)
     }
 
     checkoutResult.map(_.fold(failure, success))
@@ -216,26 +205,26 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
     }
   }
 
-  def thankYouDigipack = NoCacheAction.async { request => thankYou(Digipack).apply(request) }
 
-  def thankYouPaper = AuthorisedTester.async { request => thankYou(Paper).apply(request) }
-
-  def thankYou(product: ProductFamily) = NoCacheAction { implicit request =>
-
+  def thankYou() = NoCacheAction { implicit request =>
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
+
+    import tpBackend.catalogService._
+
     val session = request.session
 
     val sessionInfo = for {
       subsName <- session.get(SubsName)
+      plan <- session.get(RatePlanId).map(ProductRatePlanId).flatMap(p => paperCatalog.flatMap(_.find(p)).orElse(digipackCatalog.find(p)))
       ratePlanId <- session.get(RatePlanId)
       currencyStr <- session.get(SessionKeys.Currency)
       currency <- Currency.fromString(currencyStr)
-    } yield (subsName, ratePlanId, currency)
+    } yield (subsName, plan, currency)
 
     sessionInfo.fold {
-      Redirect(getCheckoutRouteForProductFamily(product = product)).withNewSession
-    } { case (subsName, ratePlanId, currency) =>
+      Redirect(routes.Homepage.index()).withNewSession
+    } { case (subsName, plan, currency) =>
 
 
       val passwordForm = authenticatedUserFor(request).fold {
@@ -248,20 +237,8 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
         const(None)
       } // Don't display the user registration form if the user is logged in
 
-      def plan = {
-        val prpId = ProductRatePlanId(ratePlanId)
-        product match {
-          case Digipack => tpBackend.catalogService.digipackCatalog.unsafeFindPaid(prpId)
-          case Paper => tpBackend.catalogService.paperCatalog.flatMap(_.findCurrent(prpId)).get
-          case _ => throw new Exception("Unknown product")
-        }
-      }
-
       val promotion = session.get(AppliedPromoCode).flatMap(code => resolution.backend.promoService.findPromotion(PromoCode(code)))
-      val isBundle = tpBackend.catalogService.paperCatalog.exists(_.bundles.contains(plan))
-      // TODO val isHomeDelivery = ...
-
-      Ok(view.thankyou(subsName, passwordForm, resolution, plan, promotion, currency, product, isBundle))
+      Ok(view.thankyou(subsName, passwordForm, resolution, plan, promotion, currency))
     }
 
   }

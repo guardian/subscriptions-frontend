@@ -1,7 +1,7 @@
 package services
 
 import com.gu.config.{DigitalPackRatePlanIds, DiscountRatePlanIds, ProductFamilyRatePlanIds}
-import com.gu.memsub.Digipack
+import com.gu.memsub.{Digipack, Subscriptions}
 import com.gu.memsub.promo.Promotion._
 import com.gu.memsub.promo.{DynamoPromoCollection, DynamoTables, PromotionCollection}
 import com.gu.memsub.services.{PaymentService => CommonPaymentService, _}
@@ -35,14 +35,14 @@ object TouchpointBackend {
     val soapClient = new soap.ClientWithFeatureSupplier(Set.empty, config.zuoraSoap, new ServiceMetrics(Config.stage, Config.appName, "zuora-soap-client"))
     val restClient = new rest.Client(config.zuoraRest, new ServiceMetrics(Config.stage, Config.appName, "zuora-rest-client"))
 
-    val digipackConfig = ProductFamilyRatePlanIds.config(Some(Config.config))(config.environmentName, Digipack)
+    val digipackConfig = ProductFamilyRatePlanIds.config(Some(Config.config))(config.environmentName, Subscriptions)
     val digipackRatePlanIds = Config.digipackRatePlanIds(config.environmentName)
     val discountPlans = Config.discountRatePlanIds(config.environmentName)
 
     val discounter = new Discounter(discountPlans)
     val membershipRatePlanIds = Config.membershipRatePlanIds(config.environmentName)
-    val paperRatePlanIds = Config.paperRatePlanIds(config.environmentName)
-    val catalogService = CatalogService(restClient, membershipRatePlanIds, digipackRatePlanIds, paperRatePlanIds, config.environmentName)
+    val paperProductIds = Config.paperProductIds(config.environmentName)
+    val catalogService = CatalogService(restClient, paperProductIds, membershipRatePlanIds, digipackRatePlanIds, config.environmentName)
 
     val promoStorage = JsonDynamoService.forTable[AnyPromotion](DynamoTables.promotions(Config.config, config.environmentName))
     val promoCollection = new DynamoPromoCollection(promoStorage)

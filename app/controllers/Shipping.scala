@@ -3,6 +3,8 @@ package controllers
 import actions.CommonActions._
 import model.Subscriptions._
 import play.api.mvc._
+import services.TouchpointBackend
+import utils.TestUsers.PreSigninTestCookie
 
 object Shipping extends Controller {
 

@@ -1,14 +1,17 @@
 @import com.gu.memsub.ProductFamily
-@import com.gu.memsub.Digipack
+@import com.gu.memsub.Subscriptions
 @import utils.TestUsers.{PreSigninTestCookie, NameEnteredInForm, SignedInUsername}
 
+@import com.gu.memsub.BillingPeriod
+@import com.gu.memsub.Current
+@import com.gu.memsub.PaidPlan
 @(
     title: String,
     jsVars: model.JsVars = model.JsVars(),
     isInternational: Boolean = false,
     bodyClasses: Seq[String] = Nil,
     touchpointBackendResolutionOpt: Option[services.TouchpointBackend.Resolution] = None,
-    productFamily: ProductFamily = Digipack
+    plan: Option[PaidPlan[Current, BillingPeriod]] = None
 )(content: Html)
 
 <!DOCTYPE html>
@@ -39,7 +42,7 @@
             @content
         </div>
 
-        @fragments.global.footer(isInternational, productFamily)
+        @fragments.global.footer(isInternational, plan)
         @fragments.global.sessionCam()
         @fragments.footerJavaScript()
     </body>

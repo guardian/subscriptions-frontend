@@ -5,7 +5,7 @@ import com.gu.memsub.promo.PromoCode
 import com.gu.memsub.{Address, BillingPeriod, Current}
 import com.gu.memsub.Subscription.ProductRatePlanId
 import com.gu.memsub.services.CatalogService
-import com.gu.subscriptions.{ChargeName, DigipackPlan, PaperPlan}
+import com.gu.subscriptions.{DigipackPlan, ProductPlan}
 import model._
 import play.api.data.format.Formats._
 import play.api.data.format.Formatter
@@ -25,10 +25,10 @@ class SubscriptionsForm(catalogService: CatalogService) {
       Map(key -> value.productRatePlanId.get)
   }
 
-  implicit val pf2 = new Formatter[PaperPlan[Current, ChargeName]] {
-    override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], PaperPlan[Current, ChargeName]] =
-      data.get(key).map(ProductRatePlanId).flatMap(id => catalogService.paperCatalog.flatMap(_.findCurrent(id))).toRight(Seq(FormError(key, "Bad plan")))
-    override def unbind(key: String, value: PaperPlan[Current, ChargeName]): Map[String, String] =
+  implicit val pf2 = new Formatter[ProductPlan] {
+    override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], ProductPlan] =
+      data.get(key).map(ProductRatePlanId).flatMap(id => catalogService.paperCatalog.flatMap(_.find(id))).toRight(Seq(FormError(key, "Bad plan")))
+    override def unbind(key: String, value: ProductPlan): Map[String, String] =
       Map(key -> value.productRatePlanId.get)
   }
 
@@ -40,7 +40,7 @@ class SubscriptionsForm(catalogService: CatalogService) {
     "startDate" -> jodaLocalDate("d MMMM y"),
     "delivery" -> addressDataMapping,
     "deliveryInstructions" -> optional(text(0, 250)),
-    "ratePlanId" -> of[PaperPlan[Current, ChargeName]]
+    "ratePlanId" -> of[ProductPlan]
   )(PaperData.apply)(PaperData.unapply))
 
   implicit class FormOps[A](in: Form[A]) {

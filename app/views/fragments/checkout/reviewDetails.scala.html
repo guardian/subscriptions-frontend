@@ -2,6 +2,7 @@
 @import configuration.Links
 @import views.support.ProductPopulationData
 @import views.support.ProductPopulationData._
+@import views.support.PlanOps._
 
 @(personalData: Option[PersonalData], productData: ProductPopulationData)
 <div class="review-details">
@@ -15,7 +16,7 @@
             </ul>
         </div>
     </div>
-    @productData.paper.map { p =>
+    @if(productData.plans.default.hasPaper) {
         <div class="review-details__item">
             <span class="review-details__heading">Deliver to</span>
             <div class="review-details__list">

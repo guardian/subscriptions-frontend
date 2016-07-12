@@ -8,16 +8,15 @@
 @import views.support.Pricing._
 @import com.gu.memsub.promo.PromoCode
 @import model.PersonalData
-@import views.support.ProductFamilyOps._
+@import views.support.PlanOps._
 @import views.support.ProductPopulationData
 @import views.support.ProductPopulationData._
 @import com.gu.memsub.Current
-@import com.gu.subscriptions.PaperPlan
+@import com.gu.subscriptions.ProductPlan
 @import com.gu.i18n.Currency
 @import com.gu.i18n.Country
-@import com.gu.memsub.Paper
-@import com.gu.subscriptions.ChargeName
-@import views.support.ProductFamilyOps._
+@import views.support.PlanOps._
+@import com.gu.memsub.Subscriptions
 @(
     personalData: Option[PersonalData],
     productData: ProductPopulationData,
@@ -28,19 +27,19 @@
     touchpointBackendResolution: services.TouchpointBackend.Resolution,
     promoCode: Option[PromoCode])(implicit request: RequestHeader)
 
-@priceOption(plan: Either[DigipackPlan[BillingPeriod], PaperPlan[Current, ChargeName]], currency: Currency) = {
+@priceOption(plan: ProductPlan, currency: Currency) = {
     <label class="option" data-currency="@currency">
         <span class="option__input">
             <input
             type="radio" name="ratePlanId"
-            data-option-mirror-payment-default="@plan.asPaidPlan.prettyPricing(currency)"
-            data-option-mirror-payment="@plan.asPaidPlan.prettyPricing(currency)"
-            data-option-mirror-package="@productData.family.title(plan.asPaidPlan)"
-            data-amount="@plan.asPaidPlan.gbpPrice.amount"
-            data-number-of-months="@plan.asPaidPlan.billingPeriod.numberOfMonths"
+            data-option-mirror-payment-default="@plan.prettyPricing(currency)"
+            data-option-mirror-payment="@plan.prettyPricing(currency)"
+            data-option-mirror-package="@plan.title"
+            data-amount="@plan.gbpPrice.amount"
+            data-number-of-months="@plan.billingPeriod.numberOfMonths"
             data-currency="@currency"
             value="@plan.productRatePlanId.get"
-            @if(plan.fold(identity, identity) == productData.plans.default && currency == defaultCurrency){ checked="checked" }
+            @if(plan == productData.plans.default && currency == defaultCurrency){ checked="checked" }
             >
         </span>
         <span class="option__label" id="label-for-@plan.productRatePlanId.get-@currency" title="@plan.title">@plan.prettyName(currency)</span>
@@ -55,7 +54,7 @@
 }
 
 @main(
-    title = s"Details - name and address | Subscribe to the ${productData.family.title(productData.plans.default)} | The Guardian",
+    title = s"Details - name and address | Subscribe to the ${productData.plans.default.title} | The Guardian",
     jsVars = JsVars(userIsSignedIn = personalData.isDefined, ignorePageLoadTracking = true, countryGroup = countryGroup, currency = defaultCurrency, country = country),
     bodyClasses = List("is-wide"),
     touchpointBackendResolutionOpt = Some(touchpointBackendResolution)
@@ -69,21 +68,21 @@
         <form class="form js-checkout-form" action="" method="POST" novalidate>
             @helper.CSRF.formField
 
-            @fragments.checkout.checkoutHeader(productData.family.title(productData.plans.default))
+            @fragments.checkout.checkoutHeader(productData.plans.default.title)
 
             @* ===== Plan selection ===== *@
             <div class="checkout-container__sidebar js-basket">
-                @fragments.checkout.basketPreview(productData.family, productData.plans.default)
+                @fragments.checkout.basketPreview(productData.plans.default)
                 @if(productData.plans.list.length > 1) {
                     <div class="basket-options-toggle u-note prose">
                         <a class="js-toggle checkout-container__frequency" data-toggle="change-payment-frequency">
-                        @productData.family.changeRatePlanText
+                        @productData.plans.default.changeRatePlanText
                         </a>
                     </div>
                 }
                 <fieldset class="basket-billing-options is-hidden js-payment-frequency js-option-mirror-group" id="change-payment-frequency">
-                    @productData.toPlanEither.list.map { p =>
-                        @p.asPaidPlan.currencies.map { c =>
+                    @productData.plans.list.map { p =>
+                        @p.currencies.map { c =>
                             @priceOption(p, c)
                         }
                     }
@@ -100,7 +99,7 @@
                         }
                         </div>
                         <div class="js-payment-type-direct-debit u-note">
-                            @fragments.checkout.noticesDirectDebit(productData.family)
+                            @fragments.checkout.noticesDirectDebit(productData.plans)
                         </div>
                         <div class="js-payment-type-card" hidden="true">
                             @fragments.checkout.noticesCard()
@@ -123,10 +122,10 @@
                             </div>
                             <div class="field-note field-note--offset prose">
                                 @if(personalData.isDefined) {
-                                    <a href="@idWebAppSignOutUrl(controllers.Checkout.getCheckoutRouteForProductFamily(productData.family, countryGroup, promoCode, productData.plans.default.name))">Sign out</a>
+                                    <a href="@idWebAppSignOutUrl(controllers.Checkout.getCheckoutRouteForProductFamily(Subscriptions, countryGroup, promoCode, productData.plans.default.name))">Sign out</a>
                                 } else {
                                     <span class="field-note__label">Already have a Guardian account?</span>
-                                    <a href="@idWebAppSigninUrl(controllers.Checkout.getCheckoutRouteForProductFamily(productData.family, countryGroup, promoCode, productData.plans.default.name))">Sign in</a>
+                                    <a href="@idWebAppSigninUrl(controllers.Checkout.getCheckoutRouteForProductFamily(Subscriptions, countryGroup, promoCode, productData.plans.default.name))">Sign in</a>
                                 }
                             </div>
                         </div>
@@ -135,20 +134,20 @@
                         </div>
                         <div class="field-panel__fields">
                             @fragments.checkout.fieldsPersonal(personalData, countriesWithCurrency)
-                            @continueButton(productData.fold(_ => "#deliveryDetails")(_ => "#paymentDetails"), "js-checkout-your-details-submit")
+                            @continueButton("", "js-checkout-your-details-submit")
                         </div>
                     </fieldset>
                 </div>
 
                 @* ===== Delivery details ===== *@
-                @productData.paper.map { p =>
+                @if(productData.plans.default.hasPaper) {
                         <div id="deliveryDetails" class="field-panel is-collapsed js-fieldset-delivery-details">
                             <fieldset>
                                 <legend class="field-panel__legend">
                                     Delivery address
                                 </legend>
                                 <div class="field-panel__fields">
-                                    @fragments.checkout.fieldsPaper(p, countriesWithCurrency)
+                                    @fragments.checkout.fieldsPaper(productData, countriesWithCurrency)
                                     @continueButton("#paymentDetails", "js-checkout-delivery-details-submit")
                                 </div>
                                 <div class="field-panel__edit">
@@ -168,8 +167,8 @@
                             <a href="#yourDetails" class="text-button u-button-reset js-edit-billing-address" title="Edit your personal details">Edit</a>
                         </div>
                         <div class="field-panel__fields">
-                            @fragments.checkout.fieldsBilling(personalData.map(_.address), canBeHidden = productData.family == Paper, countriesWithCurrency)
-                            @continueButton(productData.fold(_ => "#deliveryDetails")(_ => "#paymentDetails"), "js-checkout-billing-address-submit")
+                            @fragments.checkout.fieldsBilling(personalData.map(_.address), canBeHidden = productData.plans.default.hasPaper, countriesWithCurrency)
+                            @continueButton("", "js-checkout-billing-address-submit")
                         </div>
                     </fieldset>
                 </div>

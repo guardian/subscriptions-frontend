@@ -4,9 +4,9 @@ import com.gu.i18n.{Currency, GBP}
 import com.gu.memsub.promo.PercentDiscount.getDiscountScaledToPeriod
 import com.gu.memsub.promo.{LandingPage, PercentDiscount, Promotion}
 import com.gu.memsub.{BillingPeriod => BP, _}
-import com.gu.subscriptions.{ChargeName, DigipackPlan, PaperPlan}
+import com.gu.subscriptions.{DigipackPlan, ProductPlan}
 import views.support.BillingPeriod._
-
+import utils.SetOps._
 object Pricing {
 
   implicit class PlanWithPricing(plan: PaidPlan[Status, BP]) {
@@ -55,15 +55,8 @@ object Pricing {
       }
     }
   }
-
-  implicit class EitherPlanPlan(in: Either[DigipackPlan[BP], PaperPlan[Current, ChargeName]]) {
-
-    implicit val planWithPricing = new PlanWithPricing(asPaidPlan)
-
-    def productRatePlanId = in.fold(_.productRatePlanId, _.productRatePlanId)
-    def asPaidPlan: PaidPlan[Current, BP] = in.fold(identity, identity)
-    def prettyName(currency: Currency): String = in.fold(_ => planWithPricing.prettyPricing(currency), p => s"${p.name} package - ${planWithPricing.prettyPricing(currency)}")
-    def title: String = in.fold(_.description, _.description)
-
+  implicit class PrettyProductPlan(in: ProductPlan) {
+    implicit val planWithPricing = new PlanWithPricing(in)
+    def prettyName(currency: Currency): String = s"${in.name} package - ${planWithPricing.prettyPricing(currency)}"
   }
 }

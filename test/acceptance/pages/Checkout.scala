@@ -4,7 +4,7 @@ import acceptance.util.{Browser, TestUser, Config}
 import Config.baseUrl
 import org.scalatest.selenium.Page
 
-case class Checkout(val testUser: TestUser) extends Page with Browser {
+case class Checkout(testUser: TestUser) extends Page with Browser {
   val url = s"$baseUrl/checkout"
 
   def fillInPersonalDetails(): Unit = PersonalDetails.fillIn()
