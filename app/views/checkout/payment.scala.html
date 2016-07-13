@@ -134,7 +134,7 @@
                         </div>
                         <div class="field-panel__fields">
                             @fragments.checkout.fieldsPersonal(personalData, countriesWithCurrency)
-                            @continueButton("", "js-checkout-your-details-submit")
+                            @continueButton(if(productData.plans.default.hasPaper) "#deliveryDetails" else "#billingAddress", "js-checkout-your-details-submit")
                         </div>
                     </fieldset>
                 </div>
@@ -168,7 +168,7 @@
                         </div>
                         <div class="field-panel__fields">
                             @fragments.checkout.fieldsBilling(personalData.map(_.address), canBeHidden = productData.plans.default.hasPaper, countriesWithCurrency)
-                            @continueButton("", "js-checkout-billing-address-submit")
+                            @continueButton("#paymentDetails", "js-checkout-billing-address-submit")
                         </div>
                     </fieldset>
                 </div>
