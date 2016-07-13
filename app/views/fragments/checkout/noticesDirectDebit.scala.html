@@ -1,12 +1,9 @@
 @import controllers.CachedAssets.hashedPathFor
 @import views.support.PlanOps._
-
 @import views.support.PlanList
-@import com.gu.memsub.BillingPeriod
-@import com.gu.memsub.Current
-@import com.gu.memsub.PaidPlan
-
-@(plans: PlanList[PaidPlan[Current, BillingPeriod]])
+@import com.gu.subscriptions.ProductList
+@import com.gu.subscriptions.ProductPlan
+@(plans: PlanList[ProductPlan[ProductList]])
 
 @fragments.checkout.notice("Advanced Notice") {
     <p>

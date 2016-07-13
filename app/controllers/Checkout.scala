@@ -8,7 +8,7 @@ import com.gu.memsub.Subscription.ProductRatePlanId
 import com.gu.memsub.promo.Formatters.PromotionFormatters._
 import com.gu.memsub.promo.PromoCode
 import com.gu.memsub.promo.Promotion.AnyPromotion
-import com.gu.subscriptions.DigipackPlan
+import com.gu.subscriptions.{DigipackPlan, DigitalProducts, PhysicalProducts}
 import com.gu.zuora.soap.models.errors._
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config.Identity.webAppProfileUrl
@@ -26,6 +26,7 @@ import tracking.activities.{CheckoutReachedActivity, MemberData, SubscriptionReg
 import utils.TestUsers.{NameEnteredInForm, PreSigninTestCookie}
 import views.html.{checkout => view}
 import views.support.{BillingPeriod => _, _}
+
 import scala.Function.const
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -46,25 +47,13 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
 
   import SessionKeys.{Currency => _, UserId => _, _}
 
-
-
   def checkoutService(implicit res: TouchpointBackend.Resolution): CheckoutService =
     res.backend.checkoutService
 
   def getEmptySubscriptionsForm(promoCode: Option[PromoCode])(implicit res: TouchpointBackend.Resolution) =
     SubscriptionsForm.subsForm.bind(Map("promoCode" -> promoCode.fold("")(_.get)))
 
-  def getCheckoutRouteForProductFamily(product: ProductFamily, countryGroup: CountryGroup = CountryGroup.UK, promoCode: Option[PromoCode] = None, forThisPlan: String = "everyday") = {
-    product match {
-      case _ => routes.Homepage.index()
-    }
-  }
-
-  def renderPaperCheckout(countryGroup: CountryGroup, promoCode: Option[PromoCode], forThisPlan: String) = AuthorisedTester.async { req =>
-    renderCheckout(countryGroup, promoCode, if (forThisPlan.trim.isEmpty) None else Some(forThisPlan)).apply(req)
-  }
-
-  def renderCheckout(countryGroup: CountryGroup, promoCode: Option[PromoCode], forThisPlan: Option[String] = None) = NoSubAction.async { implicit request =>
+  def renderCheckout(countryGroup: CountryGroup, promoCode: Option[PromoCode], forThisPlan: String) = NoSubAction.async { implicit request =>
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
 
@@ -77,23 +66,23 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
     } yield idUser).run
 
     idUser map { user =>
-
-      val catalog = tpBackend.catalogService.paperCatalog
-      val chosenPlan = catalog.forName(forThisPlan.mkString).getOrElse(catalog.digipack.cheapest)
-      val betterPlans = catalog.group(chosenPlan).toList.map(_.betterThan(chosenPlan)).flatMap(_.productPlans).sortBy(_.priceGBP.amount)
-      val productData = ProductPopulationData(user.map(_.address), PlanList(chosenPlan, betterPlans : _*))
+      val planListEither = catalogue.forSlug(forThisPlan)
+        .getOrElse(Left(catalogue.digipack.cheapest -> catalogue.digipack))
+        .fold({ case (plan, group) => Left(PlanList(plan, group.betterThan(plan).productPlans.sortBy(_.priceGBP.amount):_*)) },
+              { case (plan, group) => Right(PlanList(plan, group.betterThan(plan).productPlans.sortBy(_.priceGBP.amount):_*)) })
 
       val personalData = user.map(PersonalData.fromIdUser)
       val countryOpt = personalData.flatMap(data => data.address.country)
       val countryGroupWithDefault = countryOpt.fold(countryGroup)(c => CountryGroup.byCountryCode(c.alpha2).getOrElse(countryGroup))
       val country = countryOpt orElse countryGroupWithDefault.defaultCountry
+
       val desiredCurrency = countryGroupWithDefault.currency
-      val supportedCurrencies = productData.plans.default.currencies
+      val supportedCurrencies = planListEither.fold(identity, identity).default.currencies
       val defaultCurrency = if (supportedCurrencies.contains(desiredCurrency)) desiredCurrency else GBP
 
       Ok(views.html.checkout.payment(
         personalData = personalData,
-        productData = productData,
+        productData = ProductPopulationData(user.map(_.address), planListEither),
         country = country,
         countryGroup = countryGroupWithDefault,
         defaultCurrency = defaultCurrency,
@@ -216,7 +205,7 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
 
     val sessionInfo = for {
       subsName <- session.get(SubsName)
-      plan <- session.get(RatePlanId).map(ProductRatePlanId).flatMap(p => paperCatalog.find(p).orElse(digipackCatalog.find(p)))
+      plan <- session.get(RatePlanId).map(ProductRatePlanId).flatMap(p => paperCatalog.find(p))
       ratePlanId <- session.get(RatePlanId)
       currencyStr <- session.get(SessionKeys.Currency)
       currency <- Currency.fromString(currencyStr)

@@ -4,7 +4,7 @@ import com.gu.i18n.{Currency, GBP}
 import com.gu.memsub.promo.PercentDiscount.getDiscountScaledToPeriod
 import com.gu.memsub.promo.{LandingPage, PercentDiscount, Promotion}
 import com.gu.memsub.{BillingPeriod => BP, _}
-import com.gu.subscriptions.{DigipackPlan, ProductPlan}
+import com.gu.subscriptions.{DigipackPlan, ProductList, ProductPlan}
 import views.support.BillingPeriod._
 import utils.SetOps._
 object Pricing {
@@ -55,7 +55,7 @@ object Pricing {
       }
     }
   }
-  implicit class PrettyProductPlan(in: ProductPlan) {
+  implicit class PrettyProductPlan(in: ProductPlan[ProductList]) {
     implicit val planWithPricing = new PlanWithPricing(in)
     def prettyName(currency: Currency): String = s"${in.name} package - ${planWithPricing.prettyPricing(currency)}"
   }

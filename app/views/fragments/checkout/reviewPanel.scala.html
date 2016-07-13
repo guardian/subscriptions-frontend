@@ -13,8 +13,8 @@
 @import com.gu.memsub.ProductFamily
 @import views.support.PlanOps._
 @import com.gu.subscriptions.ProductPlan
-
-@(subscriptionId: String, plan: PaidPlan[Current, BillingPeriod], promotion: Option[AnyPromotion] = None, currency: Currency)
+@import com.gu.subscriptions.ProductList
+@(subscriptionId: String, plan: ProductPlan[ProductList], promotion: Option[AnyPromotion] = None, currency: Currency)
 <div class="review-panel js-payment-frequency">
     <input type="checkbox" name="subscriptionDetails"
            checked="checked"

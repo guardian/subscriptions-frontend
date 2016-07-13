@@ -7,7 +7,7 @@ import com.gu.memsub.Subscription.ProductRatePlanId
 import com.gu.memsub.{Address, BillingPeriod, Current, FullName}
 import com.gu.memsub.promo.PromoCode
 import IdUserOps._
-import com.gu.subscriptions.{DigipackPlan, ProductPlan}
+import com.gu.subscriptions.{DigipackPlan, DigitalProducts, PhysicalProducts, ProductPlan}
 import org.joda.time.LocalDate
 
 sealed trait PaymentType {
@@ -61,14 +61,14 @@ case class SubscriptionData(
 )
 
 case class DigipackData(
-   plan: DigipackPlan[BillingPeriod]
+   plan: ProductPlan[DigitalProducts]
 )
 
 case class PaperData(
   startDate: LocalDate,
   deliveryAddress: Address,
   deliveryInstructions: Option[String],
-  plan: ProductPlan
+  plan: ProductPlan[PhysicalProducts]
 )
 
 object PersonalData {

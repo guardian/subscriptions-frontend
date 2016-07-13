@@ -17,6 +17,7 @@
 @import com.gu.i18n.Country
 @import views.support.PlanOps._
 @import com.gu.memsub.Subscriptions
+@import com.gu.subscriptions.ProductList
 @(
     personalData: Option[PersonalData],
     productData: ProductPopulationData,
@@ -27,7 +28,7 @@
     touchpointBackendResolution: services.TouchpointBackend.Resolution,
     promoCode: Option[PromoCode])(implicit request: RequestHeader)
 
-@priceOption(plan: ProductPlan, currency: Currency) = {
+@priceOption(plan: ProductPlan[ProductList], currency: Currency) = {
     <label class="option" data-currency="@currency">
         <span class="option__input">
             <input
@@ -122,10 +123,10 @@
                             </div>
                             <div class="field-note field-note--offset prose">
                                 @if(personalData.isDefined) {
-                                    <a href="@idWebAppSignOutUrl(controllers.Checkout.getCheckoutRouteForProductFamily(Subscriptions, countryGroup, promoCode, productData.plans.default.name))">Sign out</a>
+                                    <a href="@idWebAppSignOutUrl(routes.Checkout.renderCheckout(countryGroup, promoCode, productData.plans.default.slug))">Sign out</a>
                                 } else {
                                     <span class="field-note__label">Already have a Guardian account?</span>
-                                    <a href="@idWebAppSigninUrl(controllers.Checkout.getCheckoutRouteForProductFamily(Subscriptions, countryGroup, promoCode, productData.plans.default.name))">Sign in</a>
+                                    <a href="@idWebAppSigninUrl(routes.Checkout.renderCheckout(countryGroup, promoCode, productData.plans.default.slug))">Sign in</a>
                                 }
                             </div>
                         </div>
@@ -134,13 +135,13 @@
                         </div>
                         <div class="field-panel__fields">
                             @fragments.checkout.fieldsPersonal(personalData, countriesWithCurrency)
-                            @continueButton(if(productData.plans.default.hasPaper) "#deliveryDetails" else "#billingAddress", "js-checkout-your-details-submit")
+                            @continueButton(productData.planEither.fold(_ => "#deliveryDetails", _ => "#billingAddress"), "js-checkout-your-details-submit")
                         </div>
                     </fieldset>
                 </div>
 
                 @* ===== Delivery details ===== *@
-                @if(productData.plans.default.hasPaper) {
+                @if(productData.planEither.isRight) {
                         <div id="deliveryDetails" class="field-panel is-collapsed js-fieldset-delivery-details">
                             <fieldset>
                                 <legend class="field-panel__legend">
@@ -167,7 +168,7 @@
                             <a href="#yourDetails" class="text-button u-button-reset js-edit-billing-address" title="Edit your personal details">Edit</a>
                         </div>
                         <div class="field-panel__fields">
-                            @fragments.checkout.fieldsBilling(personalData.map(_.address), canBeHidden = productData.plans.default.hasPaper, countriesWithCurrency)
+                            @fragments.checkout.fieldsBilling(personalData.map(_.address), canBeHidden = productData.planEither.isRight, countriesWithCurrency)
                             @continueButton("#paymentDetails", "js-checkout-billing-address-submit")
                         </div>
                     </fieldset>

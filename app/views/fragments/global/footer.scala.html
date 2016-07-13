@@ -1,12 +1,13 @@
 @import configuration.Links
 @import org.joda.time.DateTime
 @import views.support.PlanOps._
-
 @import com.gu.memsub.BillingPeriod
 @import com.gu.memsub.Status
 @import com.gu.memsub.PaidPlan
 @import com.gu.memsub.Current
-@(showInternationalMessage: Boolean = false, plan: Option[PaidPlan[Current, BillingPeriod]])
+@import com.gu.subscriptions.ProductList
+@import com.gu.subscriptions.ProductPlan
+@(showInternationalMessage: Boolean = false, plan: Option[ProductPlan[ProductList]])
 
 <footer class="global-footer">
 
