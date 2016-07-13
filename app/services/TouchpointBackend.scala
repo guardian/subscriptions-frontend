@@ -55,7 +55,7 @@ object TouchpointBackend {
     })
 
     val subService = new SubscriptionService(zuoraService, _stripeService, catalogService.digipackCatalog)
-    val subServicePaper = catalogService.paperCatalog.map(c => new SubscriptionService(zuoraService, _stripeService, c))
+    val subServicePaper = new SubscriptionService(zuoraService, _stripeService, catalogService.paperCatalog)
     val memsubPaymentService = new CommonPaymentService(_stripeService, zuoraService, catalogService)
     val form = new forms.SubscriptionsForm(catalogService)
 
@@ -113,7 +113,7 @@ case class TouchpointBackend(environmentName: String,
                              catalogService : api.CatalogService,
                              zuoraService: zuora.api.ZuoraService,
                              subscriptionService: SubscriptionService[DigipackCatalog],
-                             subscriptionServicePaper: Option[SubscriptionService[PaperCatalog]],
+                             subscriptionServicePaper: SubscriptionService[PaperCatalog],
                              zuoraRestClient: zuora.rest.Client,
                              digipackIds: DigitalPackRatePlanIds,
                              paymentService: PaymentService,

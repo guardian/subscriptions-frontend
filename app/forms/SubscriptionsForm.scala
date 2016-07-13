@@ -27,7 +27,7 @@ class SubscriptionsForm(catalogService: CatalogService) {
 
   implicit val pf2 = new Formatter[ProductPlan] {
     override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], ProductPlan] =
-      data.get(key).map(ProductRatePlanId).flatMap(id => catalogService.paperCatalog.flatMap(_.find(id))).toRight(Seq(FormError(key, "Bad plan")))
+      data.get(key).map(ProductRatePlanId).flatMap(id => catalogService.paperCatalog.find(id)).toRight(Seq(FormError(key, "Bad plan")))
     override def unbind(key: String, value: ProductPlan): Map[String, String] =
       Map(key -> value.productRatePlanId.get)
   }

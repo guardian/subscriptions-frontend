@@ -30,7 +30,7 @@ import scala.util.{Failure, Success, Try}
   */
 trait ExactTargetService extends LazyLogging {
   def digiSubscriptionService: SubscriptionService[DigipackCatalog]
-  def paperSubscriptionService: Option[SubscriptionService[PaperCatalog]]
+  def paperSubscriptionService: SubscriptionService[PaperCatalog]
   def paymentService: CommonPaymentService
 
   private def getPlanDescription(validPromotion: Option[ValidPromotion[NewUsers]], currency: Currency, plan: PaidPlan[Status, BillingPeriod]): String = {
@@ -49,7 +49,7 @@ trait ExactTargetService extends LazyLogging {
     validPromotion: Option[ValidPromotion[NewUsers]]): Future[Unit] = {
 
     val subscription = subscriptionData.productData.fold({ paper =>
-      paperSubscriptionService.get.unsafeGetPaid(Subscription.Name(subscribeResult.subscriptionName))
+      paperSubscriptionService.unsafeGetPaid(Subscription.Name(subscribeResult.subscriptionName))
     }, {digipack =>
       digiSubscriptionService.unsafeGetPaid(Subscription.Name(subscribeResult.subscriptionName))
     })

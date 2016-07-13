@@ -6,6 +6,6 @@ package object controllers {
     def catalog(implicit touchpointBackend: TouchpointBackend): DigipackCatalog =
       touchpointBackend.catalogService.digipackCatalog
     def catalogue(implicit touchpointBackend: TouchpointBackend): PaperCatalog =
-      touchpointBackend.catalogService.paperCatalog.get
+      touchpointBackend.catalogService.paperCatalog
   }
 }

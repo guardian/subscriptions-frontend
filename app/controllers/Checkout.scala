@@ -78,7 +78,7 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
 
     idUser map { user =>
 
-      val catalog = tpBackend.catalogService.paperCatalog.get
+      val catalog = tpBackend.catalogService.paperCatalog
       val chosenPlan = catalog.forName(forThisPlan.mkString).getOrElse(catalog.digipack.cheapest)
       val betterPlans = catalog.group(chosenPlan).toList.map(_.betterThan(chosenPlan)).flatMap(_.productPlans).sortBy(_.priceGBP.amount)
       val productData = ProductPopulationData(user.map(_.address), PlanList(chosenPlan, betterPlans : _*))
@@ -216,7 +216,7 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
 
     val sessionInfo = for {
       subsName <- session.get(SubsName)
-      plan <- session.get(RatePlanId).map(ProductRatePlanId).flatMap(p => paperCatalog.flatMap(_.find(p)).orElse(digipackCatalog.find(p)))
+      plan <- session.get(RatePlanId).map(ProductRatePlanId).flatMap(p => paperCatalog.find(p).orElse(digipackCatalog.find(p)))
       ratePlanId <- session.get(RatePlanId)
       currencyStr <- session.get(SessionKeys.Currency)
       currency <- Currency.fromString(currencyStr)
