@@ -7,20 +7,19 @@
 @import com.gu.memsub.Digipack
 @import com.gu.memsub.PaidPlan
 @import com.gu.memsub.ProductFamily
-@import views.support.ProductFamilyOps._
-@import com.gu.memsub.Paper
+@import views.support.PlanOps._
+@import com.gu.subscriptions.ProductPlan
 
+@import com.gu.memsub.MondayPaper
 @(subscriptionName: String,
     guestAccountForm: Option[Form[model.GuestAccountData]] = None,
     touchpointBackendResolution: services.TouchpointBackend.Resolution,
     plan: PaidPlan[Current, BillingPeriod],
     promotion: Option[AnyPromotion] = None,
-    currency: Currency,
-    productFamily: ProductFamily,
-    isBundle: Boolean
+    currency: Currency
 )(implicit request: RequestHeader)
 
-@main(s"Confirmation | Subscribe to the ${productFamily.title(plan)} | The Guardian", bodyClasses=List("is-wide"), touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
+@main(s"Confirmation | Subscribe to the ${plan.title} | The Guardian", bodyClasses=List("is-wide"), touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
 
     @fragments.analytics.tagmanager()
 
@@ -45,9 +44,11 @@
                     We have received your request and are now processing your subscription,
                     you'll receive email confirmation of this shortly.
                 </p>
-                <p>Here are the details of your subscription, if any of these are incorrect please get in touch with us straight away via email at <a href="mailto:@productFamily.email">@productFamily.email</a> or on <strong>@productFamily.phone</strong>. Lines are open BST Monday&ndash;Friday 8.00am&ndash;8.00pm. Saturday &amp; Sunday 8.00am&ndash;6.00pm.</p>
+                <p>Here are the details of your subscription, if any of these are incorrect please get in touch with us straight away via email at
+                    <a href="mailto:@plan.email">@plan.email</a> or on <strong>@plan.phone</strong>.
+                    Lines are open BST Monday&ndash;Friday 8.00am&ndash;8.00pm. Saturday &amp; Sunday 8.00am&ndash;6.00pm.</p>
             </div>
-            @fragments.checkout.reviewPanel(subscriptionName, plan, promotion, currency, productFamily)
+            @fragments.checkout.reviewPanel(subscriptionName, plan, promotion, currency)
         </div>
     </section>
 
@@ -56,13 +57,8 @@
 
             <h2 class="section-title">What happens now?</h2>
 
-            @{
-                productFamily match {
-                    case Digipack => fragments.confirmation.appSteps()
-                    case Paper => fragments.confirmation.deliverySteps(isBundle)
-                }
-            }
-
+            @if(plan.products.contains(Digipack)) {@fragments.confirmation.appSteps()}
+            @if(plan.products.contains(MondayPaper) /*WRONG*/) {@fragments.confirmation.deliverySteps()}
             @fragments.confirmation.registerGuestAccount(guestAccountForm)
 
         </div>

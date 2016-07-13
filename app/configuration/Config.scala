@@ -7,7 +7,7 @@ import com.gu.cas.PrefixedTokens
 import com.gu.config._
 import com.gu.identity.cookie.{PreProductionKeys, ProductionKeys}
 import com.gu.memsub.auth.common.MemSub.Google._
-import com.gu.memsub.{Digipack, Membership, Paper}
+import com.gu.memsub.{Membership, Subscriptions}
 import com.gu.monitoring.StatusMetrics
 import com.gu.salesforce.SalesforceConfig
 import com.gu.subscriptions.{CASApi, CASService}
@@ -17,6 +17,7 @@ import monitoring.Metrics
 import net.kencochrane.raven.dsn.Dsn
 import org.joda.time.Days
 import play.api.mvc.{Call, RequestHeader}
+
 import scala.util.Try
 
 object Config {
@@ -87,7 +88,7 @@ object Config {
   }
 
   def digipackRatePlanIds(env: String): DigitalPackRatePlanIds =
-    DigitalPackRatePlanIds.fromConfig(ProductFamilyRatePlanIds.config(Some(config))(env, Digipack))
+    DigitalPackRatePlanIds.fromConfig(ProductFamilyRatePlanIds.config(Some(config))(env, Subscriptions))
 
   def discountRatePlanIds(env: String): DiscountRatePlanIds =
     DiscountRatePlanIds.fromConfig(config.getConfig(s"touchpoint.backend.environments.$env.zuora.ratePlanIds"))
@@ -95,8 +96,8 @@ object Config {
   def membershipRatePlanIds(env: String) =
     MembershipRatePlanIds.fromConfig(ProductFamilyRatePlanIds.config(Some(config))(env, Membership))
 
-  def paperRatePlanIds(env: String) =
-    PaperRatePlanIds(ProductFamilyRatePlanIds.config(Some(config))(env, Paper))
+  def paperProductIds(env: String) =
+    SubscriptionsProductIds(config.getConfig(s"touchpoint.backend.environments.$env.zuora.productIds.subscriptions"))
 
   object CAS {
     lazy val casConf = config.getConfig("cas")

@@ -31,8 +31,8 @@ GET         /checkout/lookupPromotion        controllers.Checkout.validatePromoC
 
 # Checkout pages
 GET         /checkout                        controllers.Checkout.renderCheckout(countryGroup: CountryGroup ?= CountryGroup.UK, promoCode: Option[PromoCode])
-GET         /checkout/thank-you              controllers.Checkout.thankYouDigipack
-GET         /checkout/paper/thank-you        controllers.Checkout.thankYouPaper
+GET         /checkout/thank-you              controllers.Checkout.thankYou()
+GET         /checkout/paper/thank-you        controllers.Checkout.thankYou()
 GET         /checkout/paper/:forThisPlan     controllers.Checkout.renderPaperCheckout(countryGroup: CountryGroup ?= CountryGroup.UK, promoCode: Option[PromoCode], forThisPlan: String)
 
 # collection and delivery

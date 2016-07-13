@@ -3,9 +3,9 @@
 @import views.support.CountryWithCurrency
 @import com.gu.i18n.Title
 @import model.PersonalData
-@import views.support.PaperProductPopulationData
 
-@(data: PaperProductPopulationData, countriesWithCurrency: List[CountryWithCurrency])
+@import views.support.ProductPopulationData
+@(data: ProductPopulationData, countriesWithCurrency: List[CountryWithCurrency])
 
 @address(data.deliveryAddress, "delivery", countriesWithCurrency)
 

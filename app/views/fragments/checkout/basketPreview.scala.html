@@ -2,20 +2,20 @@
 @import com.gu.memsub.Current
 @import com.gu.memsub.BillingPeriod
 @import com.gu.memsub.ProductFamily
-@import views.support.ProductFamilyOps._
-@(productFamily: ProductFamily, plan: PaidPlan[Current, BillingPeriod])
+@import views.support.PlanOps._
+@(plan: PaidPlan[Current, BillingPeriod])
 
 <div class="basket-preview  basket-preview--products">
     <h3 class="basket-preview__title">You've chosen:</h3>
     <div class="basket-preview__image">
-        <img src="@controllers.CachedAssets.hashedPathFor(productFamily.packImage)" alt="@productFamily.title(plan)">
+        <img src="@controllers.CachedAssets.hashedPathFor(plan.packImage)" alt="@plan.title">
     </div>
     <div class="basket-preview__product">
         <span class="basket-preview__product__title js-option-mirror-package-display">
-            @productFamily.title(plan)
+            @plan.title
         </span>
             <span class="basket-preview__product__caption">
-                (@productFamily.subtitle(plan))
+                (@plan.subtitle)
             </span>
         <span class="basket-preview__product__payment js-option-mirror-payment-display"></span>
     </div>

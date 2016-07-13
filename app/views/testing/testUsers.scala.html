@@ -1,6 +1,5 @@
 @import com.gu.i18n.CountryGroup
-@import com.gu.memsub.Digipack
-@import com.gu.memsub.Paper
+@import com.gu.memsub.Subscriptions
 @import com.gu.i18n.CountryGroup.UK
 @import controllers.Checkout.getCheckoutRouteForProductFamily
 @(userString: String)(implicit request: RequestHeader)
@@ -21,9 +20,9 @@
 
         <div class="actions">
             <h3>Register as an Identity user, redirecting to checkout for:</h3>
-            <a href="@idWebAppRegisterUrl(getCheckoutRouteForProductFamily(Digipack))" class="button button--primary button--large">Digital Pack</a>
-            <a href="@idWebAppRegisterUrl(getCheckoutRouteForProductFamily(Paper))" class="button button--primary button--large">Everyday package</a>
-            <a href="@idWebAppRegisterUrl(getCheckoutRouteForProductFamily(Paper, forThisPlan = "everyday+"))" class="button button--primary button--large">Everyday+ package</a>
+            <a href="@idWebAppRegisterUrl(getCheckoutRouteForProductFamily(Subscriptions))" class="button button--primary button--large">Digital Pack</a>
+            <a href="@idWebAppRegisterUrl(getCheckoutRouteForProductFamily(Subscriptions))" class="button button--primary button--large">Everyday package</a>
+            <a href="@idWebAppRegisterUrl(getCheckoutRouteForProductFamily(Subscriptions, forThisPlan = "everyday+"))" class="button button--primary button--large">Everyday+ package</a>
         </div>
 
         <hr/>
@@ -31,18 +30,18 @@
         <div class="actions">
             <h3>Subscribe as a <em>guest</em> user to:</h3>
             <dl>
-                <a href="@getCheckoutRouteForProductFamily(Digipack)" class="button button--primary button--large">Digital Pack</a>
+                <a href="@getCheckoutRouteForProductFamily(Subscriptions)" class="button button--primary button--large">Digital Pack</a>
             </dl>
             <dl>
-                <a href="@getCheckoutRouteForProductFamily(Paper)" class="button button--primary button--large">Everyday package</a>
-                <a href="@getCheckoutRouteForProductFamily(Paper, forThisPlan = "sixday")" class="button button--primary button--large">Sixday package</a>
-                <a href="@getCheckoutRouteForProductFamily(Paper, forThisPlan = "weekend")" class="button button--primary button--large">Weekend package</a>
+                <a href="@getCheckoutRouteForProductFamily(Subscriptions)" class="button button--primary button--large">Everyday package</a>
+                <a href="@getCheckoutRouteForProductFamily(Subscriptions, forThisPlan = "sixday")" class="button button--primary button--large">Sixday package</a>
+                <a href="@getCheckoutRouteForProductFamily(Subscriptions, forThisPlan = "weekend")" class="button button--primary button--large">Weekend package</a>
             </dl>
             <dl>
-                <a href="@getCheckoutRouteForProductFamily(Paper, forThisPlan = "everyday+")" class="button button--primary button--large">Everyday+ package</a>
-                <a href="@getCheckoutRouteForProductFamily(Paper, forThisPlan = "sixday+")" class="button button--primary button--large">Sixday+ package</a>
-                <a href="@getCheckoutRouteForProductFamily(Paper, forThisPlan = "weekend+")" class="button button--primary button--large">Weekend+ package</a>
-                <a href="@getCheckoutRouteForProductFamily(Paper, forThisPlan = "sunday+")" class="button button--primary button--large">Sunday+ package</a>
+                <a href="@getCheckoutRouteForProductFamily(Subscriptions, forThisPlan = "everyday+")" class="button button--primary button--large">Everyday+ package</a>
+                <a href="@getCheckoutRouteForProductFamily(Subscriptions, forThisPlan = "sixday+")" class="button button--primary button--large">Sixday+ package</a>
+                <a href="@getCheckoutRouteForProductFamily(Subscriptions, forThisPlan = "weekend+")" class="button button--primary button--large">Weekend+ package</a>
+                <a href="@getCheckoutRouteForProductFamily(Subscriptions, forThisPlan = "sunday+")" class="button button--primary button--large">Sunday+ package</a>
             </dl>
         </div>
 
