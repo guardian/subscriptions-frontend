@@ -11,10 +11,11 @@
 @import com.gu.subscriptions.ProductPlan
 
 @import com.gu.memsub.MondayPaper
+@import com.gu.subscriptions.ProductList
 @(subscriptionName: String,
     guestAccountForm: Option[Form[model.GuestAccountData]] = None,
     touchpointBackendResolution: services.TouchpointBackend.Resolution,
-    plan: PaidPlan[Current, BillingPeriod],
+    plan: ProductPlan[ProductList],
     promotion: Option[AnyPromotion] = None,
     currency: Currency
 )(implicit request: RequestHeader)
@@ -57,8 +58,8 @@
 
             <h2 class="section-title">What happens now?</h2>
 
-            @if(plan.products.contains(Digipack)) {@fragments.confirmation.appSteps()}
-            @if(plan.products.contains(MondayPaper) /*WRONG*/) {@fragments.confirmation.deliverySteps()}
+            @if(plan.products.seq.contains(Digipack)) {@fragments.confirmation.appSteps()}
+            @if(plan.products.seq.contains(MondayPaper) /*WRONG*/) {@fragments.confirmation.deliverySteps()}
             @fragments.confirmation.registerGuestAccount(guestAccountForm)
 
         </div>

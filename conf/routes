@@ -30,10 +30,9 @@ POST        /checkout/register-guest-user    controllers.Checkout.convertGuestUs
 GET         /checkout/lookupPromotion        controllers.Checkout.validatePromoCode(promoCode: PromoCode, productRatePlanId: ProductRatePlanId, country: Country)
 
 # Checkout pages
-GET         /checkout                        controllers.Checkout.renderCheckout(countryGroup: CountryGroup ?= CountryGroup.UK, promoCode: Option[PromoCode])
 GET         /checkout/thank-you              controllers.Checkout.thankYou()
-GET         /checkout/paper/thank-you        controllers.Checkout.thankYou()
-GET         /checkout/paper/:forThisPlan     controllers.Checkout.renderPaperCheckout(countryGroup: CountryGroup ?= CountryGroup.UK, promoCode: Option[PromoCode], forThisPlan: String)
+GET         /checkout                        controllers.Checkout.renderCheckout(countryGroup: CountryGroup ?= CountryGroup.UK, promoCode: Option[PromoCode], forThisPlan = "")
+GET         /checkout/:forThisPlan           controllers.Checkout.renderCheckout(countryGroup: CountryGroup ?= CountryGroup.UK, promoCode: Option[PromoCode], forThisPlan: String)
 
 # collection and delivery
 GET         /collection/paper-digital        controllers.Shipping.viewCollectionPaperDigital

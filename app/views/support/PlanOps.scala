@@ -1,14 +1,11 @@
 package views.support
 import utils.SetOps._
 import com.gu.memsub._
-import com.gu.subscriptions.ProductPlan
+import com.gu.subscriptions.{ProductList, ProductPlan}
 
 object PlanOps {
 
-  implicit class ToProductPlanOps(in: PaidPlan[Current, BillingPeriod]) {
-
-    def hasPaper =
-      in.products.containsAny(ProductFamily.paper)
+  implicit class ToProductPlanOps(in: ProductPlan[ProductList]) {
 
     def title: String = in match {
       case _ if in.products == Set(Digipack) => "Guardian Digital Pack"

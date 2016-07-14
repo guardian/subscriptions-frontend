@@ -16,7 +16,7 @@
             </ul>
         </div>
     </div>
-    @if(productData.plans.default.hasPaper) {
+    @if(productData.planEither.isLeft) {
         <div class="review-details__item">
             <span class="review-details__heading">Deliver to</span>
             <div class="review-details__list">
