@@ -112,7 +112,7 @@ object SqsClient extends LazyLogging {
       ).toString()
 
       def sendToQueue(msg: String): SendMessageResult = {
-        val queueUrl = sqsClient.createQueue(new CreateQueueRequest(Config.welcomeEmailQueue)).getQueueUrl()
+        val queueUrl = sqsClient.createQueue(new CreateQueueRequest(Config.welcomeEmailQueue)).getQueueUrl
         sqsClient.sendMessage(new SendMessageRequest(queueUrl, msg))
       }
 
