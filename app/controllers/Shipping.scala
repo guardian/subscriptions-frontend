@@ -1,23 +1,38 @@
 package controllers
 
 import actions.CommonActions._
+import com.gu.i18n.CountryGroup
+import com.gu.memsub.Digipack
+import com.gu.subscriptions.{PhysicalProducts, ProductPlan}
 import model.Subscriptions._
 import play.api.mvc._
 import services.TouchpointBackend
 import utils.TestUsers.PreSigninTestCookie
+import scalaz.syntax.std.boolean._
 
 object Shipping extends Controller {
+
+  // no need to support test users here really as plans seldom change
+  val catalog = TouchpointBackend.Normal.catalogService.paperCatalog
 
   def index(subscriptionCollection: SubscriptionProduct) = {
     Ok(views.html.shipping.shipping(subscriptionCollection))
   }
 
+  def planToOptions(in: ProductPlan[PhysicalProducts]): SubscriptionOption =
+    SubscriptionOption(in.slug,
+      in.name, in.priceGBP.amount * 12 / 52, None /*todo*/, in.priceGBP.amount, in.description,
+      routes.Checkout.renderCheckout(CountryGroup.UK, None, in.slug).url
+    )
+
   def viewCollectionPaperDigital() = CachedAction {
+    val plans = catalog.voucher.productPlans.filter(_.products.others.contains(Digipack)).map(planToOptions)
     index(CollectionSubscriptionProduct(
       title = "Paper + digital voucher subscription",
       description = "Save money on your newspapers and digital content. Plus start using the daily edition and premium live news app immediately.",
       packageType = "paper-digital",
-      options = Seq(
+      options = plans.nonEmpty.option(plans).getOrElse(
+        Seq(
         SubscriptionOption("everyday",
           "Everyday+", 10.99f, Some("41%"), 47.62f, "Guardian and Observer papers, plus tablet editions and Premium mobile access",
           "https://www.guardiansubscriptions.co.uk/Voucher?prom=faa13&pkgcode=ukx01&title=gv7&skip=1"
@@ -35,15 +50,16 @@ object Shipping extends Controller {
           "https://www.guardiansubscriptions.co.uk/Voucher?prom=faa13&pkgcode=ukx01&title=ov1&skip=1"
         )
       )
-    ))
+    )))
   }
 
   def viewCollectionPaper() = CachedAction {
+    val plans = catalog.voucher.productPlans.filter(_.products.others.isEmpty).map(planToOptions)
     index(CollectionSubscriptionProduct(
       title = "Paper voucher subscription",
       description = "Save money on your newspapers.",
       packageType = "paper",
-      options = Seq(
+      options = plans.nonEmpty.option(plans).getOrElse(Seq(
         SubscriptionOption("everyday",
           "Everyday", 9.99f, Some("37%"), 43.29f, "Guardian and Observer papers",
           "https://www.guardiansubscriptions.co.uk/Voucher?prom=faa13&pkgcode=ukx00&title=gv7&skip=1"
@@ -57,16 +73,17 @@ object Shipping extends Controller {
           "https://www.guardiansubscriptions.co.uk/Voucher?prom=faa13&pkgcode=ukx00&title=gv2&skip=1"
         )
       )
-    ))
+    )))
   }
 
   def viewDeliveryPaperDigital() = CachedAction {
+    val plans = catalog.delivery.productPlans.filter(_.products.others.contains(Digipack)).map(planToOptions)
     index(DeliverySubscriptionProduct(
       title = "Paper + digital home delivery subscription",
       description = """|If you live within the M25 you can have your papers delivered by 7am Monday - Saturday and 8.30am on Sunday.
         |Plus you can start using the daily edition and premium live news app immediately.""".stripMargin,
       packageType = "paper-digital",
-      options = Seq(
+      options = plans.nonEmpty.option(plans).getOrElse(Seq(
         SubscriptionOption("everyday",
           "Everyday+", 14.49f, None, 62.79f, "Guardian and Observer papers, plus tablet editions and Premium mobile access",
           "https://www.guardiandirectsubs.co.uk/Delivery/details.aspx?package=EVERYDAY%2B"
@@ -84,15 +101,16 @@ object Shipping extends Controller {
           "https://www.guardiandirectsubs.co.uk/Delivery/details.aspx?package=SUNDAY%2B"
         )
       )
-    ))
+    )))
   }
 
   def viewDeliveryPaper() = CachedAction {
+    val plans = catalog.delivery.productPlans.filter(_.products.others.isEmpty).map(planToOptions)
     index(DeliverySubscriptionProduct(
       title = "Paper home delivery subscription",
       description = "If you live within the M25 you can have your papers delivered by 7am Monday - Saturday and 8.30 on Sunday.",
       packageType = "paper",
-      options = Seq(
+      options = plans.nonEmpty.option(plans).getOrElse(Seq(
         SubscriptionOption("everyday",
           "Everyday", 13.49f, None, 58.46f, "Guardian and Observer papers",
           "https://www.guardiandirectsubs.co.uk/Delivery/details.aspx?package=EVERYDAY"
@@ -106,7 +124,7 @@ object Shipping extends Controller {
           "https://www.guardiandirectsubs.co.uk/Delivery/details.aspx?package=WEEKEND"
         )
       )
-    ))
+    )))
   }
 
 }
