@@ -14,11 +14,10 @@ import com.gu.zuora.soap.models.Results.SubscribeResult
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
 import model.SubscribeRequest
-import model.exactTarget.DataExtensionRow
+import model.exactTarget._
 import org.joda.time.Days
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json._
-
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
@@ -43,10 +42,10 @@ trait ExactTargetService extends LazyLogging {
   }
 
   def sendETDataExtensionRow(
-    subscribeResult: SubscribeResult,
-    subscriptionData: SubscribeRequest,
-    gracePeriod: Days,
-    validPromotion: Option[ValidPromotion[NewUsers]]): Future[Unit] = {
+                              subscribeResult: SubscribeResult,
+                              subscriptionData: SubscribeRequest,
+                              gracePeriod: Days,
+                              validPromotion: Option[ValidPromotion[NewUsers]]): Future[Unit] = {
 
     val subscription = subscriptionData.productData.fold({ paper =>
       paperSubscriptionService.unsafeGetPaid(Subscription.Name(subscribeResult.subscriptionName))
@@ -60,24 +59,38 @@ trait ExactTargetService extends LazyLogging {
 
     val promotionDescription = validPromotion.filterNot(_.promotion.promotionType == Tracking).map(_.promotion.description)
 
-    for {
-      sub <- subscription
-      pm <- paymentMethod
-      row = DataExtensionRow(
-        personalData = subscriptionData.genericData.personalData,
-        subscription = sub,
-        paymentMethod = pm,
-        gracePeriod = gracePeriod,
-        subscriptionDetails = getPlanDescription(validPromotion, subscriptionData.genericData.personalData.currency, sub.plan),
-        promotionDescription = promotionDescription
-      )
-      response <- SqsClient.sendWelcomeEmailToQueue(row)
-    } yield {
-      response match {
-        case Success(sendMsgResult) => logger.info(s"Successfully sent ${subscribeResult.subscriptionName} welcome email.")
-        case Failure(e) => logger.error(s"Failed to send ${subscribeResult.subscriptionName} welcome email.", e)
+    val personalData = subscriptionData.genericData.personalData
+
+    val subscriptionDetails =
+      for {
+        sub <- subscription
+        subscriptionDetails = getPlanDescription(validPromotion, personalData.currency, sub.plan)
+        pm <- paymentMethod
+        row = subscriptionData.productData.fold(
+          paperData => PaperHomeDeliveryWelcome1DataExtensionRow(
+            paperData = paperData,
+            personalData = personalData,
+            subscription = sub,
+            paymentMethod = pm,
+            subscriptionDetails = subscriptionDetails,
+            promotionDescription = promotionDescription
+          ),
+          _ => DigipackWelcome1DataExtensionRow(
+            personalData = personalData,
+            subscription = sub,
+            paymentMethod = pm,
+            gracePeriod = gracePeriod,
+            subscriptionDetails = subscriptionDetails,
+            promotionDescription = promotionDescription
+          )
+        )
+        response <- SqsClient.sendWelcomeEmailToQueue(row)
+      } yield {
+        response match {
+          case Success(sendMsgResult) => logger.info(s"Successfully sent ${subscribeResult.subscriptionName} welcome email.")
+          case Failure(e) => logger.error(s"Failed to send ${subscribeResult.subscriptionName} welcome email.", e)
+        }
       }
-    }
   }
 }
 
@@ -94,7 +107,8 @@ object SqsClient extends LazyLogging {
           "ContactAttributes" -> Json.obj(
             "SubscriberAttributes" ->  Json.toJsFieldJsValueWrapper(row.fields.toMap)
           )
-        )
+        ),
+        "DataExtensionName" -> row.forExtension.name
       ).toString()
 
       def sendToQueue(msg: String): SendMessageResult = {
