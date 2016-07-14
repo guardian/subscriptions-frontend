@@ -153,7 +153,7 @@ class CheckoutService(identityService: IdentityService,
     (for {
       memberId <- salesforceService.createOrUpdateUser(
         subscribeRequest.genericData.personalData,
-        subscribeRequest.productData.fold[Option[Address]](_.deliveryAddress.some, _ => None),
+        subscribeRequest.productData.left.toOption,
         userData
       )
     } yield {
