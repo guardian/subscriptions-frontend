@@ -14,7 +14,7 @@ import com.gu.zuora.soap.models.Results.SubscribeResult
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
 import model.SubscribeRequest
-import model.exactTarget.SubscriptionDataExtensionRow
+import model.exactTarget.DataExtensionRow
 import org.joda.time.Days
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json._
@@ -63,7 +63,7 @@ trait ExactTargetService extends LazyLogging {
     for {
       sub <- subscription
       pm <- paymentMethod
-      row = SubscriptionDataExtensionRow(
+      row = DataExtensionRow(
         personalData = subscriptionData.genericData.personalData,
         subscription = sub,
         paymentMethod = pm,
@@ -85,7 +85,7 @@ object SqsClient extends LazyLogging {
   private val sqsClient = new AmazonSQSClient()
   sqsClient.setRegion(Region.getRegion(Regions.EU_WEST_1))
 
-  def sendWelcomeEmailToQueue(row: SubscriptionDataExtensionRow): Future[Try[SendMessageResult]] = {
+  def sendWelcomeEmailToQueue(row: DataExtensionRow): Future[Try[SendMessageResult]] = {
     Future {
       val payload = Json.obj(
         "To" -> Json.obj(

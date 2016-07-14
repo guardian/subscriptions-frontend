@@ -9,7 +9,7 @@ import utils.Dates
 
 import scala.math.BigDecimal.decimal
 
-object SubscriptionDataExtensionRow extends LazyLogging {
+object DataExtensionRow extends LazyLogging {
 
   def apply(
              personalData: PersonalData,
@@ -18,7 +18,7 @@ object SubscriptionDataExtensionRow extends LazyLogging {
              gracePeriod: Days,
              subscriptionDetails: String,
              promotionDescription: Option[String] = None
-  ): SubscriptionDataExtensionRow = {
+  ): DataExtensionRow = {
 
 
     val address = personalData.address
@@ -39,7 +39,7 @@ object SubscriptionDataExtensionRow extends LazyLogging {
 
     val promotionFields = promotionDescription.map(d => "Promotion description" -> d.substring(0, Math.min(d.length, 255)))
 
-    SubscriptionDataExtensionRow(
+    DataExtensionRow(
       personalData.email,
       Seq(
         "ZuoraSubscriberId" -> subscription.name.get,
@@ -88,8 +88,4 @@ object SubscriptionDataExtensionRow extends LazyLogging {
     sortCode.filter(_.isDigit).grouped(2).mkString("-")
 }
 
-trait DataExtensionRow {
-  def fields: Seq[(String, String)]
-}
-
-case class SubscriptionDataExtensionRow(email: String, fields: Seq[(String, String)]) extends DataExtensionRow
+case class DataExtensionRow(email: String, fields: Seq[(String, String)])
