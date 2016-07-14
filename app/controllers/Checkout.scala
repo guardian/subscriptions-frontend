@@ -1,5 +1,7 @@
 package controllers
 
+import java.time.LocalDate
+
 import actions.CommonActions._
 import com.gu.i18n.{Country, CountryGroup, Currency, GBP}
 import com.gu.identity.play.ProxiedIP
@@ -43,6 +45,7 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
     val IdentityGuestPasswordSettingToken = "newSubs_token"
     val AppliedPromoCode = "newSubs_appliedPromoCode"
     val Currency = "newSubs_currency"
+    val StartDate = "newSubs_startDate"
   }
 
   import SessionKeys.{Currency => _, UserId => _, _}
@@ -175,7 +178,10 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
       }
 
       val appliedPromoCode = r.validPromoCode.fold(Seq.empty[(String, String)])(validPromoCode => Seq(AppliedPromoCode -> validPromoCode.get))
-      val session = (productData ++ userSessionFields ++ appliedPromoCode).foldLeft(request.session.-(AppliedPromoCode)) {
+
+      val subscriptionDetails = Some(StartDate -> subscribeRequest.productData.fold(_.startDate, _ => LocalDate.now).formatted("dd MM YYYY"))
+
+      val session = (productData ++ userSessionFields ++ appliedPromoCode ++ subscriptionDetails).foldLeft(request.session.-(AppliedPromoCode)) {
         _ + _
       }
 
@@ -209,12 +215,12 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
       ratePlanId <- session.get(RatePlanId)
       currencyStr <- session.get(SessionKeys.Currency)
       currency <- Currency.fromString(currencyStr)
-    } yield (subsName, plan, currency)
+      startDate <- session.get(StartDate)
+    } yield (subsName, plan, currency, startDate)
 
     sessionInfo.fold {
       Redirect(routes.Homepage.index()).withNewSession
-    } { case (subsName, plan, currency) =>
-
+    } { case (subsName, plan, currency, startDate) =>
 
       val passwordForm = authenticatedUserFor(request).fold {
         for {
@@ -227,7 +233,8 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
       } // Don't display the user registration form if the user is logged in
 
       val promotion = session.get(AppliedPromoCode).flatMap(code => resolution.backend.promoService.findPromotion(PromoCode(code)))
-      Ok(view.thankyou(subsName, passwordForm, resolution, plan, promotion, currency))
+
+      Ok(view.thankyou(subsName, passwordForm, resolution, plan, promotion, currency, startDate))
     }
 
   }

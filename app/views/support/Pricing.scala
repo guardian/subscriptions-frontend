@@ -4,9 +4,9 @@ import com.gu.i18n.{Currency, GBP}
 import com.gu.memsub.promo.PercentDiscount.getDiscountScaledToPeriod
 import com.gu.memsub.promo.{LandingPage, PercentDiscount, Promotion}
 import com.gu.memsub.{BillingPeriod => BP, _}
-import com.gu.subscriptions.{DigipackPlan, ProductList, ProductPlan}
+import com.gu.subscriptions.{ProductList, ProductPlan}
 import views.support.BillingPeriod._
-import utils.SetOps._
+
 object Pricing {
 
   implicit class PlanWithPricing(plan: PaidPlan[Status, BP]) {
@@ -57,6 +57,9 @@ object Pricing {
   }
   implicit class PrettyProductPlan(in: ProductPlan[ProductList]) {
     implicit val planWithPricing = new PlanWithPricing(in)
-    def prettyName(currency: Currency): String = s"${in.name} package - ${planWithPricing.prettyPricing(currency)}"
+    def prettyName(currency: Currency): String = in match {
+      case _ if in.products.seq == Seq(Digipack) => planWithPricing.prettyPricing(currency)
+      case _ => s"${in.name} package - ${planWithPricing.prettyPricing(currency)}"
+    }
   }
 }
