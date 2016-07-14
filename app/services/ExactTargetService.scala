@@ -61,36 +61,35 @@ trait ExactTargetService extends LazyLogging {
 
     val personalData = subscriptionData.genericData.personalData
 
-    val subscriptionDetails =
-      for {
-        sub <- subscription
-        subscriptionDetails = getPlanDescription(validPromotion, personalData.currency, sub.plan)
-        pm <- paymentMethod
-        row = subscriptionData.productData.fold(
-          paperData => PaperHomeDeliveryWelcome1DataExtensionRow(
-            paperData = paperData,
-            personalData = personalData,
-            subscription = sub,
-            paymentMethod = pm,
-            subscriptionDetails = subscriptionDetails,
-            promotionDescription = promotionDescription
-          ),
-          _ => DigipackWelcome1DataExtensionRow(
-            personalData = personalData,
-            subscription = sub,
-            paymentMethod = pm,
-            gracePeriod = gracePeriod,
-            subscriptionDetails = subscriptionDetails,
-            promotionDescription = promotionDescription
-          )
+    for {
+      sub <- subscription
+      subscriptionDetails = getPlanDescription(validPromotion, personalData.currency, sub.plan)
+      pm <- paymentMethod
+      row = subscriptionData.productData.fold(
+        paperData => PaperHomeDeliveryWelcome1DataExtensionRow(
+          paperData = paperData,
+          personalData = personalData,
+          subscription = sub,
+          paymentMethod = pm,
+          subscriptionDetails = subscriptionDetails,
+          promotionDescription = promotionDescription
+        ),
+        _ => DigipackWelcome1DataExtensionRow(
+          personalData = personalData,
+          subscription = sub,
+          paymentMethod = pm,
+          gracePeriod = gracePeriod,
+          subscriptionDetails = subscriptionDetails,
+          promotionDescription = promotionDescription
         )
-        response <- SqsClient.sendWelcomeEmailToQueue(row)
-      } yield {
-        response match {
-          case Success(sendMsgResult) => logger.info(s"Successfully sent ${subscribeResult.subscriptionName} welcome email.")
-          case Failure(e) => logger.error(s"Failed to send ${subscribeResult.subscriptionName} welcome email.", e)
-        }
+      )
+      response <- SqsClient.sendWelcomeEmailToQueue(row)
+    } yield {
+      response match {
+        case Success(sendMsgResult) => logger.info(s"Successfully sent ${subscribeResult.subscriptionName} welcome email.")
+        case Failure(e) => logger.error(s"Failed to send ${subscribeResult.subscriptionName} welcome email.", e)
       }
+    }
   }
 }
 
