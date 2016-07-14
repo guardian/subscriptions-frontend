@@ -6,18 +6,9 @@ import com.gu.memsub.Address
 
 object IdUserOps {
   implicit class IdUserWithAddress(u: IdUser) {
-    def address = {
+
+    def billingAddress: Address = {
       val pf = u.privateFields.getOrElse(PrivateFields())
-
-      val billingAddressDefined =
-        (pf.billingCountry orElse
-         pf.billingAddress1 orElse
-         pf.billingAddress2 orElse
-         pf.billingAddress3 orElse
-         pf.billingAddress4 orElse
-         pf.billingPostcode).isDefined
-
-      if (billingAddressDefined)
         Address(
           lineOne = pf.billingAddress1.getOrElse(""),
           lineTwo = pf.billingAddress2.getOrElse(""),
@@ -26,7 +17,10 @@ object IdUserOps {
           postCode = pf.billingPostcode.getOrElse(""),
           countryName = pf.billingCountry.getOrElse("")
         )
-      else
+    }
+
+    def address: Address = {
+      val pf = u.privateFields.getOrElse(PrivateFields())
         Address(
           lineOne = pf.address1.getOrElse(""),
           lineTwo = pf.address2.getOrElse(""),
