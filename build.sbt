@@ -30,7 +30,7 @@ lazy val root = (project in file(".")).enablePlugins(
       "com.gu.memsub.Subscription.ProductRatePlanId"
   ))
 
-scalaVersion := "2.11.6"
+scalaVersion := "2.11.8"
 scalacOptions ++= Seq("-feature")
 
 val scalatestVersion = "2.2.4"
@@ -40,10 +40,10 @@ libraryDependencies ++= Seq(
     ws,
     filters,
     PlayImport.specs2,
-    "com.gu" %% "membership-common" % "0.236",
+    "com.gu" %% "membership-common" % "0.237",
     "com.gu" %% "memsub-common-play-auth" % "0.8",
     "com.gu" %% "content-authorisation-common" % "0.1",
-    "com.github.nscala-time" %% "nscala-time" % "2.0.0",
+    "com.github.nscala-time" %% "nscala-time" % "2.8.0",
     "net.kencochrane.raven" % "raven-logback" % "6.0.0",
     "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0",
     "org.scalatest" %% "scalatest" % scalatestVersion % "test",

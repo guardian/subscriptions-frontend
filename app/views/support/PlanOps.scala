@@ -28,7 +28,9 @@ object PlanOps {
 
     def email: String = in match {
       case _ if in.products.seq == Seq(Digipack) => "digitalpack@theguardian.com"
-      case _ => "todo@theguardian.com" // TODO
+      case _ if in.products.seq.contains(Delivery) => "homedelivery@theguardian.com"
+      case _ if !in.products.seq.contains(Delivery) => "vouchersubs@theguardian.com"
+      case _ => "subscriptions@theguardian.com"
     }
 
     def phone: String = "+44 (0) 330 333 6767"

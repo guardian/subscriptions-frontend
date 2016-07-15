@@ -54,11 +54,18 @@
 
             <h2 class="section-title">What happens now?</h2>
 
-            @if(plan.products.seq.contains(Digipack)) { @fragments.confirmation.appSteps() }
-            @if(plan.products.seq.contains(Delivery)) { @fragments.confirmation.deliverySteps(startDate) }
+            <div class="steps">
+                <h4 class="steps__title">We’ll send you an email confirming your subscription and payment information.</h4>
+                @if(plan.products.seq.contains(Delivery)) {
+                    <h4 class="steps__title">Your first paper will be delivered on @startDate. </h4>
+                }
+                @if(plan.products.seq.contains(Digipack)) { @fragments.confirmation.appSteps() }
+            </div>
 
             @fragments.confirmation.registerGuestAccount(guestAccountForm)
 
+            <br/>
+            <h4>We hope you enjoy your subscription.</h4>
         </div>
     </section>
 </main>

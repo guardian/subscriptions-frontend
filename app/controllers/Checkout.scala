@@ -1,23 +1,23 @@
 package controllers
 
-import java.time.LocalDate
-
 import actions.CommonActions._
 import com.gu.i18n.{Country, CountryGroup, Currency, GBP}
 import com.gu.identity.play.ProxiedIP
-import com.gu.memsub.{BillingPeriod, ProductFamily}
+import com.gu.memsub.BillingPeriod
 import com.gu.memsub.Subscription.ProductRatePlanId
 import com.gu.memsub.promo.Formatters.PromotionFormatters._
 import com.gu.memsub.promo.PromoCode
 import com.gu.memsub.promo.Promotion.AnyPromotion
-import com.gu.subscriptions.{DigipackPlan, DigitalProducts, PhysicalProducts}
+import com.gu.subscriptions.DigipackPlan
 import com.gu.zuora.soap.models.errors._
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config.Identity.webAppProfileUrl
 import forms.{FinishAccountForm, SubscriptionsForm}
+import model.IdUserOps._
+import model._
 import model.error.CheckoutService._
 import model.error.SubsError
-import model._
+import org.joda.time.LocalDate
 import play.api.data.Form
 import play.api.libs.json._
 import play.api.mvc._
@@ -34,7 +34,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scalaz.std.scalaFuture._
 import scalaz.{NonEmptyList, OptionT}
-import model.IdUserOps._
 
 object Checkout extends Controller with LazyLogging with ActivityTracking with CatalogProvider {
 
@@ -179,7 +178,7 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
 
       val appliedPromoCode = r.validPromoCode.fold(Seq.empty[(String, String)])(validPromoCode => Seq(AppliedPromoCode -> validPromoCode.get))
 
-      val subscriptionDetails = Some(StartDate -> subscribeRequest.productData.fold(_.startDate, _ => LocalDate.now).formatted("dd MM YYYY"))
+      val subscriptionDetails = Some(StartDate -> subscribeRequest.productData.fold(_.startDate, _ => LocalDate.now).toString("d MMMM YYYY"))
 
       val session = (productData ++ userSessionFields ++ appliedPromoCode ++ subscriptionDetails).foldLeft(request.session.-(AppliedPromoCode)) {
         _ + _
