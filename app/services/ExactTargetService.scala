@@ -14,11 +14,10 @@ import com.gu.zuora.soap.models.Results.SubscribeResult
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
 import model.SubscribeRequest
-import model.exactTarget.SubscriptionDataExtensionRow
+import model.exactTarget._
 import org.joda.time.Days
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json._
-
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
@@ -43,10 +42,10 @@ trait ExactTargetService extends LazyLogging {
   }
 
   def sendETDataExtensionRow(
-    subscribeResult: SubscribeResult,
-    subscriptionData: SubscribeRequest,
-    gracePeriod: Days,
-    validPromotion: Option[ValidPromotion[NewUsers]]): Future[Unit] = {
+                              subscribeResult: SubscribeResult,
+                              subscriptionData: SubscribeRequest,
+                              gracePeriod: Days,
+                              validPromotion: Option[ValidPromotion[NewUsers]]): Future[Unit] = {
 
     val subscription = subscriptionData.productData.fold({ paper =>
       paperSubscriptionService.unsafeGetPaid(Subscription.Name(subscribeResult.subscriptionName))
@@ -60,16 +59,29 @@ trait ExactTargetService extends LazyLogging {
 
     val promotionDescription = validPromotion.filterNot(_.promotion.promotionType == Tracking).map(_.promotion.description)
 
+    val personalData = subscriptionData.genericData.personalData
+
     for {
       sub <- subscription
+      subscriptionDetails = getPlanDescription(validPromotion, personalData.currency, sub.plan)
       pm <- paymentMethod
-      row = SubscriptionDataExtensionRow(
-        personalData = subscriptionData.genericData.personalData,
-        subscription = sub,
-        paymentMethod = pm,
-        gracePeriod = gracePeriod,
-        subscriptionDetails = getPlanDescription(validPromotion, subscriptionData.genericData.personalData.currency, sub.plan),
-        promotionDescription = promotionDescription
+      row = subscriptionData.productData.fold(
+        paperData => PaperHomeDeliveryWelcome1DataExtensionRow(
+          paperData = paperData,
+          personalData = personalData,
+          subscription = sub,
+          paymentMethod = pm,
+          subscriptionDetails = subscriptionDetails,
+          promotionDescription = promotionDescription
+        ),
+        _ => DigipackWelcome1DataExtensionRow(
+          personalData = personalData,
+          subscription = sub,
+          paymentMethod = pm,
+          gracePeriod = gracePeriod,
+          subscriptionDetails = subscriptionDetails,
+          promotionDescription = promotionDescription
+        )
       )
       response <- SqsClient.sendWelcomeEmailToQueue(row)
     } yield {
@@ -85,7 +97,7 @@ object SqsClient extends LazyLogging {
   private val sqsClient = new AmazonSQSClient()
   sqsClient.setRegion(Region.getRegion(Regions.EU_WEST_1))
 
-  def sendWelcomeEmailToQueue(row: SubscriptionDataExtensionRow): Future[Try[SendMessageResult]] = {
+  def sendWelcomeEmailToQueue(row: DataExtensionRow): Future[Try[SendMessageResult]] = {
     Future {
       val payload = Json.obj(
         "To" -> Json.obj(
@@ -94,11 +106,12 @@ object SqsClient extends LazyLogging {
           "ContactAttributes" -> Json.obj(
             "SubscriberAttributes" ->  Json.toJsFieldJsValueWrapper(row.fields.toMap)
           )
-        )
+        ),
+        "DataExtensionName" -> row.forExtension.name
       ).toString()
 
       def sendToQueue(msg: String): SendMessageResult = {
-        val queueUrl = sqsClient.createQueue(new CreateQueueRequest(Config.welcomeEmailQueue)).getQueueUrl()
+        val queueUrl = sqsClient.createQueue(new CreateQueueRequest(Config.welcomeEmailQueue)).getQueueUrl
         sqsClient.sendMessage(new SendMessageRequest(queueUrl, msg))
       }
 
