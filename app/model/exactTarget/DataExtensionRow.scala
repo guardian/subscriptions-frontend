@@ -139,6 +139,7 @@ object PaperHomeDeliveryWelcome1DataExtensionRow {
     PaperHomeDeliveryWelcome1DataExtensionRow(
       personalData.email,
       Seq(
+        "ZuoraSubscriberId" -> subscription.name.get,
         "SubscriberKey" -> personalData.email,
         "EmailAddress" -> personalData.email,
         "subscriber_id" -> subscription.name.get,
