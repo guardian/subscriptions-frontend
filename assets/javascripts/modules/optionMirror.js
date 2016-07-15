@@ -3,19 +3,25 @@ define(['$'], function ($) {
 
     var selectors = {
         OPTION_GROUP: '.js-option-mirror-group',
-        $MIRROR_VALUES: $('.js-option-mirror-payment-display'),
-        $MIRROR_TITLES: $('.js-option-mirror-package-display')
+        $MIRROR_PACKAGE: $('.js-option-mirror-package-display'),
+        $MIRROR_DESCRIPTION: $('.js-option-mirror-description-display'),
+        $MIRROR_PAYMENT: $('.js-option-mirror-payment-display')
     };
 
     function mirror(input) {
-        var selectedValue = input.getAttribute('data-option-mirror-payment'),
-            selectedTitle = input.getAttribute('data-option-mirror-package');
-        if (selectedValue && selectedTitle) {
-            selectors.$MIRROR_VALUES.each(function (el) {
-                el.textContent = selectedValue;
+        var selectedPackage = input.getAttribute('data-option-mirror-package'),
+            selectedDescription = input.getAttribute('data-option-mirror-description'),
+            selectedPayment = input.getAttribute('data-option-mirror-payment');
+
+        if (selectedPackage && selectedDescription && selectedPayment) {
+            selectors.$MIRROR_PACKAGE.each(function (el) {
+                el.textContent = selectedPackage;
             });
-            selectors.$MIRROR_TITLES.each(function (el) {
-                el.textContent = selectedTitle;
+            selectors.$MIRROR_DESCRIPTION.each(function (el) {
+                el.textContent = selectedDescription;
+            });
+            selectors.$MIRROR_PAYMENT.each(function (el) {
+                el.textContent = selectedPayment;
             });
         }
     }

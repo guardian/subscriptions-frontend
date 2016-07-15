@@ -1,9 +1,12 @@
 @import com.gu.i18n.CountryGroup
+@import com.gu.i18n.GBP
 @import com.gu.memsub.Subscriptions
 @import com.gu.i18n.CountryGroup.UK
 @import com.gu.subscriptions.ProductList
 @import com.gu.subscriptions.ProductPlan
 @import com.gu.subscriptions.PlanGroup
+@import views.support.Pricing._
+
 @(userString: String, products: List[PlanGroup[ProductList]])(implicit request: RequestHeader)
 
 @import configuration.Config.Identity.idWebAppRegisterUrl
@@ -13,40 +16,40 @@
         @fragments.page.header("Test Users", None, Nil)
 
         <div class="prose">
-            <ul class="u-unstyled">
+            <ul class="o-unstyled-list">
                 <li>First Name: <strong>@userString</strong></li>
                 <li>Username: <strong>@userString</strong></li>
                 <li>Email: <strong>@userString@@gu.com</strong></li>
             </ul>
         </div>
 
-        <div class="actions">
-            <h3>Register as an Identity user, redirecting to checkout for:</h3>
-            @for(group <- products) {
-                <h4>@group.name</h4>
-                <dl>
-                    @for(plan <- group.productPlans) {
-                        <a href="@idWebAppRegisterUrl(routes.Checkout.renderCheckout(CountryGroup.UK, None, plan.slug))" style="margin-bottom: 10px" class="button button--primary button--large">@plan.name</a>
-                    }
-                </dl>
-            }
-        </div>
-
         <hr/>
 
         <div class="actions">
-            <h3>Subscribe as a <em>guest</em> user to:</h3>
-            @for(group <- products) {
+            <h2>Subscribe as a <em>guest</em> user to:</h2>
+            @for(group <- products.sortBy(_.name)) {
                 <h4>@group.name</h4>
                 <dl>
-                @for(plan <- group.productPlans) {
-                    <a href="@routes.Checkout.renderCheckout(CountryGroup.UK, None, plan.slug)" style="margin-bottom: 10px" class="button button--primary button--large">@plan.name</a>
+                @for(plan <- group.productPlans.sortBy(_.priceGBP.amount)) {
+                    <a href="@routes.Checkout.renderCheckout(UK, None, plan.slug)" style="margin-bottom: 10px" class="button button--primary button--large">@plan.name (@plan.unsafePrice(GBP).pretty)</a>
                 }
                 </dl>
             }
         </div>
 
         <hr/>
+
+        <div class="actions">
+            <h2>Register as an Identity user, redirecting to checkout for:</h2>
+            @for(group <- products.sortBy(_.name)) {
+                <h4>@group.name</h4>
+                <dl>
+                    @for(plan <- group.productPlans.sortBy(_.priceGBP.amount)) {
+                        <a href="@idWebAppRegisterUrl(routes.Checkout.renderCheckout(UK, None, plan.slug))" style="margin-bottom: 10px" class="button button--primary button--large">@plan.name (@plan.unsafePrice(GBP).pretty)</a>
+                    }
+                </dl>
+            }
+        </div>
 
     </main>
 }
