@@ -1,7 +1,10 @@
 @import com.gu.i18n.CountryGroup
 @import com.gu.memsub.Subscriptions
 @import com.gu.i18n.CountryGroup.UK
-@(userString: String)(implicit request: RequestHeader)
+@import com.gu.subscriptions.ProductList
+@import com.gu.subscriptions.ProductPlan
+@import com.gu.subscriptions.PlanGroup
+@(userString: String, products: List[PlanGroup[ProductList]])(implicit request: RequestHeader)
 
 @import configuration.Config.Identity.idWebAppRegisterUrl
 
@@ -19,28 +22,28 @@
 
         <div class="actions">
             <h3>Register as an Identity user, redirecting to checkout for:</h3>
-            <a href="@idWebAppRegisterUrl(routes.Checkout.renderCheckout(CountryGroup.UK, None, ""))" class="button button--primary button--large">Digital Pack</a>
-            <a href="@idWebAppRegisterUrl(routes.Checkout.renderCheckout(CountryGroup.UK, None, "everyday"))" class="button button--primary button--large">Everyday package</a>
-            <a href="@idWebAppRegisterUrl(routes.Checkout.renderCheckout(CountryGroup.UK, None, "everyday+"))" class="button button--primary button--large">Everyday+ package</a>
+            @for(group <- products) {
+                <h4>@group.name</h4>
+                <dl>
+                    @for(plan <- group.productPlans) {
+                        <a href="@idWebAppRegisterUrl(routes.Checkout.renderCheckout(CountryGroup.UK, None, plan.slug))" style="margin-bottom: 10px" class="button button--primary button--large">@plan.name</a>
+                    }
+                </dl>
+            }
         </div>
 
         <hr/>
 
         <div class="actions">
             <h3>Subscribe as a <em>guest</em> user to:</h3>
-            <dl>
-                <a href="@routes.Checkout.renderCheckout(CountryGroup.UK, None, "")" class="button button--primary button--large">Digital Pack</a>
-            </dl>
-            <dl>
-                <a href="@routes.Checkout.renderCheckout(CountryGroup.UK, None, "everyday")" class="button button--primary button--large">Everyday package</a>
-                <a href="@routes.Checkout.renderCheckout(CountryGroup.UK, None, "sixday")" class="button button--primary button--large">Sixday package</a>
-                <a href="@routes.Checkout.renderCheckout(CountryGroup.UK, None, "weekend")" class="button button--primary button--large">Weekend package</a>
-            </dl>
-            <dl>
-                <a href="@routes.Checkout.renderCheckout(CountryGroup.UK, None, "everyday+")" class="button button--primary button--large">Everyday+ package</a>
-                <a href="@routes.Checkout.renderCheckout(CountryGroup.UK, None, "sixday+")" class="button button--primary button--large">Sixday+ package</a>
-                <a href="@routes.Checkout.renderCheckout(CountryGroup.UK, None, "weekend+")" class="button button--primary button--large">Weekend+ package</a>
-            </dl>
+            @for(group <- products) {
+                <h4>@group.name</h4>
+                <dl>
+                @for(plan <- group.productPlans) {
+                    <a href="@routes.Checkout.renderCheckout(CountryGroup.UK, None, plan.slug)" style="margin-bottom: 10px" class="button button--primary button--large">@plan.name</a>
+                }
+                </dl>
+            }
         </div>
 
         <hr/>
