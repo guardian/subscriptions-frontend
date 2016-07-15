@@ -99,35 +99,27 @@ class CheckoutService(identityService: IdentityService,
       authenticatedUserOpt: Option[AuthenticatedIdUser],
       memberId: ContactId): EitherT[Future, NonEmptyList[SubsError], IdentitySuccess] = {
 
+    val personalData = subscribeRequest.genericData.personalData
+    val deliveryAddress = subscribeRequest.productData.left.toOption.map(_.deliveryAddress)
+
+
+    def addErrContext(context: String)(errSeq: NonEmptyList[SubsError]): NonEmptyList[SubsError] =
+      errSeq.<::(CheckoutIdentityFailure(
+        s"$context user ${authenticatedUserOpt.map(_.user.id)} could not become subscriber",
+        Some(s"SF Account ID = ${memberId.salesforceAccountId}, SF Contact ID = ${memberId.salesforceContactId}")
+      ))
+
     authenticatedUserOpt match {
-      case Some(authenticatedIdUser) => {
-
-        def addErrContext(errSeq: NonEmptyList[SubsError]): NonEmptyList[SubsError] =
-          errSeq.<::(CheckoutIdentityFailure(
-            s"Registered user ${authenticatedIdUser.user.id} could not become subscriber",
-            Some(s"SF Account ID = ${memberId.salesforceAccountId}, SF Contact ID = ${memberId.salesforceContactId}")))
-
-        EitherT(identityService.updateUserDetails(subscribeRequest.genericData.personalData)(authenticatedIdUser).map { _.leftMap(addErrContext(_)) })
-      }
-      case None => {
+      case Some(authenticatedIdUser) =>
+        EitherT(identityService.updateUserDetails(personalData, deliveryAddress)(authenticatedIdUser)).leftMap(addErrContext("Authenticated"))
+      case None =>
         logger.info(s"User does not have an Identity account. Creating a guest account")
-
-        def addErrContext(errSeq: NonEmptyList[SubsError]): NonEmptyList[SubsError] =
-          errSeq.<::(CheckoutIdentityFailure(
-            s"Guest user (${subscribeRequest.genericData.personalData.toStringSanitized} could not become subscriber",
-            Some(s"SF Account ID = ${memberId.salesforceAccountId}, SF Contact ID = ${memberId.salesforceContactId}")))
-
-        for (identitySuccess <- EitherT(identityService.registerGuest(subscribeRequest.genericData.personalData, subscribeRequest.productData.fold[Option[Address]](_.deliveryAddress.some, _ => None)).map { _.leftMap(addErrContext(_)) })) yield {
-          val identityId = identitySuccess.userData.id.id
-          val salesforceResult = salesforceService.repo.updateIdentityId(memberId, identityId)
-          for (err <- EitherT(salesforceResult).swap) yield {
-            // Swallow salesforce update errors, but log them
-            logger.error(s"Error updating salesforce contact ${memberId.salesforceContactId} with identity id $identityId: ${err.getMessage()}")
-          }
-
-          identitySuccess
+        EitherT(identityService.registerGuest(personalData, deliveryAddress)).leftMap(addErrContext("Guest")).map { succ =>
+          EitherT(salesforceService.repo.updateIdentityId(memberId, succ.userData.id.id)).swap.map(err =>
+            logger.error(s"Error updating salesforce contact ${memberId.salesforceContactId} with identity id ${succ.userData.id.id}: ${err.getMessage}")
+          )
+          succ
         }
-      }
     }
   }
 
