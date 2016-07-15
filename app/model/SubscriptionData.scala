@@ -79,7 +79,7 @@ object PersonalData {
       last = u.privateFields.flatMap(_.secondName).getOrElse(""),
       email = u.primaryEmailAddress,
       receiveGnmMarketing = u.statusFields.flatMap(_.receiveGnmMarketing).getOrElse(false),
-      address = u.address,
+      address = u.billingAddress,
       telephoneNumber = u.privateFields.flatMap(_.telephoneNumber).flatMap(_.localNumber)
     )
     personalData

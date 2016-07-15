@@ -104,14 +104,20 @@ class IdentityServiceTest extends FreeSpec {
         "telephoneNumber" -> Json.obj(
           "countryCode" -> "44",
           "localNumber" -> "1872123456"
-        )
+        ),
+        "address1" -> "123 Delivery Grove",
+        "address2" -> "",
+        "address3" -> "Delivery upon Thames",
+        "address4" -> "Deliveryshire",
+        "postcode" -> "DL1 VRY",
+        "country"  -> "UK"
       ),
       "statusFields" ->
         Json.obj("receiveGnmMarketing" -> true)
     )
 
     assertResult(expectedJson)(
-      PersonalDataJsonSerialiser.convertToUser(testPersonalData, None)
+      PersonalDataJsonSerialiser.convertToUser(testPersonalData, Some(Address("123 Delivery Grove", "", "Delivery upon Thames", "Deliveryshire", "DL1 VRY", "UK")))
     )
   }
 }

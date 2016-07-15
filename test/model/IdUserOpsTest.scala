@@ -22,8 +22,7 @@ class IdUserOpsTest extends Specification {
       billingAddress3 = Some("billingAddress3"),
       billingAddress4 = Some("billingAddress4"),
       billingCountry = Some("billingCountry"),
-      billingPostcode = Some("billingPostcode"),
-      country = Some("country"))
+      billingPostcode = Some("billingPostcode"))
 
      val deliveryAddress = PrivateFields(
       address1 = Some("address1"),
@@ -36,8 +35,8 @@ class IdUserOpsTest extends Specification {
     val withBillingAddress = idUser(billingAddress)
     val withoutBillingAddress = idUser(deliveryAddress)
 
-    "use the billing address if at least one of its fields is present" in {
-      withBillingAddress.address.should_===(Address(
+    "pull through billing details if present and a blank address if not" in {
+      withBillingAddress.billingAddress.should_===(Address(
         billingAddress.billingAddress1.get,
         billingAddress.billingAddress2.get,
         billingAddress.billingAddress3.get,
@@ -45,9 +44,13 @@ class IdUserOpsTest extends Specification {
         billingAddress.billingPostcode.get,
         billingAddress.billingCountry.get
       ))
+
+      withoutBillingAddress.billingAddress.should_===(Address(
+        "", "", "", "", "", ""
+      ))
     }
 
-    "use the delivery address otherwise" in {
+    "pull through delivery details if present and a blank address if not" in {
       withoutBillingAddress.address.should_===(Address(
         deliveryAddress.address1.get,
         deliveryAddress.address2.get,
@@ -56,7 +59,12 @@ class IdUserOpsTest extends Specification {
         deliveryAddress.postcode.get,
         deliveryAddress.country.get
       ))
+
+      withBillingAddress.address.should_===(Address(
+        "", "", "", "", "", ""
+      ))
     }
+
   }
 
 }

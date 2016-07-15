@@ -64,12 +64,12 @@ class IdentityService(identityApiClient: => IdentityApiClient) extends LazyLoggi
     }
   }
 
-  def updateUserDetails(personalData: PersonalData)(authenticatedUser: AuthenticatedIdUser): Future[NonEmptyList[SubsError] \/ IdentitySuccess] =
+  def updateUserDetails(personalData: PersonalData, delivery: Option[Address])(authenticatedUser: AuthenticatedIdUser): Future[NonEmptyList[SubsError] \/ IdentitySuccess] =
     authenticatedUser.credentials match {
       case cookies: AccessCredentials.Cookies =>
         identityApiClient.updateUserDetails(
           personalData,
-          None,
+          delivery,
           cookies
         ).map { response => response.status match {
             case Status.OK => \/.right(IdentitySuccess(RegisteredUser(IdMinimalUser("", None))))
@@ -121,18 +121,18 @@ object  PersonalDataJsonSerialiser {
            Json.obj(
              "telephoneNumber" -> Json.toJson(t)
            )}
-      ),
+      ).++(deliveryAddress.fold(Json.obj()) { addr =>
+        Json.obj(
+          "address1" -> addr.lineOne,
+          "address2" -> addr.lineTwo,
+          "address3" -> addr.town,
+          "address4" -> addr.countyOrState,
+          "postcode" -> addr.postCode,
+          "country" -> addr.country.fold(addr.countryName)(_.name)
+        )
+      }),
       "statusFields" ->
-        Json.obj("receiveGnmMarketing" -> personalData.receiveGnmMarketing)) ++ deliveryAddress.fold(Json.obj()) { addr =>
-      Json.obj(
-        "address1" -> addr.lineOne,
-        "address2" -> addr.lineTwo,
-        "address3" -> addr.town,
-        "address4" -> addr.countyOrState,
-        "postcode" -> addr.postCode,
-        "country" -> addr.country.fold(addr.countryName)(_.name)
-      )
-    }
+        Json.obj("receiveGnmMarketing" -> personalData.receiveGnmMarketing))
   }
 }
 
