@@ -3,19 +3,21 @@ package controllers
 import actions.CommonActions._
 import com.gu.i18n.{Country, CountryGroup, Currency, GBP}
 import com.gu.identity.play.ProxiedIP
-import com.gu.memsub.{BillingPeriod, ProductFamily}
+import com.gu.memsub.BillingPeriod
 import com.gu.memsub.Subscription.ProductRatePlanId
 import com.gu.memsub.promo.Formatters.PromotionFormatters._
 import com.gu.memsub.promo.PromoCode
 import com.gu.memsub.promo.Promotion.AnyPromotion
-import com.gu.subscriptions.{DigipackPlan, DigitalProducts, PhysicalProducts}
+import com.gu.subscriptions.DigipackPlan
 import com.gu.zuora.soap.models.errors._
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config.Identity.webAppProfileUrl
 import forms.{FinishAccountForm, SubscriptionsForm}
+import model.IdUserOps._
+import model._
 import model.error.CheckoutService._
 import model.error.SubsError
-import model._
+import org.joda.time.LocalDate
 import play.api.data.Form
 import play.api.libs.json._
 import play.api.mvc._
@@ -32,7 +34,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scalaz.std.scalaFuture._
 import scalaz.{NonEmptyList, OptionT}
-import model.IdUserOps._
 
 object Checkout extends Controller with LazyLogging with ActivityTracking with CatalogProvider {
 
@@ -43,6 +44,7 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
     val IdentityGuestPasswordSettingToken = "newSubs_token"
     val AppliedPromoCode = "newSubs_appliedPromoCode"
     val Currency = "newSubs_currency"
+    val StartDate = "newSubs_startDate"
   }
 
   import SessionKeys.{Currency => _, UserId => _, _}
@@ -175,7 +177,10 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
       }
 
       val appliedPromoCode = r.validPromoCode.fold(Seq.empty[(String, String)])(validPromoCode => Seq(AppliedPromoCode -> validPromoCode.get))
-      val session = (productData ++ userSessionFields ++ appliedPromoCode).foldLeft(request.session.-(AppliedPromoCode)) {
+
+      val subscriptionDetails = Some(StartDate -> subscribeRequest.productData.fold(_.startDate, _ => LocalDate.now).toString("d MMMM YYYY"))
+
+      val session = (productData ++ userSessionFields ++ appliedPromoCode ++ subscriptionDetails).foldLeft(request.session.-(AppliedPromoCode)) {
         _ + _
       }
 
@@ -209,12 +214,12 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
       ratePlanId <- session.get(RatePlanId)
       currencyStr <- session.get(SessionKeys.Currency)
       currency <- Currency.fromString(currencyStr)
-    } yield (subsName, plan, currency)
+      startDate <- session.get(StartDate)
+    } yield (subsName, plan, currency, startDate)
 
     sessionInfo.fold {
       Redirect(routes.Homepage.index()).withNewSession
-    } { case (subsName, plan, currency) =>
-
+    } { case (subsName, plan, currency, startDate) =>
 
       val passwordForm = authenticatedUserFor(request).fold {
         for {
@@ -227,7 +232,8 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
       } // Don't display the user registration form if the user is logged in
 
       val promotion = session.get(AppliedPromoCode).flatMap(code => resolution.backend.promoService.findPromotion(PromoCode(code)))
-      Ok(view.thankyou(subsName, passwordForm, resolution, plan, promotion, currency))
+
+      Ok(view.thankyou(subsName, passwordForm, resolution, plan, promotion, currency, startDate))
     }
 
   }

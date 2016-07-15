@@ -1,23 +1,19 @@
 @import com.gu.i18n.Currency
-@import com.gu.memsub.BillingPeriod
 @import com.gu.memsub.promo.Promotion.AnyPromotion
 @import views.support.BillingPeriod._
 @import views.support.Pricing._
-@import com.gu.memsub.Current
 @import com.gu.memsub.Digipack
-@import com.gu.memsub.PaidPlan
-@import com.gu.memsub.ProductFamily
 @import views.support.PlanOps._
 @import com.gu.subscriptions.ProductPlan
-
-@import com.gu.memsub.MondayPaper
 @import com.gu.subscriptions.ProductList
+@import com.gu.memsub.Delivery
 @(subscriptionName: String,
     guestAccountForm: Option[Form[model.GuestAccountData]] = None,
     touchpointBackendResolution: services.TouchpointBackend.Resolution,
     plan: ProductPlan[ProductList],
     promotion: Option[AnyPromotion] = None,
-    currency: Currency
+    currency: Currency,
+    startDate: String
 )(implicit request: RequestHeader)
 
 @main(s"Confirmation | Subscribe to the ${plan.title} | The Guardian", bodyClasses=List("is-wide"), touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
@@ -58,10 +54,18 @@
 
             <h2 class="section-title">What happens now?</h2>
 
-            @if(plan.products.seq.contains(Digipack)) {@fragments.confirmation.appSteps()}
-            @if(plan.products.seq.contains(MondayPaper) /*WRONG*/) {@fragments.confirmation.deliverySteps()}
+            <div class="steps">
+                <h4 class="steps__title">We’ll send you an email confirming your subscription and payment information.</h4>
+                @if(plan.products.seq.contains(Delivery)) {
+                    <h4 class="steps__title">Your first paper will be delivered on @startDate. </h4>
+                }
+                @if(plan.products.seq.contains(Digipack)) { @fragments.confirmation.appSteps() }
+            </div>
+
             @fragments.confirmation.registerGuestAccount(guestAccountForm)
 
+            <br/>
+            <h4>We hope you enjoy your subscription.</h4>
         </div>
     </section>
 </main>

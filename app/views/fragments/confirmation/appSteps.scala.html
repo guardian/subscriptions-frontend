@@ -2,30 +2,25 @@
 
 @import model.Apps
 
-<h3 class="section-divider">Download your apps</h3>
+<h4 class="steps__title">You can use the links below to download the apps included in your digital pack.</h4>
 
-<div class="steps">
-    <h4 class="steps__title">You’ll receive an email confirmation of your subscription details, including your payment information.</h4>
-    <h4 class="steps__title">Download the products that make up your digital pack.</h4>
-
-    <div class="app-package">
-        <h5 class="app-package__title">Download The Guardian &amp; Observer Daily Edition</h5>
-        <div class="badge-group">
-            @for(appLink <- Apps.DailyEdition.links) {
-                @fragments.common.appBadge(appLink)
-            }
-        </div>
+<div class="app-package">
+    <h5 class="app-package__title">Guardian &amp; Observer Daily Edition (for your tablet)</h5>
+    <div class="badge-group">
+        @for(appLink <- Apps.DailyEdition.links) {
+            @fragments.common.appBadge(appLink)
+        }
     </div>
-
-    <div class="app-package">
-        <h5 class="app-package__title">Download The Guardian live news app</h5>
-        <div class="badge-group">
-            @for(appLink <- Apps.LiveNews.links) {
-                @fragments.common.appBadge(appLink)
-            }
-        </div>
-    </div>
-
-    <h4 class="steps__title">Once downloaded enter your subscriber ID (above) when prompted. Further details can be found in your confirmation email.</h4>
 </div>
+
+<div class="app-package">
+    <h5 class="app-package__title">Guardian live news app (for your mobile)</h5>
+    <div class="badge-group">
+        @for(appLink <- Apps.LiveNews.links) {
+            @fragments.common.appBadge(appLink)
+        }
+    </div>
+</div>
+
+<h4 class="steps__title">Once downloaded you'll be asked to enter your Subscriber ID. You can find this at the top of the grey box above, or in your confirmation email.</h4>
 
