@@ -1,12 +1,15 @@
 @import com.gu.memsub.Address
+@import views.support.AddressOps._
 @import views.support.CountryWithCurrency
+@import scalaz.syntax.std.boolean._
+
 @(billingAddress: Option[Address], canBeHidden: Boolean, countriesWithCurrency: List[CountryWithCurrency])
 
 @if(canBeHidden) {
   <div class="js-checkout-use-delivery">
     <label class="option">
       <span class="option__input">
-        <input type="checkbox" class="js-input js-checkout-delivery-sames-as-billing" checked="true">
+        <input type="checkbox" class="js-input js-checkout-delivery-sames-as-billing" @billingAddress.forall(_.isEmpty).fold("checked", "")>
       </span>
       <span class="option__label">
         Bill my delivery address
@@ -16,6 +19,6 @@
 }
 
 @* ===== Address ===== *@
-<div class="js-billing-address @{if(canBeHidden) "is-hidden" else ""}">
+<div class="js-billing-address @{if(canBeHidden && billingAddress.forall(_.isEmpty)) "is-hidden" else ""}">
 @address(billingAddress, "personal.address", countriesWithCurrency)
 </div>
