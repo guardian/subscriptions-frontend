@@ -153,6 +153,8 @@ object PaperHomeDeliveryWelcome1DataExtensionRow {
         "delivery_county" -> paperData.deliveryAddress.countyOrState,
         "delivery_postcode" -> paperData.deliveryAddress.postCode,
         "delivery_country" -> paperData.deliveryAddress.country.fold(paperData.deliveryAddress.countryName)(_.name),
+        "delivery_instructions" -> paperData.deliveryInstructions.getOrElse(""),
+        "date_of_first_paper" -> formatDate(paperData.startDate),
         "date_of_first_payment" -> formatDate(subscription.firstPaymentDate),
         "package" -> paperData.plan.name,
         "subscription_rate" -> subscriptionDetails
