@@ -1,12 +1,12 @@
 package controllers
-
 import actions.CommonActions._
 import com.gu.i18n._
 import com.gu.identity.play.ProxiedIP
 import com.gu.memsub.{BillingPeriod, Delivery}
 import com.gu.memsub.Subscription.ProductRatePlanId
 import com.gu.memsub.promo.Formatters.PromotionFormatters._
-import com.gu.memsub.promo.PromoCode
+import com.gu.memsub.promo.{NewUsers, PromoCode}
+import com.gu.memsub.promo.Promotion._
 import com.gu.memsub.promo.Promotion.AnyPromotion
 import com.gu.subscriptions.DigipackPlan
 import com.gu.zuora.soap.models.errors._
@@ -28,7 +28,8 @@ import tracking.activities.{CheckoutReachedActivity, MemberData, SubscriptionReg
 import utils.TestUsers.{NameEnteredInForm, PreSigninTestCookie}
 import views.html.{checkout => view}
 import views.support.{BillingPeriod => _, _}
-
+import scalaz.std.option._
+import scalaz.syntax.applicative._
 import scala.Function.const
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -43,6 +44,7 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
     val UserId = "newSubs_userId"
     val IdentityGuestPasswordSettingToken = "newSubs_token"
     val AppliedPromoCode = "newSubs_appliedPromoCode"
+    val TrackingCode = "newSubs_trackingCode"
     val Currency = "newSubs_currency"
     val StartDate = "newSubs_startDate"
   }
@@ -69,6 +71,7 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
         .fold({ case (plan, group) => Left(PlanList(plan, group.betterThan(plan).productPlans.sortBy(_.priceGBP.amount):_*)) },
               { case (plan, group) => Right(PlanList(plan, group.betterThan(plan).productPlans.sortBy(_.priceGBP.amount):_*)) })
 
+      val plans = planListEither.fold(identity, identity)
       val personalData = user.map(PersonalData.fromIdUser)
       val productData = ProductPopulationData(user.map(_.address), planListEither)
       val preselectedCountry = personalData.flatMap(data => data.address.country)
@@ -80,13 +83,19 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
       }
       val determinedCountry = preselectedCountry orElse determinedCountryGroup.defaultCountry
 
-      val supportedCurrencies = planListEither.fold(identity, identity).default.currencies
+      val supportedCurrencies = plans.default.currencies
       val determinedCurrency = if (supportedCurrencies.contains(determinedCountryGroup.currency)) determinedCountryGroup.currency else GBP
       val determinedCountriesWithCurrency = if (planListEither.isRight) {
         determinedCountryGroup.countries.map(c => CountryWithCurrency(c, determinedCurrency))
       } else {
         CountryWithCurrency.whitelisted(supportedCurrencies, GBP)
       }
+
+      // either a code to send to the form (left) or a tracking code for the session (right)
+      val promo: Either[PromoCode, Seq[(String, String)]] = (promoCode |@| determinedCountry)(
+        tpBackend.promoService.validate[NewUsers](_: PromoCode, _: Country, plans.default.productRatePlanId)
+      ).flatMap(_.toOption).map(vp => vp.promotion.asTracking.map(_ => Seq(TrackingCode -> vp.code.get)).toRight(vp.code))
+       .getOrElse(Right(Seq.empty))
 
       Ok(views.html.checkout.payment(
         personalData = personalData,
@@ -96,7 +105,8 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
         defaultCurrency = determinedCurrency,
         countriesWithCurrency = determinedCountriesWithCurrency,
         touchpointBackendResolution = resolution,
-        promoCode = promoCode))
+        promoCode = promo.left.toOption
+      )).withSession(promo.right.toSeq.flatten:_*)
     }
   }
 
@@ -107,14 +117,17 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(NameEnteredInForm, tempData)
     implicit val tpBackend = resolution.backend
     val idUserOpt = authenticatedUserFor(request)
-
     val srEither = tpBackend.subsForm.bindFromRequest
 
-    val subscribeRequest = srEither.valueOr {
+    val sr = srEither.valueOr {
       e => throw new Exception(s"Backend validation failed: identityId=${idUserOpt.map(_.user.id).mkString};" +
         s" JavaScriptEnabled=${request.headers.toMap.contains("X-Requested-With")};" +
         s" ${e.map(err => s"${err.key} ${err.message}").mkString(", ")}")
     }
+
+    val sessionTrackingCode = request.session.get(TrackingCode)
+    val subscribeRequest = sr.copy(genericData = sr.genericData.copy(
+      suppliedPromoCode = sr.genericData.suppliedPromoCode orElse sessionTrackingCode.map(PromoCode)))
 
     val requestData = SubscriptionRequestData(ProxiedIP.getIP(request))
     val checkoutResult = checkoutService.processSubscription(subscribeRequest, idUserOpt, requestData)
@@ -182,11 +195,10 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
         case _ => Seq()
       }
 
-      val appliedPromoCode = r.validPromoCode.fold(Seq.empty[(String, String)])(validPromoCode => Seq(AppliedPromoCode -> validPromoCode.get))
-
+      val appliedCode = r.validPromotion.flatMap(vp => vp.promotion.asTracking.fold[Option[PromoCode]](Some(vp.code))(_ => None))
+      val appliedCodeSession = appliedCode.fold(Seq.empty[(String, String)])(promoCode => Seq(AppliedPromoCode -> promoCode.get))
       val subscriptionDetails = Some(StartDate -> subscribeRequest.productData.fold(_.startDate, _ => LocalDate.now).toString("d MMMM YYYY"))
-
-      val session = (productData ++ userSessionFields ++ appliedPromoCode ++ subscriptionDetails).foldLeft(request.session.-(AppliedPromoCode)) {
+      val session = (productData ++ userSessionFields ++ appliedCodeSession ++ subscriptionDetails).foldLeft(request.session - AppliedPromoCode - TrackingCode) {
         _ + _
       }
 
@@ -204,7 +216,6 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
       Ok(Json.obj("profileUrl" -> webAppProfileUrl.toString())).withCookies(cookies: _*)
     }
   }
-
 
   def thankYou() = NoCacheAction { implicit request =>
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
@@ -238,14 +249,12 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
       } // Don't display the user registration form if the user is logged in
 
       val promotion = session.get(AppliedPromoCode).flatMap(code => resolution.backend.promoService.findPromotion(PromoCode(code)))
-
       Ok(view.thankyou(subsName, passwordForm, resolution, plan, promotion, currency, startDate))
     }
 
   }
 
   def validatePromoCode(promoCode: PromoCode, prpId: ProductRatePlanId, country: Country) = NoCacheAction { implicit request =>
-
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
 

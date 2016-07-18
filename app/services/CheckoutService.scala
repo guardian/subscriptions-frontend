@@ -69,7 +69,7 @@ class CheckoutService(identityService: IdentityService,
       withPromo = validPromotion.map(v => p.apply(v, subscribe, catalogService.digipackCatalog.unsafeFindPaid, promoPlans)).getOrElse(subscribe)
       result <- EitherT(createSubscription(withPromo, purchaserIds))
       out <- postSubscribeSteps(authenticatedUserOpt, memberId, result, subscriptionData, validPromotion)
-    } yield CheckoutSuccess(memberId, out._1, result, validPromotion.map(_.code), out._2)).run
+    } yield CheckoutSuccess(memberId, out._1, result, validPromotion, out._2)).run
   }
 
   def postSubscribeSteps(user: Option[AuthenticatedIdUser],
