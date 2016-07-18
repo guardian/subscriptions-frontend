@@ -1,9 +1,9 @@
 package controllers
 
 import actions.CommonActions._
-import com.gu.i18n.{Country, CountryGroup, Currency, GBP}
+import com.gu.i18n._
 import com.gu.identity.play.ProxiedIP
-import com.gu.memsub.BillingPeriod
+import com.gu.memsub.{BillingPeriod, Delivery}
 import com.gu.memsub.Subscription.ProductRatePlanId
 import com.gu.memsub.promo.Formatters.PromotionFormatters._
 import com.gu.memsub.promo.PromoCode
@@ -52,18 +52,14 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
   def checkoutService(implicit res: TouchpointBackend.Resolution): CheckoutService =
     res.backend.checkoutService
 
-  def getEmptySubscriptionsForm(promoCode: Option[PromoCode])(implicit res: TouchpointBackend.Resolution) =
-    SubscriptionsForm.subsForm.bind(Map("promoCode" -> promoCode.fold("")(_.get)))
-
   def renderCheckout(countryGroup: CountryGroup, promoCode: Option[PromoCode], forThisPlan: String) = NoSubAction.async { implicit request =>
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
 
     trackAnon(CheckoutReachedActivity(countryGroup))
-    val authenticatedUser = authenticatedUserFor(request)
 
     val idUser = (for {
-      authUser <- OptionT(Future.successful(authenticatedUser))
+      authUser <- OptionT(Future.successful(authenticatedUserFor(request)))
       idUser <- OptionT(IdentityService.userLookupByCredentials(authUser.credentials))
     } yield idUser).run
 
@@ -74,21 +70,31 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
               { case (plan, group) => Right(PlanList(plan, group.betterThan(plan).productPlans.sortBy(_.priceGBP.amount):_*)) })
 
       val personalData = user.map(PersonalData.fromIdUser)
-      val countryOpt = personalData.flatMap(data => data.address.country)
-      val countryGroupWithDefault = countryOpt.fold(countryGroup)(c => CountryGroup.byCountryCode(c.alpha2).getOrElse(countryGroup))
-      val country = countryOpt orElse countryGroupWithDefault.defaultCountry
+      val productData = ProductPopulationData(user.map(_.address), planListEither)
+      val preselectedCountry = personalData.flatMap(data => data.address.country)
+      val countryGroupForPreselectedCountry = preselectedCountry.flatMap(c => CountryGroup.byCountryCode(c.alpha2))
+      val determinedCountryGroup = if (planListEither.isRight) {
+        CountryGroup(Country.UK.name, "ukm", Some(Country.UK), List(Country.UK), CountryGroup.UK.currency, PostCode)
+      } else {
+        countryGroupForPreselectedCountry.getOrElse(countryGroup)
+      }
+      val determinedCountry = preselectedCountry orElse determinedCountryGroup.defaultCountry
 
-      val desiredCurrency = countryGroupWithDefault.currency
       val supportedCurrencies = planListEither.fold(identity, identity).default.currencies
-      val defaultCurrency = if (supportedCurrencies.contains(desiredCurrency)) desiredCurrency else GBP
+      val determinedCurrency = if (supportedCurrencies.contains(determinedCountryGroup.currency)) determinedCountryGroup.currency else GBP
+      val determinedCountriesWithCurrency = if (planListEither.isRight) {
+        determinedCountryGroup.countries.map(c => CountryWithCurrency(c, determinedCurrency))
+      } else {
+        CountryWithCurrency.whitelisted(supportedCurrencies, GBP)
+      }
 
       Ok(views.html.checkout.payment(
         personalData = personalData,
-        productData = ProductPopulationData(user.map(_.address), planListEither),
-        country = country,
-        countryGroup = countryGroupWithDefault,
-        defaultCurrency = defaultCurrency,
-        countriesWithCurrency = CountryWithCurrency.whitelisted(supportedCurrencies, GBP),
+        productData = productData,
+        country = determinedCountry,
+        countryGroup = determinedCountryGroup,
+        defaultCurrency = determinedCurrency,
+        countriesWithCurrency = determinedCountriesWithCurrency,
         touchpointBackendResolution = resolution,
         promoCode = promoCode))
     }

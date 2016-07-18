@@ -41,7 +41,9 @@
     <div class="form-field js-checkout-country">
         <label class="label" @labelFor("country")>Country</label>
         <select @attrs("country") class=" select select--wide js-country" required>
-            <option data-currency-choice="USD"></option>
+            @if(countriesWithCurrency.size > 1) {
+                <option data-currency-choice="USD"></option>
+            }
             @for(c <- countriesWithCurrency) {
                 <option value="@c.alpha2" @c.country.validationRules.toAttributes @c.country.addressLabels data-currency-choice="@c.currency">@c.name</option>
             }
