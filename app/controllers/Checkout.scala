@@ -69,22 +69,23 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
         .fold({ case (plan, group) => Left(PlanList(plan, group.betterThan(plan).productPlans.sortBy(_.priceGBP.amount):_*)) },
               { case (plan, group) => Right(PlanList(plan, group.betterThan(plan).productPlans.sortBy(_.priceGBP.amount):_*)) })
 
-      val productPlan = planListEither.fold(identity, identity).default
       val personalData = user.map(PersonalData.fromIdUser)
       val productData = ProductPopulationData(user.map(_.address), planListEither)
       val preselectedCountry = personalData.flatMap(data => data.address.country)
       val countryGroupForPreselectedCountry = preselectedCountry.flatMap(c => CountryGroup.byCountryCode(c.alpha2))
-      val determinedCountryGroup = if (productPlan.products.seq.contains(Delivery)) {
+      val determinedCountryGroup = if (planListEither.isRight) {
         CountryGroup(Country.UK.name, "ukm", Some(Country.UK), List(Country.UK), CountryGroup.UK.currency, PostCode)
       } else {
         countryGroupForPreselectedCountry.getOrElse(countryGroup)
       }
       val determinedCountry = preselectedCountry orElse determinedCountryGroup.defaultCountry
-      val determinedCurrency = if (productPlan.currencies.contains(determinedCountryGroup.currency)) determinedCountryGroup.currency else GBP
-      val determinedCountriesWithCurrency = if (productPlan.products.seq.contains(Delivery)) {
+
+      val supportedCurrencies = planListEither.fold(identity, identity).default.currencies
+      val determinedCurrency = if (supportedCurrencies.contains(determinedCountryGroup.currency)) determinedCountryGroup.currency else GBP
+      val determinedCountriesWithCurrency = if (planListEither.isRight) {
         determinedCountryGroup.countries.map(c => CountryWithCurrency(c, determinedCurrency))
       } else {
-        CountryWithCurrency.whitelisted(productPlan.currencies, GBP)
+        CountryWithCurrency.whitelisted(supportedCurrencies, GBP)
       }
 
       Ok(views.html.checkout.payment(
