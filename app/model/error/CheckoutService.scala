@@ -1,7 +1,7 @@
 package model.error
 
 import com.gu.identity.play.IdMinimalUser
-import com.gu.memsub.promo.PromoCode
+import com.gu.memsub.promo.{NewUsers, PromoCode, ValidPromotion}
 import com.gu.salesforce.ContactId
 import com.gu.zuora.soap.models.Results.SubscribeResult
 import com.gu.zuora.soap.models.errors.PaymentGatewayError
@@ -13,11 +13,11 @@ object CheckoutService {
   sealed trait CheckoutResult
 
   case class CheckoutSuccess(
-      salesforceMember: ContactId,
-      userIdData: Option[UserIdData],
-      subscribeResult: SubscribeResult,
-      validPromoCode: Option[PromoCode],
-      nonFatalErrors: Seq[SubsError]) extends CheckoutResult
+    salesforceMember: ContactId,
+    userIdData: Option[UserIdData],
+    subscribeResult: SubscribeResult,
+    validPromotion: Option[ValidPromotion[NewUsers]],
+    nonFatalErrors: Seq[SubsError]) extends CheckoutResult
 
   case class CheckoutIdentityFailure(
       msg: String,

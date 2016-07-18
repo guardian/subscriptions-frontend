@@ -1,10 +1,10 @@
 package forms
 
 import com.gu.i18n.{CountryGroup, Title}
-import com.gu.memsub.promo.PromoCode
+import com.gu.memsub.promo.{NewUsers, PromoCode, ValidPromotion}
 import com.gu.memsub.{Address, BillingPeriod, Current}
 import com.gu.memsub.Subscription.ProductRatePlanId
-import com.gu.memsub.services.CatalogService
+import com.gu.memsub.services.{CatalogService, PromoService}
 import com.gu.subscriptions.{DigipackPlan, DigitalProducts, PhysicalProducts, ProductPlan}
 import model._
 import play.api.data.format.Formats._
