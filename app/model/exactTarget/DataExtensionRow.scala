@@ -143,7 +143,7 @@ object PaperHomeDeliveryWelcome1DataExtensionRow {
         "SubscriberKey" -> personalData.email,
         "EmailAddress" -> personalData.email,
         "subscriber_id" -> subscription.name.get,
-        "includes_digipack" -> paperData.plan.products.others.contains(Digipack).toString,
+        "IncludesDigipack" -> paperData.plan.products.others.contains(Digipack).toString,
         "title" -> personalData.title.fold("")(_.title),
         "first_name" -> personalData.first,
         "last_name" -> personalData.last,
@@ -153,8 +153,10 @@ object PaperHomeDeliveryWelcome1DataExtensionRow {
         "delivery_county" -> paperData.deliveryAddress.countyOrState,
         "delivery_postcode" -> paperData.deliveryAddress.postCode,
         "delivery_country" -> paperData.deliveryAddress.country.fold(paperData.deliveryAddress.countryName)(_.name),
+        "delivery_instructions" -> paperData.deliveryInstructions.getOrElse(""),
+        "date_of_first_paper" -> formatDate(paperData.startDate),
         "date_of_first_payment" -> formatDate(subscription.firstPaymentDate),
-        "subscription_package" -> paperData.plan.name,
+        "package" -> paperData.plan.name,
         "subscription_rate" -> subscriptionDetails
       ) ++ billingAddressFields ++ paymentFields ++ promotionFields
     )
