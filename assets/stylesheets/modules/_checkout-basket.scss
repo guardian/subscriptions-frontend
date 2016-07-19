@@ -16,6 +16,7 @@
 }
 
 .basket-preview__image {
+    width: 300px;
     @include mq($until: desktop) {
         width: 150px;
     }

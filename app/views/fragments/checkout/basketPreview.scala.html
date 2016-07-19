@@ -11,7 +11,11 @@
 <div class="basket-preview  basket-preview--products">
     <h3 class="basket-preview__title">You've chosen:</h3>
     <div class="basket-preview__image">
-        <img src="@controllers.CachedAssets.hashedPathFor(plan.packImage)" alt="@plan.title">
+        <img
+            src="@plan.packImage.defaultImage"
+            srcset="@plan.packImage.srcset"
+            sizes="(max-width: 980px) 150px, 300px"
+            alt="@plan.title">
     </div>
     <div class="basket-preview__product">
         <span class="basket-preview__product__title js-option-mirror-package-display">
