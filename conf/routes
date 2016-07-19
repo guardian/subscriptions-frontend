@@ -28,7 +28,7 @@ GET         /checkout/check-identity         controllers.Checkout.checkIdentity(
 POST        /checkout/check-account          controllers.Checkout.checkAccount
 POST        /checkout/register-guest-user    controllers.Checkout.convertGuestUser
 GET         /checkout/lookupPromotion        controllers.Checkout.validatePromoCode(promoCode: PromoCode, productRatePlanId: ProductRatePlanId, country: Country)
-
+GET         /checkout/validateDelivery       controllers.Checkout.validateDelivery(postCode: String)
 # Checkout pages
 GET         /checkout/thank-you              controllers.Checkout.thankYou()
 GET         /checkout                        controllers.Checkout.renderCheckout(countryGroup: CountryGroup ?= CountryGroup.UK, promoCode: Option[PromoCode], forThisPlan = "")

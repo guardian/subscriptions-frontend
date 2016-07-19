@@ -7,7 +7,7 @@
 @import views.support.ProductPopulationData
 @(data: ProductPopulationData, countriesWithCurrency: List[CountryWithCurrency])
 
-@address(data.deliveryAddress, "delivery", countriesWithCurrency)
+@address(data.deliveryAddress, "delivery", countriesWithCurrency, data.plans.default)
 
 <div class="js-checkout-delivery-data" id="paperFields">
     <div class="form-field js-checkout-delivery">
