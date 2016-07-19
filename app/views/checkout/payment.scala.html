@@ -61,7 +61,8 @@
     title = s"Details - name and address | Subscribe to the ${productData.plans.default.title} | The Guardian",
     jsVars = JsVars(userIsSignedIn = personalData.isDefined, ignorePageLoadTracking = true, countryGroup = countryGroup, currency = defaultCurrency, country = country),
     bodyClasses = List("is-wide"),
-    touchpointBackendResolutionOpt = Some(touchpointBackendResolution)
+    touchpointBackendResolutionOpt = Some(touchpointBackendResolution),
+    plan = Some(productData.plans.default)
 ) {
 
     @fragments.analytics.tagmanager()
@@ -103,7 +104,7 @@
                         }
                         </div>
                         <div class="js-payment-type-direct-debit u-note">
-                            @fragments.checkout.noticesDirectDebit(productData.plans)
+                            @fragments.checkout.noticesDirectDebit(productData.plans.default)
                         </div>
                         <div class="js-payment-type-card" hidden="true">
                             @fragments.checkout.noticesCard()
@@ -171,7 +172,7 @@
                             <a href="#yourDetails" class="text-button u-button-reset js-edit-billing-address" title="Edit your personal details">Edit</a>
                         </div>
                         <div class="field-panel__fields">
-                            @fragments.checkout.fieldsBilling(personalData.map(_.address), canBeHidden = productData.planEither.isRight, countriesWithCurrency)
+                            @fragments.checkout.fieldsBilling(personalData.map(_.address), canBeHidden = productData.planEither.isRight, countriesWithCurrency, productData.plans.default)
                             @continueButton("#paymentDetails", "js-checkout-billing-address-submit")
                         </div>
                     </fieldset>

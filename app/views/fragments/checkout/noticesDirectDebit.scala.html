@@ -3,7 +3,7 @@
 @import views.support.PlanList
 @import com.gu.subscriptions.ProductList
 @import com.gu.subscriptions.ProductPlan
-@(plans: PlanList[ProductPlan[ProductList]])
+@(plan: ProductPlan[ProductList])
 
 @fragments.checkout.notice("Advanced Notice") {
     <p>
@@ -21,8 +21,8 @@
     </address>
 
     <ul class="o-unstyled-list">
-        <li>Tel: @plans.default.phone</li>
-        <li><a href="mailto:@plans.default.email">@plans.default.email</a></li>
+        <li>Tel: @plan.phone</li>
+        <li><a href="mailto:@plan.email">@plan.email</a></li>
     </ul>
 
     <aside class="direct-debit">

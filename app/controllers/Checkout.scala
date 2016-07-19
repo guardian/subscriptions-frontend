@@ -77,7 +77,11 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
       val preselectedCountry = personalData.flatMap(data => data.address.country)
       val countryGroupForPreselectedCountry = preselectedCountry.flatMap(c => CountryGroup.byCountryCode(c.alpha2))
       val determinedCountryGroup = if (planListEither.isRight) {
-        CountryGroup(Country.UK.name, "ukm", Some(Country.UK), List(Country.UK), CountryGroup.UK.currency, PostCode)
+        if (plans.default.products.seq.contains(Delivery)) {
+          CountryGroup(Country.UK.name, "london-area", Some(Country.UK), List(Country.UK), CountryGroup.UK.currency, PostCode)
+        } else {
+          CountryGroup(Country.UK.name, "uk-mainland", Some(Country.UK), List(Country("IM", "Isle of Man"), Country.UK), CountryGroup.UK.currency, PostCode)
+        }
       } else {
         countryGroupForPreselectedCountry.getOrElse(countryGroup)
       }
@@ -283,6 +287,10 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
       )
       result.fold(_ => NotAcceptable(body), _ => Ok(body))
     }
+  }
+
+  def validateDelivery(postCode: String) = NoCacheAction { implicit request =>
+    HomeDeliveryPostCodes.findDistrict(postCode).fold(NotAcceptable(""))(_ => Ok(""))
   }
 
   def checkIdentity(email: String) = CachedAction.async { implicit request =>

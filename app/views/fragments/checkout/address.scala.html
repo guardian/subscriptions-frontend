@@ -4,8 +4,12 @@
 @import com.gu.i18n.Title
 @import model.PersonalData
 @import com.gu.memsub.Address
+@import com.gu.memsub.Delivery
+@import com.gu.subscriptions.ProductPlan
+@import views.support.PlanOps._
+@import com.gu.subscriptions.ProductList
 
-@(address: Option[Address], namePrefix: String, countriesWithCurrency: List[CountryWithCurrency])
+@(address: Option[Address], namePrefix: String, countriesWithCurrency: List[CountryWithCurrency], plan: ProductPlan[ProductList])
 
 
 @attrs(field: String) = @{
@@ -55,7 +59,12 @@
         <select @attrs("subdivision") class="js-input"></select>
         @fragments.forms.errorMessage("Please enter a valid state/county")
     </div>
-    <div class="form-field js-checkout-postcode">
+    <div class="form-field js-checkout-postcode"
+        @if(plan.products.seq.contains(Delivery)) {
+            data-validate-for="@namePrefix"
+            data-validation-url="@routes.Checkout.validateDelivery("").path.replaceFirst("\\?.*", "")"
+            data-error-message="Sorry, we cannot deliver a paper to an address with this postcode. Please call Customer Services on: @plan.phone or press Back to purchase a voucher subscription."
+        }>
         <label class="label" @labelFor("postcode")>Postcode</label>
         <input type="text" class="input-text js-input input-text input-text--small" @attrs("postcode")
         value="@address.map(_.postCode)" maxlength="10" required>
