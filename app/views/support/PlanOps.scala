@@ -1,7 +1,8 @@
 package views.support
 import com.gu.memsub._
+import com.gu.memsub.images.{ResponsiveImage, ResponsiveImageGenerator, ResponsiveImageGroup}
 import com.gu.subscriptions.{ProductList, ProductPlan}
-
+import com.netaporter.uri.dsl._
 object PlanOps {
 
   implicit class ToProductPlanOps(in: ProductPlan[ProductList]) {
@@ -16,9 +17,9 @@ object PlanOps {
       case _ => in.description
     }
 
-    def packImage: String = in match {
-      case _ if in.products.seq == Seq(Digipack) => "images/digital-pack.png"
-      case _ => "images/backgrounds/bg-paper-only.png"
+    def packImage: ResponsiveImageGroup = in match {
+      case _ if in.products.seq == Seq(Digipack) => ResponsiveImageGroup(availableImages = Seq(ResponsiveImage(controllers.CachedAssets.hashedPathFor("images/digital-pack.png"), 300)))
+      case _ => ResponsiveImageGroup(availableImages = ResponsiveImageGenerator("05129395fe0461071f176f526d7a4ae2b1d9b9bf/0_0_5863_5116", Seq(140, 500, 1000, 2000)))
     }
 
     def changeRatePlanText: String = in match {
