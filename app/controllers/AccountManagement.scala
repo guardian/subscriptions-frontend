@@ -40,10 +40,8 @@ object AccountManagement extends Controller with LazyLogging {
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
 
-
     def detailsMatch(zuoraContact: Contact, loginRequest: AccountManagementLoginRequest): Boolean = {
       def format(str: String): String = str.filter(_.isLetterOrDigit).toLowerCase
-
       format(zuoraContact.lastName) == format(loginRequest.lastname) &&
         zuoraContact.postalCode.map(format).contains(format(loginRequest.postcode))
     }
