@@ -46,7 +46,9 @@ body:not(:-moz-handler-blocked) fieldset {
     width: $gs-gutter;
     counter-increment: section;
     content: counter(section);
-
+}
+.field-panel__legend-numberless::before {
+    content: '';
 }
 .field-panel__intro {
     @include mq(tablet) {
@@ -239,12 +241,15 @@ input[type=number] {
 .form-field {
     margin-bottom: ($gs-baseline);
 }
-.form-field__error-message {
+.form-field__error-message, .form-field__error-message-visible {
     @include fs-data(3);
     color: guss-colour(error);
     margin-top: 2px;
     margin-bottom: ($gs-baseline / 2);
     display: none;
+}
+.form-field__error-message-visible {
+    display: block;
 }
 .form-field--no-margin {
     margin-bottom: 0;

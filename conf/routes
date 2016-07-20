@@ -51,6 +51,11 @@ POST        /staff/cas/subscription          controllers.CAS.searchSubscription
 POST        /staff/cas/token                 controllers.CAS.generateToken
 GET         /oauth2callback                  controllers.OAuth.oauth2Callback
 
+# Manage my account
+GET         /manage                          controllers.AccountManagement.login(subscriberId: Option[String])
+POST        /manage                          controllers.AccountManagement.processLogin
+POST        /manage/suspend                  controllers.AccountManagement.processSuspension
+
 # Pattern Library
 GET         /patterns                        controllers.PatternLibrary.patterns
 
