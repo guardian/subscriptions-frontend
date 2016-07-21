@@ -9,7 +9,7 @@ object PlanOps {
 
     def title: String = in match {
       case _ if in.products.seq == Seq(Digipack) => "Guardian Digital Pack"
-      case _ => in.name + " package"
+      case _ => s"${in.name} package"
     }
 
     def subtitle: String = in match {

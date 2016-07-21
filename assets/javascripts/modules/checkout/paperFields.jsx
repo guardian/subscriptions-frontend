@@ -13,6 +13,8 @@ const MAX_WEEKS_AVAILABLE = 4;
 
 function filterDate(packageName) {
     switch (true) {
+        case /Sunday/i.test(packageName):
+            return (date) => date.day() === 0;
         case /Sixday/i.test(packageName):
             return (date) => date.day() !== 0;
         case /Weekend/i.test(packageName):
