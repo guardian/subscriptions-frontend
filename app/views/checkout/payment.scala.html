@@ -35,7 +35,8 @@
         <span class="option__input">
             <input
             type="radio" name="ratePlanId"
-            data-option-mirror-payment-default="@plan.prettyName(currency)"
+            data-option-label-prefix="@plan.prefix"
+            data-option-mirror-payment-default="@plan.prettyPricing(currency)"
             data-option-mirror-payment="@plan.prettyPricing(currency)"
             data-option-mirror-description="(@plan.subtitle)"
             data-option-mirror-package="@plan.title"

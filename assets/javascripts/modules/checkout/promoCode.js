@@ -27,8 +27,10 @@ define([
             var $el = $(el),
                 currency = $el.data('currency'),
                 $label = $('#label-for-' + $el.val() + '-' + currency),
+                labelPrefix = $el.data('option-label-prefix'),
                 newDisplayPrice = $el.data('option-mirror-payment-default');
-            $label.html(newDisplayPrice);
+
+            $label.html(labelPrefix + newDisplayPrice);
             $el.attr('data-option-mirror-payment', newDisplayPrice);
             if ($el.attr('checked')) {
                 bean.fire(el, 'change');
@@ -42,10 +44,11 @@ define([
                 var $el = $(el),
                     ratePlanId = $el.val(),
                     currency = $el.data('currency'),
+                    labelPrefix = $el.data('option-label-prefix'),
                     $label = $('#label-for-' + ratePlanId + '-' + currency);
 
                 if (adjustedRatePlans[ratePlanId]) {
-                    $label.html(adjustedRatePlans[ratePlanId]);
+                    $label.html(labelPrefix + adjustedRatePlans[ratePlanId]);
                     $el.attr('data-option-mirror-payment', adjustedRatePlans[ratePlanId]);
                     if ($el.attr('checked')) {
                         bean.fire(el, 'change');

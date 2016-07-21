@@ -6,6 +6,7 @@ import com.gu.memsub.promo.{LandingPage, PercentDiscount, Promotion}
 import com.gu.memsub.{BillingPeriod => BP, _}
 import com.gu.subscriptions.{ProductList, ProductPlan}
 import views.support.BillingPeriod._
+import views.support.PlanOps._
 
 object Pricing {
 
@@ -57,9 +58,15 @@ object Pricing {
   }
   implicit class PrettyProductPlan(in: ProductPlan[ProductList]) {
     implicit val planWithPricing = new PlanWithPricing(in)
+
+    def prefix = in match {
+      case _ if in.products.seq == Seq(Digipack) => ""
+      case _ => s"${in.title} - "
+    }
+
     def prettyName(currency: Currency): String = in match {
       case _ if in.products.seq == Seq(Digipack) => planWithPricing.prettyPricing(currency)
-      case _ => s"${in.name} package - ${planWithPricing.prettyPricing(currency)}"
+      case _ => s"$prefix${planWithPricing.prettyPricing(currency)}"
     }
   }
 }
