@@ -48,7 +48,7 @@ object TouchpointBackend {
     val promoCollection = new DynamoPromoCollection(promoStorage)
 
     val promoService = new PromoService(promoCollection, catalogService.digipackCatalog, discounter)
-    val zuoraService = new zuora.ZuoraService(soapClient, restClient, digipackRatePlanIds)
+    val zuoraService = new zuora.ZuoraService(soapClient, restClient)
     val _stripeService = new StripeService(config.stripe, new TouchpointBackendMetrics with StatusMetrics {
       val backendEnv = config.stripe.envName
       val service = "Stripe"
