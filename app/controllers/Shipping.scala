@@ -26,7 +26,7 @@ object Shipping extends Controller {
     )
 
   def viewCollectionPaperDigital() = CachedAction {
-    val plans = catalog.voucher.productPlans.filter(_.products.others.contains(Digipack)).map(planToOptions)
+    val plans = List.empty //catalog.voucher.productPlans.filter(_.products.others.contains(Digipack)).map(planToOptions)
     index(CollectionSubscriptionProduct(
       title = "Paper + digital voucher subscription",
       description = "Save money on your newspapers and digital content. Plus start using the daily edition and premium live news app immediately.",
@@ -54,7 +54,7 @@ object Shipping extends Controller {
   }
 
   def viewCollectionPaper() = CachedAction {
-    val plans = catalog.voucher.productPlans.filter(_.products.others.isEmpty).map(planToOptions)
+    val plans = List.empty //catalog.voucher.productPlans.filter(_.products.others.isEmpty).map(planToOptions)
     index(CollectionSubscriptionProduct(
       title = "Paper voucher subscription",
       description = "Save money on your newspapers.",
@@ -77,7 +77,7 @@ object Shipping extends Controller {
   }
 
   def viewDeliveryPaperDigital() = CachedAction {
-    val plans = catalog.delivery.productPlans.filter(_.products.others.contains(Digipack)).map(planToOptions)
+    val plans = List.empty //catalog.delivery.productPlans.filter(_.products.others.contains(Digipack)).map(planToOptions)
     index(DeliverySubscriptionProduct(
       title = "Paper + digital home delivery subscription",
       description = """|If you live within the M25 you can have your papers delivered by 7am Monday - Saturday and 8.30am on Sunday.
@@ -105,7 +105,7 @@ object Shipping extends Controller {
   }
 
   def viewDeliveryPaper() = CachedAction {
-    val plans = catalog.delivery.productPlans.filter(_.products.others.isEmpty).map(planToOptions)
+    val plans = List.empty //catalog.delivery.productPlans.filter(_.products.others.isEmpty).map(planToOptions)
     index(DeliverySubscriptionProduct(
       title = "Paper home delivery subscription",
       description = "If you live within the M25 you can have your papers delivered by 7am Monday - Saturday and 8.30 on Sunday.",
