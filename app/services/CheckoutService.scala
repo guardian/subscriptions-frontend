@@ -19,19 +19,21 @@ import model._
 import model.error.CheckoutService._
 import model.error.IdentityService._
 import model.error.SubsError
-import org.joda.time.Days
-import org.joda.time.Days.ZERO
+import org.joda.time.{Days, LocalDate}
 import touchpoint.ZuoraProperties
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scalaz.{EitherT, Monad, NonEmptyList, \/}
-import com.gu.memsub.promo.Promotion._
-
 import scala.concurrent.Future
 import scalaz.std.scalaFuture._
 import scalaz.syntax.monad._
 import scalaz.std.option._
-import scalaz.syntax.std.option._
+
+object CheckoutService {
+  def paymentDelay(in: Either[PaperData, DigipackData], zuora: ZuoraProperties)(implicit now: LocalDate): Days = in.fold(
+    p => Days.daysBetween(now, p.startDate), d => zuora.gracePeriodInDays.plus(zuora.paymentDelayInDays)
+  )
+}
 
 class CheckoutService(identityService: IdentityService,
                       salesforceService: SalesforceService,
@@ -47,6 +49,7 @@ class CheckoutService(identityService: IdentityService,
   type PostSubscribeResult = (Option[UserIdData], NonFatalErrors)
   type SubNel[A] = EitherT[Future, NonEmptyList[SubsError], A]
   type FatalErrors = NonEmptyList[SubsError]
+  implicit val today = LocalDate.now()
 
   def processSubscription(subscriptionData: SubscribeRequest,
                           authenticatedUserOpt: Option[AuthenticatedIdUser],
@@ -64,7 +67,8 @@ class CheckoutService(identityService: IdentityService,
       memberId <- EitherT(createOrUpdateUserInSalesforce(subscriptionData, idMinimalUser))
       purchaserIds = PurchaserIdentifiers(memberId, idMinimalUser)
       payment <- EitherT(createPaymentType(requestData, purchaserIds, subscriptionData))
-      subscribe <- EitherT(createSubscribeRequest(personalData, requestData, plan, purchaserIds, payment))
+      defaultPaymentDelay = CheckoutService.paymentDelay(subscriptionData.productData, zuoraProperties)
+      subscribe <- EitherT(createSubscribeRequest(personalData, requestData, plan, purchaserIds, payment, Some(defaultPaymentDelay)))
       validPromotion = suppliedPromoCode.flatMap(promoService.validate[NewUsers](_, personalData.address.country.getOrElse(Country.UK), subscriptionData.productRatePlanId).toOption)
       withPromo = validPromotion.map(v => p.apply(v, subscribe, catalogService.digipackCatalog.unsafeFindPaid, promoPlans)).getOrElse(subscribe)
       result <- EitherT(createSubscription(withPromo, purchaserIds))
@@ -89,10 +93,7 @@ class CheckoutService(identityService: IdentityService,
   }
 
   private def gracePeriod(promo: Option[ValidPromotion[NewUsers]]) =
-    promo.flatMap(_.promotion.asDiscount).fold(zuoraProperties.gracePeriodInDays)(_ => ZERO)
-
-  private def gracePeriod(withPromo: Subscribe, subscribe: Subscribe) =
-    if (withPromo.paymentDelay == subscribe.paymentDelay) zuoraProperties.gracePeriodInDays else ZERO
+    promo.flatMap(_.promotion.asDiscount).fold(zuoraProperties.gracePeriodInDays)(_ => Days.ZERO)
 
   private def storeIdentityDetails(
       subscribeRequest: SubscribeRequest,
@@ -162,7 +163,8 @@ class CheckoutService(identityService: IdentityService,
       requestData: SubscriptionRequestData,
       plan: RatePlan,
       purchaserIds: PurchaserIdentifiers,
-      payment: PaymentService#Payment): Future[NonEmptyList[SubsError] \/ Subscribe] = {
+      payment: PaymentService#Payment,
+      paymentDelay: Option[Days]): Future[NonEmptyList[SubsError] \/ Subscribe] = {
 
     payment.makePaymentMethod.map { method =>
       \/.right(Subscribe(
@@ -170,7 +172,7 @@ class CheckoutService(identityService: IdentityService,
         ratePlans = NonEmptyList(plan),
         name = personalData,
         address = personalData.address,
-        paymentDelay = Some(zuoraProperties.paymentDelayInDays.plus(zuoraProperties.gracePeriodInDays)),
+        paymentDelay = paymentDelay,
         ipAddress = requestData.ipAddress.map(_.getHostAddress)
       ))
     }.recover {
