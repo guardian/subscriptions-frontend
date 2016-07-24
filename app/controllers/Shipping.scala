@@ -34,11 +34,11 @@ object Shipping extends Controller {
       options = plans.nonEmpty.option(plans).getOrElse(
         Seq(
         SubscriptionOption("everyday",
-          "Everyday+", 10.99f, Some("41%"), 47.62f, "Guardian and Observer papers, plus tablet editions and Premium mobile access",
+          "Everyday+", 11.99f, Some("36%"), 51.96f, "Guardian and Observer papers, plus tablet editions and Premium mobile access",
           "https://www.guardiansubscriptions.co.uk/Voucher?prom=faa13&pkgcode=ukx01&title=gv7&skip=1"
         ),
         SubscriptionOption("sixday",
-          "Sixday+", 9.99f, Some("36%"), 43.29f, "Guardian papers, plus tablet editions and Premium mobile access",
+          "Sixday+", 10.99f, Some("30%"), 47.62f, "Guardian papers, plus tablet editions and Premium mobile access",
           "https://www.guardiansubscriptions.co.uk/Voucher?prom=faa13&pkgcode=ukx01&title=gv6&skip=1"
         ),
         SubscriptionOption("weekend",
@@ -61,11 +61,11 @@ object Shipping extends Controller {
       packageType = "paper",
       options = plans.nonEmpty.option(plans).getOrElse(Seq(
         SubscriptionOption("everyday",
-          "Everyday", 9.99f, Some("37%"), 43.29f, "Guardian and Observer papers",
+          "Everyday", 10.99f, Some("31%"), 47.62f, "Guardian and Observer papers",
           "https://www.guardiansubscriptions.co.uk/Voucher?prom=faa13&pkgcode=ukx00&title=gv7&skip=1"
         ),
         SubscriptionOption("sixday",
-          "Sixday", 8.49f, Some("34%"), 36.79f, "Guardian papers",
+          "Sixday", 9.49f, Some("26%"), 41.12f, "Guardian papers",
           "https://www.guardiansubscriptions.co.uk/Voucher?prom=faa13&pkgcode=ukx00&title=gv6&skip=1"
         ),
         SubscriptionOption("weekend",
@@ -85,11 +85,11 @@ object Shipping extends Controller {
       packageType = "paper-digital",
       options = plans.nonEmpty.option(plans).getOrElse(Seq(
         SubscriptionOption("everyday",
-          "Everyday+", 14.49f, None, 62.79f, "Guardian and Observer papers, plus tablet editions and Premium mobile access",
+          "Everyday+", 15.49f, None, 67.12f, "Guardian and Observer papers, plus tablet editions and Premium mobile access",
           "https://www.guardiandirectsubs.co.uk/Delivery/details.aspx?package=EVERYDAY%2B"
         ),
         SubscriptionOption("sixday",
-          "Sixday+", 12.99f, None, 56.29f, "Guardian papers, plus tablet editions and Premium mobile access",
+          "Sixday+", 13.99f, None, 60.62f, "Guardian papers, plus tablet editions and Premium mobile access",
           "https://www.guardiandirectsubs.co.uk/Delivery/details.aspx?package=SIXDAY%2B"
         ),
         SubscriptionOption("weekend",
@@ -112,11 +112,11 @@ object Shipping extends Controller {
       packageType = "paper",
       options = plans.nonEmpty.option(plans).getOrElse(Seq(
         SubscriptionOption("everyday",
-          "Everyday", 13.49f, None, 58.46f, "Guardian and Observer papers",
+          "Everyday", 14.49f, None, 62.79f, "Guardian and Observer papers",
           "https://www.guardiandirectsubs.co.uk/Delivery/details.aspx?package=EVERYDAY"
         ),
         SubscriptionOption("sixday",
-          "Sixday", 11.49f, None, 49.79f, "Guardian papers",
+          "Sixday", 12.49f, None, 54.12f, "Guardian papers",
           "https://www.guardiandirectsubs.co.uk/Delivery/details.aspx?package=SIXDAY"
         ),
         SubscriptionOption("weekend",
