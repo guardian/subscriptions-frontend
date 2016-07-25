@@ -8,4 +8,13 @@ object DigitalEdition {
   object US extends DigitalEdition(CountryGroup.US, "us", "US", "dis_2378")
   object INT extends DigitalEdition(CountryGroup.RestOfTheWorld, "int", "International", "dis_2378")
   object AU extends DigitalEdition(CountryGroup.Australia, "au", "Australia", "dis_2379")
+
+  def getForCountryGroup(countryGroup: CountryGroup): DigitalEdition = {
+    countryGroup match {
+      case CountryGroup.UK => UK
+      case CountryGroup.US => US
+      case CountryGroup.Australia => AU
+      case _ => INT
+    }
+  }
 }

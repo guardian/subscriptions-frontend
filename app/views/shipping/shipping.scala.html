@@ -1,8 +1,9 @@
+@import model.DigitalEdition.UK
 @(subscription: model.Subscriptions.SubscriptionProduct)
 
 @import utils.Prices._
 
-@main(s"${subscription.capitalizedTitle} | Choose a Package | Subscriptions | The Guardian", isInternational=true) {
+@main(s"${subscription.capitalizedTitle} | Choose a Package | Subscriptions | The Guardian", edition = UK) {
 
     <main class="page-container gs-container">
 

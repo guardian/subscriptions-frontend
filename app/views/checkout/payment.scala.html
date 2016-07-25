@@ -19,6 +19,7 @@
 @import com.gu.memsub.Subscriptions
 @import com.gu.subscriptions.ProductList
 @import views.support.AddressOps
+@import model.DigitalEdition
 
 @(
     personalData: Option[PersonalData],
@@ -28,7 +29,9 @@
     defaultCurrency: Currency,
     countriesWithCurrency: List[CountryWithCurrency],
     touchpointBackendResolution: services.TouchpointBackend.Resolution,
-    promoCode: Option[PromoCode])(implicit request: RequestHeader)
+    promoCode: Option[PromoCode],
+    edition: DigitalEdition
+)(implicit request: RequestHeader)
 
 @priceOption(plan: ProductPlan[ProductList], currency: Currency) = {
     <label class="option" data-currency="@currency">
@@ -63,7 +66,8 @@
     jsVars = JsVars(userIsSignedIn = personalData.isDefined, ignorePageLoadTracking = true, countryGroup = countryGroup, currency = defaultCurrency, country = country),
     bodyClasses = List("is-wide"),
     touchpointBackendResolutionOpt = Some(touchpointBackendResolution),
-    plan = Some(productData.plans.default)
+    plan = Some(productData.plans.default),
+    edition = edition
 ) {
 
     @fragments.analytics.tagmanager()
