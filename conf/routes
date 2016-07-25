@@ -62,3 +62,5 @@ GET         /p/:promoCodeStr                 controllers.PromoLandingPage.render
 
 # NOCSRF
 POST         /q                              controllers.PromoLandingPage.preview
+
+GET         /manage                          controllers.Testing.manageHoldingPage
