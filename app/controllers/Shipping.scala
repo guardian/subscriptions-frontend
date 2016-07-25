@@ -33,24 +33,24 @@ object Shipping extends Controller {
       packageType = "paper-digital",
       options = plans.nonEmpty.option(plans).getOrElse(
         Seq(
-        SubscriptionOption("everyday",
-          "Everyday+", 11.99f, Some("36%"), 51.96f, "Guardian and Observer papers, plus tablet editions and Premium mobile access",
-          "https://www.guardiansubscriptions.co.uk/Voucher?prom=faa13&pkgcode=ukx01&title=gv7&skip=1"
-        ),
-        SubscriptionOption("sixday",
-          "Sixday+", 10.99f, Some("30%"), 47.62f, "Guardian papers, plus tablet editions and Premium mobile access",
-          "https://www.guardiansubscriptions.co.uk/Voucher?prom=faa13&pkgcode=ukx01&title=gv6&skip=1"
-        ),
-        SubscriptionOption("weekend",
-          "Weekend+", 6.79f, Some("22%"), 29.42f, "Saturday Guardian and Observer papers, plus tablet editions and Premium mobile access",
-          "https://www.guardiansubscriptions.co.uk/Voucher?prom=faa13&pkgcode=ukx01&title=gv2&skip=1"
-        ),
-        SubscriptionOption("sunday",
-          "Sunday+", 5.09f, Some("12%"), 22.06f, "Observer paper, plus tablet editions and Premium mobile access",
-          "https://www.guardiansubscriptions.co.uk/Voucher?prom=faa13&pkgcode=ukx01&title=ov1&skip=1"
+          SubscriptionOption("everyday",
+            "Everyday+", 11.99f, Some("36%"), 51.96f, "Guardian and Observer papers, plus tablet editions and Premium mobile access",
+            "https://www.guardiansubscriptions.co.uk/Voucher?prom=faa13&pkgcode=ukx01&title=gv7&skip=1"
+          ),
+          SubscriptionOption("sixday",
+            "Sixday+", 10.99f, Some("30%"), 47.62f, "Guardian papers, plus tablet editions and Premium mobile access",
+            "https://www.guardiansubscriptions.co.uk/Voucher?prom=faa13&pkgcode=ukx01&title=gv6&skip=1"
+          ),
+          SubscriptionOption("weekend",
+            "Weekend+", 6.79f, Some("22%"), 29.42f, "Saturday Guardian and Observer papers, plus tablet editions and Premium mobile access",
+            "https://www.guardiansubscriptions.co.uk/Voucher?prom=faa13&pkgcode=ukx01&title=gv2&skip=1"
+          ),
+          SubscriptionOption("sunday",
+            "Sunday+", 5.09f, Some("12%"), 22.06f, "Observer paper, plus tablet editions and Premium mobile access",
+            "https://www.guardiansubscriptions.co.uk/Voucher?prom=faa13&pkgcode=ukx01&title=ov1&skip=1"
+          )
         )
-      )
-    )))
+      )))
   }
 
   def viewCollectionPaper() = CachedAction {
@@ -73,58 +73,26 @@ object Shipping extends Controller {
           "https://www.guardiansubscriptions.co.uk/Voucher?prom=faa13&pkgcode=ukx00&title=gv2&skip=1"
         )
       )
-    )))
+      )))
   }
 
   def viewDeliveryPaperDigital() = CachedAction {
-    val plans = List.empty //catalog.delivery.productPlans.filter(_.products.others.contains(Digipack)).map(planToOptions)
     index(DeliverySubscriptionProduct(
       title = "Paper + digital home delivery subscription",
       description = """|If you live within the M25 you can have your papers delivered by 7am Monday - Saturday and 8.30am on Sunday.
-        |Plus you can start using the daily edition and premium live news app immediately.""".stripMargin,
+                      |Plus you can start using the daily edition and premium live news app immediately.""".stripMargin,
       packageType = "paper-digital",
-      options = plans.nonEmpty.option(plans).getOrElse(Seq(
-        SubscriptionOption("everyday",
-          "Everyday+", 15.49f, None, 67.12f, "Guardian and Observer papers, plus tablet editions and Premium mobile access",
-          "https://www.guardiandirectsubs.co.uk/Delivery/details.aspx?package=EVERYDAY%2B"
-        ),
-        SubscriptionOption("sixday",
-          "Sixday+", 13.99f, None, 60.62f, "Guardian papers, plus tablet editions and Premium mobile access",
-          "https://www.guardiandirectsubs.co.uk/Delivery/details.aspx?package=SIXDAY%2B"
-        ),
-        SubscriptionOption("weekend",
-          "Weekend+", 7.79f, None, 33.76f, "Saturday Guardian and Observer papers, plus tablet editions and Premium mobile access",
-          "https://www.guardiandirectsubs.co.uk/Delivery/details.aspx?package=WEEKEND%2B"
-        ),
-        SubscriptionOption("sunday",
-          "Sunday+", 6.09f, None, 26.39f, "Observer paper, plus tablet editions and Premium mobile access",
-          "https://www.guardiandirectsubs.co.uk/Delivery/details.aspx?package=SUNDAY%2B"
-        )
-      )
-    )))
+      options = catalog.delivery.productPlans.filter(_.products.others.contains(Digipack)).map(planToOptions).sortBy(_.weeklyPrice).reverse
+    ))
   }
 
   def viewDeliveryPaper() = CachedAction {
-    val plans = List.empty //catalog.delivery.productPlans.filter(_.products.others.isEmpty).map(planToOptions)
     index(DeliverySubscriptionProduct(
       title = "Paper home delivery subscription",
       description = "If you live within the M25 you can have your papers delivered by 7am Monday - Saturday and 8.30 on Sunday.",
       packageType = "paper",
-      options = plans.nonEmpty.option(plans).getOrElse(Seq(
-        SubscriptionOption("everyday",
-          "Everyday", 14.49f, None, 62.79f, "Guardian and Observer papers",
-          "https://www.guardiandirectsubs.co.uk/Delivery/details.aspx?package=EVERYDAY"
-        ),
-        SubscriptionOption("sixday",
-          "Sixday", 12.49f, None, 54.12f, "Guardian papers",
-          "https://www.guardiandirectsubs.co.uk/Delivery/details.aspx?package=SIXDAY"
-        ),
-        SubscriptionOption("weekend",
-          "Weekend", 5.79f, None, 25.09f, "Saturday Guardian and Observer papers",
-          "https://www.guardiandirectsubs.co.uk/Delivery/details.aspx?package=WEEKEND"
-        )
-      )
-    )))
+      options = catalog.delivery.productPlans.filter(_.products.others.isEmpty).map(planToOptions).sortBy(_.weeklyPrice).reverse
+    ))
   }
 
 }
