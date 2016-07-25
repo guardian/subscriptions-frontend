@@ -1,5 +1,6 @@
 package actions
-import com.gu.memsub.{Subscription, Digipack}
+
+import com.gu.memsub.Subscription
 import play.api.mvc.{ActionFilter, Result, Request}
 import scala.concurrent.ExecutionContext.Implicits.global
 import services.AuthenticationService._
@@ -8,6 +9,7 @@ import utils.TestUsers.PreSigninTestCookie
 import scalaz.std.scalaFuture._
 import scala.concurrent.Future
 import scalaz.OptionT
+import org.joda.time.DateTime
 
 
 object ActionRefiners {
@@ -19,7 +21,8 @@ object ActionRefiners {
         (for {
           sf <- OptionT(tp.salesforceService.repo.get(user.id))
           sub <- OptionT(tp.subscriptionService.get(sf))
-        } yield onSubscription(sub)).run
+          stillActiveSub <- OptionT(Future.successful(if (sub.isCancelled && sub.termEndDate.isBefore(DateTime.now.toLocalDate)) None else Some(sub)))
+        } yield onSubscription(stillActiveSub)).run
       }
     }
   }
