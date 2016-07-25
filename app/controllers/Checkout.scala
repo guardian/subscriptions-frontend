@@ -77,11 +77,8 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
       val preselectedCountry = personalData.flatMap(data => data.address.country)
       val countryGroupForPreselectedCountry = preselectedCountry.flatMap(c => CountryGroup.byCountryCode(c.alpha2))
       val determinedCountryGroup = if (planListEither.isRight) {
-        if (plans.default.products.seq.contains(Delivery)) {
-          CountryGroup(Country.UK.name, "london-area", Some(Country.UK), List(Country.UK), CountryGroup.UK.currency, PostCode)
-        } else {
-          CountryGroup(Country.UK.name, "uk-mainland", Some(Country.UK), List(Country("IM", "Isle of Man"), Country.UK), CountryGroup.UK.currency, PostCode)
-        }
+        val countriesInDropDown = if (plans.default.products.seq.contains(Delivery)) List(Country.UK) else List(Country("IM", "Isle of Man"), Country.UK)
+        CountryGroup(Country.UK.name, "uk", Some(Country.UK), countriesInDropDown, CountryGroup.UK.currency, PostCode)
       } else {
         countryGroupForPreselectedCountry.getOrElse(countryGroup)
       }
