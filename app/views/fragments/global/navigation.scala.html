@@ -1,5 +1,15 @@
+@import model.DigitalEdition
+@import views.support.DigitalEdition._
+
+@import model.DigitalEdition.UK
+@(edition: DigitalEdition)
 <nav class="global-nav">
     <div class="global-nav__inner gs-container">
-        <a href="/" class="global-nav__link">Subscriptions</a>
+        <a href="/?INTCMP=GU_SUBSCRIPTIONS_NAV" class="global-nav__link">home</a>
+        <a href="/@edition.id/digital?INTCMP=GU_SUBSCRIPTIONS_NAV" class="global-nav__link">digital</a>
+        @if(edition == UK) {
+            <a href="/collection/paper?INTCMP=GU_SUBSCRIPTIONS_NAV" class="global-nav__link">paper</a>
+        }
+        <a href="@edition.getMembershipLandingPage("GU_SUBSCRIPTIONS_NAV")" class="global-nav__link">membership</a>
     </div>
 </nav>

@@ -106,7 +106,8 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
         defaultCurrency = determinedCurrency,
         countriesWithCurrency = determinedCountriesWithCurrency,
         touchpointBackendResolution = resolution,
-        promoCode = promo.left.toOption
+        promoCode = promo.left.toOption,
+        edition = model.DigitalEdition.getForCountryGroup(determinedCountryGroup)
       )).withSession(promo.right.toSeq.flatten:_*)
     }
   }

@@ -8,14 +8,18 @@ object DigitalEdition {
 
   implicit class DigitalEditionOps(edition: DE) {
 
+    lazy val DEFAULT_CAMPAIGN_CODE = s"GU_SUBSCRIPTIONS_${edition.id.toUpperCase}_PROMO"
+
     def redirect: Uri = {
       "/checkout" ? ("countryGroup" -> edition.countryGroup.id)
     }
 
-    def membershipLandingPage: Uri = {
-      val params = "INTCMP" -> s"GU_SUBSCRIPTIONS_${edition.id.toUpperCase}_PROMO"
+    def membershipLandingPage = getMembershipLandingPage(DEFAULT_CAMPAIGN_CODE)
 
+    def getMembershipLandingPage(campaignCode: String): Uri = {
+      val params = "INTCMP" -> campaignCode
       edition match {
+        case AU => "https://membership.theguardian.com/au/supporter" ? params
         case INT => "https://membership.theguardian.com/int/supporter" ? params
         case US => "https://membership.theguardian.com/us/supporter" ? params
         case _ => "https://membership.theguardian.com/join" ? params

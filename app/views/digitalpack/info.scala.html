@@ -1,6 +1,7 @@
 @import com.gu.memsub.Price
 @import model.DigitalEdition
 @import views.support.DigitalEdition._
+@import model.DigitalEdition.UK
 @(edition: DigitalEdition, price: Price)
 
 @import model.Benefits
@@ -22,7 +23,8 @@
 
 @main(
     title = s"Subscribe to the Guardian Digital Pack | The Guardian (${edition.name})",
-    bodyClasses = List("is-wide")
+    bodyClasses = List("is-wide"),
+    edition=edition
 ) {
 
 <main class="page-container gs-container gs-container--slim">

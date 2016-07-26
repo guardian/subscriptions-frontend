@@ -7,6 +7,7 @@ GET         /favicon.ico                     controllers.CacheBustedAssets.at(pa
 
 # Editions homepage
 GET         /                                controllers.Homepage.index
+GET         /uk                              controllers.Homepage.indexUk
 GET         /au                              controllers.Homepage.indexAu
 GET         /us                              controllers.Homepage.indexUs
 GET         /int                             controllers.Homepage.indexInt
@@ -17,7 +18,8 @@ GET         /healthcheck                     controllers.Management.healthcheck
 GET         /management/manifest             controllers.Management.manifest
 
 # Digital pack
-GET         /digital                         controllers.DigitalPack.uk
+GET         /digital                         controllers.DigitalPack.redirect
+GET         /uk/digital                      controllers.DigitalPack.uk
 GET         /us/digital                      controllers.DigitalPack.us
 GET         /au/digital                      controllers.DigitalPack.au
 GET         /int/digital                     controllers.DigitalPack.int
@@ -61,6 +63,6 @@ GET         /test-users                      controllers.Testing.testUser
 GET         /p/:promoCodeStr                 controllers.PromoLandingPage.render(promoCodeStr: String)
 
 # NOCSRF
-POST         /q                              controllers.PromoLandingPage.preview
+POST        /q                               controllers.PromoLandingPage.preview
 
 GET         /manage                          controllers.Testing.manageHoldingPage
