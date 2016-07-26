@@ -24,7 +24,7 @@ object AccountManagement extends Controller with LazyLogging {
 
   private def subscriptionFromRequest(implicit request: Request[AnyContent]): Future[Option[Subscription]] = {
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
-    implicit val tpBackend = TouchpointBackend.Test // CHANGE
+    implicit val tpBackend = resolution.backend
 
     (for {
       subscriptionId <- OptionT(Future.successful(request.session.data.get(SUBSCRIPTION_SESSION_KEY)))
@@ -38,10 +38,14 @@ object AccountManagement extends Controller with LazyLogging {
 
   private def subscriptionFromUserDetails(loginRequestOpt: Option[AccountManagementLoginRequest])(implicit request: Request[AnyContent]): Future[Option[Subscription]] = {
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
-    implicit val tpBackend = TouchpointBackend.Test // CHANGE
+    implicit val tpBackend = resolution.backend
+
 
     def detailsMatch(zuoraContact: Contact, loginRequest: AccountManagementLoginRequest): Boolean = {
-      zuoraContact.lastName == loginRequest.lastname && zuoraContact.postalCode.contains(loginRequest.postcode.toUpperCase)
+      def format(str: String): String = str.filter(_.isLetterOrDigit).toLowerCase
+
+      format(zuoraContact.lastName) == format(loginRequest.lastname) &&
+        zuoraContact.postalCode.map(format).contains(format(loginRequest.postcode))
     }
 
     (for {
@@ -86,7 +90,7 @@ object AccountManagement extends Controller with LazyLogging {
   def processSuspension = NoCacheAction.async { implicit request =>
     val suspension = SuspendForm.mappings.bindFromRequest().value.map(s => Seq(
         s"Got ${s.verifiedSubscriptionId.getOrElse("unverified subscription ID")}",
-        s"Asked to suspend ${s.subscriptionId} for ${s.asDays()} days",
+        s"Asked to suspend ${s.subscriptionId} for ${s.asDays()} days, starting ${s.startDate}",
         s"Suspension = ${s.toString}", s"s.verifiedSubscriptionId = ${s.verifiedSubscriptionId}"
       ).mkString("\n")
     ).getOrElse("No data provided")
