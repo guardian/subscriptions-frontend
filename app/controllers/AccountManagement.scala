@@ -42,6 +42,7 @@ object AccountManagement extends Controller with LazyLogging {
 
     def detailsMatch(zuoraContact: Contact, loginRequest: AccountManagementLoginRequest): Boolean = {
       def format(str: String): String = str.filter(_.isLetterOrDigit).toLowerCase
+      
       format(zuoraContact.lastName) == format(loginRequest.lastname) &&
         zuoraContact.postalCode.map(format).contains(format(loginRequest.postcode))
     }
