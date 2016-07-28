@@ -127,4 +127,11 @@ object Dates {
       range.start + "–" + range.end
     }
   }
+
+  def formattedDateRange(start: LocalDate, finish: LocalDate) = {
+    val formatStart = "d" + (if (start.monthOfYear != finish.monthOfYear) " MMMM" + (if (start.year != finish.year) " YYYY" else "") else "")
+    val formatFinish = "d MMMM" + (if (finish.year != LocalDate.now.year) " YYYY" else "")
+    val formattedFinish = finish.toString(formatFinish)
+    if(finish.isAfter(start)) s"${start.toString(formatStart)} - $formattedFinish" else formattedFinish
+  }
 }

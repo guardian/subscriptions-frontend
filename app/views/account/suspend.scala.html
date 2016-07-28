@@ -1,61 +1,86 @@
-@(subscriptionId: String, signedSubscriptionId: String)(implicit request: RequestHeader)
+@import com.gu.memsub.images.ResponsiveImageGroup
+@import com.gu.memsub.images.ResponsiveImageGenerator
+@import com.gu.memsub.Subscription
+@import org.joda.time.Days.daysBetween
+@import views.support.PlanOps._
+@import views.support.Pricing._
+@import com.gu.subscriptions.ProductPlan
+@import com.gu.memsub.PaidPS
+@import com.gu.memsub.promo.Promotion.AnyPromotion
+@import com.gu.subscriptions.PhysicalProducts
+@import com.gu.subscriptions.suspendresume.SuspensionService.HolidayRefund
+@import configuration.Config.suspendableWeeks
+@import model.DigitalEdition.UK
 
-@main("Suspend and resume | The Guardian") {
+@(
+    subscription: Subscription with PaidPS[ProductPlan[PhysicalProducts]],
+    promotion: Option[AnyPromotion] = None,
+    holidayRefunds: Seq[HolidayRefund] = Seq.empty,
+    suspendableDays: Int,
+    suspendedDays: Int
+)(implicit r: RequestHeader)
+
+@packImage = @{
+    ResponsiveImageGroup(availableImages = ResponsiveImageGenerator("05129395fe0461071f176f526d7a4ae2b1d9b9bf/0_0_5863_5116", Seq(140, 500, 1000, 2000)))
+}
+
+@main("Suspend your newspaper delivery | The Guardian", edition = UK) {
 
     <main class="page-container gs-container">
 
         <section class="suspend-container">
-            <form class="form js-suspend-form" action="@routes.AccountManagement.processSuspension().url" method="POST" novalidate>
 
-                @helper.CSRF.formField
+            <div class="suspend-header">
+                <h1 class="suspend-header__title">Suspend your newspaper delivery</h1>
+            </div>
 
-                <input type="hidden" name="subscriptionId" value="@subscriptionId" />
-                <input type="hidden" name="signedSubscriptionId" value="@signedSubscriptionId" />
+            <div>
+                <h2>Your subscription</h2>
+                <ul>
+                    <li>You are subscribed to the <strong>@subscription.plan.title</strong></li>
+                    <li>
+                        You pay <strong>@promotion.flatMap(_.asDiscount).fold {
+                            @subscription.plan.prettyPricing(subscription.currency)
+                        } { discountPromo =>
+                            @Html(subscription.plan.prettyPricingForDiscountedPeriod(discountPromo, subscription.currency))
+                        }</strong>
+                    </li>
+                    <li>You can line up <strong>@suspendableWeeks weeks</strong> worth of suspensions <span class="u-note">(Up to @suspendableDays days on the @subscription.plan.title)</span></li>
+                    <li>@account.suspensions(holidayRefunds, suspendableDays, suspendedDays)</li>
+                </ul>
+            </div>
 
-                <div class="suspend-header">
-                    <h1 class="suspend-header__title">Suspend and resume your paper</h1>
-                </div>
+            <br/>
 
-                <div class="suspend-container__sidebar">
-                    <div class="js-suspend-notices notices-container">
-                        <div class="js-append">
-                            <div class="u-note">
-                                Please give us 2 weeks notice so that we can process the delivery suspension.
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
+            @if((suspendableDays - suspendedDays) > 0) {
                 <div class="suspend-container__form">
-
-                    <div id="suspendDetails" class="field-panel js-fieldset-your-details">
-                        <fieldset>
-                            <legend class="field-panel__legend field-panel__legend-numberless">
-                                Create suspension
-                            </legend>
-                            <div class="field-panel__intro">
-                                <div class="field-note field-note--offset">
+                    <form class="form js-suspend-form" action="@routes.AccountManagement.processSuspension().url" method="POST" novalidate>
+                        @helper.CSRF.formField
+                        <div id="suspendDetails" class="field-panel js-fieldset-your-details">
+                            <fieldset>
+                                <legend class="field-panel__legend">
+                                    Create a suspension
+                                </legend>
+                                <div class="field-panel__intro u-note">
+                                    Please give us 5 working days notice to process the suspension.<br/>
+                                    All dates are inclusive.
                                 </div>
-                                <div class="field-note field-note--offset prose">
+                                <div class="field-panel__fields">
+                                    <div class="form-field js-suspend-start-date">
+                                        <div id="dateRangePicker"
+                                        remainingDays="@{suspendableDays - suspendedDays}"
+                                        ratePlanName="@subscription.plan.name"></div>
+                                    </div>
+                                    <button type="submit" class="js-suspend-submit button button--primary button--large u-margin-bottom">
+                                        Continue
+                                    </button>
                                 </div>
-                            </div>
-                            <div class="field-panel__edit">
-                            </div>
-                            <div class="field-panel__fields">
-                                <div class="form-field js-suspend-start-date">
-                                    <label class="label" for="startDate">Date range</label>
-                                    <div id="dateRangePicker"></div>
-                                </div>
-                                <button type="submit" class="js-suspend-submit button button--primary button--large u-margin-bottom">
-                                    Continue
-                                </button>
-                            </div>
-                        </fieldset>
-                    </div>
+                            </fieldset>
+                        </div>
+                    </form>
                 </div>
-            </form>
+            }
 
         </section>
-
     </main>
 }

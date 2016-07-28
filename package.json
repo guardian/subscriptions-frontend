@@ -39,6 +39,7 @@
     "lodash": "^4.13.1",
     "lodash-amd": "~3.10.0",
     "moment": "^2.13.0",
+    "moment-business-days":"0.0.10",
     "phantomjs": "~1.9.15",
     "promise-polyfill": "^5.2.1",
     "qwery": "^4.0.0",

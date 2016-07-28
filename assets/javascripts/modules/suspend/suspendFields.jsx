@@ -4,22 +4,42 @@ import ReactDOM from 'react-dom';
 import formElements from './formElements'
 import CustomDateRangePicker from '../react/customDateRangePicker'
 
-import moment from 'moment'
+import moment from 'moment-business-days'
 
 require('react-datepicker/dist/react-datepicker.css');
 
-const NUMBER_OF_DAYS_IN_ADVANCE = 15;
-const MAX_WEEKS_AVAILABLE = 12;
+const FIRST_SELECTABLE_DATE = moment().businessAdd(5);
+const MAX_WEEKS = 3;
 
-const FIRST_SELECTABLE_DATE = moment().add(NUMBER_OF_DAYS_IN_ADVANCE, 'days')
-const DEFAULT_END_DATE = moment().add(NUMBER_OF_DAYS_IN_ADVANCE + 2, 'days')
-const LAST_SELECTABLE_DATE = moment().add(NUMBER_OF_DAYS_IN_ADVANCE + 7 * MAX_WEEKS_AVAILABLE, 'days')
+function filterDate(packageName) {
+    switch (true) {
+        case /Sunday/i.test(packageName):
+            return (date) => date.day() === 0;
+        case /Sixday/i.test(packageName):
+            return (date) => date.day() !== 0;
+        case /Weekend/i.test(packageName):
+            return (date) => date.day() === 6 || date.day() === 0;
+        default:
+            return (date) => true;
+    }
+}
 
 export default {
+
     renderDatePicker () {
+        const container = document.getElementById(formElements.SUSPEND_DATE_PICKER_ID),
+            remainingDays = parseInt(container.getAttribute('remainingDays'), 10),
+            filterDateFn = filterDate(container.getAttribute('ratePlanName'));
+
         ReactDOM.render(
-            <CustomDateRangePicker className="input-text" startDate={FIRST_SELECTABLE_DATE} minDate={FIRST_SELECTABLE_DATE} endDate={DEFAULT_END_DATE} maxDate={LAST_SELECTABLE_DATE} dateFormat="D MMMM YYYY" locale="en-gb" />,
-            document.getElementById(formElements.SUSPEND_DATE_PICKER_ID)
+            <CustomDateRangePicker className="input-text"
+                                   maxWeeks={MAX_WEEKS}
+                                   firstSelectableDate={FIRST_SELECTABLE_DATE}
+                                   dateFormat="D MMMM YYYY" locale="en-gb"
+                                   filterDate={filterDateFn}
+                                   remainingDays={remainingDays}
+            />,
+            container
         )
 
     },

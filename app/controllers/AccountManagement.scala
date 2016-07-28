@@ -1,10 +1,16 @@
 package controllers
 
 import actions.CommonActions._
-import com.gu.memsub.Subscription
+import com.github.nscala_time.time.OrderingImplicits.LocalDateOrdering
+import com.gu.memsub.{Delivery, PaidPS, Subscription}
+import com.gu.subscriptions.suspendresume.{RefundCalculator, SuspensionService}
+import com.gu.subscriptions.suspendresume.SuspensionService.{AlreadyOnHoliday, BadZuoraJson, ErrNel, HolidayRefund, NegativeDays, NoRefundDue, NotEnoughNotice, PaymentHoliday}
+import com.gu.subscriptions.{PhysicalProducts, ProductPlan}
 import com.gu.zuora.soap.models.Queries.Contact
 import com.typesafe.scalalogging.LazyLogging
-import forms.{AccountManagementLoginForm, AccountManagementLoginRequest, SuspendForm, Suspension}
+import configuration.Config
+import forms.{AccountManagementLoginForm, AccountManagementLoginRequest, SuspendForm}
+import org.joda.time.LocalDate
 import play.api.mvc.{AnyContent, Controller, Request}
 import services.AuthenticationService._
 import services.TouchpointBackend
@@ -12,27 +18,27 @@ import utils.TestUsers.PreSigninTestCookie
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scalaz.{Monad, OptionT}
+import scalaz.std.option._
 import scalaz.std.scalaFuture._
 import scalaz.syntax.std.boolean._
 import scalaz.syntax.std.option._
-import scalaz.std.option._
+import scalaz.{EitherT, OptionT}
 
 object AccountManagement extends Controller with LazyLogging {
 
   val SUBSCRIPTION_SESSION_KEY = "subscriptionId"
 
-  private def subscriptionFromRequest(implicit request: Request[AnyContent]): Future[Option[Subscription]] = {
+  private def subscriptionFromRequest(implicit request: Request[AnyContent]): Future[Option[Subscription with PaidPS[ProductPlan[PhysicalProducts]]]] = {
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
 
     (for {
       subscriptionId <- OptionT(Future.successful(request.session.data.get(SUBSCRIPTION_SESSION_KEY)))
-      zuoraSubscription <- OptionT(tpBackend.subscriptionServicePaper.get(Subscription.Name(subscriptionId)))
+      zuoraSubscription <- OptionT(tpBackend.subscriptionServicePaper.paidWith(Subscription.Name(subscriptionId))(_.findPhysical))
     } yield zuoraSubscription).orElse(for {
       identityUser <- OptionT(Future.successful(authenticatedUserFor(request)))
       salesForceUser <- OptionT(tpBackend.salesforceService.repo.get(identityUser.user.id))
-      zuoraSubscription <- OptionT(tpBackend.subscriptionServicePaper.getPaid(_.findPhysical)(salesForceUser))
+      zuoraSubscription <- OptionT(tpBackend.subscriptionServicePaper.paidWith(salesForceUser)(_.findPhysical))
     } yield zuoraSubscription).run
   }
 
@@ -42,7 +48,7 @@ object AccountManagement extends Controller with LazyLogging {
 
     def detailsMatch(zuoraContact: Contact, loginRequest: AccountManagementLoginRequest): Boolean = {
       def format(str: String): String = str.filter(_.isLetterOrDigit).toLowerCase
-      
+
       format(zuoraContact.lastName) == format(loginRequest.lastname) &&
         zuoraContact.postalCode.map(format).contains(format(loginRequest.postcode))
     }
@@ -57,23 +63,26 @@ object AccountManagement extends Controller with LazyLogging {
 
   }
 
-  def login(subscriberId: Option[String] = None) = NoCacheAction.async { implicit request =>
+  private def pendingHolidayRefunds(allHolidays: Seq[HolidayRefund]) = allHolidays.filterNot(_._2.finish.isBefore(LocalDate.now)).sortBy(_._2.start)
 
-    val subscription = subscriptionFromRequest(request)
+  def login(subscriberId: Option[String] = None) = GoogleAuthenticatedStaffAction.async { implicit request =>
+    implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
+    implicit val tpBackend = resolution.backend
 
-    subscription.map {
-      case Some(sub) => {
-        val signedSubscriptionId = Suspension.signedSubscriptionId(sub.name.get)
-        Ok(views.html.account.suspend(sub.name.get, signedSubscriptionId))
-      }
-      case _ => {
-        Ok(views.html.account.details(subscriberId))
-      }
-    }
+    val subscription = subscriptionFromRequest
 
+    (for {
+      sub <- OptionT(subscription)
+      allHolidays <- OptionT(tpBackend.suspensionService.getHolidays(sub.name).map(_.toOption))
+      promo = sub.promoCode.flatMap(tpBackend.promoService.findPromotion)
+      pendingHolidays = pendingHolidayRefunds(allHolidays)
+      suspendableDays = Config.suspendableWeeks * sub.plan.products.without(Delivery).size
+      suspendedDays = SuspensionService.holidayToSuspendedDays(pendingHolidays, sub.plan.products.physicalProducts.list)
+    } yield Ok(views.html.account.suspend(sub, promo, pendingHolidayRefunds(allHolidays), suspendableDays, suspendedDays)))
+      .getOrElse(Ok(views.html.account.details(subscriberId)))
   }
 
-  def processLogin = NoCacheAction.async { implicit request =>
+  def processLogin = GoogleAuthenticatedStaffAction.async { implicit request =>
     val loginRequest = AccountManagementLoginForm.mappings.bindFromRequest().value
 
     subscriptionFromUserDetails(loginRequest).map {
@@ -86,15 +95,38 @@ object AccountManagement extends Controller with LazyLogging {
     }
   }
 
-  def processSuspension = NoCacheAction.async { implicit request =>
-    val suspension = SuspendForm.mappings.bindFromRequest().value.map(s => Seq(
-        s"Got ${s.verifiedSubscriptionId.getOrElse("unverified subscription ID")}",
-        s"Asked to suspend ${s.subscriptionId} for ${s.asDays()} days, starting ${s.startDate}",
-        s"Suspension = ${s.toString}", s"s.verifiedSubscriptionId = ${s.verifiedSubscriptionId}"
-      ).mkString("\n")
-    ).getOrElse("No data provided")
-    Future.successful(Ok(suspension).withNewSession)
-  }
+  private def userFacingError(r: ErrNel): String = r.map {
+    case NoRefundDue => "You aren't receiving the paper on any of the days you've selected" // change
+    case NotEnoughNotice => "Unfortunately we require five days notice to suspend deliveries" // these
+    case AlreadyOnHoliday => "It looks like you're already on holiday for some of the time" // at some point
+    case NegativeDays => "Invalid date range, please check your selections"
+    case BadZuoraJson(_) => "Unexpected error"
+  }.list.mkString(", ")
 
+  def processSuspension = GoogleAuthenticatedStaffAction.async { implicit request =>
+    lazy val noSub = "Could not find an active subscription"
+    implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
+    implicit val tpBackend = resolution.backend
+
+    (for {
+      form <- EitherT(Future.successful(SuspendForm.mappings.bindFromRequest().value \/> "Please check your selections and try again"))
+      sub <- EitherT(subscriptionFromRequest.map(_ \/> noSub))
+      newHoliday = PaymentHoliday(sub.name, form.startDate, form.endDate)
+      result <- EitherT(tpBackend.suspensionService.addHoliday(newHoliday, sub.plan)).leftMap(userFacingError)
+      billingSchedule <- EitherT(tpBackend.commonPaymentService.billingSchedule(sub).map(_ \/> "Error getting billing schedule"))
+      newHolidays <- EitherT(tpBackend.suspensionService.getHolidays(sub.name))
+      pendingHolidays = pendingHolidayRefunds(newHolidays)
+      suspendableDays = Config.suspendableWeeks * sub.plan.products.without(Delivery).size
+      suspendedDays = SuspensionService.holidayToSuspendedDays(pendingHolidays, sub.plan.products.physicalProducts.list)
+    } yield ((result.refund, newHoliday), pendingHolidays, billingSchedule, suspendableDays, suspendedDays)).fold(err => BadRequest(err), result => {
+        Ok(views.html.account.success(
+          newRefund = result._1,
+          holidayRefunds = result._2,
+          billingSchedule = result._3,
+          suspendableDays = result._4,
+          suspendedDays = result._5
+        )).withNewSession
+    })
+  }
 }
 

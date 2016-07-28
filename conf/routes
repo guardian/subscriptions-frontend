@@ -54,6 +54,7 @@ GET         /oauth2callback                  controllers.OAuth.oauth2Callback
 # Manage my account
 GET         /mma                             controllers.AccountManagement.login(subscriberId: Option[String])
 POST        /mma                             controllers.AccountManagement.processLogin
+GET         /mma/suspend                     controllers.AccountManagement.login(subscriberId: Option[String])
 POST        /mma/suspend                     controllers.AccountManagement.processSuspension
 
 # Pattern Library

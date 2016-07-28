@@ -4,7 +4,7 @@ import ReactDOM from 'react-dom';
 import formElements from './formElements'
 import CustomDatePicker from '../react/customDatePicker'
 import CharacterCountedTextArea from './characterCountedTextArea'
-import moment from 'moment'
+import moment from 'moment-business-days'
 
 require('react-datepicker/dist/react-datepicker.css');
 
@@ -25,16 +25,16 @@ function filterDate(packageName) {
 }
 
 function getFirstSelectableDate(filterFn) {
-    var firstSelectableDate = moment().add(NUMBER_OF_DAYS_IN_ADVANCE, 'days');
+    var firstSelectableDate = moment().businessAdd(NUMBER_OF_DAYS_IN_ADVANCE);
     while (filterFn && !filterFn(firstSelectableDate)) {
-        firstSelectableDate = firstSelectableDate.add(1, 'days');
+        firstSelectableDate.add(1, 'day');
     }
     return firstSelectableDate;
 }
 
 function getLastSelectableDate(firstSelectableDate) {
     var startDate = firstSelectableDate || moment();
-    return startDate.clone().add(MAX_WEEKS_AVAILABLE, 'weeks');
+    return moment(startDate).add(MAX_WEEKS_AVAILABLE, 'weeks');
 }
 
 export default {

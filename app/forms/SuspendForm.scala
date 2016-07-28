@@ -6,20 +6,9 @@ import play.api.data.Forms._
 import play.api.libs.Crypto
 import scalaz.syntax.std.boolean._
 
-case class Suspension(startDate: LocalDate, endDate: LocalDate, subscriptionId: String, signedSubscriptionId: String) {
+case class Suspension(startDate: LocalDate, endDate: LocalDate) {
 
-  def verifiedSubscriptionId: Option[String] =
-    Suspension.isValidSubscriptionId(subscriptionId, signedSubscriptionId).option(subscriptionId)
-
-  def asDays(): Integer = Days.daysBetween(startDate, endDate).getDays
-
-}
-
-object Suspension {
-
-  def signedSubscriptionId(subscriptionId: String): String = Crypto.sign(subscriptionId)
-
-  def isValidSubscriptionId(subscriptionId: String, signedSubscriptionId: String): Boolean = Crypto.sign(subscriptionId) == signedSubscriptionId
+  def asDays(): Days = Days.daysBetween(startDate, endDate)
 
 }
 
@@ -27,9 +16,7 @@ object SuspendForm {
 
   val mappings = Form(mapping(
     "startDate" -> jodaLocalDate("d MMMM y"),
-    "endDate" -> jodaLocalDate("d MMMM y"),
-    "subscriptionId" -> text,
-    "signedSubscriptionId" -> text
+    "endDate" -> jodaLocalDate("d MMMM y")
   )(Suspension.apply)(Suspension.unapply))
 
 }

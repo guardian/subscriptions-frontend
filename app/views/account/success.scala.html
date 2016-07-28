@@ -1,0 +1,57 @@
+@import org.joda.time.Days.daysBetween
+@import com.gu.subscriptions.suspendresume.SuspensionService.HolidayRefund
+@import com.gu.memsub.BillingSchedule
+@import com.gu.memsub.Price
+@import com.gu.i18n.GBP
+@import views.support.Dates.prettyDate
+@import model.DigitalEdition.UK
+
+@(newRefund: HolidayRefund, holidayRefunds: Seq[HolidayRefund], billingSchedule: BillingSchedule, suspendableDays: Int, suspendedDays: Int)
+
+@main("Suspension success | The Guardian", edition = UK) {
+    <main class="page-container gs-container">
+
+        <div class="suspend-header">
+            <h1 class="suspend-header__title">Suspend your newspaper delivery</h1>
+        </div>
+
+        <div class="prose">
+            <p>
+                Thank you. Your newspaper delivery will be suspended
+                @if(newRefund._2.start == newRefund._2.finish) { on @prettyDate(newRefund._2.start) } else { from @prettyDate(newRefund._2.start) to @prettyDate(newRefund._2.finish) }.
+            </p>
+            <p>@Price(newRefund._1, GBP).pretty will be deducted from your next payment after @prettyDate(newRefund._2.start).</p>
+            <p>Have a great holiday.</p>
+        </div>
+
+        <div>
+            <h3>Your suspensions</h3>
+            <div>@account.suspensions(holidayRefunds, suspendableDays, suspendedDays)</div>
+        </div>
+
+        <br/>
+
+        <div>
+            <h3>Your new billing schedule</h3>
+            <table class="table table--striped">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @for(bill <- billingSchedule.invoices.list) {
+                    <tr>
+                        <td>@prettyDate(bill.date)</td>
+                        <td>@Price(bill.amount, GBP).pretty</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+
+        <br/>
+
+    </main>
+}
