@@ -54,7 +54,7 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
   def checkoutService(implicit res: TouchpointBackend.Resolution): CheckoutService =
     res.backend.checkoutService
 
-  def renderCheckout(countryGroup: CountryGroup, promoCode: Option[PromoCode], forThisPlan: String) = NoSubAction.async { implicit request =>
+  def renderCheckout(countryGroup: CountryGroup, promoCode: Option[PromoCode], forThisPlan: String) = NoCacheAction.async { implicit request =>
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
 
@@ -112,7 +112,7 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
     }
   }
 
-  def handleCheckout = NoSubAjaxAction.async { implicit request =>
+  def handleCheckout = NoCacheAction.async { implicit request =>
 
     //there's an annoying circular dependency going on here
     val tempData = SubscriptionsForm.subsForm.bindFromRequest().value
