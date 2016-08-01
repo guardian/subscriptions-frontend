@@ -21,6 +21,9 @@ define(['utils/cookie',
             'cookieDomain': guardian.googleAnalytics.cookieDomain
         });
 
+        ga('require', 'linker');
+        ga('linker:autoLink', ['eventbrite.co.uk'] ); // for consistency with the rest of membership sites
+
         /**
          * Enable enhanced link attribution
          * https://support.google.com/analytics/answer/2558867?hl=en-GB
