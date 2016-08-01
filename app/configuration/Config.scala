@@ -121,4 +121,6 @@ object Config {
   val previewXFrameOptionsOverride = config.getString("subscriptions.preview-x-frame-options-override")
 
   val welcomeEmailQueue = config.getString("aws.queue.welcome-email")
+
+  val googleAnalyticsTrackingId = config.getString("google.analytics.tracking.id")
 }

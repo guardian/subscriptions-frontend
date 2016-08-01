@@ -16,9 +16,22 @@ define(['utils/cookie',
         })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
         /*eslint-enable */
 
-        ga('create', 'UA-51507017-5', 'auto');
-        ga('set', 'dimension1', identitySignedIn.toString());
-        ga('set', 'dimension2', identitySignedOut.toString());
+        ga('create', guardian.googleAnalytics.trackingId, {
+            'allowLinker': true,
+            'cookieDomain': guardian.googleAnalytics.cookieDomain
+        });
+
+        ga('require', 'linker');
+        ga('linker:autoLink', ['eventbrite.co.uk'] ); // for consistency with the rest of membership sites
+
+        /**
+         * Enable enhanced link attribution
+         * https://support.google.com/analytics/answer/2558867?hl=en-GB
+         */
+        ga('require', 'linkid', 'linkid.js');
+
+        ga('set', 'dimension1', identitySignedIn.toString());   // deprecated
+        ga('set', 'dimension2', identitySignedOut.toString());  // deprecated
         ga('send', 'pageview');
 
         ga('create', 'UA-44575989-1', 'auto', 'jellyfishGA');
