@@ -8,7 +8,6 @@ define([
     function init() {
         if (formElements.$SUSPEND_FORM.length) {
             require(['modules/suspend/suspendFields'], function(suspendFields) {
-                console.log('Loaded suspend JS stuff');
                 suspendFields.default.init();
             });
         }
