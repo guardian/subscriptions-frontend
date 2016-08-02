@@ -37,6 +37,7 @@
             <div>
                 <h2>Your subscription</h2>
                 <ul>
+                    <li>Subscriber ID: <strong>@subscription.name.get</strong></li>
                     <li>You are subscribed to the <strong>@subscription.plan.title</strong></li>
                     <li>
                         You pay <strong>@promotion.flatMap(_.asDiscount).fold {
