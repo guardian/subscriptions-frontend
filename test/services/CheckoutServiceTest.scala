@@ -11,7 +11,6 @@ import scalaz.syntax.nel._
 
 class CheckoutServiceTest extends Specification {
 
-  val noPricing = PricingSummary(Map.empty)
   implicit val today = new LocalDate("2016-07-22") // deterministic
   val address = Address("123 Fake St", "", "Town", "Kent", "123", "Blah")
   val noPricing = PricingSummary(Map.empty)
