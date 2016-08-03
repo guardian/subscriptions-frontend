@@ -17,7 +17,7 @@ class SalesforceServiceTest extends Specification {
   "Salesforce contact serialiser" should {
 
     val plan = new ProductPlan[PhysicalProducts](ProductRatePlanId("p"), "name", "desc",
-      PhysicalProducts(MondayPaper.wrapNel, List.empty), "slug", None, BillingPeriod.month, PricingSummary(Map.empty))
+      PhysicalProducts((MondayPaper -> PricingSummary(Map.empty)).wrapNel, List.empty), "slug", None, BillingPeriod.month)
 
     val bloggsResidence = Address("Flat 123", "123 Fake Street", "Faketown", "Kent", "FT1 0HF", "UK")
     val data = PersonalData("Joe", "Bloggs", "joebloggs@example,com", receiveGnmMarketing = true, bloggsResidence, Some("1234"), Title.Prof.some)
