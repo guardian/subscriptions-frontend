@@ -13,9 +13,10 @@ class CheckoutServiceTest extends Specification {
 
   implicit val today = new LocalDate("2016-07-22") // deterministic
   val address = Address("123 Fake St", "", "Town", "Kent", "123", "Blah")
+  val noPricing = PricingSummary(Map.empty)
 
-  val paperPlan = ProductPlan(ProductRatePlanId(""), "", "", PhysicalProducts(MondayPaper.wrapNel, List.empty), "", None, BillingPeriod.month, PricingSummary(Map.empty))
-  val digiPlan = ProductPlan(ProductRatePlanId(""), "", "", DigitalProducts(Digipack.wrapNel), "", None, BillingPeriod.month, PricingSummary(Map.empty))
+  val paperPlan = ProductPlan(ProductRatePlanId(""), "", "", PhysicalProducts((MondayPaper -> noPricing).wrapNel, List.empty), "", None, BillingPeriod.month)
+  val digiPlan = ProductPlan(ProductRatePlanId(""), "", "", DigitalProducts((Digipack -> noPricing).wrapNel), "", None, BillingPeriod.month)
 
   val zuora = ZuoraProperties(paymentDelayInDays = Days.days(14), gracePeriodInDays = Days.days(2))
   val paperData = Left(PaperData(new LocalDate("2016-07-30"), address, None, paperPlan))
