@@ -10,6 +10,7 @@ require([
     'modules/password',
     'modules/inputMask',
     'modules/checkout',
+    'modules/suspend',
     'modules/confirmation',
     'modules/patterns',
     'modules/cas/form',
@@ -27,6 +28,7 @@ require([
     password,
     inputMask,
     checkout,
+    suspend,
     confirmation,
     cas,
     patterns,
@@ -47,6 +49,7 @@ require([
     password.init();
     inputMask.init();
     checkout.init();
+    suspend.init();
     confirmation.init();
     cas.init();
     patterns.init();

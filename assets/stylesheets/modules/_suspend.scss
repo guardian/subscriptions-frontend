@@ -1,0 +1,146 @@
+/* ==========================================================================
+   suspend
+   ========================================================================== */
+
+.suspend-header {
+    padding: ($gs-gutter / 2) 0 ($gs-baseline / 2);
+
+    @include mq(desktop) {
+        padding-left: 22.5%;
+        padding-bottom: $gs-gutter * 2;
+    }
+}
+.suspend-header__title {
+    @include fs-headline(6);
+
+    @include mq(tablet) {
+        @include fs-headline(8, true);
+    }
+}
+
+.suspend-container {
+    @include clearfix();
+    padding-bottom: $gs-gutter * 2;
+}
+.suspend-container__form {
+    margin-bottom: $gs-baseline;
+
+    @include mq(desktop) {
+        float: left;
+        width: 65%
+    }
+}
+.suspend-container__sidebar {
+    position: relative;
+
+    @include mq(desktop) {
+        float: right;
+        width: 35%;
+        padding-left: $gs-gutter;
+    }
+    @include mq(wide) {
+        padding-left: gs-span(1.5);
+    }
+}
+.suspend-container__frequency {
+    cursor: pointer;
+}
+
+/* Notice
+   ========================================================================== */
+
+.notices-container {
+    display: none;
+    @include mq(tablet) {
+        display: block;
+    }
+}
+.notice {
+    @include fs-textSans(2);
+    border-top: 1px dotted $c-neutral5;
+    padding-top: $gs-baseline / 2;
+    margin-bottom: $gs-baseline;
+}
+.notice__header {
+    font-weight: 900;
+}
+
+/* Review Details
+   ========================================================================== */
+
+.review-details {
+    @include fs-bodyCopy(2);
+}
+.review-details__item {
+    margin-bottom: $gs-gutter;
+
+    @include mq(tablet) {
+        display: table;
+        width: 100%
+    }
+}
+.review-details__heading,
+.review-details__list {
+    @include mq(tablet) {
+        display: table-cell;
+        vertical-align: top;
+    }
+}
+.review-details__heading {
+    @include fs-bodyHeading(2);
+
+    @include mq(tablet) {
+        width: 35%;
+        padding-right: $gs-gutter;
+        text-align: right;
+    }
+}
+.review-details__actions {
+    @include mq(tablet) {
+        margin-left: 35%;
+    }
+}
+
+
+/* ==========================================================================
+   Review Panel
+   ========================================================================== */
+
+.review-panel {
+    @include fs-bodyCopy(2);
+    background: $c-neutral7;
+    border-top: 1px solid $c-border;
+    padding: $gs-gutter / 2;
+}
+.review-panel__item {
+    padding-bottom: $gs-baseline;
+
+    @include mq(tablet) {
+        display: table;
+        width: 100%
+    }
+}
+.review-panel__label,
+.review-panel__details {
+    @include mq(tablet) {
+        display: table-cell;
+        vertical-align: top;
+    }
+}
+.review-panel__label {
+    font-weight: bold;
+
+    @include mq(tablet) {
+        text-align: right;
+        padding-right: $gs-gutter;
+        width: gs-span(3);
+    }
+}
+
+/* ==========================================================================
+   Thank you page
+   ========================================================================== */
+
+.finish-account-error {
+    color: guss-colour(error);
+}

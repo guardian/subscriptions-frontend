@@ -8,8 +8,10 @@ import com.gu.memsub.services.{PaymentService => CommonPaymentService, _}
 import com.gu.monitoring.{ServiceMetrics, StatusMetrics}
 import com.gu.salesforce.SimpleContactRepository
 import com.gu.stripe.StripeService
+import com.gu.subscriptions.suspendresume.SuspensionService
 import com.gu.subscriptions.{DigipackCatalog, Discounter, PaperCatalog}
 import com.gu.zuora
+import com.gu.zuora.rest.{RequestRunners, SimpleClient}
 import com.gu.zuora.{rest, soap}
 import configuration.Config
 import forms.SubscriptionsForm
@@ -20,6 +22,7 @@ import play.api.libs.concurrent.Execution.Implicits._
 import play.api.mvc.RequestHeader
 import touchpoint.TouchpointBackendConfig.BackendType
 import touchpoint.{TouchpointBackendConfig, ZuoraProperties}
+import scalaz.std.scalaFuture._
 import utils.TestUsers._
 
 import scala.concurrent.Future
@@ -57,6 +60,12 @@ object TouchpointBackend {
     val subService = new SubscriptionService(zuoraService, _stripeService, catalogService.digipackCatalog)
     val subServicePaper = new SubscriptionService(zuoraService, _stripeService, catalogService.paperCatalog)
     val memsubPaymentService = new CommonPaymentService(_stripeService, zuoraService, catalogService)
+
+    val suspService = new SuspensionService[Future](
+      Config.holidayRatePlanIds(config.environmentName),
+      new SimpleClient[Future](config.zuoraRest, RequestRunners.futureRunner)
+    )
+
     val form = new forms.SubscriptionsForm(catalogService)
 
 
@@ -80,6 +89,7 @@ object TouchpointBackend {
       promoCollection,
       promoStorage,
       discountPlans,
+      suspService,
       subsForm = form
     )
   }
@@ -123,6 +133,7 @@ case class TouchpointBackend(environmentName: String,
                              promos: PromotionCollection,
                              promoStorage: JsonDynamoService[AnyPromotion, Future],
                              discountRatePlanIds: DiscountRatePlanIds,
+                             suspensionService: SuspensionService[Future],
                              subsForm: SubscriptionsForm) {
 
   private val that = this

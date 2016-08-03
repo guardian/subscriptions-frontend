@@ -99,6 +99,9 @@ object Config {
   def paperProductIds(env: String) =
     SubscriptionsProductIds(config.getConfig(s"touchpoint.backend.environments.$env.zuora.productIds.subscriptions"))
 
+  def holidayRatePlanIds(env: String) =
+    HolidayRatePlanIds(config.getConfig(s"touchpoint.backend.environments.$env.zuora.ratePlanIds.discount.deliverycredit"))
+
   object CAS {
     lazy val casConf = config.getConfig("cas")
     lazy val url = casConf.getString("url")
@@ -123,4 +126,6 @@ object Config {
   val welcomeEmailQueue = config.getString("aws.queue.welcome-email")
 
   val googleAnalyticsTrackingId = config.getString("google.analytics.tracking.id")
+
+  val suspendableWeeks = 6
 }

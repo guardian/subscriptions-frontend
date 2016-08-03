@@ -209,6 +209,10 @@ module.exports = function(grunt) {
             js: {
                 files: ['<%= dirs.assets.javascripts %>/**/*.js'],
                 tasks: ['compile:js']
+            },
+            jsx: {
+                files: ['<%= dirs.assets.javascripts %>/**/*.jsx'],
+                tasks: ['compile:js']
             }
         },
 

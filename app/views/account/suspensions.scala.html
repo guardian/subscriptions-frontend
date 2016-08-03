@@ -1,0 +1,29 @@
+@import com.gu.i18n.GBP
+@import com.gu.memsub.Price
+@import com.gu.subscriptions.suspendresume.SuspensionService.HolidayRefund
+@import views.support.Dates.formattedDateRange
+
+@(holidayRefunds: Seq[HolidayRefund] = Seq.empty, suspendableDays: Int, suspendedDays: Int)
+
+@if(holidayRefunds.nonEmpty) {
+    <div>
+        You have <strong>@suspendedDays days</strong> lined up:
+        <ul>
+        @for((refund, holiday) <- holidayRefunds) {
+            <li>
+                <strong>@formattedDateRange(holiday.start, holiday.finish)</strong>
+                <span class="u-note">(credit due: @Price(refund, GBP).pretty)</span>
+            </li>
+        }
+        </ul>
+        <div class="prose u-note">
+            @if((suspendableDays - suspendedDays) == 0) {
+                <strong>You cannot line up any more days</strong>.
+                <br/>
+            }
+            Please contact Customer Services on <a href="tel:+44 330 333 6767">+44 (0) 330 333 6767</a> or <a href="mailto:subscriptions@@theguardian.com">subscriptions@@theguardian.com</a> if you wish to cancel or amend any of these.
+        </div>
+    </div>
+} else {
+    You have no suspensions currently lined up.
+}

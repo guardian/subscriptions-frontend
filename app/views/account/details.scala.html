@@ -1,0 +1,94 @@
+@import configuration.Config.Identity._
+@import com.gu.memsub.images.ResponsiveImageGroup
+@import com.gu.memsub.images.ResponsiveImageGenerator
+
+@import model.DigitalEdition.UK
+@(subscriberId: Option[String])(implicit request: RequestHeader, flash: Flash)
+
+@packImage = @{
+    ResponsiveImageGroup(availableImages = ResponsiveImageGenerator("05129395fe0461071f176f526d7a4ae2b1d9b9bf/0_0_5863_5116", Seq(140, 500, 1000, 2000)))
+}
+
+@main("Suspend your newspaper delivery | The Guardian", edition = UK) {
+
+    <main class="page-container gs-container">
+
+        <section class="suspend-container">
+
+            <div class="suspend-header">
+                <h1 class="suspend-header__title">Suspend your newspaper delivery</h1>
+            </div>
+
+            <div class="prose">
+                <p>
+                    Please use this service to let us know about any holidays you have planned so that we can suspend
+                    delivery of your newspapers while you're away. The cost of each suspended newspaper
+                    + 50 pence delivery will be deducted from the first payment after your suspension start date.
+                    For any other customer service enquiry, please contact us on: <a href="tel:+44 330 333 6767">+44 (0) 330 333 6767</a>
+                    or email <a href="mailto:subscriptions@@theguardian.com">subscriptions@@theguardian.com</a>.
+                </p>
+                <p>You can find your Subscriber ID in any post or email communications we've sent to you.</p>
+            </div>
+
+            <br/>
+
+            <form class="form js-suspend-form" action="@routes.AccountManagement.processLogin().url" method="POST" novalidate>
+
+                @helper.CSRF.formField
+
+                <div class="suspend-container__form">
+
+                    <div id="yourDetails" class="field-panel js-fieldset-your-details">
+                        <fieldset>
+                            <legend class="field-panel__legend">
+                                Your details
+                            </legend>
+                            <div class="field-panel__intro">
+                                <div class="field-note field-note--offset">
+                                @fragments.forms.securityNote()
+                                </div>
+                                <div class="field-note field-note--offset prose">
+                                    <span class="field-note__label">Already have a Guardian account?</span>
+                                    <a href="@idWebAppSigninUrl(routes.AccountManagement.login(None))">Sign in</a>
+                                </div>
+                            </div>
+                            <div class="field-panel__edit">
+                                <a href="#yourDetails" class="text-button u-button-reset js-edit-your-details" title="Edit your personal details">Edit</a>
+                            </div>
+                            <div class="field-panel__fields">
+                                <div class="form-field js-subscriber-id">
+                                    <label class="label" for="first">Subscriber ID</label>
+                                    <input type="text" class="input-text js-input" name="subscriptionId" id="first"
+                                    value="@subscriberId" maxlength="30" required>
+                                    @fragments.forms.errorMessage("This field is required")
+                                </div>
+                                <div class="form-field js-suspend-last">
+                                    <label class="label" for="last">Last name</label>
+                                    <input type="text" class="input-text js-input" name="lastname" id="last"
+                                    value="" maxlength="50" required>
+                                    @fragments.forms.errorMessage("This field is required")
+                                </div>
+                                <div class="form-field js-suspend-last">
+                                    <label class="label" for="last">Post code</label>
+                                    <input type="text" class="input-text js-input" name="postcode" id="last"
+                                    value="" maxlength="50" required>
+                                    @fragments.forms.errorMessage("This field is required")
+                                </div>
+                                @if(flash.get("error").isDefined) {
+                                    <div class="form-field__error-message-visible">@flash.get("error")</div>
+                                }
+                                <button type="submit" class="js-suspend-submit button button--primary button--large u-margin-bottom">
+                                    Continue
+                                </button>
+                            </div>
+                        </fieldset>
+                    </div>
+
+                </div>
+
+            </form>
+
+        </section>
+        <br/>
+    </main>
+}
