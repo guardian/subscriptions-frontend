@@ -47,12 +47,15 @@ define([
     }
 
     function validatePostCode(e) {
-        if (e.key === 'Control' || e.key === 'Shift' ||  e.key === 'Alt' || e.key === ' ') {
+        // Don't react on key presses that don't affect the text, or is just whitespace that'll get trimmed
+        if (e.key     === 'Control' || e.key     === 'Shift' || e.key     === 'Alt' || e.key     ===  ' ' ||
+            e.keyCode === 17        || e.keyCode === 16      || e.keyCode === 18    || e.keyCode === 32
+        ) {
             return;
         }
 
         var $e = $(e.target),
-            postCodeStr = $e.val().replace(/^\s+/, '').toUpperCase(); // trim only leading spaces
+            postCodeStr = $e.val().replace(/^\s+/, '').replace(/\s+/g, ' ').toUpperCase(); // trim only leading spaces
 
         $e.val(postCodeStr); // update display as soon as possible
 

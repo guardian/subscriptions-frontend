@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-
+import moment from 'moment'
 import formElements from './formElements'
 import CustomDatePicker from '../react/customDatePicker'
 import CharacterCountedTextArea from './characterCountedTextArea'
