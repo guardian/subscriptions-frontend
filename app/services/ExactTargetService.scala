@@ -50,14 +50,14 @@ trait ExactTargetService extends LazyLogging {
       validPromotion: Option[ValidPromotion[NewUsers]],
       purchaserIds: PurchaserIdentifiers): Future[DataExtensionRow] = {
 
-    def getZuoraPaidSubscription(): Future[PaidSub] =
+    val zuoraPaidSubscription: Future[PaidSub] =
       subscriptionData.productData.fold(
         { paper => paperSubscriptionService.unsafeGetPaid(Subscription.Name(subscribeResult.subscriptionName))},
         { digipack => digiSubscriptionService.unsafeGetPaid(Subscription.Name(subscribeResult.subscriptionName))}
       ).andThen { case Failure(e) =>
         logger.error(s"Failed to get paid subscription ${subscribeResult.subscriptionName} from Zuora for user ${purchaserIds.identityId}", e)}
 
-    def getZuoraPaymentMethod(): Future[PaymentMethod] =
+    val zuoraPaymentMethod: Future[PaymentMethod] =
       paymentService.getPaymentMethod(Subscription.AccountId(subscribeResult.accountId)).map(
         _.getOrElse(throw new Exception(s"Subscription with no payment method found, ${subscribeResult.subscriptionId}"))
       ).andThen { case Failure(e) =>
@@ -89,8 +89,8 @@ trait ExactTargetService extends LazyLogging {
     }
 
     for {
-      sub <- getZuoraPaidSubscription()
-      pm <- getZuoraPaymentMethod()
+      sub <- zuoraPaidSubscription
+      pm <- zuoraPaymentMethod
     } yield {
       buildRow(sub, pm)
     }
