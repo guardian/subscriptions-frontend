@@ -270,6 +270,11 @@ input[type=number] {
         border-color: guss-colour(error);
     }
 }
+.form-field__react-datepicker {
+    .react-datepicker__input-container {
+        display: block;
+    }
+}
 
 /**
  * Option groups

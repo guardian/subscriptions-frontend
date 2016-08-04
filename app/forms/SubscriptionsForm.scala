@@ -37,7 +37,7 @@ class SubscriptionsForm(catalogService: CatalogService) {
   (DigipackData)(DigipackData.unapply))
 
   val paperForm = Form(mapping(
-    "startDate" -> jodaLocalDate("d MMMM y"),
+    "startDate" -> jodaLocalDate("EEEE d MMMM y"),
     "delivery" -> addressDataMapping,
     "deliveryInstructions" -> optional(text(0, 250)),
     "ratePlanId" -> of[ProductPlan[PhysicalProducts]]
