@@ -47,12 +47,12 @@ define([
     }
 
     function validatePostCode(e) {
-        if ( e.key === 'Control' || e.key === 'Shift' ||  e.key === 'Alt' || e.key === ' ') {
+        if (e.key === 'Control' || e.key === 'Shift' ||  e.key === 'Alt' || e.key === ' ') {
             return;
         }
 
         var $e = $(e.target),
-            postCodeStr = $e.val().trim().toUpperCase();
+            postCodeStr = $e.val().replace(/^\s+/, '').toUpperCase(); // trim only leading spaces
 
         $e.val(postCodeStr); // update display as soon as possible
 
@@ -62,6 +62,9 @@ define([
             errorMessage = $deliveryPostcodeContainer.data('error-message'),
             validationUrl = $deliveryPostcodeContainer.data('validation-url');
             ORIGINAL_ERROR_MESSAGE = ORIGINAL_ERROR_MESSAGE || $errorLabel.text();
+
+        // remove all whitespace for the lookup
+        postCodeStr = postCodeStr.replace(/\s+/g, '');
 
         if (postCodeStr.length < 2) {
             POSTCODE_ELIGIBLE = true;
