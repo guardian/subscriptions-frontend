@@ -55,8 +55,9 @@ libraryDependencies ++= Seq(
     "com.github.t3hnar" %% "scala-bcrypt" % "2.4",
     "org.apache.commons" % "commons-io" % "1.3.2",
     "org.scalaz" %% "scalaz-core" % "7.1.3",
-    "org.pegdown" % "pegdown" % "1.6.0"
-    ,"com.amazonaws" % "aws-java-sdk-sqs" % "1.10.50"
+    "org.pegdown" % "pegdown" % "1.6.0",
+    "com.amazonaws" % "aws-java-sdk-sqs" % "1.10.50",
+    "net.databinder.dispatch" %% "dispatch-core" % "0.11.3"
 )
 
 testOptions in Test ++= Seq(

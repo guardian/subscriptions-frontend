@@ -137,9 +137,9 @@ class CheckoutService(identityService: IdentityService,
     } yield {
       \/.right(())
     }).recover {
-      case e => \/.left(NonEmptyList(CheckoutExactTargetFailure(
+      case e: Throwable => \/.left(NonEmptyList(CheckoutExactTargetFailure(
         purchaserIds,
-        s"ExactTarget failed to send welcome email to subscriber $purchaserIds")))
+        s"ExactTarget failed to send welcome email to subscriber $purchaserIds: ${e.getMessage}")))
     }
 
   private def createOrUpdateUserInSalesforce(subscribeRequest: SubscribeRequest, userData: Option[IdMinimalUser]): Future[NonEmptyList[SubsError] \/ ContactId] = {
