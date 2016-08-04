@@ -5,10 +5,12 @@ import com.amazonaws.services.sqs.AmazonSQSClient
 import com.amazonaws.services.sqs.model._
 import views.support.Pricing._
 import com.gu.i18n.Currency
+import model.PurchaserIdentifiers
 import com.gu.memsub.promo.Promotion._
 import com.gu.memsub.promo._
 import com.gu.memsub.services.{SubscriptionService, PaymentService => CommonPaymentService}
 import com.gu.memsub._
+import com.gu.memsub.Subscription._
 import com.gu.subscriptions.{DigipackCatalog, PaperCatalog}
 import com.gu.zuora.soap.models.Results.SubscribeResult
 import com.typesafe.scalalogging.LazyLogging
@@ -41,31 +43,32 @@ trait ExactTargetService extends LazyLogging {
     }).getOrElse(plan.prettyPricing(currency))
   }
 
-  def sendETDataExtensionRow(
-                              subscribeResult: SubscribeResult,
-                              subscriptionData: SubscribeRequest,
-                              gracePeriod: Days,
-                              validPromotion: Option[ValidPromotion[NewUsers]]): Future[Unit] = {
+  private def buildETDataExtensionRow(
+      subscribeResult: SubscribeResult,
+      subscriptionData: SubscribeRequest,
+      gracePeriod: Days,
+      validPromotion: Option[ValidPromotion[NewUsers]],
+      purchaserIds: PurchaserIdentifiers): Future[DataExtensionRow] = {
 
-    val subscription = subscriptionData.productData.fold({ paper =>
-      paperSubscriptionService.unsafeGetPaid(Subscription.Name(subscribeResult.subscriptionName))
-    }, {digipack =>
-      digiSubscriptionService.unsafeGetPaid(Subscription.Name(subscribeResult.subscriptionName))
-    })
+    val zuoraPaidSubscription: Future[PaidSub] =
+      subscriptionData.productData.fold(
+        { paper => paperSubscriptionService.unsafeGetPaid(Subscription.Name(subscribeResult.subscriptionName))},
+        { digipack => digiSubscriptionService.unsafeGetPaid(Subscription.Name(subscribeResult.subscriptionName))}
+      ).andThen { case Failure(e) =>
+        logger.error(s"Failed to get paid subscription ${subscribeResult.subscriptionName} from Zuora for user ${purchaserIds.identityId}", e)}
 
-    val paymentMethod = paymentService.getPaymentMethod(Subscription.AccountId(subscribeResult.accountId)).map(
-      _.getOrElse(throw new Exception(s"Subscription with no payment method found, ${subscribeResult.subscriptionId}"))
-    )
+    val zuoraPaymentMethod: Future[PaymentMethod] =
+      paymentService.getPaymentMethod(Subscription.AccountId(subscribeResult.accountId)).map(
+        _.getOrElse(throw new Exception(s"Subscription with no payment method found, ${subscribeResult.subscriptionId}"))
+      ).andThen { case Failure(e) =>
+        logger.error(s"Failed to get payment method from Zuora: subscriptionId=${subscribeResult.subscriptionName} userId=${purchaserIds.identityId}", e)}
 
-    val promotionDescription = validPromotion.filterNot(_.promotion.promotionType == Tracking).map(_.promotion.description)
+    def buildRow(sub: PaidSub, pm: PaymentMethod) = {
+      val personalData = subscriptionData.genericData.personalData
+      val promotionDescription = validPromotion.filterNot(_.promotion.promotionType == Tracking).map(_.promotion.description)
+      val subscriptionDetails = getPlanDescription(validPromotion, personalData.currency, sub.plan)
 
-    val personalData = subscriptionData.genericData.personalData
-
-    for {
-      sub <- subscription
-      subscriptionDetails = getPlanDescription(validPromotion, personalData.currency, sub.plan)
-      pm <- paymentMethod
-      row = subscriptionData.productData.fold(
+      subscriptionData.productData.fold(
         paperData => PaperHomeDeliveryWelcome1DataExtensionRow(
           paperData = paperData,
           personalData = personalData,
@@ -83,6 +86,25 @@ trait ExactTargetService extends LazyLogging {
           promotionDescription = promotionDescription
         )
       )
+    }
+
+    for {
+      sub <- zuoraPaidSubscription
+      pm <- zuoraPaymentMethod
+    } yield {
+      buildRow(sub, pm)
+    }
+  }
+
+  def sendETDataExtensionRow(
+      subscribeResult: SubscribeResult,
+      subscriptionData: SubscribeRequest,
+      gracePeriod: Days,
+      validPromotion: Option[ValidPromotion[NewUsers]],
+      purchaserIds: PurchaserIdentifiers): Future[Unit] =
+
+    for {
+      row <- buildETDataExtensionRow(subscribeResult, subscriptionData, gracePeriod, validPromotion, purchaserIds)
       response <- SqsClient.sendWelcomeEmailToQueue(row)
     } yield {
       response match {
@@ -90,7 +112,6 @@ trait ExactTargetService extends LazyLogging {
         case Failure(e) => logger.error(s"Failed to send ${subscribeResult.subscriptionName} welcome email.", e)
       }
     }
-  }
 }
 
 object SqsClient extends LazyLogging {
