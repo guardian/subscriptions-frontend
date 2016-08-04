@@ -7,7 +7,7 @@
 
 @if(holidayRefunds.nonEmpty) {
     <div>
-        You have <strong>@suspendedDays days</strong> lined up:
+        You have <strong>@suspendedDays @if(suspendedDays == 1) { day } else { days }</strong> lined up:
         <ul>
         @for((refund, holiday) <- holidayRefunds) {
             <li>

@@ -3,13 +3,15 @@
 @import com.gu.memsub.images.ResponsiveImageGenerator
 
 @import model.DigitalEdition.UK
-@(subscriberId: Option[String])(implicit request: RequestHeader, flash: Flash)
+@(
+    subscriberId: Option[String]
+)(implicit request: RequestHeader, flash: Flash, touchpointBackendResolution: services.TouchpointBackend.Resolution)
 
 @packImage = @{
     ResponsiveImageGroup(availableImages = ResponsiveImageGenerator("05129395fe0461071f176f526d7a4ae2b1d9b9bf/0_0_5863_5116", Seq(140, 500, 1000, 2000)))
 }
 
-@main("Suspend your newspaper delivery | The Guardian", edition = UK) {
+@main("Suspend your newspaper delivery | The Guardian", edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
 
     <main class="page-container gs-container">
 
