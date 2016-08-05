@@ -120,7 +120,7 @@ object AccountManagement extends Controller with LazyLogging {
       suspendedDays = SuspensionService.holidayToSuspendedDays(pendingHolidays, sub.plan.products.physicalProducts.list)
     } yield {
       tpBackend.exactTargetService.enqueueETHolidaySuspensionEmail(sub, sub.plan.name, newBS, pendingHolidays.size, suspendableDays, suspendedDays).onFailure { case e: Throwable =>
-        logger.error(s"Failed to generate data to create ${sub.name.get}'s data extension", e.getMessage)
+        logger.error(s"Failed to generate data needed to enqueue ${sub.name.get}'s holiday suspension email. Reason: ${e.getMessage}")
       }
       Ok(views.html.account.success(
         newRefund = (result.refund, newHoliday),
@@ -130,6 +130,10 @@ object AccountManagement extends Controller with LazyLogging {
         suspendedDays = suspendedDays
       )).withNewSession
     }).valueOr(BadRequest(_))
+  }
+
+  def redirect = NoCacheAction { implicit request =>
+    Redirect(routes.AccountManagement.login(None).url)
   }
 }
 

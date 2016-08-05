@@ -132,7 +132,7 @@ trait ExactTargetService extends LazyLogging {
         }
         sfContactId <- zuoraAccount.sfContactId.fold[Future[String]](Future.failed(new IllegalStateException(s"Zuora record for ${subscription.accountId} has no sfContactId")))(Future.successful)
         salesforceContact <- Retry(2, s"Failed to get Salesforce Contact for sfContactId: $sfContactId") {
-          salesforceService.repo.get(sfContactId).map(_.getOrElse(throw new IllegalStateException(s"Cannot find salesforce contact for $sfContactId")))
+          salesforceService.repo.getByContactId(sfContactId).map(_.getOrElse(throw new IllegalStateException(s"Cannot find salesforce contact for $sfContactId")))
         }
       } yield HolidaySuspensionBillingScheduleDataExtensionRow(
         email = StringOps.oempty(salesforceContact.email).headOption,

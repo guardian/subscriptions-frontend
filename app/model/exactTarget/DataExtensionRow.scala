@@ -181,9 +181,7 @@ object HolidaySuspensionBillingScheduleDataExtensionRow {
            daysAllowed: Int
          ): HolidaySuspensionBillingScheduleDataExtensionRow = {
 
-    val reversedSchedule = billingSchedule.invoices.reverse.list
-    val thereafterBill = reversedSchedule.takeWhile(_.amount == reversedSchedule.head.amount).last
-    val trimmedSchedule = reversedSchedule.dropWhile(_.amount == thereafterBill.amount).reverse
+    val (thereafterBill, trimmedSchedule) = BillingSchedule.rolledUp(billingSchedule)
     val count = new AtomicInteger()
     val futureBills = trimmedSchedule.flatMap(bill => {
       val number = count.incrementAndGet()
