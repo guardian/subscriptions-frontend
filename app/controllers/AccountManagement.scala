@@ -114,7 +114,7 @@ object AccountManagement extends Controller with LazyLogging {
       oldBS <- EitherT(tpBackend.commonPaymentService.billingSchedule(sub, 12).map(_ \/> "Error getting billing schedule"))
       result <- EitherT(tpBackend.suspensionService.addHoliday(newHoliday, oldBS)).leftMap(userFacingError)
       newBS <- EitherT(tpBackend.commonPaymentService.billingSchedule(sub, 12).map(_ \/> "Error getting billing schedule"))
-      newHolidays <- EitherT(tpBackend.suspensionService.getHolidays(sub.name))
+      newHolidays <- EitherT(tpBackend.suspensionService.getHolidays(sub.name)).leftMap(_ => "Error getting holidays")
       pendingHolidays = pendingHolidayRefunds(newHolidays)
       suspendableDays = Config.suspendableWeeks * sub.plan.products.without(Delivery).size
       suspendedDays = SuspensionService.holidayToSuspendedDays(pendingHolidays, sub.plan.products.physicalProducts.list)
