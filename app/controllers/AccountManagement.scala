@@ -68,7 +68,6 @@ object AccountManagement extends Controller with LazyLogging {
   def login(subscriberId: Option[String] = None) = GoogleAuthenticatedStaffAction.async { implicit request =>
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
-
     val subscription = subscriptionFromRequest
 
     (for {
@@ -112,13 +111,14 @@ object AccountManagement extends Controller with LazyLogging {
       form <- EitherT(Future.successful(SuspendForm.mappings.bindFromRequest().value \/> "Please check your selections and try again"))
       sub <- EitherT(subscriptionFromRequest.map(_ \/> noSub))
       newHoliday = PaymentHoliday(sub.name, form.startDate, form.endDate)
-      result <- EitherT(tpBackend.suspensionService.addHoliday(newHoliday, sub.plan)).leftMap(userFacingError)
-      billingSchedule <- EitherT(tpBackend.commonPaymentService.billingSchedule(sub).map(_ \/> "Error getting billing schedule"))
+      oldBS <- EitherT(tpBackend.commonPaymentService.billingSchedule(sub, 12).map(_ \/> "Error getting billing schedule"))
+      result <- EitherT(tpBackend.suspensionService.addHoliday(newHoliday, oldBS)).leftMap(userFacingError)
+      newBS <- EitherT(tpBackend.commonPaymentService.billingSchedule(sub, 12).map(_ \/> "Error getting billing schedule"))
       newHolidays <- EitherT(tpBackend.suspensionService.getHolidays(sub.name))
       pendingHolidays = pendingHolidayRefunds(newHolidays)
       suspendableDays = Config.suspendableWeeks * sub.plan.products.without(Delivery).size
       suspendedDays = SuspensionService.holidayToSuspendedDays(pendingHolidays, sub.plan.products.physicalProducts.list)
-    } yield ((result.refund, newHoliday), pendingHolidays, billingSchedule, suspendableDays, suspendedDays)).fold(err => BadRequest(err), result => {
+    } yield ((result.refund, newHoliday), pendingHolidays, newBS, suspendableDays, suspendedDays)).fold(err => BadRequest(err), result => {
         Ok(views.html.account.success(
           newRefund = result._1,
           holidayRefunds = result._2,
