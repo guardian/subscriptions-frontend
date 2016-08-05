@@ -184,8 +184,8 @@ object HolidaySuspensionBillingScheduleDataExtensionRow {
     val (thereafterBill, trimmedSchedule) = BillingSchedule.rolledUp(billingSchedule)
     val futureBills = trimmedSchedule.zipWithIndex.flatMap { case (bill, number) =>
       Seq(
-        s"future_bill_${number}_date" -> prettyDate(bill.date),
-        s"future_bill_${number}_amount" -> Price(bill.amount, subscriptionCurrency).pretty
+        s"future_bill_${number + 1}_date" -> prettyDate(bill.date),
+        s"future_bill_${number + 1}_amount" -> Price(bill.amount, subscriptionCurrency).pretty
       )
     }
     val emailAddress = email.getOrElse("holiday-suspension-bounce@guardian.co.uk")
