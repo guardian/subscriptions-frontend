@@ -29,7 +29,7 @@ function filterDate() {
 }
 
 function getFirstSelectableDate(filterFn) {
-    var firstSelectableDate = moment().add(NUMBER_OF_DAYS_IN_ADVANCE);
+    var firstSelectableDate = moment().add(NUMBER_OF_DAYS_IN_ADVANCE, 'days');
     while (filterFn && !filterFn(firstSelectableDate)) {
         firstSelectableDate.add(1, 'day');
     }
