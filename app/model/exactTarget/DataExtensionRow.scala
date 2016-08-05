@@ -143,7 +143,7 @@ object PaperHomeDeliveryWelcome1DataExtensionRow {
         "SubscriberKey" -> personalData.email,
         "EmailAddress" -> personalData.email,
         "subscriber_id" -> subscription.name.get,
-        "IncludesDigipack" -> paperData.plan.products.others.contains(Digipack).toString,
+        "IncludesDigipack" -> paperData.plan.products.others.map(_._1).contains(Digipack).toString,
         "title" -> personalData.title.fold("")(_.title),
         "first_name" -> personalData.first,
         "last_name" -> personalData.last,
