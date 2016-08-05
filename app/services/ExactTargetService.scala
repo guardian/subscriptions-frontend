@@ -22,6 +22,9 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json._
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
+import scala.concurrent.duration._
+import dispatch._, Defaults.timer
+import dispatch.retry
 
 /**
   * Sends welcome email message to Amazon SQS queue which is consumed by membership-workflow.
@@ -51,17 +54,17 @@ trait ExactTargetService extends LazyLogging {
       purchaserIds: PurchaserIdentifiers): Future[DataExtensionRow] = {
 
     val zuoraPaidSubscription: Future[PaidSub] =
-      subscriptionData.productData.fold(
-        { paper => paperSubscriptionService.unsafeGetPaid(Subscription.Name(subscribeResult.subscriptionName))},
-        { digipack => digiSubscriptionService.unsafeGetPaid(Subscription.Name(subscribeResult.subscriptionName))}
-      ).andThen { case Failure(e) =>
-        logger.error(s"Failed to get paid subscription ${subscribeResult.subscriptionName} from Zuora for user ${purchaserIds.identityId}", e)}
+      retry.Backoff(max = 2, delay = 2.seconds, base = 2) { () =>
+        subscriptionData.productData.fold(
+          { paper => paperSubscriptionService.unsafeGetPaid(Subscription.Name(subscribeResult.subscriptionName)) },
+          { digipack => digiSubscriptionService.unsafeGetPaid(Subscription.Name(subscribeResult.subscriptionName)) }).either
+      }.map(_.fold(e => throw new Exception(s"Failed to get Zuora paid subscription ${subscribeResult.subscriptionName}", e), identity))
 
     val zuoraPaymentMethod: Future[PaymentMethod] =
-      paymentService.getPaymentMethod(Subscription.AccountId(subscribeResult.accountId)).map(
-        _.getOrElse(throw new Exception(s"Subscription with no payment method found, ${subscribeResult.subscriptionId}"))
-      ).andThen { case Failure(e) =>
-        logger.error(s"Failed to get payment method from Zuora: subscriptionId=${subscribeResult.subscriptionName} userId=${purchaserIds.identityId}", e)}
+      retry.Backoff(max = 2, delay = 2.seconds, base = 2) { () =>
+          paymentService.getPaymentMethod(Subscription.AccountId(subscribeResult.accountId)).map(
+            _.getOrElse(throw new Exception(s"Subscription with no payment method found, ${subscribeResult.subscriptionId}"))).either
+      }.map(_.fold(e => throw new Exception(s"Failed to get Zuora payment method ${subscribeResult.subscriptionName}", e), identity))
 
     def buildRow(sub: PaidSub, pm: PaymentMethod) = {
       val personalData = subscriptionData.genericData.personalData
@@ -108,8 +111,8 @@ trait ExactTargetService extends LazyLogging {
       response <- SqsClient.sendWelcomeEmailToQueue(row)
     } yield {
       response match {
-        case Success(sendMsgResult) => logger.info(s"Successfully sent ${subscribeResult.subscriptionName} welcome email.")
-        case Failure(e) => logger.error(s"Failed to send ${subscribeResult.subscriptionName} welcome email.", e)
+        case Success(sendMsgResult) => logger.info(s"Successfully sent ${subscribeResult.subscriptionName} welcome email to user ${purchaserIds.identityId}.")
+        case Failure(e) => logger.error(s"Failed to send ${subscribeResult.subscriptionName} welcome email to user ${purchaserIds.identityId}.", e)
       }
     }
 }
