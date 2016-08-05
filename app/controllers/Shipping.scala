@@ -82,7 +82,7 @@ object Shipping extends Controller {
       description = """|If you live within the M25 you can have your papers delivered by 7am Monday - Saturday and 8.30am on Sunday.
                       |Plus you can start using the daily edition and premium live news app immediately.""".stripMargin,
       packageType = "paper-digital",
-      options = catalog.delivery.productPlans.filter(_.products.others.contains(Digipack)).map(planToOptions).sortBy(_.weeklyPrice).reverse
+      options = catalog.delivery.productPlans.filter(_.products.others.map(_._1).contains(Digipack)).map(planToOptions).sortBy(_.weeklyPrice).reverse
     ))
   }
 
