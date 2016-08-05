@@ -118,15 +118,18 @@ object AccountManagement extends Controller with LazyLogging {
       pendingHolidays = pendingHolidayRefunds(newHolidays)
       suspendableDays = Config.suspendableWeeks * sub.plan.products.without(Delivery).size
       suspendedDays = SuspensionService.holidayToSuspendedDays(pendingHolidays, sub.plan.products.physicalProducts.list)
-    } yield ((result.refund, newHoliday), pendingHolidays, newBS, suspendableDays, suspendedDays)).fold(err => BadRequest(err), result => {
-        Ok(views.html.account.success(
-          newRefund = result._1,
-          holidayRefunds = result._2,
-          billingSchedule = result._3,
-          suspendableDays = result._4,
-          suspendedDays = result._5
-        )).withNewSession
-    })
+    } yield {
+      tpBackend.exactTargetService.sendETDataExtensionRow(sub, sub.plan.name, newBS, pendingHolidays.size, suspendableDays, suspendedDays).onFailure { case e: Throwable =>
+        logger.error(s"Failed to generate data to create ${sub.name.get}'s data extension", e.getMessage)
+      }
+      Ok(views.html.account.success(
+        newRefund = (result.refund, newHoliday),
+        holidayRefunds = pendingHolidays,
+        billingSchedule = newBS,
+        suspendableDays = suspendableDays,
+        suspendedDays = suspendedDays
+      )).withNewSession
+    }).valueOr(BadRequest(_))
   }
 }
 

@@ -1,16 +1,20 @@
 package model.exactTarget
 
 import java.lang.Math.min
+import java.util.UUID
+import java.util.concurrent.atomic.AtomicInteger
 
-import com.gu.memsub._
 import com.gu.exacttarget._
+import com.gu.i18n.Currency
 import com.gu.memsub.Subscription._
+import com.gu.memsub._
 import com.typesafe.scalalogging.LazyLogging
 import model.exactTarget.DataExtensionRowHelpers._
-import org.joda.time.{Days, LocalDate}
 import model.{PaperData, PersonalData}
 import org.joda.time.Days.daysBetween
+import org.joda.time.{Days, LocalDate}
 import utils.Dates
+import views.support.Dates.prettyDate
 
 import scala.math.BigDecimal.decimal
 
@@ -163,10 +167,62 @@ object PaperHomeDeliveryWelcome1DataExtensionRow {
   }
 }
 
+object HolidaySuspensionBillingScheduleDataExtensionRow {
+
+  def apply(
+           email: Option[String],
+           saltuation: String,
+           subscriptionName: String,
+           subscriptionCurrency: Currency,
+           packageName: String,
+           billingSchedule: BillingSchedule,
+           numberOfSuspensionsLinedUp: Int,
+           daysUsed: Int,
+           daysAllowed: Int
+         ): HolidaySuspensionBillingScheduleDataExtensionRow = {
+
+    val reversedSchedule = billingSchedule.invoices.reverse.list
+    val thereafterBill = reversedSchedule.takeWhile(_.amount == reversedSchedule.head.amount).last
+    val trimmedSchedule = reversedSchedule.dropWhile(_.amount == thereafterBill.amount).reverse
+    val count = new AtomicInteger()
+    val futureBills = trimmedSchedule.flatMap(bill => {
+      val number = count.incrementAndGet()
+      Seq(
+        s"future_bill_${number}_date" -> prettyDate(bill.date),
+        s"future_bill_${number}_amount" -> Price(bill.amount, subscriptionCurrency).pretty
+      )
+    })
+    val emailAddress = email.getOrElse("holiday-suspension-bounce@guardian.co.uk")
+
+    HolidaySuspensionBillingScheduleDataExtensionRow(
+      emailAddress,
+      Seq(
+        "uuid" -> UUID.randomUUID().toString,
+        "subscription_id" -> subscriptionName,
+        "email_address" -> emailAddress,
+        "customer_salutation" -> saltuation,
+        "package_name" -> packageName,
+        "days_allowed" -> daysAllowed.toString,
+        "days_used" -> daysUsed.toString,
+        "days_remaining" -> (daysAllowed - daysUsed).toString,
+        "number_of_suspensions_lined_up" -> numberOfSuspensionsLinedUp.toString,
+        "normal_price" -> Price(thereafterBill.amount, subscriptionCurrency).pretty
+      ) ++ futureBills
+    )
+  }
+
+  def constructSalutation(titleOpt: Option[String], firstNameOpt: Option[String], lastNameOpt: Option[String]): String =
+    titleOpt.flatMap(title => lastNameOpt.map(lastName => s"$title $lastName")).getOrElse(firstNameOpt.getOrElse("Subscriber"))
+}
+
 case class DigipackWelcome1DataExtensionRow(email: String, fields: Seq[(String, String)]) extends DataExtensionRow {
   override def forExtension = DigipackDataExtension
 }
 
 case class PaperHomeDeliveryWelcome1DataExtensionRow(email: String, fields: Seq[(String, String)]) extends DataExtensionRow {
   override def forExtension = PaperDeliveryDataExtension
+}
+
+case class HolidaySuspensionBillingScheduleDataExtensionRow(email: String, fields: Seq[(String, String)]) extends DataExtensionRow {
+  override def forExtension = HolidaySuspensionBillingSchedule
 }
