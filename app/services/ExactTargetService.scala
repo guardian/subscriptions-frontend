@@ -22,9 +22,7 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json._
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
-import scala.concurrent.duration._
-import dispatch._, Defaults.timer
-import dispatch.retry
+import utils.Retry
 
 /**
   * Sends welcome email message to Amazon SQS queue which is consumed by membership-workflow.
@@ -54,17 +52,15 @@ trait ExactTargetService extends LazyLogging {
       purchaserIds: PurchaserIdentifiers): Future[DataExtensionRow] = {
 
     val zuoraPaidSubscription: Future[PaidSub] =
-      retry.Backoff(max = 2, delay = 2.seconds, base = 2) { () =>
+      Retry(2, s"Failed to get Zuora paid subscription ${subscribeResult.subscriptionName} for ${purchaserIds.identityId}") {
         subscriptionData.productData.fold(
           { paper => paperSubscriptionService.unsafeGetPaid(Subscription.Name(subscribeResult.subscriptionName)) },
-          { digipack => digiSubscriptionService.unsafeGetPaid(Subscription.Name(subscribeResult.subscriptionName)) }).either
-      }.map(_.fold(e => throw new Exception(s"Failed to get Zuora paid subscription ${subscribeResult.subscriptionName}", e), identity))
+          { digipack => digiSubscriptionService.unsafeGetPaid(Subscription.Name(subscribeResult.subscriptionName)) })}
 
     val zuoraPaymentMethod: Future[PaymentMethod] =
-      retry.Backoff(max = 2, delay = 2.seconds, base = 2) { () =>
-          paymentService.getPaymentMethod(Subscription.AccountId(subscribeResult.accountId)).map(
-            _.getOrElse(throw new Exception(s"Subscription with no payment method found, ${subscribeResult.subscriptionId}"))).either
-      }.map(_.fold(e => throw new Exception(s"Failed to get Zuora payment method ${subscribeResult.subscriptionName}", e), identity))
+      Retry(2, s"Failed to get Zuora payment method ${subscribeResult.subscriptionName} for ${purchaserIds.identityId}") {
+        paymentService.getPaymentMethod(Subscription.AccountId(subscribeResult.accountId)).map(
+          _.getOrElse(throw new Exception(s"Subscription with no payment method found, ${subscribeResult.subscriptionId}")))}
 
     def buildRow(sub: PaidSub, pm: PaymentMethod) = {
       val personalData = subscriptionData.genericData.personalData
