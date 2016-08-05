@@ -119,7 +119,7 @@ object AccountManagement extends Controller with LazyLogging {
       suspendableDays = Config.suspendableWeeks * sub.plan.products.without(Delivery).size
       suspendedDays = SuspensionService.holidayToSuspendedDays(pendingHolidays, sub.plan.products.physicalProducts.list)
     } yield {
-      tpBackend.exactTargetService.sendETDataExtensionRow(sub, sub.plan.name, newBS, pendingHolidays.size, suspendableDays, suspendedDays).onFailure { case e: Throwable =>
+      tpBackend.exactTargetService.enqueueETHolidaySuspensionEmail(sub, sub.plan.name, newBS, pendingHolidays.size, suspendableDays, suspendedDays).onFailure { case e: Throwable =>
         logger.error(s"Failed to generate data to create ${sub.name.get}'s data extension", e.getMessage)
       }
       Ok(views.html.account.success(

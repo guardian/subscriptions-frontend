@@ -133,7 +133,7 @@ class CheckoutService(identityService: IdentityService,
   ): Future[NonEmptyList[SubsError] \/ Unit] =
 
     (for {
-      a <- exactTargetService.sendETDataExtensionRow(subscribeResult, subscriptionData, gracePeriodInDays, validPromotion, purchaserIds)
+      a <- exactTargetService.enqueueETWelcomeEmail(subscribeResult, subscriptionData, gracePeriodInDays, validPromotion, purchaserIds)
     } yield {
       \/.right(())
     }).recover {

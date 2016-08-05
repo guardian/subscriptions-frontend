@@ -49,7 +49,7 @@ trait ExactTargetService extends LazyLogging {
     }).getOrElse(plan.prettyPricing(currency))
   }
 
-  private def buildETDataExtensionRow(
+  private def buildWelcomeEmailDataExtensionRow(
       subscribeResult: SubscribeResult,
       subscriptionData: SubscribeRequest,
       gracePeriod: Days,
@@ -100,7 +100,7 @@ trait ExactTargetService extends LazyLogging {
     }
   }
 
-  def sendETDataExtensionRow(
+  def enqueueETWelcomeEmail(
       subscribeResult: SubscribeResult,
       subscriptionData: SubscribeRequest,
       gracePeriod: Days,
@@ -108,7 +108,7 @@ trait ExactTargetService extends LazyLogging {
       purchaserIds: PurchaserIdentifiers): Future[Unit] =
 
     for {
-      row <- buildETDataExtensionRow(subscribeResult, subscriptionData, gracePeriod, validPromotion, purchaserIds)
+      row <- buildWelcomeEmailDataExtensionRow(subscribeResult, subscriptionData, gracePeriod, validPromotion, purchaserIds)
       response <- SqsClient.sendDataExtensionToQueue(Config.welcomeEmailQueue, row)
     } yield {
       response match {
@@ -117,7 +117,7 @@ trait ExactTargetService extends LazyLogging {
       }
     }
 
-  def sendETDataExtensionRow(
+  def enqueueETHolidaySuspensionEmail(
       subscription: Subscription,
       packageName: String,
       billingSchedule: BillingSchedule,
@@ -125,11 +125,16 @@ trait ExactTargetService extends LazyLogging {
       daysUsed: Int,
       daysAllowed: Int): Future[Unit] = {
 
-    for {
-      zuoraAccount <- zuoraService.getAccount(subscription.accountId)
-      sfContactId <- zuoraAccount.sfContactId.fold[Future[String]](Future.failed(new IllegalStateException(s"Zuora record for ${subscription.accountId} has no sfContactId")))(Future.successful)
-      salesforceContact <- salesforceService.repo.get(sfContactId).map(_.getOrElse(throw new IllegalStateException(s"Cannot find salesforce contact for $sfContactId")))
-      row = HolidaySuspensionBillingScheduleDataExtensionRow(
+    val buildDataExtensionRow =
+      for {
+        zuoraAccount <- Retry(2, s"Failed to get Zuora account for subscription: ${subscription.name.get}") {
+          zuoraService.getAccount(subscription.accountId)
+        }
+        sfContactId <- zuoraAccount.sfContactId.fold[Future[String]](Future.failed(new IllegalStateException(s"Zuora record for ${subscription.accountId} has no sfContactId")))(Future.successful)
+        salesforceContact <- Retry(2, s"Failed to get Salesforce Contact for sfContactId: $sfContactId") {
+          salesforceService.repo.get(sfContactId).map(_.getOrElse(throw new IllegalStateException(s"Cannot find salesforce contact for $sfContactId")))
+        }
+      } yield HolidaySuspensionBillingScheduleDataExtensionRow(
         email = StringOps.oempty(salesforceContact.email).headOption,
         saltuation = constructSalutation(salesforceContact.title, salesforceContact.firstName, Some(salesforceContact.lastName)),
         subscriptionName = subscription.name.get,
@@ -140,6 +145,9 @@ trait ExactTargetService extends LazyLogging {
         daysUsed,
         daysAllowed
       )
+
+    for {
+      row <- buildDataExtensionRow
       response <- SqsClient.sendDataExtensionToQueue(Config.holidaySuspensionEmailQueue, row)
     } yield {
       response match {
