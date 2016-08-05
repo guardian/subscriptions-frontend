@@ -125,6 +125,8 @@ object Config {
 
   val welcomeEmailQueue = config.getString("aws.queue.welcome-email")
 
+  val holidaySuspensionEmailQueue = config.getString("aws.queue.holiday-suspension-email")
+
   val googleAnalyticsTrackingId = config.getString("google.analytics.tracking.id")
 
   val suspendableWeeks = 6

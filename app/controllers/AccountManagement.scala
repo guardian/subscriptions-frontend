@@ -114,19 +114,26 @@ object AccountManagement extends Controller with LazyLogging {
       oldBS <- EitherT(tpBackend.commonPaymentService.billingSchedule(sub, 12).map(_ \/> "Error getting billing schedule"))
       result <- EitherT(tpBackend.suspensionService.addHoliday(newHoliday, oldBS)).leftMap(userFacingError)
       newBS <- EitherT(tpBackend.commonPaymentService.billingSchedule(sub, 12).map(_ \/> "Error getting billing schedule"))
-      newHolidays <- EitherT(tpBackend.suspensionService.getHolidays(sub.name))
+      newHolidays <- EitherT(tpBackend.suspensionService.getHolidays(sub.name)).leftMap(_ => "Error getting holidays")
       pendingHolidays = pendingHolidayRefunds(newHolidays)
       suspendableDays = Config.suspendableWeeks * sub.plan.products.without(Delivery).size
       suspendedDays = SuspensionService.holidayToSuspendedDays(pendingHolidays, sub.plan.products.physicalProducts.list)
-    } yield ((result.refund, newHoliday), pendingHolidays, newBS, suspendableDays, suspendedDays)).fold(err => BadRequest(err), result => {
-        Ok(views.html.account.success(
-          newRefund = result._1,
-          holidayRefunds = result._2,
-          billingSchedule = result._3,
-          suspendableDays = result._4,
-          suspendedDays = result._5
-        )).withNewSession
-    })
+    } yield {
+      tpBackend.exactTargetService.enqueueETHolidaySuspensionEmail(sub, sub.plan.name, newBS, pendingHolidays.size, suspendableDays, suspendedDays).onFailure { case e: Throwable =>
+        logger.error(s"Failed to generate data needed to enqueue ${sub.name.get}'s holiday suspension email. Reason: ${e.getMessage}")
+      }
+      Ok(views.html.account.success(
+        newRefund = (result.refund, newHoliday),
+        holidayRefunds = pendingHolidays,
+        billingSchedule = newBS,
+        suspendableDays = suspendableDays,
+        suspendedDays = suspendedDays
+      )).withNewSession
+    }).valueOr(BadRequest(_))
+  }
+
+  def redirect = NoCacheAction { implicit request =>
+    Redirect(routes.AccountManagement.login(None).url)
   }
 }
 

@@ -3,24 +3,27 @@ package services
 import com.amazonaws.regions.{Region, Regions}
 import com.amazonaws.services.sqs.AmazonSQSClient
 import com.amazonaws.services.sqs.model._
-import views.support.Pricing._
 import com.gu.i18n.Currency
-import model.PurchaserIdentifiers
+import com.gu.memsub.Subscription._
+import com.gu.memsub._
 import com.gu.memsub.promo.Promotion._
 import com.gu.memsub.promo._
 import com.gu.memsub.services.{SubscriptionService, PaymentService => CommonPaymentService}
-import com.gu.memsub._
-import com.gu.memsub.Subscription._
 import com.gu.subscriptions.{DigipackCatalog, PaperCatalog}
+import com.gu.zuora.api.ZuoraService
 import com.gu.zuora.soap.models.Results.SubscribeResult
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
-import model.SubscribeRequest
+import model.exactTarget.HolidaySuspensionBillingScheduleDataExtensionRow.constructSalutation
+import model.{PurchaserIdentifiers, SubscribeRequest}
 import model.exactTarget._
 import org.joda.time.Days
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json._
+import views.support.Pricing._
+
 import scala.concurrent.Future
+import scala.reflect.internal.util.StringOps
 import scala.util.{Failure, Success, Try}
 import utils.Retry
 
@@ -34,6 +37,8 @@ trait ExactTargetService extends LazyLogging {
   def digiSubscriptionService: SubscriptionService[DigipackCatalog]
   def paperSubscriptionService: SubscriptionService[PaperCatalog]
   def paymentService: CommonPaymentService
+  def zuoraService: ZuoraService
+  def salesforceService: SalesforceService
 
   private def getPlanDescription(validPromotion: Option[ValidPromotion[NewUsers]], currency: Currency, plan: PaidPlan[Status, BillingPeriod]): String = {
     (for {
@@ -44,7 +49,7 @@ trait ExactTargetService extends LazyLogging {
     }).getOrElse(plan.prettyPricing(currency))
   }
 
-  private def buildETDataExtensionRow(
+  private def buildWelcomeEmailDataExtensionRow(
       subscribeResult: SubscribeResult,
       subscriptionData: SubscribeRequest,
       gracePeriod: Days,
@@ -95,7 +100,7 @@ trait ExactTargetService extends LazyLogging {
     }
   }
 
-  def sendETDataExtensionRow(
+  def enqueueETWelcomeEmail(
       subscribeResult: SubscribeResult,
       subscriptionData: SubscribeRequest,
       gracePeriod: Days,
@@ -103,21 +108,61 @@ trait ExactTargetService extends LazyLogging {
       purchaserIds: PurchaserIdentifiers): Future[Unit] =
 
     for {
-      row <- buildETDataExtensionRow(subscribeResult, subscriptionData, gracePeriod, validPromotion, purchaserIds)
-      response <- SqsClient.sendWelcomeEmailToQueue(row)
+      row <- buildWelcomeEmailDataExtensionRow(subscribeResult, subscriptionData, gracePeriod, validPromotion, purchaserIds)
+      response <- SqsClient.sendDataExtensionToQueue(Config.welcomeEmailQueue, row)
     } yield {
       response match {
-        case Success(sendMsgResult) => logger.info(s"Successfully sent ${subscribeResult.subscriptionName} welcome email to user ${purchaserIds.identityId}.")
-        case Failure(e) => logger.error(s"Failed to send ${subscribeResult.subscriptionName} welcome email to user ${purchaserIds.identityId}.", e)
+        case Success(sendMsgResult) => logger.info(s"Successfully enqueued ${subscribeResult.subscriptionName} welcome email for user ${purchaserIds.identityId}.")
+        case Failure(e) => logger.error(s"Failed to enqueue ${subscribeResult.subscriptionName} welcome email for user ${purchaserIds.identityId}.", e)
       }
     }
+
+  def enqueueETHolidaySuspensionEmail(
+      subscription: Subscription,
+      packageName: String,
+      billingSchedule: BillingSchedule,
+      numberOfSuspensionsLinedUp: Int,
+      daysUsed: Int,
+      daysAllowed: Int): Future[Unit] = {
+
+    val buildDataExtensionRow =
+      for {
+        zuoraAccount <- Retry(2, s"Failed to get Zuora account for subscription: ${subscription.name.get}") {
+          zuoraService.getAccount(subscription.accountId)
+        }
+        sfContactId <- zuoraAccount.sfContactId.fold[Future[String]](Future.failed(new IllegalStateException(s"Zuora record for ${subscription.accountId} has no sfContactId")))(Future.successful)
+        salesforceContact <- Retry(2, s"Failed to get Salesforce Contact for sfContactId: $sfContactId") {
+          salesforceService.repo.getByContactId(sfContactId).map(_.getOrElse(throw new IllegalStateException(s"Cannot find salesforce contact for $sfContactId")))
+        }
+      } yield HolidaySuspensionBillingScheduleDataExtensionRow(
+        email = StringOps.oempty(salesforceContact.email).headOption,
+        saltuation = constructSalutation(salesforceContact.title, salesforceContact.firstName, Some(salesforceContact.lastName)),
+        subscriptionName = subscription.name.get,
+        subscriptionCurrency = subscription.currency,
+        packageName = packageName,
+        billingSchedule = billingSchedule,
+        numberOfSuspensionsLinedUp,
+        daysUsed,
+        daysAllowed
+      )
+
+    for {
+      row <- buildDataExtensionRow
+      response <- SqsClient.sendDataExtensionToQueue(Config.holidaySuspensionEmailQueue, row)
+    } yield {
+      response match {
+        case Success(sendMsgResult) => logger.info(s"Successfully enqueued ${subscription.name.get}'s updated billing schedule email.")
+        case Failure(e) => logger.error(s"Failed to enqueue ${subscription.name.get}'s updated billing schedule email. Details were: " + row.toString, e)
+      }
+    }
+  }
 }
 
 object SqsClient extends LazyLogging {
   private val sqsClient = new AmazonSQSClient()
   sqsClient.setRegion(Region.getRegion(Regions.EU_WEST_1))
 
-  def sendWelcomeEmailToQueue(row: DataExtensionRow): Future[Try[SendMessageResult]] = {
+  def sendDataExtensionToQueue(queueName: String, row: DataExtensionRow): Future[Try[SendMessageResult]] = {
     Future {
       val payload = Json.obj(
         "To" -> Json.obj(
@@ -131,7 +176,7 @@ object SqsClient extends LazyLogging {
       ).toString()
 
       def sendToQueue(msg: String): SendMessageResult = {
-        val queueUrl = sqsClient.createQueue(new CreateQueueRequest(Config.welcomeEmailQueue)).getQueueUrl
+        val queueUrl = sqsClient.createQueue(new CreateQueueRequest(queueName)).getQueueUrl
         sqsClient.sendMessage(new SendMessageRequest(queueUrl, msg))
       }
 

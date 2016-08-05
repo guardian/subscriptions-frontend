@@ -138,10 +138,12 @@ case class TouchpointBackend(environmentName: String,
 
   private val that = this
 
-  private val exactTargetService = new ExactTargetService {
+  val exactTargetService = new ExactTargetService {
     override def digiSubscriptionService = that.subscriptionService
     override def paperSubscriptionService = that.subscriptionServicePaper
     override def paymentService = that.commonPaymentService
+    override def zuoraService = that.zuoraService
+    override def salesforceService = that.salesforceService
   }
 
   val checkoutService =
