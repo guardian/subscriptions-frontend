@@ -11,7 +11,7 @@ define([
         On navigator [Firefox, Chrome, Opera]
         On window [IE, Safari]
     */
-    var isDNT = navigator.doNotTrack == '1' || window.doNotTrack == '1';
+    var isDNT = navigator.doNotTrack == '1' || window.doNotTrack == '1'; // == not === in case some random browser uses Number(1).
 
     var analyticsEnabled = (
         window.guardian.analyticsEnabled &&
@@ -22,8 +22,8 @@ define([
     return function(cb){
         return function() {
             if (analyticsEnabled) {
-                return cb()
+                return cb();
             }
-        }
-    }
+        };
+    };
 });

@@ -1,12 +1,14 @@
 /* global ga */
-define(['utils/cookie',
-        'modules/analytics/analyticsEnabled'
-    ], function(cookie, analyticsEnabled) {
+define(['modules/analytics/analyticsEnabled',
+        'utils/cookie',
+        'utils/user'
+    ], function(analyticsEnabled, cookie, user) {
     'use strict';
     function init() {
 
-        var identitySignedIn = !!cookie.getCookie('GU_U');
+        var identitySignedIn = user.isLoggedIn();
         var identitySignedOut = !!cookie.getCookie('GU_SO') && !identitySignedIn;
+        var ophanBrowserId = cookie.getCookie('bwid');
 
         /* Google analytics snippet */
         /*eslint-disable */
@@ -15,6 +17,10 @@ define(['utils/cookie',
             m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
         })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
         /*eslint-enable */
+
+        // Do JellyFish first as they don't want our custom dimensions
+        ga('create', 'UA-44575989-1', 'auto', 'jellyfishGA');
+        ga('jellyfishGA.send', 'pageview');
 
         ga('create', guardian.googleAnalytics.trackingId, {
             'allowLinker': true,
@@ -30,12 +36,14 @@ define(['utils/cookie',
          */
         ga('require', 'linkid', 'linkid.js');
 
-        ga('set', 'dimension1', identitySignedIn.toString());   // deprecated
-        ga('set', 'dimension2', identitySignedOut.toString());  // deprecated
+        ga('set', 'dimension1', identitySignedIn.toString());   // deprecated - now uses dimension7 via util/user
+        ga('set', 'dimension2', identitySignedOut.toString());  // deprecated - is logically equivalent to: dimension6 != "" and dimension7 === "false"
+        (guardian.ophan) && ga('set', 'dimension3', guardian.ophan.pageViewId); // ophanPageview Id
+        (ophanBrowserId) && ga('set', 'dimension4', ophanBrowserId); // ophanBrowserId
+        ga('set', 'dimension5', 'subscriptions');               // platform
+        (identitySignedIn) && ga('set', 'dimension6', user.getUserFromCookie().id); // identityId
+        ga('set', 'dimension7', identitySignedIn.toString());   // isLoggedOn
         ga('send', 'pageview');
-
-        ga('create', 'UA-44575989-1', 'auto', 'jellyfishGA');
-        ga('jellyfishGA.send', 'pageview');
     }
 
 
