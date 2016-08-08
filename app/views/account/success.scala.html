@@ -4,12 +4,15 @@
 @import com.gu.i18n.GBP
 @import views.support.Dates.prettyDate
 @import model.DigitalEdition.UK
+@import com.gu.i18n.Currency
+
 @(
     newRefund: HolidayRefund,
     holidayRefunds: Seq[HolidayRefund],
     billingSchedule: BillingSchedule,
     suspendableDays: Int,
-    suspendedDays: Int
+    suspendedDays: Int,
+    currency: Currency
 )(implicit touchpointBackendResolution: services.TouchpointBackend.Resolution)
 
 @main("Suspension success | The Guardian", edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
@@ -37,7 +40,7 @@
 
         <div>
             <h3>Your new billing schedule</h3>
-            @account.fragments.billingSchedule(billingSchedule)
+            @account.fragments.billingSchedule(billingSchedule, currency)
         </div>
 
         <br/>

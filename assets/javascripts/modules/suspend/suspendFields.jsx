@@ -4,11 +4,12 @@ import ReactDOM from 'react-dom';
 import formElements from './formElements'
 import CustomDateRangePicker from '../react/customDateRangePicker'
 
-import moment from 'moment-business-days'
+import moment from 'moment'
 
 require('react-datepicker/dist/react-datepicker.css');
 
-const FIRST_SELECTABLE_DATE = moment().businessAdd(5);
+const FIRST_SELECTABLE_DATE = moment().add(5, 'days');
+const LAST_START_DATE = moment().add(1, 'year');
 const MAX_WEEKS = 3;
 
 function filterDate(packageName, exclusionList) {
@@ -38,6 +39,7 @@ export default {
             <CustomDateRangePicker className="input-text"
                                    maxWeeks={MAX_WEEKS}
                                    firstSelectableDate={FIRST_SELECTABLE_DATE}
+                                   lastStartDate={LAST_START_DATE}
                                    dateFormat="D MMMM YYYY" locale="en-gb"
                                    filterDate={filterDateFn}
                                    remainingDays={remainingDays}

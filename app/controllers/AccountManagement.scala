@@ -73,12 +73,11 @@ object AccountManagement extends Controller with LazyLogging {
     (for {
       sub <- OptionT(subscription)
       allHolidays <- OptionT(tpBackend.suspensionService.getHolidays(sub.name).map(_.toOption))
-      billingSchedule <- OptionT(tpBackend.commonPaymentService.billingSchedule(sub))
-      promo = sub.promoCode.flatMap(tpBackend.promoService.findPromotion)
+      billingSchedule <- OptionT(tpBackend.commonPaymentService.billingSchedule(sub, 12))
       pendingHolidays = pendingHolidayRefunds(allHolidays)
       suspendableDays = Config.suspendableWeeks * sub.plan.products.without(Delivery).size
       suspendedDays = SuspensionService.holidayToSuspendedDays(pendingHolidays, sub.plan.products.physicalProducts.list)
-    } yield Ok(views.html.account.suspend(sub, promo, pendingHolidayRefunds(allHolidays), billingSchedule, suspendableDays, suspendedDays)))
+    } yield Ok(views.html.account.suspend(sub, pendingHolidayRefunds(allHolidays), billingSchedule, suspendableDays, suspendedDays)))
       .getOrElse(Ok(views.html.account.details(subscriberId)))
   }
 
@@ -112,7 +111,8 @@ object AccountManagement extends Controller with LazyLogging {
       form <- EitherT(Future.successful(SuspendForm.mappings.bindFromRequest().value \/> "Please check your selections and try again"))
       sub <- EitherT(subscriptionFromRequest.map(_ \/> noSub))
       newHoliday = PaymentHoliday(sub.name, form.startDate, form.endDate)
-      oldBS <- EitherT(tpBackend.commonPaymentService.billingSchedule(sub, 12).map(_ \/> "Error getting billing schedule"))
+      // 14 because + 2 extra months needed in calculation to cover setting a 6-week suspension on the day before your 12th billing day!
+      oldBS <- EitherT(tpBackend.commonPaymentService.billingSchedule(sub, 14).map(_ \/> "Error getting billing schedule"))
       result <- EitherT(tpBackend.suspensionService.addHoliday(newHoliday, oldBS)).leftMap(userFacingError)
       newBS <- EitherT(tpBackend.commonPaymentService.billingSchedule(sub, 12).map(_ \/> "Error getting billing schedule"))
       newHolidays <- EitherT(tpBackend.suspensionService.getHolidays(sub.name)).leftMap(_ => "Error getting holidays")
@@ -128,7 +128,8 @@ object AccountManagement extends Controller with LazyLogging {
         holidayRefunds = pendingHolidays,
         billingSchedule = newBS,
         suspendableDays = suspendableDays,
-        suspendedDays = suspendedDays
+        suspendedDays = suspendedDays,
+        currency = sub.currency
       )).withNewSession
     }).valueOr(BadRequest(_))
   }

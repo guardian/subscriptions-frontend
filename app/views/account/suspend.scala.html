@@ -16,7 +16,6 @@
 
 @(
     subscription: Subscription with PaidPS[ProductPlan[PhysicalProducts]],
-    promotion: Option[AnyPromotion] = None,
     holidayRefunds: Seq[HolidayRefund] = Seq.empty,
     billingSchedule: BillingSchedule,
     suspendableDays: Int,
@@ -39,7 +38,7 @@
 
             <div class="suspend-container__sidebar">
                 <h2>Your billing schedule</h2>
-                @account.fragments.billingSchedule(billingSchedule)
+                @account.fragments.billingSchedule(billingSchedule, subscription.currency)
             </div>
 
             <div>
@@ -47,13 +46,6 @@
                 <ul>
                     <li>Subscriber ID: <strong>@subscription.name.get</strong></li>
                     <li>You are subscribed to the <strong>@subscription.plan.title</strong></li>
-                    <li>
-                        You pay <strong>@promotion.flatMap(_.asDiscount).fold {
-                            @subscription.plan.prettyPricing(subscription.currency)
-                        } { discountPromo =>
-                            @Html(subscription.plan.prettyPricingForDiscountedPeriod(discountPromo, subscription.currency))
-                        }</strong>
-                    </li>
                     <li>You can line up <strong>@suspendableWeeks weeks</strong> worth of suspensions <span class="u-note">(Up to @suspendableDays days on the @subscription.plan.title)</span></li>
                     <li>@account.fragments.suspensions(holidayRefunds, suspendableDays, suspendedDays)</li>
                 </ul>

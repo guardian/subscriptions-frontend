@@ -27,10 +27,11 @@ export default React.createClass({
         }
     },
     getDefaultProps () {
-        const maxWeeks = 365;
+        const maxWeeks = 6;
         return {
             remainingDays: (maxWeeks * 7),
-            firstSelectableDate: moment()
+            firstSelectableDate: moment(),
+            lastStartDate: moment().add(1, 'year')
         }
     },
     handleChange: function ({ startDate, endDate }) {
@@ -61,6 +62,7 @@ export default React.createClass({
                 <DatePicker
                     name="startDate"
                     minDate={this.state.startMinDate}
+                    maxDate={this.props.lastStartDate}
                     selected={this.state.startDate}
                     onChange={this.handleChangeStart} {...this.props} />
             </div>

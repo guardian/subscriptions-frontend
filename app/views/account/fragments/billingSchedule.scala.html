@@ -1,9 +1,14 @@
 @import com.gu.memsub.BillingSchedule
+@import com.gu.memsub.BillingSchedule.rolledUp
 @import com.gu.memsub.Price
 @import com.gu.i18n.GBP
 @import views.support.Dates.prettyDate
+@import com.gu.i18n.Currency
 
-@(billingSchedule: BillingSchedule)
+@(billingSchedule: BillingSchedule, currency: Currency)
+
+@rolledUpBills = @{rolledUp(billingSchedule)}
+
 <table class="table table--striped suspend__table">
     <thead>
         <tr>
@@ -12,11 +17,19 @@
         </tr>
     </thead>
     <tbody>
-        @for(bill <- billingSchedule.invoices.list) {
+        @for(bill <- rolledUpBills._2) {
             <tr>
                 <td class="date">@prettyDate(bill.date)</td>
                 <td class="money">@Price(bill.amount, GBP).pretty</td>
             </tr>
         }
+        <tr>
+            @if(rolledUpBills._2.nonEmpty) {
+                <td class="date u-note">Every month thereafter</td>
+            } else {
+                <td class="date">Every month</td>
+            }
+            <td class="money">@Price(rolledUpBills._1.amount, GBP).pretty</td>
+        </tr>
     </tbody>
 </table>
