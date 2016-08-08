@@ -49,7 +49,6 @@ class CheckoutService(identityService: IdentityService,
   type PostSubscribeResult = (Option[UserIdData], NonFatalErrors)
   type SubNel[A] = EitherT[Future, NonEmptyList[SubsError], A]
   type FatalErrors = NonEmptyList[SubsError]
-  implicit val today = LocalDate.now()
 
   def processSubscription(subscriptionData: SubscribeRequest,
                           authenticatedUserOpt: Option[AuthenticatedIdUser],
@@ -60,6 +59,7 @@ class CheckoutService(identityService: IdentityService,
     val plan = RatePlan(subscriptionData.productRatePlanId.get, None)
     def emailError: SubNel[Unit] = EitherT(Future.successful(\/.left(NonEmptyList(CheckoutIdentityFailure("Email in use")))))
     val idMinimalUser = authenticatedUserOpt.map(_.user)
+    implicit val today = LocalDate.now()
 
     (for {
       userExists <- EitherT(IdentityService.doesUserExist(personalData.email).map(\/.right[FatalErrors, Boolean]))
