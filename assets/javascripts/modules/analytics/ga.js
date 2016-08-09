@@ -21,24 +21,24 @@ define(['modules/analytics/analyticsEnabled',
         // Ours
         ga('create', {
             'trackingId': guardian.googleAnalytics.trackingId,
-            'name': 'subscriptionsGA',
+            'name': 'membershipPropertyTracker',
             'allowLinker': true,
             'cookieDomain': guardian.googleAnalytics.cookieDomain
         });
 
-        ga('subscriptionsGA.require', 'linkid');
-        ga('subscriptionsGA.require', 'linker');
-        ga('subscriptionsGA.linker:autoLink', ['eventbrite.co.uk']);
+        ga('membershipPropertyTracker.require', 'linkid');
+        ga('membershipPropertyTracker.require', 'linker');
+        ga('membershipPropertyTracker.linker:autoLink', ['eventbrite.co.uk'] );
 
-        ga('subscriptionsGA.set', 'dimension1', identitySignedIn.toString());   // deprecated - now uses dimension7 via util/user
-        ga('subscriptionsGA.set', 'dimension2', identitySignedOut.toString());  // deprecated - is logically equivalent to: dimension6 != "" and dimension7 === "false"
-        (guardian.ophan) && ga('subscriptionsGA.set', 'dimension3', guardian.ophan.pageViewId); // ophanPageview Id
-        (ophanBrowserId) && ga('subscriptionsGA.set', 'dimension4', ophanBrowserId); // ophanBrowserId
-        ga('subscriptionsGA.set', 'dimension5', 'subscriptions');               // platform
-        (identitySignedIn) && ga('subscriptionsGA.set', 'dimension6', user.getUserFromCookie().id); // identityId
-        ga('subscriptionsGA.set', 'dimension7', identitySignedIn.toString());   // isLoggedOn
+        ga('membershipPropertyTracker.set', 'dimension1', identitySignedIn.toString());   // deprecated - now uses dimension7 via util/user
+        ga('membershipPropertyTracker.set', 'dimension2', identitySignedOut.toString());  // deprecated - is logically equivalent to: dimension6 != "" and dimension7 === "false"
+        (guardian.ophan) && ga('membershipPropertyTracker.set', 'dimension3', guardian.ophan.pageViewId); // ophanPageview Id
+        (ophanBrowserId) && ga('membershipPropertyTracker.set', 'dimension4', ophanBrowserId); // ophanBrowserId
+        ga('membershipPropertyTracker.set', 'dimension5', 'subscriptions');               // platform
+        (identitySignedIn) && ga('membershipPropertyTracker.set', 'dimension6', user.getUserFromCookie().id); // identityId
+        ga('membershipPropertyTracker.set', 'dimension7', identitySignedIn.toString());   // isLoggedOn
 
-        ga('subscriptionsGA.send', 'pageview');
+        ga('membershipPropertyTracker.send', 'pageview');
 
         // JellyFish
         ga('create', {
