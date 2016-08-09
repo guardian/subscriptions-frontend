@@ -18,32 +18,35 @@ define(['modules/analytics/analyticsEnabled',
         })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
         /*eslint-enable */
 
-        // Do JellyFish first as they don't want our custom dimensions
-        ga('create', 'UA-44575989-1', 'auto', 'jellyfishGA');
-        ga('jellyfishGA.send', 'pageview');
-
-        ga('create', guardian.googleAnalytics.trackingId, {
+        // Ours
+        ga('create', {
+            'trackingId': guardian.googleAnalytics.trackingId,
+            'name': 'subscriptionsGA',
             'allowLinker': true,
             'cookieDomain': guardian.googleAnalytics.cookieDomain
         });
 
-        ga('require', 'linker');
-        ga('linker:autoLink', ['eventbrite.co.uk'] ); // for consistency with the rest of membership sites
+        ga('subscriptionsGA.require', 'linkid');
+        ga('subscriptionsGA.require', 'linker');
+        ga('subscriptionsGA.linker:autoLink', ['eventbrite.co.uk']);
 
-        /**
-         * Enable enhanced link attribution
-         * https://support.google.com/analytics/answer/2558867?hl=en-GB
-         */
-        ga('require', 'linkid', 'linkid.js');
+        ga('subscriptionsGA.set', 'dimension1', identitySignedIn.toString());   // deprecated - now uses dimension7 via util/user
+        ga('subscriptionsGA.set', 'dimension2', identitySignedOut.toString());  // deprecated - is logically equivalent to: dimension6 != "" and dimension7 === "false"
+        (guardian.ophan) && ga('subscriptionsGA.set', 'dimension3', guardian.ophan.pageViewId); // ophanPageview Id
+        (ophanBrowserId) && ga('subscriptionsGA.set', 'dimension4', ophanBrowserId); // ophanBrowserId
+        ga('subscriptionsGA.set', 'dimension5', 'subscriptions');               // platform
+        (identitySignedIn) && ga('subscriptionsGA.set', 'dimension6', user.getUserFromCookie().id); // identityId
+        ga('subscriptionsGA.set', 'dimension7', identitySignedIn.toString());   // isLoggedOn
 
-        ga('set', 'dimension1', identitySignedIn.toString());   // deprecated - now uses dimension7 via util/user
-        ga('set', 'dimension2', identitySignedOut.toString());  // deprecated - is logically equivalent to: dimension6 != "" and dimension7 === "false"
-        (guardian.ophan) && ga('set', 'dimension3', guardian.ophan.pageViewId); // ophanPageview Id
-        (ophanBrowserId) && ga('set', 'dimension4', ophanBrowserId); // ophanBrowserId
-        ga('set', 'dimension5', 'subscriptions');               // platform
-        (identitySignedIn) && ga('set', 'dimension6', user.getUserFromCookie().id); // identityId
-        ga('set', 'dimension7', identitySignedIn.toString());   // isLoggedOn
-        ga('send', 'pageview');
+        ga('subscriptionsGA.send', 'pageview');
+
+        // JellyFish
+        ga('create', {
+            'trackingId': 'UA-44575989-1',
+            'name': 'jellyfishGA',
+            'cookieDomain': 'auto'
+        });
+        ga('jellyfishGA.send', 'pageview');
     }
 
 
