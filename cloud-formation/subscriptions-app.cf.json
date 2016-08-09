@@ -214,7 +214,20 @@
                             }
                         ]
                     }
-                }]
+                },
+                {
+                    "PolicyName": "SQSHolidaySuspensionEmails",
+                    "PolicyDocument": {
+                        "Statement": [
+                            {
+                                "Effect": "Allow",
+                                "Action": "sqs:*",
+                                "Resource": "arn:aws:sqs:eu-west-1:865473395570:subs-holiday-suspension-email"
+                            }
+                        ]
+                    }
+                }
+                ]
             }
         },
         "SubscriptionsAppInstanceProfile": {
