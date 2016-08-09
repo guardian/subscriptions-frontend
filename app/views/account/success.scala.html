@@ -1,14 +1,21 @@
-@import org.joda.time.Days.daysBetween
 @import com.gu.subscriptions.suspendresume.SuspensionService.HolidayRefund
 @import com.gu.memsub.BillingSchedule
 @import com.gu.memsub.Price
 @import com.gu.i18n.GBP
 @import views.support.Dates.prettyDate
 @import model.DigitalEdition.UK
+@import com.gu.i18n.Currency
 
-@(newRefund: HolidayRefund, holidayRefunds: Seq[HolidayRefund], billingSchedule: BillingSchedule, suspendableDays: Int, suspendedDays: Int)
+@(
+    newRefund: HolidayRefund,
+    holidayRefunds: Seq[HolidayRefund],
+    billingSchedule: BillingSchedule,
+    suspendableDays: Int,
+    suspendedDays: Int,
+    currency: Currency
+)(implicit touchpointBackendResolution: services.TouchpointBackend.Resolution)
 
-@main("Suspension success | The Guardian", edition = UK) {
+@main("Suspension success | The Guardian", edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
     <main class="page-container gs-container">
 
         <div class="suspend-header">
@@ -26,29 +33,14 @@
 
         <div>
             <h3>Your suspensions</h3>
-            <div>@account.suspensions(holidayRefunds, suspendableDays, suspendedDays)</div>
+            <div>@account.fragments.suspensions(holidayRefunds, suspendableDays, suspendedDays)</div>
         </div>
 
         <br/>
 
         <div>
             <h3>Your new billing schedule</h3>
-            <table class="table table--striped">
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Amount</th>
-                    </tr>
-                </thead>
-                <tbody>
-                @for(bill <- billingSchedule.invoices.list) {
-                    <tr>
-                        <td>@prettyDate(bill.date)</td>
-                        <td>@Price(bill.amount, GBP).pretty</td>
-                    </tr>
-                }
-                </tbody>
-            </table>
+            @account.fragments.billingSchedule(billingSchedule, currency)
         </div>
 
         <br/>

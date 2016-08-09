@@ -1,7 +1,7 @@
 @import com.gu.memsub.images.ResponsiveImageGroup
 @import com.gu.memsub.images.ResponsiveImageGenerator
 @import com.gu.memsub.Subscription
-@import org.joda.time.Days.daysBetween
+@import com.gu.memsub.BillingSchedule
 @import views.support.PlanOps._
 @import views.support.Pricing._
 @import com.gu.subscriptions.ProductPlan
@@ -10,21 +10,23 @@
 @import com.gu.subscriptions.PhysicalProducts
 @import com.gu.subscriptions.suspendresume.SuspensionService.HolidayRefund
 @import configuration.Config.suspendableWeeks
+@import com.gu.subscriptions.suspendresume.SuspensionService.holidayToDays
 @import model.DigitalEdition.UK
+@import views.support.Dates.prettyDate
 
 @(
     subscription: Subscription with PaidPS[ProductPlan[PhysicalProducts]],
-    promotion: Option[AnyPromotion] = None,
     holidayRefunds: Seq[HolidayRefund] = Seq.empty,
+    billingSchedule: BillingSchedule,
     suspendableDays: Int,
     suspendedDays: Int
-)(implicit r: RequestHeader)
+)(implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackend.Resolution)
 
 @packImage = @{
     ResponsiveImageGroup(availableImages = ResponsiveImageGenerator("05129395fe0461071f176f526d7a4ae2b1d9b9bf/0_0_5863_5116", Seq(140, 500, 1000, 2000)))
 }
 
-@main("Suspend your newspaper delivery | The Guardian", edition = UK) {
+@main("Suspend your newspaper delivery | The Guardian", edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
 
     <main class="page-container gs-container">
 
@@ -34,20 +36,18 @@
                 <h1 class="suspend-header__title">Suspend your newspaper delivery</h1>
             </div>
 
+            <div class="suspend-container__sidebar">
+                <h2>Your billing schedule</h2>
+                @account.fragments.billingSchedule(billingSchedule, subscription.currency)
+            </div>
+
             <div>
                 <h2>Your subscription</h2>
                 <ul>
                     <li>Subscriber ID: <strong>@subscription.name.get</strong></li>
                     <li>You are subscribed to the <strong>@subscription.plan.title</strong></li>
-                    <li>
-                        You pay <strong>@promotion.flatMap(_.asDiscount).fold {
-                            @subscription.plan.prettyPricing(subscription.currency)
-                        } { discountPromo =>
-                            @Html(subscription.plan.prettyPricingForDiscountedPeriod(discountPromo, subscription.currency))
-                        }</strong>
-                    </li>
                     <li>You can line up <strong>@suspendableWeeks weeks</strong> worth of suspensions <span class="u-note">(Up to @suspendableDays days on the @subscription.plan.title)</span></li>
-                    <li>@account.suspensions(holidayRefunds, suspendableDays, suspendedDays)</li>
+                    <li>@account.fragments.suspensions(holidayRefunds, suspendableDays, suspendedDays)</li>
                 </ul>
             </div>
 
@@ -70,6 +70,7 @@
                                     <div class="form-field js-suspend-start-date">
                                         <div id="dateRangePicker"
                                         remainingDays="@{suspendableDays - suspendedDays}"
+                                        excludeExistingDays="@{holidayRefunds.flatMap(x => holidayToDays(x._2.start, x._2.finish)).map(prettyDate).mkString(",")}"
                                         ratePlanName="@subscription.plan.name"></div>
                                     </div>
                                     <button type="submit" class="js-suspend-submit button button--primary button--large u-margin-bottom">
@@ -81,7 +82,6 @@
                     </form>
                 </div>
             }
-
         </section>
     </main>
 }
