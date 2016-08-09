@@ -193,15 +193,16 @@ object HolidaySuspensionBillingScheduleDataExtensionRow {
     HolidaySuspensionBillingScheduleDataExtensionRow(
       emailAddress,
       Seq(
+        "ZuoraSubscriberId" -> subscriptionName,
         "uuid" -> UUID.randomUUID().toString,
-        "subscription_id" -> subscriptionName,
-        "email_address" -> emailAddress,
+        "subscriber_id" -> subscriptionName,
+        "EmailAddress" -> emailAddress,
         "customer_salutation" -> saltuation,
         "package_name" -> packageName,
-        "days_allowed" -> daysAllowed.toString,
-        "days_used" -> daysUsed.toString,
-        "days_remaining" -> (daysAllowed - daysUsed).toString,
-        "number_of_suspensions_lined_up" -> numberOfSuspensionsLinedUp.toString,
+        "days_allowed" -> daysAllowed,
+        "days_used" -> daysUsed,
+        "days_remaining" -> (daysAllowed - daysUsed),
+        "number_of_suspensions_lined_up" -> numberOfSuspensionsLinedUp,
         "normal_price" -> Price(thereafterBill.amount, subscriptionCurrency).pretty
       ) ++ futureBills
     )
@@ -219,6 +220,6 @@ case class PaperHomeDeliveryWelcome1DataExtensionRow(email: String, fields: Seq[
   override def forExtension = PaperDeliveryDataExtension
 }
 
-case class HolidaySuspensionBillingScheduleDataExtensionRow(email: String, fields: Seq[(String, String)]) extends DataExtensionRow {
+case class HolidaySuspensionBillingScheduleDataExtensionRow(email: String, fields: Seq[(String, Any)]) extends DataExtensionRow {
   override def forExtension = HolidaySuspensionBillingSchedule
 }
