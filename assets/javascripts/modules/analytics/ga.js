@@ -1,12 +1,14 @@
 /* global ga */
-define(['utils/cookie',
-        'modules/analytics/analyticsEnabled'
-    ], function(cookie, analyticsEnabled) {
+define(['modules/analytics/analyticsEnabled',
+        'utils/cookie',
+        'utils/user'
+    ], function(analyticsEnabled, cookie, user) {
     'use strict';
     function init() {
 
-        var identitySignedIn = !!cookie.getCookie('GU_U');
+        var identitySignedIn = user.isLoggedIn();
         var identitySignedOut = !!cookie.getCookie('GU_SO') && !identitySignedIn;
+        var ophanBrowserId = cookie.getCookie('bwid');
 
         /* Google analytics snippet */
         /*eslint-disable */
@@ -16,25 +18,34 @@ define(['utils/cookie',
         })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
         /*eslint-enable */
 
-        ga('create', guardian.googleAnalytics.trackingId, {
+        // Ours
+        ga('create', {
+            'trackingId': guardian.googleAnalytics.trackingId,
+            'name': 'membershipPropertyTracker',
             'allowLinker': true,
             'cookieDomain': guardian.googleAnalytics.cookieDomain
         });
 
-        ga('require', 'linker');
-        ga('linker:autoLink', ['eventbrite.co.uk'] ); // for consistency with the rest of membership sites
+        ga('membershipPropertyTracker.require', 'linkid');
+        ga('membershipPropertyTracker.require', 'linker');
+        ga('membershipPropertyTracker.linker:autoLink', ['eventbrite.co.uk'] );
 
-        /**
-         * Enable enhanced link attribution
-         * https://support.google.com/analytics/answer/2558867?hl=en-GB
-         */
-        ga('require', 'linkid', 'linkid.js');
+        ga('membershipPropertyTracker.set', 'dimension1', identitySignedIn.toString());   // deprecated - now uses dimension7 via util/user
+        ga('membershipPropertyTracker.set', 'dimension2', identitySignedOut.toString());  // deprecated - is logically equivalent to: dimension6 != "" and dimension7 === "false"
+        (guardian.ophan) && ga('membershipPropertyTracker.set', 'dimension3', guardian.ophan.pageViewId); // ophanPageview Id
+        (ophanBrowserId) && ga('membershipPropertyTracker.set', 'dimension4', ophanBrowserId); // ophanBrowserId
+        ga('membershipPropertyTracker.set', 'dimension5', 'subscriptions');               // platform
+        (identitySignedIn) && ga('membershipPropertyTracker.set', 'dimension6', user.getUserFromCookie().id); // identityId
+        ga('membershipPropertyTracker.set', 'dimension7', identitySignedIn.toString());   // isLoggedOn
 
-        ga('set', 'dimension1', identitySignedIn.toString());   // deprecated
-        ga('set', 'dimension2', identitySignedOut.toString());  // deprecated
-        ga('send', 'pageview');
+        ga('membershipPropertyTracker.send', 'pageview');
 
-        ga('create', 'UA-44575989-1', 'auto', 'jellyfishGA');
+        // JellyFish
+        ga('create', {
+            'trackingId': 'UA-44575989-1',
+            'name': 'jellyfishGA',
+            'cookieDomain': 'auto'
+        });
         ga('jellyfishGA.send', 'pageview');
     }
 
