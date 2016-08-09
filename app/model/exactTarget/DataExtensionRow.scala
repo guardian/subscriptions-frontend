@@ -197,9 +197,10 @@ object HolidaySuspensionBillingScheduleDataExtensionRow {
       emailAddress,
       Seq(
         "ZuoraSubscriberId" -> subscriptionName,
+        "SubscriberKey" -> emailAddress,
+        "EmailAddress" -> emailAddress,
         "uuid" -> UUID.randomUUID().toString,
         "subscriber_id" -> subscriptionName,
-        "EmailAddress" -> emailAddress,
         "customer_salutation" -> saltuation,
         "package_name" -> packageName,
         "days_allowed" -> daysAllowed.toString,
