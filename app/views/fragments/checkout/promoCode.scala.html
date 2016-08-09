@@ -3,11 +3,11 @@
 @import com.gu.memsub.promo.PromoCode
 @import controllers.routes.Checkout.validatePromoCode
 @(promoCode: Option[PromoCode])
-@if(promoCode.exists(_.get.contains("DGA85"))) {
+@if(promoCode.exists(_.get == "DLA01")) {
     <div class="promo-code-applied">✓&nbsp; Promotion applied</div>
     <div class="promo-code-snippet">
         <ul>
-            <li><strong>£30 digital gift card</strong></li>
+            <li><strong>50% off for your first 3 months</strong></li>
             <li><strong>14 day free trial before first payment</strong></li>
             <li>Access to the daily edition</li>
             <li>Ad free experience on the live news app</li>
