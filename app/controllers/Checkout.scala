@@ -287,8 +287,8 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
     }
   }
 
-  def validateDelivery(postCode: String) = NoCacheAction { implicit request =>
-    HomeDeliveryPostCodes.findDistrict(postCode).fold(NotAcceptable(""))(_ => Ok(""))
+  def validateDelivery(postCode: String) = CachedAction { implicit request =>
+    HomeDeliveryPostCodes.findDistrict(postCode).fold(NotAcceptable(""))(pc => Ok(Json.obj("availableDistrict" -> pc)))
   }
 
   def checkIdentity(email: String) = CachedAction.async { implicit request =>

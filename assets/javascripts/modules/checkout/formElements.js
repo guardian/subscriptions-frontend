@@ -56,6 +56,8 @@ define(['$'], function ($) {
         $CHECKOUT_FORM: $('.js-checkout-form'),
         $NOTICES: $('.js-checkout-notices'),
 
+        $SIGN_IN_LINK: $('.js-sign-in-link'),
+
         BILLING: addressFields('.js-billing-address'),
         DELIVERY: addressFields('.js-checkout-delivery'),
 
