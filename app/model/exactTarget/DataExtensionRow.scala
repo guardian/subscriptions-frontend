@@ -2,7 +2,6 @@ package model.exactTarget
 
 import java.lang.Math.min
 import java.util.UUID
-import java.util.concurrent.atomic.AtomicInteger
 
 import com.gu.exacttarget._
 import com.gu.i18n.Currency
@@ -17,6 +16,9 @@ import utils.Dates
 import views.support.Dates.prettyDate
 
 import scala.math.BigDecimal.decimal
+import scalaz.NonEmptyList
+import scalaz.syntax.std.list._
+import scalaz.syntax.nel._
 
 trait DataExtensionRow {
   def email: String
@@ -182,20 +184,23 @@ object HolidaySuspensionBillingScheduleDataExtensionRow {
          ): HolidaySuspensionBillingScheduleDataExtensionRow = {
 
     val (thereafterBill, trimmedSchedule) = BillingSchedule.rolledUp(billingSchedule)
-    val futureBills = trimmedSchedule.zipWithIndex.flatMap { case (bill, number) =>
-      Seq(
+    val schedule = trimmedSchedule.toList.toNel.getOrElse(thereafterBill.wrapNel)
+    val futureBills = schedule.zipWithIndex.flatMap { case (bill, number) => NonEmptyList(
         s"future_bill_${number + 1}_date" -> prettyDate(bill.date),
         s"future_bill_${number + 1}_amount" -> Price(bill.amount, subscriptionCurrency).pretty
       )
     }
+
     val emailAddress = email.getOrElse("holiday-suspension-bounce@guardian.co.uk")
 
     HolidaySuspensionBillingScheduleDataExtensionRow(
       emailAddress,
       Seq(
+        "ZuoraSubscriberId" -> subscriptionName,
+        "SubscriberKey" -> emailAddress,
+        "EmailAddress" -> emailAddress,
         "uuid" -> UUID.randomUUID().toString,
-        "subscription_id" -> subscriptionName,
-        "email_address" -> emailAddress,
+        "subscriber_id" -> subscriptionName,
         "customer_salutation" -> saltuation,
         "package_name" -> packageName,
         "days_allowed" -> daysAllowed.toString,
@@ -203,7 +208,7 @@ object HolidaySuspensionBillingScheduleDataExtensionRow {
         "days_remaining" -> (daysAllowed - daysUsed).toString,
         "number_of_suspensions_lined_up" -> numberOfSuspensionsLinedUp.toString,
         "normal_price" -> Price(thereafterBill.amount, subscriptionCurrency).pretty
-      ) ++ futureBills
+      ) ++ futureBills.list
     )
   }
 
