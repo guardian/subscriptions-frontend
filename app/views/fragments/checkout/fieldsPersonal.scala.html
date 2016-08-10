@@ -37,8 +37,8 @@
 @* ===== Email ===== *@
 <div class="form-field @if(form.isEmpty) {js-checkout-email}">
     <label class="label" for="email">Email address</label>
-    <input type="email" class="input-text js-input" name="personal.emailValidation.email" id="email"
-        value="@form.map(_.email)" maxlength="80" @signedInAttrs>
+    <input type="email" class="input-text js-input"  name="personal.emailValidation.email" id="email"
+        value="@form.map(_.email)" maxlength="80" @signedInAttrs data-validation-url="@{routes.Checkout.checkIdentity("").path.replaceFirst("\\?.*", "")}">
     @fragments.forms.errorMessage("")
 </div>
 <div class="form-field @if(form.isEmpty) {js-checkout-confirm-email}">

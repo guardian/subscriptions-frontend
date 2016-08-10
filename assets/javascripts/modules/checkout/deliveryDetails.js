@@ -66,8 +66,8 @@ define([
             validationUrl = $deliveryPostcodeContainer.data('validation-url');
             ORIGINAL_ERROR_MESSAGE = ORIGINAL_ERROR_MESSAGE || $errorLabel.text();
 
-        // remove all whitespace for the lookup
-        postCodeStr = postCodeStr.replace(/\s+/g, '');
+        // remove all whitespace for the lookup and trim to at most 4 characters for more user privacy
+        postCodeStr = postCodeStr.replace(/\s+/g, '').substring(0, 4);
 
         if (postCodeStr.length < 2) {
             POSTCODE_ELIGIBLE = true;

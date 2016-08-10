@@ -29,7 +29,7 @@ define([
         toggleError(formEls.$EMAIL_CONTAINER, validity.isEmailInUse);
 
         if(validity.emailMessage) {
-            formEls.$EMAIL_ERROR.text(validity.emailMessage);
+            formEls.$EMAIL_ERROR.html(validity.emailMessage);
             toggleError(formEls.$EMAIL_CONTAINER, true);
         }
     }
@@ -50,7 +50,7 @@ define([
     }
 
     function handleValidation(personalDetails) {
-        
+
         var basicValidity = checkFields.checkRequiredFields(formEls.$FIELDSET_YOUR_DETAILS);
         loader.setLoaderElem(document.querySelector('.js-personal-details-validating'));
         loader.startLoader();

@@ -1,12 +1,20 @@
 define([
     'utils/ajax',
+    'modules/checkout/formElements',
     'modules/forms/regex',
     'modules/raven'
-], function (ajax, regex, raven) {
+], function (ajax, formElements, regex, raven) {
     'use strict';
 
     function emailCheck(email) {
-        return ajax({ url: '/checkout/check-identity?email=' + encodeURIComponent(email) }).then(function (response) {
+        return ajax({
+            method: 'GET',
+            type: 'json',
+            url: formElements.$EMAIL.data('validation-url'),
+            data: {
+                'email': email
+            }
+        }).then(function (response) {
             return response.emailInUse;
         }).fail(function (err) {
             raven.Raven.captureException(err);
@@ -17,8 +25,8 @@ define([
 
         var MESSAGES = {
             emailInvalid: 'Please enter a valid email address.',
-            emailTaken: 'Your email is already in use. Please sign in or use another email address.',
-            emailFailure: 'There has been a problem. Please try again later.'
+            emailTaken: 'You already have a Guardian account. Please <a class="u-nowrap" href="' + formElements.$SIGN_IN_LINK.attr('href') + '">sign in</a> or use another email address.',
+            emailFailure: 'Sorry there has been a problem. Please try again later.'
         };
 
         /**
@@ -43,11 +51,11 @@ define([
                 requiredFieldValues: data.requiredFieldValues,
                 hasValidEmail: hasValidEmail,
                 hasConfirmedEmail: hasConfirmedEmail,
-                emailMessage: (hasValidEmail) ? false : MESSAGES.emailInvalid,
+                emailMessage: hasValidEmail ? false : MESSAGES.emailInvalid,
                 isEmailInUse: false
             };
-            
-            
+
+
             /**
              * If the user is signed in we do not need to
              * validate their email address
