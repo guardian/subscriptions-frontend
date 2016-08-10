@@ -13,7 +13,7 @@ object Homepage extends Controller {
 
   def index = NoCacheAction { implicit request =>
     val countryGroup = request.getFastlyCountry.getOrElse(CountryGroup.UK)
-    val redirectUri = Uri(request.uri) / getForCountryGroup(countryGroup).id
+    val redirectUri = Uri.parse(request.uri) / getForCountryGroup(countryGroup).id
     Redirect(request.toUriWithCampaignParams(redirectUri), SEE_OTHER)
   }
 
