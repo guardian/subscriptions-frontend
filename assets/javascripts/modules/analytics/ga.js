@@ -45,7 +45,7 @@ define(['modules/analytics/analyticsEnabled',
                 ga('membershipPropertyTracker.set', 'dimension9', productData.zuoraId);   // zuoraId
             }
             if (productData.productPurchased) {
-                ga('membershipPropertyTracker.set', 'dimension11', guardian.productData.productPurchased);  // productPurchased
+                ga('membershipPropertyTracker.set', 'dimension11', productData.productPurchased);  // productPurchased
             }
         }
 
