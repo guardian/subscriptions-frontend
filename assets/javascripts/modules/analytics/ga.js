@@ -9,6 +9,8 @@ define(['modules/analytics/analyticsEnabled',
         var identitySignedIn = user.isLoggedIn();
         var identitySignedOut = !!cookie.getCookie('GU_SO') && !identitySignedIn;
         var ophanBrowserId = cookie.getCookie('bwid');
+        var productData = guardian.productData;
+        var intcmp = new RegExp('INTCMP=([^&]*)').exec(location.search);
 
         /* Google analytics snippet */
         /*eslint-disable */
@@ -37,6 +39,19 @@ define(['modules/analytics/analyticsEnabled',
         ga('membershipPropertyTracker.set', 'dimension5', 'subscriptions');               // platform
         (identitySignedIn) && ga('membershipPropertyTracker.set', 'dimension6', user.getUserFromCookie().id); // identityId
         ga('membershipPropertyTracker.set', 'dimension7', identitySignedIn.toString());   // isLoggedOn
+
+        if (productData) {
+            if (productData.zuoraId) {
+                ga('membershipPropertyTracker.set', 'dimension9', productData.zuoraId);   // zuoraId
+            }
+            if (productData.productPurchased) {
+                ga('membershipPropertyTracker.set', 'dimension11', guardian.productData.productPurchased);  // productPurchased
+            }
+        }
+
+        if (intcmp && intcmp[1]) {
+            ga('membershipPropertyTracker.set', 'dimension12', intcmp[1]);  // internalCampCode
+        }
 
         ga('membershipPropertyTracker.send', 'pageview');
 

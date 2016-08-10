@@ -23,11 +23,15 @@
 <script type="text/javascript">
     guardian.pageInfo.slug="GuardianDigiPack:Order Complete";
     guardian.pageInfo.productData = {
+        // Omniture - TODO - fix the type field
         source: 'Subscriptions and Membership',
         type: 'GUARDIAN_DIGIPACK',
         eventName: 'purchase',
         amount: @{plan.gbpPrice.amount},
-        frequency: @{plan.billingPeriod.numberOfMonths}
+        frequency: @{plan.billingPeriod.numberOfMonths},
+        // Google Analtics
+        zuoraId: '@subscriptionName',
+        productPurchased: '@plan.name'
     };
 </script>
 
