@@ -18,4 +18,6 @@ object DigitalEdition {
       case _ => None
     }
   }
+
+  def getForCountryGroup(countryGroup: CountryGroup) = getById(countryGroup.id).getOrElse(INT)
 }
