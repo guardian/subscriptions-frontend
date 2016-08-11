@@ -9,12 +9,15 @@ object DigitalEdition {
   object INT extends DigitalEdition(CountryGroup.RestOfTheWorld, "int", "International", "dis_2378")
   object AU extends DigitalEdition(CountryGroup.Australia, "au", "Australia", "dis_2379")
 
-  def getForCountryGroup(countryGroup: CountryGroup): DigitalEdition = {
-    countryGroup match {
-      case CountryGroup.UK => UK
-      case CountryGroup.US => US
-      case CountryGroup.Australia => AU
-      case _ => INT
+  def getById(id: String): Option[DigitalEdition] = {
+    id match {
+      case UK.id => Some(UK)
+      case US.id => Some(US)
+      case AU.id => Some(AU)
+      case INT.id => Some(INT)
+      case _ => None
     }
   }
+
+  def getForCountryGroup(countryGroup: CountryGroup) = getById(countryGroup.id).getOrElse(INT)
 }
