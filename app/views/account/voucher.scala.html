@@ -1,0 +1,48 @@
+@import com.gu.memsub.images.ResponsiveImageGroup
+@import com.gu.memsub.images.ResponsiveImageGenerator
+@import com.gu.memsub.Subscription
+@import com.gu.memsub.BillingSchedule
+@import views.support.PlanOps._
+@import views.support.Pricing._
+@import com.gu.subscriptions.ProductPlan
+@import com.gu.memsub.PaidPS
+@import com.gu.subscriptions.PhysicalProducts
+@import model.DigitalEdition.UK
+
+@(
+  subscription: Subscription with PaidPS[ProductPlan[PhysicalProducts]], billingSchedule: BillingSchedule)(
+  implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackend.Resolution
+)
+
+@packImage = @{
+  ResponsiveImageGroup(availableImages = ResponsiveImageGenerator("05129395fe0461071f176f526d7a4ae2b1d9b9bf/0_0_5863_5116", Seq(140, 500, 1000, 2000)))
+}
+
+@main("Suspend your newspaper delivery | The Guardian", edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
+
+  <main class="page-container gs-container">
+
+
+    <section class="suspend-container">
+
+      <div class="suspend-header">
+        <h1 class="suspend-header__title">Your Guardian subscription</h1>
+      </div>
+
+      <div class="suspend-container__sidebar">
+        <h2>Your billing schedule</h2>
+        @account.fragments.billingSchedule(billingSchedule, subscription.currency)
+      </div>
+
+      <div>
+        <h2>Your subscription</h2>
+        <ul>
+          <li>Subscriber ID: <strong>@subscription.name.get</strong></li>
+          <li>You are subscribed to the <strong>@subscription.plan.title</strong></li>
+        </ul>
+      </div>
+
+      <br/>
+    </section>
+  </main>
+}

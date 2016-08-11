@@ -13,6 +13,7 @@
 @import com.gu.subscriptions.suspendresume.SuspensionService.holidayToDays
 @import model.DigitalEdition.UK
 @import views.support.Dates.prettyDate
+@import views.support.PlanOps._
 
 @(
     subscription: Subscription with PaidPS[ProductPlan[PhysicalProducts]],
@@ -30,6 +31,7 @@
 
     <main class="page-container gs-container">
 
+
         <section class="suspend-container">
 
             <div class="suspend-header">
@@ -37,6 +39,7 @@
             </div>
 
             <div class="suspend-container__sidebar">
+
                 <h2>Your billing schedule</h2>
                 @account.fragments.billingSchedule(billingSchedule, subscription.currency)
             </div>

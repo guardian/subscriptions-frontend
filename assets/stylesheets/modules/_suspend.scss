@@ -6,7 +6,6 @@
     padding: ($gs-gutter / 2) 0 ($gs-baseline / 2);
 
     @include mq(desktop) {
-        padding-left: 22.5%;
         padding-bottom: $gs-gutter * 2;
     }
 }
@@ -30,7 +29,9 @@
         width: 65%
     }
 }
+
 .suspend-container__sidebar {
+
     position: relative;
     display: none;
 

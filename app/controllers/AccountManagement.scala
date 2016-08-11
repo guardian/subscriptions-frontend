@@ -74,11 +74,16 @@ object AccountManagement extends Controller with LazyLogging {
       sub <- OptionT(subscription)
       allHolidays <- OptionT(tpBackend.suspensionService.getHolidays(sub.name).map(_.toOption))
       billingSchedule <- OptionT(tpBackend.commonPaymentService.billingSchedule(sub, 12))
-      pendingHolidays = pendingHolidayRefunds(allHolidays)
       suspendableDays = Config.suspendableWeeks * sub.plan.products.without(Delivery).size
-      suspendedDays = SuspensionService.holidayToSuspendedDays(pendingHolidays, sub.plan.products.physicalProducts.list)
-    } yield Ok(views.html.account.suspend(sub, pendingHolidayRefunds(allHolidays), billingSchedule, suspendableDays, suspendedDays)))
-      .getOrElse(Ok(views.html.account.details(subscriberId)))
+    } yield {
+      sub.plan.products.seq.contains(Delivery).fold({
+        val pendingHolidays = pendingHolidayRefunds(allHolidays)
+        val suspendedDays = SuspensionService.holidayToSuspendedDays(pendingHolidays, sub.plan.products.physicalProducts.list)
+        Ok(views.html.account.suspend(sub, pendingHolidayRefunds(allHolidays), billingSchedule, suspendableDays, suspendedDays))
+      },{
+        Ok(views.html.account.voucher(sub, billingSchedule))
+      })
+    }).getOrElse(Ok(views.html.account.details(subscriberId)))
   }
 
   def processLogin = GoogleAuthenticatedStaffAction.async { implicit request =>
