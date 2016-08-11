@@ -24,6 +24,7 @@ lazy val root = (project in file(".")).enablePlugins(
     )
   .settings(play.sbt.routes.RoutesKeys.routesImport ++= Seq(
       "controllers.Binders._",
+      "model.DigitalEdition",
       "com.gu.i18n.CountryGroup",
       "com.gu.i18n.Country",
       "com.gu.memsub.promo.PromoCode",
