@@ -5,45 +5,45 @@
 @import views.support.Dates.prettyDate
 @import model.DigitalEdition.UK
 @import com.gu.i18n.Currency
-
+@import com.gu.subscriptions.ProductPlan
+@import com.gu.subscriptions.PhysicalProducts
+@import com.gu.memsub.Subscription
+@import com.gu.memsub.PaidPS
 @(
     newRefund: HolidayRefund,
     holidayRefunds: Seq[HolidayRefund],
+    subscription: Subscription with PaidPS[ProductPlan[PhysicalProducts]],
     billingSchedule: BillingSchedule,
     suspendableDays: Int,
     suspendedDays: Int,
     currency: Currency
 )(implicit touchpointBackendResolution: services.TouchpointBackend.Resolution)
 
-@main("Suspension success | The Guardian", edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
+@main("Suspension success | The Guardian", edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution), bodyClasses = Seq("is-wide")) {
     <main class="page-container gs-container">
 
         <div class="suspend-header">
             <h1 class="suspend-header__title">Suspend your newspaper delivery</h1>
         </div>
-
-        <div class="prose">
+        <section class="mma-section prose">
+            <h3 class="mma-section__header">Suspension created successfully</h3>
             <p>
                 Thank you. Your newspaper delivery will be suspended
                 @if(newRefund._2.start == newRefund._2.finish) { on @prettyDate(newRefund._2.start) } else { from @prettyDate(newRefund._2.start) to @prettyDate(newRefund._2.finish) }.
             </p>
-            <p>@Price(newRefund._1, GBP).pretty will be deducted from your next payment after @prettyDate(newRefund._2.start).</p>
+            <p>@Price(newRefund._1, GBP).pretty will be deducted from your next payment on or after @prettyDate(newRefund._2.start).</p>
             <p>Have a great holiday.</p>
-        </div>
+        </section>
 
-        <div>
-            <h3>Your suspensions</h3>
+        <section class="mma-section">
+            <h3 class="mma-section__header">Your suspensions</h3>
             <div>@account.fragments.suspensions(holidayRefunds, suspendableDays, suspendedDays)</div>
-        </div>
+        </section>
 
-        <br/>
-
-        <div>
-            <h3>Your new billing schedule</h3>
-            @account.fragments.billingSchedule(billingSchedule, currency)
-        </div>
-
-        <br/>
+        <section class="mma-section">
+            <h3 class="mma-section__header">Your new billing schedule</h3>
+            @account.fragments.billingSchedule(billingSchedule, subscription.currency)
+        </section>
 
     </main>
 }

@@ -19,7 +19,6 @@
 
 .suspend-container {
     @include clearfix();
-    padding-bottom: $gs-gutter * 2;
 }
 
 .suspend-container__form {
@@ -107,7 +106,7 @@
     margin-top: 4px;
 }
 
-.mma-section__calendar--amount--discounted {
+.mma-section__calendar--amount--discounted, .scheduled-suspensions__discount {
     font-weight: bold;
     color: darkgreen;
 }
@@ -127,6 +126,11 @@
 
 .mma-section__schedule {
     margin-top: 20px;
+}
+
+.scheduled-suspensions__help {
+    margin-top: 20px;
+    display: block;
 }
 
 .suspend-container__sidebar {

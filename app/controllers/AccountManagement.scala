@@ -131,6 +131,7 @@ object AccountManagement extends Controller with LazyLogging {
       Ok(views.html.account.success(
         newRefund = (result.refund, newHoliday),
         holidayRefunds = pendingHolidays,
+        subscription = sub,
         billingSchedule = newBS,
         suspendableDays = suspendableDays,
         suspendedDays = suspendedDays,

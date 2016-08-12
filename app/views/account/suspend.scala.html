@@ -56,6 +56,9 @@
                         <span class="mma-section__list--plan-title">@subscription.plan.title</span>
                         <span class="mma-section__list--plan-description">@subscription.plan.description</span>
                     </dd>
+
+                    <dt class="mma-section__list--title">Monthly cost</dt>
+                    <dd class="mma-section__list--content"> @subscription.plan.priceGBP.pretty</dd>
                 </dl>
             </section>
 
@@ -88,6 +91,10 @@
                 @account.fragments.billingSchedule(billingSchedule, subscription.currency)
             </section>
 
+            <section class="mma-section">
+                <h3 class="mma-section__header">Scheduled suspensions</h3>
+                @account.fragments.suspensions(holidayRefunds, suspendableDays, suspendedDays)
+            </section>
         </section>
     </main>
 }
