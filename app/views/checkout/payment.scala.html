@@ -158,7 +158,7 @@
                                     Delivery address
                                 </legend>
                                 <div class="field-panel__fields">
-                                    @if(productData.plans.list.contains(Delivery)) {
+                                    @if(productData.plans.default.products.seq.contains(Delivery)) {
                                         @fragments.checkout.fieldsPaper(productData, countriesWithCurrency)
                                     }else{
                                         @fragments.checkout.fieldsVoucher(productData, countriesWithCurrency)
