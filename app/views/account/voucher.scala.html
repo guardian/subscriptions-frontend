@@ -1,0 +1,68 @@
+@import com.gu.memsub.images.ResponsiveImageGroup
+@import com.gu.memsub.images.ResponsiveImageGenerator
+@import com.gu.memsub.Subscription
+@import com.gu.memsub.BillingSchedule
+@import views.support.PlanOps._
+@import views.support.FloatOps._
+@import views.support.Dates._
+@import com.gu.subscriptions.ProductPlan
+@import com.gu.memsub.PaidPS
+@import com.gu.subscriptions.PhysicalProducts
+@import model.DigitalEdition.UK
+
+@(
+  subscription: Subscription with PaidPS[ProductPlan[PhysicalProducts]], billingSchedule: BillingSchedule)(
+  implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackend.Resolution
+)
+
+@packImage = @{
+  ResponsiveImageGroup(availableImages = ResponsiveImageGenerator("05129395fe0461071f176f526d7a4ae2b1d9b9bf/0_0_5863_5116", Seq(140, 500, 1000, 2000)))
+}
+
+@main("Suspend your newspaper delivery | The Guardian", edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
+
+  <main class="page-container gs-container">
+    <section class="suspend-container">
+
+      <div class="suspend-header">
+        <h1 class="suspend-header__title">Your Guardian subscription</h1>
+      </div>
+
+      <section class="mma-section">
+        <h3 class="mma-section__header">
+          Your details
+        </h3>
+
+        <dl class="mma-section__list">
+          <dt class="mma-section__list--title">Subscriber ID</dt>
+          <dd class="mma-section__list--content">@subscription.name.get</dd>
+
+          <dt class="mma-section__list--title">Current plan</dt>
+          <dd class="mma-section__list--content">
+            <span class="mma-section__list--plan-title">@subscription.plan.title</span>
+            <span class="mma-section__list--plan-description">@subscription.plan.description</span>
+          </dd>
+        </dl>
+
+        <h3 class="mma-section__header">
+          Your billing schedule
+        </h3>
+
+        <div class="mma-section__schedule">
+        @for(bill <- billingSchedule.invoices.list.take(10)) {
+          <div class="mma-section__calendar">
+            <div class="mma-section__calendar--date">
+              <span class="mma-section__calendar--sub">@bill.date.shortDay</span>
+              <span class="mma-section__calendar--main">@bill.date.getDayOfMonth</span>
+              <span class="mma-section__calendar--sub">@bill.date.shortMonth</span>
+            </div>
+            <p class="mma-section__calendar--amount">
+              £@bill.amount.currency
+            </p>
+          </div>
+        }
+        </div>
+      </section>
+    </section>
+  </main>
+}

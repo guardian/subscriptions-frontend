@@ -6,7 +6,6 @@
     padding: ($gs-gutter / 2) 0 ($gs-baseline / 2);
 
     @include mq(desktop) {
-        padding-left: 22.5%;
         padding-bottom: $gs-gutter * 2;
     }
 }
@@ -30,7 +29,82 @@
         width: 65%
     }
 }
+
+.mma-section__header {
+    font-size: 1.25rem;
+    border-top: 1px solid #dfdfdf;
+    padding-top: 10px;
+    margin-top: 10px;
+}
+
+.mma-section__list--plan-title {
+    display: block;
+}
+
+.mma-section__list--plan-description {
+    font-style: italic;
+}
+
+.mma-section__list--title {
+    margin-right: 70px;
+    min-width: 100px;
+    clear: left;
+    float: left;
+
+}
+
+.mma-section__list--content {
+    clear: right;
+    float: left;
+}
+
+.mma-section__list--currency {
+    text-align: right;
+}
+
+.mma-section__list {
+    overflow: auto;
+}
+
+.mma-section__calendar {
+    text-align: center;
+    display: inline-block;
+    margin-right: 5px;
+}
+
+
+.mma-section__calendar--date {
+    display: inline-block;
+    background-color: #f1f1f1;
+    border: 1px solid #dfdfdf;
+    padding: 2px 0;
+    height: 92px;
+    width: 84px;
+}
+
+.mma-section__calendar--amount {
+    margin-top: 4px;
+}
+
+.mma-section__calendar--main {
+    font-weight: bold;
+    line-height: 40px;
+    font-size: 32px;
+    display: block;
+    margin: 0 0;
+}
+
+.mma-section__calendar--sub {
+    font-size: 16px;
+    display: block;
+}
+
+.mma-section__schedule {
+    margin-top: 20px;
+}
+
 .suspend-container__sidebar {
+
     position: relative;
     display: none;
 
