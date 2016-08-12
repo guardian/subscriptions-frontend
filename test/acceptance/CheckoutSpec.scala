@@ -70,8 +70,8 @@ class CheckoutSpec extends FeatureSpec with Browser
       And("click on 'Continue' button,")
       checkout.clickPersonalDetailsContinueButton()
 
-      Then("section 'Billing Details' should load.")
-      assert(checkout.billingDetailsSectionHasLoaded())
+      Then("section 'Billing Address' should load.")
+      assert(checkout.billingAddressSectionHasLoaded())
 
       When("they fill in their billing address")
       checkout.fillInBillingAddress()
@@ -171,6 +171,74 @@ class CheckoutSpec extends FeatureSpec with Browser
         And("they should still be signed in.")
         assert(thankYou.userIsSignedIn)
       }
+    }
+
+    scenario("Guest users subscribe to paper home delivery with direct debit", Acceptance) {
+      checkDependenciesAreAvailable
+      val testUser = new TestUser
+
+      val checkout = Checkout(testUser, "checkout/delivery-everyday")
+      When("users visit 'Paper Home Delivery Checkout' page,")
+      go.to(checkout)
+      assert(checkout.pageHasLoaded())
+
+      Then("section 'Your details' should load.")
+      assert(checkout.yourDetailsSectionHasLoaded())
+
+      When("they fill in personal details,")
+      checkout.fillInPersonalDetails()
+
+      And("click on 'Continue' button,")
+      checkout.clickPersonalDetailsContinueButton()
+
+      Then("section 'Delivery Address' should load.")
+      assert(checkout.deliveryAddressSectionHasLoaded())
+
+      When("they fill in delivery address details,")
+      checkout.fillInDeliveryAddressDetails()
+
+      And("click on 'Continue' button,")
+      checkout.clickDeliveryAddressDetailsContinueButton()
+
+      Then("section 'Billing Address' should load.")
+      assert(checkout.billingAddressSectionHasLoaded())
+
+      Given("checkbox 'Bill my delivery address' is pre-selected,")
+
+      When("they click on 'Continue' button,")
+      checkout.clickBillingDetailsContinueButton()
+
+      Then("section 'Payment Details' should load.")
+      assert(checkout.directDebitSectionHasLoaded())
+
+      When("they fill in direct debit payment details,")
+      checkout.fillInDirectDebitPaymentDetails()
+
+      And("select 'Confirm account holder' checkbox,")
+      checkout.selectConfirmAccountHolder()
+
+      And("click on 'Continue' button,")
+      checkout.clickDebitPaymentContinueButton()
+
+      Then("section 'Review and Confirm' should load.")
+      assert(checkout.reviewSectionHasLoaded())
+
+      When("they click on 'Submit payment' button,")
+      checkout.submitPayment()
+
+      Then("they should land on 'Thank You' page.")
+      val thankYou = ThankYou(testUser)
+      assert(thankYou.pageHasLoaded())
+
+      When("they set password for their Identity account,")
+      thankYou.setPassword("supers4af3passw0rd")
+
+      Then("they should be logged into Identity account,")
+      assert(thankYou.hasMyProfileButton)
+
+      And("should have Identity cookies.")
+      Seq("GU_U", "SC_GU_U", "SC_GU_LA").foreach { idCookie =>
+        assert(Driver.cookiesSet.map(_.getName).contains(idCookie)) }
     }
   }
 }

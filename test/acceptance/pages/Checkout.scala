@@ -4,16 +4,22 @@ import acceptance.util.{Browser, TestUser, Config}
 import Config.baseUrl
 import org.scalatest.selenium.Page
 
-case class Checkout(testUser: TestUser) extends Page with Browser {
-  val url = s"$baseUrl/checkout"
+case class Checkout(testUser: TestUser, endpoint: String = "checkout") extends Page with Browser {
+  val url = s"$baseUrl/$endpoint"
 
   def fillInPersonalDetails(): Unit = PersonalDetails.fillIn()
 
   def clickPersonalDetailsContinueButton() = PersonalDetails.continue()
 
-  def clickBillingDetailsContinueButton() = BillingDetails.continue()
+  def deliveryAddressSectionHasLoaded(): Boolean = pageHasElement(DeliveryAddress.continueButton)
 
-  def fillInBillingAddress(): Unit = BillingDetails.fillIn()
+  def fillInDeliveryAddressDetails(): Unit = DeliveryAddress.fillIn()
+
+  def clickDeliveryAddressDetailsContinueButton() = DeliveryAddress.continue()
+
+  def clickBillingDetailsContinueButton() = BillingAddress.continue()
+
+  def fillInBillingAddress(): Unit = BillingAddress.fillIn()
 
   def fillInDirectDebitPaymentDetails(): Unit = DebitCardPaymentDetails.fillIn()
 
@@ -35,7 +41,7 @@ case class Checkout(testUser: TestUser) extends Page with Browser {
 
   def directDebitSectionHasLoaded(): Boolean = pageHasElement(DebitCardPaymentDetails.continueButton)
 
-  def billingDetailsSectionHasLoaded(): Boolean = pageHasElement(BillingDetails.continueButton)
+  def billingAddressSectionHasLoaded(): Boolean = pageHasElement(BillingAddress.continueButton)
 
   def cardSectionHasLoaded(): Boolean = pageHasElement(CreditCardPaymentDetails.continueButton)
 
@@ -69,7 +75,25 @@ case class Checkout(testUser: TestUser) extends Page with Browser {
     def continue(): Unit = clickOn(continueButton)
   }
 
-  private object BillingDetails {
+  private object DeliveryAddress {
+    val address1 = id("delivery-address1")
+    val address2 = id("delivery-address2")
+    val town = id("delivery-town")
+    val postcode = id("delivery-postcode")
+    val deliveryInstructions = name("deliveryInstructions")
+    val continueButton = cssSelector(".js-checkout-delivery-details-submit")
+
+    def fillIn(): Unit = {
+      setValue(address1, "90 York Way")
+      setValue(address2, "King's Cross")
+      setValue(town, "London")
+      setValue(postcode, "N1 9GU")
+    }
+
+    def continue(): Unit = clickOn(continueButton)
+  }
+
+  private object BillingAddress {
     val address1 = id("personal-address-address1")
     val address2 = id("personal-address-address2")
     val town = id("personal-address-town")
@@ -85,7 +109,6 @@ case class Checkout(testUser: TestUser) extends Page with Browser {
 
     def continue(): Unit = clickOn(continueButton)
   }
-
 
   private object DebitCardPaymentDetails {
     val account = id("payment-account")
