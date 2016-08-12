@@ -135,8 +135,10 @@ define(['$'], function ($) {
 
         // Paper checkout delivery details counter and date picker
         $PAPER_FIELDS: $('#paperFields'),
+        $VOUCHER_FIELDS: $('#voucherFields'),
         DELIVERY_INSTRUCTIONS_ID: 'deliveryInstructionsCharacterCountedTextArea',
         PAPER_CHECKOUT_DATE_PICKER_ID: 'deliveryDatePicker',
+        VOUCHER_CHECKOUT_DATE_PICKER_ID: 'deliveryDatePicker',
 
         $BASKET: $('.js-basket'),
         $PLAN_INPUTS :_PLAN_INPUTS,

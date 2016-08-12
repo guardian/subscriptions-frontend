@@ -12,6 +12,7 @@
 @import views.support.ProductPopulationData
 @import views.support.ProductPopulationData._
 @import com.gu.memsub.Current
+@import com.gu.memsub.Delivery
 @import com.gu.subscriptions.ProductPlan
 @import com.gu.i18n.Currency
 @import com.gu.i18n.Country
@@ -157,7 +158,11 @@
                                     Delivery address
                                 </legend>
                                 <div class="field-panel__fields">
-                                    @fragments.checkout.fieldsPaper(productData, countriesWithCurrency)
+                                    @if(productData.plans.list.contains(Delivery)) {
+                                        @fragments.checkout.fieldsPaper(productData, countriesWithCurrency)
+                                    }else{
+                                        @fragments.checkout.fieldsVoucher(productData, countriesWithCurrency)
+                                    }
                                     @continueButton("#paymentDetails", "js-checkout-delivery-details-submit")
                                 </div>
                                 <div class="field-panel__edit">
