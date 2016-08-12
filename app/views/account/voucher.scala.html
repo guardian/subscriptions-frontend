@@ -34,8 +34,14 @@
         </h3>
 
         <dl class="mma-section__list">
-          <dt class="mma-section__list--title">Subscriber ID</dt><dd class="mma-section__list--content">@subscription.name.get</dd>
-          <dt class="mma-section__list--title">Current plan</dt><dd class="mma-section__list--content">@subscription.plan.title</dd>
+          <dt class="mma-section__list--title">Subscriber ID</dt>
+          <dd class="mma-section__list--content">@subscription.name.get</dd>
+
+          <dt class="mma-section__list--title">Current plan</dt>
+          <dd class="mma-section__list--content">
+            <span class="mma-section__list--plan-title">@subscription.plan.title</span>
+            <span class="mma-section__list--plan-description">@subscription.plan.description</span>
+          </dd>
         </dl>
 
         <h3 class="mma-section__header">
@@ -56,12 +62,7 @@
           </div>
         }
         </div>
-
-
-
       </section>
-
-
     </section>
   </main>
 }

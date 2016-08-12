@@ -37,8 +37,16 @@
     margin-top: 10px;
 }
 
+.mma-section__list--plan-title {
+    display: block;
+}
+
+.mma-section__list--plan-description {
+    font-style: italic;
+}
+
 .mma-section__list--title {
-    margin-right: 100px;
+    margin-right: 70px;
     min-width: 100px;
     clear: left;
     float: left;
@@ -60,6 +68,8 @@
 
 .mma-section__calendar {
     text-align: center;
+    display: inline-block;
+    margin-right: 5px;
 }
 
 
@@ -90,21 +100,8 @@
 }
 
 .mma-section__schedule {
-    justify-content: space-between;
-    flex-direction: row;
     margin-top: 20px;
-    display: flex;
 }
-
-
-.mma-section__schedule--line {
-    border-top: 1px solid #dfdfdf;
-    position: absolute;
-    top: 30%;
-    left: 0;
-    right: 0;
-}
-
 
 .suspend-container__sidebar {
 
