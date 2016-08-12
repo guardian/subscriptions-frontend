@@ -31,6 +31,7 @@ object Dates {
     lazy val pretty = prettyDate(dt)
     lazy val prettyWithTime = prettyDateWithTime(dt)
     lazy val shortMonth: String = dt.toString("MMM YY")
+    lazy val shortDay: String = dt.toString("EEE")
 
   }
 

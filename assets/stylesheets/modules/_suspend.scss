@@ -60,7 +60,6 @@
 
 .mma-section__calendar {
     text-align: center;
-    z-index: 2;
 }
 
 
@@ -68,27 +67,44 @@
     display: inline-block;
     background-color: #f1f1f1;
     border: 1px solid #dfdfdf;
-    height: 90px;
-    width: 80px;
+    padding: 2px 0;
+    height: 92px;
+    width: 84px;
 }
 
 .mma-section__calendar--amount {
     margin-top: 4px;
 }
 
-.mma-section__calendar--day {
+.mma-section__calendar--main {
     font-weight: bold;
-    margin-top: 5px;
+    line-height: 40px;
     font-size: 32px;
+    display: block;
+    margin: 0 0;
+}
+
+.mma-section__calendar--sub {
+    font-size: 16px;
+    display: block;
 }
 
 .mma-section__schedule {
     justify-content: space-between;
     flex-direction: row;
-    position: relative;
     margin-top: 20px;
     display: flex;
 }
+
+
+.mma-section__schedule--line {
+    border-top: 1px solid #dfdfdf;
+    position: absolute;
+    top: 30%;
+    left: 0;
+    right: 0;
+}
+
 
 .suspend-container__sidebar {
 

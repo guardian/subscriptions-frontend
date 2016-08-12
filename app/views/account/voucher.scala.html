@@ -43,12 +43,12 @@
         </h3>
 
         <div class="mma-section__schedule">
-          <hr class="mma-section__schedule--line"/>
         @for(bill <- billingSchedule.invoices.list.take(10)) {
           <div class="mma-section__calendar">
             <div class="mma-section__calendar--date">
-              <h4 class="mma-section__calendar--day">@bill.date.getDayOfMonth</h4>
-              <h4 class="mma-section__calendar--month">@bill.date.shortMonth</h4>
+              <span class="mma-section__calendar--sub">@bill.date.shortDay</span>
+              <span class="mma-section__calendar--main">@bill.date.getDayOfMonth</span>
+              <span class="mma-section__calendar--sub">@bill.date.shortMonth</span>
             </div>
             <p class="mma-section__calendar--amount">
               £@bill.amount.currency
