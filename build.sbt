@@ -28,6 +28,7 @@ lazy val root = (project in file(".")).enablePlugins(
       "com.gu.i18n.CountryGroup",
       "com.gu.i18n.Country",
       "com.gu.memsub.promo.PromoCode",
+      "com.gu.memsub.SupplierCode",
       "com.gu.memsub.Subscription.ProductRatePlanId"
   ))
 
@@ -41,7 +42,7 @@ libraryDependencies ++= Seq(
     ws,
     filters,
     PlayImport.specs2,
-    "com.gu" %% "membership-common" % "0.256",
+    "com.gu" %% "membership-common" % "0.259",
     "com.gu" %% "memsub-common-play-auth" % "0.8",
     "com.gu" %% "content-authorisation-common" % "0.1",
     "com.github.nscala-time" %% "nscala-time" % "2.8.0",
@@ -54,7 +55,6 @@ libraryDependencies ++= Seq(
     "com.squareup.okhttp" % "okhttp" % "2.4.0",
     "com.snowplowanalytics" % "snowplow-java-tracker" % "0.5.2-SNAPSHOT",
     "com.github.t3hnar" %% "scala-bcrypt" % "2.4",
-    "org.apache.commons" % "commons-io" % "1.3.2",
     "org.scalaz" %% "scalaz-core" % "7.1.3",
     "org.pegdown" % "pegdown" % "1.6.0",
     "com.amazonaws" % "aws-java-sdk-sqs" % "1.10.50",

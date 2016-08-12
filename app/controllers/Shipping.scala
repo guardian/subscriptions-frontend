@@ -22,7 +22,7 @@ object Shipping extends Controller {
   def planToOptions(in: ProductPlan[PhysicalProducts]): SubscriptionOption =
     SubscriptionOption(in.slug,
       in.name, in.priceGBP.amount * 12 / 52, in.saving.map(_.toString + "%"), in.priceGBP.amount, in.description,
-      routes.Checkout.renderCheckout(CountryGroup.UK, None, in.slug).url
+      routes.Checkout.renderCheckout(CountryGroup.UK, None, None, in.slug).url
     )
 
   def viewCollectionPaperDigital() = CachedAction {

@@ -225,5 +225,5 @@ case class PaperHomeDeliveryWelcome1DataExtensionRow(email: String, fields: Seq[
 }
 
 case class HolidaySuspensionBillingScheduleDataExtensionRow(email: String, fields: Seq[(String, String)]) extends DataExtensionRow {
-  override def forExtension = HolidaySuspensionBillingSchedule
+  override def forExtension = HolidaySuspensionBillingScheduleExtension
 }

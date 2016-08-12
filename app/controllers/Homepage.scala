@@ -2,9 +2,12 @@ package controllers
 
 import actions.CommonActions._
 import com.gu.i18n.CountryGroup
+import com.gu.memsub.SupplierCode
+import com.gu.memsub.SupplierCodeBuilder
 import model.DigitalEdition._
 import utils.RequestCountry._
 import play.api.mvc._
+import SessionKeys.SupplierTrackingCode
 
 object Homepage extends Controller {
 
@@ -20,6 +23,17 @@ object Homepage extends Controller {
     } {
       case UK => Ok(views.html.index())
       case digitalEdition => Ok(views.html.index_intl(digitalEdition))
+    }
+  }
+
+  def supplierRedirect(supplierCodeStr: String) = NoCacheAction { implicit request =>
+    val url = routes.Homepage.landingPage(UK.id).url
+    SupplierCodeBuilder.buildSupplierCode(supplierCodeStr).fold {
+      val newSession = request.session - SupplierTrackingCode
+      Redirect(url, request.queryString, SEE_OTHER).withSession(newSession)  // clear any supplier code
+    } { supplierCode =>
+      val newQueryString = request.queryString + ("INTCMP" -> Seq(supplierCode.get))
+      Redirect(url, newQueryString, SEE_OTHER).withSession(request.session + (SupplierTrackingCode -> supplierCode.get))
     }
   }
 }

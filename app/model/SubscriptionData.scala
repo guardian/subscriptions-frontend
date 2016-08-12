@@ -4,7 +4,7 @@ import com.gu.i18n.Country.UK
 import com.gu.i18n.{Country, CountryGroup, Title}
 import com.gu.identity.play.IdUser
 import com.gu.memsub.Subscription.ProductRatePlanId
-import com.gu.memsub.{Address, BillingPeriod, Current, FullName}
+import com.gu.memsub._
 import com.gu.memsub.promo.PromoCode
 import IdUserOps._
 import com.gu.subscriptions.{DigipackPlan, DigitalProducts, PhysicalProducts, ProductPlan}
@@ -55,9 +55,9 @@ case class PersonalData(first: String,
 }
 
 case class SubscriptionData(
- personalData: PersonalData,
- paymentData: PaymentData,
- suppliedPromoCode: Option[PromoCode]
+   personalData: PersonalData,
+   paymentData: PaymentData,
+   promoCode: Option[PromoCode]
 )
 
 case class DigipackData(

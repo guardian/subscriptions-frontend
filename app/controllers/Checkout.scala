@@ -2,7 +2,7 @@ package controllers
 import actions.CommonActions._
 import com.gu.i18n._
 import com.gu.identity.play.ProxiedIP
-import com.gu.memsub.{BillingPeriod, Delivery}
+import com.gu.memsub.{BillingPeriod, Delivery, SupplierCode}
 import com.gu.memsub.Subscription.ProductRatePlanId
 import com.gu.memsub.promo.Formatters.PromotionFormatters._
 import com.gu.memsub.promo.{NewUsers, PromoCode}
@@ -28,6 +28,7 @@ import tracking.activities.{CheckoutReachedActivity, MemberData, SubscriptionReg
 import utils.TestUsers.{NameEnteredInForm, PreSigninTestCookie}
 import views.html.{checkout => view}
 import views.support.{BillingPeriod => _, _}
+
 import scalaz.std.option._
 import scalaz.syntax.applicative._
 import scala.Function.const
@@ -38,23 +39,12 @@ import scalaz.{NonEmptyList, OptionT}
 
 object Checkout extends Controller with LazyLogging with ActivityTracking with CatalogProvider {
 
-  object SessionKeys {
-    val SubsName = "newSubs_subscriptionName"
-    val RatePlanId = "newSubs_ratePlanId"
-    val UserId = "newSubs_userId"
-    val IdentityGuestPasswordSettingToken = "newSubs_token"
-    val AppliedPromoCode = "newSubs_appliedPromoCode"
-    val TrackingCode = "newSubs_trackingCode"
-    val Currency = "newSubs_currency"
-    val StartDate = "newSubs_startDate"
-  }
-
   import SessionKeys.{Currency => _, UserId => _, _}
 
   def checkoutService(implicit res: TouchpointBackend.Resolution): CheckoutService =
     res.backend.checkoutService
 
-  def renderCheckout(countryGroup: CountryGroup, promoCode: Option[PromoCode], forThisPlan: String) = NoCacheAction.async { implicit request =>
+  def renderCheckout(countryGroup: CountryGroup, promoCode: Option[PromoCode], supplierCode: Option[SupplierCode], forThisPlan: String) = NoCacheAction.async { implicit request =>
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
 
@@ -95,8 +85,12 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
       // either a code to send to the form (left) or a tracking code for the session (right)
       val promo: Either[PromoCode, Seq[(String, String)]] = (promoCode |@| determinedCountry)(
         tpBackend.promoService.validate[NewUsers](_: PromoCode, _: Country, plans.default.productRatePlanId)
-      ).flatMap(_.toOption).map(vp => vp.promotion.asTracking.map(_ => Seq(TrackingCode -> vp.code.get)).toRight(vp.code))
+      ).flatMap(_.toOption).map(vp => vp.promotion.asTracking.map(_ => Seq(PromotionTrackingCode -> vp.code.get)).toRight(vp.code))
        .getOrElse(Right(Seq.empty))
+
+      val resolvedSupplierCode = supplierCode orElse request.session.get(SupplierTrackingCode).map(SupplierCode) // query param wins
+      val trackingCodeSessionData = promo.right.toSeq.flatten
+      val supplierCodeSessionData = resolvedSupplierCode.map(code => Seq(SupplierTrackingCode -> code.get)).getOrElse(Seq.empty)
 
       Ok(views.html.checkout.payment(
         personalData = personalData,
@@ -107,8 +101,9 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
         countriesWithCurrency = determinedCountriesWithCurrency,
         touchpointBackendResolution = resolution,
         promoCode = promo.left.toOption,
+        supplierCode = resolvedSupplierCode,
         edition = model.DigitalEdition.getForCountryGroup(determinedCountryGroup)
-      )).withSession(promo.right.toSeq.flatten:_*)
+      )).withSession(trackingCodeSessionData ++ supplierCodeSessionData:_*)
     }
   }
 
@@ -127,11 +122,15 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
         s" ${e.map(err => s"${err.key} ${err.message}").mkString(", ")}")
     }
 
-    val sessionTrackingCode = request.session.get(TrackingCode)
-    val subscribeRequest = sr.copy(genericData = sr.genericData.copy(
-      suppliedPromoCode = sr.genericData.suppliedPromoCode orElse sessionTrackingCode.map(PromoCode)))
+    val sessionTrackingCode = request.session.get(PromotionTrackingCode)
+    val sessionSupplierCode = request.session.get(SupplierTrackingCode)
+    val subscribeRequest = sr.copy(
+      genericData = sr.genericData.copy(
+        promoCode = sr.genericData.promoCode orElse sessionTrackingCode.map(PromoCode)
+      )
+    )
 
-    val requestData = SubscriptionRequestData(ProxiedIP.getIP(request))
+    val requestData = SubscriptionRequestData(ProxiedIP.getIP(request), supplierCode = sessionSupplierCode.map(SupplierCode))
     val checkoutResult = checkoutService.processSubscription(subscribeRequest, idUserOpt, requestData)
 
     def failure(seqErr: NonEmptyList[SubsError]) = {
@@ -198,9 +197,11 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
       }
 
       val appliedCode = r.validPromotion.flatMap(vp => vp.promotion.asTracking.fold[Option[PromoCode]](Some(vp.code))(_ => None))
-      val appliedCodeSession = appliedCode.fold(Seq.empty[(String, String)])(promoCode => Seq(AppliedPromoCode -> promoCode.get))
+      val appliedCodeSession = appliedCode.map(promoCode => Seq(AppliedPromoCode -> promoCode.get)).getOrElse(Seq.empty)
       val subscriptionDetails = Some(StartDate -> subscribeRequest.productData.fold(_.startDate, _ => LocalDate.now).toString("d MMMM YYYY"))
-      val session = (productData ++ userSessionFields ++ appliedCodeSession ++ subscriptionDetails).foldLeft(request.session - AppliedPromoCode - TrackingCode) {
+
+      // Don't remove the SupplierTrackingCode from the session
+      val session = (productData ++ userSessionFields ++ appliedCodeSession ++ subscriptionDetails).foldLeft(request.session - AppliedPromoCode - PromotionTrackingCode) {
         _ + _
       }
 
@@ -313,9 +314,7 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
       Forbidden(Json.obj("type" -> errType, "message" -> msg))
     }
 
-    // TODO: Does Zuora provide a guarantee the message is safe to display to users directly?
-    // For now providing custom message to make sure no sensitive information is revealed.
-
+    // Custom message to make sure no sensitive information is revealed.
     e.errType match {
       case InsufficientFunds =>
         handleError("Your card has insufficient funds", "InsufficientFunds")

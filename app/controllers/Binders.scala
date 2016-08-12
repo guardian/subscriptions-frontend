@@ -1,7 +1,7 @@
 package controllers
 
 import com.gu.i18n.{Country, CountryGroup}
-import com.gu.memsub.ProductFamily
+import com.gu.memsub.{ProductFamily, SupplierCode, SupplierCodeBuilder}
 import com.gu.memsub.Subscription.ProductRatePlanId
 import com.gu.memsub.promo.PromoCode
 import play.api.mvc.QueryStringBindable.{Parsing => QueryParsing}
@@ -12,31 +12,35 @@ import scala.reflect.runtime.universe._
 object Binders {
   def applyNonEmpty[A: TypeTag](f: String => A)(s: String): A =
     if (s.isEmpty) {
-      val msg = s"Cannot build a ${implicitly[TypeTag[A]].tpe} from an empty string"
+      val msg = s"A paremeter value must be provided."
       throw new IllegalArgumentException(msg)
     } else f(s)
 
   implicit object bindableCountryGroup extends QueryParsing[CountryGroup](
-    id => CountryGroup.byId(id).get, _.id, (key: String, _: Exception) => s"Cannot parse parameter $key as a CountryGroup"
+    CountryGroup.byId(_).get, _.id, (key: String, _: Exception) => s"URL parameter $key is not a valid CountryGroup"
   )
 
   implicit object bindablePrpId extends QueryParsing[ProductRatePlanId](
-    applyNonEmpty(ProductRatePlanId), _.get, (key: String, _: Exception) => s"Cannot parse parameter $key as a CountryGroup"
+    applyNonEmpty(ProductRatePlanId), _.get, (key: String, e: Exception) => s"URL parameter $key is not a valid ProductRatePlanId. ${e.getMessage}"
   )
 
   implicit object bindablePromoCode extends QueryParsing[PromoCode](
-    applyNonEmpty(PromoCode), _.get, (key: String, _: Exception) => s"Cannot parse parameter $key as a PromoCode"
+    applyNonEmpty(PromoCode), _.get, (key: String, e: Exception) => s"URL parameter $key is not a valid PromoCode. ${e.getMessage}"
+  )
+
+  implicit object bindableSupplierCode extends QueryParsing[SupplierCode](
+    SupplierCodeBuilder.buildSupplierCode(_).get, _.get, (key: String, _: Exception) => s"URL parameter $key is not a valid SupplierCode"
   )
 
   implicit object bindableProductFamilyPath extends PathParsing[ProductFamily](
-    applyNonEmpty(id => ProductFamily.fromId(id).get), _.id, (key: String, _: Exception) => s"Cannot parse parameter $key as a Product"
+    ProductFamily.fromId(_).get, _.id, (key: String, _: Exception) => s"URL parameter $key is not a valid Product"
   )
 
   implicit object bindableProductFamilyQuery extends QueryParsing[ProductFamily](
-    applyNonEmpty(id => ProductFamily.fromId(id).get), _.id, (key: String, _: Exception) => s"Cannot parse parameter $key as a Product"
+    ProductFamily.fromId(_).get, _.id, (key: String, _: Exception) => s"URL parameter $key is not a valid Product"
   )
 
   implicit object bindableCountry extends QueryParsing[Country](
-    alpha2 => CountryGroup.countryByCode(alpha2).get, _.alpha2, (key: String, _: Exception) => s"Cannot parse parameter $key as a Country"
+    CountryGroup.countryByCode(_).get, _.alpha2, (key: String, _: Exception) => s"URL parameter $key is not a valid Country"
   )
 }
