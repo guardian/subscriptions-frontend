@@ -21,6 +21,7 @@
     @include clearfix();
     padding-bottom: $gs-gutter * 2;
 }
+
 .suspend-container__form {
     margin-bottom: $gs-baseline;
 
@@ -33,8 +34,27 @@
 .mma-section__header {
     font-size: 1.25rem;
     border-top: 1px solid #dfdfdf;
+    margin-bottom: 20px;
+    font-weight: bold;
     padding-top: 10px;
     margin-top: 10px;
+    display: block;
+    width: 100%;
+}
+
+.mma-dates__fields {
+    .form-field { // nesting here essentially unavoidable due to JS generated fields
+        margin-right: 10px;
+        float: left;
+    }
+}
+
+.mma-dates__button {
+    margin-top: 14px;
+}
+
+.mma-dates__request {
+    margin: 10px 0;
 }
 
 .mma-section__list--plan-title {
@@ -46,14 +66,14 @@
 }
 
 .mma-section__list--title {
-    margin-right: 70px;
-    min-width: 100px;
+    margin-right: 40px;
+    min-width: 120px;
     clear: left;
     float: left;
-
 }
 
 .mma-section__list--content {
+    margin-bottom: 10px;
     clear: right;
     float: left;
 }
@@ -84,6 +104,11 @@
 
 .mma-section__calendar--amount {
     margin-top: 4px;
+}
+
+.mma-section__calendar--amount--discounted {
+    font-weight: bold;
+    color: darkgreen;
 }
 
 .mma-section__calendar--main {
