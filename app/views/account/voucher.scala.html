@@ -3,7 +3,8 @@
 @import com.gu.memsub.Subscription
 @import com.gu.memsub.BillingSchedule
 @import views.support.PlanOps._
-@import views.support.Pricing._
+@import views.support.FloatOps._
+@import views.support.Dates._
 @import com.gu.subscriptions.ProductPlan
 @import com.gu.memsub.PaidPS
 @import com.gu.subscriptions.PhysicalProducts
@@ -21,28 +22,46 @@
 @main("Suspend your newspaper delivery | The Guardian", edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
 
   <main class="page-container gs-container">
-
-
     <section class="suspend-container">
 
       <div class="suspend-header">
         <h1 class="suspend-header__title">Your Guardian subscription</h1>
       </div>
 
-      <div class="suspend-container__sidebar">
-        <h2>Your billing schedule</h2>
-        @account.fragments.billingSchedule(billingSchedule, subscription.currency)
-      </div>
+      <section class="mma-section">
+        <h3 class="mma-section__header">
+          Your details
+        </h3>
 
-      <div>
-        <h2>Your subscription</h2>
-        <ul>
-          <li>Subscriber ID: <strong>@subscription.name.get</strong></li>
-          <li>You are subscribed to the <strong>@subscription.plan.title</strong></li>
-        </ul>
-      </div>
+        <dl class="mma-section__list">
+          <dt class="mma-section__list--title">Subscriber ID</dt><dd class="mma-section__list--content">@subscription.name.get</dd>
+          <dt class="mma-section__list--title">Current plan</dt><dd class="mma-section__list--content">@subscription.plan.title</dd>
+        </dl>
 
-      <br/>
+        <h3 class="mma-section__header">
+          Your billing schedule
+        </h3>
+
+        <div class="mma-section__schedule">
+          <hr class="mma-section__schedule--line"/>
+        @for(bill <- billingSchedule.invoices.list.take(10)) {
+          <div class="mma-section__calendar">
+            <div class="mma-section__calendar--date">
+              <h4 class="mma-section__calendar--day">@bill.date.getDayOfMonth</h4>
+              <h4 class="mma-section__calendar--month">@bill.date.shortMonth</h4>
+            </div>
+            <p class="mma-section__calendar--amount">
+              £@bill.amount.currency
+            </p>
+          </div>
+        }
+        </div>
+
+
+
+      </section>
+
+
     </section>
   </main>
 }

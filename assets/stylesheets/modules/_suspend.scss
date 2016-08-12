@@ -30,6 +30,66 @@
     }
 }
 
+.mma-section__header {
+    font-size: 1.25rem;
+    border-top: 1px solid #dfdfdf;
+    padding-top: 10px;
+    margin-top: 10px;
+}
+
+.mma-section__list--title {
+    margin-right: 100px;
+    min-width: 100px;
+    clear: left;
+    float: left;
+
+}
+
+.mma-section__list--content {
+    clear: right;
+    float: left;
+}
+
+.mma-section__list--currency {
+    text-align: right;
+}
+
+.mma-section__list {
+    overflow: auto;
+}
+
+.mma-section__calendar {
+    text-align: center;
+    z-index: 2;
+}
+
+
+.mma-section__calendar--date {
+    display: inline-block;
+    background-color: #f1f1f1;
+    border: 1px solid #dfdfdf;
+    height: 90px;
+    width: 80px;
+}
+
+.mma-section__calendar--amount {
+    margin-top: 4px;
+}
+
+.mma-section__calendar--day {
+    font-weight: bold;
+    margin-top: 5px;
+    font-size: 32px;
+}
+
+.mma-section__schedule {
+    justify-content: space-between;
+    flex-direction: row;
+    position: relative;
+    margin-top: 20px;
+    display: flex;
+}
+
 .suspend-container__sidebar {
 
     position: relative;

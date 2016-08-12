@@ -30,6 +30,8 @@ object Dates {
     val dt = ld.toDateTimeAtCurrentTime()
     lazy val pretty = prettyDate(dt)
     lazy val prettyWithTime = prettyDateWithTime(dt)
+    lazy val shortMonth: String = dt.toString("MMM YY")
+
   }
 
   implicit
