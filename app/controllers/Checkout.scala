@@ -23,8 +23,6 @@ import play.api.libs.json._
 import play.api.mvc._
 import services.AuthenticationService.authenticatedUserFor
 import services._
-import tracking.ActivityTracking
-import tracking.activities.{CheckoutReachedActivity, MemberData, SubscriptionRegistrationActivity}
 import utils.TestUsers.{NameEnteredInForm, PreSigninTestCookie}
 import views.html.{checkout => view}
 import views.support.{BillingPeriod => _, _}
@@ -36,7 +34,7 @@ import scala.concurrent.Future
 import scalaz.std.scalaFuture._
 import scalaz.{NonEmptyList, OptionT}
 
-object Checkout extends Controller with LazyLogging with ActivityTracking with CatalogProvider {
+object Checkout extends Controller with LazyLogging with CatalogProvider {
 
   object SessionKeys {
     val SubsName = "newSubs_subscriptionName"
@@ -57,8 +55,6 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
   def renderCheckout(countryGroup: CountryGroup, promoCode: Option[PromoCode], forThisPlan: String) = NoCacheAction.async { implicit request =>
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
-
-    trackAnon(CheckoutReachedActivity(countryGroup))
 
     val idUser = (for {
       authUser <- OptionT(Future.successful(authenticatedUserFor(request)))
@@ -204,7 +200,6 @@ object Checkout extends Controller with LazyLogging with ActivityTracking with C
         _ + _
       }
 
-      trackAnon(SubscriptionRegistrationActivity(MemberData(r, subscribeRequest)))
       Ok(Json.obj("redirect" -> routes.Checkout.thankYou().url)).withSession(session)
     }
 

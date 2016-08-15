@@ -43,8 +43,6 @@
         guardian.stripePublicKey = '@backend.paymentService.stripeService.publicKey';
     }
 
-    guardian.trackerUrl = '@{Config.trackerUrl}';
-
     (function(isModern) {
         // We want to add/remove classes to HTML ASAP to avoid FOUC
         var htmlClassNames = ['js-on'];
@@ -67,7 +65,7 @@
                 if (xhr.readyState === 4 && xhr.status === 200) {
                     if (cb) { cb.call(this, xhr); }
                 }
-            }
+            };
             xhr.timeout = 5000;
             xhr.send();
         }
