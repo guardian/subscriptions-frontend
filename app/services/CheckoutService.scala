@@ -69,7 +69,7 @@ class CheckoutService(identityService: IdentityService,
       payment <- EitherT(createPaymentType(requestData, purchaserIds, subscriptionData))
       defaultPaymentDelay = CheckoutService.paymentDelay(subscriptionData.productData, zuoraProperties)
       subscribe <- EitherT(createSubscribeRequest(personalData, requestData, plan, purchaserIds, payment, Some(defaultPaymentDelay)))
-      validPromotion = suppliedPromoCode.flatMap(promoService.validate[NewUsers](_, personalData.address.country.getOrElse(Country.UK), subscriptionData.productRatePlanId).toOption)
+      validPromotion = promoCode.flatMap(promoService.validate[NewUsers](_, personalData.address.country.getOrElse(Country.UK), subscriptionData.productRatePlanId).toOption)
       withPromo = validPromotion.map(v => p.apply(v, subscribe, catalogService.digipackCatalog.unsafeFindPaid, promoPlans)).getOrElse(subscribe)
       result <- EitherT(createSubscription(withPromo, purchaserIds))
       out <- postSubscribeSteps(authenticatedUserOpt, memberId, result, subscriptionData, validPromotion)
@@ -173,7 +173,8 @@ class CheckoutService(identityService: IdentityService,
         name = personalData,
         address = personalData.address,
         paymentDelay = paymentDelay,
-        ipAddress = requestData.ipAddress.map(_.getHostAddress)
+        ipAddress = requestData.ipAddress.map(_.getHostAddress),
+        supplierCode = requestData.supplierCode
       ))
     }.recover {
       case e: Stripe.Error => \/.left(NonEmptyList(CheckoutStripeError(

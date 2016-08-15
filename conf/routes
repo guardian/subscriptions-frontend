@@ -26,8 +26,8 @@ GET         /checkout/lookupPromotion        controllers.Checkout.validatePromoC
 GET         /checkout/validateDelivery       controllers.Checkout.validateDelivery(postCode: String)
 # Checkout pages
 GET         /checkout/thank-you              controllers.Checkout.thankYou()
-GET         /checkout                        controllers.Checkout.renderCheckout(countryGroup: CountryGroup ?= CountryGroup.UK, promoCode: Option[PromoCode], forThisPlan = "")
-GET         /checkout/:forThisPlan           controllers.Checkout.renderCheckout(countryGroup: CountryGroup ?= CountryGroup.UK, promoCode: Option[PromoCode], forThisPlan: String)
+GET         /checkout                        controllers.Checkout.renderCheckout(countryGroup: CountryGroup ?= CountryGroup.UK, promoCode: Option[PromoCode], supplierCode: Option[SupplierCode], forThisPlan = "")
+GET         /checkout/:forThisPlan           controllers.Checkout.renderCheckout(countryGroup: CountryGroup ?= CountryGroup.UK, promoCode: Option[PromoCode], supplierCode: Option[SupplierCode], forThisPlan: String)
 
 # collection and delivery
 GET         /collection/paper-digital        controllers.Shipping.viewCollectionPaperDigital
@@ -63,6 +63,9 @@ GET         /p/:promoCodeStr                 controllers.PromoLandingPage.render
 
 # NOCSRF
 POST        /q                               controllers.PromoLandingPage.preview
+
+# Promotions
+GET         /s/:supplierCodeStr              controllers.Homepage.supplierRedirect(supplierCodeStr: String)
 
 GET         /manage                          controllers.Testing.manageHoldingPage
 

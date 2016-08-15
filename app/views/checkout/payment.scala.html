@@ -7,6 +7,7 @@
 @import views.support.CountryWithCurrency
 @import views.support.Pricing._
 @import com.gu.memsub.promo.PromoCode
+@import com.gu.memsub.SupplierCode
 @import model.PersonalData
 @import views.support.PlanOps._
 @import views.support.ProductPopulationData
@@ -31,6 +32,7 @@
     countriesWithCurrency: List[CountryWithCurrency],
     touchpointBackendResolution: services.TouchpointBackend.Resolution,
     promoCode: Option[PromoCode],
+    supplierCode: Option[SupplierCode],
     edition: DigitalEdition
 )(implicit request: RequestHeader)
 
@@ -76,12 +78,12 @@
 <main class="page-container gs-container">
 
     <section class="checkout-container">
+        @fragments.checkout.checkoutHeader(productData.plans.default.title)
+
         <form class="form js-checkout-form" action="" method="POST" novalidate>
             @helper.CSRF.formField
 
-            @fragments.checkout.checkoutHeader(productData.plans.default.title)
-
-            @* ===== Plan selection ===== *@
+                @* ===== Plan selection ===== *@
             <div class="checkout-container__sidebar js-basket">
                 @fragments.checkout.basketPreview(productData.plans.default)
                 @if(productData.plans.list.length > 1) {
@@ -131,12 +133,17 @@
                             <div class="field-note field-note--offset">
                                 @fragments.forms.securityNote()
                             </div>
+                            @supplierCode.map { code =>
+                                <div class="field-note field-note--offset">
+                                    <span class="field-note__label">Supplier code: @code.get</span>
+                                </div>
+                            }
                             <div class="field-note field-note--offset prose">
                                 @if(personalData.isDefined) {
-                                    <a href="@idWebAppSignOutUrl(routes.Checkout.renderCheckout(countryGroup, promoCode, productData.plans.default.slug))">Sign out</a>
+                                    <a href="@idWebAppSignOutUrl(routes.Checkout.renderCheckout(countryGroup, promoCode, None, productData.plans.default.slug))">Sign out</a>
                                 } else {
                                     <span class="field-note__label">Already have a Guardian account?</span>
-                                    <a class="js-sign-in-link" href="@idWebAppSigninUrl(routes.Checkout.renderCheckout(countryGroup, promoCode, productData.plans.default.slug))">Sign in</a>
+                                    <a class="js-sign-in-link" href="@idWebAppSigninUrl(routes.Checkout.renderCheckout(countryGroup, promoCode, None, productData.plans.default.slug))">Sign in</a>
                                 }
                             </div>
                         </div>
