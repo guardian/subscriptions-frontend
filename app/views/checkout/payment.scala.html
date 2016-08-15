@@ -166,7 +166,7 @@
                                 </legend>
                                 <div class="field-panel__fields">
                                     @if(productData.plans.default.products.seq.contains(Delivery)) {
-                                        @fragments.checkout.fieldsPaper(productData, countriesWithCurrency)
+                                        @fragments.checkout.fieldsDelivery(productData, countriesWithCurrency)
                                     }else{
                                         @fragments.checkout.fieldsVoucher(productData, countriesWithCurrency)
                                     }
