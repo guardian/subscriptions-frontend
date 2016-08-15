@@ -10,8 +10,18 @@ require('react-datepicker/dist/react-datepicker.css');
 
 const MAX_WEEKS_AVAILABLE = 4;
 
+// The cut off for getting vouchers in two weeks is Wednesday at 6 AM GMT
+const CUTOFF_WEEKDAY = 3;
+const CUTOFF_HOUR = 6;
+
+const NORMAL_DELIVERY_DELAY = 2;
+const EXTRA_DELIVERY_DELAY  = 3;
+
+const DELIVERY_DAY = 1; // Monday
+
+
 function filterDate() {
-    return (date) => date.day() === 1;
+    return (date) => date.day() === DELIVERY_DAY;
 }
 
 function getFirstSelectableDate() {
@@ -19,7 +29,7 @@ function getFirstSelectableDate() {
     var currentWeekday = now.weekday();
     var currentHour = now.hour();
     var mostRecentMonday = moment().startOf('isoWeek');
-    var weeksToAdd = currentWeekday >= 3 && currentHour >= 6 ? 3 : 2;
+    var weeksToAdd = currentWeekday >= CUTOFF_WEEKDAY && currentHour >= CUTOFF_HOUR ? EXTRA_DELIVERY_DELAY : NORMAL_DELIVERY_DELAY;
     return mostRecentMonday.add(weeksToAdd, 'weeks')
 }
 
