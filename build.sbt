@@ -52,6 +52,7 @@ libraryDependencies ++= Seq(
     "org.seleniumhq.selenium" % "selenium-java" % "2.53.1" % "test",
     "com.gocardless" % "gocardless-pro" % "1.16.0",
     "com.squareup.okhttp" % "okhttp" % "2.4.0",
+    "com.snowplowanalytics" % "snowplow-java-tracker" % "0.5.2-SNAPSHOT",
     "com.github.t3hnar" %% "scala-bcrypt" % "2.4",
     "org.apache.commons" % "commons-io" % "1.3.2",
     "org.scalaz" %% "scalaz-core" % "7.1.3",

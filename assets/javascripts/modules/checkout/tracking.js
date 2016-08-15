@@ -1,4 +1,4 @@
-define(['$', 'modules/analytics/omniture'], function ($, omniture) {
+define(['$', 'modules/analytics/omniture', 'modules/analytics/snowplow'], function ($, omniture, snowplow) {
     'use strict';
 
     //TODO make this product aware
@@ -27,6 +27,7 @@ define(['$', 'modules/analytics/omniture'], function ($, omniture) {
             guardian.pageInfo.slug = 'GuardianDigiPack:'+slugName;
             guardian.pageInfo.productData = subscriptionProducts('scOpen');
             omniture.triggerPageLoadEvent();
+            snowplow.trackPageLoad();            
         };
     }
 
