@@ -32,7 +32,7 @@ object Homepage extends Controller {
       val newSession = request.session - SupplierTrackingCode
       Redirect(url, request.queryString, SEE_OTHER).withSession(newSession)  // clear any supplier code
     } { supplierCode =>
-      val newQueryString = request.queryString + ("INTCMP" -> Seq(supplierCode.get))
+      val newQueryString = request.queryString + ("INTCMP" -> Seq(s"FROM_S_${supplierCode.get}"))
       Redirect(url, newQueryString, SEE_OTHER).withSession(request.session + (SupplierTrackingCode -> supplierCode.get))
     }
   }
