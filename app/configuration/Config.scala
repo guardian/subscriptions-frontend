@@ -34,6 +34,8 @@ object Config {
   val stage = config.getString("stage")
   val stageProd: Boolean = stage == "PROD"
 
+
+  val trackerUrl = config.getString("snowplow.url")
   val bcryptSalt = config.getString("activity.tracking.bcrypt.salt")
   val bcryptPepper = config.getString("activity.tracking.bcrypt.pepper")
 
