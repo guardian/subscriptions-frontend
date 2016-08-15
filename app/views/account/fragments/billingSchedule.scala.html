@@ -1,35 +1,22 @@
 @import com.gu.memsub.BillingSchedule
-@import com.gu.memsub.BillingSchedule.rolledUp
-@import com.gu.memsub.Price
-@import com.gu.i18n.GBP
-@import views.support.Dates.prettyDate
+@import views.support.BillingScheduleOps._
+@import views.support.FloatOps._
+@import views.support.Dates._
 @import com.gu.i18n.Currency
 
 @(billingSchedule: BillingSchedule, currency: Currency)
 
-@rolledUpBills = @{rolledUp(billingSchedule)}
-
-<table class="table table--striped suspend__table">
-    <thead>
-        <tr>
-            <th>Date</th>
-            <th>Amount</th>
-        </tr>
-    </thead>
-    <tbody>
-        @for(bill <- rolledUpBills._2) {
-            <tr>
-                <td class="date">@prettyDate(bill.date)</td>
-                <td class="money">@Price(bill.amount, GBP).pretty</td>
-            </tr>
-        }
-        <tr>
-            @if(rolledUpBills._2.nonEmpty) {
-                <td class="date u-note">Every month thereafter</td>
-            } else {
-                <td class="date">Every month</td>
-            }
-            <td class="money">@Price(rolledUpBills._1.amount, GBP).pretty</td>
-        </tr>
-    </tbody>
-</table>
+<div class="mma-section__schedule">
+    @for(bill <- billingSchedule.invoices.list) {
+        <div class="mma-section__calendar">
+            <div class="mma-section__calendar--date">
+                <span class="mma-section__calendar--sub">@bill.date.shortDay</span>
+                <span class="mma-section__calendar--main">@bill.date.getDayOfMonth</span>
+                <span class="mma-section__calendar--sub">@bill.date.shortMonth</span>
+            </div>
+            <p class="mma-section__calendar--amount @bill.isDiscounted("mma-section__calendar--amount--discounted")">
+              @currency.glyph@bill.amount.currency
+            </p>
+        </div>
+    }
+</div>

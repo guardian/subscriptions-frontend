@@ -19,7 +19,7 @@
   ResponsiveImageGroup(availableImages = ResponsiveImageGenerator("05129395fe0461071f176f526d7a4ae2b1d9b9bf/0_0_5863_5116", Seq(140, 500, 1000, 2000)))
 }
 
-@main("Suspend your newspaper delivery | The Guardian", edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
+@main("Suspend your newspaper delivery | The Guardian", bodyClasses = List("is-wide"), edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
 
   <main class="page-container gs-container">
     <section class="suspend-container">
@@ -47,21 +47,7 @@
         <h3 class="mma-section__header">
           Your billing schedule
         </h3>
-
-        <div class="mma-section__schedule">
-        @for(bill <- billingSchedule.invoices.list.take(10)) {
-          <div class="mma-section__calendar">
-            <div class="mma-section__calendar--date">
-              <span class="mma-section__calendar--sub">@bill.date.shortDay</span>
-              <span class="mma-section__calendar--main">@bill.date.getDayOfMonth</span>
-              <span class="mma-section__calendar--sub">@bill.date.shortMonth</span>
-            </div>
-            <p class="mma-section__calendar--amount">
-              £@bill.amount.currency
-            </p>
-          </div>
-        }
-        </div>
+        @views.html.account.fragments.billingSchedule(billingSchedule, subscription.currency)
       </section>
     </section>
   </main>

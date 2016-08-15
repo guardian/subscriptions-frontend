@@ -27,64 +27,74 @@
     ResponsiveImageGroup(availableImages = ResponsiveImageGenerator("05129395fe0461071f176f526d7a4ae2b1d9b9bf/0_0_5863_5116", Seq(140, 500, 1000, 2000)))
 }
 
-@main("Suspend your newspaper delivery | The Guardian", edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
+@main("Suspend your newspaper delivery | The Guardian", bodyClasses = List("is-wide"), edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
 
     <main class="page-container gs-container">
-
-
         <section class="suspend-container">
 
             <div class="suspend-header">
                 <h1 class="suspend-header__title">Suspend your newspaper delivery</h1>
             </div>
 
-            <div class="suspend-container__sidebar">
 
-                <h2>Your billing schedule</h2>
-                @account.fragments.billingSchedule(billingSchedule, subscription.currency)
-            </div>
+            <section class="mma-section">
+                <h3 class="mma-section__header">
+                    Your details
+                </h3>
 
-            <div>
-                <h2>Your subscription</h2>
-                <ul>
-                    <li>Subscriber ID: <strong>@subscription.name.get</strong></li>
-                    <li>You are subscribed to the <strong>@subscription.plan.title</strong></li>
-                    <li>You can line up <strong>@suspendableWeeks weeks</strong> worth of suspensions <span class="u-note">(Up to @suspendableDays days on the @subscription.plan.title)</span></li>
-                    <li>@account.fragments.suspensions(holidayRefunds, suspendableDays, suspendedDays)</li>
-                </ul>
-            </div>
+                <dl class="mma-section__list">
+                    <dt class="mma-section__list--title">Subscriber ID</dt>
+                    <dd class="mma-section__list--content">@subscription.name.get</dd>
 
-            <br/>
+                    <dt class="mma-section__list--title">Available holiday</dt>
+                    <dd class="mma-section__list--content">
+                        <span class="mma-section__list--plan-title">@suspendableDays days over @suspendableWeeks weeks</span>
+                    </dd>
+
+                    <dt class="mma-section__list--title">Current plan</dt>
+                    <dd class="mma-section__list--content">
+                        <span class="mma-section__list--plan-title">@subscription.plan.title</span>
+                        <span class="mma-section__list--plan-description">@subscription.plan.description</span>
+                    </dd>
+
+                    <dt class="mma-section__list--title">Monthly cost</dt>
+                    <dd class="mma-section__list--content"> @subscription.plan.priceGBP.pretty</dd>
+                </dl>
+            </section>
 
             @if((suspendableDays - suspendedDays) > 0) {
-                <div class="suspend-container__form">
+                <section class="mma-section">
                     <form class="form js-suspend-form" action="@routes.AccountManagement.processSuspension().url" method="POST" novalidate>
-                        @helper.CSRF.formField
-                        <div id="suspendDetails" class="field-panel js-fieldset-your-details">
-                            <fieldset>
-                                <legend class="field-panel__legend">
-                                    Create a suspension
-                                </legend>
-                                <div class="field-panel__intro u-note">
-                                    Please give us 5 working days notice to process the suspension.<br/>
-                                    All dates are inclusive.
-                                </div>
-                                <div class="field-panel__fields">
-                                    <div class="form-field js-suspend-start-date">
-                                        <div id="dateRangePicker"
-                                        remainingDays="@{suspendableDays - suspendedDays}"
-                                        excludeExistingDays="@{holidayRefunds.flatMap(x => holidayToDays(x._2.start, x._2.finish)).map(prettyDate).mkString(",")}"
-                                        ratePlanName="@subscription.plan.name"></div>
-                                    </div>
-                                    <button type="submit" class="js-suspend-submit button button--primary button--large u-margin-bottom">
-                                        Continue
-                                    </button>
-                                </div>
-                            </fieldset>
-                        </div>
+                        <fieldset>
+                            <legend class="mma-section__header">
+                                Create a suspension
+                            </legend>
+                            @helper.CSRF.formField
+
+                            <div class="form-field js-suspend-start-date mma-dates__fields">
+                                <div id="dateRangePicker"
+                                remainingDays="@{suspendableDays - suspendedDays}"
+                                excludeExistingDays="@{holidayRefunds.flatMap(x => holidayToDays(x._2.start, x._2.finish)).map(prettyDate).mkString(",")}"
+                                ratePlanName="@subscription.plan.name"></div>
+                            </div>
+                            <button type="submit" class="js-suspend-submit button button--primary button--large u-margin-bottom mma-dates__button">
+                                Create
+                            </button>
+                        </fieldset>
                     </form>
-                </div>
+                    <span class="mma-dates__request">Please give us 5 working days notice to process the suspension. All dates are inclusive.</span>
+                </section>
             }
+
+            <section class="mma-section">
+                <h3 class="mma-section__header">Your billing schedule</h3>
+                @account.fragments.billingSchedule(billingSchedule, subscription.currency)
+            </section>
+
+            <section class="mma-section">
+                <h3 class="mma-section__header">Scheduled suspensions</h3>
+                @account.fragments.suspensions(holidayRefunds, suspendableDays, suspendedDays)
+            </section>
         </section>
     </main>
 }
