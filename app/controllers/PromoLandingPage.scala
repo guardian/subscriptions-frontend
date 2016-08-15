@@ -28,7 +28,7 @@ object PromoLandingPage extends Controller {
       promotion <- tpBackend.promoService.findPromotion(promoCode)
       promotionWithLandingPage <- promotion.asDigipack
       html <- if ((evaluateStarts && promotionWithLandingPage.starts.isAfterNow) || promotionWithLandingPage.expires.exists(_.isBeforeNow)) None else Some(views.html.promotion.landingPage(edition, catalog, promoCode, promotionWithLandingPage, Config.Zuora.paymentDelay, PegdownMarkdownRenderer))
-    } yield Ok(html)).getOrElse(Redirect("/digital" ? ("INTCMP" -> s"FROM_P_${promoCode.get}")))
+    } yield Ok(html)).getOrElse(Redirect("/digital" ? ("INTCMP" -> s"FROM_P_${promoCode.get}"))) // deliberate internal use of INTCMP code to track redirecting promos
   }
 
   def preview() = GoogleAuthenticatedStaffAction { implicit request =>
