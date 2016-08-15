@@ -1,0 +1,22 @@
+@import views.support.CountryOps._
+@import views.support.AddressValidationRulesOps._
+@import views.support.CountryWithCurrency
+@import com.gu.i18n.Title
+@import model.PersonalData
+
+@import views.support.ProductPopulationData
+@(data: ProductPopulationData, countriesWithCurrency: List[CountryWithCurrency])
+
+@address(data.deliveryAddress, "delivery", countriesWithCurrency, data.plans.default)
+
+<div class="js-checkout-delivery-data" id="voucherFields">
+    <div class="form-field js-checkout-delivery">
+        <label class="label" for="startDate">Week of first paper</label>
+        <div id="deliveryDatePicker" class="form-field__react-datepicker"></div>
+    </div>
+    <input type="hidden" name="paper" value="false">
+    <input type="hidden" name="digipack" value="false">
+</div>
+
+
+

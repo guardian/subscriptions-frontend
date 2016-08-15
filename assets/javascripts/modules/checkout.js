@@ -39,6 +39,10 @@ define([
                 require(['modules/checkout/paperFields'], function(paperFields) {
                     paperFields.default.init();
                 });
+            } else if (formElements.$VOUCHER_FIELDS.length) {
+                require(['modules/checkout/voucherFields'], function(voucherFields) {
+                    voucherFields.default.init();
+                });
             }
         }
 
