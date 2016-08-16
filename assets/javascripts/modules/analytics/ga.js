@@ -9,7 +9,7 @@ define(['modules/analytics/analyticsEnabled',
         var identitySignedIn = user.isLoggedIn();
         var identitySignedOut = !!cookie.getCookie('GU_SO') && !identitySignedIn;
         var ophanBrowserId = cookie.getCookie('bwid');
-        var productData = guardian.productData;
+        var productData = guardian.pageInfo.productData;
         var intcmp = new RegExp('INTCMP=([^&]*)').exec(location.search);
 
         /* Google analytics snippet */
