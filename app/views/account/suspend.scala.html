@@ -15,6 +15,8 @@
 @import views.support.Dates.prettyDate
 @import views.support.PlanOps._
 
+@import org.joda.time.LocalDate
+@import org.joda.time.LocalDate.now
 @(
     subscription: Subscription with PaidPS[ProductPlan[PhysicalProducts]],
     holidayRefunds: Seq[HolidayRefund] = Seq.empty,
@@ -58,7 +60,10 @@
                     </dd>
 
                     <dt class="mma-section__list--title">Monthly cost</dt>
-                    <dd class="mma-section__list--content"> @subscription.plan.priceGBP.pretty</dd>
+                    <dd class="mma-section__list--content">@subscription.plan.priceGBP.pretty</dd>
+
+                    <dt class="mma-section__list--title">First payment</dt>
+                    <dd class="mma-section__list--content">@prettyDate(subscription.firstPaymentDate)</dd>
                 </dl>
             </section>
 
