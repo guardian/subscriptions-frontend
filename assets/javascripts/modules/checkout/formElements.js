@@ -134,7 +134,7 @@ define(['$'], function ($) {
         $EDIT_BILLING_ADDRESS: $('.js-edit-billing-address'),
 
         // Paper checkout delivery details counter and date picker
-        $PAPER_FIELDS: $('#paperFields'),
+        $DELIVERY_FIELDS: $('#deliveryFields'),
         $VOUCHER_FIELDS: $('#voucherFields'),
         DELIVERY_INSTRUCTIONS_ID: 'deliveryInstructionsCharacterCountedTextArea',
         PAPER_CHECKOUT_DATE_PICKER_ID: 'deliveryDatePicker',

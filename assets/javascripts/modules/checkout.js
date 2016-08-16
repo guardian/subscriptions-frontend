@@ -35,9 +35,9 @@ define([
             deliveryDetails.init();
             deliveryAsBilling.init();
             billingAddress.init();
-            if (formElements.$PAPER_FIELDS.length) {
-                require(['modules/checkout/paperFields'], function(paperFields) {
-                    paperFields.default.init();
+            if (formElements.$DELIVERY_FIELDS.length) {
+                require(['modules/checkout/deliveryFields'], function(deliveryFields) {
+                    deliveryFields.default.init();
                 });
             } else if (formElements.$VOUCHER_FIELDS.length) {
                 require(['modules/checkout/voucherFields'], function(voucherFields) {
