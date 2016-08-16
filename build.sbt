@@ -53,7 +53,6 @@ libraryDependencies ++= Seq(
     "org.seleniumhq.selenium" % "selenium-java" % "2.53.1" % "test",
     "com.gocardless" % "gocardless-pro" % "1.16.0",
     "com.squareup.okhttp" % "okhttp" % "2.7.5" % "test",
-    "com.github.t3hnar" %% "scala-bcrypt" % "2.4",
     "org.scalaz" %% "scalaz-core" % "7.1.3",
     "org.pegdown" % "pegdown" % "1.6.0",
     "com.amazonaws" % "aws-java-sdk-sqs" % "1.10.50",

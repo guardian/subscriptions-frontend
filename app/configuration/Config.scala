@@ -34,9 +34,6 @@ object Config {
   val stage = config.getString("stage")
   val stageProd: Boolean = stage == "PROD"
 
-  val bcryptSalt = config.getString("activity.tracking.bcrypt.salt")
-  val bcryptPepper = config.getString("activity.tracking.bcrypt.pepper")
-
   val timezone = DateTimeZone.forID("Europe/London")
 
   object Identity {
