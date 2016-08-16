@@ -73,6 +73,7 @@
 
                             <div class="form-field js-suspend-start-date mma-dates__fields">
                                 <div id="dateRangePicker"
+                                firstPaymentDate="@prettyDate(subscription.firstPaymentDate)"
                                 remainingDays="@{suspendableDays - suspendedDays}"
                                 excludeExistingDays="@{holidayRefunds.flatMap(x => holidayToDays(x._2.start, x._2.finish)).map(prettyDate).mkString(",")}"
                                 ratePlanName="@subscription.plan.name"></div>

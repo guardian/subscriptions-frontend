@@ -8,9 +8,17 @@ import moment from 'moment'
 
 require('react-datepicker/dist/react-datepicker.css');
 
-const FIRST_SELECTABLE_DATE = moment().add(5, 'days');
+const LEAD_TIME = moment().add(5, 'days');
 const LAST_START_DATE = moment().add(1, 'year');
-const MAX_WEEKS = 3;
+const MAX_WEEKS = 6;
+
+function getFirstSelectableDate(firstPaymentDate) {
+    if (firstPaymentDate && moment(LEAD_TIME).isBefore(firstPaymentDate)) {
+        return moment(firstPaymentDate);
+    } else {
+        return LEAD_TIME;
+    }
+}
 
 function filterDate(packageName, exclusionList) {
     const exclusions = (exclusionList || '').split(',');
@@ -32,13 +40,14 @@ export default {
 
     renderDatePicker () {
         const container = document.getElementById(formElements.SUSPEND_DATE_PICKER_ID),
+            firstSelectableDate = getFirstSelectableDate(container.getAttribute('firstPaymentDate')),
             remainingDays = parseInt(container.getAttribute('remainingDays'), 10),
             filterDateFn = filterDate(container.getAttribute('ratePlanName'), container.getAttribute('excludeExistingDays'));
 
         ReactDOM.render(
             <CustomDateRangePicker className="input-text"
                                    maxWeeks={MAX_WEEKS}
-                                   firstSelectableDate={FIRST_SELECTABLE_DATE}
+                                   firstSelectableDate={firstSelectableDate}
                                    lastStartDate={LAST_START_DATE}
                                    dateFormat="D MMMM YYYY" locale="en-gb"
                                    filterDate={filterDateFn}
