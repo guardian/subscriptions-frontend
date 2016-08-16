@@ -15,6 +15,8 @@
 @import views.support.Dates.prettyDate
 @import views.support.PlanOps._
 
+@import org.joda.time.LocalDate
+@import org.joda.time.LocalDate.now
 @(
     subscription: Subscription with PaidPS[ProductPlan[PhysicalProducts]],
     holidayRefunds: Seq[HolidayRefund] = Seq.empty,
@@ -58,7 +60,10 @@
                     </dd>
 
                     <dt class="mma-section__list--title">Monthly cost</dt>
-                    <dd class="mma-section__list--content"> @subscription.plan.priceGBP.pretty</dd>
+                    <dd class="mma-section__list--content">@subscription.plan.priceGBP.pretty</dd>
+
+                    <dt class="mma-section__list--title">First payment</dt>
+                    <dd class="mma-section__list--content">@prettyDate(subscription.firstPaymentDate)</dd>
                 </dl>
             </section>
 
@@ -73,6 +78,7 @@
 
                             <div class="form-field js-suspend-start-date mma-dates__fields">
                                 <div id="dateRangePicker"
+                                firstPaymentDate="@prettyDate(subscription.firstPaymentDate)"
                                 remainingDays="@{suspendableDays - suspendedDays}"
                                 excludeExistingDays="@{holidayRefunds.flatMap(x => holidayToDays(x._2.start, x._2.finish)).map(prettyDate).mkString(",")}"
                                 ratePlanName="@subscription.plan.name"></div>
