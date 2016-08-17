@@ -57,14 +57,6 @@
     margin: 10px 0;
 }
 
-.mma-section__list--plan-title {
-    display: block;
-}
-
-.mma-section__list--plan-description {
-    font-style: italic;
-}
-
 .mma-section__list--title {
     margin-right: 40px;
     min-width: 120px;
@@ -103,7 +95,9 @@
 }
 
 .mma-section__calendar--amount {
-    margin-top: 4px;
+    border: 1px solid #dfdfdf;
+    border-top: none;
+    padding-top: 2px;
 }
 
 .mma-section__calendar--amount--discounted, .scheduled-suspensions__discount {

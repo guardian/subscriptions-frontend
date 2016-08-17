@@ -1,23 +1,12 @@
-@import com.gu.memsub.images.ResponsiveImageGroup
-@import com.gu.memsub.images.ResponsiveImageGenerator
 @import com.gu.memsub.Subscription
 @import com.gu.memsub.BillingSchedule
-@import views.support.PlanOps._
-@import views.support.FloatOps._
-@import views.support.Dates._
 @import com.gu.subscriptions.ProductPlan
 @import com.gu.memsub.PaidPS
 @import com.gu.subscriptions.PhysicalProducts
 @import model.DigitalEdition.UK
-
 @(
-  subscription: Subscription with PaidPS[ProductPlan[PhysicalProducts]], billingSchedule: BillingSchedule)(
-  implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackend.Resolution
-)
-
-@packImage = @{
-  ResponsiveImageGroup(availableImages = ResponsiveImageGenerator("05129395fe0461071f176f526d7a4ae2b1d9b9bf/0_0_5863_5116", Seq(140, 500, 1000, 2000)))
-}
+  subscription: Subscription with PaidPS[ProductPlan[PhysicalProducts]], billingSchedule: BillingSchedule
+)(implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackend.Resolution)
 
 @main("Suspend your newspaper delivery | The Guardian", bodyClasses = List("is-wide"), edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
 
@@ -32,18 +21,10 @@
         <h3 class="mma-section__header">
           Your details
         </h3>
+        @views.html.account.fragments.yourDetails(subscription)()
+      </section>
 
-        <dl class="mma-section__list">
-          <dt class="mma-section__list--title">Subscriber ID</dt>
-          <dd class="mma-section__list--content">@subscription.name.get</dd>
-
-          <dt class="mma-section__list--title">Current plan</dt>
-          <dd class="mma-section__list--content">
-            <span class="mma-section__list--plan-title">@subscription.plan.title</span>
-            <span class="mma-section__list--plan-description">@subscription.plan.description</span>
-          </dd>
-        </dl>
-
+      <section class="mma-section">
         <h3 class="mma-section__header">
           Your billing schedule
         </h3>
