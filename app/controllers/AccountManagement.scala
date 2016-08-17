@@ -4,7 +4,7 @@ import actions.CommonActions._
 import com.github.nscala_time.time.OrderingImplicits.LocalDateOrdering
 import com.gu.memsub.{Delivery, PaidPS, Subscription}
 import com.gu.subscriptions.suspendresume.{RefundCalculator, SuspensionService}
-import com.gu.subscriptions.suspendresume.SuspensionService.{AlreadyOnHoliday, BadZuoraJson, ErrNel, HolidayRefund, NegativeDays, NoRefundDue, NotEnoughNotice, PaymentHoliday}
+import com.gu.subscriptions.suspendresume.SuspensionService.{AlreadyOnHoliday, BadZuoraJson, ErrNel, HolidayRefund, NegativeDays, NoRefundDue, NotEnoughNotice, PaymentHoliday, RefundError}
 import com.gu.subscriptions.{PhysicalProducts, ProductPlan}
 import com.gu.zuora.soap.models.Queries.Contact
 import com.typesafe.scalalogging.LazyLogging
@@ -15,7 +15,7 @@ import play.api.mvc.{AnyContent, Controller, Request}
 import services.AuthenticationService._
 import services.TouchpointBackend
 import utils.TestUsers.PreSigninTestCookie
-
+import views.support.AccountManagementOps._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scalaz.std.option._
@@ -65,7 +65,7 @@ object AccountManagement extends Controller with LazyLogging {
 
   private def pendingHolidayRefunds(allHolidays: Seq[HolidayRefund]) = allHolidays.filterNot(_._2.finish.isBefore(LocalDate.now)).sortBy(_._2.start)
 
-  def login(subscriberId: Option[String] = None) = GoogleAuthenticatedStaffAction.async { implicit request =>
+  def login(subscriberId: Option[String] = None, errorCode: Option[String] = None) = GoogleAuthenticatedStaffAction.async { implicit request =>
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
     val subscription = subscriptionFromRequest
@@ -79,7 +79,7 @@ object AccountManagement extends Controller with LazyLogging {
       sub.plan.products.seq.contains(Delivery).fold({
         val pendingHolidays = pendingHolidayRefunds(allHolidays)
         val suspendedDays = SuspensionService.holidayToSuspendedDays(pendingHolidays, sub.plan.products.physicalProducts.list)
-        Ok(views.html.account.suspend(sub, pendingHolidayRefunds(allHolidays), billingSchedule, suspendableDays, suspendedDays))
+        Ok(views.html.account.suspend(sub, pendingHolidayRefunds(allHolidays), billingSchedule, suspendableDays, suspendedDays, errorCode))
       },{
         Ok(views.html.account.voucher(sub, billingSchedule))
       })
@@ -90,22 +90,28 @@ object AccountManagement extends Controller with LazyLogging {
     val loginRequest = AccountManagementLoginForm.mappings.bindFromRequest().value
 
     subscriptionFromUserDetails(loginRequest).map {
-        case Some(sub) => Redirect(routes.AccountManagement.login(None)).withSession(
+        case Some(sub) => Redirect(routes.AccountManagement.login(None, None)).withSession(
           SUBSCRIPTION_SESSION_KEY -> sub.name.get
         )
-        case _ => Redirect(routes.AccountManagement.login(None)).flashing(
+        case _ => Redirect(routes.AccountManagement.login(None, None)).flashing(
           "error" -> "Unable to verify your details."
         )
     }
   }
 
-  private def userFacingError(r: ErrNel): String = r.map {
-    case NoRefundDue => "You aren't receiving the paper on any of the days you've selected" // change
-    case NotEnoughNotice => "Unfortunately we require five days notice to suspend deliveries" // these
-    case AlreadyOnHoliday => "It looks like you're already on holiday for some of the time" // at some point
-    case NegativeDays => "Invalid date range, please check your selections"
-    case BadZuoraJson(_) => "Unexpected error"
-  }.list.mkString(", ")
+  /**
+    * Takes a RefundError error inside a NonEmptyList and prints a line to the log as a side effect, returning the RefundError.
+    * @param r a RefundError error inside a NonEmptyList
+    * @return RefundError
+    */
+  private def getAndLogRefundError(r: ErrNel): RefundError = {
+    val refundError = r.head
+    refundError match {
+      case e:BadZuoraJson => logger.error(s"Error when adding a new holiday - BadZuoraJson: ${e.got}")
+      case e:_ => logger.error(s"Error when adding a new holiday: ${e.getClass.getSimpleName}")
+    }
+    refundError
+  }
 
   def processSuspension = GoogleAuthenticatedStaffAction.async { implicit request =>
     lazy val noSub = "Could not find an active subscription"
@@ -118,7 +124,7 @@ object AccountManagement extends Controller with LazyLogging {
       newHoliday = PaymentHoliday(sub.name, form.startDate, form.endDate)
       // 14 because + 2 extra months needed in calculation to cover setting a 6-week suspension on the day before your 12th billing day!
       oldBS <- EitherT(tpBackend.commonPaymentService.billingSchedule(sub, 14).map(_ \/> "Error getting billing schedule"))
-      result <- EitherT(tpBackend.suspensionService.addHoliday(newHoliday, oldBS)).leftMap(userFacingError)
+      result <- EitherT(tpBackend.suspensionService.addHoliday(newHoliday, oldBS)).leftMap(getAndLogRefundError(_).getCode)
       newBS <- EitherT(tpBackend.commonPaymentService.billingSchedule(sub, 12).map(_ \/> "Error getting billing schedule"))
       newHolidays <- EitherT(tpBackend.suspensionService.getHolidays(sub.name)).leftMap(_ => "Error getting holidays")
       pendingHolidays = pendingHolidayRefunds(newHolidays)
@@ -137,11 +143,11 @@ object AccountManagement extends Controller with LazyLogging {
         suspendedDays = suspendedDays,
         currency = sub.currency
       )).withNewSession
-    }).valueOr(BadRequest(_))
+    }).valueOr(errorCode => Redirect(routes.AccountManagement.login(None, Some(errorCode)).url))
   }
 
   def redirect = NoCacheAction { implicit request =>
-    Redirect(routes.AccountManagement.login(None).url)
+    Redirect(routes.AccountManagement.login(None, None).url)
   }
 }
 
