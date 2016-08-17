@@ -1,22 +1,13 @@
-@import com.gu.memsub.images.ResponsiveImageGroup
-@import com.gu.memsub.images.ResponsiveImageGenerator
 @import com.gu.memsub.Subscription
 @import com.gu.memsub.BillingSchedule
-@import views.support.PlanOps._
-@import views.support.Pricing._
 @import com.gu.subscriptions.ProductPlan
 @import com.gu.memsub.PaidPS
-@import com.gu.memsub.promo.Promotion.AnyPromotion
 @import com.gu.subscriptions.PhysicalProducts
 @import com.gu.subscriptions.suspendresume.SuspensionService.HolidayRefund
 @import configuration.Config.suspendableWeeks
 @import com.gu.subscriptions.suspendresume.SuspensionService.holidayToDays
 @import model.DigitalEdition.UK
 @import views.support.Dates.prettyDate
-@import views.support.PlanOps._
-
-@import org.joda.time.LocalDate
-@import org.joda.time.LocalDate.now
 @(
     subscription: Subscription with PaidPS[ProductPlan[PhysicalProducts]],
     holidayRefunds: Seq[HolidayRefund] = Seq.empty,
@@ -24,10 +15,6 @@
     suspendableDays: Int,
     suspendedDays: Int
 )(implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackend.Resolution)
-
-@packImage = @{
-    ResponsiveImageGroup(availableImages = ResponsiveImageGenerator("05129395fe0461071f176f526d7a4ae2b1d9b9bf/0_0_5863_5116", Seq(140, 500, 1000, 2000)))
-}
 
 @main("Suspend your newspaper delivery | The Guardian", bodyClasses = List("is-wide"), edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
 
@@ -38,33 +25,16 @@
                 <h1 class="suspend-header__title">Suspend your newspaper delivery</h1>
             </div>
 
-
             <section class="mma-section">
                 <h3 class="mma-section__header">
                     Your details
                 </h3>
-
-                <dl class="mma-section__list">
-                    <dt class="mma-section__list--title">Subscriber ID</dt>
-                    <dd class="mma-section__list--content">@subscription.name.get</dd>
-
+                @views.html.account.fragments.yourDetails(subscription) {
                     <dt class="mma-section__list--title">Available holiday</dt>
                     <dd class="mma-section__list--content">
-                        <span class="mma-section__list--plan-title">@suspendableDays days over @suspendableWeeks weeks</span>
+                        <span class="mma-section__list--plan-title">@suspendableDays days</span>
                     </dd>
-
-                    <dt class="mma-section__list--title">Current plan</dt>
-                    <dd class="mma-section__list--content">
-                        <span class="mma-section__list--plan-title">@subscription.plan.title</span>
-                        <span class="mma-section__list--plan-description">@subscription.plan.description</span>
-                    </dd>
-
-                    <dt class="mma-section__list--title">Monthly cost</dt>
-                    <dd class="mma-section__list--content">@subscription.plan.priceGBP.pretty</dd>
-
-                    <dt class="mma-section__list--title">First payment</dt>
-                    <dd class="mma-section__list--content">@prettyDate(subscription.firstPaymentDate)</dd>
-                </dl>
+                }
             </section>
 
             @if((suspendableDays - suspendedDays) > 0) {
@@ -88,19 +58,20 @@
                             </button>
                         </fieldset>
                     </form>
-                    <span class="mma-dates__request">Please give us 5 working days notice to process the suspension. All dates are inclusive.</span>
+                    <span class="mma-dates__request">Please give us 5 working days notice to process the suspension. Maximum duration is @suspendableWeeks weeks. <strong>All dates are inclusive</strong>.</span>
                 </section>
             }
+
+            <section class="mma-section">
+                <h3 class="mma-section__header">Scheduled suspensions</h3>
+                @account.fragments.suspensions(holidayRefunds, suspendableDays, suspendedDays)
+            </section>
 
             <section class="mma-section">
                 <h3 class="mma-section__header">Your billing schedule</h3>
                 @account.fragments.billingSchedule(billingSchedule, subscription.currency)
             </section>
 
-            <section class="mma-section">
-                <h3 class="mma-section__header">Scheduled suspensions</h3>
-                @account.fragments.suspensions(holidayRefunds, suspendableDays, suspendedDays)
-            </section>
         </section>
     </main>
 }
