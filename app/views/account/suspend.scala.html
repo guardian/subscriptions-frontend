@@ -15,7 +15,7 @@
     billingSchedule: BillingSchedule,
     suspendableDays: Int,
     suspendedDays: Int,
-    errorCode: Option[String]
+    errorCodes: Set[String]
 )(implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackend.Resolution)
 
 @main("Suspend your newspaper delivery | The Guardian", bodyClasses = List("is-wide"), edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
@@ -49,7 +49,9 @@
                             @helper.CSRF.formField
 
                             <div class="form-field js-suspend-start-date mma-dates__fields">
-                                @errorCode.map { code => <div class="form-field__error-message form-field__error-message-visible">@getMessageFromCode(code)</div> }
+                                <ul class="mma-error-list">
+                                    @errorCodes.map { code => <li class="form-field__error-message mma-error-list__item">@getMessageFromCode(code)</li> }
+                                </ul>
                                 <div id="dateRangePicker"
                                 firstPaymentDate="@prettyDate(subscription.firstPaymentDate)"
                                 remainingDays="@{suspendableDays - suspendedDays}"

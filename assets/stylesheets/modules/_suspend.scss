@@ -152,3 +152,10 @@
         text-align: right;
     }
 }
+
+.mma-error-list {
+   list-style-type: disc;
+}
+.mma-error-list__item {
+    display: list-item;
+}

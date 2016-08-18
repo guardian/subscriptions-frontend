@@ -15,7 +15,6 @@ import play.api.mvc.{AnyContent, Controller, Request}
 import services.AuthenticationService._
 import services.TouchpointBackend
 import utils.TestUsers.PreSigninTestCookie
-import views.support.AccountManagementOps._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scalaz.std.option._
@@ -69,6 +68,7 @@ object AccountManagement extends Controller with LazyLogging {
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
     val subscription = subscriptionFromRequest
+    val errorCodes = errorCode.toSeq.flatMap(_.split(',').map(_.trim)).filterNot(_.isEmpty).toSet
 
     (for {
       sub <- OptionT(subscription)
@@ -79,7 +79,7 @@ object AccountManagement extends Controller with LazyLogging {
       sub.plan.products.seq.contains(Delivery).fold({
         val pendingHolidays = pendingHolidayRefunds(allHolidays)
         val suspendedDays = SuspensionService.holidayToSuspendedDays(pendingHolidays, sub.plan.products.physicalProducts.list)
-        Ok(views.html.account.suspend(sub, pendingHolidayRefunds(allHolidays), billingSchedule, suspendableDays, suspendedDays, errorCode))
+        Ok(views.html.account.suspend(sub, pendingHolidayRefunds(allHolidays), billingSchedule, suspendableDays, suspendedDays, errorCodes))
       },{
         Ok(views.html.account.voucher(sub, billingSchedule))
       })
@@ -100,17 +100,16 @@ object AccountManagement extends Controller with LazyLogging {
   }
 
   /**
-    * Takes a RefundError error inside a NonEmptyList and prints a line to the log as a side effect, returning the RefundError.
-    * @param r a RefundError error inside a NonEmptyList
-    * @return RefundError
+    * Takes a RefundError error inside a NonEmptyList and prints each error line to the log as a side effect, returning the original NonEmptyList.
+    * @param r a NonEmptyList of RefundErrors
+    * @return NonEmptyList[RefundError]
     */
-  private def getAndLogRefundError(r: ErrNel): RefundError = {
-    val refundError = r.head
-    refundError match {
+  private def getAndLogRefundError(r: ErrNel): ErrNel = {
+    r.foreach {
       case e:BadZuoraJson => logger.error(s"Error when adding a new holiday - BadZuoraJson: ${e.got}")
-      case e:_ => logger.error(s"Error when adding a new holiday: ${e.getClass.getSimpleName}")
+      case e => logger.error(s"Error when adding a new holiday: ${e.code}")
     }
-    refundError
+    r
   }
 
   def processSuspension = GoogleAuthenticatedStaffAction.async { implicit request =>
@@ -124,7 +123,7 @@ object AccountManagement extends Controller with LazyLogging {
       newHoliday = PaymentHoliday(sub.name, form.startDate, form.endDate)
       // 14 because + 2 extra months needed in calculation to cover setting a 6-week suspension on the day before your 12th billing day!
       oldBS <- EitherT(tpBackend.commonPaymentService.billingSchedule(sub, 14).map(_ \/> "Error getting billing schedule"))
-      result <- EitherT(tpBackend.suspensionService.addHoliday(newHoliday, oldBS)).leftMap(getAndLogRefundError(_).getCode)
+      result <- EitherT(tpBackend.suspensionService.addHoliday(newHoliday, oldBS)).leftMap(getAndLogRefundError(_).map(_.code).list.mkString(","))
       newBS <- EitherT(tpBackend.commonPaymentService.billingSchedule(sub, 12).map(_ \/> "Error getting billing schedule"))
       newHolidays <- EitherT(tpBackend.suspensionService.getHolidays(sub.name)).leftMap(_ => "Error getting holidays")
       pendingHolidays = pendingHolidayRefunds(newHolidays)
