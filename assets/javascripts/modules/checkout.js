@@ -10,7 +10,8 @@ define([
     'modules/checkout/promoCode',
     'modules/checkout/billingDetails',
     'modules/checkout/deliveryDetails',
-    'modules/checkout/deliveryAsBilling'
+    'modules/checkout/deliveryAsBilling',
+    'bean'
 ], function (
     optionMirror,
     formElements,
@@ -21,7 +22,8 @@ define([
     promoCode,
     billingAddress,
     deliveryDetails,
-    deliveryAsBilling
+    deliveryAsBilling,
+    bean
 ) {
     'use strict';
     function init() {
@@ -44,6 +46,13 @@ define([
                     voucherFields.default.init();
                 });
             }
+            // Prevent form submit on enter
+            bean.on(formElements.$CHECKOUT_FORM[0], 'keypress', function (event) {
+                if (event.keyCode == 13) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+            });
         }
 
         curl('js!stripe').then(function() {
