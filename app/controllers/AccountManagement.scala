@@ -3,8 +3,8 @@ package controllers
 import actions.CommonActions._
 import com.github.nscala_time.time.OrderingImplicits.LocalDateOrdering
 import com.gu.memsub.{Delivery, PaidPS, Subscription}
-import com.gu.subscriptions.suspendresume.{RefundCalculator, SuspensionService}
-import com.gu.subscriptions.suspendresume.SuspensionService.{AlreadyOnHoliday, BadZuoraJson, ErrNel, HolidayRefund, NegativeDays, NoRefundDue, NotEnoughNotice, PaymentHoliday, RefundError}
+import com.gu.subscriptions.suspendresume.SuspensionService
+import com.gu.subscriptions.suspendresume.SuspensionService.{BadZuoraJson, ErrNel, HolidayRefund, PaymentHoliday}
 import com.gu.subscriptions.{PhysicalProducts, ProductPlan}
 import com.gu.zuora.soap.models.Queries.Contact
 import com.typesafe.scalalogging.LazyLogging
