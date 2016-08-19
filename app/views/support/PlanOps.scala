@@ -34,6 +34,22 @@ object PlanOps {
       case _ => "subscriptions@theguardian.com"
     }
 
+    def hasHomeDelivery: Boolean = in match {
+      case _ if in.products.seq == Seq(Digipack) => false
+      case _ if in.products.seq.contains(Delivery) => true
+      case _ if !in.products.seq.contains(Delivery) => false
+      case _ => false
+    }
+
+    def hasVoucher: Boolean = in match {
+      case _ if in.products.seq == Seq(Digipack) => false
+      case _ if in.products.seq.contains(Delivery) => false
+      case _ if !in.products.seq.contains(Delivery) => true
+      case _ => false
+    }
+
+    def hasDigitalPack: Boolean = in.products.seq.contains(Digipack)
+
     def phone: String = "+44 (0) 330 333 6767"
   }
 }
