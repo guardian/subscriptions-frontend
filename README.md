@@ -13,7 +13,9 @@
    Mac OSX: `~/Developers/etc/nginx/sites-enabled` or `/usr/local/etc/nginx/`
    Make sure your nginx.conf (found in your nginx home) contains the following line in the `http{...}` block: `include sites-enabled/*`;
 
-   Run: `./nginx/setup.sh`
+	Get credentials for subscription so you can download the nginx keys.
+
+   Run: `./nginx/setup.sh` and enter your password where prompted.
 
 ## General Setup
 
