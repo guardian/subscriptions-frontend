@@ -52,4 +52,15 @@ object PlanOps {
 
     def phone: String = "+44 (0) 330 333 6767"
   }
+
+  implicit class ProductPopulationDataOps(in: ProductPopulationData) {
+
+    val products = in.plans.list.head
+
+    def hasHomeDelivery: Boolean = products.hasHomeDelivery
+
+    def hasVoucher: Boolean = products.hasVoucher
+
+  }
+
 }
