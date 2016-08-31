@@ -16,7 +16,7 @@
             </ul>
         </div>
     </div>
-    @if(productData.planEither.isRight) {
+    @if(productData.hasHomeDelivery) {
         <div class="review-details__item">
             <span class="review-details__heading">Deliver to</span>
             <div class="review-details__list">
@@ -24,6 +24,17 @@
                     <li class="js-checkout-review-delivery-address sessioncamhidetext"></li>
                     <li><span class="review-details__detail">Delivery instructions:</span> <span class="js-checkout-review-delivery-instructions sessioncamhidetext"></span></li>
                     <li><span class="review-details__detail">Date of first paper:</span> <span class="js-checkout-review-delivery-start-date"></span></li>
+                </ul>
+            </div>
+        </div>
+    }
+    @if(productData.hasVoucher) {
+        <div class="review-details__item">
+            <span class="review-details__heading">Deliver to</span>
+            <div class="review-details__list">
+                <ul class="o-unstyled-list">
+                    <li class="js-checkout-review-delivery-address sessioncamhidetext"></li>
+                    <li><span class="review-details__detail">Week of first paper:</span> <span class="js-checkout-review-delivery-start-date"></span></li>
                 </ul>
             </div>
         </div>
