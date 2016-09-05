@@ -70,7 +70,7 @@ class CheckoutService(identityService: IdentityService,
       defaultPaymentDelay = CheckoutService.paymentDelay(subscriptionData.productData, zuoraProperties)
       subscribe <- EitherT(createSubscribeRequest(personalData, requestData, plan, purchaserIds, payment, Some(defaultPaymentDelay)))
       validPromotion = promoCode.flatMap(promoService.validate[NewUsers](_, personalData.address.country.getOrElse(Country.UK), subscriptionData.productRatePlanId).toOption)
-      withPromo = validPromotion.map(v => p.apply(v, subscribe, catalogService.digipackCatalog.unsafeFindPaid, promoPlans)).getOrElse(subscribe)
+      withPromo = validPromotion.map(v => p.apply(v, catalogService.digipackCatalog.unsafeFindPaid, promoPlans)(subscribe)).getOrElse(subscribe)
       result <- EitherT(createSubscription(withPromo, purchaserIds))
       out <- postSubscribeSteps(authenticatedUserOpt, memberId, result, subscriptionData, validPromotion)
     } yield CheckoutSuccess(memberId, out._1, result, validPromotion, out._2)).run

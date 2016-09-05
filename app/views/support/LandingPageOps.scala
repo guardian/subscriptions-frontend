@@ -1,6 +1,6 @@
 package views.support
 
-import com.gu.memsub.promo.Promotion.AnyPromotion
+import com.gu.memsub.promo.Promotion._
 import com.gu.memsub.promo._
 import org.joda.time.DateTime.now
 import scalaz.Id._
@@ -9,7 +9,7 @@ object LandingPageOps {
 
   private def getSectionColour(landingPage: SubscriptionsLandingPage) = landingPage.sectionColour.getOrElse(Blue)
 
-  implicit class ForPromotionsWithALandingPage(promotion: Promotion[PromotionType, Id, SubscriptionsLandingPage]) {
+  implicit class ForPromotionsWithALandingPage(promotion: PromoWithDigipackLandingPage) {
     def landingPageSectionColour: String = {
       getSectionColour(promotion.landingPage) match {
         case Blue => "section-blue"

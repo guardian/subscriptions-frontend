@@ -1,4 +1,5 @@
 @import com.gu.memsub.promo.PromoCode
+@import com.gu.memsub.promo.Promotion.PromoWithDigipackLandingPage
 @import com.gu.memsub.promo.Promotion.asAnyPromotion
 @import com.gu.memsub.promo._
 @import com.gu.subscriptions.DigipackCatalog
@@ -10,7 +11,7 @@
 @import org.pegdown.PegDownProcessor
 @import views.support.MarkdownRenderer
 
-@(edition: DigitalEdition, catalog: DigipackCatalog, promoCode: PromoCode, promotion: Promotion[PromotionType, Id, SubscriptionsLandingPage], defaultTrial: Days, md: MarkdownRenderer)
+@(edition: DigitalEdition, catalog: DigipackCatalog, promoCode: PromoCode, promotion: PromoWithDigipackLandingPage, defaultTrial: Days, md: MarkdownRenderer)
 @anyPromotion = @{asAnyPromotion(promotion)}
 @main(
     title = "Subscribe to the Guardian Digital Pack offer | The Guardian (${edition.name})",
