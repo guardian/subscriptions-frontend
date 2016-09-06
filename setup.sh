@@ -30,20 +30,6 @@ create_install_vars() {
   fi
 }
 
-create_frontend_properties() {
-  local path="$HOME/.gu"
-  local filename="frontend.properties"
-
-  if [[ ! -f "$path/$filename" ]]; then
-    if [[ ! -d "$path" ]]; then
-      mkdir "$path"
-    fi
-
-    touch "$path/$filename"
-    EXTRA_STEPS+=("Ask a colleague for frontend.properties and add the contents to $path/$filename")
-  fi
-}
-
 create_aws_credentials() {
   local path="$HOME/.aws"
   local filename="credentials"
@@ -170,7 +156,6 @@ report() {
 
 main() {
   create_install_vars
-  create_frontend_properties
   create_aws_credentials
   install_homebrew
   install_jdk

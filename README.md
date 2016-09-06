@@ -13,7 +13,9 @@
    Mac OSX: `~/Developers/etc/nginx/sites-enabled` or `/usr/local/etc/nginx/`
    Make sure your nginx.conf (found in your nginx home) contains the following line in the `http{...}` block: `include sites-enabled/*`;
 
-   Run: `./nginx/setup.sh`
+	Get Janus credentials for subscription so you can download the nginx keys.
+
+   Run: `./nginx/setup.sh` and enter your password where prompted.
 
 ## General Setup
 
@@ -30,16 +32,6 @@
    Bower is a command-line utility, a package manager that makes it easy to manage all the application’s front-end dependencies. It works by fetching and installing packages
 1. Change the ownership of the 'gu' directory under 'etc' to current user.
    `$ sudo -i chown -R {username} /etc/gu`
-1. Run `./nginx/setup.sh`
-1. Setup AWS credentials (we use the gu-membership account). Ask your teammate to create an account for you and securely send you the access key. For security, you must enable [MFA](http://aws.amazon.com/iam/details/mfa/).
-
-   In `~/.aws/credentials` add the following:
-
-   ```
-   [membership]
-   aws_access_key_id = [YOUR_AWS_ACCESS_KEY]
-   aws_secret_access_key = [YOUR_AWS_SECRET_ACCESS_KEY]
-   ```
 
    In `~/.aws/config` add the following:
 
