@@ -139,6 +139,7 @@ define(['$'], function ($) {
         DELIVERY_INSTRUCTIONS_ID: 'deliveryInstructionsCharacterCountedTextArea',
         PAPER_CHECKOUT_DATE_PICKER_ID: 'deliveryDatePicker',
         VOUCHER_CHECKOUT_DATE_PICKER_ID: 'deliveryDatePicker',
+        $DELIVERED_PRODUCT_TYPE: $('input[name="delivered-product"]'),
 
         $BASKET: $('.js-basket'),
         $PLAN_INPUTS :_PLAN_INPUTS,

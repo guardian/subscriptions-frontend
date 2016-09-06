@@ -158,14 +158,14 @@
                 </div>
 
                 @* ===== Delivery details ===== *@
-                @if(productData.planEither.isRight) {
+                @if(productData.hasHomeDelivery || productData.hasVoucher) {
                         <div id="deliveryDetails" class="field-panel is-collapsed js-fieldset-delivery-details">
                             <fieldset>
                                 <legend class="field-panel__legend">
                                     Delivery address
                                 </legend>
                                 <div class="field-panel__fields">
-                                    @if(productData.plans.default.products.seq.contains(Delivery)) {
+                                    @if(productData.hasHomeDelivery) {
                                         @fragments.checkout.fieldsDelivery(productData, countriesWithCurrency)
                                     }else{
                                         @fragments.checkout.fieldsVoucher(productData, countriesWithCurrency)
