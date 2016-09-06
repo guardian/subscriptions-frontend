@@ -42,7 +42,7 @@ libraryDependencies ++= Seq(
     ws,
     filters,
     PlayImport.specs2,
-    "com.gu" %% "membership-common" % "0.265",
+    "com.gu" %% "membership-common" % "0.267",
     "com.gu" %% "memsub-common-play-auth" % "0.8",
     "com.gu" %% "content-authorisation-common" % "0.1",
     "com.github.nscala-time" %% "nscala-time" % "2.8.0",
@@ -74,7 +74,7 @@ resolvers ++= Seq(
     "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases",
     Resolver.sonatypeRepo("releases"))
 
-addCommandAlias("devrun", "run -Dconfig.resource=DEV.conf 9200")
+addCommandAlias("devrun", "run -Dconfig.resource=DEV.conf -Dconfig.trace=loads 9200")
 addCommandAlias("fast-test", "testOnly -- -l Acceptance")
 addCommandAlias("acceptance-test", "testOnly acceptance.CheckoutSpec")
 
