@@ -74,7 +74,7 @@ resolvers ++= Seq(
     "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases",
     Resolver.sonatypeRepo("releases"))
 
-addCommandAlias("devrun", "run -Dconfig.resource=DEV.conf -Dconfig.trace=loads 9200")
+addCommandAlias("devrun", "run -Dconfig.resource=DEV.conf 9200")
 addCommandAlias("fast-test", "testOnly -- -l Acceptance")
 addCommandAlias("acceptance-test", "testOnly acceptance.CheckoutSpec")
 
