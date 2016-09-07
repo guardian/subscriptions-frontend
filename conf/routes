@@ -67,7 +67,5 @@ POST        /q                               controllers.PromoLandingPage.previe
 # Promotions
 GET         /s/:supplierCodeStr              controllers.Homepage.supplierRedirect(supplierCodeStr: String)
 
-GET         /manage                          controllers.Testing.manageHoldingPage
-
 # Editions hommepage or 404
 GET         /:edition                        controllers.Homepage.landingPage(edition: String)
