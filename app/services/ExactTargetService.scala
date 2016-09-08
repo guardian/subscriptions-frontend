@@ -21,6 +21,7 @@ import org.joda.time.Days
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json._
 import views.support.Pricing._
+import views.support.PlanOps._
 
 import scala.concurrent.Future
 import scala.reflect.internal.util.StringOps
@@ -73,14 +74,25 @@ trait ExactTargetService extends LazyLogging {
       val subscriptionDetails = getPlanDescription(validPromotion, personalData.currency, sub.plan)
 
       subscriptionData.productData.fold(
-        paperData => PaperHomeDeliveryWelcome1DataExtensionRow(
-          paperData = paperData,
-          personalData = personalData,
-          subscription = sub,
-          paymentMethod = pm,
-          subscriptionDetails = subscriptionDetails,
-          promotionDescription = promotionDescription
-        ),
+        paperData => if (paperData.plan.hasHomeDelivery) {
+          PaperHomeDeliveryWelcome1DataExtensionRow(
+            paperData = paperData,
+            personalData = personalData,
+            subscription = sub,
+            paymentMethod = pm,
+            subscriptionDetails = subscriptionDetails,
+            promotionDescription = promotionDescription
+          )
+        } else {
+          PaperVoucherWelcome1DataExtensionRow(
+            paperData = paperData,
+            personalData = personalData,
+            subscription = sub,
+            paymentMethod = pm,
+            subscriptionDetails = subscriptionDetails,
+            promotionDescription = promotionDescription
+          )
+        },
         _ => DigipackWelcome1DataExtensionRow(
           personalData = personalData,
           subscription = sub,
