@@ -10,6 +10,7 @@ import com.gu.memsub.promo.Promotion._
 import com.gu.memsub.promo._
 import com.gu.memsub.services.{SubscriptionService, PaymentService => CommonPaymentService}
 import com.gu.subscriptions.{DigipackCatalog, PaperCatalog}
+import com.gu.memsub.subsv2.{SubscriptionPlan => Plan}
 import com.gu.zuora.api.ZuoraService
 import com.gu.zuora.soap.models.Results.SubscribeResult
 import com.typesafe.scalalogging.LazyLogging
@@ -35,8 +36,7 @@ import utils.Retry
   * https://code.exacttarget.com/apis-sdks/rest-api/v1/messaging/messageDefinitionSends.html
   */
 trait ExactTargetService extends LazyLogging {
-  def digiSubscriptionService: SubscriptionService[DigipackCatalog]
-  def paperSubscriptionService: SubscriptionService[PaperCatalog]
+  def subscriptionService: subsv2.services.SubscriptionService[Future]
   def paymentService: CommonPaymentService
   def zuoraService: ZuoraService
   def salesforceService: SalesforceService
@@ -60,8 +60,8 @@ trait ExactTargetService extends LazyLogging {
     val zuoraPaidSubscription: Future[PaidSub] =
       Retry(2, s"Failed to get Zuora paid subscription ${subscribeResult.subscriptionName} for ${purchaserIds.identityId}") {
         subscriptionData.productData.fold(
-          { paper => paperSubscriptionService.unsafeGetPaid(Subscription.Name(subscribeResult.subscriptionName)) },
-          { digipack => digiSubscriptionService.unsafeGetPaid(Subscription.Name(subscribeResult.subscriptionName)) })}
+          { paper => subscriptionService.get[Plan.Paper](Subscription.Name(subscribeResult.subscriptionName)) },
+          { digipack => subscriptionService.unsafeGetPaid(Subscription.Name(subscribeResult.subscriptionName)) })}
 
     val zuoraPaymentMethod: Future[PaymentMethod] =
       Retry(2, s"Failed to get Zuora payment method ${subscribeResult.subscriptionName} for ${purchaserIds.identityId}") {
