@@ -1,9 +1,8 @@
 @import controllers.CachedAssets.hashedPathFor
 @import views.support.PlanOps._
 @import views.support.PlanList
-@import com.gu.subscriptions.ProductList
-@import com.gu.subscriptions.ProductPlan
-@(plan: ProductPlan[ProductList])
+@import com.gu.memsub.subsv2.CatalogPlan
+@(plan: CatalogPlan.Paid)
 
 @fragments.checkout.notice("Advanced Notice") {
     <p>

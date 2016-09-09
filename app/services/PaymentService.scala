@@ -2,6 +2,7 @@ package services
 
 import com.gu.i18n.Country.UK
 import com.gu.i18n.{Currency, GBP}
+import com.gu.memsub.subsv2.CatalogPlan
 import com.gu.memsub.{BillingPeriod, Current, PaidPlan}
 import com.gu.salesforce.ContactId
 import com.gu.stripe.StripeService
@@ -44,16 +45,16 @@ trait PaymentService {
 
   def makeDirectDebitPayment(paymentData: DirectDebitData, personalData: PersonalData, memberId: ContactId) = {
     require(personalData.address.country.contains(UK), "Direct Debit payment only works in the UK right now")
-    new DirectDebitPayment(paymentData, personalData, memberId)
+    DirectDebitPayment(paymentData, personalData, memberId)
   }
 
   def makeCreditCardPayment(
      paymentData: CreditCardData,
      personalData: PersonalData,
      purchaserIds: PurchaserIdentifiers,
-     plan: PaidPlan[Current, BillingPeriod]) = {
+     plan: CatalogPlan.Paid) = {
     val desiredCurrency = personalData.currency
-    val currency = if (plan.currencies.contains(desiredCurrency)) desiredCurrency else GBP
+    val currency = if (plan.charges.price.currencies.contains(desiredCurrency)) desiredCurrency else GBP
 
     new CreditCardPayment(paymentData, currency, purchaserIds)
   }

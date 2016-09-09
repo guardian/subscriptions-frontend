@@ -2,7 +2,8 @@ package controllers
 import actions.CommonActions._
 import com.gu.i18n._
 import com.gu.identity.play.ProxiedIP
-import com.gu.memsub.{BillingPeriod, Delivery, SupplierCode}
+import com.gu.memsub.{BillingPeriod, SupplierCode}
+import com.gu.memsub.subsv2.{CatalogPlan, Delivery, PaidChargeList}
 import com.gu.memsub.Subscription.ProductRatePlanId
 import com.gu.memsub.promo.Formatters.PromotionFormatters._
 import com.gu.memsub.promo.{NewUsers, PromoCode}
@@ -42,6 +43,9 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
   def checkoutService(implicit res: TouchpointBackend.Resolution): CheckoutService =
     res.backend.checkoutService
 
+  def getBetterPlans[A <: CatalogPlan.Paid](plan: A, others: List[A]) =
+    others.sortBy(_.charges.gbpPrice.amount).dropWhile(_.charges.gbpPrice.amount < plan.charges.gbpPrice.amount)
+
   def renderCheckout(countryGroup: CountryGroup, promoCode: Option[PromoCode], supplierCode: Option[SupplierCode], forThisPlan: String) = NoCacheAction.async { implicit request =>
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
@@ -52,10 +56,11 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
     } yield idUser).run
 
     idUser map { user =>
-      val planListEither = catalogue.forSlug(forThisPlan)
-        .getOrElse(Left(catalogue.digipack.cheapest -> catalogue.digipack))
-        .fold({ case (plan, group) => Left(PlanList(plan, group.betterThan(plan).productPlans.sortBy(_.priceGBP.amount):_*)) },
-              { case (plan, group) => Right(PlanList(plan, group.betterThan(plan).productPlans.sortBy(_.priceGBP.amount):_*)) })
+
+      val planListEither: Either[PlanList[CatalogPlan.Digipack[BillingPeriod]], PlanList[CatalogPlan.Paper]] = (
+        catalog.delivery.list.find(_.slug == forThisPlan).map(p => PlanList(p, getBetterPlans(p, catalog.delivery.list):_*)) orElse
+        catalog.voucher.list.find(_.slug == forThisPlan).map(p => PlanList(p, getBetterPlans(p, catalog.delivery.list):_*))
+      ).toRight(PlanList(catalog.digipack.month, catalog.digipack.quarter, catalog.digipack.year))
 
       val plans = planListEither.fold(identity, identity)
       val personalData = user.map(PersonalData.fromIdUser)
@@ -63,14 +68,14 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
       val preselectedCountry = personalData.flatMap(data => data.address.country)
       val countryGroupForPreselectedCountry = preselectedCountry.flatMap(c => CountryGroup.byCountryCode(c.alpha2))
       val determinedCountryGroup = if (planListEither.isRight) {
-        val countriesInDropDown = if (plans.default.products.seq.contains(Delivery)) List(Country.UK) else List(Country("IM", "Isle of Man"), Country.UK)
+        val countriesInDropDown = if (plans.default.product == Delivery) List(Country.UK) else List(Country("IM", "Isle of Man"), Country.UK)
         CountryGroup(Country.UK.name, "uk", Some(Country.UK), countriesInDropDown, CountryGroup.UK.currency, PostCode)
       } else {
         countryGroupForPreselectedCountry.getOrElse(countryGroup)
       }
       val determinedCountry = preselectedCountry orElse determinedCountryGroup.defaultCountry
 
-      val supportedCurrencies = plans.default.currencies
+      val supportedCurrencies = plans.default.charges.price.currencies
       val determinedCurrency = if (supportedCurrencies.contains(determinedCountryGroup.currency)) determinedCountryGroup.currency else GBP
       val determinedCountriesWithCurrency = if (planListEither.isRight) {
         determinedCountryGroup.countries.map(c => CountryWithCurrency(c, determinedCurrency))
@@ -80,7 +85,7 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
 
       // either a code to send to the form (left) or a tracking code for the session (right)
       val promo: Either[PromoCode, Seq[(String, String)]] = (promoCode |@| determinedCountry)(
-        tpBackend.promoService.validate[NewUsers](_: PromoCode, _: Country, plans.default.productRatePlanId)
+        tpBackend.promoService.validate[NewUsers](_: PromoCode, _: Country, plans.default.id)
       ).flatMap(_.toOption).map(vp => vp.promotion.asTracking.map(_ => Seq(PromotionTrackingCode -> vp.code.get)).toRight(vp.code))
        .getOrElse(Right(Seq.empty))
 
@@ -218,14 +223,11 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
   def thankYou() = NoCacheAction { implicit request =>
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
-
-    import tpBackend.catalogService._
-
     val session = request.session
 
     val sessionInfo = for {
       subsName <- session.get(SubsName)
-      plan <- session.get(RatePlanId).map(ProductRatePlanId).flatMap(p => paperCatalog.find(p))
+      plan <- session.get(RatePlanId).map(ProductRatePlanId).flatMap(p => catalog.allSubs.flatten.find(_.id == p))
       ratePlanId <- session.get(RatePlanId)
       currencyStr <- session.get(SessionKeys.Currency)
       currency <- Currency.fromString(currencyStr)
@@ -260,11 +262,11 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
     import views.support.Pricing._
 
     def getAdjustedRatePlans(promo: AnyPromotion): Option[Map[String, String]] = {
-      case class RatePlanPrice(ratePlanId: ProductRatePlanId, plan: DigipackPlan[BillingPeriod])
+      case class RatePlanPrice(ratePlanId: ProductRatePlanId, chargeList: PaidChargeList)
       promo.asDiscount.map { discountPromo =>
-        catalog.planMap.map { case (key, value) => RatePlanPrice(key, value) }.map { ratePlanPrice =>
+        catalog.allSubs.flatten.map(p => RatePlanPrice(p.id, p.charges)).map { ratePlanPrice =>
           val currency = CountryGroup.byCountryCode(country.alpha2).getOrElse(CountryGroup.UK).currency
-          ratePlanPrice.ratePlanId.get -> ratePlanPrice.plan.prettyPricingForDiscountedPeriod(discountPromo, currency)
+          ratePlanPrice.ratePlanId.get -> ratePlanPrice.chargeList.prettyPricingForDiscountedPeriod(discountPromo, currency)
         }.toMap
       }
     }
@@ -272,6 +274,7 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
     tpBackend.promoService.findPromotion(promoCode).fold {
       NotFound(Json.obj("errorMessage" -> s"Sorry, we can't find that code."))
     } { promo =>
+      println(promo.appliesTo, prpId)
       val result = promo.validateFor(prpId, country)
       val body = Json.obj(
         "promotion" -> Json.toJson(promo),

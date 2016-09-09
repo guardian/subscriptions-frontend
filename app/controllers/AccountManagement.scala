@@ -1,11 +1,10 @@
 package controllers
 
 import actions.CommonActions._
+import com.gu.memsub.Subscription.Name
 import com.github.nscala_time.time.OrderingImplicits.LocalDateOrdering
-import com.gu.memsub.{Delivery, PaidPS, Subscription}
 import com.gu.subscriptions.suspendresume.SuspensionService
 import com.gu.subscriptions.suspendresume.SuspensionService.{BadZuoraJson, ErrNel, HolidayRefund, PaymentHoliday}
-import com.gu.subscriptions.{PhysicalProducts, ProductPlan}
 import com.gu.zuora.soap.models.Queries.Contact
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
@@ -15,33 +14,36 @@ import play.api.mvc.{AnyContent, Controller, Request}
 import services.AuthenticationService._
 import services.TouchpointBackend
 import utils.TestUsers.PreSigninTestCookie
+
 import scala.concurrent.ExecutionContext.Implicits.global
+import com.gu.memsub.subsv2.{Subscription, SubscriptionPlan => Plan}
+
 import scala.concurrent.Future
 import scalaz.std.option._
 import scalaz.std.scalaFuture._
 import scalaz.syntax.std.boolean._
 import scalaz.syntax.std.option._
-import scalaz.{EitherT, OptionT}
+import scalaz.{EitherT, OptionT, \/}
 
 object AccountManagement extends Controller with LazyLogging {
 
   val SUBSCRIPTION_SESSION_KEY = "subscriptionId"
 
-  private def subscriptionFromRequest(implicit request: Request[AnyContent]): Future[Option[Subscription with PaidPS[ProductPlan[PhysicalProducts]]]] = {
+  private def subscriptionFromRequest(implicit request: Request[AnyContent]): Future[Option[Subscription[Plan.Delivery] \/ Subscription[Plan.Voucher]]] = {
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
 
     (for {
       subscriptionId <- OptionT(Future.successful(request.session.data.get(SUBSCRIPTION_SESSION_KEY)))
-      zuoraSubscription <- OptionT(tpBackend.subscriptionServicePaper.paidWith(Subscription.Name(subscriptionId))(_.findPhysical))
+      zuoraSubscription <- OptionT(tpBackend.subscriptionService.either[Plan.Delivery, Plan.Voucher](Name(subscriptionId)))
     } yield zuoraSubscription).orElse(for {
       identityUser <- OptionT(Future.successful(authenticatedUserFor(request)))
       salesForceUser <- OptionT(tpBackend.salesforceService.repo.get(identityUser.user.id))
-      zuoraSubscription <- OptionT(tpBackend.subscriptionServicePaper.paidWith(salesForceUser)(_.findPhysical))
+      zuoraSubscription <- OptionT(tpBackend.subscriptionService.either[Plan.Delivery, Plan.Voucher](salesForceUser))
     } yield zuoraSubscription).run
   }
 
-  private def subscriptionFromUserDetails(loginRequestOpt: Option[AccountManagementLoginRequest])(implicit request: Request[AnyContent]): Future[Option[Subscription]] = {
+  private def subscriptionFromUserDetails(loginRequestOpt: Option[AccountManagementLoginRequest])(implicit request: Request[AnyContent]): Future[Option[Subscription[Plan.Paper]]] = {
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
 
@@ -54,7 +56,7 @@ object AccountManagement extends Controller with LazyLogging {
 
     (for {
       loginRequest <- OptionT(Future.successful(loginRequestOpt))
-      zuoraSubscription <- OptionT(tpBackend.subscriptionServicePaper.get(Subscription.Name(loginRequest.subscriptionId)))
+      zuoraSubscription <- OptionT(tpBackend.subscriptionService.get[Plan.Paper](Name(loginRequest.subscriptionId)))
       zuoraAccount <- OptionT(tpBackend.zuoraService.getAccount(zuoraSubscription.accountId).map(a => Option(a)))
       zuoraContact <- OptionT(tpBackend.zuoraService.getContact(zuoraAccount.billToId).map(c => Option(c)))
       _ <- OptionT(Future.successful(detailsMatch(zuoraContact, loginRequest).unlessM[Option, Nothing](None)))
@@ -71,19 +73,20 @@ object AccountManagement extends Controller with LazyLogging {
     val errorCodes = errorCode.toSeq.flatMap(_.split(',').map(_.trim)).filterNot(_.isEmpty).toSet
 
     (for {
-      sub <- OptionT(subscription)
+      subEither <- OptionT(subscription)
+      sub = subEither.fold(identity, identity)
       allHolidays <- OptionT(tpBackend.suspensionService.getHolidays(sub.name).map(_.toOption))
-      billingSchedule <- OptionT(tpBackend.commonPaymentService.billingSchedule(sub, 12))
-      suspendableDays = Config.suspendableWeeks * sub.plan.products.without(Delivery).size
-    } yield {
-      sub.plan.products.seq.contains(Delivery).fold({
+      billingSchedule <- OptionT(tpBackend.commonPaymentService.billingSchedule(sub.id, number = 12))
+      suspendableDays = Config.suspendableWeeks * sub.plan.charges.benefits.size
+    } yield
+      subEither.fold({ s =>
         val pendingHolidays = pendingHolidayRefunds(allHolidays)
-        val suspendedDays = SuspensionService.holidayToSuspendedDays(pendingHolidays, sub.plan.products.physicalProducts.list)
-        Ok(views.html.account.suspend(sub, pendingHolidayRefunds(allHolidays), billingSchedule, suspendableDays, suspendedDays, errorCodes))
-      },{
-        Ok(views.html.account.voucher(sub, billingSchedule))
+        val suspendedDays = SuspensionService.holidayToSuspendedDays(pendingHolidays, s.plan.charges.days.keySet.toList)
+        Ok(views.html.account.suspend(s, pendingHolidayRefunds(allHolidays), billingSchedule, suspendableDays, suspendedDays, errorCodes))
+      },{ s =>
+        Ok(views.html.account.voucher(s, billingSchedule))
       })
-    }).getOrElse(Ok(views.html.account.details(subscriberId)))
+    ).getOrElse(Ok(views.html.account.details(subscriberId)))
   }
 
   def processLogin = GoogleAuthenticatedStaffAction.async { implicit request =>
@@ -119,16 +122,16 @@ object AccountManagement extends Controller with LazyLogging {
 
     (for {
       form <- EitherT(Future.successful(SuspendForm.mappings.bindFromRequest().value \/> "Please check your selections and try again"))
-      sub <- EitherT(subscriptionFromRequest.map(_ \/> noSub))
+      sub <- EitherT(subscriptionFromRequest.map(_ \/> noSub).map(_.flatMap(_.swap.leftMap(_ => noSub))))
       newHoliday = PaymentHoliday(sub.name, form.startDate, form.endDate)
       // 14 because + 2 extra months needed in calculation to cover setting a 6-week suspension on the day before your 12th billing day!
-      oldBS <- EitherT(tpBackend.commonPaymentService.billingSchedule(sub, 14).map(_ \/> "Error getting billing schedule"))
+      oldBS <- EitherT(tpBackend.commonPaymentService.billingSchedule(sub.id, number = 14).map(_ \/> "Error getting billing schedule"))
       result <- EitherT(tpBackend.suspensionService.addHoliday(newHoliday, oldBS)).leftMap(getAndLogRefundError(_).map(_.code).list.mkString(","))
-      newBS <- EitherT(tpBackend.commonPaymentService.billingSchedule(sub, 12).map(_ \/> "Error getting billing schedule"))
+      newBS <- EitherT(tpBackend.commonPaymentService.billingSchedule(sub.id, number = 12).map(_ \/> "Error getting billing schedule"))
       newHolidays <- EitherT(tpBackend.suspensionService.getHolidays(sub.name)).leftMap(_ => "Error getting holidays")
       pendingHolidays = pendingHolidayRefunds(newHolidays)
-      suspendableDays = Config.suspendableWeeks * sub.plan.products.without(Delivery).size
-      suspendedDays = SuspensionService.holidayToSuspendedDays(pendingHolidays, sub.plan.products.physicalProducts.list)
+      suspendableDays = Config.suspendableWeeks * sub.plan.charges.days.keySet.size
+      suspendedDays = SuspensionService.holidayToSuspendedDays(pendingHolidays, sub.plan.charges.days.keySet.toList)
     } yield {
       tpBackend.exactTargetService.enqueueETHolidaySuspensionEmail(sub, sub.plan.name, newBS, pendingHolidays.size, suspendableDays, suspendedDays).onFailure { case e: Throwable =>
         logger.error(s"Failed to generate data needed to enqueue ${sub.name.get}'s holiday suspension email. Reason: ${e.getMessage}")
@@ -140,7 +143,7 @@ object AccountManagement extends Controller with LazyLogging {
         billingSchedule = newBS,
         suspendableDays = suspendableDays,
         suspendedDays = suspendedDays,
-        currency = sub.currency
+        currency = sub.plan.charges.price.currencies.head
       )).withNewSession
     }).valueOr(errorCode => Redirect(routes.AccountManagement.login(None, Some(errorCode)).url))
   }

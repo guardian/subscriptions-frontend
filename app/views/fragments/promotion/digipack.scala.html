@@ -1,8 +1,9 @@
-@import com.gu.subscriptions.DigipackCatalog
+@import com.gu.memsub.subsv2.CatalogPlan
+@import com.gu.memsub.Month
 @import com.gu.memsub.promo.PromoCode
 @import model.DigitalEdition
 
-@(edition: DigitalEdition, catalog: DigipackCatalog, promoCode: PromoCode, roundelHtml: Option[String])
+@(edition: DigitalEdition, plan: CatalogPlan.Digipack[Month], promoCode: PromoCode, roundelHtml: Option[String])
 <div class="digipack">
     <div class="grid grid--3up-step-phablet grid--flex grid--no-clearfix-before">
         <div class="grid__item grid__item--flex-2-columns grid__item--flex-wrapped">

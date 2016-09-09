@@ -9,7 +9,7 @@ import com.gu.monitoring.{ServiceMetrics, StatusMetrics}
 import com.gu.salesforce.SimpleContactRepository
 import com.gu.stripe.StripeService
 import com.gu.subscriptions.suspendresume.SuspensionService
-import com.gu.subscriptions.{DigipackCatalog, Discounter, PaperCatalog}
+import com.gu.subscriptions.Discounter
 import com.gu.zuora
 import com.gu.zuora.rest.{RequestRunners, SimpleClient}
 import com.gu.zuora.{rest, soap}
@@ -25,7 +25,6 @@ import touchpoint.{TouchpointBackendConfig, ZuoraProperties}
 import com.gu.memsub.subsv2
 import com.gu.memsub.subsv2.Catalog
 import scala.concurrent.duration._
-import com.gu.zuora.{ZuoraService => ZuoraServiceImpl}
 
 
 import scalaz.std.scalaFuture._
@@ -77,7 +76,7 @@ object TouchpointBackend {
       new SimpleClient[Future](config.zuoraRest, RequestRunners.futureRunner)
     )
 
-    val form = new forms.SubscriptionsForm(catalogService)
+    val form = new forms.SubscriptionsForm(newCatalogService.unsafeCatalog)
 
 
     val paymentService = new PaymentService {
@@ -85,22 +84,21 @@ object TouchpointBackend {
     }
 
     TouchpointBackend(
-      config.environmentName,
-      salesforceService,
-      catalogService,
-      zuoraService,
-      subService,
-      subServicePaper,
-      restClient,
-      digipackRatePlanIds,
-      paymentService,
-      memsubPaymentService,
-      config.zuoraProperties,
-      promoService,
-      promoCollection,
-      promoStorage,
-      discountPlans,
-      suspService,
+      environmentName = config.environmentName,
+      salesforceService = salesforceService,
+      catalogService = newCatalogService,
+      zuoraService = zuoraService,
+      subscriptionService = newSubsService,
+      zuoraRestClient = restClient,
+      digipackIds = digipackRatePlanIds,
+      paymentService = paymentService,
+      commonPaymentService = memsubPaymentService,
+      zuoraProperties = config.zuoraProperties,
+      promoService = promoService,
+      promos = promoCollection,
+      promoStorage = promoStorage,
+      discountRatePlanIds = discountPlans,
+      suspensionService = suspService,
       subsForm = form
     )
   }
@@ -159,7 +157,7 @@ case class TouchpointBackend(environmentName: String,
     new CheckoutService(IdentityService,
                         salesforceService,
                         paymentService,
-                        catalogService,
+                        catalogService.unsafeCatalog,
                         zuoraService,
                         exactTargetService,
                         zuoraProperties,

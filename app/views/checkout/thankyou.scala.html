@@ -4,13 +4,12 @@
 @import views.support.Pricing._
 @import com.gu.memsub.Digipack
 @import views.support.PlanOps._
-@import com.gu.subscriptions.ProductPlan
-@import com.gu.subscriptions.ProductList
+@import com.gu.memsub.subsv2.CatalogPlan
 @import com.gu.memsub.Delivery
 @(subscriptionName: String,
     guestAccountForm: Option[Form[model.GuestAccountData]] = None,
     touchpointBackendResolution: services.TouchpointBackend.Resolution,
-    plan: ProductPlan[ProductList],
+    plan: CatalogPlan.Paid, // we should take a subscription here
     promotion: Option[AnyPromotion] = None,
     currency: Currency,
     startDate: String
@@ -27,8 +26,8 @@
         source: 'Subscriptions and Membership',
         type: 'GUARDIAN_DIGIPACK',
         eventName: 'purchase',
-        amount: @{plan.gbpPrice.amount},
-        frequency: @{plan.billingPeriod.numberOfMonths},
+        amount: @{plan.charges.gbpPrice.amount},
+        frequency: @{plan.charges.billingPeriod.numberOfMonths},
         // Google Analtics
         zuoraId: '@subscriptionName',
         productPurchased: '@plan.name'

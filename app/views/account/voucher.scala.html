@@ -1,11 +1,10 @@
-@import com.gu.memsub.Subscription
 @import com.gu.memsub.BillingSchedule
-@import com.gu.subscriptions.ProductPlan
 @import com.gu.memsub.PaidPS
-@import com.gu.subscriptions.PhysicalProducts
+@import com.gu.memsub.subsv2.SubscriptionPlan
+@import com.gu.memsub.subsv2.Subscription
 @import model.DigitalEdition.UK
 @(
-  subscription: Subscription with PaidPS[ProductPlan[PhysicalProducts]], billingSchedule: BillingSchedule
+  subscription: Subscription[SubscriptionPlan.Voucher], billingSchedule: BillingSchedule
 )(implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackend.Resolution)
 
 @main("Suspend your newspaper delivery | The Guardian", bodyClasses = List("is-wide"), edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
@@ -28,7 +27,7 @@
         <h3 class="mma-section__header">
           Your billing schedule
         </h3>
-        @views.html.account.fragments.billingSchedule(billingSchedule, subscription.currency)
+        @views.html.account.fragments.billingSchedule(billingSchedule, subscription.plan.charges.price.currencies.head)
       </section>
     </section>
   </main>

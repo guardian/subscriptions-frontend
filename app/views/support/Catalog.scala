@@ -5,7 +5,8 @@ import com.gu.memsub.promo.PercentDiscount._
 import com.gu.memsub.promo.Promotion.AnyPromotion
 import com.gu.memsub.{Price, BillingPeriod => Period}
 import com.gu.subscriptions.{DigipackCatalog, DigipackPlan}
-
+import com.gu.memsub.subsv2.CatalogPlan
+import com.gu.memsub.Month
 import scalaz.NonEmptyList
 import scalaz.std.option._
 import scalaz.syntax.applicative._
@@ -69,13 +70,11 @@ object Catalog {
         ).some, _ => None)
   }
 
-  def formatPrice(catalog: DigipackCatalog, promotion: AnyPromotion): String = {
-    import catalog.digipackMonthly._
-    promotion.asDiscount.fold(priceGBP.pretty)(_.promotionType.applyDiscount(priceGBP, billingPeriod).pretty)
+  def formatPrice(plan: CatalogPlan.Digipack[Month], promotion: AnyPromotion): String = {
+    promotion.asDiscount.fold(plan.charges.gbpPrice.pretty)(_.promotionType.applyDiscount(plan.charges.gbpPrice, plan.charges.billingPeriod).pretty)
   }
 
-  def formatPrice(catalog: DigipackCatalog): String = {
-    import catalog.digipackMonthly._
-    priceGBP.pretty
+  def formatPrice(plan: CatalogPlan.Digipack[Month]): String = {
+    plan.charges.gbpPrice.pretty
   }
 }

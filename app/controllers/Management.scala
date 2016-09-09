@@ -62,7 +62,7 @@ object Management extends Controller with LazyLogging {
       "Build" -> BuildInfo.buildNumber,
       "Date" -> new Date(BuildInfo.buildTime).toString,
       "Commit" -> BuildInfo.gitCommitId,
-      "Products" -> TouchpointBackend.Normal.catalogService.digipackCatalog
+      "Products" -> TouchpointBackend.Normal.catalogService.catalog
     )
 
     Cached(1)(Ok(data map { case (k, v) => s"$k: $v"} mkString "\n"))

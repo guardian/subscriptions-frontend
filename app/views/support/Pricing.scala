@@ -4,17 +4,17 @@ import com.gu.i18n.{Currency, GBP}
 import com.gu.memsub.promo.PercentDiscount.getDiscountScaledToPeriod
 import com.gu.memsub.promo.{LandingPage, PercentDiscount, Promotion}
 import com.gu.memsub.{BillingPeriod => BP, _}
-import com.gu.subscriptions.{ProductList, ProductPlan}
+import com.gu.memsub.subsv2._
 import views.support.BillingPeriod._
 import views.support.PlanOps._
 
 object Pricing {
 
-  implicit class PlanWithPricing(plan: PaidPlan[Status, BP]) {
-    lazy val gbpPrice = plan.pricing.getPrice(GBP).get
+  implicit class PlanWithPricing[+A <: PaidChargeList](plan: A) {
+    lazy val gbpPrice = plan.price.getPrice(GBP).get
 
-    def unsafePrice(currency: Currency) = plan.pricing.getPrice(currency).getOrElse(
-      throw new NoSuchElementException(s"Could not find a price in $currency for plan ${plan.name}")
+    def unsafePrice(currency: Currency) = plan.price.getPrice(currency).getOrElse(
+      throw new NoSuchElementException(s"Could not find a price in $currency for charge list")
     )
 
     def prettyPricing(currency: Currency) =
@@ -56,16 +56,16 @@ object Pricing {
       }
     }
   }
-  implicit class PrettyProductPlan(in: ProductPlan[ProductList]) {
-    implicit val planWithPricing = new PlanWithPricing(in)
+  implicit class PrettyProductPlan(in: CatalogPlan.Paid) {
+    implicit val planWithPricing = new PlanWithPricing(in.charges)
 
-    def prefix = in match {
-      case _ if in.products.seq == Seq(Digipack) => ""
+    def prefix = in.charges.benefits.list match {
+      case Digipack :: Nil => ""
       case _ => s"${in.title} - "
     }
 
-    def prettyName(currency: Currency): String = in match {
-      case _ if in.products.seq == Seq(Digipack) => planWithPricing.prettyPricing(currency)
+    def prettyName(currency: Currency): String = in.charges.benefits.list match {
+      case Digipack :: Nil => planWithPricing.prettyPricing(currency)
       case _ => s"$prefix${planWithPricing.prettyPricing(currency)}"
     }
   }
