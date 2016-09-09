@@ -1,7 +1,6 @@
 package services
 
-import com.gu.config.{DigitalPackRatePlanIds, DiscountRatePlanIds, ProductFamilyRatePlanIds}
-import com.gu.memsub.{Digipack, Subscriptions}
+import com.gu.config.DiscountRatePlanIds
 import com.gu.memsub.promo.Promotion._
 import com.gu.memsub.promo.{DynamoPromoCollection, DynamoTables, PromotionCollection}
 import com.gu.memsub.services.{PaymentService => CommonPaymentService, _}
@@ -44,24 +43,17 @@ object TouchpointBackend {
     val restClient = new rest.Client(config.zuoraRest, new ServiceMetrics(Config.stage, Config.appName, "zuora-rest-client"))
     val simpleRestClient = new rest.SimpleClient[Future](config.zuoraRest, RequestRunners.futureRunner)
 
-    val digipackConfig = ProductFamilyRatePlanIds.config(Some(Config.config))(config.environmentName, Subscriptions)
-    val digipackRatePlanIds = Config.digipackRatePlanIds(config.environmentName)
     val discountPlans = Config.discountRatePlanIds(config.environmentName)
 
     val zuoraService = new zuora.ZuoraService(soapClient, restClient)
-
-    val newProductIds = Config.productIds(Config.stage)
-
+    val newProductIds = Config.productIds(config.environmentName)
     val discounter = new Discounter(discountPlans)
-    val membershipRatePlanIds = Config.membershipRatePlanIds(config.environmentName)
-    val paperProductIds = Config.paperProductIds(config.environmentName)
-    //val catalogService = CatalogService(restClient, paperProductIds, membershipRatePlanIds, digipackRatePlanIds, config.environmentName)
 
     val promoStorage = JsonDynamoService.forTable[AnyPromotion](DynamoTables.promotions(Config.config, config.environmentName))
     val promoCollection = new DynamoPromoCollection(promoStorage)
 
-    val newCatalogService = new subsv2.services.CatalogService[Future](newProductIds, simpleRestClient, Await.result(_, 10.seconds))
-    val newSubsService = new subsv2.services.SubscriptionService[Future](newProductIds, newCatalogService.catalog.map(_.map(_.map)), simpleRestClient, zuoraService.getAccountIds)
+    val newCatalogService = new subsv2.services.CatalogService[Future](newProductIds, simpleRestClient, Await.result(_, 10.seconds), backendType.name)
+    val newSubsService = new subsv2.services.SubscriptionService[Future](newProductIds, newCatalogService.catalog.map(_.leftMap(_.list.mkString).map(_.map)), simpleRestClient, zuoraService.getAccountIds)
 
     val promoService = new PromoService(promoCollection, discounter)
 
@@ -90,7 +82,6 @@ object TouchpointBackend {
       zuoraService = zuoraService,
       subscriptionService = newSubsService,
       zuoraRestClient = restClient,
-      digipackIds = digipackRatePlanIds,
       paymentService = paymentService,
       commonPaymentService = memsubPaymentService,
       zuoraProperties = config.zuoraProperties,
@@ -133,7 +124,6 @@ case class TouchpointBackend(environmentName: String,
                              zuoraService: zuora.api.ZuoraService,
                              subscriptionService: subsv2.services.SubscriptionService[Future],
                              zuoraRestClient: zuora.rest.Client,
-                             digipackIds: DigitalPackRatePlanIds,
                              paymentService: PaymentService,
                              commonPaymentService: CommonPaymentService,
                              zuoraProperties: ZuoraProperties,

@@ -21,7 +21,7 @@ object Management extends Controller with LazyLogging {
 
   def catalog = GoogleAuthenticatedStaffAction.async { implicit request =>
     val Seq(testCat, normalCat) = Seq(TouchpointBackend.Test, TouchpointBackend.Normal).map { be =>
-      CatalogService.makeDigipackCatalog(be.zuoraRestClient, be.digipackIds)
+      be.catalogService.catalog
     }
     testCat.zip(normalCat).map { case (test, normal) =>
       Ok(views.html.staff.catalog(Diagnostic.fromCatalogs(test, normal)))
