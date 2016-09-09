@@ -39,7 +39,7 @@ define([
 
         var BILLING_COUNTRY_SELECT = formEls.BILLING.$COUNTRY_SELECT[0];
         if (BILLING_COUNTRY_SELECT.disabled) {
-            formEls.$REVIEW_ADDRESS.text('Same as Delivery address');
+            formEls.$REVIEW_ADDRESS.text('Same as above');
         } else {
             formEls.$REVIEW_ADDRESS.text(textUtils.mergeValues([
                 formEls.BILLING.$ADDRESS1.val(),

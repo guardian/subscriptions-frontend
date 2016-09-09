@@ -49,7 +49,7 @@ object Subscriptions {
     val steps = Seq(
       "Pick the perfect package for you",
       "We'll post personalised vouchers for the newspapers in your package",
-      "Redeem your vouchers at over 1,000 retailers across the UK"
+      "Take your vouchers to your newsagent or where you buy your paper"
     )
   }
 
