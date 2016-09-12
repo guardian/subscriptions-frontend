@@ -59,7 +59,7 @@
         @fragments.forms.errorMessage("Please enter a valid state/county")
     </div>
     <div class="form-field js-checkout-postcode"
-        @if(plan.product == ZDigipack) {
+        @if(plan.hasHomeDelivery) {
             data-validate-for="@namePrefix"
             data-validation-url="@routes.Checkout.validateDelivery("").path.replaceFirst("\\?.*", "")"
             data-error-message="Sorry, we cannot deliver a paper to an address with this postcode. Please call Customer Services on: @plan.phone or press Back to purchase a voucher subscription."
