@@ -44,7 +44,7 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
     res.backend.checkoutService
 
   def getBetterPlans[A <: CatalogPlan.Paid](plan: A, others: List[A]) =
-    others.sortBy(_.charges.gbpPrice.amount).dropWhile(_.charges.gbpPrice.amount < plan.charges.gbpPrice.amount)
+    others.sortBy(_.charges.gbpPrice.amount).dropWhile(_.charges.gbpPrice.amount <= plan.charges.gbpPrice.amount)
 
   def renderCheckout(countryGroup: CountryGroup, promoCode: Option[PromoCode], supplierCode: Option[SupplierCode], forThisPlan: String) = NoCacheAction.async { implicit request =>
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)

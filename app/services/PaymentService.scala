@@ -1,20 +1,15 @@
 package services
-
 import com.gu.i18n.Country.UK
 import com.gu.i18n.{Currency, GBP}
 import com.gu.memsub.subsv2.CatalogPlan
-import com.gu.memsub.{BillingPeriod, Current, PaidPlan}
 import com.gu.salesforce.ContactId
 import com.gu.stripe.StripeService
-import com.gu.subscriptions.DigipackPlan
 import com.gu.zuora.soap.models.Commands.{Account, BankTransfer, CreditCardReferenceTransaction, PaymentMethod}
-import model._
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
-
 import scala.concurrent.Future
+import model._
 
-trait PaymentService {
-  def stripeService: StripeService
+class PaymentService(val stripeService: StripeService) {
 
   sealed trait Payment {
     def makeAccount: Account

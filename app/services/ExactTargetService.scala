@@ -36,12 +36,12 @@ import utils.Retry
   * Exact Target expects the message to be in the following format:
   * https://code.exacttarget.com/apis-sdks/rest-api/v1/messaging/messageDefinitionSends.html
   */
-trait ExactTargetService extends LazyLogging {
-  def subscriptionService: subsv2.services.SubscriptionService[Future]
-  def paymentService: CommonPaymentService
-  def zuoraService: ZuoraService
-  def salesforceService: SalesforceService
-
+class ExactTargetService(
+  subscriptionService: subsv2.services.SubscriptionService[Future],
+  paymentService: CommonPaymentService,
+  zuoraService: ZuoraService,
+  salesforceService: SalesforceService
+) extends LazyLogging {
   private def getPlanDescription(validPromotion: Option[ValidPromotion[NewUsers]], currency: Currency, plan: Plan.Paid): String = {
     (for {
       vp <- validPromotion

@@ -15,6 +15,9 @@ import views.support.Catalog._
 import play.api.Play.current
 import play.api.libs.concurrent.Akka
 import com.github.nscala_time.time.Imports._
+import com.gu.memsub.subsv2.Catalog
+import scalaz.syntax.std.option._
+import scalaz.\/
 
 object Management extends Controller with LazyLogging {
   implicit val as = Akka.system
@@ -40,10 +43,23 @@ object Management extends Controller with LazyLogging {
     override def ok = exec()
   }
 
+  class EitherTest[A](name: String, exec: () => List[String] \/ A) extends Test {
+    override def messages = exec().swap.toOption.toList.flatten
+    override def ok: Boolean = exec().isRight
+  }
+
+  private def catalogTest: List[String] \/ Catalog = for {
+    catalogTry <- catalogService.catalog.value \/> List("Future not completed yet")
+    disjunction <- catalogTry.toOption \/> List(catalogTry.failed.map(_.getMessage).getOrElse(""))
+    catalog <- disjunction.leftMap(_.list)
+  } yield catalog
+
   private def tests = Seq(
     new BoolTest("CloudWatch", () => CloudWatchHealth.hasPushedMetricSuccessfully),
     new BoolTest("ZuoraPing", () => zuoraService.lastPingTimeWithin(2.minutes)),
-    new BoolTest("Promotions", () => promos.all.nonEmpty))
+    new BoolTest("Promotions", () => promoCollection.all.nonEmpty),
+    new EitherTest("CatalogSuccess", catalogTest _)
+  )
 
   def healthcheck() = Action {
     Cached(1) {
@@ -62,7 +78,7 @@ object Management extends Controller with LazyLogging {
       "Build" -> BuildInfo.buildNumber,
       "Date" -> new Date(BuildInfo.buildTime).toString,
       "Commit" -> BuildInfo.gitCommitId,
-      "Products" -> TouchpointBackend.Normal.catalogService.catalog
+      "Products" -> TouchpointBackend.Normal.catalogService
     )
 
     Cached(1)(Ok(data map { case (k, v) => s"$k: $v"} mkString "\n"))
