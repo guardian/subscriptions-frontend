@@ -1,9 +1,9 @@
 package views.support
 import com.gu.memsub._
 import com.gu.memsub.images.{ResponsiveImage, ResponsiveImageGenerator, ResponsiveImageGroup}
-import com.gu.memsub.subsv2.CatalogPlan
+import com.gu.memsub.subsv2.{CatalogPlan, Delivery, Voucher}
+import scalaz.syntax.std.boolean._
 import com.netaporter.uri.dsl._
-
 object PlanOps {
 
   implicit class PrettyPlan[+A <: CatalogPlan.AnyPlan](in: A) {
@@ -28,29 +28,17 @@ object PlanOps {
       case _ => "Add more"
     }
 
-    def email: String = in.charges.benefits.list match {
-      case Digipack :: Nil => "digitalpack@theguardian.com"
-      case a if a.contains(Delivery) => "homedelivery@theguardian.com"
-      case a if !a.contains(Delivery) => "vouchersubs@theguardian.com"
-      case _ => "subscriptions@theguardian.com"
-    }
+    def email: String = (
+      in.hasHomeDelivery.option("homedelivery@theguardian.com") orElse
+      in.hasVoucher.option("vouchersubs@theguardian.com") orElse
+      in.hasDigitalPack.option("digitalpack@theguardian.com")
+    ).getOrElse("subscriptions@theguardian.com")
 
-    def hasHomeDelivery: Boolean = in.charges.benefits.list match {
-      case Digipack :: Nil => false
-      case a if a.contains(Delivery) => true
-      case a if !a.contains(Delivery) => false
-      case _ => false
-    }
+    def hasHomeDelivery: Boolean = in.product == Delivery
 
-    def hasVoucher: Boolean = in.charges.benefits.list match {
-      case Digipack :: Nil => false
-      case a if a.contains(Delivery) => false
-      case a if !a.contains(Delivery) => true
-      case _ => false
-    }
+    def hasVoucher: Boolean = in.product == Voucher
 
-    def hasDigitalPack: Boolean =
-      in.charges.benefits.list.contains(Digipack)
+    def hasDigitalPack: Boolean = in.charges.benefits.list.contains(Digipack)
 
     def phone: String = "0330 333 6767"
   }
