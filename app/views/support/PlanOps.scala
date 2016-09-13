@@ -50,7 +50,7 @@ object PlanOps {
 
     def hasDigitalPack: Boolean = in.products.seq.contains(Digipack)
 
-    def phone: String = "+44 (0) 330 333 6767"
+    def phone: String = "0330 333 6767"
   }
 
   implicit class ProductPopulationDataOps(in: ProductPopulationData) {
