@@ -11,6 +11,7 @@ import com.gu.memsub.promo._
 import com.gu.memsub.services.{PaymentService => CommonPaymentService}
 import com.gu.memsub.subsv2.{SubscriptionPlan => Plan, Subscription}
 import com.gu.memsub.subsv2.reads.SubPlanReads._
+import com.gu.memsub.subsv2.reads.ChargeListReads._
 import com.gu.memsub.subsv2.Subscription
 import com.gu.zuora.api.ZuoraService
 import com.gu.zuora.soap.models.Results.SubscribeResult

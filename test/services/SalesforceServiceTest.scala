@@ -1,6 +1,6 @@
 package services
 import com.gu.i18n.Title
-import com.gu.memsub.{Delivery => _, _}
+import com.gu.memsub._
 import com.gu.memsub.Subscription.ProductRatePlanId
 import com.gu.memsub.subsv2.{CatalogPlan, PaperCharges}
 import com.gu.memsub.subsv2.ZProduct.Delivery

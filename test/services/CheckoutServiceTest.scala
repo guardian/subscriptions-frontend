@@ -1,5 +1,5 @@
 package services
-import com.gu.memsub.{Delivery => _, _}
+import com.gu.memsub._
 import com.gu.memsub.Subscription.ProductRatePlanId
 import com.gu.memsub.subsv2.ZProduct.{Delivery, ZDigipack}
 import com.gu.memsub.subsv2.{CatalogPlan, Delivery, PaidCharge, PaperCharges}
@@ -8,8 +8,6 @@ import org.joda.time.Days
 import org.joda.time.LocalDate
 import org.specs2.mutable.Specification
 import touchpoint.ZuoraProperties
-
-import scalaz.syntax.nel._
 
 class CheckoutServiceTest extends Specification {
 
