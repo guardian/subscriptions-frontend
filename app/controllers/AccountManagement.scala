@@ -76,12 +76,12 @@ object AccountManagement extends Controller with LazyLogging {
       subEither <- OptionT(subscription)
       sub = subEither.fold(identity, identity)
       allHolidays <- OptionT(tpBackend.suspensionService.getHolidays(sub.name).map(_.toOption))
-      billingSchedule <- OptionT(tpBackend.commonPaymentService.billingSchedule(sub.id, number = 12))
+      billingSchedule <- OptionT(tpBackend.commonPaymentService.billingSchedule(sub.id, numberOfBills = 12))
       suspendableDays = Config.suspendableWeeks * sub.plan.charges.benefits.size
     } yield
       subEither.fold({ s =>
         val pendingHolidays = pendingHolidayRefunds(allHolidays)
-        val suspendedDays = SuspensionService.holidayToSuspendedDays(pendingHolidays, s.plan.charges.days.keySet.toList)
+        val suspendedDays = SuspensionService.holidayToSuspendedDays(pendingHolidays, s.plan.charges.days.toList)
         Ok(views.html.account.suspend(s, pendingHolidayRefunds(allHolidays), billingSchedule, suspendableDays, suspendedDays, errorCodes))
       },{ s =>
         Ok(views.html.account.voucher(s, billingSchedule))
@@ -125,13 +125,13 @@ object AccountManagement extends Controller with LazyLogging {
       sub <- EitherT(subscriptionFromRequest.map(_ \/> noSub).map(_.flatMap(_.swap.leftMap(_ => noSub))))
       newHoliday = PaymentHoliday(sub.name, form.startDate, form.endDate)
       // 14 because + 2 extra months needed in calculation to cover setting a 6-week suspension on the day before your 12th billing day!
-      oldBS <- EitherT(tpBackend.commonPaymentService.billingSchedule(sub.id, number = 14).map(_ \/> "Error getting billing schedule"))
+      oldBS <- EitherT(tpBackend.commonPaymentService.billingSchedule(sub.id, numberOfBills = 14).map(_ \/> "Error getting billing schedule"))
       result <- EitherT(tpBackend.suspensionService.addHoliday(newHoliday, oldBS)).leftMap(getAndLogRefundError(_).map(_.code).list.mkString(","))
-      newBS <- EitherT(tpBackend.commonPaymentService.billingSchedule(sub.id, number = 12).map(_ \/> "Error getting billing schedule"))
+      newBS <- EitherT(tpBackend.commonPaymentService.billingSchedule(sub.id, numberOfBills = 12).map(_ \/> "Error getting billing schedule"))
       newHolidays <- EitherT(tpBackend.suspensionService.getHolidays(sub.name)).leftMap(_ => "Error getting holidays")
       pendingHolidays = pendingHolidayRefunds(newHolidays)
-      suspendableDays = Config.suspendableWeeks * sub.plan.charges.days.keySet.size
-      suspendedDays = SuspensionService.holidayToSuspendedDays(pendingHolidays, sub.plan.charges.days.keySet.toList)
+      suspendableDays = Config.suspendableWeeks * sub.plan.charges.days.size
+      suspendedDays = SuspensionService.holidayToSuspendedDays(pendingHolidays, sub.plan.charges.days.toList)
     } yield {
       tpBackend.exactTargetService.enqueueETHolidaySuspensionEmail(sub, sub.plan.name, newBS, pendingHolidays.size, suspendableDays, suspendedDays).onFailure { case e: Throwable =>
         logger.error(s"Failed to generate data needed to enqueue ${sub.name.get}'s holiday suspension email. Reason: ${e.getMessage}")
