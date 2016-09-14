@@ -82,20 +82,14 @@ object Config {
     val client = GoCardlessClient.create(token, Environment.SANDBOX)
   }
 
-  def digipackRatePlanIds(env: String): DigitalPackRatePlanIds =
-    DigitalPackRatePlanIds.fromConfig(ProductFamilyRatePlanIds.config(Some(config))(env, Subscriptions))
-
   def discountRatePlanIds(env: String): DiscountRatePlanIds =
     DiscountRatePlanIds.fromConfig(config.getConfig(s"touchpoint.backend.environments.$env.zuora.ratePlanIds"))
 
-  def membershipRatePlanIds(env: String) =
-    MembershipRatePlanIds.fromConfig(ProductFamilyRatePlanIds.config(Some(config))(env, Membership))
-
-  def paperProductIds(env: String) =
-    SubscriptionsProductIds(config.getConfig(s"touchpoint.backend.environments.$env.zuora.productIds.subscriptions"))
-
   def holidayRatePlanIds(env: String) =
     HolidayRatePlanIds(config.getConfig(s"touchpoint.backend.environments.$env.zuora.ratePlanIds.discount.deliverycredit"))
+
+  def productIds(env: String): com.gu.memsub.subsv2.reads.ChargeListReads.ProductIds =
+    SubsV2ProductIds(config.getConfig(s"touchpoint.backend.environments.$env.zuora.productIds"))
 
   object CAS {
     lazy val casConf = config.getConfig("cas")
@@ -126,6 +120,4 @@ object Config {
 
   val suspendableWeeks = 6
 
-  def productIds(env: String): com.gu.memsub.subsv2.reads.ChargeListReads.ProductIds =
-    SubsV2ProductIds(config.getConfig(s"touchpoint.backend.environments.$env.zuora.productIds"))
 }
