@@ -2,11 +2,10 @@
 @import views.support.AddressOps._
 @import views.support.CountryWithCurrency
 @import scalaz.syntax.std.boolean._
-@import com.gu.subscriptions.ProductPlan
 @import views.support.PlanOps._
-@import com.gu.subscriptions.ProductList
+@import com.gu.memsub.subsv2.CatalogPlan
 
-@(billingAddress: Option[Address], canBeHidden: Boolean, countriesWithCurrency: List[CountryWithCurrency], plan: ProductPlan[ProductList])
+@(billingAddress: Option[Address], canBeHidden: Boolean, countriesWithCurrency: List[CountryWithCurrency], plan: CatalogPlan.Paid)
 
 @if(canBeHidden) {
   <div class="js-checkout-use-delivery">

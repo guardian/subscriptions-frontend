@@ -7,7 +7,8 @@ import com.gu.memsub.Address
 import com.gu.memsub.promo.PromotionApplicator._
 import com.gu.memsub.promo._
 import com.gu.memsub.services.PromoService
-import com.gu.memsub.services.api.CatalogService
+import com.gu.memsub.subsv2.CatalogPlan
+import com.gu.memsub.subsv2.Catalog
 import com.gu.salesforce.ContactId
 import com.gu.stripe.Stripe
 import com.gu.zuora.api.ZuoraService
@@ -38,7 +39,7 @@ object CheckoutService {
 class CheckoutService(identityService: IdentityService,
                       salesforceService: SalesforceService,
                       paymentService: PaymentService,
-                      catalogService: CatalogService,
+                      catalog: Catalog,
                       zuoraService: ZuoraService,
                       exactTargetService: ExactTargetService,
                       zuoraProperties: ZuoraProperties,
@@ -70,7 +71,7 @@ class CheckoutService(identityService: IdentityService,
       defaultPaymentDelay = CheckoutService.paymentDelay(subscriptionData.productData, zuoraProperties)
       subscribe <- EitherT(createSubscribeRequest(personalData, requestData, plan, purchaserIds, payment, Some(defaultPaymentDelay)))
       validPromotion = promoCode.flatMap(promoService.validate[NewUsers](_, personalData.address.country.getOrElse(Country.UK), subscriptionData.productRatePlanId).toOption)
-      withPromo = validPromotion.map(v => p.apply(v, catalogService.digipackCatalog.unsafeFindPaid, promoPlans)(subscribe)).getOrElse(subscribe)
+      withPromo = validPromotion.map(v => p.apply(v, prpId => catalog.paid.find(_.id == prpId).map(_.charges.billingPeriod).get, promoPlans)(subscribe)).getOrElse(subscribe)
       result <- EitherT(createSubscription(withPromo, purchaserIds))
       out <- postSubscribeSteps(authenticatedUserOpt, memberId, result, subscriptionData, validPromotion)
     } yield CheckoutSuccess(memberId, out._1, result, validPromotion, out._2)).run

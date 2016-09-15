@@ -1,15 +1,14 @@
 @import configuration.Links
 @import org.joda.time.DateTime
-@import views.support.PlanOps._
 @import com.gu.memsub.BillingPeriod
-@import com.gu.memsub.Status
+@import views.support.PlanOps._
+@import com.gu.memsub.subsv2.CatalogPlan
 @import com.gu.memsub.PaidPlan
 @import com.gu.memsub.Current
-@import com.gu.subscriptions.ProductList
-@import com.gu.subscriptions.ProductPlan
+@import model.DigitalEdition
 @import model.DigitalEdition
 
-@(plan: Option[ProductPlan[ProductList]], edition: DigitalEdition)
+@(plan: Option[CatalogPlan.Paid], edition: DigitalEdition)
 
 <footer class="global-footer">
 

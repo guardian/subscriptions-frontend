@@ -1,46 +1,48 @@
 package forms
 
 import com.gu.i18n.{CountryGroup, Title}
-import com.gu.memsub.promo.{NewUsers, PromoCode, ValidPromotion}
-import com.gu.memsub.{Address, BillingPeriod, Current}
+import com.gu.memsub.Address
 import com.gu.memsub.Subscription.ProductRatePlanId
-import com.gu.memsub.services.{CatalogService, PromoService}
-import com.gu.subscriptions.{DigipackPlan, DigitalProducts, PhysicalProducts, ProductPlan}
+import com.gu.memsub.promo.PromoCode
+import com.gu.memsub.services.CatalogService
+import com.gu.memsub.subsv2.CatalogPlan
+import com.gu.memsub.subsv2.Catalog
+import com.gu.memsub.BillingPeriod
+import forms.SubscriptionsForm._
 import model._
+import play.api.data.Forms._
 import play.api.data.format.Formats._
 import play.api.data.format.Formatter
-import play.api.data.Forms._
 import play.api.data.{Form, _}
-import SubscriptionsForm._
 import play.api.mvc.{AnyContent, Request}
 
 import scalaz.\/
 
-class SubscriptionsForm(catalogService: CatalogService) {
+class SubscriptionsForm(catalog: Catalog) {
 
-  implicit val pf1 = new Formatter[ProductPlan[DigitalProducts]] {
-    override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], ProductPlan[DigitalProducts]] =
-      data.get(key).map(ProductRatePlanId).flatMap(catalogService.paperCatalog.findDigital).toRight(Seq(FormError(key, "Bad plan")))
-    override def unbind(key: String, value: ProductPlan[DigitalProducts]): Map[String, String] =
-      Map(key -> value.productRatePlanId.get)
+  implicit val pf1 = new Formatter[CatalogPlan.Digipack[BillingPeriod]] {
+    override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], CatalogPlan.Digipack[BillingPeriod]] =
+      data.get(key).map(ProductRatePlanId).flatMap(prpId => catalog.digipack.toList.find(_.id == prpId)).toRight(Seq(FormError(key, "Bad plan")))
+    override def unbind(key: String, value: CatalogPlan.Digipack[BillingPeriod]): Map[String, String] =
+      Map(key -> value.id.get)
   }
 
-  implicit val pf2 = new Formatter[ProductPlan[PhysicalProducts]] {
-    override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], ProductPlan[PhysicalProducts]] =
-      data.get(key).map(ProductRatePlanId).flatMap(id => catalogService.paperCatalog.findPhysical(id)).toRight(Seq(FormError(key, "Bad plan")))
-    override def unbind(key: String, value: ProductPlan[PhysicalProducts]): Map[String, String] =
-      Map(key -> value.productRatePlanId.get)
+  implicit val pf2 = new Formatter[CatalogPlan.Paper] {
+    override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], CatalogPlan.Paper] =
+      data.get(key).map(ProductRatePlanId).flatMap(prpId => (catalog.delivery.list ++ catalog.voucher.list).find(_.id == prpId)).toRight(Seq(FormError(key, "Bad plan")))
+    override def unbind(key: String, value: CatalogPlan.Paper): Map[String, String] =
+      Map(key -> value.id.get)
   }
 
   val digipackForm = Form(mapping(
-    "ratePlanId" -> of[ProductPlan[DigitalProducts]])
+    "ratePlanId" -> of[CatalogPlan.Digipack[BillingPeriod]])
   (DigipackData)(DigipackData.unapply))
 
   val paperForm = Form(mapping(
     "startDate" -> jodaLocalDate("EEEE d MMMM y"),
     "delivery" -> addressDataMapping,
     "deliveryInstructions" -> optional(text(0, 250)),
-    "ratePlanId" -> of[ProductPlan[PhysicalProducts]]
+    "ratePlanId" -> of[CatalogPlan.Paper]
   )(PaperData.apply)(PaperData.unapply))
 
   implicit class FormOps[A](in: Form[A]) {

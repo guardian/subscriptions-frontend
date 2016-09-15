@@ -5,11 +5,14 @@ import com.amazonaws.services.sqs.AmazonSQSClient
 import com.amazonaws.services.sqs.model._
 import com.gu.i18n.Currency
 import com.gu.memsub.Subscription._
-import com.gu.memsub._
+import com.gu.memsub.{Subscription => _, _}
 import com.gu.memsub.promo.Promotion._
 import com.gu.memsub.promo._
-import com.gu.memsub.services.{SubscriptionService, PaymentService => CommonPaymentService}
-import com.gu.subscriptions.{DigipackCatalog, PaperCatalog}
+import com.gu.memsub.services.{PaymentService => CommonPaymentService}
+import com.gu.memsub.subsv2.{SubscriptionPlan => Plan, Subscription}
+import com.gu.memsub.subsv2.reads.SubPlanReads._
+import com.gu.memsub.subsv2.reads.ChargeListReads._
+import com.gu.memsub.subsv2.Subscription
 import com.gu.zuora.api.ZuoraService
 import com.gu.zuora.soap.models.Results.SubscribeResult
 import com.typesafe.scalalogging.LazyLogging
@@ -34,20 +37,19 @@ import utils.Retry
   * Exact Target expects the message to be in the following format:
   * https://code.exacttarget.com/apis-sdks/rest-api/v1/messaging/messageDefinitionSends.html
   */
-trait ExactTargetService extends LazyLogging {
-  def digiSubscriptionService: SubscriptionService[DigipackCatalog]
-  def paperSubscriptionService: SubscriptionService[PaperCatalog]
-  def paymentService: CommonPaymentService
-  def zuoraService: ZuoraService
-  def salesforceService: SalesforceService
-
-  private def getPlanDescription(validPromotion: Option[ValidPromotion[NewUsers]], currency: Currency, plan: PaidPlan[Status, BillingPeriod]): String = {
+class ExactTargetService(
+  subscriptionService: subsv2.services.SubscriptionService[Future],
+  paymentService: CommonPaymentService,
+  zuoraService: ZuoraService,
+  salesforceService: SalesforceService
+) extends LazyLogging {
+  private def getPlanDescription(validPromotion: Option[ValidPromotion[NewUsers]], currency: Currency, plan: Plan.Paid): String = {
     (for {
       vp <- validPromotion
       discountPromotion <- vp.promotion.asDiscount
     } yield {
-      plan.prettyPricingForDiscountedPeriod(discountPromotion, currency)
-    }).getOrElse(plan.prettyPricing(currency))
+      plan.charges.prettyPricingForDiscountedPeriod(discountPromotion, currency)
+    }).getOrElse(plan.charges.prettyPricing(currency))
   }
 
   private def buildWelcomeEmailDataExtensionRow(
@@ -57,18 +59,18 @@ trait ExactTargetService extends LazyLogging {
       validPromotion: Option[ValidPromotion[NewUsers]],
       purchaserIds: PurchaserIdentifiers): Future[DataExtensionRow] = {
 
-    val zuoraPaidSubscription: Future[PaidSub] =
+    val zuoraPaidSubscription: Future[Subscription[Plan.Paid]] =
       Retry(2, s"Failed to get Zuora paid subscription ${subscribeResult.subscriptionName} for ${purchaserIds.identityId}") {
         subscriptionData.productData.fold(
-          { paper => paperSubscriptionService.unsafeGetPaid(Subscription.Name(subscribeResult.subscriptionName)) },
-          { digipack => digiSubscriptionService.unsafeGetPaid(Subscription.Name(subscribeResult.subscriptionName)) })}
+          { paper => subscriptionService.get[Plan.Paper](Name(subscribeResult.subscriptionName)).map(_.get) },
+          { digipack => subscriptionService.get[Plan.Digipack](Name(subscribeResult.subscriptionName)).map(_.get) })}
 
     val zuoraPaymentMethod: Future[PaymentMethod] =
       Retry(2, s"Failed to get Zuora payment method ${subscribeResult.subscriptionName} for ${purchaserIds.identityId}") {
-        paymentService.getPaymentMethod(Subscription.AccountId(subscribeResult.accountId)).map(
+        paymentService.getPaymentMethod(AccountId(subscribeResult.accountId)).map(
           _.getOrElse(throw new Exception(s"Subscription with no payment method found, ${subscribeResult.subscriptionId}")))}
 
-    def buildRow(sub: PaidSub, pm: PaymentMethod) = {
+    def buildRow(sub: Subscription[Plan.Paid], pm: PaymentMethod) = {
       val personalData = subscriptionData.genericData.personalData
       val promotionDescription = validPromotion.filterNot(_.promotion.promotionType == Tracking).map(_.promotion.description)
       val subscriptionDetails = getPlanDescription(validPromotion, personalData.currency, sub.plan)
@@ -130,7 +132,7 @@ trait ExactTargetService extends LazyLogging {
     }
 
   def enqueueETHolidaySuspensionEmail(
-      subscription: Subscription,
+      subscription: Subscription[Plan.Delivery],
       packageName: String,
       billingSchedule: BillingSchedule,
       numberOfSuspensionsLinedUp: Int,
@@ -150,7 +152,7 @@ trait ExactTargetService extends LazyLogging {
         email = StringOps.oempty(salesforceContact.email).headOption,
         saltuation = constructSalutation(salesforceContact.title, salesforceContact.firstName, Some(salesforceContact.lastName)),
         subscriptionName = subscription.name.get,
-        subscriptionCurrency = subscription.currency,
+        subscriptionCurrency = subscription.plan.charges.price.currencies.head,
         packageName = packageName,
         billingSchedule = billingSchedule,
         numberOfSuspensionsLinedUp,

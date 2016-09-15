@@ -1,7 +1,6 @@
 package services
 
-import com.gu.config.{DigitalPackRatePlanIds, DiscountRatePlanIds, ProductFamilyRatePlanIds}
-import com.gu.memsub.{Digipack, Subscriptions}
+import com.gu.config.DiscountRatePlanIds
 import com.gu.memsub.promo.Promotion._
 import com.gu.memsub.promo.{DynamoPromoCollection, DynamoTables, PromotionCollection}
 import com.gu.memsub.services.{PaymentService => CommonPaymentService, _}
@@ -9,9 +8,9 @@ import com.gu.monitoring.{ServiceMetrics, StatusMetrics}
 import com.gu.salesforce.SimpleContactRepository
 import com.gu.stripe.StripeService
 import com.gu.subscriptions.suspendresume.SuspensionService
-import com.gu.subscriptions.{DigipackCatalog, Discounter, PaperCatalog}
+import com.gu.subscriptions.Discounter
 import com.gu.zuora
-import com.gu.zuora.rest.{RequestRunners, SimpleClient}
+import com.gu.zuora.rest.RequestRunners
 import com.gu.zuora.{rest, soap}
 import configuration.Config
 import forms.SubscriptionsForm
@@ -22,76 +21,67 @@ import play.api.libs.concurrent.Execution.Implicits._
 import play.api.mvc.RequestHeader
 import touchpoint.TouchpointBackendConfig.BackendType
 import touchpoint.{TouchpointBackendConfig, ZuoraProperties}
+import com.gu.memsub.subsv2
+import scala.concurrent.duration._
+import scala.concurrent.{Await, Future}
 import scalaz.std.scalaFuture._
 import utils.TestUsers._
 
-import scala.concurrent.Future
+trait TouchpointBackend {
+  def environmentName: String
+  def salesforceService: SalesforceService
+  def catalogService : subsv2.services.CatalogService[Future]
+  def zuoraService: zuora.api.ZuoraService
+  def subscriptionService: subsv2.services.SubscriptionService[Future]
+  def zuoraRestClient: zuora.rest.Client
+  def paymentService: PaymentService
+  def commonPaymentService: CommonPaymentService
+  def zuoraProperties: ZuoraProperties
+  def promoService: PromoService
+  def promoCollection: PromotionCollection
+  def promoStorage: JsonDynamoService[AnyPromotion, Future]
+  def discountRatePlanIds: DiscountRatePlanIds
+  def suspensionService: SuspensionService[Future]
+  def subsForm: SubscriptionsForm
+  def exactTargetService: ExactTargetService
+  def checkoutService: CheckoutService
+}
 
 object TouchpointBackend {
 
   private implicit val system = Akka.system
 
   def apply(backendType: TouchpointBackendConfig.BackendType): TouchpointBackend = {
+
     val config = TouchpointBackendConfig.backendType(backendType, Config.config)
-    val salesforceService = new SalesforceServiceImp(new SimpleContactRepository(config.salesforce, system.scheduler, Config.appName))
-
     val soapClient = new soap.ClientWithFeatureSupplier(Set.empty, config.zuoraSoap, new ServiceMetrics(Config.stage, Config.appName, "zuora-soap-client"))
-    val restClient = new rest.Client(config.zuoraRest, new ServiceMetrics(Config.stage, Config.appName, "zuora-rest-client"))
+    val simpleRestClient = new rest.SimpleClient[Future](config.zuoraRest, RequestRunners.futureRunner)
 
-    val digipackConfig = ProductFamilyRatePlanIds.config(Some(Config.config))(config.environmentName, Subscriptions)
-    val digipackRatePlanIds = Config.digipackRatePlanIds(config.environmentName)
-    val discountPlans = Config.discountRatePlanIds(config.environmentName)
-
-    val discounter = new Discounter(discountPlans)
-    val membershipRatePlanIds = Config.membershipRatePlanIds(config.environmentName)
-    val paperProductIds = Config.paperProductIds(config.environmentName)
-    val catalogService = CatalogService(restClient, paperProductIds, membershipRatePlanIds, digipackRatePlanIds, config.environmentName)
-
-    val promoStorage = JsonDynamoService.forTable[AnyPromotion](DynamoTables.promotions(Config.config, config.environmentName))
-    val promoCollection = new DynamoPromoCollection(promoStorage)
-
-    val promoService = new PromoService(promoCollection, catalogService.digipackCatalog, discounter)
-    val zuoraService = new zuora.ZuoraService(soapClient, restClient)
+    val newProductIds = Config.productIds(config.environmentName)
     val _stripeService = new StripeService(config.stripe, new TouchpointBackendMetrics with StatusMetrics {
       val backendEnv = config.stripe.envName
       val service = "Stripe"
     })
 
-    val subService = new SubscriptionService(zuoraService, _stripeService, catalogService.digipackCatalog)
-    val subServicePaper = new SubscriptionService(zuoraService, _stripeService, catalogService.paperCatalog)
-    val memsubPaymentService = new CommonPaymentService(_stripeService, zuoraService, catalogService)
-
-    val suspService = new SuspensionService[Future](
-      Config.holidayRatePlanIds(config.environmentName),
-      new SimpleClient[Future](config.zuoraRest, RequestRunners.futureRunner)
-    )
-
-    val form = new forms.SubscriptionsForm(catalogService)
-
-
-    val paymentService = new PaymentService {
-      override def stripeService = _stripeService
+    new TouchpointBackend {
+      lazy val environmentName = config.environmentName
+      lazy val salesforceService = new SalesforceServiceImp(new SimpleContactRepository(config.salesforce, system.scheduler, Config.appName))
+      lazy val catalogService = new subsv2.services.CatalogService[Future](newProductIds, simpleRestClient, Await.result(_, 10.seconds), backendType.name)
+      lazy val zuoraService = new zuora.ZuoraService(soapClient, this.zuoraRestClient)
+      lazy val subscriptionService = new subsv2.services.SubscriptionService[Future](newProductIds, this.catalogService.catalog.map(_.leftMap(_.list.mkString).map(_.map)), simpleRestClient, zuoraService.getAccountIds)
+      lazy val zuoraRestClient = new rest.Client(config.zuoraRest, new ServiceMetrics(Config.stage, Config.appName, "zuora-rest-client"))
+      lazy val paymentService = new PaymentService(_stripeService)
+      lazy val commonPaymentService = new CommonPaymentService(_stripeService, zuoraService, this.catalogService.unsafeCatalog.productMap)
+      lazy val zuoraProperties = config.zuoraProperties
+      lazy val promoService = new PromoService(promoCollection, new Discounter(this.discountRatePlanIds))
+      lazy val promoCollection = new DynamoPromoCollection(this.promoStorage)
+      lazy val promoStorage = JsonDynamoService.forTable[AnyPromotion](DynamoTables.promotions(Config.config, config.environmentName))
+      lazy val discountRatePlanIds = Config.discountRatePlanIds(config.environmentName)
+      lazy val suspensionService = new SuspensionService[Future](Config.holidayRatePlanIds(config.environmentName), simpleRestClient)
+      lazy val subsForm = new forms.SubscriptionsForm(this.catalogService.unsafeCatalog)
+      lazy val exactTargetService: ExactTargetService = new ExactTargetService(this.subscriptionService, this.commonPaymentService, this.zuoraService, this.salesforceService)
+      lazy val checkoutService: CheckoutService = new CheckoutService(IdentityService, this.salesforceService, this.paymentService, this.catalogService.unsafeCatalog, this.zuoraService, this.exactTargetService, this.zuoraProperties, this.promoService, this.discountRatePlanIds)
     }
-
-    TouchpointBackend(
-      config.environmentName,
-      salesforceService,
-      catalogService,
-      zuoraService,
-      subService,
-      subServicePaper,
-      restClient,
-      digipackRatePlanIds,
-      paymentService,
-      memsubPaymentService,
-      config.zuoraProperties,
-      promoService,
-      promoCollection,
-      promoStorage,
-      discountPlans,
-      suspService,
-      subsForm = form
-    )
   }
 
   val BackendsByType = BackendType.All.map(typ => typ -> TouchpointBackend(typ)).toMap
@@ -118,42 +108,3 @@ object TouchpointBackend {
   }
 }
 
-case class TouchpointBackend(environmentName: String,
-                             salesforceService: SalesforceService,
-                             catalogService : api.CatalogService,
-                             zuoraService: zuora.api.ZuoraService,
-                             subscriptionService: SubscriptionService[DigipackCatalog],
-                             subscriptionServicePaper: SubscriptionService[PaperCatalog],
-                             zuoraRestClient: zuora.rest.Client,
-                             digipackIds: DigitalPackRatePlanIds,
-                             paymentService: PaymentService,
-                             commonPaymentService: CommonPaymentService,
-                             zuoraProperties: ZuoraProperties,
-                             promoService: PromoService,
-                             promos: PromotionCollection,
-                             promoStorage: JsonDynamoService[AnyPromotion, Future],
-                             discountRatePlanIds: DiscountRatePlanIds,
-                             suspensionService: SuspensionService[Future],
-                             subsForm: SubscriptionsForm) {
-
-  private val that = this
-
-  val exactTargetService = new ExactTargetService {
-    override def digiSubscriptionService = that.subscriptionService
-    override def paperSubscriptionService = that.subscriptionServicePaper
-    override def paymentService = that.commonPaymentService
-    override def zuoraService = that.zuoraService
-    override def salesforceService = that.salesforceService
-  }
-
-  val checkoutService =
-    new CheckoutService(IdentityService,
-                        salesforceService,
-                        paymentService,
-                        catalogService,
-                        zuoraService,
-                        exactTargetService,
-                        zuoraProperties,
-                        promoService,
-                        discountRatePlanIds)
-}

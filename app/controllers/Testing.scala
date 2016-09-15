@@ -15,7 +15,7 @@ object Testing extends Controller with LazyLogging {
 
   val PreSigninTestCookieName = "pre-signin-test-user"
 
-  lazy val products = TouchpointBackend.Test.catalogService.paperCatalog.all
+  lazy val products = TouchpointBackend.Test.catalogService.unsafeCatalog.allSubs
 
   def testUser = AuthorisedTester { implicit request =>
     val headers = request.headers
@@ -23,7 +23,7 @@ object Testing extends Controller with LazyLogging {
 
     val testUserString = testUsers.generate()
     logger.info(s"Generated test user string $testUserString")
-    val testUserCookie = new Cookie(PreSigninTestCookieName, testUserString, Some(30 * 60), httpOnly = true)
+    val testUserCookie = Cookie(PreSigninTestCookieName, testUserString, Some(30 * 60), httpOnly = true)
     Ok(views.html.testing.testUsers(testUserString, products)).withCookies(testUserCookie, analyticsOffCookie)
   }
 
