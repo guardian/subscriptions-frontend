@@ -1,9 +1,10 @@
 package controllers
-
 import java.util.Date
 
 import app.BuildInfo
+
 import scalaz.syntax.nel._
+import scalaz.syntax.std.boolean._
 import com.typesafe.scalalogging.LazyLogging
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.mvc._
@@ -15,13 +16,14 @@ import views.support.Catalog._
 import play.api.Play.current
 import play.api.libs.concurrent.Akka
 import com.github.nscala_time.time.Imports._
-import com.gu.memsub.subsv2.Catalog
-import scalaz.syntax.applicative._
+import scalaz.{Semigroup, Validation, ValidationNel}
 import scalaz.syntax.std.option._
-import scalaz.{NonEmptyList, Validation, ValidationNel, \/}
 
 object Management extends Controller with LazyLogging {
+
   implicit val as = Akka.system
+  implicit val unitSemigroup = Semigroup.firstSemigroup[Unit]
+  import TouchpointBackend.Normal._
 
   def catalog = GoogleAuthenticatedStaffAction.async { implicit request =>
     val Seq(testCat, normalCat) = Seq(TouchpointBackend.Test, TouchpointBackend.Normal).map { be =>
@@ -32,35 +34,22 @@ object Management extends Controller with LazyLogging {
     }
   }
 
-  import TouchpointBackend.Normal._
-
-  trait Test {
-    def run: ValidationNel[String, Unit]
+  implicit class TestResultBoolean(result: Boolean) {
+    def testing(name: String): ValidationNel[String, Unit] =
+      result.fold(Validation.success(()), Validation.failureNel(s"Test $name failed. health check will fail"))
   }
 
-  class BoolTest(name: String, exec: () => Boolean) extends Test {
-    override def run = if(exec())
-      Validation.success(())
-    else
-      Validation.failureNel(s"Test $name failed, health check will fail")
-  }
-
-  class EitherTest[A](name: String, exec: () => NonEmptyList[String] \/ A) extends Test {
-    override def run = exec().validation.map(_ => ())
-  }
-
-  private def catalogTest: NonEmptyList[String] \/ Catalog = for {
+  private def catalogWorkedOkay: ValidationNel[String, Unit] = (for {
     catalogTry <- catalogService.catalog.value \/> "Future not completed yet".wrapNel
     catalogDisjunction <- catalogTry.toOption \/> catalogTry.failed.map(_.getMessage).getOrElse("").wrapNel
     catalog <- catalogDisjunction
-  } yield catalog
+  } yield ()).validation
 
-  private def tests = (
-    new BoolTest("CloudWatch", () => CloudWatchHealth.hasPushedMetricSuccessfully).run |@|
-    new BoolTest("ZuoraPing", () => zuoraService.lastPingTimeWithin(2.minutes)).run |@|
-    new BoolTest("Promotions", () => promoCollection.all.nonEmpty).run |@|
-    new EitherTest("CatalogSuccess", catalogTest _).run
-  ).tupled
+  private def tests =
+    CloudWatchHealth.hasPushedMetricSuccessfully.testing("CloudWatch") +++
+    zuoraService.lastPingTimeWithin(2.minutes).testing("ZuoraPing") +++
+    promoCollection.all.nonEmpty.testing("Promotions") +++
+    catalogWorkedOkay
 
   def healthcheck() = Action {
     Cached(1) {
@@ -82,7 +71,7 @@ object Management extends Controller with LazyLogging {
       "Products" -> TouchpointBackend.Normal.catalogService
     )
 
-    Cached(1)(Ok(data map { case (k, v) => s"$k: $v"} mkString "\n"))
+    Cached(1)(Ok(data map { case (k, v) => s"$k: $v" } mkString "\n"))
   }
 
 }
