@@ -34,21 +34,19 @@ object Management extends Controller with LazyLogging {
     }
   }
 
-  implicit class TestResultBoolean(result: Boolean) {
-    def testing(name: String): ValidationNel[String, Unit] =
-      result.fold(Validation.success(()), Validation.failureNel(s"Test $name failed. health check will fail"))
-  }
-
   private def catalogWorkedOkay: ValidationNel[String, Unit] = (for {
-    catalogTry <- catalogService.catalog.value \/> "Future not completed yet".wrapNel
+    catalogTry <- catalogService.catalog.value \/> "Catalog not parsed from Zuora yet".wrapNel
     catalogDisjunction <- catalogTry.toOption \/> catalogTry.failed.map(_.getMessage).getOrElse("").wrapNel
     catalog <- catalogDisjunction
   } yield ()).validation
 
+  def boolTest(result: Boolean, name: String): ValidationNel[String, Unit] =
+    result.fold(Validation.success(()), Validation.failureNel(s"Test $name failed. health check will fail"))
+
   private def tests =
-    CloudWatchHealth.hasPushedMetricSuccessfully.testing("CloudWatch") +++
-    zuoraService.lastPingTimeWithin(2.minutes).testing("ZuoraPing") +++
-    promoCollection.all.nonEmpty.testing("Promotions") +++
+    boolTest(CloudWatchHealth.hasPushedMetricSuccessfully, "CloudWatch") +++
+    boolTest(zuoraService.lastPingTimeWithin(2.minutes), "ZuoraPing") +++
+    boolTest(promoCollection.all.nonEmpty, "Promotions") +++
     catalogWorkedOkay
 
   def healthcheck() = Action {
