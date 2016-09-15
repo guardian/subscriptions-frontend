@@ -7,11 +7,6 @@
 
 @(subscriptionId: String, plan: CatalogPlan.Paid, promotion: Option[AnyPromotion] = None, currency: Currency)
 <div class="review-panel">
-    <input type="checkbox" name="subscriptionDetails"
-           checked="checked"
-           class="u-h"
-           data-amount="@plan.charges.gbpPrice.amount"
-           data-number-of-months="@plan.charges.billingPeriod.numberOfMonths">
     <div class="review-panel__item">
         <h4 class="review-panel__label">Subscriber ID:</h4>
         <div class="review-panel__details">@subscriptionId</div>

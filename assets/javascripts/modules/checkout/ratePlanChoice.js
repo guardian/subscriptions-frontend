@@ -60,7 +60,6 @@ define(['$', 'bean'], function ($, bean) {
     }
 
     function addOnChangeAction(fn) {
-        console.log('add', fn);
         if (typeof(fn) === 'function') {
             _ON_CHANGE_ACTIONS.push(fn);
         }
