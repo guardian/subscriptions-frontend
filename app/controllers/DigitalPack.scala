@@ -22,8 +22,8 @@ object DigitalPack extends Controller {
 
   def landingPage(code: String) = CachedAction { implicit request =>
     getById(code).fold(redirectResult(INT)) { digitalEdition =>
-      val plan = TouchpointBackend.Normal.catalogService.unsafeCatalog.digipack.month
-      val price = plan.charges.price.getPrice(digitalEdition.countryGroup.currency).getOrElse(plan.charges.gbpPrice)
+      val plan = TouchpointBackend.Normal.catalogService.digipackCatalog.digipackMonthly
+      val price = plan.pricing.getPrice(digitalEdition.countryGroup.currency).getOrElse(plan.gbpPrice)
       Ok(views.html.digitalpack.info(digitalEdition, price))
     }
   }

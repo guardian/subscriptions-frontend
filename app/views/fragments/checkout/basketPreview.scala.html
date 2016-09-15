@@ -3,9 +3,10 @@
 @import com.gu.memsub.BillingPeriod
 @import com.gu.memsub.ProductFamily
 @import views.support.PlanOps._
-@import com.gu.memsub.subsv2.CatalogPlan
+@import com.gu.subscriptions.ProductList
+@import com.gu.subscriptions.ProductPlan
 
-@(plan: CatalogPlan.Paid)
+@(plan: ProductPlan[ProductList])
 
 <div class="basket-preview  basket-preview--products">
     <h3 class="basket-preview__title">You've chosen:</h3>

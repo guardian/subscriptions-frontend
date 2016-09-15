@@ -1,20 +1,21 @@
+@import com.gu.memsub.Subscription
 @import com.gu.memsub.PaidPS
-@import com.gu.memsub.subsv2.SubscriptionPlan
-@import com.gu.memsub.subsv2.Subscription
+@import com.gu.subscriptions.ProductPlan
+@import com.gu.subscriptions.PhysicalProducts
 @import views.support.PlanOps._
 @import views.support.Dates._
 @import views.support.Pricing._
 
-@(subscription: Subscription[SubscriptionPlan.Paper])(extra: Html = Html(""))
+@(subscription: Subscription with PaidPS[ProductPlan[PhysicalProducts]])(extra: Html = Html(""))
 <dl class="mma-section__list">
     <dt class="mma-section__list--title">Subscriber ID</dt>
     <dd class="mma-section__list--content">@subscription.name.get</dd>
 
     <dt class="mma-section__list--title">Current plan</dt>
     <dd class="mma-section__list--content">
-        <div>@subscription.plan.name</div>
+        <div>@subscription.plan.title</div>
         <div>(@subscription.plan.description)</div>
-        <div>@subscription.plan.charges.prettyPricing(subscription.plan.charges.price.currencies.head)</div>
+        <div>@subscription.plan.prettyPricing(subscription.currency)</div>
     </dd>
 
     <dt class="mma-section__list--title">Start date</dt>

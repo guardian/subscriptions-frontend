@@ -1,7 +1,8 @@
+@import com.gu.i18n.{Country, CountryGroup, Currency}
 @import com.gu.memsub.BillingPeriod
 @import com.gu.subscriptions.DigipackPlan
-@import model.JsVars
 @import configuration.Config.Identity._
+@import model.JsVars
 @import views.support.BillingPeriod._
 @import views.support.CountryWithCurrency
 @import views.support.Pricing._
@@ -12,11 +13,13 @@
 @import views.support.ProductPopulationData
 @import views.support.ProductPopulationData._
 @import com.gu.memsub.Current
-@import com.gu.memsub.subsv2.CatalogPlan
+@import com.gu.memsub.Delivery
+@import com.gu.subscriptions.ProductPlan
 @import com.gu.i18n.Currency
+@import com.gu.i18n.Country
 @import views.support.PlanOps._
-@import com.gu.i18n._
 @import com.gu.memsub.Subscriptions
+@import com.gu.subscriptions.ProductList
 @import views.support.AddressOps
 @import model.DigitalEdition
 
@@ -33,24 +36,24 @@
     edition: DigitalEdition
 )(implicit request: RequestHeader)
 
-@priceOption(plan: CatalogPlan.Paid, currency: Currency) = {
+@priceOption(plan: ProductPlan[ProductList], currency: Currency) = {
     <label class="option" data-currency="@currency">
         <span class="option__input">
             <input
             type="radio" name="ratePlanId"
             data-option-label-prefix="@plan.prefix"
-            data-option-mirror-payment-default="@plan.charges.prettyPricing(currency)"
-            data-option-mirror-payment="@plan.charges.prettyPricing(currency)"
+            data-option-mirror-payment-default="@plan.prettyPricing(currency)"
+            data-option-mirror-payment="@plan.prettyPricing(currency)"
             data-option-mirror-description="(@plan.subtitle)"
             data-option-mirror-package="@plan.title"
-            data-amount="@plan.charges.gbpPrice.amount"
-            data-number-of-months="@plan.charges.billingPeriod.numberOfMonths"
+            data-amount="@plan.gbpPrice.amount"
+            data-number-of-months="@plan.billingPeriod.numberOfMonths"
             data-currency="@currency"
-            value="@plan.id.get"
+            value="@plan.productRatePlanId.get"
             @if(plan == productData.plans.default && currency == defaultCurrency){ checked="checked" }
             >
         </span>
-        <span class="option__label" id="label-for-@plan.id.get-@currency" title="@plan.title">@plan.prettyName(currency)</span>
+        <span class="option__label" id="label-for-@plan.productRatePlanId.get-@currency" title="@plan.title">@plan.prettyName(currency)</span>
     </label>
 }
 
@@ -92,7 +95,7 @@
                 }
                 <fieldset class="basket-billing-options is-hidden js-payment-frequency js-option-mirror-group" id="change-payment-frequency">
                     @productData.plans.list.map { p =>
-                        @p.charges.price.currencies.map { c =>
+                        @p.currencies.map { c =>
                             @priceOption(p, c)
                         }
                     }

@@ -1,14 +1,18 @@
-@import com.gu.i18n.Currency
-@import com.gu.i18n.GBP
-@import com.gu.memsub.{BillingSchedule, Price}
-@import com.gu.memsub.subsv2.{Subscription, SubscriptionPlan => Plan}
 @import com.gu.subscriptions.suspendresume.SuspensionService.HolidayRefund
-@import model.DigitalEdition.UK
+@import com.gu.memsub.BillingSchedule
+@import com.gu.memsub.Price
+@import com.gu.i18n.GBP
 @import views.support.Dates.prettyDate
+@import model.DigitalEdition.UK
+@import com.gu.i18n.Currency
+@import com.gu.subscriptions.ProductPlan
+@import com.gu.subscriptions.PhysicalProducts
+@import com.gu.memsub.Subscription
+@import com.gu.memsub.PaidPS
 @(
     newRefund: HolidayRefund,
     holidayRefunds: Seq[HolidayRefund],
-    subscription: Subscription[Plan.Paper],
+    subscription: Subscription with PaidPS[ProductPlan[PhysicalProducts]],
     billingSchedule: BillingSchedule,
     suspendableDays: Int,
     suspendedDays: Int,
@@ -38,7 +42,7 @@
 
         <section class="mma-section">
             <h3 class="mma-section__header">Your new billing schedule</h3>
-            @account.fragments.billingSchedule(billingSchedule, currency)
+            @account.fragments.billingSchedule(billingSchedule, subscription.currency)
         </section>
 
     </main>

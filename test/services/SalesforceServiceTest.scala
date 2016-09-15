@@ -1,14 +1,14 @@
 package services
 import com.gu.i18n.Title
-import com.gu.memsub._
+import com.gu.memsub.{Address, BillingPeriod, MondayPaper, PricingSummary}
 import com.gu.memsub.Subscription.ProductRatePlanId
-import com.gu.memsub.subsv2.{CatalogPlan, PaperCharges}
-import com.gu.memsub.subsv2.ZProduct.Delivery
-import com.gu.memsub.subsv2.Delivery
 import model.{PaperData, PersonalData}
 import org.specs2.mutable.Specification
 import com.gu.salesforce.ContactDeserializer.Keys._
+import com.gu.subscriptions.{PhysicalProducts, ProductPlan}
 import org.joda.time.LocalDate
+
+import scalaz.syntax.nel._
 import scalaz.syntax.std.option._
 import play.api.libs.json.{JsString, Json}
 
@@ -16,15 +16,8 @@ class SalesforceServiceTest extends Specification {
 
   "Salesforce contact serialiser" should {
 
-    val plan = new CatalogPlan[Delivery, PaperCharges, Current](
-      id = ProductRatePlanId("p"),
-      name = "name",
-      description = "desc",
-      charges = PaperCharges(Map(MondayPaper -> PricingSummary(Map.empty)), None),
-      product = Delivery,
-      saving = None,
-      s = Status.current
-    )
+    val plan = new ProductPlan[PhysicalProducts](ProductRatePlanId("p"), "name", "desc",
+      PhysicalProducts((MondayPaper -> PricingSummary(Map.empty)).wrapNel, List.empty), "slug", None, BillingPeriod.month)
 
     val bloggsResidence = Address("Flat 123", "123 Fake Street", "Faketown", "Kent", "FT1 0HF", "UK")
     val data = PersonalData("Joe", "Bloggs", "joebloggs@example,com", receiveGnmMarketing = true, bloggsResidence, Some("1234"), Title.Prof.some)

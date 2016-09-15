@@ -1,18 +1,8 @@
-@import com.gu.memsub.subsv2.CatalogPlan
-@import com.gu.memsub.Month
+@import com.gu.subscriptions.DigipackCatalog
 @import com.gu.memsub.promo.Promotion._
 @import views.support.Catalog._
 @import org.joda.time.Days
 
-@(defaultFreeTrialDays: Days, catalog: CatalogPlan.Digipack[Month], promotion: AnyPromotion)
+@(defaultFreeTrialDays: Days, catalog: DigipackCatalog, promotion: AnyPromotion)
 <h4>Subscription terms and conditions</h4>
-<p>Subscriptions available to people aged 18 and over with a valid email address.
-  Free trial open to new digital pack subscribers only. Free trial period lasts
-  @promotion.asFreeTrial.fold(defaultFreeTrialDays.getDays.toString)(_.promotionType.duration.getDays.toString)
-  days from receipt of subscriber ID, up to and including the day before your first payment falls due. At the end of the free trial,
-  the subscription is charged at @promotion.asIncentive.map { p => standard price (currently @formatPrice(catalog, promotion) a month) }
-  @promotion.asDiscount.map { p => the special price of @formatPrice(catalog, promotion) a month } unless cancelled.
-  Requires Internet connection (additional charges may apply) and an Apple, Android or Kindle Fire device.
-  For full details of the digital pack and its terms and conditions - see
-  <a class="u-link" href="//www.theguardian.com/digital-subscriptions-terms-conditions" target="_blank">theguardian.com/digital-subscriptions-terms-conditions</a>.
-</p>
+<p>Subscriptions available to people aged 18 and over with a valid email address. Free trial open to new digital pack subscribers only. Free trial period lasts @promotion.asFreeTrial.fold(defaultFreeTrialDays.getDays.toString)(_.promotionType.duration.getDays.toString) days from receipt of subscriber ID, up to and including the day before your first payment falls due. At the end of the free trial, the subscription is charged at @promotion.asIncentive.map { p => standard price (currently @formatPrice(catalog, promotion) a month) } @promotion.asDiscount.map { p => the special price of @formatPrice(catalog, promotion) a month } unless cancelled. Requires Internet connection (additional charges may apply) and an Apple, Android or Kindle Fire device. For full details of the digital pack and its terms and conditions - see <a class="u-link" href="//www.theguardian.com/digital-subscriptions-terms-conditions" target="_blank">theguardian.com/digital-subscriptions-terms-conditions</a>.</p>
