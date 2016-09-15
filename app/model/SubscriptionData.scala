@@ -1,12 +1,14 @@
 package model
+
 import com.gu.i18n.Country.UK
-import com.gu.i18n.{CountryGroup, Title}
+import com.gu.i18n.{Country, CountryGroup, Title}
 import com.gu.identity.play.IdUser
+import com.gu.memsub.Subscription.ProductRatePlanId
 import com.gu.memsub._
 import com.gu.memsub.promo.PromoCode
 import IdUserOps._
+import com.gu.subscriptions.{DigipackPlan, DigitalProducts, PhysicalProducts, ProductPlan}
 import org.joda.time.LocalDate
-import com.gu.memsub.subsv2._
 
 sealed trait PaymentType {
   def toKey: String
@@ -59,14 +61,14 @@ case class SubscriptionData(
 )
 
 case class DigipackData(
-   plan: CatalogPlan.Digipack[BillingPeriod]
+   plan: ProductPlan[DigitalProducts]
 )
 
 case class PaperData(
   startDate: LocalDate,
   deliveryAddress: Address,
   deliveryInstructions: Option[String],
-  plan: CatalogPlan.Paper
+  plan: ProductPlan[PhysicalProducts]
 )
 
 object PersonalData {
@@ -86,5 +88,5 @@ object PersonalData {
 
 
 case class SubscribeRequest(genericData: SubscriptionData, productData: Either[PaperData, DigipackData]) {
-  def productRatePlanId = productData.fold(_.plan.id, _.plan.id)
+  def productRatePlanId = productData.fold(_.plan.productRatePlanId, _.plan.productRatePlanId)
 }

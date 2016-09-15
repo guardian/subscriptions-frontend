@@ -1,25 +1,24 @@
 @import com.gu.memsub.promo.PromoCode
 @import com.gu.memsub.promo.Promotion.AnyPromotion
-@import com.gu.memsub.subsv2.CatalogPlan
-@import com.gu.memsub.Month
+@import com.gu.subscriptions.DigipackCatalog
 @import model.DigitalEdition
 @import views.support.Catalog._
 @import org.joda.time.Days
-@(defaultFreeTrialDays: Days, edition: DigitalEdition, plan: CatalogPlan.Digipack[Month], promoCode: PromoCode, promotion: AnyPromotion)
+@(defaultFreeTrialDays: Days, edition: DigitalEdition, catalog: DigipackCatalog, promoCode: PromoCode, promotion: AnyPromotion)
 <div class="pricing-cta">
     <div class="pricing-cta__pricing">
         <h4 class="pricing-cta__pricing__title">Free for @promotion.asFreeTrial.fold(defaultFreeTrialDays.getDays)(_.promotionType.duration.getDays) days</h4>
         <p class="pricing-cta__pricing__value">
             @promotion.asDiscount.find(_.promotionType.durationMonths.isDefined).fold {
-                Then @formatPrice(plan, promotion)/month
+                Then @formatPrice(catalog, promotion)/month
             } { p =>
                 @if(p.promotionType.durationMonths.get > 1) {
-                    Then @formatPrice(plan, promotion)/month for @p.promotionType.durationMonths.get months
+                    Then @formatPrice(catalog, promotion)/month for @p.promotionType.durationMonths.get months
                 } else {
-                    Then @formatPrice(plan, promotion) for 1 month
+                    Then @formatPrice(catalog, promotion) for 1 month
                 }
                 <br/>
-                Then @formatPrice(plan) every month thereafter
+                Then @formatPrice(catalog) every month thereafter
             }
         </p>
     </div>

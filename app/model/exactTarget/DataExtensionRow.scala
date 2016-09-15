@@ -6,9 +6,7 @@ import java.util.UUID
 import com.gu.exacttarget._
 import com.gu.i18n.Currency
 import com.gu.memsub.Subscription._
-import com.gu.memsub.{Subscription => _, _}
-import com.gu.memsub.subsv2.Subscription
-import com.gu.memsub.subsv2.{SubscriptionPlan => Plan}
+import com.gu.memsub._
 import com.typesafe.scalalogging.LazyLogging
 import model.exactTarget.DataExtensionRowHelpers._
 import model.{PaperData, PersonalData}
@@ -63,7 +61,7 @@ object DigipackWelcome1DataExtensionRow extends LazyLogging {
 
   def apply(
              personalData: PersonalData,
-             subscription: Subscription[Plan.Paid],
+             subscription: Subscription with Paid,
              paymentMethod: PaymentMethod,
              gracePeriod: Days,
              subscriptionDetails: String,
@@ -91,8 +89,8 @@ object DigipackWelcome1DataExtensionRow extends LazyLogging {
         "ZuoraSubscriberId" -> subscription.name.get,
         "SubscriberKey" -> personalData.email,
         "EmailAddress" -> personalData.email,
-        "Subscription term" -> subscription.plan.charges.billingPeriod.noun,
-        "Payment amount" -> formatPrice(subscription.plan.charges.price.prices.head.amount),
+        "Subscription term" -> subscription.plan.billingPeriod.noun,
+        "Payment amount" -> formatPrice(subscription.recurringPrice.amount),
         "First Name" -> personalData.first,
         "Last Name" -> personalData.last,
         "Address 1" -> personalData.address.lineOne,
@@ -115,7 +113,7 @@ object PaperHomeDeliveryWelcome1DataExtensionRow {
   def apply(
              paperData: PaperData,
              personalData: PersonalData,
-             subscription: Subscription[Plan.Paid],
+             subscription: Subscription with Paid,
              paymentMethod: PaymentMethod,
              subscriptionDetails: String,
              promotionDescription: Option[String] = None
@@ -151,7 +149,7 @@ object PaperHomeDeliveryWelcome1DataExtensionRow {
         "SubscriberKey" -> personalData.email,
         "EmailAddress" -> personalData.email,
         "subscriber_id" -> subscription.name.get,
-        "IncludesDigipack" -> paperData.plan.charges.benefits.list.contains(Digipack).toString,
+        "IncludesDigipack" -> paperData.plan.products.others.map(_._1).contains(Digipack).toString,
         "title" -> personalData.title.fold("")(_.title),
         "first_name" -> personalData.first,
         "last_name" -> personalData.last,
@@ -175,7 +173,7 @@ object PaperVoucherWelcome1DataExtensionRow {
   def apply(
              paperData: PaperData,
              personalData: PersonalData,
-             subscription: Subscription[Plan.Paid],
+             subscription: Subscription with Paid,
              paymentMethod: PaymentMethod,
              subscriptionDetails: String,
              promotionDescription: Option[String] = None
@@ -211,7 +209,7 @@ object PaperVoucherWelcome1DataExtensionRow {
         "SubscriberKey" -> personalData.email,
         "EmailAddress" -> personalData.email,
         "subscriber_id" -> subscription.name.get,
-        "IncludesDigipack" -> paperData.plan.charges.benefits.list.contains(Digipack).toString,
+        "IncludesDigipack" -> paperData.plan.products.others.map(_._1).contains(Digipack).toString,
         "title" -> personalData.title.fold("")(_.title),
         "first_name" -> personalData.first,
         "last_name" -> personalData.last,

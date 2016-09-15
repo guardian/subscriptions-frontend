@@ -1,13 +1,16 @@
+@import com.gu.memsub.Subscription
 @import com.gu.memsub.BillingSchedule
+@import com.gu.subscriptions.ProductPlan
+@import com.gu.memsub.PaidPS
+@import com.gu.subscriptions.PhysicalProducts
 @import com.gu.subscriptions.suspendresume.SuspensionService.HolidayRefund
-@import com.gu.memsub.subsv2.{SubscriptionPlan => Plan, Subscription}
 @import configuration.Config.suspendableWeeks
 @import com.gu.subscriptions.suspendresume.SuspensionService.holidayToDays
 @import model.DigitalEdition.UK
 @import views.support.Dates.prettyDate
 @import views.support.AccountManagementOps._
 @(
-    subscription: Subscription[Plan.Paper],
+    subscription: Subscription with PaidPS[ProductPlan[PhysicalProducts]],
     holidayRefunds: Seq[HolidayRefund] = Seq.empty,
     billingSchedule: BillingSchedule,
     suspendableDays: Int,
@@ -71,7 +74,7 @@
 
             <section class="mma-section">
                 <h3 class="mma-section__header">Your billing schedule</h3>
-                @account.fragments.billingSchedule(billingSchedule, subscription.plan.charges.price.currencies.head)
+                @account.fragments.billingSchedule(billingSchedule, subscription.currency)
             </section>
 
         </section>

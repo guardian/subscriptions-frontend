@@ -1,10 +1,12 @@
 @import com.gu.memsub.ProductFamily
 @import com.gu.memsub.Subscriptions
 @import utils.TestUsers.{PreSigninTestCookie, NameEnteredInForm, SignedInUsername}
-@import com.gu.memsub.subsv2.CatalogPlan
+
 @import com.gu.memsub.BillingPeriod
 @import com.gu.memsub.Current
 @import com.gu.memsub.PaidPlan
+@import com.gu.subscriptions.ProductList
+@import com.gu.subscriptions.ProductPlan
 @import model.DigitalEdition
 
 @(
@@ -13,7 +15,7 @@
     jsVars: model.JsVars = model.JsVars(),
     bodyClasses: Seq[String] = Nil,
     touchpointBackendResolutionOpt: Option[services.TouchpointBackend.Resolution] = None,
-    plan: Option[CatalogPlan.Paid] = None,
+    plan: Option[ProductPlan[ProductList]] = None,
     edition: DigitalEdition = DigitalEdition.INT
 )(content: Html)
 

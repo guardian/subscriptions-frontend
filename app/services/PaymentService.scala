@@ -1,15 +1,19 @@
 package services
+
 import com.gu.i18n.Country.UK
 import com.gu.i18n.{Currency, GBP}
-import com.gu.memsub.subsv2.CatalogPlan
+import com.gu.memsub.{BillingPeriod, Current, PaidPlan}
 import com.gu.salesforce.ContactId
 import com.gu.stripe.StripeService
+import com.gu.subscriptions.DigipackPlan
 import com.gu.zuora.soap.models.Commands.{Account, BankTransfer, CreditCardReferenceTransaction, PaymentMethod}
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
-import scala.concurrent.Future
 import model._
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
-class PaymentService(val stripeService: StripeService) {
+import scala.concurrent.Future
+
+trait PaymentService {
+  def stripeService: StripeService
 
   sealed trait Payment {
     def makeAccount: Account
@@ -40,16 +44,16 @@ class PaymentService(val stripeService: StripeService) {
 
   def makeDirectDebitPayment(paymentData: DirectDebitData, personalData: PersonalData, memberId: ContactId) = {
     require(personalData.address.country.contains(UK), "Direct Debit payment only works in the UK right now")
-    DirectDebitPayment(paymentData, personalData, memberId)
+    new DirectDebitPayment(paymentData, personalData, memberId)
   }
 
   def makeCreditCardPayment(
      paymentData: CreditCardData,
      personalData: PersonalData,
      purchaserIds: PurchaserIdentifiers,
-     plan: CatalogPlan.Paid) = {
+     plan: PaidPlan[Current, BillingPeriod]) = {
     val desiredCurrency = personalData.currency
-    val currency = if (plan.charges.price.currencies.contains(desiredCurrency)) desiredCurrency else GBP
+    val currency = if (plan.currencies.contains(desiredCurrency)) desiredCurrency else GBP
 
     new CreditCardPayment(paymentData, currency, purchaserIds)
   }

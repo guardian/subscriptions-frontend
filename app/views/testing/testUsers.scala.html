@@ -2,10 +2,12 @@
 @import com.gu.i18n.GBP
 @import com.gu.memsub.Subscriptions
 @import com.gu.i18n.CountryGroup.UK
-@import com.gu.memsub.subsv2._
+@import com.gu.subscriptions.ProductList
+@import com.gu.subscriptions.ProductPlan
+@import com.gu.subscriptions.PlanGroup
 @import views.support.Pricing._
 
-@(userString: String, products: List[List[CatalogPlan.Paid]])(implicit request: RequestHeader)
+@(userString: String, products: List[PlanGroup[ProductList]])(implicit request: RequestHeader)
 
 @import configuration.Config.Identity.idWebAppRegisterUrl
 
@@ -25,10 +27,11 @@
 
         <div class="actions">
             <h2>Subscribe as a <em>guest</em> user to:</h2>
-            @for(group <- products) {
+            @for(group <- products.sortBy(_.name)) {
+                <h4>@group.name</h4>
                 <dl>
-                @for(plan <- group.sortBy(_.charges.gbpPrice.amount)) {
-                    <a href="@routes.Checkout.renderCheckout(UK, None, None, plan.slug)" style="margin-bottom: 10px" class="button button--primary button--large">@plan.name (@{(plan.charges.gbpPrice * 12 / 52).pretty}/w, @plan.charges.gbpPrice.pretty/m)</a>
+                @for(plan <- group.productPlans.sortBy(_.priceGBP.amount)) {
+                    <a href="@routes.Checkout.renderCheckout(UK, None, None, plan.slug)" style="margin-bottom: 10px" class="button button--primary button--large">@plan.name (@{(plan.priceGBP * 12 / 52).pretty}/w, @plan.priceGBP.pretty/m)</a>
                 }
                 </dl>
             }
@@ -38,10 +41,11 @@
 
         <div class="actions">
             <h2>Register as an Identity user, redirecting to checkout for:</h2>
-            @for(group <- products) {
+            @for(group <- products.sortBy(_.name)) {
+                <h4>@group.name</h4>
                 <dl>
-                    @for(plan <- group.sortBy(_.charges.gbpPrice.amount)) {
-                        <a href="@idWebAppRegisterUrl(routes.Checkout.renderCheckout(UK, None, None, plan.slug))" style="margin-bottom: 10px" class="button button--primary button--large">@plan.name (@{(plan.charges.gbpPrice * 12 / 52).pretty}/w, @plan.charges.gbpPrice.pretty/m)</a>
+                    @for(plan <- group.productPlans.sortBy(_.priceGBP.amount)) {
+                        <a href="@idWebAppRegisterUrl(routes.Checkout.renderCheckout(UK, None, None, plan.slug))" style="margin-bottom: 10px" class="button button--primary button--large">@plan.name (@{(plan.priceGBP * 12 / 52).pretty}/w, @plan.priceGBP.pretty/m)</a>
                     }
                 </dl>
             }

@@ -17,7 +17,7 @@ import views.support.PegdownMarkdownRenderer
 object PromoLandingPage extends Controller {
 
   val tpBackend = TouchpointBackend.Normal
-  val catalog = tpBackend.catalogService.unsafeCatalog
+  val catalog = tpBackend.catalogService.digipackCatalog
   val edition = DigitalEdition.UK
 
   def render(promoCodeStr: String) = CachedAction { implicit request =>
@@ -27,17 +27,14 @@ object PromoLandingPage extends Controller {
     (for {
       promotion <- tpBackend.promoService.findPromotion(promoCode)
       promotionWithLandingPage <- promotion.asDigipack
-      html <- if ((evaluateStarts && promotionWithLandingPage.starts.isAfterNow) || promotionWithLandingPage.expires.exists(_.isBeforeNow))
-        None
-      else
-        Some(views.html.promotion.landingPage(edition, catalog.digipack.month, promoCode, promotionWithLandingPage, Config.Zuora.paymentDelay, PegdownMarkdownRenderer))
+      html <- if ((evaluateStarts && promotionWithLandingPage.starts.isAfterNow) || promotionWithLandingPage.expires.exists(_.isBeforeNow)) None else Some(views.html.promotion.landingPage(edition, catalog, promoCode, promotionWithLandingPage, Config.Zuora.paymentDelay, PegdownMarkdownRenderer))
     } yield Ok(html)).getOrElse(Redirect("/digital" ? ("INTCMP" -> s"FROM_P_${promoCode.get}")))
   }
 
   def preview() = GoogleAuthenticatedStaffAction { implicit request =>
     Form(Forms.single("promoJson" -> Forms.text)).bindFromRequest().fold(_ => NotFound, { jsString =>
       Json.fromJson[AnyPromotion](Json.parse(jsString)).asOpt.flatMap(_.asDigipack)
-      .map(p => views.html.promotion.landingPage(edition, catalog.digipack.month, p.codes.headOption.getOrElse(PromoCode("")), p, Config.Zuora.paymentDelay, PegdownMarkdownRenderer))
+      .map(p => views.html.promotion.landingPage(edition, catalog, p.codes.headOption.getOrElse(PromoCode("")), p, Config.Zuora.paymentDelay, PegdownMarkdownRenderer))
       .fold[Result](NotFound)(p => Ok(p).withHeaders(HandleXFrameOptionsOverrideHeader.HEADER_KEY -> s"ALLOW-FROM ${Config.previewXFrameOptionsOverride}"))
     })
   }

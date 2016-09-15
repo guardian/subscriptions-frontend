@@ -1,24 +1,27 @@
 package controllers
+
 import actions.CommonActions._
 import com.gu.i18n.CountryGroup
+import com.gu.memsub.Digipack
+import com.gu.subscriptions.{PhysicalProducts, ProductPlan}
 import model.Subscriptions._
 import play.api.mvc._
 import services.TouchpointBackend
-import com.gu.memsub.subsv2.CatalogPlan
+import utils.TestUsers.PreSigninTestCookie
 import scalaz.syntax.std.boolean._
 
 object Shipping extends Controller {
 
   // no need to support test users here really as plans seldom change
-  val catalog = TouchpointBackend.Normal.catalogService.unsafeCatalog
+  val catalog = TouchpointBackend.Normal.catalogService.paperCatalog
 
   def index(subscriptionCollection: SubscriptionProduct) = {
     Ok(views.html.shipping.shipping(subscriptionCollection))
   }
 
-  def planToOptions(in: CatalogPlan.Paid): SubscriptionOption =
+  def planToOptions(in: ProductPlan[PhysicalProducts]): SubscriptionOption =
     SubscriptionOption(in.slug,
-      in.name, in.charges.gbpPrice.amount * 12 / 52, in.saving.map(_.toString + "%"), in.charges.gbpPrice.amount, in.description,
+      in.name, in.priceGBP.amount * 12 / 52, in.saving.map(_.toString + "%"), in.priceGBP.amount, in.description,
       routes.Checkout.renderCheckout(CountryGroup.UK, None, None, in.slug).url
     )
 
@@ -79,7 +82,7 @@ object Shipping extends Controller {
       description = """|If you live within the M25 you can have your papers delivered by 7am Monday - Saturday and 8.30am on Sunday.
                       |Plus you can start using the daily edition and premium live news app immediately.""".stripMargin,
       packageType = "paper-digital",
-      options = catalog.delivery.list.filter(_.charges.digipack.isDefined).map(planToOptions).sortBy(_.weeklyPrice).reverse
+      options = catalog.delivery.productPlans.filter(_.products.others.map(_._1).contains(Digipack)).map(planToOptions).sortBy(_.weeklyPrice).reverse
     ))
   }
 
@@ -88,7 +91,7 @@ object Shipping extends Controller {
       title = "Paper home delivery subscription",
       description = "If you live within the M25 you can have your papers delivered by 7am Monday - Saturday and 8.30 on Sunday.",
       packageType = "paper",
-      options = catalog.delivery.list.filter(_.charges.digipack.isEmpty).map(planToOptions).sortBy(_.weeklyPrice).reverse
+      options = catalog.delivery.productPlans.filter(_.products.others.isEmpty).map(planToOptions).sortBy(_.weeklyPrice).reverse
     ))
   }
 

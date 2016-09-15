@@ -17,6 +17,15 @@ object CommonActions {
 
   val NoCacheAction = resultModifier(noCache)
 
+  val NoSubAction = NoCacheAction andThen ActionRefiners.noSubscriptionAction({ _ =>
+    Redirect(Config.Identity.webAppMMAUrl.toString)
+  })
+
+  val NoSubAjaxAction = NoCacheAction andThen ActionRefiners.noSubscriptionAction({ sub =>
+    Logger.error(s"Attempt to checkout with existing subscription ${sub.name.get}")
+    BadRequest
+  })
+
   type GoogleAuthRequest[A] = AuthenticatedRequest[A, googleauth.UserIdentity]
 
   val GoogleAuthAction: ActionBuilder[GoogleAuthRequest] = AuthAction
