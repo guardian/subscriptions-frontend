@@ -58,8 +58,8 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
     idUser map { user =>
 
       val planListEither: Either[PlanList[CatalogPlan.Digipack[BillingPeriod]], PlanList[CatalogPlan.Paper]] = (
-        catalog.delivery.list.find(_.slug == forThisPlan).map(p => PlanList(p, getBetterPlans(p, catalog.delivery.list):_*)) orElse
-        catalog.voucher.list.find(_.slug == forThisPlan).map(p => PlanList(p, getBetterPlans(p, catalog.delivery.list):_*))
+        catalog.delivery.list.find(_.slug == forThisPlan).map(p => PlanList[CatalogPlan.Delivery](p, getBetterPlans(p, catalog.delivery.list):_*)) orElse
+        catalog.voucher.list.find(_.slug == forThisPlan).map(p => PlanList[CatalogPlan.Voucher](p, getBetterPlans(p, catalog.voucher.list):_*))
       ).toRight(PlanList(catalog.digipack.month, catalog.digipack.quarter, catalog.digipack.year))
 
       val plans = planListEither.fold(identity, identity)
