@@ -274,7 +274,6 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
     tpBackend.promoService.findPromotion(promoCode).fold {
       NotFound(Json.obj("errorMessage" -> s"Sorry, we can't find that code."))
     } { promo =>
-      println(promo.appliesTo, prpId)
       val result = promo.validateFor(prpId, country)
       val body = Json.obj(
         "promotion" -> Json.toJson(promo),
