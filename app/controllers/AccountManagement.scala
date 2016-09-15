@@ -79,12 +79,12 @@ object AccountManagement extends Controller with LazyLogging {
       billingSchedule <- OptionT(tpBackend.commonPaymentService.billingSchedule(sub.id, numberOfBills = 12))
       suspendableDays = Config.suspendableWeeks * sub.plan.charges.benefits.size
     } yield
-      subEither.fold({ s =>
+      subEither.fold({ deliverySubscription =>
         val pendingHolidays = pendingHolidayRefunds(allHolidays)
-        val suspendedDays = SuspensionService.holidayToSuspendedDays(pendingHolidays, s.plan.charges.days.toList)
-        Ok(views.html.account.suspend(s, pendingHolidayRefunds(allHolidays), billingSchedule, suspendableDays, suspendedDays, errorCodes))
-      },{ s =>
-        Ok(views.html.account.voucher(s, billingSchedule))
+        val suspendedDays = SuspensionService.holidayToSuspendedDays(pendingHolidays, deliverySubscription.plan.charges.days.toList)
+        Ok(views.html.account.suspend(deliverySubscription, pendingHolidayRefunds(allHolidays), billingSchedule, suspendableDays, suspendedDays, errorCodes))
+      },{ voucherSubscription =>
+        Ok(views.html.account.voucher(voucherSubscription, billingSchedule))
       })
     ).getOrElse(Ok(views.html.account.details(subscriberId)))
   }
