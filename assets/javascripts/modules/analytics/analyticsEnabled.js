@@ -16,7 +16,7 @@ define([
     var analyticsEnabled = (
         window.guardian.analyticsEnabled &&
         !isDNT &&
-        !cookie.getCookie('xANALYTICS_OFF_KEY')
+        !cookie.getCookie('ANALYTICS_OFF_KEY')
     );
 
     return function(cb){

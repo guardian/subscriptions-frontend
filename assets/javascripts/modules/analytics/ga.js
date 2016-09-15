@@ -70,7 +70,7 @@ define(['modules/analytics/analyticsEnabled',
             eventCategory: 'Subscriptions Checkout',
             eventAction:  guardian.pageInfo.productData.productType,
             eventLabel: eventLabel,
-            dimension11: guardian.pageInfo.productData.productPurchasing,
+            dimension11: guardian.pageInfo.productData.productType + ' - ' + guardian.pageInfo.productData.productPurchasing,
             metric1: upgrading
         });
     }
