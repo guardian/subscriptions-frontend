@@ -45,7 +45,7 @@ define(['modules/analytics/analyticsEnabled',
                 ga('membershipPropertyTracker.set', 'dimension9', productData.zuoraId);   // zuoraId
             }
             if (productData.productPurchased) {
-                ga('membershipPropertyTracker.set', 'dimension11', productData.productPurchased);  // productPurchased
+                ga('membershipPropertyTracker.set', 'dimension11', productData.productType + ' - ' + productData.productPurchased);  // productPurchased
             }
         }
 
@@ -64,8 +64,19 @@ define(['modules/analytics/analyticsEnabled',
         ga('jellyfishGA.send', 'pageview');
     }
 
+    function trackEvent(eventLabel) {
+        var upgrading = (eventLabel === 'Rate Plan Change' && guardian.pageInfo.productData.initialProduct !== guardian.pageInfo.productData.productPurchasing) ? 1 : 0;
+        ga('membershipPropertyTracker.send', 'event', {
+            eventCategory: 'Subscriptions Checkout',
+            eventAction:  guardian.pageInfo.productData.productType,
+            eventLabel: eventLabel,
+            dimension11: guardian.pageInfo.productData.productPurchasing,
+            metric1: upgrading
+        });
+    }
 
     return {
-        init: analyticsEnabled(init)
+        init: analyticsEnabled(init),
+        trackEvent: trackEvent
     };
 });

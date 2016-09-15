@@ -3,8 +3,9 @@ define([
     'bean',
     'modules/forms/toggleError',
     'utils/ajax',
-    'modules/checkout/formElements'
-], function ($, bean, toggleError, ajax, formElements) {
+    'modules/checkout/formElements',
+    'modules/checkout/ratePlanChoice'
+], function ($, bean, toggleError, ajax, formElements, ratePlanChoice) {
     'use strict';
 
     var $inputBox           = formElements.$PROMO_CODE,
@@ -98,7 +99,7 @@ define([
             url: lookupUrl,
             data: {
                 promoCode: promoCode,
-                productRatePlanId: formElements.getRatePlanId(),
+                productRatePlanId: ratePlanChoice.getSelectedRatePlanId(),
                 country: country
             }
         }).then(function (a) {

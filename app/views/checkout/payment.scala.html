@@ -44,6 +44,7 @@
             data-option-mirror-description="(@plan.subtitle)"
             data-option-mirror-package="@plan.title"
             data-amount="@plan.charges.gbpPrice.amount"
+            data-name="@plan.name"
             data-number-of-months="@plan.charges.billingPeriod.numberOfMonths"
             data-currency="@currency"
             value="@plan.id.get"
@@ -69,7 +70,10 @@
     plan = Some(productData.plans.default),
     edition = edition
 ) {
-
+<script>
+    guardian.pageInfo.productData.initialProduct = '@productData.plans.default.name';
+    guardian.pageInfo.productData.productType = '@productData.productType';
+</script>
     @fragments.analytics.tagmanager()
 
 <main class="page-container gs-container">
@@ -90,7 +94,7 @@
                         </a>
                     </div>
                 }
-                <fieldset class="basket-billing-options is-hidden js-payment-frequency js-option-mirror-group" id="change-payment-frequency">
+                <fieldset class="basket-billing-options is-hidden js-rate-plans js-option-mirror-group" id="change-payment-frequency">
                     @productData.plans.list.map { p =>
                         @p.charges.price.currencies.map { c =>
                             @priceOption(p, c)
@@ -155,14 +159,14 @@
                 </div>
 
                 @* ===== Delivery details ===== *@
-                @if(productData.hasHomeDelivery || productData.hasVoucher) {
+                @if(productData.isHomeDelivery || productData.isVoucher) {
                         <div id="deliveryDetails" class="field-panel is-collapsed js-fieldset-delivery-details">
                             <fieldset>
                                 <legend class="field-panel__legend">
                                     Delivery address
                                 </legend>
                                 <div class="field-panel__fields">
-                                    @if(productData.hasHomeDelivery) {
+                                    @if(productData.isHomeDelivery) {
                                         @fragments.checkout.fieldsDelivery(productData, countriesWithCurrency)
                                     }else{
                                         @fragments.checkout.fieldsVoucher(productData, countriesWithCurrency)

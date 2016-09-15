@@ -1,21 +1,12 @@
 @import com.gu.i18n.Currency
-@import com.gu.memsub.BillingPeriod
-@import com.gu.memsub.promo._
 @import com.gu.memsub.promo.Promotion._
-@import com.gu.memsub.promo.PercentDiscount._
-@import com.gu.subscriptions.DigipackPlan
-@import views.support.Pricing._
-@import views.support.BillingPeriod._
-@import com.gu.memsub.promo.SubscriptionsLandingPage
-@import scalaz.Id._
-@import com.gu.memsub.Current
-@import com.gu.memsub.PaidPlan
-@import com.gu.memsub.ProductFamily
-@import views.support.PlanOps._
 @import com.gu.memsub.subsv2.CatalogPlan
+@import views.support.BillingPeriod._
+@import views.support.PlanOps._
+@import views.support.Pricing._
 
 @(subscriptionId: String, plan: CatalogPlan.Paid, promotion: Option[AnyPromotion] = None, currency: Currency)
-<div class="review-panel js-payment-frequency">
+<div class="review-panel">
     <input type="checkbox" name="subscriptionDetails"
            checked="checked"
            class="u-h"

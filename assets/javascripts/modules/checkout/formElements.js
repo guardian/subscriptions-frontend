@@ -1,20 +1,8 @@
 define(['$'], function ($) {
     'use strict';
-    var _PLAN_SELECT = $('.js-payment-frequency');
-    var _PLAN_INPUTS = $('input[type="radio"]', _PLAN_SELECT);
+
     var _PAPER_CHECKOUT_DATE_PICKER_FORM_FIELD_NAME = 'startDate';
     var _PAPER_CHECKOUT_DELIVERY_INSTRUCTIONS_FIELD_NAME = 'deliveryInstructions';
-
-    var getRatePlanId = function () {
-        // Bonzo has no filter function :(
-        var ratePlanId = null;
-        _PLAN_INPUTS.each(function (input) {
-            if ($(input).attr('checked')) {
-                ratePlanId = input.value;
-            }
-        });
-        return ratePlanId;
-    };
 
     var addressFields = function(relativeTo) {
         var $CONTAINER = $(relativeTo);
@@ -142,9 +130,7 @@ define(['$'], function ($) {
         $DELIVERED_PRODUCT_TYPE: $('input[name="delivered-product"]'),
 
         $BASKET: $('.js-basket'),
-        $PLAN_INPUTS :_PLAN_INPUTS,
 
-        getRatePlanId: getRatePlanId,
         getPaperCheckoutField: getPaperCheckoutField,
         getDeliveryInstructions: getDeliveryInstructions
     };

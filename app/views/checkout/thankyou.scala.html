@@ -1,8 +1,6 @@
 @import com.gu.i18n.Currency
 @import com.gu.memsub.promo.Promotion.AnyPromotion
-@import views.support.Pricing._
 @import views.support.BillingPeriod._
-@import com.gu.memsub.Digipack
 @import views.support.PlanOps._
 @import com.gu.memsub.subsv2.CatalogPlan
 
@@ -22,14 +20,15 @@
 <script type="text/javascript">
     guardian.pageInfo.slug="GuardianDigiPack:Order Complete";
     guardian.pageInfo.productData = {
-        // Omniture - TODO - fix the type field
+        numberOfMonths: @{plan.charges.billingPeriod.numberOfMonths},
+        // Omniture
         source: 'Subscriptions and Membership',
         type: 'GUARDIAN_DIGIPACK',
         eventName: 'purchase',
         amount: @{plan.charges.gbpPrice.amount},
-        frequency: @{plan.charges.billingPeriod.numberOfMonths},
         // Google Analtics
         zuoraId: '@subscriptionName',
+        productType: '@plan.productType'
         productPurchased: '@plan.name'
     };
 </script>

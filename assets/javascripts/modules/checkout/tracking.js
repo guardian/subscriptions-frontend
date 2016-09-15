@@ -1,39 +1,51 @@
-define(['$', 'modules/analytics/omniture'], function ($, omniture) {
+define(['$', 'modules/analytics/ga', 'modules/analytics/omniture', 'modules/analytics/ophan', 'modules/checkout/ratePlanChoice'], function ($, ga, omniture, ophan, ratePlanChoice) {
     'use strict';
 
-    //TODO make this product aware
-
-    function subscriptionProducts(eventName) {
-        var selectedFrequency = $('.js-payment-frequency input:checked');
-        if (selectedFrequency.length && eventName) {
-            var amount = selectedFrequency[0].getAttribute('data-amount'),
-                qty = selectedFrequency[0].getAttribute('data-number-of-months');
-            return {
-                source: 'Subscriptions and Membership',
-                type: 'GUARDIAN_DIGIPACK',
-                eventName: eventName,
-                amount: amount,
-                frequency: qty
-            };
+    function trackOmniture(omnnitureSlugName, omniturePageInfoName) {
+        guardian.pageInfo.productData.eventName = 'scOpen';
+        guardian.pageInfo.productData.source = 'Subscriptions and Membership';
+        guardian.pageInfo.productData.type = 'GUARDIAN_DIGIPACK';
+        if (omnnitureSlugName) {
+            guardian.pageInfo.slug = 'GuardianDigiPack:'+omnnitureSlugName;
         }
-        return undefined;
+        if (omniturePageInfoName) {
+            guardian.pageInfo.name = 'Details - ' + omniturePageInfoName + ' | Digital | Subscriptions | The Guardian';
+        }
+        omniture.triggerPageLoadEvent();
     }
 
-    function tracking(slugName, pageInfoName) {
+    function trackGA(googleAnalyticsEventName) {
+        var fn = function () {
+            ga.trackEvent(googleAnalyticsEventName);
+        };
+        ophan.loaded.then(fn, fn);
+    }
+
+    function tracking(omnnitureSlugName, omniturePageInfoName, googleAnalyticsEventName) {
         return function() {
-            if (pageInfoName !== undefined) {
-                guardian.pageInfo.name = 'Details - ' + pageInfoName + ' | Digital | Subscriptions | The Guardian';
-            }
-            guardian.pageInfo.slug = 'GuardianDigiPack:'+slugName;
-            guardian.pageInfo.productData = subscriptionProducts('scOpen');
-            omniture.triggerPageLoadEvent();
+            trackOmniture(omnnitureSlugName, omniturePageInfoName);
+            trackGA(googleAnalyticsEventName);
         };
     }
 
+    function trackRatePlanChange() {
+        var selectedRatePlanData = ratePlanChoice.getSelectedOptionData();
+        if (selectedRatePlanData) {
+            guardian.pageInfo.productData.amount = selectedRatePlanData.amount;
+            guardian.pageInfo.productData.productPurchasing = selectedRatePlanData.name;
+            guardian.pageInfo.productData.numberOfMonths = selectedRatePlanData.numberOfMonths;
+        }
+        tracking('','','Rate Plan Change')();
+    }
+
     return {
-        personalDetailsTracking: tracking('Name and address'),
-        paymentDetailsTracking: tracking('Payment Details', 'payment details'),
-        billingDetailsTracking: tracking('Billing Details', 'billing details'),
-        paymentReviewTracking: tracking('Review and confirm', 'submission/signup')
+        personalDetailsTracking: tracking('Name and address', '', 'Your details'),
+        paymentDetailsTracking: tracking('Payment Details', 'payment details', 'Payment details'),
+        billingDetailsTracking: tracking('Billing Details', 'billing details', 'Billing address'),
+        paymentReviewTracking: tracking('Review and confirm', 'submission/signup', 'Review and confirm'),
+        deliveryDetailsTracking: tracking('Delivery address', 'delivery details', 'Delivery address'),
+        init: function () {
+            ratePlanChoice.registerOnChangeAction(trackRatePlanChange);
+        }
     };
 });

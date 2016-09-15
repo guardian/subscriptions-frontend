@@ -5,8 +5,9 @@ define([
     'modules/checkout/countryChoice',
     'modules/checkout/addressFields',
     'modules/checkout/localizationSwitcher',
-    'modules/checkout/formElements'
-], function ($, bean, countryChoiceFunction, addressFields, localizationSwitcher, formElements) {
+    'modules/checkout/formElements',
+    'modules/checkout/ratePlanChoice'
+], function ($, bean, countryChoiceFunction, addressFields, localizationSwitcher, formElements, ratePlanChoice) {
     'use strict';
 
     var everything = function(addressObject) {
@@ -21,11 +22,7 @@ define([
         };
 
         var checkPlanInput = function (ratePlanId, currency) {
-            formElements.$PLAN_INPUTS.each(function(input) {
-                if ($(input).val() === ratePlanId && $(input).attr('data-currency') === currency) {
-                    check(input);
-                }
-            });
+            ratePlanChoice.selectRatePlanForIdAndCurrency(ratePlanId, currency);
         };
 
         var redrawAddressField = function($container, newField, modelValue) {
@@ -92,7 +89,7 @@ define([
                 subdivisionRules: rules.subdivision,
                 currency: currentCountryOption.attr('data-currency-choice'),
                 country: currentCountryOption.val(),
-                ratePlanId: formElements.getRatePlanId()
+                ratePlanId: ratePlanChoice.getSelectedRatePlanId()
             };
         };
 

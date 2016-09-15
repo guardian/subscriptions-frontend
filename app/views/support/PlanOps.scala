@@ -29,25 +29,40 @@ object PlanOps {
     }
 
     def email: String = (
-      in.hasHomeDelivery.option("homedelivery@theguardian.com") orElse
-      in.hasVoucher.option("vouchersubs@theguardian.com") orElse
+      in.isHomeDelivery.option("homedelivery@theguardian.com") orElse
+      in.isVoucher.option("vouchersubs@theguardian.com") orElse
       in.hasDigitalPack.option("digitalpack@theguardian.com")
     ).getOrElse("subscriptions@theguardian.com")
 
-    def hasHomeDelivery: Boolean = in.product == Delivery
+    def isHomeDelivery: Boolean = in.product == Delivery
 
-    def hasVoucher: Boolean = in.product == Voucher
+    def isVoucher: Boolean = in.product == Voucher
+
+    def isDigitalPack: Boolean = in.product == com.gu.memsub.subsv2.ZDigipack
 
     def hasDigitalPack: Boolean = in.charges.benefits.list.contains(Digipack)
 
     def phone: String = "0330 333 6767"
+
+    def productType: String = {
+      if (isHomeDelivery) {
+        "Home Delivery"
+      } else if (isVoucher) {
+        "Voucher Book"
+      } else if (isDigitalPack) {
+        "Digital Pack"
+      } else {
+        "Unknown"
+      }
+    }
   }
 
   implicit class ProductPopulationDataOps(in: ProductPopulationData) {
     val products = in.plans.list.head
-    def hasHomeDelivery: Boolean = products.product == com.gu.memsub.subsv2.Delivery
-    def hasVoucher: Boolean = products.product == com.gu.memsub.subsv2.Voucher
-
+    def isHomeDelivery: Boolean = products.isHomeDelivery
+    def isVoucher: Boolean = products.isVoucher
+    def isDigitalPack: Boolean = products.isDigitalPack
+    def productType: String = products.productType
   }
 
 }
