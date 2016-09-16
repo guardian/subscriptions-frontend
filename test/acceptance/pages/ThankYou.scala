@@ -16,7 +16,7 @@ case class ThankYou(val testUser: TestUser) extends Page with Browser {
     click.on(cssSelector(".js-checkout-finish-account-submit"))
   }
 
-  def pageHasLoaded(): Boolean = pageHasElement(subscriptionDetails)
+  def pageHasLoaded(): Boolean = elementIsPresent(subscriptionDetails)
 
   def userIsSignedIn: Boolean = elementHasText(userDisplayName, testUser.username.toLowerCase)
 

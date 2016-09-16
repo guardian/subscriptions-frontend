@@ -20,6 +20,9 @@ trait Browser extends WebBrowser {
   def pageHasElement(q: Query): Boolean =
     waitUntil(ExpectedConditions.visibilityOfElementLocated(q.by))
 
+  def elementIsPresent(q: Query): Boolean =
+    waitUntil(ExpectedConditions.presenceOfElementLocated(q.by))
+
   def pageHasUrl(urlFraction: String): Boolean =
     waitUntil(ExpectedConditions.urlContains(urlFraction))
 
