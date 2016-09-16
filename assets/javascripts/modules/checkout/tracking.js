@@ -15,10 +15,7 @@ define(['$', 'modules/analytics/ga', 'modules/analytics/omniture', 'modules/anal
     }
 
     function trackGA(googleAnalyticsEventName) {
-        var fn = function () {
-            ga.trackEvent(googleAnalyticsEventName);
-        };
-        ophan.loaded.then(fn, fn);
+        ga.trackEvent(googleAnalyticsEventName);
     }
 
     function tracking(omnnitureSlugName, omniturePageInfoName, googleAnalyticsEventName) {
