@@ -4,7 +4,8 @@
     "frontend":{
       "type":"autoscaling",
       "data":{
-        "bucket": "subscriptions-dist"
+        "bucket": "subscriptions-dist",
+        "publicReadAcl": false
       }
     }
   },
