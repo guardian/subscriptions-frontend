@@ -173,12 +173,12 @@ class CheckoutSpec extends FeatureSpec with Browser
       }
     }
 
-    scenario("Guest users subscribe to paper home delivery with direct debit", Acceptance) {
+    scenario("Guest users subscribe for vouchers (Sixday+ package) by direct debit", Acceptance) {
       checkDependenciesAreAvailable
       val testUser = new TestUser
 
-      val checkout = Checkout(testUser, "checkout/delivery-everyday")
-      When("users visit 'Paper Home Delivery Checkout' page,")
+      val checkout = Checkout(testUser, "checkout/voucher-sixday+")
+      When("users visit the Sixday+ Voucher checkout page")
       go.to(checkout)
       assert(checkout.pageHasLoaded())
 
