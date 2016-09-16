@@ -58,6 +58,7 @@ define([
                     e.preventDefault();
                     collapseFieldsetsExcept(formEls.$FIELDSET_DELIVERY_DETAILS);
                     formEls.$FIELDSET_DELIVERY_DETAILS.removeClass(FIELDSET_COMPLETE);
+                    tracking.deliveryDetailsTracking();
                 });
             }
 

@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import moment from 'moment'
 import formElements from './formElements'
+import ratePlanChoice from './ratePlanChoice'
 import planDateFilter from './planDateFilter'
 import CustomDatePicker from '../react/customDatePicker'
 import CharacterCountedTextArea from './characterCountedTextArea'
@@ -59,7 +60,7 @@ export default {
 
         const self = this;
 
-        formElements.$PLAN_INPUTS.each((el) => el.addEventListener('change', () => {
+        ratePlanChoice.registerOnChangeAction(() => {
 
             // Reset the startDate (i.e. date of first paper) to the new minDate
             // iff the current selection is not in the new filter
@@ -70,7 +71,7 @@ export default {
             }
 
             self.renderDatePicker(datePickerContainer, defaultState);
-        }));
+        });
     },
     init: function() {
         this.renderDeliveryInstructions();

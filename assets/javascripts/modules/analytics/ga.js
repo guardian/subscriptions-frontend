@@ -4,6 +4,9 @@ define(['modules/analytics/analyticsEnabled',
         'utils/user'
     ], function(analyticsEnabled, cookie, user) {
     'use strict';
+
+    var _EVENT_QUEUE = [];
+
     function init() {
 
         var identitySignedIn = user.isLoggedIn();
@@ -45,7 +48,7 @@ define(['modules/analytics/analyticsEnabled',
                 ga('membershipPropertyTracker.set', 'dimension9', productData.zuoraId);   // zuoraId
             }
             if (productData.productPurchased) {
-                ga('membershipPropertyTracker.set', 'dimension11', productData.productPurchased);  // productPurchased
+                ga('membershipPropertyTracker.set', 'dimension11', productData.productType + ' - ' + productData.productPurchased);  // productPurchased
             }
         }
 
@@ -64,8 +67,30 @@ define(['modules/analytics/analyticsEnabled',
         ga('jellyfishGA.send', 'pageview');
     }
 
+    function flushEventQueue() {
+        if (typeof(ga) === 'undefined') { return; }
+
+        _EVENT_QUEUE.forEach(function (eventLabel) {
+            var upgrading = (eventLabel === 'Rate Plan Change' && guardian.pageInfo.productData.initialProduct !== guardian.pageInfo.productData.productPurchasing) ? 1 : 0;
+            ga('membershipPropertyTracker.send', 'event', {
+                eventCategory: 'Subscriptions Checkout',
+                eventAction:  guardian.pageInfo.productData.productType,
+                eventLabel: eventLabel,
+                dimension11: guardian.pageInfo.productData.productType + ' - ' + guardian.pageInfo.productData.productPurchasing,
+                metric1: upgrading
+            });
+        });
+
+        _EVENT_QUEUE = [];
+    }
+
+    function enqueueEvent(eventLabel) {
+        _EVENT_QUEUE.push(eventLabel);
+        setTimeout(flushEventQueue, 1);
+    }
 
     return {
-        init: analyticsEnabled(init)
+        init: init,
+        trackEvent: enqueueEvent
     };
 });

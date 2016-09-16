@@ -41,7 +41,7 @@ define([
             s.products = [
                 productData.source,
                 productData.type,
-                productData.frequency,
+                productData.numberOfMonths,
                 productData.amount,
                 productData.eventName
             ].join(';');

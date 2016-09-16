@@ -1,13 +1,11 @@
 define([
     'modules/checkout/formElements',
-], function (formElements) {
+    'modules/checkout/ratePlanChoice',
+], function (formElements, ratePlanChoice) {
     'use strict';
 
     return function() {
-        // Get the package name from the checked $PLAN_INPUTS
-        var packageName = '';
-        formElements.$PLAN_INPUTS.each((el) => (el.checked) && (packageName = el.getAttribute('data-option-mirror-package')));
-
+        let packageName = ratePlanChoice.getSelectedRatePlanName();
         let deliveredProduct = formElements.$DELIVERED_PRODUCT_TYPE.val();
         let isPaper = 'paper' === deliveredProduct;
 
@@ -16,13 +14,13 @@ define([
                 sixday: (date) => date.day() === 1,
                 sunday: (date) => date.day() === 6,
                 weekend: (date) => date.day() === 6,
-                default: (date) => date.day() === 1
+                allDays: (date) => date.day() === 1
             },
             paper: {
                 sixday: (date) => date.day() !== 0,
                 sunday: (date) => date.day() === 0,
                 weekend: (date) => date.day() === 6 || date.day() === 0,
-                default: (date) => true
+                allDays: (date) => true
             }
         };
 
@@ -36,7 +34,7 @@ define([
             case /Weekend/i.test(packageName):
                 return filters.weekend;
             default:
-                return filters.default;
+                return filters.allDays;
         }
     };
 });

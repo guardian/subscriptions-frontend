@@ -1,8 +1,6 @@
 @import com.gu.i18n.Currency
 @import com.gu.memsub.promo.Promotion.AnyPromotion
-@import views.support.Pricing._
 @import views.support.BillingPeriod._
-@import com.gu.memsub.Digipack
 @import views.support.PlanOps._
 @import com.gu.memsub.subsv2.CatalogPlan
 
@@ -22,14 +20,15 @@
 <script type="text/javascript">
     guardian.pageInfo.slug="GuardianDigiPack:Order Complete";
     guardian.pageInfo.productData = {
-        // Omniture - TODO - fix the type field
+        numberOfMonths: @{plan.charges.billingPeriod.numberOfMonths},
+        // Omniture
         source: 'Subscriptions and Membership',
         type: 'GUARDIAN_DIGIPACK',
         eventName: 'purchase',
         amount: @{plan.charges.gbpPrice.amount},
-        frequency: @{plan.charges.billingPeriod.numberOfMonths},
         // Google Analtics
         zuoraId: '@subscriptionName',
+        productType: '@plan.productType'
         productPurchased: '@plan.name'
     };
 </script>
@@ -59,10 +58,10 @@
 
             <div class="steps">
                 <h4 class="steps__title">We’ll send you an email confirming your subscription and payment information.</h4>
-                @if(plan.hasHomeDelivery) {
+                @if(plan.isHomeDelivery) {
                     <h4 class="steps__title">Your first paper will be delivered on @startDate. </h4>
                 }
-                @if(plan.hasVoucher) {
+                @if(plan.isVoucher) {
                     <h4 class="steps__title">You will then receive your personalised book of vouchers.</h4>
                     <h4 class="steps__title">Take your vouchers to your newsagent or where you buy your paper.</h4>
                 }

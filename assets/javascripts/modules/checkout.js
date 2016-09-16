@@ -11,6 +11,8 @@ define([
     'modules/checkout/billingDetails',
     'modules/checkout/deliveryDetails',
     'modules/checkout/deliveryAsBilling',
+    'modules/checkout/ratePlanChoice',
+    'modules/checkout/tracking',
     'bean'
 ], function (
     optionMirror,
@@ -23,6 +25,8 @@ define([
     billingAddress,
     deliveryDetails,
     deliveryAsBilling,
+    ratePlanChoice,
+    tracking,
     bean
 ) {
     'use strict';
@@ -37,6 +41,8 @@ define([
             deliveryDetails.init();
             deliveryAsBilling.init();
             billingAddress.init();
+            ratePlanChoice.init();
+            tracking.init();
             if (formElements.$DELIVERY_FIELDS.length) {
                 require(['modules/checkout/deliveryFields'], function(deliveryFields) {
                     deliveryFields.default.init();
