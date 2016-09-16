@@ -76,7 +76,7 @@ class ExactTargetService(
       val subscriptionDetails = getPlanDescription(validPromotion, personalData.currency, sub.plan)
 
       subscriptionData.productData.fold(
-        paperData => if (paperData.plan.hasHomeDelivery) {
+        paperData => if (paperData.plan.isHomeDelivery) {
           PaperHomeDeliveryWelcome1DataExtensionRow(
             paperData = paperData,
             personalData = personalData,
