@@ -3,13 +3,13 @@ define(['modules/analytics/ga', 'modules/checkout/ratePlanChoice'], function (ga
 
     var STARTED = Date.now();
 
-    function getElapsedTimeMs() {
+    function getElapsedSeconds() {
         return Math.floor((Date.now() - STARTED) / 1000);
     }
 
     function trackEvent(eventName) {
         return function() {
-            ga.trackEvent(eventName, getElapsedTimeMs());
+            ga.trackEvent(eventName, getElapsedSeconds());
         };
     }
 
