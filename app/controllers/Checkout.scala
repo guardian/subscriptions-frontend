@@ -264,7 +264,9 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
     def getAdjustedRatePlans(promo: AnyPromotion): Option[Map[String, String]] = {
       case class RatePlanPrice(ratePlanId: ProductRatePlanId, chargeList: PaidChargeList)
       promo.asDiscount.map { discountPromo =>
-        catalog.allSubs.flatten.map(plan => RatePlanPrice(plan.id, plan.charges)).map { ratePlanPrice =>
+        catalog.allSubs.flatten
+          .filter(plan => promo.appliesTo.productRatePlanIds.contains(plan.id))
+          .map(plan => RatePlanPrice(plan.id, plan.charges)).map { ratePlanPrice =>
           val currency = CountryGroup.byCountryCode(country.alpha2).getOrElse(CountryGroup.UK).currency
           ratePlanPrice.ratePlanId.get -> ratePlanPrice.chargeList.prettyPricingForDiscountedPeriod(discountPromo, currency)
         }.toMap
