@@ -63,7 +63,15 @@ define([
         ], ', '));
 
         formEls.$REVIEW_EMAIL.text(formEls.$EMAIL.val());
-        formEls.$REVIEW_PHONE.text(formEls.$PHONE.val());
+
+        if (formEls.$PHONE.val().length > 0) {
+            formEls.$REVIEW_PHONE_FIELD.show();
+            formEls.$REVIEW_PHONE.text(formEls.$PHONE.val());
+        } else {
+            formEls.$REVIEW_PHONE_FIELD.hide();
+        }
+
+
         formEls.$REVIEW_ACCOUNT.text(formEls.$ACCOUNT.val());
         formEls.$REVIEW_SORTCODE.text(formEls.$SORTCODE.val());
         formEls.$REVIEW_HOLDER.text(formEls.$HOLDER.val());
