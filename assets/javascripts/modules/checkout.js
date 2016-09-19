@@ -12,7 +12,7 @@ define([
     'modules/checkout/deliveryDetails',
     'modules/checkout/deliveryAsBilling',
     'modules/checkout/ratePlanChoice',
-    'modules/checkout/impressionTracking',
+    'modules/checkout/eventTracking',
     'bean'
 ], function (
     optionMirror,
@@ -26,7 +26,7 @@ define([
     deliveryDetails,
     deliveryAsBilling,
     ratePlanChoice,
-    impressionTracking,
+    eventTracking,
     bean
 ) {
     'use strict';
@@ -42,7 +42,7 @@ define([
             deliveryAsBilling.init();
             billingAddress.init();
             ratePlanChoice.init();
-            impressionTracking.init();
+            eventTracking.init();
             if (formElements.$DELIVERY_FIELDS.length) {
                 require(['modules/checkout/deliveryFields'], function(deliveryFields) {
                     deliveryFields.default.init();
@@ -54,7 +54,7 @@ define([
             }
             // Prevent form submit on enter
             bean.on(formElements.$CHECKOUT_FORM[0], 'keypress', function (event) {
-                if (event.keyCode == 13) {
+                if (event.keyCode === 13) {
                     event.preventDefault();
                     event.stopPropagation();
                 }

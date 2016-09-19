@@ -14,6 +14,7 @@ define(['modules/analytics/analyticsEnabled',
         var ophanBrowserId = cookie.getCookie('bwid');
         var productData = guardian.pageInfo ? guardian.pageInfo.productData : {};
         var intcmp = new RegExp('INTCMP=([^&]*)').exec(location.search);
+        var isCustomerAgent = !!guardian.supplierCode;
 
         /* Google analytics snippet */
         /*eslint-disable */
@@ -56,6 +57,8 @@ define(['modules/analytics/analyticsEnabled',
             ga('membershipPropertyTracker.set', 'dimension12', intcmp[1]);  // internalCampCode
         }
 
+        ga('membershipPropertyTracker.set', 'dimension13', isCustomerAgent);  // customerAgent
+
         ga('membershipPropertyTracker.send', 'pageview');
 
         // JellyFish
@@ -70,23 +73,25 @@ define(['modules/analytics/analyticsEnabled',
     function flushEventQueue() {
         if (typeof(ga) === 'undefined') { return; }
 
-        _EVENT_QUEUE.forEach(function (eventLabel) {
-            var upgrading = (eventLabel === 'Rate Plan Change' && guardian.pageInfo.productData.initialProduct !== guardian.pageInfo.productData.productPurchasing) ? 1 : 0;
+        _EVENT_QUEUE.forEach(function (obj) {
+            var upgrading = (obj.eventLabel === 'Rate Plan Change' && guardian.pageInfo.productData.initialProduct !== guardian.pageInfo.productData.productPurchasing) ? 1 : 0;
             ga('membershipPropertyTracker.send', 'event', {
                 eventCategory: 'Subscriptions Checkout',
                 eventAction:  guardian.pageInfo.productData.productType,
-                eventLabel: eventLabel,
+                eventLabel: obj.eventLabel,
                 dimension11: guardian.pageInfo.productData.productType + ' - ' + guardian.pageInfo.productData.productPurchasing,
-                metric1: upgrading
+                dimension13: !!guardian.supplierCode,
+                metric1: upgrading,
+                metric2: obj.elapsedTime
             });
         });
 
         _EVENT_QUEUE = [];
     }
 
-    function enqueueEvent(eventLabel) {
-        _EVENT_QUEUE.push(eventLabel);
-        setTimeout(flushEventQueue, 1);
+    function enqueueEvent(eventLabel, elapsedTime) {
+        _EVENT_QUEUE.push({ eventLabel: eventLabel, elapsedTime: elapsedTime });
+        flushEventQueue();
     }
 
     return {

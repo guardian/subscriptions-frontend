@@ -6,7 +6,8 @@ define([
     'modules/forms/loader',
     'modules/forms/toggleError',
     'modules/checkout/formElements',
-    'modules/checkout/payment'
+    'modules/checkout/payment',
+    'modules/checkout/eventTracking'
 ], function (
     bean,
     ajax,
@@ -15,7 +16,8 @@ define([
     loader,
     toggleError,
     formEls,
-    payment
+    payment,
+    eventTracking
 ) {
     'use strict';
 
@@ -107,6 +109,7 @@ define([
                     method: 'post',
                     data: data,
                     success: function(successData) {
+                        eventTracking.completedReviewDetails();
                         window.location.assign(successData.redirect);
                     },
                     error: function() {

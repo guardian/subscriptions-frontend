@@ -5,6 +5,7 @@ define([
     'modules/checkout/formElements',
     'modules/checkout/displayCardImg',
     'modules/checkout/payment',
+    'modules/checkout/eventTracking',
     'modules/checkout/impressionTracking',
     'lodash/collection/find',
     'modules/forms/loader',
@@ -16,6 +17,7 @@ define([
     formEls,
     displayCardImg,
     payment,
+    eventTracking,
     impressionTracking,
     find,
     loader,
@@ -49,6 +51,7 @@ define([
         formEls.$FIELDSET_YOUR_DETAILS[0]
             .scrollIntoView();
 
+        eventTracking.completedPaymentDetails();
         impressionTracking.paymentReviewTracking();
     }
 

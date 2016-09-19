@@ -6,6 +6,7 @@ define([
     'modules/checkout/validatePersonal',
     'modules/forms/loader',
     'modules/checkout/fieldSwitcher',
+    'modules/checkout/eventTracking',
     'modules/checkout/impressionTracking'
 ], function (
     $,
@@ -15,6 +16,7 @@ define([
     validatePersonal,
     loader,
     fieldSwitcher,
+    eventTracking,
     impressionTracking
 ) {
     'use strict';
@@ -46,6 +48,8 @@ define([
             .scrollIntoView();
 
         formEls.$NOTICES.removeAttr('hidden');
+
+        eventTracking.completedPersonalDetails();
         impressionTracking.billingDetailsTracking();
     }
 

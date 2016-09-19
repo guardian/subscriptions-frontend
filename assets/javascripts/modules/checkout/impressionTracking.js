@@ -1,48 +1,30 @@
-define(['$', 'modules/analytics/ga', 'modules/analytics/omniture', 'modules/analytics/ophan', 'modules/checkout/ratePlanChoice'], function ($, ga, omniture, ophan, ratePlanChoice) {
+define(['$', 'modules/analytics/omniture'], function ($,  omniture) {
     'use strict';
 
-    function trackOmniture(omnnitureSlugName, omniturePageInfoName) {
+    function trackOmniture(slugName, pageInfoName) {
         guardian.pageInfo.productData.eventName = 'scOpen';
         guardian.pageInfo.productData.source = 'Subscriptions and Membership';
         guardian.pageInfo.productData.type = 'GUARDIAN_DIGIPACK';
-        if (omnnitureSlugName) {
-            guardian.pageInfo.slug = 'GuardianDigiPack:'+omnnitureSlugName;
+        if (slugName) {
+            guardian.pageInfo.slug = 'GuardianDigiPack:'+slugName;
         }
-        if (omniturePageInfoName) {
-            guardian.pageInfo.name = 'Details - ' + omniturePageInfoName + ' | Digital | Subscriptions | The Guardian';
+        if (pageInfoName) {
+            guardian.pageInfo.name = 'Details - ' + pageInfoName + ' | Digital | Subscriptions | The Guardian';
         }
         omniture.triggerPageLoadEvent();
     }
 
-    function trackGA(googleAnalyticsEventName) {
-        ga.trackEvent(googleAnalyticsEventName);
-    }
-
-    function tracking(omnnitureSlugName, omniturePageInfoName, googleAnalyticsEventName) {
+    function trackImpression(slugName, pageInfoName) {
         return function() {
-            trackOmniture(omnnitureSlugName, omniturePageInfoName);
-            trackGA(googleAnalyticsEventName);
+            trackOmniture(slugName, pageInfoName);
         };
     }
 
-    function trackRatePlanChange() {
-        var selectedRatePlanData = ratePlanChoice.getSelectedOptionData();
-        if (selectedRatePlanData) {
-            guardian.pageInfo.productData.amount = selectedRatePlanData.amount;
-            guardian.pageInfo.productData.productPurchasing = selectedRatePlanData.name;
-            guardian.pageInfo.productData.numberOfMonths = selectedRatePlanData.numberOfMonths;
-        }
-        tracking('','','Rate Plan Change')();
-    }
-
     return {
-        personalDetailsTracking: tracking('Name and address', '', 'Your details'),
-        paymentDetailsTracking: tracking('Payment Details', 'payment details', 'Payment details'),
-        billingDetailsTracking: tracking('Billing Details', 'billing details', 'Billing address'),
-        paymentReviewTracking: tracking('Review and confirm', 'submission/signup', 'Review and confirm'),
-        deliveryDetailsTracking: tracking('Delivery address', 'delivery details', 'Delivery address'),
-        init: function () {
-            ratePlanChoice.registerOnChangeAction(trackRatePlanChange);
-        }
+        personalDetailsTracking: trackImpression('Name and address', ''),
+        paymentDetailsTracking: trackImpression('Payment Details', 'payment details'),
+        billingDetailsTracking: trackImpression('Billing Details', 'billing details'),
+        paymentReviewTracking: trackImpression('Review and confirm', 'submission/signup'),
+        deliveryDetailsTracking: trackImpression('Delivery address', 'delivery details')
     };
 });
