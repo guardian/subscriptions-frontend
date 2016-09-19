@@ -1,11 +1,11 @@
 define([
     'bean',
     'modules/checkout/formElements',
-    'modules/checkout/tracking'
+    'modules/checkout/impressionTracking'
 ], function (
     bean,
     formEls,
-    tracking) {
+    impressionTracking) {
     'use strict';
 
     var FIELDSET_COMPLETE = 'is-complete';
@@ -43,14 +43,14 @@ define([
                 formEls.$FIELDSET_YOUR_DETAILS.removeClass(FIELDSET_COMPLETE);
                 formEls.$FIELDSET_PAYMENT_DETAILS.removeClass(FIELDSET_COMPLETE);
                 formEls.$NOTICES.attr('hidden', true);
-                tracking.personalDetailsTracking();
+                impressionTracking.personalDetailsTracking();
             });
 
             bean.on($editPayment[0], 'click', function(e) {
                 e.preventDefault();
                 collapseFieldsetsExcept(formEls.$FIELDSET_PAYMENT_DETAILS);
                 formEls.$FIELDSET_PAYMENT_DETAILS.removeClass(FIELDSET_COMPLETE);
-                tracking.paymentDetailsTracking();
+                impressionTracking.paymentDetailsTracking();
             });
 
             if ($editDelivery.length) {
@@ -58,7 +58,7 @@ define([
                     e.preventDefault();
                     collapseFieldsetsExcept(formEls.$FIELDSET_DELIVERY_DETAILS);
                     formEls.$FIELDSET_DELIVERY_DETAILS.removeClass(FIELDSET_COMPLETE);
-                    tracking.deliveryDetailsTracking();
+                    impressionTracking.deliveryDetailsTracking();
                 });
             }
 
@@ -67,7 +67,7 @@ define([
                     e.preventDefault();
                     collapseFieldsetsExcept(formEls.$FIELDSET_BILLING_ADDRESS);
                     formEls.$FIELDSET_BILLING_ADDRESS.removeClass(FIELDSET_COMPLETE);
-                    tracking.billingDetailsTracking();
+                    impressionTracking.billingDetailsTracking();
                 });
             }
         }

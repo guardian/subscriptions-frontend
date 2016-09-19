@@ -3,13 +3,13 @@ define([
     'utils/ajax',
     'modules/forms/checkFields',
     'modules/checkout/formElements',
-    'modules/checkout/tracking'
+    'modules/checkout/impressionTracking'
 ], function (
     bean,
     ajax,
     checkFields,
     formEls,
-    tracking
+    impressionTracking
 ) {
     'use strict';
 
@@ -23,7 +23,7 @@ define([
 
         formEls.$FIELDSET_PAYMENT_DETAILS.removeClass(FIELDSET_COLLAPSED);
         formEls.$FIELDSET_PAYMENT_DETAILS[0].scrollIntoView();
-        tracking.paymentReviewTracking();
+        impressionTracking.paymentReviewTracking();
     }
 
     function handleValidation() {
