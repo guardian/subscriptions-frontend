@@ -35,13 +35,11 @@ object DataExtensionRowHelpers {
   def formatDate(dateTime: LocalDate) = {
     val day = dateTime.dayOfMonth.get
 
-    val dayWithSuffix = Dates.getOrdinalDay(day)
-
     val month = dateTime.monthOfYear.getAsText
 
     val year = dateTime.year.getAsString
 
-    s"$dayWithSuffix $month $year"
+    s"$day $month $year"
   }
 
   def formatPrice(price: Float): String = {
