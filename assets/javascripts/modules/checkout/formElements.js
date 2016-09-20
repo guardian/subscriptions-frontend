@@ -103,6 +103,7 @@ define(['$'], function ($) {
         $REVIEW_ADDRESS: $('.js-checkout-review-address'),
         $REVIEW_EMAIL: $('.js-checkout-review-email'),
         $REVIEW_PHONE: $('.js-checkout-review-phone'),
+        $REVIEW_PHONE_FIELD: $('.js-checkout-review-phone-field'),
 
         $FIELDSET_BILLING_ADDRESS: $('.js-fieldset-billing-address'),
         $FIELDSET_PAYMENT_DETAILS: $('.js-fieldset-payment-details'),

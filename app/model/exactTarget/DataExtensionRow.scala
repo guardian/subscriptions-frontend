@@ -5,22 +5,19 @@ import java.util.UUID
 
 import com.gu.exacttarget._
 import com.gu.i18n.Currency
-import com.gu.memsub.Subscription._
+import com.gu.memsub.subsv2.{Subscription, SubscriptionPlan => Plan}
 import com.gu.memsub.{Subscription => _, _}
-import com.gu.memsub.subsv2.Subscription
-import com.gu.memsub.subsv2.{SubscriptionPlan => Plan}
 import com.typesafe.scalalogging.LazyLogging
 import model.exactTarget.DataExtensionRowHelpers._
 import model.{PaperData, PersonalData}
 import org.joda.time.Days.daysBetween
 import org.joda.time.{Days, LocalDate}
-import utils.Dates
 import views.support.Dates.prettyDate
 
 import scala.math.BigDecimal.decimal
 import scalaz.NonEmptyList
-import scalaz.syntax.std.list._
 import scalaz.syntax.nel._
+import scalaz.syntax.std.list._
 
 trait DataExtensionRow {
   def email: String
@@ -35,13 +32,11 @@ object DataExtensionRowHelpers {
   def formatDate(dateTime: LocalDate) = {
     val day = dateTime.dayOfMonth.get
 
-    val dayWithSuffix = Dates.getOrdinalDay(day)
-
     val month = dateTime.monthOfYear.getAsText
 
     val year = dateTime.year.getAsString
 
-    s"$dayWithSuffix $month $year"
+    s"$day $month $year"
   }
 
   def formatPrice(price: Float): String = {
