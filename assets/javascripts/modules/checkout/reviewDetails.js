@@ -7,7 +7,9 @@ define([
     'modules/forms/toggleError',
     'modules/checkout/formElements',
     'modules/checkout/payment',
-    'modules/checkout/eventTracking'
+    'modules/checkout/eventTracking',
+    'modules/checkout/stripeErrorMessages',
+    'modules/raven'
 ], function (
     bean,
     ajax,
@@ -17,7 +19,9 @@ define([
     toggleError,
     formEls,
     payment,
-    eventTracking
+    eventTracking,
+    paymentErrorMessages,
+    raven
 ) {
     'use strict';
 
@@ -120,7 +124,7 @@ define([
                         eventTracking.completedReviewDetails();
                         window.location.assign(successData.redirect);
                     },
-                    error: function() {
+                    error: function(err) {
                         loader.stopLoader();
                         submitEl.removeAttribute('disabled');
 
@@ -134,6 +138,20 @@ define([
                             .scrollIntoView();
 
                         toggleError(formEls.$CARD_CONTAINER, true);
+
+                        var paymentErr;
+
+                        try {
+                            paymentErr = JSON.parse(err.response);
+                        } catch (e) {
+                            raven.Raven.captureException(e);
+                        }
+
+                        var userMessage = paymentErrorMessages.getMessage(paymentErr);
+                        var errorElement = paymentErrorMessages.getElement(paymentErr);
+                        if (errorElement) {
+                            errorElement.textContent = userMessage;
+                        }
                     }
                 });
             }, false);
