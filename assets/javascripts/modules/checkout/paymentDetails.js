@@ -5,7 +5,8 @@ define([
     'modules/checkout/formElements',
     'modules/checkout/displayCardImg',
     'modules/checkout/payment',
-    'modules/checkout/tracking',
+    'modules/checkout/eventTracking',
+    'modules/checkout/impressionTracking',
     'lodash/collection/find',
     'modules/forms/loader',
     'lodash/object/assign'
@@ -16,7 +17,8 @@ define([
     formEls,
     displayCardImg,
     payment,
-    tracking,
+    eventTracking,
+    impressionTracking,
     find,
     loader,
     assign
@@ -49,7 +51,8 @@ define([
         formEls.$FIELDSET_YOUR_DETAILS[0]
             .scrollIntoView();
 
-        tracking.paymentReviewTracking();
+        eventTracking.completedPaymentDetails();
+        impressionTracking.paymentReviewTracking();
     }
 
     function handleValidation() {

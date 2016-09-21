@@ -17,6 +17,7 @@
     guardian.analyticsEnabled = true;
     guardian.buildNumber = '@app.BuildInfo.buildNumber';
     guardian.isDev = @(Config.stage == "DEV");
+    guardian.supplierCode = '';
     guardian.googleAnalytics = {
         trackingId: '@Config.googleAnalyticsTrackingId',
         cookieDomain: @if(Config.stage == "PROD") { 'auto' } else { 'none' }

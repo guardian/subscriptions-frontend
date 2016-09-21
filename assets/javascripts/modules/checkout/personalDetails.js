@@ -6,7 +6,8 @@ define([
     'modules/checkout/validatePersonal',
     'modules/forms/loader',
     'modules/checkout/fieldSwitcher',
-    'modules/checkout/tracking'
+    'modules/checkout/eventTracking',
+    'modules/checkout/impressionTracking'
 ], function (
     $,
     toggleError,
@@ -15,7 +16,8 @@ define([
     validatePersonal,
     loader,
     fieldSwitcher,
-    tracking
+    eventTracking,
+    impressionTracking
 ) {
     'use strict';
 
@@ -46,7 +48,9 @@ define([
             .scrollIntoView();
 
         formEls.$NOTICES.removeAttr('hidden');
-        tracking.billingDetailsTracking();
+
+        eventTracking.completedPersonalDetails();
+        impressionTracking.billingDetailsTracking();
     }
 
     function handleValidation(personalDetails) {
@@ -71,7 +75,7 @@ define([
         fieldSwitcher.init();
         var $actionEl = formEls.$YOUR_DETAILS_SUBMIT;
         var actionEl = $actionEl[0];
-        tracking.personalDetailsTracking();
+        impressionTracking.personalDetailsTracking();
 
         if ($actionEl.length) {
             actionEl.addEventListener('click', function(e) {

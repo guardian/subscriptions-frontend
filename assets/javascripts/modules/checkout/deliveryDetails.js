@@ -1,4 +1,5 @@
 define([
+    'modules/checkout/eventTracking',
     'modules/forms/checkFields',
     'modules/checkout/formElements',
     'modules/forms/toggleError',
@@ -6,6 +7,7 @@ define([
     'bean',
     '$'
 ], function (
+    eventTracking,
     checkFields,
     formEls,
     toggleError,
@@ -44,6 +46,8 @@ define([
             .scrollIntoView();
 
         formEls.$NOTICES.removeAttr('hidden');
+
+        eventTracking.completedDeliveryDetails();
     }
 
     function validatePostCode(e) {

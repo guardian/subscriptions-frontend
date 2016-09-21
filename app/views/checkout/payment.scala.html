@@ -71,8 +71,10 @@
     edition = edition
 ) {
 <script>
-    guardian.pageInfo.productData.initialProduct = '@productData.plans.default.name';
-    guardian.pageInfo.productData.productType = '@productData.productType';
+    guardian.supplierCode = '@{supplierCode.mkString}'
+    guardian.pageInfo.productData.initialProduct = '@{productData.plans.default.name}';
+    guardian.pageInfo.productData.productPurchasing = '@{productData.plans.default.name}';
+    guardian.pageInfo.productData.productType = '@{productData.productType}';
 </script>
     @fragments.analytics.tagmanager()
 
