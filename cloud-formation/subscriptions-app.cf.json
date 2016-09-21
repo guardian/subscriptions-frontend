@@ -254,7 +254,7 @@
                     "LoadBalancerPort": "443",
                     "InstancePort": 9000,
                     "Protocol": "HTTPS",
-                    "SSLCertificateId" : { "Fn::Join" : [ "", [ "arn:aws:iam::", {"Ref":"AWS::AccountId"}, ":server-certificate/", { "Ref" : "SiteDomain" } ] ] }
+                    "SSLCertificateId" : { "Fn::Sub": "arn:aws:acm:eu-west-1:${AWS::AccountId}:certificate/89005cdb-ddf9-4893-89da-0e5facb13914" }
                 }],
                 "SecurityGroups" : [ { "Ref" : "LoadBalancerSecurityGroup" } ],
                 "Subnets" : { "Ref" : "Subnets" },
