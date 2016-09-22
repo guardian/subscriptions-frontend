@@ -1,4 +1,5 @@
 package views.support
+import com.gu.memsub.Product.{Delivery, Voucher}
 
 import com.gu.memsub.Product.{Delivery, Voucher}
 import com.gu.memsub._
@@ -63,6 +64,7 @@ object PlanOps {
   implicit class ProductPopulationDataOps(in: ProductPopulationData) {
     val products = in.plans.list.head
     def isHomeDelivery: Boolean = products.isHomeDelivery
+    def isPhysical: Boolean = products.isHomeDelivery
     def isVoucher: Boolean = products.isVoucher
     def isDigitalPack: Boolean = products.isDigitalPack
     def productType: String = products.productType

@@ -3,12 +3,17 @@ import actions.CommonActions._
 import com.gu.i18n._
 import com.gu.identity.play.ProxiedIP
 import com.gu.memsub.Product.Delivery
+import com.gu.memsub.Product.Delivery
+import com.gu.memsub.{BillingPeriod, SupplierCode}
+import com.gu.memsub.subsv2.{CatalogPlan, PaidChargeList}
 import com.gu.memsub.Subscription.ProductRatePlanId
 import com.gu.memsub.promo.Formatters.PromotionFormatters._
 import com.gu.memsub.promo.Promotion.{AnyPromotion, _}
 import com.gu.memsub.promo.{NewUsers, PromoCode}
 import com.gu.memsub.subsv2.{CatalogPlan, PaidChargeList}
 import com.gu.memsub.{BillingPeriod, SupplierCode}
+import com.gu.memsub.promo.Promotion._
+import com.gu.memsub.promo.Promotion.AnyPromotion
 import com.gu.zuora.soap.models.errors._
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config.Identity.webAppProfileUrl
@@ -58,7 +63,9 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
 
       val planListEither: Either[PlanList[CatalogPlan.Digipack[BillingPeriod]], PlanList[CatalogPlan.Paper]] = (
         catalog.delivery.list.find(_.slug == forThisPlan).map(p => PlanList[CatalogPlan.Delivery](p, getBetterPlans(p, catalog.delivery.list):_*)) orElse
-        catalog.voucher.list.find(_.slug == forThisPlan).map(p => PlanList[CatalogPlan.Voucher](p, getBetterPlans(p, catalog.voucher.list):_*))
+        catalog.voucher.list.find(_.slug == forThisPlan).map(p => PlanList[CatalogPlan.Voucher](p, getBetterPlans(p, catalog.voucher.list):_*)) orElse
+        catalog.weeklyUK.toList.find(_.slug == forThisPlan).map(p => PlanList[CatalogPlan.WeeklyUK[BillingPeriod]](p, getBetterPlans(p, catalog.weeklyUK.toList):_*)) orElse
+        catalog.weeklyROW.toList.find(_.slug == forThisPlan).map(p => PlanList[CatalogPlan.WeeklyROW[BillingPeriod]](p, getBetterPlans(p, catalog.weeklyROW.toList):_*))
       ).toRight(PlanList(catalog.digipack.month, catalog.digipack.quarter, catalog.digipack.year))
 
       val plans = planListEither.fold(identity, identity)
