@@ -152,7 +152,7 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
 
         case e: CheckoutZuoraPaymentGatewayError =>
           logger.warn(SubsError.toStringPretty(e))
-          handlePaymentGatewayError(e.paymentError, e.purchaserIds)
+          handlePaymentGatewayError(e.paymentError, e.purchaserIds, subscribeRequest.genericData.personalData.address.countryName)
 
         case e: CheckoutPaymentTypeFailure =>
           logger.error(SubsError.header(e))
@@ -306,28 +306,21 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
   }
 
   // PaymentGatewayError should be logged at WARN level
-  private def handlePaymentGatewayError(e: PaymentGatewayError, purchaserIds: PurchaserIdentifiers) = {
+  private def handlePaymentGatewayError(e: PaymentGatewayError, purchaserIds: PurchaserIdentifiers, country: String) = {
 
-    def handleError(msg: String, errType: String) = {
-      logger.warn(s"$purchaserIds could not subscribe: $msg")
-      Forbidden(Json.obj("type" -> errType, "message" -> msg))
+    def handleError(code: String) = {
+      logger.warn(s"User $purchaserIds could not subscribe due to payment gateway failed transaction: \n\terror=${e} \n\tuser=$purchaserIds \n\tcountry=$country")
+      Forbidden(Json.obj("type" -> "PaymentGatewayError", "code" -> code))
     }
 
-    // Custom message to make sure no sensitive information is revealed.
     e.errType match {
-      case InsufficientFunds =>
-        handleError("Your card has insufficient funds", "InsufficientFunds")
-
-      case TransactionNotAllowed =>
-        handleError("Your card does not support this type of purchase", "TransactionNotAllowed")
-
-      case RevocationOfAuthorization =>
-        handleError(
-          "Cardholder has requested all payments to be stopped on this card",
-          "RevocationOfAuthorization")
-
-      case _ =>
-        handleError("Your card was declined", "PaymentGatewayError")
+      case Fraudulent => handleError("Fraudulent")
+      case TransactionNotAllowed => handleError("TransactionNotAllowed")
+      case DoNotHonor => handleError("DoNotHonor")
+      case InsufficientFunds => handleError("InsufficientFunds")
+      case RevocationOfAuthorization => handleError("RevocationOfAuthorization")
+      case GenericDecline => handleError("GenericDecline")
+      case _ => handleError("UknownPaymentError")
     }
   }
 }
