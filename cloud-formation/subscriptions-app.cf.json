@@ -105,7 +105,7 @@
 
                         "CONF_DIR=/subscriptions/subscriptions-frontend-1.0-SNAPSHOT/conf",
 
-                        {"Fn::Join":["", ["aws --region ", { "Ref": "AWS::Region" }, " s3 cp s3://subscriptions-dist/", { "Ref" : "Stack" }, "/authorized_keys /home/ubuntu/.ssh"]]},
+                        "/opt/features/ssh-keys/initialise-keys-and-cron-job.sh -l -b github-team-keys -t Membership-and-Subscriptions || true",
 
                         "adduser --system --home /subscriptions --disabled-password subscriptions",
 
