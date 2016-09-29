@@ -1,5 +1,6 @@
 package services
 
+import com.amazonaws.regions.{Region, Regions}
 import com.gu.config.DiscountRatePlanIds
 import com.gu.memsub.promo.Promotion._
 import com.gu.memsub.promo.{DynamoPromoCollection, DynamoTables, PromotionCollection}
@@ -10,7 +11,7 @@ import com.gu.stripe.StripeService
 import com.gu.subscriptions.suspendresume.SuspensionService
 import com.gu.subscriptions.Discounter
 import com.gu.zuora
-import com.gu.zuora.rest.RequestRunners
+import com.gu.okhttp.RequestRunners._
 import com.gu.zuora.{rest, soap}
 import configuration.Config
 import forms.SubscriptionsForm
@@ -54,14 +55,14 @@ object TouchpointBackend {
   def apply(backendType: TouchpointBackendConfig.BackendType): TouchpointBackend = {
 
     val config = TouchpointBackendConfig.backendType(backendType, Config.config)
-    val soapClient = new soap.ClientWithFeatureSupplier(Set.empty, config.zuoraSoap, new ServiceMetrics(Config.stage, Config.appName, "zuora-soap-client"))
-    val simpleRestClient = new rest.SimpleClient[Future](config.zuoraRest, RequestRunners.futureRunner)
-
-    val newProductIds = Config.productIds(config.environmentName)
-    val _stripeService = new StripeService(config.stripe, new TouchpointBackendMetrics with StatusMetrics {
+    val soapServiceMetrics = new ServiceMetrics(Config.stage, Config.appName, "zuora-soap-client")
+    val touchpointBackendMetrics = new ServiceMetrics(Config.stage, Config.appName, "Stripe") with TouchpointBackendMetrics {
       val backendEnv = config.stripe.envName
-      val service = "Stripe"
-    })
+    }
+    val soapClient = new soap.ClientWithFeatureSupplier(Set.empty, config.zuoraSoap, loggingRunner(soapServiceMetrics), configurableLoggingRunner(20.seconds, soapServiceMetrics))
+    val simpleRestClient = new rest.SimpleClient[Future](config.zuoraRest, futureRunner)
+    val newProductIds = Config.productIds(config.environmentName)
+    val _stripeService = new StripeService(config.stripe, loggingRunner(touchpointBackendMetrics))
 
     new TouchpointBackend {
       lazy val environmentName = config.environmentName

@@ -7,16 +7,16 @@ import com.gu.cas.PrefixedTokens
 import com.gu.config._
 import com.gu.identity.cookie.{PreProductionKeys, ProductionKeys}
 import com.gu.memsub.auth.common.MemSub.Google._
-import com.gu.memsub.{Membership, Subscriptions}
-import com.gu.monitoring.StatusMetrics
+import com.gu.monitoring.{ServiceMetrics}
 import com.gu.salesforce.SalesforceConfig
 import com.gu.subscriptions.{CASApi, CASService}
+import com.gu.okhttp.RequestRunners
 import com.netaporter.uri.dsl._
 import com.typesafe.config.ConfigFactory
-import monitoring.Metrics
 import net.kencochrane.raven.dsn.Dsn
 import org.joda.time.Days
 import play.api.mvc.{Call, RequestHeader}
+import scala.concurrent.ExecutionContext.Implicits.global
 
 import scala.util.Try
 
@@ -103,10 +103,8 @@ object Config {
   }
 
   lazy val casService = {
-    val metrics = new StatusMetrics with Metrics {
-      override val service: String = "CAS service"
-    }
-    val api = new CASApi(CAS.url, metrics)
+    val metrics = new ServiceMetrics(stage, appName, "CAS service")
+    val api = new CASApi(CAS.url, RequestRunners.loggingRunner(metrics))
     new CASService(api)
   }
 
