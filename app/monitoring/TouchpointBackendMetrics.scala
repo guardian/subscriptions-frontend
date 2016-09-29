@@ -1,9 +1,10 @@
 package monitoring
 
 import com.amazonaws.services.cloudwatch.model.Dimension
+import com.gu.monitoring.ServiceMetrics
 import configuration.Config
 
-trait TouchpointBackendMetrics extends Metrics {
+trait TouchpointBackendMetrics extends ServiceMetrics {
   val backendEnv: String
 
   val standardBackend = Config.stage == backendEnv

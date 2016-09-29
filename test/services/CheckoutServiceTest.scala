@@ -2,7 +2,7 @@ package services
 import com.gu.memsub._
 import com.gu.memsub.Subscription.ProductRatePlanId
 import com.gu.memsub.subsv2.ZProduct.{Delivery, ZDigipack}
-import com.gu.memsub.subsv2.{CatalogPlan, Delivery, PaidCharge, PaperCharges}
+import com.gu.memsub.subsv2._
 import model.{DigipackData, PaperData}
 import org.joda.time.Days
 import org.joda.time.LocalDate
@@ -30,7 +30,7 @@ class CheckoutServiceTest extends Specification {
     name = "name",
     description = "desc",
     charges = PaidCharge(Digipack, BillingPeriod.month, PricingSummary(Map.empty)),
-    product = Delivery,
+    product = ZDigipack,
     saving = None,
     s = Status.current
   )
