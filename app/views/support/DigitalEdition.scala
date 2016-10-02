@@ -1,8 +1,9 @@
 package views.support
 import com.netaporter.uri.Uri
 import com.netaporter.uri.dsl._
+import model.DigitalEdition._
 import model.{DigitalEdition => DE}
-import DE._
+import utils.Tracking.internalCampaignCode
 
 object DigitalEdition {
 
@@ -17,7 +18,7 @@ object DigitalEdition {
     def membershipLandingPage = getMembershipLandingPage(DEFAULT_CAMPAIGN_CODE)
 
     def getMembershipLandingPage(campaignCode: String): Uri = {
-      val params = "INTCMP" -> campaignCode
+      val params = internalCampaignCode -> campaignCode
       edition match {
         case AU => "https://membership.theguardian.com/au/supporter" ? params
         case INT => "https://membership.theguardian.com/int/supporter" ? params
