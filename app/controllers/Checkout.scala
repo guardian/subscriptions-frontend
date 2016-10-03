@@ -205,6 +205,7 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
         _ + _
       }
 
+      logger.info(s"User successfully became subscriber:\n\tUser: SF=${r.salesforceMember.salesforceContactId}\n\tPlan: ${subscribeRequest.productData.fold(_.plan, _.plan).name}\n\tSubscription: ${r.subscribeResult.subscriptionName}")
       Ok(Json.obj("redirect" -> routes.Checkout.thankYou().url)).withSession(session)
     }
 
