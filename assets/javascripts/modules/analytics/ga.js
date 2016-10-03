@@ -95,7 +95,7 @@ define(['modules/analytics/analyticsEnabled',
     }
 
     return {
-        init: init,
+        init: analyticsEnabled(init),
         trackEvent: enqueueEvent
     };
 });
