@@ -1,16 +1,16 @@
 package services
 import com.gu.i18n.Title
-import com.gu.memsub._
+import com.gu.memsub.Product.Delivery
 import com.gu.memsub.Subscription.ProductRatePlanId
+import com.gu.memsub._
 import com.gu.memsub.subsv2.{CatalogPlan, PaperCharges}
-import com.gu.memsub.subsv2.ZProduct.Delivery
-import com.gu.memsub.subsv2.Delivery
-import model.{PaperData, PersonalData}
-import org.specs2.mutable.Specification
 import com.gu.salesforce.ContactDeserializer.Keys._
+import model.{PaperData, PersonalData}
 import org.joda.time.LocalDate
-import scalaz.syntax.std.option._
+import org.specs2.mutable.Specification
 import play.api.libs.json.{JsString, Json}
+
+import scalaz.syntax.std.option._
 
 class SalesforceServiceTest extends Specification {
 
