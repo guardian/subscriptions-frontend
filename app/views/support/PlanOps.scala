@@ -1,4 +1,5 @@
 package views.support
+
 import com.gu.memsub.Product.{Delivery, Voucher}
 
 import com.gu.memsub.Product.{Delivery, Voucher}
@@ -23,8 +24,12 @@ object PlanOps {
     }
 
     def packImage: ResponsiveImageGroup = in.charges.benefits.list match {
-      case Digipack :: Nil => ResponsiveImageGroup(availableImages = Seq(ResponsiveImage(controllers.CachedAssets.hashedPathFor("images/digital-pack.png"), 300)))
-      case _ => ResponsiveImageGroup(availableImages = ResponsiveImageGenerator("05129395fe0461071f176f526d7a4ae2b1d9b9bf/0_0_5863_5116", Seq(140, 500, 1000, 2000)))
+      case Digipack :: Nil =>
+        ResponsiveImageGroup(availableImages = Seq(ResponsiveImage(controllers.CachedAssets.hashedPathFor("images/digital-pack.png"), 300)))
+      case Weekly :: Nil =>
+        ResponsiveImageGroup(availableImages = ResponsiveImageGenerator("1961260fc68598c31c0b882d8f4da8e8ec34e7d0/0_0_1000_1333", Seq(375, 750, 1000), "png"))
+      case _ =>
+        ResponsiveImageGroup(availableImages = ResponsiveImageGenerator("05129395fe0461071f176f526d7a4ae2b1d9b9bf/0_0_5863_5116", Seq(140, 500, 1000, 2000)))
     }
 
     def changeRatePlanText: String = in.charges.benefits.list match {
@@ -43,6 +48,10 @@ object PlanOps {
     def isVoucher: Boolean = in.product == Voucher
 
     def isDigitalPack: Boolean = in.product == com.gu.memsub.Product.Digipack
+
+    def isGuardianWeekly: Boolean = in.product == Product.WeeklyROW || in.product == Product.WeeklyUK // TODO is this right to include both?
+
+    def hasPhysicalBenefits: Boolean = in.charges.benefits.list.exists(_.isPhysical)
 
     def hasDigitalPack: Boolean = in.charges.benefits.list.contains(Digipack)
 
@@ -64,7 +73,8 @@ object PlanOps {
   implicit class ProductPopulationDataOps(in: ProductPopulationData) {
     val products = in.plans.list.head
     def isHomeDelivery: Boolean = products.isHomeDelivery
-    def isPhysical: Boolean = products.isHomeDelivery
+    def isGuardianWeekly: Boolean = products.isGuardianWeekly
+    def isPhysical: Boolean = products.hasPhysicalBenefits
     def isVoucher: Boolean = products.isVoucher
     def isDigitalPack: Boolean = products.isDigitalPack
     def productType: String = products.productType

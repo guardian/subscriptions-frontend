@@ -161,14 +161,14 @@
                 </div>
 
                 @* ===== Delivery details ===== *@
-                @if(productData.isHomeDelivery || productData.isVoucher) {
+                @if(productData.isPhysical) {
                         <div id="deliveryDetails" class="field-panel is-collapsed js-fieldset-delivery-details">
                             <fieldset>
                                 <legend class="field-panel__legend">
                                     Delivery address
                                 </legend>
                                 <div class="field-panel__fields">
-                                    @if(productData.isHomeDelivery) {
+                                    @if(productData.isHomeDelivery || productData.isGuardianWeekly) {
                                         @fragments.checkout.fieldsDelivery(productData, countriesWithCurrency)
                                     }else{
                                         @fragments.checkout.fieldsVoucher(productData, countriesWithCurrency)

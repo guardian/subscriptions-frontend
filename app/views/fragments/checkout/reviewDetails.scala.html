@@ -16,7 +16,7 @@
             </ul>
         </div>
     </div>
-    @if(productData.isHomeDelivery) {
+    @if(productData.isHomeDelivery || productData.isGuardianWeekly) {
         <div class="review-details__item">
             <span class="review-details__heading">Deliver to</span>
             <div class="review-details__list">

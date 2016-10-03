@@ -6,6 +6,13 @@ import com.gu.memsub.Product.Delivery
 import com.gu.memsub.Product.Delivery
 import com.gu.memsub.{BillingPeriod, SupplierCode}
 import com.gu.memsub.subsv2.{CatalogPlan, PaidChargeList}
+import com.gu.memsub
+import com.gu.memsub.Product.{WeeklyUK, Voucher, Delivery}
+import com.gu.memsub.subsv2.CatalogPlan.Voucher
+import com.gu.memsub.subsv2.CatalogPlan.WeeklyUK
+import com.gu.memsub.subsv2.CatalogPlan._
+import com.gu.memsub.{Current, BillingPeriod, SupplierCode}
+import com.gu.memsub.subsv2.{CatalogPlan, PaidChargeList}
 import com.gu.memsub.Subscription.ProductRatePlanId
 import com.gu.memsub.promo.Formatters.PromotionFormatters._
 import com.gu.memsub.promo.Promotion.{AnyPromotion, _}
@@ -50,6 +57,39 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
   def getBetterPlans[A <: CatalogPlan.Paid](plan: A, others: List[A]) =
     others.sortBy(_.charges.gbpPrice.amount).dropWhile(_.charges.gbpPrice.amount <= plan.charges.gbpPrice.amount)
 
+
+  case class CountryStuff(countryGroupAllowedForChosenPlan: CountryGroup, determinedCountry: Option[Country], currencyForPlanAndCountryGroup: Currency, determinedCountriesWithCurrency: List[CountryWithCurrency])
+
+  def doWeirdCountryStuff(defaultCountryGroup: CountryGroup, plans: PlanList[CatalogPlan[memsub.Product, PaidChargeList, Current]], personalData: Option[PersonalData]): CountryStuff = {
+    val countryFromIdentity = personalData.flatMap(data => data.address.country)
+    val countryGroupFromIdentity = countryFromIdentity.flatMap(c => CountryGroup.byCountryCode(c.alpha2))
+
+    val countryGroupAllowedForChosenPlan =
+      plans.default.product match {
+        case Delivery => List(Country.UK)
+        case Voucher => List(Country("IM", "Isle of Man"), Country.UK)
+        case WeeklyUK => List(Country("IM", "Isle of Man"), Country.UK)
+        case WeeklyROW => CountryGroup.allGroups.flatMap(countryGroup => countryGroup.countries.map((_, countryGroup.c)))
+      }
+
+    val countryGroupAllowedForChosenPlan = if (digipackOrPhysicalItem.isRight) {
+      val countriesToDeliverPhysicalProduct = if (plans.default.product == Delivery) List(Country.UK) else List(Country("IM", "Isle of Man"), Country.UK)
+      CountryGroup(Country.UK.name, "uk", Some(Country.UK), countriesToDeliverPhysicalProduct, CountryGroup.UK.currency, PostCode)
+    } else {
+      countryGroupFromIdentity.getOrElse(defaultCountryGroup)
+    }
+    val determinedCountry = countryFromIdentity orElse countryGroupAllowedForChosenPlan.defaultCountry
+
+    val currenciesForPlan = plans.default.charges.price.currencies
+    val currencyForPlanAndCountryGroup = if (currenciesForPlan.contains(countryGroupAllowedForChosenPlan.currency)) countryGroupAllowedForChosenPlan.currency else GBP
+    val determinedCountriesWithCurrency = if (digipackOrPhysicalItem.isRight) {
+      countryGroupAllowedForChosenPlan.countries.map(c => CountryWithCurrency(c, currencyForPlanAndCountryGroup))
+    } else {
+      CountryWithCurrency.whitelisted(currenciesForPlan, GBP)
+    }
+    CountryStuff(countryGroupAllowedForChosenPlan, determinedCountry, currencyForPlanAndCountryGroup, determinedCountriesWithCurrency)
+  }
+
   def renderCheckout(countryGroup: CountryGroup, promoCode: Option[PromoCode], supplierCode: Option[SupplierCode], forThisPlan: String) = NoCacheAction.async { implicit request =>
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
@@ -61,33 +101,22 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
 
     idUser map { user =>
 
-      val planListEither: Either[PlanList[CatalogPlan.Digipack[BillingPeriod]], PlanList[CatalogPlan.Paper]] = (
+      val digipackOrPhysicalItem: Either[PlanList[Digipack[BillingPeriod]], PlanList[Paper]] = (
         catalog.delivery.list.find(_.slug == forThisPlan).map(p => PlanList[CatalogPlan.Delivery](p, getBetterPlans(p, catalog.delivery.list):_*)) orElse
-        catalog.voucher.list.find(_.slug == forThisPlan).map(p => PlanList[CatalogPlan.Voucher](p, getBetterPlans(p, catalog.voucher.list):_*)) orElse
-        catalog.weeklyUK.toList.find(_.slug == forThisPlan).map(p => PlanList[CatalogPlan.WeeklyUK[BillingPeriod]](p, getBetterPlans(p, catalog.weeklyUK.toList):_*)) orElse
-        catalog.weeklyROW.toList.find(_.slug == forThisPlan).map(p => PlanList[CatalogPlan.WeeklyROW[BillingPeriod]](p, getBetterPlans(p, catalog.weeklyROW.toList):_*))
+        catalog.voucher.list.find(_.slug == forThisPlan).map(p => PlanList[Voucher](p, getBetterPlans(p, catalog.voucher.list):_*)) orElse
+        catalog.weeklyUK.toList.find(_.slug == forThisPlan).map(p => PlanList[WeeklyUK[BillingPeriod]](p, getBetterPlans(p, catalog.weeklyUK.toList):_*)) orElse
+        catalog.weeklyROW.toList.find(_.slug == forThisPlan).map(p => PlanList[WeeklyROW[BillingPeriod]](p, getBetterPlans(p, catalog.weeklyROW.toList):_*))
       ).toRight(PlanList(catalog.digipack.month, catalog.digipack.quarter, catalog.digipack.year))
 
-      val plans = planListEither.fold(identity, identity)
+      val plans = digipackOrPhysicalItem.fold(identity, identity)
       val personalData = user.map(PersonalData.fromIdUser)
-      val productData = ProductPopulationData(user.map(_.address), planListEither)
-      val preselectedCountry = personalData.flatMap(data => data.address.country)
-      val countryGroupForPreselectedCountry = preselectedCountry.flatMap(c => CountryGroup.byCountryCode(c.alpha2))
-      val determinedCountryGroup = if (planListEither.isRight) {
-        val countriesInDropDown = if (plans.default.product == Delivery) List(Country.UK) else List(Country("IM", "Isle of Man"), Country.UK)
-        CountryGroup(Country.UK.name, "uk", Some(Country.UK), countriesInDropDown, CountryGroup.UK.currency, PostCode)
-      } else {
-        countryGroupForPreselectedCountry.getOrElse(countryGroup)
-      }
-      val determinedCountry = preselectedCountry orElse determinedCountryGroup.defaultCountry
+      val productData = ProductPopulationData(user.map(_.address), digipackOrPhysicalItem)
 
-      val supportedCurrencies = plans.default.charges.price.currencies
-      val determinedCurrency = if (supportedCurrencies.contains(determinedCountryGroup.currency)) determinedCountryGroup.currency else GBP
-      val determinedCountriesWithCurrency = if (planListEither.isRight) {
-        determinedCountryGroup.countries.map(c => CountryWithCurrency(c, determinedCurrency))
-      } else {
-        CountryWithCurrency.whitelisted(supportedCurrencies, GBP)
-      }
+
+      val doWeirdCountryStuffResult = doWeirdCountryStuff(countryGroup, digipackOrPhysicalItem, plans, personalData)
+      val CountryStuff(countryGroupAllowedForChosenPlan: CountryGroup, determinedCountry: Option[Country], currencyForPlanAndCountryGroup: Currency, determinedCountriesWithCurrency: List[CountryWithCurrency]) = doWeirdCountryStuffResult
+
+
 
       // either a code to send to the form (left) or a tracking code for the session (right)
       val promo: Either[PromoCode, Seq[(String, String)]] = (promoCode |@| determinedCountry)(
@@ -103,13 +132,13 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
         personalData = personalData,
         productData = productData,
         country = determinedCountry,
-        countryGroup = determinedCountryGroup,
-        defaultCurrency = determinedCurrency,
+        countryGroup = countryGroupAllowedForChosenPlan,
+        defaultCurrency = currencyForPlanAndCountryGroup,
         countriesWithCurrency = determinedCountriesWithCurrency,
         touchpointBackendResolution = resolution,
         promoCode = promo.left.toOption,
         supplierCode = resolvedSupplierCode,
-        edition = model.DigitalEdition.getForCountryGroup(determinedCountryGroup)
+        edition = model.DigitalEdition.getForCountryGroup(countryGroupAllowedForChosenPlan)
       )).withSession(trackingCodeSessionData ++ supplierCodeSessionData:_*)
     }
   }
