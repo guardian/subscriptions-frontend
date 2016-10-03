@@ -1,12 +1,9 @@
-@import views.support.CountryOps._
-@import views.support.AddressValidationRulesOps._
-@import views.support.CountryWithCurrency
-@import com.gu.i18n.Title
-@import model.PersonalData
 @import com.gu.memsub.Address
-@import views.support.PlanOps._
 @import com.gu.memsub.subsv2.CatalogPlan
-@import com.gu.memsub.subsv2.ZDigipack
+@import views.support.AddressValidationRulesOps._
+@import views.support.CountryOps._
+@import views.support.CountryWithCurrency
+@import views.support.PlanOps._
 
 @(address: Option[Address], namePrefix: String, countriesWithCurrency: List[CountryWithCurrency], plan: CatalogPlan.Paid)
 

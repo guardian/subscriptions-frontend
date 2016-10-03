@@ -1,9 +1,12 @@
 package views.support
+
+import com.gu.memsub.Product.{Delivery, Voucher}
 import com.gu.memsub._
 import com.gu.memsub.images.{ResponsiveImage, ResponsiveImageGenerator, ResponsiveImageGroup}
-import com.gu.memsub.subsv2.{CatalogPlan, Delivery, Voucher}
-import scalaz.syntax.std.boolean._
+import com.gu.memsub.subsv2.CatalogPlan
 import com.netaporter.uri.dsl._
+
+import scalaz.syntax.std.boolean._
 object PlanOps {
 
   implicit class PrettyPlan[+A <: CatalogPlan.AnyPlan](in: A) {
@@ -38,7 +41,7 @@ object PlanOps {
 
     def isVoucher: Boolean = in.product == Voucher
 
-    def isDigitalPack: Boolean = in.product == com.gu.memsub.subsv2.ZDigipack
+    def isDigitalPack: Boolean = in.product == com.gu.memsub.Product.Digipack
 
     def hasDigitalPack: Boolean = in.charges.benefits.list.contains(Digipack)
 

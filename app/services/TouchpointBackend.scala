@@ -1,17 +1,18 @@
 package services
 
-import com.amazonaws.regions.{Region, Regions}
 import com.gu.config.DiscountRatePlanIds
 import com.gu.memsub.promo.Promotion._
 import com.gu.memsub.promo.{DynamoPromoCollection, DynamoTables, PromotionCollection}
 import com.gu.memsub.services.{PaymentService => CommonPaymentService, _}
-import com.gu.monitoring.{ServiceMetrics, StatusMetrics}
+import com.gu.memsub.subsv2
+import com.gu.memsub.subsv2.services.SubscriptionService._
+import com.gu.monitoring.ServiceMetrics
+import com.gu.okhttp.RequestRunners._
 import com.gu.salesforce.SimpleContactRepository
 import com.gu.stripe.StripeService
-import com.gu.subscriptions.suspendresume.SuspensionService
 import com.gu.subscriptions.Discounter
+import com.gu.subscriptions.suspendresume.SuspensionService
 import com.gu.zuora
-import com.gu.okhttp.RequestRunners._
 import com.gu.zuora.{rest, soap}
 import configuration.Config
 import forms.SubscriptionsForm
@@ -22,11 +23,12 @@ import play.api.libs.concurrent.Execution.Implicits._
 import play.api.mvc.RequestHeader
 import touchpoint.TouchpointBackendConfig.BackendType
 import touchpoint.{TouchpointBackendConfig, ZuoraProperties}
-import com.gu.memsub.subsv2
+import utils.TestUsers._
+
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
+import scala.util.{Failure, Try}
 import scalaz.std.scalaFuture._
-import utils.TestUsers._
 
 trait TouchpointBackend {
   def environmentName: String
@@ -50,7 +52,9 @@ trait TouchpointBackend {
 
 object TouchpointBackend {
 
-  private implicit val system = Akka.system
+  def logE[A](a: => A): A = Try(a).recoverWith({case e: Throwable => e.printStackTrace; Failure(e)}).get
+
+  private implicit val system = logE(Akka.system)
 
   def apply(backendType: TouchpointBackendConfig.BackendType): TouchpointBackend = {
 
@@ -69,7 +73,8 @@ object TouchpointBackend {
       lazy val salesforceService = new SalesforceServiceImp(new SimpleContactRepository(config.salesforce, system.scheduler, Config.appName))
       lazy val catalogService = new subsv2.services.CatalogService[Future](newProductIds, simpleRestClient, Await.result(_, 10.seconds), backendType.name)
       lazy val zuoraService = new zuora.ZuoraService(soapClient, this.zuoraRestClient)
-      lazy val subscriptionService = new subsv2.services.SubscriptionService[Future](newProductIds, this.catalogService.catalog.map(_.leftMap(_.list.mkString).map(_.map)), simpleRestClient, zuoraService.getAccountIds)
+      val map = this.catalogService.catalog.map(_.fold[CatalogMap](error => {println(s"error: ${error.list.mkString}"); Map()}, _.map))
+      lazy val subscriptionService = new subsv2.services.SubscriptionService[Future](newProductIds, map, simpleRestClient, zuoraService.getAccountIds)
       lazy val zuoraRestClient = new rest.Client(config.zuoraRest, new ServiceMetrics(Config.stage, Config.appName, "zuora-rest-client"))
       lazy val paymentService = new PaymentService(_stripeService)
       lazy val commonPaymentService = new CommonPaymentService(_stripeService, zuoraService, this.catalogService.unsafeCatalog.productMap)
@@ -85,11 +90,11 @@ object TouchpointBackend {
     }
   }
 
-  val BackendsByType = BackendType.All.map(typ => typ -> TouchpointBackend(typ)).toMap
+  val BackendsByType = logE(BackendType.All.map(typ => typ -> TouchpointBackend(typ)).toMap)
 
-  val Normal = BackendsByType(BackendType.Default)
-  val Test = BackendsByType(BackendType.Testing)
-  val All = BackendsByType.values.toSeq
+  val Normal = logE(BackendsByType(BackendType.Default))
+  val Test = logE(BackendsByType(BackendType.Testing))
+  val All = logE(BackendsByType.values.toSeq)
 
   case class Resolution(
     backend: TouchpointBackend,

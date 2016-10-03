@@ -7,7 +7,7 @@ import scalaz.Id._
 
 object LandingPageOps {
 
-  private def getSectionColour(landingPage: SubscriptionsLandingPage) = landingPage.sectionColour.getOrElse(Blue)
+  private def getSectionColour(landingPage: DigitalPackLandingPage) = landingPage.sectionColour.getOrElse(Blue)
 
   implicit class ForPromotionsWithALandingPage(promotion: PromoWithDigipackLandingPage) {
     def landingPageSectionColour: String = {
