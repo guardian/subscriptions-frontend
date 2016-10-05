@@ -64,7 +64,7 @@
 
 @main(
     title = s"Details - name and address | Subscribe to the ${productData.plans.default.title} | The Guardian",
-    jsVars = JsVars(userIsSignedIn = personalData.isDefined, ignorePageLoadTracking = true, countryGroup = countryGroup, currency = defaultCurrency, country = country),
+    jsVars = JsVars(userIsSignedIn = personalData.isDefined, ignorePageLoadTracking = true, currency = defaultCurrency, country = country),
     bodyClasses = List("is-wide"),
     touchpointBackendResolutionOpt = Some(touchpointBackendResolution),
     plan = Some(productData.plans.default),

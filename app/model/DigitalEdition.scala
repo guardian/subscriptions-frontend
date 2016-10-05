@@ -1,5 +1,5 @@
 package model
-import com.gu.i18n.CountryGroup
+import com.gu.i18n.{Country, CountryGroup}
 
 case class DigitalEdition(countryGroup: CountryGroup, id: String, name: String, campaign: String)
 
@@ -20,4 +20,11 @@ object DigitalEdition {
   }
 
   def getForCountryGroup(countryGroup: CountryGroup) = getById(countryGroup.id).getOrElse(INT)
+
+  def getForCountry(country: Option[Country]) = country match {
+    case Some(Country.UK) => UK
+    case Some(Country.US) => US
+    case Some(Country.Australia) => AU
+    case _ => INT
+  }
 }
