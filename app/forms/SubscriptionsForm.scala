@@ -4,7 +4,6 @@ import com.gu.i18n.{CountryGroup, Title}
 import com.gu.memsub.Address
 import com.gu.memsub.Subscription.ProductRatePlanId
 import com.gu.memsub.promo.PromoCode
-import com.gu.memsub.services.CatalogService
 import com.gu.memsub.subsv2.CatalogPlan
 import com.gu.memsub.subsv2.Catalog
 import com.gu.memsub.BillingPeriod
