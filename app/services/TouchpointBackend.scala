@@ -17,6 +17,7 @@ import com.gu.zuora.{rest, soap}
 import configuration.Config
 import forms.SubscriptionsForm
 import monitoring.TouchpointBackendMetrics
+import org.joda.time.LocalDate
 import play.api.Play.current
 import play.api.libs.concurrent.Akka
 import play.api.libs.concurrent.Execution.Implicits._
@@ -74,7 +75,7 @@ object TouchpointBackend {
       lazy val catalogService = new subsv2.services.CatalogService[Future](newProductIds, simpleRestClient, Await.result(_, 10.seconds), backendType.name)
       lazy val zuoraService = new zuora.ZuoraService(soapClient, this.zuoraRestClient)
       val map = this.catalogService.catalog.map(_.fold[CatalogMap](error => {println(s"error: ${error.list.mkString}"); Map()}, _.map))
-      lazy val subscriptionService = new subsv2.services.SubscriptionService[Future](newProductIds, map, simpleRestClient, zuoraService.getAccountIds)
+      lazy val subscriptionService = new subsv2.services.SubscriptionService[Future](newProductIds, map, simpleRestClient, zuoraService.getAccountIds, () => LocalDate.now)
       lazy val zuoraRestClient = new rest.Client(config.zuoraRest, new ServiceMetrics(Config.stage, Config.appName, "zuora-rest-client"))
       lazy val paymentService = new PaymentService(_stripeService)
       lazy val commonPaymentService = new CommonPaymentService(_stripeService, zuoraService, this.catalogService.unsafeCatalog.productMap)
