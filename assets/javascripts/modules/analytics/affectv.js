@@ -1,6 +1,7 @@
 define(['utils/loadJs',
-        'modules/analytics/analyticsEnabled'
-], function(loadJs, analyticsEnabled) {
+        'modules/analytics/analyticsEnabled',
+        'modules/analytics/dntEnabled'
+], function(loadJs, analyticsEnabled, dntEnabled) {
     'use strict';
 
     var digitalPackId = '546dd61001896028ffd29273';
@@ -20,6 +21,6 @@ define(['utils/loadJs',
     }
 
     return {
-        init: analyticsEnabled(init)
+        init: analyticsEnabled(dntEnabled(init))
     };
 });
