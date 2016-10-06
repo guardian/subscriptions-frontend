@@ -22,5 +22,5 @@
 
 @* ===== Address ===== *@
 <div class="js-billing-address @{if(canBeHidden && billingAddress.forall(_.isEmpty)) "is-hidden" else ""}">
-@address(billingAddress, "personal.address", countriesWithCurrency, plan)
+@address(billingAddress, "personal.address", countriesWithCurrency, plan, false)
 </div>
