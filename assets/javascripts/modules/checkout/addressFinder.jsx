@@ -34,7 +34,9 @@ function getSantitisedPostcode(addressSection) {
 }
 
 function lookup(addressSection) {
-    return () => {
+    return (e) => {
+        e.stopPropagation();
+        e.preventDefault();
         var postCode = getSantitisedPostcode(addressSection);
         if (postCode.length < 3) { return; }
 
