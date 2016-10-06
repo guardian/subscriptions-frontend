@@ -68,10 +68,11 @@ object TouchpointBackend {
     val simpleRestClient = new rest.SimpleClient[Future](config.zuoraRest, futureRunner)
     val newProductIds = Config.productIds(config.environmentName)
     val _stripeService = new StripeService(config.stripe, loggingRunner(touchpointBackendMetrics))
+    val sfSimpleContactRepo = new SimpleContactRepository(config.salesforce, system.scheduler, Config.appName)
 
     new TouchpointBackend {
       lazy val environmentName = config.environmentName
-      lazy val salesforceService = new SalesforceServiceImp(new SimpleContactRepository(config.salesforce, system.scheduler, Config.appName))
+      lazy val salesforceService = new SalesforceServiceImp(sfSimpleContactRepo)
       lazy val catalogService = new subsv2.services.CatalogService[Future](newProductIds, simpleRestClient, Await.result(_, 10.seconds), backendType.name)
       lazy val zuoraService = new zuora.ZuoraService(soapClient, this.zuoraRestClient)
       val map = this.catalogService.catalog.map(_.fold[CatalogMap](error => {println(s"error: ${error.list.mkString}"); Map()}, _.map))

@@ -4,12 +4,13 @@ import com.amazonaws.regions.{Region, Regions}
 import com.amazonaws.services.sqs.AmazonSQSClient
 import com.amazonaws.services.sqs.model._
 import com.gu.i18n.Currency
+import com.gu.lib.Retry
 import com.gu.memsub.Subscription._
 import com.gu.memsub.{Subscription => _, _}
 import com.gu.memsub.promo.Promotion._
 import com.gu.memsub.promo._
 import com.gu.memsub.services.{PaymentService => CommonPaymentService}
-import com.gu.memsub.subsv2.{SubscriptionPlan => Plan, Subscription}
+import com.gu.memsub.subsv2.{Subscription, SubscriptionPlan => Plan}
 import com.gu.memsub.subsv2.reads.SubPlanReads._
 import com.gu.memsub.subsv2.reads.ChargeListReads._
 import com.gu.memsub.subsv2.Subscription
@@ -29,7 +30,6 @@ import views.support.PlanOps._
 import scala.concurrent.Future
 import scala.reflect.internal.util.StringOps
 import scala.util.{Failure, Success, Try}
-import utils.Retry
 
 /**
   * Sends welcome email message to Amazon SQS queue which is consumed by membership-workflow.
