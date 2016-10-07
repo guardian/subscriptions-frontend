@@ -17,12 +17,9 @@ define(['modules/analytics/ga',
         // ga prefers ophan to have bootstrapped and set window.guardian state etc
         ophan.loaded.then(ga.init, ga.init);
         omniture.init();
-
-        if (!window.guardian.isDev) {
-            remarketing.init();
-            krux.init();
-            affectv.init();
-        }
+        remarketing.init();
+        krux.init();
+        affectv.init();
     }
 
     return {

@@ -1,4 +1,8 @@
-define(['modules/analytics/analyticsEnabled', 'modules/raven'], function(analyticsEnabled, raven) {
+define([
+    'modules/analytics/analyticsEnabled',
+    'modules/analytics/dntEnabled',
+    'modules/raven'
+], function (analyticsEnabled, dntEnabled, raven) {
     'use strict';
 
     var KRUX_ID = 'Jglpp88U';
@@ -10,6 +14,6 @@ define(['modules/analytics/analyticsEnabled', 'modules/raven'], function(analyti
     }
 
     return {
-        init: analyticsEnabled(init)
+        init: analyticsEnabled(dntEnabled(init))
     };
 });
