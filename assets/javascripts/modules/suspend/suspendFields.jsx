@@ -39,8 +39,10 @@ function filterDate(packageName, exclusionList) {
 export default {
 
     renderDatePicker () {
-        const container = document.getElementById(formElements.SUSPEND_DATE_PICKER_ID),
-            firstSelectableDate = getFirstSelectableDate(container.getAttribute('firstPaymentDate')),
+        const container = document.getElementById(formElements.SUSPEND_DATE_PICKER_ID);
+        if (!container) { return; }
+
+        var firstSelectableDate = getFirstSelectableDate(container.getAttribute('firstPaymentDate')),
             remainingDays = parseInt(container.getAttribute('remainingDays'), 10),
             filterDateFn = filterDate(container.getAttribute('ratePlanName'), container.getAttribute('excludeExistingDays'));
 
@@ -55,7 +57,6 @@ export default {
             />,
             container
         )
-
     },
     init: function() {
         this.renderDatePicker();
