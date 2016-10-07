@@ -118,4 +118,7 @@ object Config {
 
   val suspendableWeeks = 6
 
+  val getAddressIOApiUrl = config.getString("get-address-io-api.url")
+  val getAddressIOApiKey = config.getString("get-address-io-api.key")
+
 }

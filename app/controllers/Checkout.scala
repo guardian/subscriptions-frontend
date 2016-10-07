@@ -305,6 +305,16 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
     } yield Ok(Json.obj("accountValid" -> isAccountValid))
   }
 
+  def findAddress(postCode: String) = CSRFCachedAsyncAction { implicit request =>
+    GetAddressIOService.find(postCode).map { result =>
+      // Capital A 'Addresses' is for compatibility with the https://api.getaddress.io/v2/uk/ response,
+      // should a client want not to proxy via this server.
+      Ok(Json.obj("Addresses" -> result.Addresses))
+    } recover {
+      case e => BadRequest(Json.obj("Message" -> e.getMessage))
+    }
+  }
+
   // PaymentGatewayError should be logged at WARN level
   private def handlePaymentGatewayError(e: PaymentGatewayError, purchaserIds: PurchaserIdentifiers, country: String) = {
 
