@@ -8,21 +8,24 @@ import moment from 'moment'
 
 require('react-datepicker/dist/react-datepicker.css');
 
+const DATE_PATTERN = 'D MMMM YYYY';
 const LEAD_TIME = moment().add(5, 'days');
 const LAST_START_DATE = moment().add(1, 'year');
 const MAX_WEEKS = 6;
 
 function getFirstSelectableDate(firstPaymentDate) {
-    if (firstPaymentDate && moment(LEAD_TIME).isBefore(firstPaymentDate)) {
-        return moment(firstPaymentDate);
-    } else {
-        return LEAD_TIME;
+    if (firstPaymentDate) {
+        const firstPaymentMoment = moment(firstPaymentDate, DATE_PATTERN);
+        if (firstPaymentMoment.isAfter(LEAD_TIME)) {
+            return firstPaymentMoment;
+        }
     }
+    return LEAD_TIME;
 }
 
 function filterDate(packageName, exclusionList) {
     const exclusions = (exclusionList || '').split(',');
-    const isNotTaken = (date) => !exclusions.includes(date.format('D MMMM YYYY'));
+    const isNotTaken = (date) => !exclusions.includes(date.format(DATE_PATTERN));
 
     switch (true) {
         case /Sunday/i.test(packageName):
