@@ -4,25 +4,29 @@
     subscriberId: Option[String]
 )(implicit request: RequestHeader, flash: Flash, touchpointBackendResolution: services.TouchpointBackend.Resolution)
 
-@main("Suspend your newspaper delivery | The Guardian", edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
+@main("Cancel your papers when you're away | The Guardian", edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
 
     <main class="page-container gs-container">
 
         <section class="suspend-container">
 
             <div class="suspend-header">
-                <h1 class="suspend-header__title">Suspend your newspaper delivery</h1>
+                <h1 class="suspend-header__title">Cancel your papers while you're away</h1>
             </div>
 
             <div class="prose">
                 <p>
-                    Please use this service to let us know about any holidays you have planned so that we can suspend
-                    delivery of your newspapers while you're away. The rate you pay for each suspended newspaper,
-                    including delivery, will be deducted from the first payment after your suspension start date.
-                    For any other customer service enquiry, please contact us on: <a href="tel:+44 330 333 6767">+44 (0) 330 333 6767</a>
-                    or email <a href="mailto:subscriptions@@theguardian.com">subscriptions@@theguardian.com</a>.
+                    You can use this service to temporarily suspend delivery of your newspapers.
+                    You will need your ​​Subscriber ID​, which you can find on any correspondence.
                 </p>
-                <p>You can find your Subscriber ID in any post or email communications we've sent to you.</p>
+                <p>
+                    Please give us at least 5 days notice, and we will reduce the first payment after you go away by the value of the cancelled papers, including delivery.
+                </p>
+                <p>
+                    If you do not have your Subscriber ID to hand, or you have any other customer service enquir​ies,
+                    please contact us on: <a href="tel:+44 330 333 6767">+44 (0) 330 333 6767</a>
+                    or email <a href="mailto:homedelivery@@theguardian.com">homedelivery@@theguardian.com</a>.
+                </p>
             </div>
 
             <br/>
