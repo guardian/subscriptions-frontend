@@ -90,8 +90,15 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
       case class CountryAndCurrencySettings(options: List[CountryWithCurrency], defaultCountry: Option[Country], defaultCurrency: Currency)
 
 
+      val ukAndIsleOfMan = CountryGroup.UK.copy(countries = List(Country.UK, Country("IM", "Isle of Man")))
 
-      val ukMainlandSettings = CountryAndCurrencySettings.withIdDefaultsOrFallback(
+      val rowUk = CountryGroup("Row Uk", "uk", None, CountryGroup.UK.countries.filterNot(ukAndIsleOfMan.countries.contains(_)), GBP, PostCode)
+
+      val weeklyUkNorthAmericaGroups = List (ukAndIsleOfMan, CountryGroup.US, CountryGroup.Canada)
+
+      val weeklyRowGroups = rowUk :: CountryGroup.allGroups.filterNot(group => (CountryGroup.UK :: weeklyUkNorthAmericaGroups) contains group)
+
+      val deliverySettings = CountryAndCurrencySettings.withIdDefaultsOrFallback(
         options = List(CountryWithCurrency(Country.UK, GBP)),
         fallbackCountry = Some(Country.UK),
         fallbackCurrency = GBP
@@ -104,21 +111,21 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
           fallbackCountry = countryGroup.defaultCountry,
           fallbackCurrency = GBP
         )
-        case Product.Voucher => ukMainlandSettings.copy(options = CountryWithCurrency(Country("IM", "Isle of Man"), GBP) :: ukMainlandSettings.options)
-        case Product.Delivery => ukMainlandSettings
-        case Product.WeeklyUK => ukMainlandSettings
+        case Product.Voucher => deliverySettings.copy(options = CountryWithCurrency.fromCountryGroup(ukAndIsleOfMan))
+        case Product.Delivery => deliverySettings
+        case Product.WeeklyUK => CountryAndCurrencySettings.withIdDefaultsOrFallback(
+          options = CountryWithCurrency.whitelisted(supportedCurrencies, GBP, weeklyUkNorthAmericaGroups),
+          fallbackCountry = Some(Country.UK),
+          fallbackCurrency = GBP
+        )
         case Product.WeeklyROW => {
-          ///TODO get the correct list of countries and in an efficient way
-          val notUk = CountryGroup.allGroups.flatMap(_.countries).filterNot(_ == Country.UK)
-          val countriesWithSupportedCurrencies = CountryWithCurrency.whitelisted(supportedCurrencies, GBP)
-          val supportedCountriesAndCurrencies = countriesWithSupportedCurrencies.filter{ cc => notUk.contains(cc.country) }
           CountryAndCurrencySettings.withIdDefaultsOrFallback(
-            options = supportedCountriesAndCurrencies,
-            fallbackCountry = None, //this makes the javascript return null for country which did not happen in the previous version but it seems to work
+            options = CountryWithCurrency.whitelisted(supportedCurrencies, USD, weeklyRowGroups),
+            fallbackCountry = None,
             fallbackCurrency = USD
           )
         }
-        //case _ => do something to match all cases?
+        //case _ => TODO do something to match all cases?
       }
 
       val defaultCountry = countryAndCurrencySettings.defaultCountry
@@ -138,7 +145,7 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
         personalData = personalData,
         productData = productData,
         country = countryAndCurrencySettings.defaultCountry,
-        countryGroup = countryGroup,//TODO THIS IS ALMOST NEVER USED AND IT DOESN'T NECESSARILY MATCH THE SELECTED COUNTRY I WOULD LIKE TO REMOVE IT BUT IT IS AN INPUT PARAMETER THAT PROBABLY SHOWS UP IN LINKS FROM EXTERNAL SYSTEMS
+        countryGroup = countryGroup,
         defaultCurrency = countryAndCurrencySettings.defaultCurrency,
         countriesWithCurrency = countryAndCurrencySettings.options,
         touchpointBackendResolution = resolution,
