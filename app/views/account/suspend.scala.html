@@ -15,13 +15,13 @@
     errorCodes: Set[String]
 )(implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackend.Resolution)
 
-@main("Suspend your newspaper delivery | The Guardian", bodyClasses = List("is-wide"), edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
+@main("Cancel your papers while you're away | The Guardian", bodyClasses = List("is-wide"), edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
 
     <main class="page-container gs-container">
         <section class="suspend-container">
 
             <div class="suspend-header">
-                <h1 class="suspend-header__title">Suspend your newspaper delivery</h1>
+                <h1 class="suspend-header__title">Cancel your papers while you're away</h1>
             </div>
 
             <section class="mma-section">
@@ -60,7 +60,7 @@
                             </button>
                         </fieldset>
                     </form>
-                    <span class="mma-dates__request">Please give us 5 working days notice to process the suspension. Maximum duration is @suspendableWeeks weeks. <strong>All dates are inclusive</strong>.</span>
+                    <span class="mma-dates__request">Please give us at least 5 days notice to process the suspension. You can suspend up to @suspendableWeeks weeks. <strong>All dates are inclusive</strong>.</span>
                 </section>
             }
 
