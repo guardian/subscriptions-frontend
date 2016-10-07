@@ -27,6 +27,8 @@ import scalaz.{EitherT, OptionT, \/}
 
 object AccountManagement extends Controller with LazyLogging {
 
+  val accountManagementAction = NoCacheAction
+
   val SUBSCRIPTION_SESSION_KEY = "subscriptionId"
 
   private def subscriptionFromRequest(implicit request: Request[AnyContent]): Future[Option[Subscription[Plan.Delivery] \/ Subscription[Plan.Voucher]]] = {
@@ -66,7 +68,7 @@ object AccountManagement extends Controller with LazyLogging {
 
   private def pendingHolidayRefunds(allHolidays: Seq[HolidayRefund]) = allHolidays.filterNot(_._2.finish.isBefore(LocalDate.now)).sortBy(_._2.start)
 
-  def login(subscriberId: Option[String] = None, errorCode: Option[String] = None) = GoogleAuthenticatedStaffAction.async { implicit request =>
+  def login(subscriberId: Option[String] = None, errorCode: Option[String] = None) = accountManagementAction.async { implicit request =>
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
     val subscription = subscriptionFromRequest
@@ -89,7 +91,7 @@ object AccountManagement extends Controller with LazyLogging {
     ).getOrElse(Ok(views.html.account.details(subscriberId)))
   }
 
-  def processLogin = GoogleAuthenticatedStaffAction.async { implicit request =>
+  def processLogin = accountManagementAction.async { implicit request =>
     val loginRequest = AccountManagementLoginForm.mappings.bindFromRequest().value
 
     subscriptionFromUserDetails(loginRequest).map {
@@ -115,7 +117,7 @@ object AccountManagement extends Controller with LazyLogging {
     r
   }
 
-  def processSuspension = GoogleAuthenticatedStaffAction.async { implicit request =>
+  def processSuspension = accountManagementAction.async { implicit request =>
     lazy val noSub = "Could not find an active subscription"
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend

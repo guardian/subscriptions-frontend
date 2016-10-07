@@ -31,7 +31,4 @@ object Testing extends Controller with LazyLogging {
     Ok(s"${analyticsOffCookie.name} cookie dropped").withCookies(analyticsOffCookie)
   }
 
-  def manageHoldingPage = CachedAction {
-    Ok(views.html.testing.manageHoldingPage())
-  }
 }
