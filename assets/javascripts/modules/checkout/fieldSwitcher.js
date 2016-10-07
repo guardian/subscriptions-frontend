@@ -14,7 +14,9 @@ define([
 
         var $postcode = addressObject.$POSTCODE_CONTAINER,
             $subdivision = addressObject.$SUBDIVISION_CONTAINER,
-            countryChoice = countryChoiceFunction(addressObject);
+            countryChoice = countryChoiceFunction(addressObject),
+            shouldUpdateCurrency = addressObject.isCurrencyAddress();
+
 
         var check = function(domEl) {
             $(domEl).attr('checked', 'checked');
@@ -73,9 +75,11 @@ define([
 
         var redraw = function(model) {
             redrawAddressFields(model);
-            switchLocalization(model);
-            checkPlanInput(model.ratePlanId, model.currency);
-            selectPaymentMethod(model.country);
+            if (shouldUpdateCurrency) {
+                switchLocalization(model);
+                checkPlanInput(model.ratePlanId, model.currency);
+                selectPaymentMethod(model.country);
+            }
         };
 
         var getCurrentState = function() {

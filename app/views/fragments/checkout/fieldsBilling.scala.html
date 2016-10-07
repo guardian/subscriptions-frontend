@@ -5,7 +5,7 @@
 @import views.support.PlanOps._
 @import com.gu.memsub.subsv2.CatalogPlan
 
-@(billingAddress: Option[Address], canBeHidden: Boolean, countriesWithCurrency: List[CountryWithCurrency], plan: CatalogPlan.Paid)
+@(billingAddress: Option[Address], canBeHidden: Boolean, countriesWithCurrency: List[CountryWithCurrency], plan: CatalogPlan.Paid, isCurrencyAddress : Boolean)
 
 @if(canBeHidden) {
   <div class="js-checkout-use-delivery">
@@ -17,10 +17,9 @@
         Bill my delivery address
       </span>
     </label>
-  </div>
+  </
 }
-
 @* ===== Address ===== *@
 <div class="js-billing-address @{if(canBeHidden && billingAddress.forall(_.isEmpty)) "is-hidden" else ""}">
-@address(billingAddress, "personal.address", countriesWithCurrency, plan, false)
+@address(billingAddress, "personal.address", countriesWithCurrency, plan, false, isCurrencyAddress)
 </div>

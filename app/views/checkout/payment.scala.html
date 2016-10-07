@@ -194,7 +194,7 @@
                             <a href="#yourDetails" class="text-button u-button-reset js-edit-billing-address" title="Edit your personal details">Edit</a>
                         </div>
                         <div class="field-panel__fields">
-                            @fragments.checkout.fieldsBilling(personalData.map(_.address), canBeHidden = productData.planEither.isRight, countriesWithCurrency, productData.plans.default)
+                            @fragments.checkout.fieldsBilling(personalData.map(_.address), canBeHidden = productData.planEither.isRight, countriesWithCurrency, productData.plans.default, !productData.isPhysical)
                             @continueButton("#paymentDetails", "js-checkout-billing-address-submit")
                         </div>
                     </fieldset>
