@@ -1,6 +1,6 @@
 package model
 import com.gu.i18n.Country.UK
-import com.gu.i18n.{CountryGroup, Title}
+import com.gu.i18n.{CountryGroup, Currency, Title}
 import com.gu.identity.play.IdUser
 import com.gu.memsub._
 import com.gu.memsub.promo.PromoCode
@@ -55,7 +55,8 @@ case class PersonalData(first: String,
 case class SubscriptionData(
    personalData: PersonalData,
    paymentData: PaymentData,
-   promoCode: Option[PromoCode]
+   promoCode: Option[PromoCode],
+   currency: Currency
 )
 
 case class DigipackData(

@@ -1,6 +1,6 @@
 package forms
 
-import com.gu.i18n.{CountryGroup, Title}
+import com.gu.i18n.{CountryGroup, Currency, Title}
 import com.gu.memsub.Address
 import com.gu.memsub.Subscription.ProductRatePlanId
 import com.gu.memsub.promo.PromoCode
@@ -145,6 +145,10 @@ object SubscriptionsForm {
 
   val creditCardDataMapping = mapping("token" -> text)(CreditCardData)(CreditCardData.unapply)
 
+  implicit val currencyFormatter = new Formatter[Currency] {
+    override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Currency] = data.get(key).flatMap(Currency.fromString).toRight(Seq(FormError(key, "Invalid currency")))
+    override def unbind(key: String, value: Currency): Map[String, String] = Map(key -> value.identifier)
+  }
   implicit val promoCodeFormatter: Formatter[PromoCode] = new Formatter[PromoCode] {
     override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], PromoCode] =
       data.get(key).filter(_.nonEmpty).map(PromoCode).toRight(Seq(FormError(key, "Cannot find a promo code")))
@@ -188,7 +192,8 @@ object SubscriptionsForm {
   val subsForm = Form(mapping(
     "personal" -> personalDataMapping,
     "payment" -> of[PaymentData],
-    "promoCode" -> optional(of[PromoCode])
+    "promoCode" -> optional(of[PromoCode]),
+    "currency" -> of[Currency]
   )(SubscriptionData.apply)(SubscriptionData.unapply)
     .verifying("DirectDebit is only available in the UK", PaymentValidation.validateDirectDebit _))
 }

@@ -53,7 +53,6 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
   def renderCheckout(countryGroup: CountryGroup, promoCode: Option[PromoCode], supplierCode: Option[SupplierCode], forThisPlan: String) = NoCacheAction.async { implicit request =>
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
-
     val idUser = (for {
       authUser <- OptionT(Future.successful(authenticatedUserFor(request)))
       idUser <- OptionT(IdentityService.userLookupByCredentials(authUser.credentials))
@@ -135,12 +134,11 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
       val trackingCodeSessionData = promo.right.toSeq.flatten
       val supplierCodeSessionData = resolvedSupplierCode.map(code => Seq(SupplierTrackingCode -> code.get)).getOrElse(Seq.empty)
       val productData = ProductPopulationData(user.map(_.address), planListEither)
-
       Ok(views.html.checkout.payment(
         personalData = personalData,
         productData = productData,
         country = countryAndCurrencySettings.defaultCountry,
-        countryGroup = countryGroup,//TODO THIS IS ALMOST NEVER USED AND IT DOESN'T NECESARILY MATCH THE SELECTED COUNTRY I WOULD LIKE TO REMOVE IT BUT IT IS AN INPUT PARAMETER THAT PROBABLY SHOWS UP IN LINKS FROM EXTERNAL SYSTEMS
+        countryGroup = countryGroup,//TODO THIS IS ALMOST NEVER USED AND IT DOESN'T NECESSARILY MATCH THE SELECTED COUNTRY I WOULD LIKE TO REMOVE IT BUT IT IS AN INPUT PARAMETER THAT PROBABLY SHOWS UP IN LINKS FROM EXTERNAL SYSTEMS
         defaultCurrency = countryAndCurrencySettings.defaultCurrency,
         countriesWithCurrency = countryAndCurrencySettings.options,
         touchpointBackendResolution = resolution,
@@ -165,7 +163,6 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
         s" JavaScriptEnabled=${request.headers.toMap.contains("X-Requested-With")};" +
         s" ${e.map(err => s"${err.key} ${err.message}").mkString(", ")}")
     }
-
     val sessionTrackingCode = request.session.get(PromotionTrackingCode)
     val sessionSupplierCode = request.session.get(SupplierTrackingCode)
     val subscribeRequest = sr.copy(
@@ -227,11 +224,10 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
           logger.warn(h)
           logger.error(m)
       }
-
       val productData = Seq(
         SubsName -> r.subscribeResult.subscriptionName,
         RatePlanId -> subscribeRequest.productRatePlanId.get,
-        SessionKeys.Currency -> subscribeRequest.genericData.personalData.currency.toString
+        SessionKeys.Currency -> subscribeRequest.genericData.currency.toString
       )
 
       val userSessionFields = r.userIdData match {
@@ -277,7 +273,6 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
       currency <- Currency.fromString(currencyStr)
       startDate <- session.get(StartDate)
     } yield (subsName, plan, currency, startDate)
-
     sessionInfo.fold {
       Redirect(routes.Homepage.index()).withNewSession
     } { case (subsName, plan, currency, startDate) =>
