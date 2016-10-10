@@ -24,6 +24,11 @@ object Shipping extends Controller {
 
   def viewCollectionPaperDigital() = CachedAction {
     val plans = List.empty //catalog.voucher.productPlans.filter(_.products.others.contains(Digipack)).map(planToOptions)
+    val qssSixDayPlus = SubscriptionOption("sixday",
+      "Sixday+", 10.99f, Some("30%"), 47.62f, "Guardian papers, plus tablet editions and Premium mobile access",
+      "https://www.guardiansubscriptions.co.uk/Voucher?prom=faa13&pkgcode=ukx01&title=gv6&skip=1"
+    )
+    val sixdayPlus = catalog.voucher.productPlans.filter(p => p.slug == "voucher-sixday+").map(planToOptions).headOption.getOrElse(qssSixDayPlus)
     index(CollectionSubscriptionProduct(
       title = "Paper + digital voucher subscription",
       description = "Save money on your newspapers and digital content. Plus start using the daily edition and premium live news app immediately.",
@@ -34,10 +39,7 @@ object Shipping extends Controller {
             "Everyday+", 11.99f, Some("36%"), 51.96f, "Guardian and Observer papers, plus tablet editions and Premium mobile access",
             "https://www.guardiansubscriptions.co.uk/Voucher?prom=faa13&pkgcode=ukx01&title=gv7&skip=1"
           ),
-          SubscriptionOption("sixday",
-            "Sixday+", 10.99f, Some("30%"), 47.62f, "Guardian papers, plus tablet editions and Premium mobile access",
-            "https://www.guardiansubscriptions.co.uk/Voucher?prom=faa13&pkgcode=ukx01&title=gv6&skip=1"
-          ),
+          sixdayPlus,
           SubscriptionOption("weekend",
             "Weekend+", 6.79f, Some("22%"), 29.42f, "Saturday Guardian and Observer papers, plus tablet editions and Premium mobile access",
             "https://www.guardiansubscriptions.co.uk/Voucher?prom=faa13&pkgcode=ukx01&title=gv2&skip=1"
