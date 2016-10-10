@@ -33,7 +33,8 @@ object PlanOps {
     }
 
     def changeRatePlanText: String = in.charges.benefits.list match {
-      case Digipack :: Nil => "Change payment frequency"
+      case Digipack :: Nil | Weekly :: Nil=> "Change payment frequency"
+
       case _ => "Add more"
     }
 

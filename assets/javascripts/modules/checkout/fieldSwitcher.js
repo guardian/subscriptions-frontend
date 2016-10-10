@@ -11,7 +11,6 @@ define([
     'use strict';
 
     var everything = function(addressObject) {
-
         var $postcode = addressObject.$POSTCODE_CONTAINER,
             $subdivision = addressObject.$SUBDIVISION_CONTAINER,
             countryChoice = countryChoiceFunction(addressObject),
@@ -72,13 +71,41 @@ define([
             var currency = model.currency || guardian.currency;
             localizationSwitcher.set(currency, model.country);
         };
-
+        var initCurrencyOverride = function () {
+            //TODO SEE HOW TO GET THE DOM ELEMENT USING A $ SELECTOR AND CHECK IF I HAVE TO USE ONCLICK INSTEAD OF ONCHANGE FOR THE CHECKBOX
+            var currencyOverrideCheckbox = document.getElementById('currency-override-checkbox');
+            bean.on(currencyOverrideCheckbox, 'change', function () {
+                if (currencyOverrideCheckbox.checked) {
+                    overrideCurrency('GBP');
+                }
+                else {
+                    overrideCurrency('USD');
+                }
+            });
+        };
+        var overrideCurrency = function(currency) {
+            var model = getCurrentState();
+            model.currency = currency;
+            switchCurrency(model);
+        };
+        var switchCurrency = function(model) {
+            switchLocalization(model);
+            checkPlanInput(model.ratePlanId, model.currency);
+            selectPaymentMethod(model.country);
+        };
+        var refreshCurrencyOverride = function (selectedCurrency) {
+            var checkbox = $('#currency-override-label');
+            if (selectedCurrency == 'USD') {
+                checkbox.show();
+            } else {
+                checkbox.hide();
+            }
+        };
         var redraw = function(model) {
             redrawAddressFields(model);
             if (shouldUpdateCurrency) {
-                switchLocalization(model);
-                checkPlanInput(model.ratePlanId, model.currency);
-                selectPaymentMethod(model.country);
+                switchCurrency(model);
+                refreshCurrencyOverride(model.currency);
             }
         };
 
@@ -126,7 +153,8 @@ define([
         };
 
         return {
-            init: init
+            init: init,
+            initCurrencyOverride:initCurrencyOverride
         };
     };
 
@@ -134,6 +162,10 @@ define([
         init: function() {
             everything(formElements.BILLING).init();
             everything(formElements.DELIVERY).init();
+            //see what we can do about the useless parameter
+            everything(formElements.BILLING).initCurrencyOverride();
+
         }
+
     };
 });

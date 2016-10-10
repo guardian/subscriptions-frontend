@@ -20,6 +20,7 @@
 @import views.support.AddressOps
 @import model.DigitalEdition
 
+@import com.gu.memsub.Product.WeeklyROW
 @(
     personalData: Option[PersonalData],
     productData: ProductPopulationData,
@@ -89,6 +90,11 @@
                 @* ===== Plan selection ===== *@
             <div class="checkout-container__sidebar js-basket">
                 @fragments.checkout.basketPreview(productData.plans.default)
+
+                <label id ='currency-override-label' @if(productData.plans.default.product != WeeklyROW) { hidden="true" } >
+                    <input type="checkbox" name="currencyOverride" value="true" id="currency-override-checkbox"> Pay in £GBP
+                </label>
+
                 @if(productData.plans.list.length > 1) {
                     <div class="basket-options-toggle u-note prose">
                         <a class="js-toggle checkout-container__frequency" data-toggle="change-payment-frequency">

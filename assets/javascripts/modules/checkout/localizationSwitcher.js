@@ -5,7 +5,6 @@ define(['$'], function ($) {
        currency: null,
        country: null
     };
-//TODO WE NEED TO SEE IF THE RIGHT ADDRESS IS BEING MODIFIED (DELIVERY FOR WEEKLY, BILLING FOR DIGIPACK)
     var refresh = function () {
         ['currency', 'country'].forEach(function (param) {
             var dataAttr = 'data-' + param;
