@@ -12,7 +12,7 @@ object CountryWithCurrency {
 
   def withCurrency(c: Currency) = all.map(_.copy(currency = c))
 
-  def fromCountryGroup(countryGroup: CountryGroup):List[CountryWithCurrency] = countryGroup.countries.map(c => CountryWithCurrency(c, countryGroup.currency))
+  def fromCountryGroup(countryGroup: CountryGroup): List[CountryWithCurrency] = countryGroup.countries.map(c => CountryWithCurrency(c, countryGroup.currency))
 
   def whitelisted(availableCurrencies: Set[Currency], default: Currency, availableCountryGroups: List[CountryGroup] = CountryGroup.allGroups): List[CountryWithCurrency] = {
     def ensureValidCurrency(group: CountryGroup) = if (availableCurrencies.contains(group.currency)) group else group.copy(currency = default)
@@ -21,3 +21,5 @@ object CountryWithCurrency {
 
   implicit def toCountry(countryWithCurrency: CountryWithCurrency): Country = countryWithCurrency.country
 }
+
+case class CountryAndCurrencySettings(availableCountries: List[CountryWithCurrency], defaultCountry: Option[Country], defaultCurrency: Currency)

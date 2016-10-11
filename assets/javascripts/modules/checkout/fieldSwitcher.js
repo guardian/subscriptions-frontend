@@ -39,7 +39,6 @@ define([
         selectPaymentMethod(model.country);
     };
     var initCurrencyOverride = function () {
-        //TODO SEE HOW TO GET THE DOM ELEMENT USING A $ SELECTOR AND CHECK IF I HAVE TO USE ONCLICK INSTEAD OF ONCHANGE FOR THE CHECKBOX
         var currencyOverrideCheckbox = document.getElementById('currency-override-checkbox');
         bean.on(currencyOverrideCheckbox, 'change', function () {
             if (currencyOverrideCheckbox.checked) {
@@ -94,8 +93,6 @@ define([
 
         var redrawCountryOverride = function (selectedCurrency) {
             $('#currency-override-checkbox').attr('checked', false);
-            //TODO FIGURE OUT WHY USING THIS LINE DOESNT WORK INSTEAD OF THE UGLY CODE BELOW
-            //$('#currency-override-label').toggle(selectedCurrency == 'USD')
 
             var checkboxLabel = $('#currency-override-label');
             if (selectedCurrency == 'USD') {

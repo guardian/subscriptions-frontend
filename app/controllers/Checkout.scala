@@ -1,17 +1,14 @@
 package controllers
-import java.text.NumberFormat.Field
 
 import actions.CommonActions._
 import com.gu.i18n._
 import com.gu.identity.play.ProxiedIP
-import com.gu.memsub.Product.Delivery
 import com.gu.memsub.Subscription.ProductRatePlanId
 import com.gu.memsub.promo.Formatters.PromotionFormatters._
 import com.gu.memsub.promo.Promotion.{AnyPromotion, _}
 import com.gu.memsub.promo.{NewUsers, PromoCode}
-import com.gu.memsub.subsv2.CatalogPlan._
 import com.gu.memsub.subsv2.{CatalogPlan, PaidChargeList}
-import com.gu.memsub.{BillingPeriod, Product, SupplierCode}
+import com.gu.memsub.{ Product, SupplierCode}
 import com.gu.zuora.soap.models.errors._
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config.Identity.webAppProfileUrl
@@ -29,9 +26,6 @@ import services._
 import utils.TestUsers.{NameEnteredInForm, PreSigninTestCookie}
 import views.html.{checkout => view}
 import views.support.{BillingPeriod => _, _}
-
-import scalaz.std.option._
-import scalaz.syntax.applicative._
 import scala.Function.const
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -41,6 +35,14 @@ import scalaz.syntax.applicative._
 import scalaz.{NonEmptyList, OptionT}
 
 object Checkout extends Controller with LazyLogging with CatalogProvider {
+
+  val ukAndIsleOfMan = CountryGroup.UK.copy(countries = List(Country.UK, Country("IM", "Isle of Man")))
+  val weeklyUkNorthAmericaGroups = List (ukAndIsleOfMan, CountryGroup.US, CountryGroup.Canada)
+  val weeklyRowGroups = {
+    val rowUk = CountryGroup("Row Uk", "uk", None, CountryGroup.UK.countries.filterNot(ukAndIsleOfMan.countries.contains(_)), GBP, PostCode)
+    rowUk :: CountryGroup.allGroups.filterNot(group => (CountryGroup.UK :: weeklyUkNorthAmericaGroups) contains group)
+  }
+
 
   import SessionKeys.{Currency => _, UserId => _, _}
 
@@ -58,100 +60,90 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
       idUser <- OptionT(IdentityService.userLookupByCredentials(authUser.credentials))
     } yield idUser).run
 
+
     idUser map { user =>
 
-      val planListEither: Either[PlanList[CatalogPlan.Digipack[BillingPeriod]], PlanList[CatalogPlan.Paper]] = (
-        catalog.delivery.list.find(_.slug == forThisPlan).map(p => PlanList[CatalogPlan.Delivery](p, getBetterPlans(p, catalog.delivery.list):_*)) orElse
-        catalog.voucher.list.find(_.slug == forThisPlan).map(p => PlanList[Voucher](p, getBetterPlans(p, catalog.voucher.list):_*)) orElse
-        catalog.weeklyUK.toList.find(_.slug == forThisPlan).map(p => PlanList[WeeklyUK[BillingPeriod]](p, getBetterPlans(p, catalog.weeklyUK.toList):_*)) orElse
-        catalog.weeklyROW.toList.find(_.slug == forThisPlan).map(p => PlanList[WeeklyROW[BillingPeriod]](p, getBetterPlans(p, catalog.weeklyROW.toList):_*))
-        ).toRight(PlanList(catalog.digipack.month, catalog.digipack.quarter, catalog.digipack.year))
+      val planList: PlanList[CatalogPlan.ContentSubscription] = {
 
-      val plans = planListEither.fold(identity, identity)
-      val supportedCurrencies = plans.default.charges.price.currencies
+        val paperPlans = List(
+          catalog.delivery.list,
+          catalog.voucher.list,
+          catalog.weeklyUK.toList,
+          catalog.weeklyROW.toList)
+
+        def matchingPlanList(planCandidates: List[CatalogPlan.ContentSubscription]) = planCandidates.find(_.slug == forThisPlan).map(p => PlanList(p, getBetterPlans(p, planCandidates): _*))
+
+        val matchingPaperPlan = paperPlans.toIterator.map(matchingPlanList).find(_.isDefined).flatten
+
+        matchingPaperPlan getOrElse PlanList(catalog.digipack.month, catalog.digipack.quarter, catalog.digipack.year)
+      }
+
+      val supportedCurrencies = planList.default.charges.price.currencies
+
       val personalData = user.map(PersonalData.fromIdUser)
 
-      val identityCountry = personalData.flatMap(data => data.address.country)
+      def getSettings(availableCountries: List[CountryWithCurrency], fallbackCountry: Option[Country], fallbackCurrency: Currency) = {
 
-      object CountryAndCurrencySettings {
-        def withIdDefaultsOrFallback(options: List[CountryWithCurrency], fallbackCountry: Option[Country], fallbackCurrency: Currency):CountryAndCurrencySettings = {
+        def availableCountryWithCurrencyFor(country:Option[Country]) = country.flatMap(c => availableCountries.find(_.country == c))
+        val personalDataCountry = personalData.flatMap(data => data.address.country)
 
-          def selectedIdDefault = identityCountry.flatMap(c => options.find(_.country == c))
-          def selectedFallbackDefault = fallbackCountry.flatMap { c => options.find(_.country == c) }
-          val selectedDefault = selectedIdDefault orElse selectedFallbackDefault
+        val defaultCountryWithCurrency = availableCountryWithCurrencyFor(personalDataCountry) orElse availableCountryWithCurrencyFor(fallbackCountry)
 
-          CountryAndCurrencySettings(
-            options = options,
-            defaultCountry = selectedDefault.map(_.country),
-            defaultCurrency = selectedDefault.map(_.currency).getOrElse(fallbackCurrency)
-          )
-        }
+        CountryAndCurrencySettings(
+          availableCountries = availableCountries,
+          defaultCountry = defaultCountryWithCurrency.map(_.country),
+          defaultCurrency = defaultCountryWithCurrency.map(_.currency).getOrElse(fallbackCurrency)
+        )
       }
-      case class CountryAndCurrencySettings(options: List[CountryWithCurrency], defaultCountry: Option[Country], defaultCurrency: Currency)
 
-
-      val ukAndIsleOfMan = CountryGroup.UK.copy(countries = List(Country.UK, Country("IM", "Isle of Man")))
-
-      val rowUk = CountryGroup("Row Uk", "uk", None, CountryGroup.UK.countries.filterNot(ukAndIsleOfMan.countries.contains(_)), GBP, PostCode)
-
-      val weeklyUkNorthAmericaGroups = List (ukAndIsleOfMan, CountryGroup.US, CountryGroup.Canada)
-
-      val weeklyRowGroups = rowUk :: CountryGroup.allGroups.filterNot(group => (CountryGroup.UK :: weeklyUkNorthAmericaGroups) contains group)
-
-      val deliverySettings = CountryAndCurrencySettings.withIdDefaultsOrFallback(
-        options = List(CountryWithCurrency(Country.UK, GBP)),
+      val ukMainLandSettings = getSettings(
+        availableCountries = List(CountryWithCurrency(Country.UK, GBP)),
         fallbackCountry = Some(Country.UK),
         fallbackCurrency = GBP
       )
 
-      val countryAndCurrencySettings = plans.default.product match {
-
-        case Product.Digipack => CountryAndCurrencySettings.withIdDefaultsOrFallback(
-          options = CountryWithCurrency.whitelisted(supportedCurrencies, GBP),
+      val countryAndCurrencySettings = planList.default.product match {
+        case Product.Digipack => getSettings(
+          availableCountries = CountryWithCurrency.whitelisted(supportedCurrencies, GBP),
           fallbackCountry = countryGroup.defaultCountry,
           fallbackCurrency = GBP
         )
-        case Product.Voucher => deliverySettings.copy(options = CountryWithCurrency.fromCountryGroup(ukAndIsleOfMan))
-        case Product.Delivery => deliverySettings
-        case Product.WeeklyUK => CountryAndCurrencySettings.withIdDefaultsOrFallback(
-          options = CountryWithCurrency.whitelisted(supportedCurrencies, GBP, weeklyUkNorthAmericaGroups),
+        case Product.Delivery => ukMainLandSettings
+        case Product.Voucher => ukMainLandSettings.copy(availableCountries = CountryWithCurrency.fromCountryGroup(ukAndIsleOfMan))
+        case Product.WeeklyUK => getSettings(
+          availableCountries = CountryWithCurrency.whitelisted(supportedCurrencies, GBP, weeklyUkNorthAmericaGroups),
           fallbackCountry = Some(Country.UK),
           fallbackCurrency = GBP
         )
-        case Product.WeeklyROW => {
-          CountryAndCurrencySettings.withIdDefaultsOrFallback(
-            options = CountryWithCurrency.whitelisted(supportedCurrencies, USD, weeklyRowGroups),
-            fallbackCountry = None,
-            fallbackCurrency = USD
-          )
-        }
-        //case _ => TODO do something to match all cases?
+        case Product.WeeklyROW => getSettings(
+          availableCountries = CountryWithCurrency.whitelisted(supportedCurrencies, USD, weeklyRowGroups),
+          fallbackCountry = None,
+          fallbackCurrency = USD
+        )
       }
 
-      val defaultCountry = countryAndCurrencySettings.defaultCountry
-      val digitalEdition = model.DigitalEdition.getForCountry(defaultCountry)
+      val digitalEdition = model.DigitalEdition.getForCountry(countryAndCurrencySettings.defaultCountry)
 
       // either a code to send to the form (left) or a tracking code for the session (right)
-      val promo: Either[PromoCode, Seq[(String, String)]] = (promoCode |@| defaultCountry)(
-        tpBackend.promoService.validate[NewUsers](_: PromoCode, _: Country, plans.default.id)
+      val promo: Either[PromoCode, Seq[(String, String)]] = (promoCode |@| countryAndCurrencySettings.defaultCountry)(
+        tpBackend.promoService.validate[NewUsers](_: PromoCode, _: Country, planList.default.id)
       ).flatMap(_.toOption).map(vp => vp.promotion.asTracking.map(_ => Seq(PromotionTrackingCode -> vp.code.get)).toRight(vp.code))
        .getOrElse(Right(Seq.empty))
 
       val resolvedSupplierCode = supplierCode orElse request.session.get(SupplierTrackingCode).map(SupplierCode) // query param wins
       val trackingCodeSessionData = promo.right.toSeq.flatten
       val supplierCodeSessionData = resolvedSupplierCode.map(code => Seq(SupplierTrackingCode -> code.get)).getOrElse(Seq.empty)
-      val productData = ProductPopulationData(user.map(_.address), planListEither)
+      val productData = ProductPopulationData(user.map(_.address), planList)
+
       Ok(views.html.checkout.payment(
         personalData = personalData,
         productData = productData,
-        country = countryAndCurrencySettings.defaultCountry,
         countryGroup = countryGroup,
-        defaultCurrency = countryAndCurrencySettings.defaultCurrency,
-        countriesWithCurrency = countryAndCurrencySettings.options,
         touchpointBackendResolution = resolution,
         promoCode = promo.left.toOption,
         supplierCode = resolvedSupplierCode,
-        edition = digitalEdition
+        edition = digitalEdition,
+        countryAndCurrencySettings = countryAndCurrencySettings
       )).withSession(trackingCodeSessionData ++ supplierCodeSessionData:_*)
     }
   }

@@ -10,6 +10,9 @@ define(['$'], function ($) {
             var dataAttr = 'data-' + param;
             $('[' + dataAttr + ']').each(function(el) {
                 var $el = $(el);
+                if ($el.attr('type') == 'hidden'){
+                    $el.val(model[param]);
+                } else
                 if ($el.attr(dataAttr) === model[param]) {
                     $el.show();
                 } else {
@@ -20,16 +23,9 @@ define(['$'], function ($) {
                 }
             });
         });
-    //TODO check if there is a way or reusing the code above or do something more general than this
-    updateHiddenCurrency();
+
     };
 
-    var updateHiddenCurrency = function () {
-        $('[data-hidden-currency]').each(function (el) {
-            var $el = $(el);
-            $el.val(model['currency']);
-        });
-    }
     var set = function (currency, country) {
         model.currency = currency;
         model.country = country;

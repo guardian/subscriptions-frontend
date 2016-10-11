@@ -21,17 +21,16 @@
 @import model.DigitalEdition
 
 @import com.gu.memsub.Product.WeeklyROW
+@import views.support.CountryAndCurrencySettings
 @(
     personalData: Option[PersonalData],
     productData: ProductPopulationData,
-    country: Option[Country],
     countryGroup: CountryGroup,
-    defaultCurrency: Currency,
-    countriesWithCurrency: List[CountryWithCurrency],
     touchpointBackendResolution: services.TouchpointBackend.Resolution,
     promoCode: Option[PromoCode],
     supplierCode: Option[SupplierCode],
-    edition: DigitalEdition
+    edition: DigitalEdition,
+    countryAndCurrencySettings: CountryAndCurrencySettings
 )(implicit request: RequestHeader)
 
 @priceOption(plan: CatalogPlan.Paid, currency: Currency) = {
@@ -49,7 +48,7 @@
             data-number-of-months="@plan.charges.billingPeriod.numberOfMonths"
             data-currency="@currency"
             value="@plan.id.get"
-            @if(plan == productData.plans.default && currency == defaultCurrency){ checked="checked" }
+            @if(plan == productData.plans.default && currency == countryAndCurrencySettings.defaultCurrency){ checked="checked" }
             >
         </span>
         <span class="option__label" id="label-for-@plan.id.get-@currency" title="@plan.title">@plan.prettyName(currency)</span>
@@ -65,7 +64,7 @@
 
 @main(
     title = s"Details - name and address | Subscribe to the ${productData.plans.default.title} | The Guardian",
-    jsVars = JsVars(userIsSignedIn = personalData.isDefined, ignorePageLoadTracking = true, currency = defaultCurrency, country = country),
+    jsVars = JsVars(userIsSignedIn = personalData.isDefined, ignorePageLoadTracking = true, currency = countryAndCurrencySettings.defaultCurrency, country = countryAndCurrencySettings.defaultCountry),
     bodyClasses = List("is-wide"),
     touchpointBackendResolutionOpt = Some(touchpointBackendResolution),
     plan = Some(productData.plans.default),
@@ -160,8 +159,10 @@
                             <a href="#yourDetails" class="text-button u-button-reset js-edit-your-details" title="Edit your personal details">Edit</a>
                         </div>
                         <div class="field-panel__fields">
-                            @fragments.checkout.fieldsPersonal(personalData, countriesWithCurrency)
-                            @continueButton(productData.planEither.fold(_ => "#deliveryDetails", _ => "#billingAddress"), "js-checkout-your-details-submit")
+                            @fragments.checkout.fieldsPersonal(personalData, countryAndCurrencySettings.availableCountries)
+                            @defining(if(productData.isDigitalPack) "#billingAddress" else "#deliveryDetails") { goto =>
+                                @continueButton(goto, "js-checkout-your-details-submit")
+                            }
                         </div>
                     </fieldset>
                 </div>
@@ -175,9 +176,9 @@
                                 </legend>
                                 <div class="field-panel__fields">
                                     @if(productData.isHomeDelivery || productData.isGuardianWeekly) {
-                                        @fragments.checkout.fieldsDelivery(productData, countriesWithCurrency)
+                                        @fragments.checkout.fieldsDelivery(productData, countryAndCurrencySettings.availableCountries)
                                     }else{
-                                        @fragments.checkout.fieldsVoucher(productData, countriesWithCurrency)
+                                        @fragments.checkout.fieldsVoucher(productData, countryAndCurrencySettings.availableCountries)
                                     }
                                     @continueButton("#paymentDetails", "js-checkout-delivery-details-submit")
                                 </div>
@@ -188,7 +189,7 @@
                         </div>
                 }
 
-                <input type="hidden" name="currency" value="@defaultCurrency" data-hidden-currency="true">
+                <input type="hidden" name="currency" value="@countryAndCurrencySettings.defaultCountry" data-currency="true">
 
                 @* ===== Billing details ===== *@
                 <div id="billingAddress" class="field-panel is-collapsed js-fieldset-billing-address">
@@ -200,7 +201,7 @@
                             <a href="#yourDetails" class="text-button u-button-reset js-edit-billing-address" title="Edit your personal details">Edit</a>
                         </div>
                         <div class="field-panel__fields">
-                            @fragments.checkout.fieldsBilling(personalData.map(_.address), canBeHidden = productData.planEither.isRight, countriesWithCurrency, productData.plans.default, !productData.isPhysical)
+                            @fragments.checkout.fieldsBilling(personalData.map(_.address), canBeHidden = !productData.isDigitalPack, countryAndCurrencySettings.availableCountries, productData.plans.default, !productData.isPhysical)
                             @continueButton("#paymentDetails", "js-checkout-billing-address-submit")
                         </div>
                     </fieldset>
