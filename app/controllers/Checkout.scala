@@ -37,9 +37,17 @@ import scalaz.{NonEmptyList, OptionT}
 object Checkout extends Controller with LazyLogging with CatalogProvider {
 
   val ukAndIsleOfMan = CountryGroup.UK.copy(countries = List(Country.UK, Country("IM", "Isle of Man")))
-  val weeklyUkNorthAmericaGroups = List (ukAndIsleOfMan, CountryGroup.US, CountryGroup.Canada)
+  val weeklyUkCountries = CountryGroup.UK.copy(
+    countries = List(
+      Country.UK,
+      Country("GG", "Guernsey"),
+      Country("IM", "Isle of Man"),
+      Country("JE", "Jersey")
+    ))
+
+  val weeklyUkNorthAmericaGroups = List (weeklyUkCountries, CountryGroup.US, CountryGroup.Canada)
   val weeklyRowGroups = {
-    val rowUk = CountryGroup("Row Uk", "uk", None, CountryGroup.UK.countries.filterNot(ukAndIsleOfMan.countries.contains(_)), GBP, PostCode)
+    val rowUk = CountryGroup("Row Uk", "uk", None, CountryGroup.UK.countries.filterNot(weeklyUkCountries.countries.contains(_)), GBP, PostCode)
     rowUk :: CountryGroup.allGroups.filterNot(group => (CountryGroup.UK :: weeklyUkNorthAmericaGroups) contains group)
   }
 
