@@ -3,13 +3,17 @@ define([
     'modules/forms/checkFields',
     'modules/checkout/formElements',
     'modules/checkout/eventTracking',
-    'modules/checkout/impressionTracking'
+    'modules/checkout/impressionTracking',
+    'modules/checkout/reviewDetails',
+    'modules/checkout/paymentDetails'
 ], function (
     bean,
     checkFields,
     formEls,
     eventTracking,
-    impressionTracking
+    impressionTracking,
+    reviewDetails,
+    paymentDetails
 ) {
     'use strict';
 
@@ -26,6 +30,11 @@ define([
 
         eventTracking.completedBillingDetails();
         impressionTracking.paymentDetailsTracking();
+        reviewDetails.repopulateDetails();
+        //                                     you didn't see this \/
+        if(formEls.$FIELDSET_PAYMENT_DETAILS[0].offsetHeight == 0){
+            paymentDetails.nextStep();
+        }
     }
 
     function handleValidation() {

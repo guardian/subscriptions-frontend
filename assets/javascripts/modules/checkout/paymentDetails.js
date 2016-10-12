@@ -1,3 +1,5 @@
+/* global guardian  */
+
 define([
     'bean',
     'utils/ajax',
@@ -10,19 +12,17 @@ define([
     'lodash/collection/find',
     'modules/forms/loader',
     'lodash/object/assign'
-], function (
-    bean,
-    ajax,
-    toggleError,
-    formEls,
-    displayCardImg,
-    payment,
-    eventTracking,
-    impressionTracking,
-    find,
-    loader,
-    assign
-) {
+], function (bean,
+             ajax,
+             toggleError,
+             formEls,
+             displayCardImg,
+             payment,
+             eventTracking,
+             impressionTracking,
+             find,
+             loader,
+             assign) {
     'use strict';
 
     var FIELDSET_COMPLETE = 'is-complete';
@@ -56,7 +56,9 @@ define([
     }
 
     function handleValidation() {
-        var paymentMethod = find(formEls.$PAYMENT_METHOD, function(elem) {return elem.checked}).value;
+        var paymentMethod = find(formEls.$PAYMENT_METHOD, function (elem) {
+            return elem.checked
+        }).value;
         var paymentDetails = {paymentMethod: paymentMethod};
 
         if (paymentMethod === 'direct-debit') {
@@ -75,12 +77,12 @@ define([
                 cardExpiryYear: formEls.$CARD_EXPIRY_YEAR.val()
             });
         } else {
-            throw new Error('Invalid payment method '+paymentMethod);
+            throw new Error('Invalid payment method ' + paymentMethod);
         }
 
         loader.setLoaderElem(document.querySelector('.js-payment-details-validating'));
         loader.startLoader();
-        payment.validate(paymentDetails).then(function(validity) {
+        payment.validate(paymentDetails).then(function (validity) {
             loader.stopLoader();
             displayErrors(validity);
             if (validity.allValid) {
@@ -92,14 +94,15 @@ define([
     function init() {
         var $actionEl = formEls.$PAYMENT_DETAILS_SUBMIT;
         if ($actionEl.length) {
-            bean.on($actionEl[0], 'click', function (evt) {
-                evt.preventDefault();
-                handleValidation();
-            });
+                bean.on($actionEl[0], 'click', function (evt) {
+                    evt.preventDefault();
+                    handleValidation();
+                });
         }
 
         var $cardNumberEl = formEls.$CARD_NUMBER;
         if ($cardNumberEl.length) {
+
             bean.on($cardNumberEl[0], 'keyup blur', function (e) {
                 var input = e && e.target;
                 displayCardImg(input.value);
@@ -108,7 +111,8 @@ define([
     }
 
     return {
-        init: init
+        init: init,
+        nextStep: nextStep
     };
 
 });

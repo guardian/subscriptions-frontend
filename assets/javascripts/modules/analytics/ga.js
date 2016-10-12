@@ -60,6 +60,10 @@ define(['modules/analytics/analyticsEnabled',
         }
 
         ga('membershipPropertyTracker.set', 'dimension13', isCustomerAgent);  // customerAgent
+        if('stripeCheckout' in window.guardian){
+            ga('membershipPropertyTracker.set', 'dimension16', guardian.stripeCheckout?'stripeCheckout':'stripeJS');  // Stripe checkout test
+
+        }
 
         if (camCodeBusinessUnit && camCodeBusinessUnit[1]) {
             ga('membershipPropertyTracker.set', 'dimension14', camCodeBusinessUnit[1]);  // CamCodeBusinessUnit

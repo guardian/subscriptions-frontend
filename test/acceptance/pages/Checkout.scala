@@ -1,6 +1,6 @@
 package acceptance.pages
 
-import acceptance.util.{Browser, TestUser, Config}
+import acceptance.util.{Browser, Config, Driver, TestUser}
 import Config.baseUrl
 import org.scalatest.selenium.Page
 
@@ -29,6 +29,10 @@ case class Checkout(testUser: TestUser, endpoint: String = "checkout") extends P
 
   def fillInCreditCardPaymentDetails(): Unit = CreditCardPaymentDetails.fillIn()
 
+  def fillInCreditCardPaymentDetailsStripe(): Unit = StripeCheckout.fillIn()
+
+  def setInStripeTest(b: Boolean) = StripeCheckout.setInTest(b)
+
   def clickCredictCardPaymentContinueButton() = CreditCardPaymentDetails.continue()
 
   def selectCreditCardPaymentOption() = setRadioButtonValue(CreditCardPaymentDetails.paymentType, "card")
@@ -44,6 +48,8 @@ case class Checkout(testUser: TestUser, endpoint: String = "checkout") extends P
   def billingAddressSectionHasLoaded(): Boolean = pageHasElement(BillingAddress.continueButton)
 
   def cardSectionHasLoaded(): Boolean = pageHasElement(CreditCardPaymentDetails.continueButton)
+
+  def stripeCheckoutHasLoaded(): Boolean = pageHasElement(StripeCheckout.container)
 
   def reviewSectionHasLoaded(): Boolean = pageHasElement(ReviewSection.submitPaymentButton)
 
@@ -165,5 +171,42 @@ case class Checkout(testUser: TestUser, endpoint: String = "checkout") extends P
 
   private object ReviewSection {
     val submitPaymentButton = cssSelector(".js-checkout-submit")
+  }
+
+  private object StripeCheckout {
+    val container = name("stripe_checkout_app")
+    val cardNumber = id("card_number")
+    val cardExp = id("cc-exp")
+    val cardCvc = id("cc-csc")
+    val submitButton = id("submitButton")
+
+    def setInTest(inTest: Boolean) = Driver.addCookie("gu.subscriptions.test.id",if(inTest){"2"}else{"1"})
+
+    private def fillInHelper(cardNum: String) = {
+      setValue(cardNumber, "4242424242424242")
+      setValue(cardExp, "1019")
+      setValue(cardCvc, "111")
+    }
+
+    def fillIn(): Unit = fillInHelper("4242424242424242")
+
+    /* https://stripe.com/docs/testing */
+
+    // Charge will be declined with a card_declined code.
+    def fillInCardDeclined(): Unit = fillInHelper("4000000000000002")
+
+    // Charge will be declined with a card_declined code and a fraudulent reason.
+    def fillInCardDeclinedFraud(): Unit = fillInHelper("4100000000000019")
+
+    // Charge will be declined with an incorrect_cvc code.
+    def fillInCardDeclinedCvc(): Unit = fillInHelper("4000000000000127")
+
+    // Charge will be declined with an expired_card code.
+    def fillInCardDeclinedExpired(): Unit = fillInHelper("4000000000000069")
+
+    // Charge will be declined with a processing_error code.
+    def fillInCardDeclinedProcessError(): Unit = fillInHelper("4000000000000119")
+
+    def continue(): Unit = clickOn(submitButton)
   }
 }

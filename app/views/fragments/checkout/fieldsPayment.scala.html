@@ -1,4 +1,4 @@
-@()
+@(stripeCheckout: Boolean)
 
 @* ===== Payment type ===== *@
 
@@ -25,11 +25,15 @@
         </div>
     </div>
 </div>
-
+<input type="hidden" name="payment.token" class="js-payment-token"/>
 <div class="payment-type payment-type--direct-debit js-payment-type-direct-debit" data-country="GB">
     @fragments.checkout.fieldsDirectDebit()
 </div>
 
 <div class="payment-type payment-type--card js-payment-type-card">
-    @fragments.checkout.fieldsCard()
+    @if(stripeCheckout){
+        @fragments.checkout.fieldsStripeCheckout()
+    }else {
+        @fragments.checkout.fieldsCard()
+    }
 </div>
