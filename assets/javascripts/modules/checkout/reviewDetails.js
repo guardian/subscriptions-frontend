@@ -10,19 +10,17 @@ define([
     'modules/checkout/eventTracking',
     'modules/checkout/stripeErrorMessages',
     'modules/raven'
-], function (
-    bean,
-    ajax,
-    textUtils,
-    serializer,
-    loader,
-    toggleError,
-    formEls,
-    payment,
-    eventTracking,
-    paymentErrorMessages,
-    raven
-) {
+], function (bean,
+             ajax,
+             textUtils,
+             serializer,
+             loader,
+             toggleError,
+             formEls,
+             payment,
+             eventTracking,
+             paymentErrorMessages,
+             raven) {
     'use strict';
 
     var FIELDSET_COLLAPSED = 'is-collapsed';
@@ -36,7 +34,9 @@ define([
         }
     }
 
-    function populateDetails() {
+    function populateDetails(token) {
+        console.log('populatin details');
+        console.log(token);
         formEls.$REVIEW_NAME.text(textUtils.mergeValues([
             formEls.$TITLE.val(),
             formEls.$FIRST_NAME.val(),
@@ -82,11 +82,11 @@ define([
         formEls.$REVIEW_SORTCODE.text(formEls.$SORTCODE.val());
         formEls.$REVIEW_HOLDER.text(formEls.$HOLDER.val());
 
-        var obscuredCardNumber = textUtils.obscure(formEls.$CARD_NUMBER.val(), 4, '*');
+        var obscuredCardNumber = token ? "**** **** **** " + token.card.last4 : textUtils.obscure(formEls.$CARD_NUMBER.val(), 4, '*');
         formEls.$REVIEW_CARD_NUMBER.text(obscuredCardNumber);
         formEls.$REVIEW_CARD_EXPIRY.text(textUtils.mergeValues([
-            formEls.$CARD_EXPIRY_MONTH.val(),
-            formEls.$CARD_EXPIRY_YEAR.val()
+            token ? token.card.exp_month : formEls.$CARD_EXPIRY_MONTH.val(),
+            token ? token.card.exp_year : formEls.$CARD_EXPIRY_YEAR.val()
         ], '/'));
 
         formEls.$REVIEW_DELIVERY_INSTRUCTIONS.text(formEls.getDeliveryInstructions().val());
@@ -94,7 +94,9 @@ define([
     }
 
     function registerPopulateDetails() {
-        clickHelper(formEls.$PAYMENT_DETAILS_SUBMIT, populateDetails);
+        if (!guardian.stripeCheckout) {
+            clickHelper(formEls.$PAYMENT_DETAILS_SUBMIT, populateDetails);
+        }
     }
 
     function submitHandler() {
@@ -103,7 +105,7 @@ define([
             submitEl = formEls.$CHECKOUT_SUBMIT[0];
 
             var form = formEls.$CHECKOUT_FORM[0];
-            form.addEventListener('submit', function(e) {
+            form.addEventListener('submit', function (e) {
                 e.preventDefault();
 
                 loader.setLoaderElem(document.querySelector('.js-loader'));
@@ -112,19 +114,16 @@ define([
 
                 var data = serializer([].slice.call(form.elements));
 
-                if (data['payment.type'] === 'card') {
-                    data['payment.token'] = payment.getStripeToken();
-                }
 
                 ajax({
                     url: '/checkout',
                     method: 'post',
                     data: data,
-                    success: function(successData) {
+                    success: function (successData) {
                         eventTracking.completedReviewDetails();
                         window.location.assign(successData.redirect);
                     },
-                    error: function(err) {
+                    error: function (err) {
                         loader.stopLoader();
                         submitEl.removeAttribute('disabled');
 

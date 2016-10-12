@@ -47,6 +47,7 @@
             data-name="@plan.name"
             data-number-of-months="@plan.charges.billingPeriod.numberOfMonths"
             data-currency="@currency"
+            data-stripe-button="Pay {{amount}}"
             value="@plan.id.get"
             @if(plan == productData.plans.default && currency == defaultCurrency){ checked="checked" }
             >

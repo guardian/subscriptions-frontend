@@ -118,4 +118,6 @@ object Config {
 
   val suspendableWeeks = 6
 
+  val stripeCheckout = config.getBoolean("stripe.checkout.flag")
+
 }
