@@ -12,7 +12,7 @@ import com.gu.memsub.subsv2.Catalog
 import com.gu.salesforce.ContactId
 import com.gu.stripe.Stripe
 import com.gu.zuora.api.ZuoraService
-import com.gu.zuora.soap.models.Commands.{RatePlan, Subscribe}
+import com.gu.zuora.soap.models.Commands.{RatePlan, Subscribe, PaymentMethod, Account}
 import com.gu.zuora.soap.models.Results.SubscribeResult
 import com.gu.zuora.soap.models.errors._
 import com.typesafe.scalalogging.LazyLogging
@@ -69,7 +69,8 @@ class CheckoutService(identityService: IdentityService,
       purchaserIds = PurchaserIdentifiers(memberId, idMinimalUser)
       payment <- EitherT(createPaymentType(requestData, purchaserIds, subscriptionData))
       defaultPaymentDelay = CheckoutService.paymentDelay(subscriptionData.productData, zuoraProperties)
-      subscribe <- EitherT(createSubscribeRequest(personalData, requestData, plan, purchaserIds, payment, Some(defaultPaymentDelay)))
+      paymentMethod <- EitherT(attachPaymentMethodToStripeCustomer(payment, purchaserIds))
+      subscribe = createSubscribeRequest(personalData, requestData, plan, purchaserIds, paymentMethod, payment.makeAccount, Some(defaultPaymentDelay))
       validPromotion = promoCode.flatMap(promoService.validate[NewUsers](_, personalData.address.country.getOrElse(Country.UK), subscriptionData.productRatePlanId).toOption)
       withPromo = validPromotion.map(v => p.apply(v, prpId => catalog.paid.find(_.id == prpId).map(_.charges.billingPeriod).get, promoPlans)(subscribe)).getOrElse(subscribe)
       result <- EitherT(createSubscription(withPromo, purchaserIds))
@@ -159,35 +160,38 @@ class CheckoutService(identityService: IdentityService,
     }
   }
 
+  private def attachPaymentMethodToStripeCustomer(payment: PaymentService#Payment, purchaserIds: PurchaserIdentifiers): Future[NonEmptyList[SubsError] \/ PaymentMethod] =
+    payment.makePaymentMethod.map(\/.right).recover {
+        case e: Stripe.Error =>
+          \/.left(NonEmptyList(CheckoutStripeError(
+            purchaserIds,
+            e,
+            s"$purchaserIds could not subscribe because payment method could not be attached to Stripe customer",
+            errorResponse = Some(e.getMessage))))
+
+        case e => \/.left(NonEmptyList(CheckoutGenericFailure(
+          purchaserIds,
+          s"$purchaserIds could not subscribe during checkout")))
+      }
+
   private def createSubscribeRequest(
       personalData: PersonalData,
       requestData: SubscriptionRequestData,
       plan: RatePlan,
       purchaserIds: PurchaserIdentifiers,
-      payment: PaymentService#Payment,
-      paymentDelay: Option[Days]): Future[NonEmptyList[SubsError] \/ Subscribe] = {
+      paymentMethod: PaymentMethod,
+      acc: Account,
+      paymentDelay: Option[Days]): Subscribe =
 
-    payment.makePaymentMethod.map { method =>
-      \/.right(Subscribe(
-        account = payment.makeAccount, Some(method),
-        ratePlans = NonEmptyList(plan),
-        name = personalData,
-        address = personalData.address,
-        paymentDelay = paymentDelay,
-        ipAddress = requestData.ipAddress.map(_.getHostAddress),
-        supplierCode = requestData.supplierCode
-      ))
-    }.recover {
-      case e: Stripe.Error => \/.left(NonEmptyList(CheckoutStripeError(
-        purchaserIds,
-        e,
-        s"$purchaserIds could not subscribe during checkout due to Stripe API error")))
-
-      case e => \/.left(NonEmptyList(CheckoutGenericFailure(
-        purchaserIds,
-        s"$purchaserIds could not subscribe during checkout")))
-    }
-  }
+    Subscribe(
+      account = acc, Some(paymentMethod),
+      ratePlans = NonEmptyList(plan),
+      name = personalData,
+      address = personalData.address,
+      paymentDelay = paymentDelay,
+      ipAddress = requestData.ipAddress.map(_.getHostAddress),
+      supplierCode = requestData.supplierCode
+    )
 
   private def createSubscription(
       subscribe: Subscribe,
