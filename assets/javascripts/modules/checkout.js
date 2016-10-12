@@ -60,10 +60,13 @@ define([
                 }
             });
         }
-
-        curl('js!stripe').then(function() {
-            Stripe.setPublishableKey(guardian.stripePublicKey);
-        });
+        if(guardian.stripeCheckout){
+            curl('js!stripeCheckout');
+        } else {
+            curl('js!stripe').then(function () {
+                Stripe.setPublishableKey(guardian.stripePublicKey);
+            });
+        }
     }
 
     return {

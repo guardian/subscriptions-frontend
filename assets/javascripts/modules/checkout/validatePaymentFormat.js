@@ -27,10 +27,10 @@ define(['modules/forms/regex'], function (regex) {
                 data.accountHolderName.length <= 18
             );
 
-            validity.sortCodeValid = data.sortCode && (data.sortCode.split('-')).filter(function(code) {
-                var codeAsNumber = parseInt(code, 10);
-                return codeAsNumber >= 0 && codeAsNumber <= 99;
-            }).length === 3;
+            validity.sortCodeValid = data.sortCode && (data.sortCode.split('-')).filter(function (code) {
+                    var codeAsNumber = parseInt(code, 10);
+                    return codeAsNumber >= 0 && codeAsNumber <= 99;
+                }).length === 3;
 
             validity.detailsConfirmedValid = data.detailsConfirmed;
 
@@ -40,7 +40,16 @@ define(['modules/forms/regex'], function (regex) {
                 validity.sortCodeValid &&
                 validity.detailsConfirmedValid
             );
-        } else {
+            return validity;
+
+        }
+
+        if (guardian.stripeCheckout && data.paymentMethod === 'card') {
+            validity.allValid = true;
+            return validity;
+
+        }
+        if (data.paymentMethod === 'card') {
             validity.cardNumberValid = Stripe.card.validateCardNumber(data.cardNumber);
             validity.cardCVCValid = Stripe.card.validateCVC(data.cardCVC);
             validity.cardExpiryValid = Stripe.card.validateExpiry(data.cardExpiryMonth, data.cardExpiryYear);
@@ -50,10 +59,10 @@ define(['modules/forms/regex'], function (regex) {
                 validity.cardCVCValid &&
                 validity.cardExpiryValid
             );
+            return validity;
         }
 
 
-        return validity;
     };
 
 });
