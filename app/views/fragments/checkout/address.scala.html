@@ -5,7 +5,7 @@
 @import views.support.CountryWithCurrency
 @import views.support.PlanOps._
 
-@(address: Option[Address], namePrefix: String, countriesWithCurrency: List[CountryWithCurrency], plan: CatalogPlan.Paid)
+@(address: Option[Address], namePrefix: String, countriesWithCurrency: List[CountryWithCurrency], plan: CatalogPlan.Paid, usePostcodeLookup: Boolean)
 
 
 @attrs(field: String) = @{
@@ -16,8 +16,35 @@
     Html(s"for='${(namePrefix + "-" + field).replace('.', '-')}'")
 }
 
+@postcode = {
+    <div class="form-field js-checkout-postcode"
+        @if(plan.isHomeDelivery) {
+            data-validate-for="@namePrefix"
+            data-validation-url="@routes.Checkout.validateDelivery("").path.replaceFirst("\\?.*", "")"
+            data-error-message="Sorry, we cannot deliver a paper to an address with this postcode. Please call Customer Services on: @plan.phone or press Back to purchase a voucher subscription."
+        }>
+        <label class="label" @labelFor("postcode")>Postcode</label>
+        @if(usePostcodeLookup) {
+            <div class="address-finder">
+                <input type="text" class="input-text js-input input-text input-text--small" @attrs("postcode") value="@address.map(_.postCode)" maxlength="10" required>
+                <button class="button button--secondary button--large button--no-arrow js-checkout-address-finder">Find address</button>
+                <div>@fragments.forms.errorMessage("Please enter a valid postal code")</div>
+                <div>
+                    <div class="js-checkout-address-chooser"></div>
+                </div>
+            </div>
+        } else {
+            <input type="text" class="input-text js-input input-text input-text--small" @attrs("postcode") value="@address.map(_.postCode)" maxlength="10" required>
+            <div>@fragments.forms.errorMessage("Please enter a valid postal code")</div>
+        }
+    </div>
+}
+
 @* ===== Address ===== *@
 <div class="js-checkout-@{namePrefix.replace('.', '-')}">
+    @if(usePostcodeLookup) {
+        @postcode
+    }
     <div class="form-field js-checkout-house">
         <label class="label" @labelFor("address1")>Address line 1</label>
         @* Salesforce accepts up to 255 chars but this field gets concatenated with address line 2 *@
@@ -55,17 +82,9 @@
         <select @attrs("subdivision") class="js-input"></select>
         @fragments.forms.errorMessage("Please enter a valid state/county")
     </div>
-    <div class="form-field js-checkout-postcode"
-        @if(plan.isHomeDelivery) {
-            data-validate-for="@namePrefix"
-            data-validation-url="@routes.Checkout.validateDelivery("").path.replaceFirst("\\?.*", "")"
-            data-error-message="Sorry, we cannot deliver a paper to an address with this postcode. Please call Customer Services on: @plan.phone or press Back to purchase a voucher subscription."
-        }>
-        <label class="label" @labelFor("postcode")>Postcode</label>
-        <input type="text" class="input-text js-input input-text input-text--small" @attrs("postcode")
-        value="@address.map(_.postCode)" maxlength="10" required>
-        @fragments.forms.errorMessage("Please enter a valid postal code")
-    </div>
+    @if(!usePostcodeLookup) {
+        @postcode
+    }
 </div>
 
 
