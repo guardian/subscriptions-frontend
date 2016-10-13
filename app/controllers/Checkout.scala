@@ -47,10 +47,10 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
       Country("JE", "Jersey")
     ))
 
-  val weeklyUkNorthAmericaGroups = List (weeklyUkCountries, CountryGroup.US, CountryGroup.Canada)
-  val weeklyRowGroups = {
+  val weeklyZoneAGroups = List (weeklyUkCountries, CountryGroup.US, CountryGroup.Canada)
+  val weeklyZoneBGroups = {
     val rowUk = CountryGroup("Row Uk", "uk", None, CountryGroup.UK.countries.filterNot(weeklyUkCountries.countries.contains(_)), GBP, PostCode)
-    rowUk :: CountryGroup.allGroups.filterNot(group => (CountryGroup.UK :: weeklyUkNorthAmericaGroups) contains group)
+    rowUk :: CountryGroup.allGroups.filterNot(group => (CountryGroup.UK :: weeklyZoneAGroups) contains group)
   }
 
 
@@ -121,12 +121,12 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
         case Product.Delivery => ukMainLandSettings
         case Product.Voucher => ukMainLandSettings.copy(availableCountries = CountryWithCurrency.fromCountryGroup(ukAndIsleOfMan))
         case Product.WeeklyZoneA => getSettings(
-          availableCountries = CountryWithCurrency.whitelisted(supportedCurrencies, GBP, weeklyUkNorthAmericaGroups),
+          availableCountries = CountryWithCurrency.whitelisted(supportedCurrencies, GBP, weeklyZoneAGroups),
           fallbackCountry = Some(Country.UK),
           fallbackCurrency = GBP
         )
         case Product.WeeklyZoneB => getSettings(
-          availableCountries = CountryWithCurrency.whitelisted(supportedCurrencies, USD, weeklyRowGroups),
+          availableCountries = CountryWithCurrency.whitelisted(supportedCurrencies, USD, weeklyZoneBGroups),
           fallbackCountry = None,
           fallbackCurrency = USD
         )
