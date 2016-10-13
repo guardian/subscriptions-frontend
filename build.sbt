@@ -51,6 +51,7 @@ libraryDependencies ++= Seq(
     "org.scalatest" %% "scalatest" % scalatestVersion % "test",
     "org.scalactic" %% "scalactic" % scalatestVersion % "test",
     "org.seleniumhq.selenium" % "selenium-java" % "2.53.1" % "test",
+    "io.github.bonigarcia" % "webdrivermanager" % "1.4.9" % "test",
     "com.gocardless" % "gocardless-pro" % "1.16.0",
     "com.squareup.okhttp3" % "okhttp" % "3.4.1" % "test",
     "org.scalaz" %% "scalaz-core" % "7.1.3",

@@ -1,10 +1,11 @@
 package acceptance.util
 
 import java.net.URL
-import org.openqa.selenium.firefox.FirefoxDriver
+import org.openqa.selenium.firefox.MarionetteDriver
 import org.openqa.selenium.{Cookie, WebDriver}
 import org.openqa.selenium.remote.{RemoteWebDriver, DesiredCapabilities}
 import scala.collection.JavaConverters._
+import io.github.bonigarcia.wdm.MarionetteDriverManager
 
 /** There should be only a single instance of WebDriver (Singleton Pattern) */
 object Driver {
@@ -30,9 +31,8 @@ object Driver {
       instantiateRemoteBrowser()
 
   private def instantiateLocalBrowser(): WebDriver = {
-    val capabilities = DesiredCapabilities.firefox()
-    capabilities.setCapability("marionette", true)
-    new FirefoxDriver(capabilities)
+    MarionetteDriverManager.getInstance().setup()
+    new MarionetteDriver()
   }
 
   private def instantiateRemoteBrowser(): WebDriver = {
