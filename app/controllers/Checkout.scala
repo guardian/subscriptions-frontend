@@ -72,7 +72,6 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
 
 
     idUser map { user =>
-      println(catalog.weeklyZoneB.quarter.slug)
       val planList: PlanList[CatalogPlan.ContentSubscription] = {
 
         val paperPlans = List(
