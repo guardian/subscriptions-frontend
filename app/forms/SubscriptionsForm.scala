@@ -4,7 +4,6 @@ import com.gu.i18n.{CountryGroup, Currency, Title}
 import com.gu.memsub.Address
 import com.gu.memsub.Subscription.ProductRatePlanId
 import com.gu.memsub.promo.PromoCode
-import com.gu.memsub.services.CatalogService
 import com.gu.memsub.subsv2.CatalogPlan
 import com.gu.memsub.subsv2.Catalog
 import com.gu.memsub.BillingPeriod
@@ -28,7 +27,7 @@ class SubscriptionsForm(catalog: Catalog) {
   }
 
   implicit val pf2 = new Formatter[CatalogPlan.Paper] {
-    val validPlans = catalog.delivery.list ++ catalog.voucher.list ++ catalog.weeklyUK.toList ++ catalog.weeklyROW.toList
+    val validPlans = catalog.delivery.list ++ catalog.voucher.list ++ catalog.weeklyZoneA.toList ++ catalog.weeklyZoneB.toList
     override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], CatalogPlan.Paper] =
       data.get(key).map(ProductRatePlanId).flatMap(prpId => validPlans.find(_.id == prpId)).toRight(Seq(FormError(key, "Bad plan")))
     override def unbind(key: String, value: CatalogPlan.Paper): Map[String, String] =

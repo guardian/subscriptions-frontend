@@ -3,12 +3,13 @@ package controllers
 import actions.CommonActions._
 import com.gu.i18n._
 import com.gu.identity.play.ProxiedIP
+import com.gu.memsub.Product.WeeklyZoneB
 import com.gu.memsub.Subscription.ProductRatePlanId
 import com.gu.memsub.promo.Formatters.PromotionFormatters._
 import com.gu.memsub.promo.Promotion.{AnyPromotion, _}
 import com.gu.memsub.promo.{NewUsers, PromoCode}
 import com.gu.memsub.subsv2.{CatalogPlan, PaidChargeList}
-import com.gu.memsub.{ Product, SupplierCode}
+import com.gu.memsub.{Product, SupplierCode}
 import com.gu.zuora.soap.models.errors._
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config.Identity.webAppProfileUrl
@@ -26,6 +27,7 @@ import services._
 import utils.TestUsers.{NameEnteredInForm, PreSigninTestCookie}
 import views.html.{checkout => view}
 import views.support.{BillingPeriod => _, _}
+
 import scala.Function.const
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -70,14 +72,14 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
 
 
     idUser map { user =>
-
+      println(catalog.weeklyZoneB.quarter.slug)
       val planList: PlanList[CatalogPlan.ContentSubscription] = {
 
         val paperPlans = List(
           catalog.delivery.list,
           catalog.voucher.list,
-          catalog.weeklyUK.toList,
-          catalog.weeklyROW.toList)
+          catalog.weeklyZoneA.toList,
+          catalog.weeklyZoneB.toList)
 
         def matchingPlanList(planCandidates: List[CatalogPlan.ContentSubscription]) = planCandidates.find(_.slug == forThisPlan).map(p => PlanList(p, getBetterPlans(p, planCandidates): _*))
 
@@ -118,12 +120,12 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
         )
         case Product.Delivery => ukMainLandSettings
         case Product.Voucher => ukMainLandSettings.copy(availableCountries = CountryWithCurrency.fromCountryGroup(ukAndIsleOfMan))
-        case Product.WeeklyUK => getSettings(
+        case Product.WeeklyZoneA => getSettings(
           availableCountries = CountryWithCurrency.whitelisted(supportedCurrencies, GBP, weeklyUkNorthAmericaGroups),
           fallbackCountry = Some(Country.UK),
           fallbackCurrency = GBP
         )
-        case Product.WeeklyROW => getSettings(
+        case Product.WeeklyZoneB => getSettings(
           availableCountries = CountryWithCurrency.whitelisted(supportedCurrencies, USD, weeklyRowGroups),
           fallbackCountry = None,
           fallbackCurrency = USD
