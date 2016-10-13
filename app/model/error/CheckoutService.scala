@@ -3,6 +3,7 @@ package model.error
 import com.gu.identity.play.IdMinimalUser
 import com.gu.memsub.promo.{NewUsers, PromoCode, ValidPromotion}
 import com.gu.salesforce.ContactId
+import com.gu.stripe.Stripe
 import com.gu.zuora.soap.models.Results.SubscribeResult
 import com.gu.zuora.soap.models.errors.PaymentGatewayError
 import model.PurchaserIdentifiers
@@ -40,7 +41,7 @@ object CheckoutService {
 
   case class CheckoutStripeError(
       purchaserIds: PurchaserIdentifiers,
-      paymentError: Throwable,
+      paymentError: Stripe.Error,
       msg: String,
       requestData: Option[String] = None,
       errorResponse: Option[String] = None) extends CheckoutResult with SubsError {
