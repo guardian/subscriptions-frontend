@@ -20,6 +20,6 @@
   </div>
 }
 @* ===== Address ===== *@
-<div class="js-billing-address @{if(canBeHidden && billingAddress.forall(_.isEmpty)) "is-hidden" else ""}">
+<div class="js-billing-address @{if(canBeHidden && billingAddress.forall(_.isEmpty)) "is-hidden" else ""}"   data-currency-address="@determinesCurrency">
 @address(billingAddress, "personal.address", countriesWithCurrency, plan, false, determinesCurrency)
 </div>

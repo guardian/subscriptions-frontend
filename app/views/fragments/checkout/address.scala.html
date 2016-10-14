@@ -41,7 +41,7 @@
 }
 
 @* ===== Address ===== *@
-<div class="js-checkout-@{namePrefix.replace('.', '-')} data-currency-address=@determinesCurrency">
+<div class="js-checkout-@{namePrefix.replace('.', '-')}" data-currency-address="@determinesCurrency">
     @if(usePostcodeLookup) {
         @postcode
     }
