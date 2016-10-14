@@ -39,7 +39,7 @@ define([
         selectPaymentMethod(model.country);
     };
     var initCurrencyOverride = function () {
-        var currencyOverrideCheckbox = document.getElementById('currency-override-checkbox');
+        var currencyOverrideCheckbox = $('.js-currency-override-checkbox')[0];
         bean.on(currencyOverrideCheckbox, 'change', function () {
             if (currencyOverrideCheckbox.checked) {
                 overrideCurrency('GBP');
@@ -92,9 +92,9 @@ define([
         };
 
         var redrawCountryOverride = function (selectedCurrency) {
-            $('#currency-override-checkbox').attr('checked', false);
+            $('.js-currency-override-checkbox').attr('checked', false);
 
-            var checkboxLabel = $('#currency-override-label');
+            var checkboxLabel = $('.js-currency-override-label');
             if (selectedCurrency == 'USD') {
                 checkboxLabel.show();
             } else {
