@@ -58,7 +58,7 @@ define([
         var $postcode = addressObject.$POSTCODE_CONTAINER,
             $subdivision = addressObject.$SUBDIVISION_CONTAINER,
             countryChoice = countryChoiceFunction(addressObject),
-            shouldUpdateCurrency = addressObject.isCurrencyAddress();
+            shouldUpdateCurrency = addressObject.determinesCurrency();
 
         var redrawAddressField = function($container, newField, modelValue) {
 
