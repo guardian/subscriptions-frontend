@@ -1,13 +1,27 @@
-@import views.support.CountryOps._
-@import views.support.AddressValidationRulesOps._
 @import views.support.CountryWithCurrency
-@import com.gu.i18n.Title
-@import model.PersonalData
+@import views.html.fragments.checkout.address
 
 @import views.support.ProductPopulationData
+@import com.gu.memsub.Product
+
 @(data: ProductPopulationData, countriesWithCurrency: List[CountryWithCurrency])
 
-@address(data.deliveryAddress, "delivery", countriesWithCurrency, data.plans.default, true, true)
+@defining(
+    data.plans.default.product match {
+        case _: Product.WeeklyZoneA | _: Product.WeeklyZoneB => false
+        case _ => true
+    }
+) { usePostcodeLookup =>
+    @address(
+        address = data.deliveryAddress,
+        namePrefix = "delivery",
+        countriesWithCurrency = countriesWithCurrency,
+        plan = data.plans.default,
+        usePostcodeLookup = usePostcodeLookup,
+        determinesCurrency = true)
+
+}
+
 
 <div class="js-checkout-delivery-data" id="deliveryFields">
     <div class="form-field js-checkout-delivery">
