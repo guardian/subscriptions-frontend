@@ -78,7 +78,8 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
           catalog.delivery.list,
           catalog.voucher.list,
           catalog.weeklyZoneA.toList,
-          catalog.weeklyZoneB.toList)
+          catalog.weeklyZoneB.toList,
+          catalog.digipack.toList)
 
         def matchingPlanList(planCandidates: List[CatalogPlan.ContentSubscription]) = planCandidates.find(_.slug == forThisPlan).map(p => PlanList(p, getBetterPlans(p, planCandidates): _*))
 
