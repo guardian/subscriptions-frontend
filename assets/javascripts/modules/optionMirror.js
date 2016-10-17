@@ -13,7 +13,7 @@ define(['$'], function ($) {
             selectedDescription = input.getAttribute('data-option-mirror-description'),
             selectedPayment = input.getAttribute('data-option-mirror-payment');
 
-        if (selectedPackage && selectedDescription && selectedPayment) {
+        if (selectedPackage && selectedPayment) {
             selectors.$MIRROR_PACKAGE.each(function (el) {
                 el.textContent = selectedPackage;
             });

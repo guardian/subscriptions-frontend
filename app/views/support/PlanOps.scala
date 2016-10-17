@@ -16,9 +16,9 @@ object PlanOps {
       case _ => s"${in.name} package"
     }
 
-    def subtitle: String = in.charges.benefits.list match {
-      case Digipack :: Nil => "Daily Edition + Guardian App Premium Tier"
-      case _ => in.description
+    def subtitle: Option[String] = in.charges.benefits.list match {
+      case Digipack :: Nil => Some("Daily Edition + Guardian App Premium Tier")
+      case _ => if (in.description.trim.isEmpty) None else Some(in.description)
     }
 
     def packImage: ResponsiveImageGroup = in.charges.benefits.list match {

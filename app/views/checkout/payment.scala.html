@@ -32,7 +32,7 @@
             data-option-label-prefix="@plan.prefix"
             data-option-mirror-payment-default="@plan.charges.prettyPricing(currency)"
             data-option-mirror-payment="@plan.charges.prettyPricing(currency)"
-            data-option-mirror-description="(@plan.subtitle)"
+            data-option-mirror-description="@for(s <- plan.subtitle) {(@s)}"
             data-option-mirror-package="@plan.title"
             data-amount="@plan.charges.gbpPrice.amount"
             data-name="@plan.name"
