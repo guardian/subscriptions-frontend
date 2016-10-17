@@ -63,7 +63,10 @@ object PlanOps {
         "Voucher Book"
       } else if (isDigitalPack) {
         "Digital Pack"
-      } else {
+      } else if (isGuardianWeekly) {
+        "Guardian Weekly"
+      }
+      else {
         "Unknown"
       }
     }
