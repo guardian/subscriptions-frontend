@@ -12,7 +12,7 @@ object DigitalEdition {
     lazy val DEFAULT_CAMPAIGN_CODE = s"GU_SUBSCRIPTIONS_${edition.id.toUpperCase}_PROMO"
 
     def redirect: Uri = {
-      "/checkout/digitalpack-digitalpackmonthly" ? ("countryGroup" -> edition.countryGroup.id)
+      "/checkout" ? ("countryGroup" -> edition.countryGroup.id)
     }
 
     def membershipLandingPage = getMembershipLandingPage(DEFAULT_CAMPAIGN_CODE)
