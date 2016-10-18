@@ -12,7 +12,7 @@ define([
         let validDays = {
             voucher: {
                 sixday: (date) => date.day() === 1,
-                sunday: (date) => date.day() === 6,
+                sunday: (date) => date.day() === 0,
                 weekend: (date) => date.day() === 6,
                 allDays: (date) => date.day() === 1
             },
