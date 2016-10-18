@@ -6,6 +6,7 @@ import com.gu.memsub.images.{ResponsiveImage, ResponsiveImageGenerator, Responsi
 import com.gu.memsub.subsv2.CatalogPlan
 import com.netaporter.uri.dsl._
 
+import scala.reflect.internal.util.StringOps
 import scalaz.syntax.std.boolean._
 object PlanOps {
 
@@ -18,7 +19,7 @@ object PlanOps {
 
     def subtitle: Option[String] = in.charges.benefits.list match {
       case Digipack :: Nil => Some("Daily Edition + Guardian App Premium Tier")
-      case _ => if (in.description.trim.isEmpty) None else Some(in.description)
+      case _ => StringOps.oempty(in.description).headOption
     }
 
     def packImage: ResponsiveImageGroup = in.charges.benefits.list match {
