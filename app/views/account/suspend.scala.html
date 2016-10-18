@@ -1,13 +1,15 @@
 @import com.gu.memsub.BillingSchedule
 @import com.gu.subscriptions.suspendresume.SuspensionService.HolidayRefund
-@import com.gu.memsub.subsv2.{SubscriptionPlan => Plan, Subscription}
+@import com.gu.memsub.subsv2.Subscription
 @import configuration.Config.suspendableWeeks
 @import com.gu.subscriptions.suspendresume.SuspensionService.holidayToDays
 @import model.DigitalEdition.UK
 @import views.support.Dates.prettyDate
 @import views.support.AccountManagementOps._
+@import com.gu.memsub.BillingPeriod
+@import com.gu.memsub.subsv2.SubscriptionPlan.Delivery
 @(
-    subscription: Subscription[Plan.Paper],
+    subscription: Subscription[Delivery],
     holidayRefunds: Seq[HolidayRefund] = Seq.empty,
     billingSchedule: BillingSchedule,
     suspendableDays: Int,
@@ -36,7 +38,7 @@
                 }
             </section>
 
-            @if((suspendableDays - suspendedDays) > 0) {
+            @if(subscription.plan.charges.billingPeriod == BillingPeriod.month && (suspendableDays - suspendedDays) > 0) {
                 <section class="mma-section">
                     <form class="form js-suspend-form" action="@routes.AccountManagement.processSuspension().url" method="POST" novalidate>
                         <fieldset>

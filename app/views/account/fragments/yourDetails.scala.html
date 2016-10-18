@@ -1,24 +1,27 @@
-@import com.gu.memsub.PaidPS
-@import com.gu.memsub.subsv2.SubscriptionPlan
 @import com.gu.memsub.subsv2.Subscription
-@import views.support.PlanOps._
 @import views.support.Dates._
 @import views.support.Pricing._
+@import com.gu.memsub.subsv2.SubscriptionPlan.Paper
 
-@(subscription: Subscription[SubscriptionPlan.Paper])(extra: Html = Html(""))
+@(subscription: Subscription[Paper])(extra: Html = Html(""))
 <dl class="mma-section__list">
     <dt class="mma-section__list--title">Subscriber ID</dt>
     <dd class="mma-section__list--content">@subscription.name.get</dd>
 
     <dt class="mma-section__list--title">Current plan</dt>
     <dd class="mma-section__list--content">
-        <div>@subscription.plan.name</div>
+        <div>@if(subscription.plan.name == "Echo-Legacy") { Multi-day } else { subscription.plan.name }</div>
         <div>(@subscription.plan.description)</div>
         <div>@subscription.plan.charges.prettyPricing(subscription.plan.charges.price.currencies.head)</div>
     </dd>
 
     <dt class="mma-section__list--title">Start date</dt>
-    <dd class="mma-section__list--content">@prettyDate(subscription.firstPaymentDate)</dd>
-
+    <dd class="mma-section__list--content">
+    @if(subscription.plan.name == "Echo-Legacy") {
+        @prettyDate(subscription.startDate)
+    } else {
+        @prettyDate(subscription.firstPaymentDate)
+    }
+    </dd>
     @extra
 </dl>
