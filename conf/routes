@@ -28,7 +28,7 @@ GET         /checkout/findAddress            controllers.Checkout.findAddress(po
 
 # Checkout pages
 GET         /checkout/thank-you              controllers.Checkout.thankYou()
-GET         /checkout                        controllers.Checkout.renderCheckout(countryGroup: CountryGroup ?= CountryGroup.UK, promoCode: Option[PromoCode], supplierCode: Option[SupplierCode], forThisPlan = "")
+GET         /checkout                        controllers.Checkout.renderCheckout(countryGroup: CountryGroup ?= CountryGroup.UK, promoCode: Option[PromoCode], supplierCode: Option[SupplierCode], forThisPlan = "digitalpack-digitalpackmonthly")
 GET         /checkout/:forThisPlan           controllers.Checkout.renderCheckout(countryGroup: CountryGroup ?= CountryGroup.UK, promoCode: Option[PromoCode], supplierCode: Option[SupplierCode], forThisPlan: String)
 
 # collection and delivery

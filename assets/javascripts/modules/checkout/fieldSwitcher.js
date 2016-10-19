@@ -9,21 +9,56 @@ define([
     'modules/checkout/ratePlanChoice'
 ], function ($, bean, countryChoiceFunction, addressFields, localizationSwitcher, formElements, ratePlanChoice) {
     'use strict';
+    var latestCurrencyAddressModel = null;
+    var check = function(domEl) {
+        $(domEl).attr('checked', 'checked');
+        bean.fire(domEl, 'change');
+    };
+    var checkPlanInput = function (ratePlanId, currency) {
+        ratePlanChoice.selectRatePlanForIdAndCurrency(ratePlanId, currency);
+    };
+
+    // Change the payment method to Direct Debit for UK users,
+    // Credit Card for international users
+    var selectPaymentMethod = function (country) {
+        if (country === 'GB') {
+            check(formElements.$DIRECT_DEBIT_TYPE[0]);
+        } else {
+            check(formElements.$CARD_TYPE[0]);
+        }
+    };
+
+    var switchLocalization = function (model) {
+        var currency = model.currency || guardian.currency;
+        localizationSwitcher.set(currency, model.country);
+    };
+
+    var switchCurrency = function(model) {
+        switchLocalization(model);
+        checkPlanInput(model.ratePlanId, model.currency);
+        selectPaymentMethod(model.country);
+    };
+    var initCurrencyOverride = function () {
+        var currencyOverrideCheckbox = $('.js-currency-override-checkbox')[0];
+        bean.on(currencyOverrideCheckbox, 'change', function () {
+            if (currencyOverrideCheckbox.checked) {
+                overrideCurrency('GBP');
+            }
+            else {
+                overrideCurrency('USD');
+            }
+        });
+    };
+    var overrideCurrency = function(currency) {
+        latestCurrencyAddressModel.currency = currency;
+        switchCurrency(latestCurrencyAddressModel);
+    };
 
     var everything = function(addressObject) {
-
         var $postcode = addressObject.$POSTCODE_CONTAINER,
             $subdivision = addressObject.$SUBDIVISION_CONTAINER,
-            countryChoice = countryChoiceFunction(addressObject);
-
-        var check = function(domEl) {
-            $(domEl).attr('checked', 'checked');
-            bean.fire(domEl, 'change');
-        };
-
-        var checkPlanInput = function (ratePlanId, currency) {
-            ratePlanChoice.selectRatePlanForIdAndCurrency(ratePlanId, currency);
-        };
+            countryChoice = countryChoiceFunction(addressObject),
+            shouldUpdateCurrency = addressObject.determinesCurrency();
 
         var redrawAddressField = function($container, newField, modelValue) {
 
@@ -56,28 +91,23 @@ define([
             redrawAddressField($subdivision, newSubdivision, model.subdivision);
         };
 
-        // Change the payment method to Direct Debit for UK users,
-        // Credit Card for international users
-        var selectPaymentMethod = function (country) {
-            if (country === 'GB') {
-                check(formElements.$DIRECT_DEBIT_TYPE[0]);
+        var redrawCountryOverride = function (selectedCurrency) {
+            $('.js-currency-override-checkbox').attr('checked', false);
+
+            var checkboxLabel = $('.js-currency-override-label');
+            if (selectedCurrency == 'USD') {
+                checkboxLabel.show();
             } else {
-                check(formElements.$CARD_TYPE[0]);
+                checkboxLabel.hide();
             }
         };
-
-        var switchLocalization = function (model) {
-            var currency = model.currency || guardian.currency;
-            localizationSwitcher.set(currency, model.country);
-        };
-
         var redraw = function(model) {
             redrawAddressFields(model);
-            switchLocalization(model);
-            checkPlanInput(model.ratePlanId, model.currency);
-            selectPaymentMethod(model.country);
+            if (shouldUpdateCurrency) {
+                switchCurrency(model);
+                redrawCountryOverride(model.currency);
+            }
         };
-
         var getCurrentState = function() {
             var currentCountryOption = $(countryChoice.getCurrentCountryOption()),
                 rules = countryChoice.addressRules();
@@ -103,6 +133,9 @@ define([
 
         var refresh = function () {
             var model = getCurrentState();
+            if (shouldUpdateCurrency) {
+                latestCurrencyAddressModel= model;
+            }
             redraw(model);
             updateGuardianPageInfo(model);
         };
@@ -122,7 +155,8 @@ define([
         };
 
         return {
-            init: init
+            init: init,
+            initCurrencyOverride:initCurrencyOverride
         };
     };
 
@@ -130,6 +164,9 @@ define([
         init: function() {
             everything(formElements.BILLING).init();
             everything(formElements.DELIVERY).init();
+            initCurrencyOverride();
+
         }
+
     };
 });

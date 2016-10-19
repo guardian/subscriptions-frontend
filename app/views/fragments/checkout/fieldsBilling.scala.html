@@ -2,10 +2,10 @@
 @import views.support.AddressOps._
 @import views.support.CountryWithCurrency
 @import scalaz.syntax.std.boolean._
-@import views.support.PlanOps._
 @import com.gu.memsub.subsv2.CatalogPlan
+@import views.html.fragments.checkout.address
 
-@(billingAddress: Option[Address], canBeHidden: Boolean, countriesWithCurrency: List[CountryWithCurrency], plan: CatalogPlan.Paid)
+@(billingAddress: Option[Address], canBeHidden: Boolean, countriesWithCurrency: List[CountryWithCurrency], plan: CatalogPlan.Paid, determinesCurrency : Boolean)
 
 @if(canBeHidden) {
   <div class="js-checkout-use-delivery">
@@ -19,8 +19,13 @@
     </label>
   </div>
 }
-
 @* ===== Address ===== *@
-<div class="js-billing-address @{if(canBeHidden && billingAddress.forall(_.isEmpty)) "is-hidden" else ""}">
-@address(billingAddress, "personal.address", countriesWithCurrency, plan, false)
+<div class="js-billing-address @{if(canBeHidden && billingAddress.forall(_.isEmpty)) "is-hidden" else ""}"   data-currency-address="@determinesCurrency">
+    @address(
+        address = billingAddress,
+        namePrefix = "personal.address",
+        countriesWithCurrency = countriesWithCurrency,
+        plan = plan,
+        usePostcodeLookup = false,
+        determinesCurrency = determinesCurrency)
 </div>
