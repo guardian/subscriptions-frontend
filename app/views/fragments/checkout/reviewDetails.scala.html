@@ -108,11 +108,16 @@
             <a href="@Links.whyYourDataMattersToUs.href" target="_blank">here</a>.
         </p>
 
-        <!-- TODO confirm whether these T&Cs apply to paper-only packages too -->
         <p class="u-note prose">
+        @if(productData.isDigitalPack) {
             By proceeding you agree to the
-            <a href="@Links.terms.href" target="_blank">@Links.terms.title</a>
+            <a href="@Links.digipackTerms.href" target="_blank">@Links.digipackTerms.title</a>
             for Guardian Digital Pack subscriptions.
+        } else {
+            By proceeding you agree to the
+            <a href="@Links.paperTerms.href" target="_blank">@Links.paperTerms.title</a>
+            for Guardian voucher and home delivery subscription services.
+        }
         </p>
 
     </div>
