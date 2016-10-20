@@ -51,6 +51,7 @@ GET         /manage                             controllers.AccountManagement.lo
 POST        /manage                             controllers.AccountManagement.processLogin
 GET         /manage/suspend                     controllers.AccountManagement.redirect
 POST        /manage/suspend                     controllers.AccountManagement.processSuspension
+GET         /manage/signout                      controllers.AccountManagement.logout
 
 # Pattern Library
 GET         /patterns                        controllers.PatternLibrary.patterns

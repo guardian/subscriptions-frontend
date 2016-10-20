@@ -33,7 +33,9 @@
                 @views.html.account.fragments.yourDetails(subscription) {
                     <dt class="mma-section__list--title">Available holiday</dt>
                     <dd class="mma-section__list--content">
-                        <span class="mma-section__list--plan-title">@{suspendableDays - suspendedDays} days</span>
+                        <span class="mma-section__list--plan-title">@{
+                            suspendableDays - suspendedDays
+                        } days</span>
                     </dd>
                 }
             </section>
@@ -74,6 +76,10 @@
             <section class="mma-section">
                 <h3 class="mma-section__header">Your billing schedule</h3>
                 @account.fragments.billingSchedule(billingSchedule, subscription.plan.charges.price.currencies.head)
+            </section>
+
+            <section class="mma-section">
+                <a class="button button--primary button--large" href="@routes.AccountManagement.logout">Sign Out</a>
             </section>
 
         </section>

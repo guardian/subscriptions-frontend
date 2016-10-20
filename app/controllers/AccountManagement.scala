@@ -7,7 +7,7 @@ import com.gu.subscriptions.suspendresume.SuspensionService
 import com.gu.subscriptions.suspendresume.SuspensionService.{BadZuoraJson, ErrNel, HolidayRefund, PaymentHoliday}
 import com.gu.zuora.soap.models.Queries.Contact
 import com.typesafe.scalalogging.LazyLogging
-import configuration.Config
+import configuration.{Config, ProfileLinks}
 import forms.{AccountManagementLoginForm, AccountManagementLoginRequest, SuspendForm}
 import org.joda.time.LocalDate
 import play.api.mvc.{AnyContent, Controller, Request}
@@ -89,6 +89,10 @@ object AccountManagement extends Controller with LazyLogging {
         Ok(views.html.account.voucher(voucherSubscription, billingSchedule))
       })
     ).getOrElse(Ok(views.html.account.details(subscriberId)))
+  }
+
+  def logout = accountManagementAction { implicit request =>
+    Redirect(ProfileLinks.signOut.href,SEE_OTHER).withSession(request.session - SUBSCRIPTION_SESSION_KEY)
   }
 
   def processLogin = accountManagementAction.async { implicit request =>
