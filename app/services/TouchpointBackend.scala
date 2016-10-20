@@ -82,7 +82,7 @@ object TouchpointBackend {
       lazy val commonPaymentService = new CommonPaymentService(_stripeService, zuoraService, this.catalogService.unsafeCatalog.productMap)
       lazy val zuoraProperties = config.zuoraProperties
       lazy val promoService = new PromoService(promoCollection, new Discounter(this.discountRatePlanIds))
-      lazy val promoCollection = new DynamoPromoCollection(this.promoStorage)
+      lazy val promoCollection = new DynamoPromoCollection(this.promoStorage, 15.seconds)
       lazy val promoStorage = JsonDynamoService.forTable[AnyPromotion](DynamoTables.promotions(Config.config, config.environmentName))
       lazy val discountRatePlanIds = Config.discountRatePlanIds(config.environmentName)
       lazy val suspensionService = new SuspensionService[Future](Config.holidayRatePlanIds(config.environmentName), simpleRestClient)
