@@ -49,7 +49,7 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
       Country("JE", "Jersey")
     ))
 
-  val weeklyZoneAGroups = List (weeklyUkCountries, CountryGroup.US, CountryGroup.Canada)
+  val weeklyZoneAGroups = List(weeklyUkCountries, CountryGroup.US, CountryGroup.Canada)
   val weeklyZoneBGroups = {
     val rowUk = CountryGroup("Row Uk", "uk", None, CountryGroup.UK.countries.filterNot(weeklyUkCountries.countries.contains(_)), GBP, PostCode)
     rowUk :: CountryGroup.allGroups.filterNot(group => (CountryGroup.UK :: weeklyZoneAGroups) contains group)
@@ -158,8 +158,8 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
           promoCode = promo.left.toOption,
           supplierCode = resolvedSupplierCode,
           edition = digitalEdition,
-          countryAndCurrencySettings = countryAndCurrencySettings
-            stripeCheckoutTest = Config.stripeCheckout && (testId % 2 == 0)
+          countryAndCurrencySettings = countryAndCurrencySettings,
+          stripeCheckoutTest = Config.stripeCheckout && (testId % 2 == 0)
         )).withSession(trackingCodeSessionData ++ supplierCodeSessionData: _*).withCookies(ABTest.testIdCookie(testId))
       }
 
@@ -278,8 +278,8 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
     val guestAccountData = request.body
     IdentityService.convertGuest(guestAccountData.password, IdentityToken(guestAccountData.token))
       .map { cookies =>
-      Ok(Json.obj("profileUrl" -> webAppProfileUrl.toString())).withCookies(cookies: _*)
-    }
+        Ok(Json.obj("profileUrl" -> webAppProfileUrl.toString())).withCookies(cookies: _*)
+      }
   }
 
   def thankYou() = NoCacheAction { implicit request =>
