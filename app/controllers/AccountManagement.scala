@@ -150,7 +150,7 @@ object AccountManagement extends Controller with LazyLogging {
         suspendableDays = suspendableDays,
         suspendedDays = suspendedDays,
         currency = sub.plan.charges.price.currencies.head
-      )).withNewSession
+      ))
     }).valueOr(errorCode => Redirect(routes.AccountManagement.login(None, Some(errorCode)).url))
   }
 
