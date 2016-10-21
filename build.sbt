@@ -35,7 +35,7 @@ lazy val root = (project in file(".")).enablePlugins(
 scalaVersion := "2.11.8"
 scalacOptions ++= Seq("-feature")
 
-val scalatestVersion = "2.2.4"
+val scalatestVersion = "3.0.0"
 
 libraryDependencies ++= Seq(
     cache,
@@ -50,8 +50,9 @@ libraryDependencies ++= Seq(
     "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0",
     "org.scalatest" %% "scalatest" % scalatestVersion % "test",
     "org.scalactic" %% "scalactic" % scalatestVersion % "test",
-    "org.seleniumhq.selenium" % "selenium-java" % "2.53.1" % "test",
-    "io.github.bonigarcia" % "webdrivermanager" % "1.4.9" % "test",
+    "org.seleniumhq.selenium" % "selenium-java" % "3.0.1" % "test",
+    "org.seleniumhq.selenium" % "htmlunit-driver" % "2.23" % "test",
+    "io.github.bonigarcia" % "webdrivermanager" % "1.4.10" % "test",
     "com.gocardless" % "gocardless-pro" % "1.16.0",
     "com.squareup.okhttp3" % "okhttp" % "3.4.1" % "test",
     "org.scalaz" %% "scalaz-core" % "7.1.3",

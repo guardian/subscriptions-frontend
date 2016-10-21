@@ -1,13 +1,12 @@
 package acceptance.util
 
 import java.net.URL
-import org.openqa.selenium.firefox.MarionetteDriver
+import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.{Cookie, WebDriver}
-import org.openqa.selenium.remote.{RemoteWebDriver, DesiredCapabilities}
+import org.openqa.selenium.remote.{DesiredCapabilities, RemoteWebDriver}
 import scala.collection.JavaConverters._
-import io.github.bonigarcia.wdm.MarionetteDriverManager
+import io.github.bonigarcia.wdm.ChromeDriverManager
 
-/** There should be only a single instance of WebDriver (Singleton Pattern) */
 object Driver {
   def apply() = driver
   val sessionId = driver.asInstanceOf[RemoteWebDriver].getSessionId.toString
@@ -31,8 +30,8 @@ object Driver {
       instantiateRemoteBrowser()
 
   private def instantiateLocalBrowser(): WebDriver = {
-    MarionetteDriverManager.getInstance().setup()
-    new MarionetteDriver()
+    ChromeDriverManager.getInstance().setup()
+    new ChromeDriver()
   }
 
   private def instantiateRemoteBrowser(): WebDriver = {
