@@ -49,6 +49,13 @@ trait Browser extends WebBrowser {
       throw new MissingPageElementException(q)
   }
 
+  def clearValue(q: Query): Unit = {
+    if (pageHasElement(q)) {
+      q.webElement.clear()
+    } else
+      throw new MissingPageElementException(q)
+  }
+
   def setRadioButtonValue(q: NameQuery, value: String): Unit = {
     if (pageHasElement(q)) {
       radioButtonGroup(q.queryString).value = value

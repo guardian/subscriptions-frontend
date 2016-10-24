@@ -210,11 +210,15 @@ case class Checkout(testUser: TestUser, endpoint: String = "checkout") extends P
       Thread.sleep(5000)
     }
 
-    private def setValueSlowly(q: Query, value: String):Unit ={
-      for{
+    /*
+    * Stripe wants you to pause between month and year and between each quartet in the cc
+    * This causes pain when you use Selenium. There are a few stack overflow posts- but nothing really useful.
+    * */
+    private def setValueSlowly(q: Query, value: String): Unit = {
+      for {
         c <- value
-      } yield{
-        setValue(q,c.toString)
+      } yield {
+        setValue(q, c.toString)
         Thread.sleep(100)
       }
     }

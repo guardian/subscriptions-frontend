@@ -113,6 +113,68 @@ class CheckoutSpec extends FeatureSpec with Browser
         assert(Driver.cookiesSet.map(_.getName).contains(idCookie)) }
     }
 
+    scenario("Identity user subscribes with credit card", Acceptance) {
+      withRegisteredIdentityUserFixture { testUser =>
+
+        Given("registered and signed in Identity users want to subscribe by clicking on " +
+          "'Start your free trial'")
+
+        Then("they should land on 'Checkout' page,")
+        val checkout = pages.Checkout(testUser)
+        checkout.setInStripeTest(false)
+        go.to(checkout.url + "?stripe=old")
+        assert(checkout.pageHasLoaded())
+
+        And("should be signed in with their Identity account,")
+        assert(checkout.userIsSignedIn)
+
+        And("first name, last name, and email address should be pre-filled,")
+        assert(checkout.userDetailsArePrefilled)
+
+        And("they should have Identity cookies,")
+        Seq("GU_U", "SC_GU_U", "SC_GU_LA").foreach { idCookie =>
+          assert(Driver.cookiesSet.map(_.getName).contains(idCookie))
+        }
+
+        And("the section 'Your details' should load.")
+        assert(checkout.yourDetailsSectionHasLoaded())
+
+        Then("Go along to the address details")
+        checkout.clickPersonalDetailsContinueButton()
+
+        When("they fill in the address,")
+        checkout.fillInBillingAddress()
+
+        And("click on 'Continue' button,")
+        checkout.clickBillingDetailsContinueButton()
+
+        Then("the section 'Payment Details' should load.")
+        assert(checkout.directDebitSectionHasLoaded())
+
+        When("Users select credit card payment option,")
+        checkout.selectCreditCardPaymentOption()
+
+        And("fill in credit card payment details,")
+        checkout.fillInCreditCardPaymentDetails()
+
+        And("click on 'Continue' button,")
+        checkout.clickCredictCardPaymentContinueButton()
+
+        Then("the section 'Confirm and Review' should load.")
+        assert(checkout.reviewSectionHasLoaded())
+
+        When("they submit the form,")
+        checkout.submitPayment()
+
+        Then("they should land on 'Thank You' page,")
+        val thankYou = ThankYou(testUser)
+        assert(thankYou.pageHasLoaded())
+
+        And("they should still be signed in.")
+        assert(thankYou.userIsSignedIn)
+      }
+    }
+
     scenario("Identity user subscribes with credit card through Stripe Checkout", Acceptance) {
       withRegisteredIdentityUserFixture { testUser =>
 
