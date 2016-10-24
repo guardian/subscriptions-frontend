@@ -5,10 +5,13 @@ import play.api.mvc.{Cookie, Request}
 import scala.util.Random
 
 object ABTest {
-  val TestIdCookieName = s"${"gu.subscriptions.test"}.id"
+  val TestIdCookieName = "gu.subscriptions.test.id"
 
   def testIdFor[A](implicit request: Request[A]): Int = {
-    request.cookies.get(TestIdCookieName) map (_.value.toInt) getOrElse Random.nextInt(Int.MaxValue)
+
+    request.getQueryString("stripe").flatMap((str) => if (str == "checkout") {Some(2)} else {Some(1)}).
+      getOrElse(((request.cookies.get(TestIdCookieName) map (_.value.toInt)).
+        getOrElse(Random.nextInt(Int.MaxValue))))
   }
 
   def testIdCookie(id: Int) = Cookie(TestIdCookieName, id.toString, maxAge = Some(604800))

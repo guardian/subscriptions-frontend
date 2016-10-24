@@ -17,7 +17,7 @@ trait Browser extends WebBrowser {
   def pageHasText(text: String): Boolean =
     waitUntil(ExpectedConditions.textToBePresentInElementLocated(By.tagName("body"), text))
 
-  def pageHasElement(q: Query): Boolean =
+  def  pageHasElement(q: Query): Boolean =
     waitUntil(ExpectedConditions.visibilityOfElementLocated(q.by))
 
   def elementIsPresent(q: Query): Boolean =

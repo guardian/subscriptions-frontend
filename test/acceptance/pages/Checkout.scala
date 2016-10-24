@@ -2,7 +2,9 @@ package acceptance.pages
 
 import acceptance.util.{Browser, Config, Driver, TestUser}
 import Config.baseUrl
+import org.openqa.selenium.By
 import org.scalatest.selenium.Page
+import views.fragments.ABTest
 
 case class Checkout(testUser: TestUser, endpoint: String = "checkout") extends Page with Browser {
   val url = s"$baseUrl/$endpoint"
@@ -49,7 +51,17 @@ case class Checkout(testUser: TestUser, endpoint: String = "checkout") extends P
 
   def cardSectionHasLoaded(): Boolean = pageHasElement(CreditCardPaymentDetails.continueButton)
 
+  def switchToStripe() = driver.switchTo().frame(driver.findElement(StripeCheckout.container.by))
+
   def stripeCheckoutHasLoaded(): Boolean = pageHasElement(StripeCheckout.container)
+
+  def stripeCheckoutHasCC(): Boolean = pageHasElement(StripeCheckout.cardNumber)
+
+  def stripeCheckoutHasCVC(): Boolean = pageHasElement(StripeCheckout.cardCvc)
+
+  def stripeCheckoutHasExph(): Boolean = pageHasElement(StripeCheckout.cardExp)
+
+  def stripeCheckoutHasSubmit(): Boolean = pageHasElement(StripeCheckout.submitButton)
 
   def reviewSectionHasLoaded(): Boolean = pageHasElement(ReviewSection.submitPaymentButton)
 
@@ -180,15 +192,34 @@ case class Checkout(testUser: TestUser, endpoint: String = "checkout") extends P
     val cardCvc = id("cc-csc")
     val submitButton = id("submitButton")
 
-    def setInTest(inTest: Boolean) = Driver.addCookie("gu.subscriptions.test.id",if(inTest){"2"}else{"1"})
+    def setInTest(inTest: Boolean) = {
 
-    private def fillInHelper(cardNum: String) = {
-      setValue(cardNumber, "4242424242424242")
-      setValue(cardExp, "1019")
-      setValue(cardCvc, "111")
+      Driver.addCookie(ABTest.TestIdCookieName, if (inTest) {
+        "2"
+      } else {
+        "1"
+      })
     }
 
-    def fillIn(): Unit = fillInHelper("4242424242424242")
+    private def fillInHelper(cardNum: String) = {
+
+      setValueSlowly(cardNumber, cardNum)
+      setValueSlowly(cardExp, "1019")
+      setValueSlowly(cardCvc, "111")
+      continue()
+      Thread.sleep(5000)
+    }
+
+    private def setValueSlowly(q: Query, value: String):Unit ={
+      for{
+        c <- value
+      } yield{
+        setValue(q,c.toString)
+        Thread.sleep(100)
+      }
+    }
+
+    def fillIn(): Unit = fillInHelper("4242 4242 4242 4242")
 
     /* https://stripe.com/docs/testing */
 
