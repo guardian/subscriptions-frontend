@@ -15,6 +15,8 @@ define(['modules/analytics/analyticsEnabled',
         var productData = guardian.pageInfo ? guardian.pageInfo.productData : {};
         var intcmp = new RegExp('INTCMP=([^&]*)').exec(location.search);
         var isCustomerAgent = !!guardian.supplierCode;
+        var camCodeBusinessUnit = new RegExp('CMP_BUNIT=([^&]*)').exec(location.search);
+        var camCodeTeam = new RegExp('CMP_TU=([^&]*)').exec(location.search);
 
         /* Google analytics snippet */
         /*eslint-disable */
@@ -58,6 +60,14 @@ define(['modules/analytics/analyticsEnabled',
         }
 
         ga('membershipPropertyTracker.set', 'dimension13', isCustomerAgent);  // customerAgent
+
+        if (camCodeBusinessUnit && camCodeBusinessUnit[1]) {
+            ga('membershipPropertyTracker.set', 'dimension14', camCodeBusinessUnit[1]);  // CamCodeBusinessUnit
+        }
+
+        if (camCodeTeam && camCodeTeam[1]) {
+            ga('membershipPropertyTracker.set', 'dimension15', camCodeTeam[1]);  // CamCodeTeam
+        }
 
         ga('membershipPropertyTracker.send', 'pageview');
 

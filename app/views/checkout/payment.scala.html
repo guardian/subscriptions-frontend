@@ -2,34 +2,27 @@
 @import model.JsVars
 @import configuration.Config.Identity._
 @import views.support.BillingPeriod._
-@import views.support.CountryWithCurrency
 @import views.support.Pricing._
 @import com.gu.memsub.promo.PromoCode
 @import com.gu.memsub.SupplierCode
 @import model.PersonalData
 @import views.support.PlanOps._
 @import views.support.ProductPopulationData
-@import views.support.ProductPopulationData._
-@import com.gu.memsub.Current
 @import com.gu.memsub.subsv2.CatalogPlan
 @import com.gu.i18n.Currency
-@import views.support.PlanOps._
 @import com.gu.i18n._
-@import com.gu.memsub.Subscriptions
-@import views.support.AddressOps
 @import model.DigitalEdition
-
+@import com.gu.memsub.Product.WeeklyZoneB
+@import views.support.CountryAndCurrencySettings
 @(
     personalData: Option[PersonalData],
     productData: ProductPopulationData,
-    country: Option[Country],
     countryGroup: CountryGroup,
-    defaultCurrency: Currency,
-    countriesWithCurrency: List[CountryWithCurrency],
     touchpointBackendResolution: services.TouchpointBackend.Resolution,
     promoCode: Option[PromoCode],
     supplierCode: Option[SupplierCode],
-    edition: DigitalEdition
+    edition: DigitalEdition,
+    countryAndCurrencySettings: CountryAndCurrencySettings
 )(implicit request: RequestHeader)
 
 @priceOption(plan: CatalogPlan.Paid, currency: Currency) = {
@@ -40,14 +33,14 @@
             data-option-label-prefix="@plan.prefix"
             data-option-mirror-payment-default="@plan.charges.prettyPricing(currency)"
             data-option-mirror-payment="@plan.charges.prettyPricing(currency)"
-            data-option-mirror-description="(@plan.subtitle)"
+            data-option-mirror-description="@for(s <- plan.subtitle) {(@s)}"
             data-option-mirror-package="@plan.title"
             data-amount="@plan.charges.gbpPrice.amount"
             data-name="@plan.name"
             data-number-of-months="@plan.charges.billingPeriod.numberOfMonths"
             data-currency="@currency"
             value="@plan.id.get"
-            @if(plan == productData.plans.default && currency == defaultCurrency){ checked="checked" }
+            @if(plan == productData.plans.default && currency == countryAndCurrencySettings.defaultCurrency){ checked="checked" }
             >
         </span>
         <span class="option__label" id="label-for-@plan.id.get-@currency" title="@plan.title">@plan.prettyName(currency)</span>
@@ -63,7 +56,7 @@
 
 @main(
     title = s"Details - name and address | Subscribe to the ${productData.plans.default.title} | The Guardian",
-    jsVars = JsVars(userIsSignedIn = personalData.isDefined, ignorePageLoadTracking = true, countryGroup = countryGroup, currency = defaultCurrency, country = country),
+    jsVars = JsVars(userIsSignedIn = personalData.isDefined, ignorePageLoadTracking = true, currency = countryAndCurrencySettings.defaultCurrency, country = countryAndCurrencySettings.defaultCountry),
     bodyClasses = List("is-wide"),
     touchpointBackendResolutionOpt = Some(touchpointBackendResolution),
     plan = Some(productData.plans.default),
@@ -88,6 +81,11 @@
                 @* ===== Plan selection ===== *@
             <div class="checkout-container__sidebar js-basket">
                 @fragments.checkout.basketPreview(productData.plans.default)
+
+                <label class ='label js-currency-override-label' @if(productData.plans.default.product != WeeklyZoneB) { hidden="true" } >
+                    <input type="checkbox" name="currencyOverride" value="true" class="js-currency-override-checkbox"> Pay in £GBP
+                </label>
+
                 @if(productData.plans.list.length > 1) {
                     <div class="basket-options-toggle u-note prose">
                         <a class="js-toggle checkout-container__frequency" data-toggle="change-payment-frequency">
@@ -153,24 +151,26 @@
                             <a href="#yourDetails" class="text-button u-button-reset js-edit-your-details" title="Edit your personal details">Edit</a>
                         </div>
                         <div class="field-panel__fields">
-                            @fragments.checkout.fieldsPersonal(personalData, countriesWithCurrency)
-                            @continueButton(productData.planEither.fold(_ => "#deliveryDetails", _ => "#billingAddress"), "js-checkout-your-details-submit")
+                            @fragments.checkout.fieldsPersonal(personalData, countryAndCurrencySettings.availableCountries)
+                            @defining(if(productData.isDigitalPack) "#billingAddress" else "#deliveryDetails") { goto =>
+                                @continueButton(goto, "js-checkout-your-details-submit")
+                            }
                         </div>
                     </fieldset>
                 </div>
 
                 @* ===== Delivery details ===== *@
-                @if(productData.isHomeDelivery || productData.isVoucher) {
+                @if(productData.isPhysical) {
                         <div id="deliveryDetails" class="field-panel is-collapsed js-fieldset-delivery-details">
                             <fieldset>
                                 <legend class="field-panel__legend">
                                     Delivery address
                                 </legend>
                                 <div class="field-panel__fields">
-                                    @if(productData.isHomeDelivery) {
-                                        @fragments.checkout.fieldsDelivery(productData, countriesWithCurrency)
+                                    @if(productData.isHomeDelivery || productData.isGuardianWeekly) {
+                                        @fragments.checkout.fieldsDelivery(productData, countryAndCurrencySettings.availableCountries)
                                     }else{
-                                        @fragments.checkout.fieldsVoucher(productData, countriesWithCurrency)
+                                        @fragments.checkout.fieldsVoucher(productData, countryAndCurrencySettings.availableCountries)
                                     }
                                     @continueButton("#paymentDetails", "js-checkout-delivery-details-submit")
                                 </div>
@@ -180,6 +180,8 @@
                             </fieldset>
                         </div>
                 }
+
+                <input type="hidden" name="currency" value="@countryAndCurrencySettings.defaultCurrency" data-currency="true">
 
                 @* ===== Billing details ===== *@
                 <div id="billingAddress" class="field-panel is-collapsed js-fieldset-billing-address">
@@ -191,7 +193,7 @@
                             <a href="#yourDetails" class="text-button u-button-reset js-edit-billing-address" title="Edit your personal details">Edit</a>
                         </div>
                         <div class="field-panel__fields">
-                            @fragments.checkout.fieldsBilling(personalData.map(_.address), canBeHidden = productData.planEither.isRight, countriesWithCurrency, productData.plans.default)
+                            @fragments.checkout.fieldsBilling(personalData.map(_.address), canBeHidden = !productData.isDigitalPack, countryAndCurrencySettings.availableCountries, productData.plans.default, !productData.isPhysical)
                             @continueButton("#paymentDetails", "js-checkout-billing-address-submit")
                         </div>
                     </fieldset>

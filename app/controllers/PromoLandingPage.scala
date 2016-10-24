@@ -13,6 +13,7 @@ import play.api.libs.json.Json
 import play.api.mvc._
 import services.TouchpointBackend
 import views.support.PegdownMarkdownRenderer
+import utils.Tracking.internalCampaignCode
 
 object PromoLandingPage extends Controller {
 
@@ -31,7 +32,7 @@ object PromoLandingPage extends Controller {
         None
       else
         Some(views.html.promotion.landingPage(edition, catalog.digipack.month, promoCode, promotionWithLandingPage, Config.Zuora.paymentDelay, PegdownMarkdownRenderer))
-    } yield Ok(html)).getOrElse(Redirect("/digital" ? ("INTCMP" -> s"FROM_P_${promoCode.get}")))
+    } yield Ok(html)).getOrElse(Redirect("/digital" ? (internalCampaignCode -> s"FROM_P_${promoCode.get}")))
   }
 
   def preview() = GoogleAuthenticatedStaffAction { implicit request =>

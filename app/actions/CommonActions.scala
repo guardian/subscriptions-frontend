@@ -3,15 +3,13 @@ package actions
 import actions.OAuthActions._
 import com.gu.googleauth
 import com.typesafe.scalalogging.LazyLogging
-import configuration.Config
 import configuration.QA.passthroughCookie
 import controllers.{Cached, NoCache}
-import play.api.Logger
 import play.api.mvc.Security.AuthenticatedRequest
 import play.api.mvc._
+import play.filters.csrf.{CSRFCheck, CSRFConfig}
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import play.api.mvc.Results.{Redirect, BadRequest}
 import scala.concurrent.Future
 object CommonActions {
 
@@ -43,6 +41,8 @@ object CommonActions {
   ))
 
   val CachedAction = resultModifier(Cached(_))
+
+  val CSRFCachedAsyncAction = (block: Request[_] => Future[Result]) => CSRFCheck(action = CachedAction.async(block), config = CSRFConfig.global.copy(checkContentType = (x: Option[String]) => true))
 
   def noCache(result: Result): Result = NoCache(result)
 

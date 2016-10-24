@@ -24,9 +24,11 @@ POST        /checkout/check-account          controllers.Checkout.checkAccount
 POST        /checkout/register-guest-user    controllers.Checkout.convertGuestUser
 GET         /checkout/lookupPromotion        controllers.Checkout.validatePromoCode(promoCode: PromoCode, productRatePlanId: ProductRatePlanId, country: Country)
 GET         /checkout/validateDelivery       controllers.Checkout.validateDelivery(postCode: String)
+GET         /checkout/findAddress            controllers.Checkout.findAddress(postCode: String)
+
 # Checkout pages
 GET         /checkout/thank-you              controllers.Checkout.thankYou()
-GET         /checkout                        controllers.Checkout.renderCheckout(countryGroup: CountryGroup ?= CountryGroup.UK, promoCode: Option[PromoCode], supplierCode: Option[SupplierCode], forThisPlan = "")
+GET         /checkout                        controllers.Checkout.renderCheckout(countryGroup: CountryGroup ?= CountryGroup.UK, promoCode: Option[PromoCode], supplierCode: Option[SupplierCode], forThisPlan = "digitalpack-digitalpackmonthly")
 GET         /checkout/:forThisPlan           controllers.Checkout.renderCheckout(countryGroup: CountryGroup ?= CountryGroup.UK, promoCode: Option[PromoCode], supplierCode: Option[SupplierCode], forThisPlan: String)
 
 # collection and delivery
@@ -45,10 +47,11 @@ POST        /staff/cas/token                 controllers.CAS.generateToken
 GET         /oauth2callback                  controllers.OAuth.oauth2Callback
 
 # Manage my account
-GET         /mma                             controllers.AccountManagement.login(subscriberId: Option[String], errorCode: Option[String])
-POST        /mma                             controllers.AccountManagement.processLogin
-GET         /mma/suspend                     controllers.AccountManagement.redirect
-POST        /mma/suspend                     controllers.AccountManagement.processSuspension
+GET         /manage                             controllers.AccountManagement.login(subscriberId: Option[String], errorCode: Option[String])
+POST        /manage                             controllers.AccountManagement.processLogin
+GET         /manage/suspend                     controllers.AccountManagement.redirect
+POST        /manage/suspend                     controllers.AccountManagement.processSuspension
+GET         /manage/signout                      controllers.AccountManagement.logout
 
 # Pattern Library
 GET         /patterns                        controllers.PatternLibrary.patterns
@@ -66,8 +69,6 @@ POST        /q                               controllers.PromoLandingPage.previe
 
 # Promotions
 GET         /s/:supplierCodeStr              controllers.Homepage.supplierRedirect(supplierCodeStr: String)
-
-GET         /manage                          controllers.Testing.manageHoldingPage
 
 # Editions hommepage or 404
 GET         /:edition                        controllers.Homepage.landingPage(edition: String)

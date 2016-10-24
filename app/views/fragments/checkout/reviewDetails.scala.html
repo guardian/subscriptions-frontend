@@ -10,19 +10,19 @@
         <span class="review-details__heading">Your details</span>
         <div class="review-details__list">
             <ul class="o-unstyled-list">
-                <li class="js-checkout-review-name sessioncamhidetext"></li>
-                <li><span class="review-details__detail">Email:</span> <span class="js-checkout-review-email sessioncamhidetext"></span></li>
-                <li class="js-checkout-review-phone-field"><span class="review-details__detail">Phone:</span> <span class="js-checkout-review-phone sessioncamhidetext"></span></li>
+                <li class="js-checkout-review-name"></li>
+                <li><span class="review-details__detail">Email:</span> <span class="js-checkout-review-email"></span></li>
+                <li class="js-checkout-review-phone-field"><span class="review-details__detail">Phone:</span> <span class="js-checkout-review-phone"></span></li>
             </ul>
         </div>
     </div>
-    @if(productData.isHomeDelivery) {
+    @if(productData.isHomeDelivery || productData.isGuardianWeekly) {
         <div class="review-details__item">
             <span class="review-details__heading">Deliver to</span>
             <div class="review-details__list">
                 <ul class="o-unstyled-list">
-                    <li class="js-checkout-review-delivery-address sessioncamhidetext"></li>
-                    <li><span class="review-details__detail">Delivery instructions:</span> <span class="js-checkout-review-delivery-instructions sessioncamhidetext"></span></li>
+                    <li class="js-checkout-review-delivery-address"></li>
+                    <li><span class="review-details__detail">Delivery instructions:</span> <span class="js-checkout-review-delivery-instructions"></span></li>
                     <li><span class="review-details__detail">Date of first paper:</span> <span class="js-checkout-review-delivery-start-date"></span></li>
                 </ul>
             </div>
@@ -33,7 +33,7 @@
             <span class="review-details__heading">Post voucher book to</span>
             <div class="review-details__list">
                 <ul class="o-unstyled-list">
-                    <li class="js-checkout-review-delivery-address sessioncamhidetext"></li>
+                    <li class="js-checkout-review-delivery-address"></li>
                     <li><span class="review-details__detail">Voucher book start date:</span> <span class="js-checkout-review-delivery-start-date"></span></li>
                 </ul>
             </div>
@@ -43,7 +43,7 @@
         <span class="review-details__heading">Billing address</span>
         <div class="review-details__list">
             <ul class="o-unstyled-list">
-                <li class="js-checkout-review-address sessioncamhidetext"></li>
+                <li class="js-checkout-review-address"></li>
             </ul>
         </div>
     </div>
@@ -52,16 +52,16 @@
         <div class="review-details__list js-payment-type-direct-debit">
             <ul class="o-unstyled-list">
                 <li><span class="review-details__detail">Payment method:</span> Direct Debit</li>
-                <li><span class="review-details__detail">Bank account:</span> <span class="js-checkout-review-account sessioncamhidetext"></span></li>
-                <li><span class="review-details__detail">Sort code:</span> <span class="js-checkout-review-sortcode sessioncamhidetext"></span></li>
-                <li><span class="review-details__detail">Account holder:</span> <span class="js-checkout-review-holder sessioncamhidetext"></span></li>
+                <li><span class="review-details__detail">Bank account:</span> <span class="js-checkout-review-account"></span></li>
+                <li><span class="review-details__detail">Sort code:</span> <span class="js-checkout-review-sortcode"></span></li>
+                <li><span class="review-details__detail">Account holder:</span> <span class="js-checkout-review-holder"></span></li>
             </ul>
         </div>
         <div class="review-details__list js-payment-type-card" hidden="true">
             <ul class="o-unstyled-list">
                 <li><span class="review-details__detail">Payment method:</span> Credit/Debit card</li>
-                <li><span class="review-details__detail">Card number:</span> <span class="js-checkout-review-card-number sessioncamhidetext"></span></li>
-                <li><span class="review-details__detail">Expiry:</span> <span class="js-checkout-review-card-expiry sessioncamhidetext"></span></li>
+                <li><span class="review-details__detail">Card number:</span> <span class="js-checkout-review-card-number"></span></li>
+                <li><span class="review-details__detail">Expiry:</span> <span class="js-checkout-review-card-expiry"></span></li>
             </ul>
         </div>
     </div>
@@ -108,11 +108,16 @@
             <a href="@Links.whyYourDataMattersToUs.href" target="_blank">here</a>.
         </p>
 
-        <!-- TODO confirm whether these T&Cs apply to paper-only packages too -->
         <p class="u-note prose">
+        @if(productData.isDigitalPack) {
             By proceeding you agree to the
-            <a href="@Links.terms.href" target="_blank">@Links.terms.title</a>
+            <a href="@Links.digipackTerms.href" target="_blank">@Links.digipackTerms.title</a>
             for Guardian Digital Pack subscriptions.
+        } else {
+            By proceeding you agree to the
+            <a href="@Links.paperTerms.href" target="_blank">@Links.paperTerms.title</a>
+            for Guardian voucher and home delivery subscription services.
+        }
         </p>
 
     </div>

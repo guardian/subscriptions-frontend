@@ -7,7 +7,7 @@ import com.gu.subscriptions.suspendresume.SuspensionService
 import com.gu.subscriptions.suspendresume.SuspensionService.{BadZuoraJson, ErrNel, HolidayRefund, PaymentHoliday}
 import com.gu.zuora.soap.models.Queries.Contact
 import com.typesafe.scalalogging.LazyLogging
-import configuration.Config
+import configuration.{Config, ProfileLinks}
 import forms.{AccountManagementLoginForm, AccountManagementLoginRequest, SuspendForm}
 import org.joda.time.LocalDate
 import play.api.mvc.{AnyContent, Controller, Request}
@@ -26,6 +26,8 @@ import scalaz.syntax.std.option._
 import scalaz.{EitherT, OptionT, \/}
 
 object AccountManagement extends Controller with LazyLogging {
+
+  val accountManagementAction = NoCacheAction
 
   val SUBSCRIPTION_SESSION_KEY = "subscriptionId"
 
@@ -66,7 +68,7 @@ object AccountManagement extends Controller with LazyLogging {
 
   private def pendingHolidayRefunds(allHolidays: Seq[HolidayRefund]) = allHolidays.filterNot(_._2.finish.isBefore(LocalDate.now)).sortBy(_._2.start)
 
-  def login(subscriberId: Option[String] = None, errorCode: Option[String] = None) = GoogleAuthenticatedStaffAction.async { implicit request =>
+  def login(subscriberId: Option[String] = None, errorCode: Option[String] = None) = accountManagementAction.async { implicit request =>
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
     val subscription = subscriptionFromRequest
@@ -89,7 +91,11 @@ object AccountManagement extends Controller with LazyLogging {
     ).getOrElse(Ok(views.html.account.details(subscriberId)))
   }
 
-  def processLogin = GoogleAuthenticatedStaffAction.async { implicit request =>
+  def logout = accountManagementAction { implicit request =>
+    Redirect(ProfileLinks.signOut.href,SEE_OTHER).withSession(request.session - SUBSCRIPTION_SESSION_KEY)
+  }
+
+  def processLogin = accountManagementAction.async { implicit request =>
     val loginRequest = AccountManagementLoginForm.mappings.bindFromRequest().value
 
     subscriptionFromUserDetails(loginRequest).map {
@@ -115,7 +121,7 @@ object AccountManagement extends Controller with LazyLogging {
     r
   }
 
-  def processSuspension = GoogleAuthenticatedStaffAction.async { implicit request =>
+  def processSuspension = accountManagementAction.async { implicit request =>
     lazy val noSub = "Could not find an active subscription"
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
@@ -144,7 +150,7 @@ object AccountManagement extends Controller with LazyLogging {
         suspendableDays = suspendableDays,
         suspendedDays = suspendedDays,
         currency = sub.plan.charges.price.currencies.head
-      )).withNewSession
+      ))
     }).valueOr(errorCode => Redirect(routes.AccountManagement.login(None, Some(errorCode)).url))
   }
 

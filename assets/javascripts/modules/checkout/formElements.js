@@ -13,6 +13,8 @@ define(['$'], function ($) {
         var $COUNTRY_CONTAINER = $('.js-checkout-country', container);
         var $SUBDIVISION_CONTAINER = $('.js-checkout-subdivision', container);
         var $POSTCODE_CONTAINER = $('.js-checkout-postcode', container);
+        var $ADDRESS_FINDER = $('.js-checkout-address-finder', container);
+        var $ADDRESS_CHOOSER = $('.js-checkout-address-chooser', container);
 
         return {
             $CONTAINER: $CONTAINER,
@@ -22,14 +24,16 @@ define(['$'], function ($) {
             $COUNTRY_CONTAINER: $COUNTRY_CONTAINER,
             $SUBDIVISION_CONTAINER: $SUBDIVISION_CONTAINER,
             $POSTCODE_CONTAINER: $POSTCODE_CONTAINER,
+            $ADDRESS_FINDER: $ADDRESS_FINDER,
+            $ADDRESS_CHOOSER: $ADDRESS_CHOOSER,
 
             $ADDRESS1: $('.js-input', $ADDRESS1_CONTAINER[0]),
             $ADDRESS2: $('.js-input', $ADDRESS2_CONTAINER[0]),
             $TOWN: $('.js-input', $TOWN_CONTAINER[0]),
             $COUNTRY_SELECT: $('.js-country', $COUNTRY_CONTAINER[0]),
             getPostcode$: function() { return $('.js-input', $POSTCODE_CONTAINER[0]); },
-            getSubdivision$: function() { return $('.js-input', $SUBDIVISION_CONTAINER[0]); }
-        };
+            getSubdivision$: function() { return $('.js-input', $SUBDIVISION_CONTAINER[0]); },
+            determinesCurrency: function(){ return $(container).data('currency-address') === true} };
     };
 
     var getPaperCheckoutField = function() {

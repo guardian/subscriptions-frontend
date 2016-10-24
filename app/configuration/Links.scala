@@ -7,12 +7,16 @@ case class Links(href: String, title: String) {
 }
 
 object Links {
-  val terms = Links(
-    "http://www.theguardian.com/info/2014/aug/06/guardian-observer-digital-subscriptions-terms-conditions",
+  val digipackTerms = Links(
+    "https://www.theguardian.com/info/2014/aug/06/guardian-observer-digital-subscriptions-terms-conditions",
+    "Terms and Conditions"
+  )
+  val paperTerms = Links(
+    "https://www.theguardian.com/subscriber-direct/subscription-terms-and-conditions",
     "Terms and Conditions"
   )
   val privacyPolicy = Links(
-    "http://www.theguardian.com/help/privacy-policy",
+    "https://www.theguardian.com/help/privacy-policy",
     "Privacy Policy"
   )
 
@@ -22,7 +26,7 @@ object Links {
   )
 
   val guardianSubscriptionFaqs = Links(
-    "http://www.theguardian.com/subscriber-direct/subscription-frequently-asked-questions",
+    "https://www.theguardian.com/subscriber-direct/subscription-frequently-asked-questions",
     "Frequently Asked Questions"
   )
 }

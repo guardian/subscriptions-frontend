@@ -30,7 +30,6 @@ case class JsVars(
   userIsSignedIn: Boolean = false,
   ignorePageLoadTracking: Boolean = false,
   stripePublicKey: Option[String] = None,
-  countryGroup: CountryGroup = CountryGroup.UK,
   currency: Currency = GBP,
   country: Option[Country] = None
 )

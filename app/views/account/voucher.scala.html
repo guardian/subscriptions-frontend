@@ -3,31 +3,34 @@
 @import com.gu.memsub.subsv2.Subscription
 @import model.DigitalEdition.UK
 @(
-  subscription: Subscription[SubscriptionPlan.Voucher], billingSchedule: BillingSchedule
+    subscription: Subscription[SubscriptionPlan.Voucher], billingSchedule: BillingSchedule
 )(implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackend.Resolution)
 
-@main("Suspend your newspaper delivery | The Guardian", bodyClasses = List("is-wide"), edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
+@main("Your Guardian subscription | The Guardian", bodyClasses = List("is-wide"), edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
 
-  <main class="page-container gs-container">
-    <section class="suspend-container">
+    <main class="page-container gs-container">
+        <section class="suspend-container">
 
-      <div class="suspend-header">
-        <h1 class="suspend-header__title">Your Guardian subscription</h1>
-      </div>
+            <div class="suspend-header">
+                <h1 class="suspend-header__title">Your Guardian subscription</h1>
+            </div>
 
-      <section class="mma-section">
-        <h3 class="mma-section__header">
-          Your details
-        </h3>
-        @views.html.account.fragments.yourDetails(subscription)()
-      </section>
+            <section class="mma-section">
+                <h3 class="mma-section__header">
+                    Your details
+                </h3>
+                @views.html.account.fragments.yourDetails(subscription)()
+            </section>
 
-      <section class="mma-section">
-        <h3 class="mma-section__header">
-          Your billing schedule
-        </h3>
-        @views.html.account.fragments.billingSchedule(billingSchedule, subscription.plan.charges.price.currencies.head)
-      </section>
-    </section>
-  </main>
+            <section class="mma-section">
+                <h3 class="mma-section__header">
+                    Your billing schedule
+                </h3>
+                @views.html.account.fragments.billingSchedule(billingSchedule, subscription.plan.charges.price.currencies.head)
+            </section>
+            <section class="mma-section">
+                <a class="button button--primary button--large" href="@routes.AccountManagement.logout">Sign Out</a>
+            </section>
+        </section>
+    </main>
 }

@@ -44,12 +44,14 @@ define([
             ratePlanChoice.init();
             eventTracking.init();
             if (formElements.$DELIVERY_FIELDS.length) {
-                require(['modules/checkout/deliveryFields'], function(deliveryFields) {
+                require(['modules/checkout/deliveryFields', 'modules/checkout/addressFinder'], function(deliveryFields, addressFinder) {
                     deliveryFields.default.init();
+                    addressFinder.default.init();
                 });
             } else if (formElements.$VOUCHER_FIELDS.length) {
-                require(['modules/checkout/voucherFields'], function(voucherFields) {
+                require(['modules/checkout/voucherFields', 'modules/checkout/addressFinder'], function(voucherFields, addressFinder) {
                     voucherFields.default.init();
+                    addressFinder.default.init();
                 });
             }
             // Prevent form submit on enter
