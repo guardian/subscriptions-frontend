@@ -1,0 +1,51 @@
+@import com.gu.memsub.promo.PromoCode
+@import com.gu.memsub.promo.Promotion.AnyPromotion
+@import views.support.Dates._
+@import views.support.MarkdownRenderer
+
+@(promoCode: PromoCode, promotion: AnyPromotion, md: MarkdownRenderer)
+@main(
+    title = s"$promoCode Promotion Details | The Guardian",
+    bodyClasses = Seq("is-wide")
+) {
+
+    <main class="page-container promo-landing-page">
+        <section class="section-white section--dark-sides">
+            <div class="gs-container gs-container--slim page-slice">
+                <div class="page-slice__content">
+                @fragments.page.header("Promotion Details", Some(promotion.description))
+                @promotion.asIncentive.map { i =>
+                    <h4>Redemption instructions</h4>
+                    <p>@i.promotionType.redemptionInstructions</p>
+                }
+                @if(promotion.starts.isAfterNow) {
+                    <h4>Launches</h4>
+                    <div>@prettyDate(promotion.starts)</div>
+                } else {
+                    <h4>Launched</h4>
+                    <div>@prettyDate(promotion.starts)</div>
+                }
+                @promotion.expires.map { e =>
+                    <h4>Expires</h4>
+                    <div>@prettyDate(e)</div>
+                }
+                @if(promotion.expires.isEmpty || promotion.expires.exists(_.isAfterNow)) {
+                    <div>
+                        <a href="/p/@promoCode">See more</a>
+                    </div>
+                }
+                </div>
+            </div>
+        </section>
+        <section class="section-white section--dark-sides promotion-terms">
+            <div class="gs-container gs-container--slim page-slice">
+                <div class="page-slice__content">
+                    <h4>Terms and conditions</h4>
+                    <p>Subscriptions available to people aged 18 and over with a valid email address. @promotion.expires.map { e => Customers must subscribe by @prettyDate(e.minusSeconds(1)) to be eligible for the offer. } Offer subject to availability. Guardian News and Media Limited ("GNM") reserves the right to withdraw this promotion at any time.</p>
+                    @fragments.promotion.incentiveTermsAndConditions(promotion, md)
+                    <p>Guardian News and Media Limited – a member of Guardian Media Group plc. Registered office: Kings Place, 90 York Way, London, N1 9GU. Registered in England No. 908396</p>
+                </div>
+            </div>
+        </section>
+    </main>
+}

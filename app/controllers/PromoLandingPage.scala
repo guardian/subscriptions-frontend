@@ -21,17 +21,16 @@ object PromoLandingPage extends Controller {
   val catalog = tpBackend.catalogService.unsafeCatalog
   val edition = DigitalEdition.UK
 
-  def render(promoCodeStr: String) = CachedAction { implicit request =>
+  def render(promoCodeStr: String) = CachedAction { _ =>
     val evaluateStarts = tpBackend.environmentName == "PROD"
     val promoCode = PromoCode(promoCodeStr)
 
     (for {
       promotion <- tpBackend.promoService.findPromotion(promoCode)
-      promotionWithLandingPage <- promotion.asDigipack
-      html <- if ((evaluateStarts && promotionWithLandingPage.starts.isAfterNow) || promotionWithLandingPage.expires.exists(_.isBeforeNow))
-        None
+      html <- if (((evaluateStarts && promotion.starts.isBeforeNow) || promotion.expires.exists(_.isAfterNow)) && promotion.asDigipack.isDefined)
+        Some(views.html.promotion.landingPage(edition, catalog.digipack.month, promoCode, promotion.asDigipack.get, Config.Zuora.paymentDelay, PegdownMarkdownRenderer))
       else
-        Some(views.html.promotion.landingPage(edition, catalog.digipack.month, promoCode, promotionWithLandingPage, Config.Zuora.paymentDelay, PegdownMarkdownRenderer))
+        Some(views.html.promotion.termsPage(promoCode, promotion, PegdownMarkdownRenderer))
     } yield Ok(html)).getOrElse(Redirect("/" ? (internalCampaignCode -> s"FROM_P_${promoCode.get}")))
   }
 
@@ -42,4 +41,5 @@ object PromoLandingPage extends Controller {
       .fold[Result](NotFound)(p => Ok(p).withHeaders(HandleXFrameOptionsOverrideHeader.HEADER_KEY -> s"ALLOW-FROM ${Config.previewXFrameOptionsOverride}"))
     })
   }
+
 }
