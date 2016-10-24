@@ -76,7 +76,6 @@ object TouchpointBackend {
       lazy val zuoraService = new zuora.ZuoraService(soapClient)
       val map = this.catalogService.catalog.map(_.fold[CatalogMap](error => {println(s"error: ${error.list.mkString}"); Map()}, _.map))
       lazy val subscriptionService = new subsv2.services.SubscriptionService[Future](newProductIds, map, simpleRestClient, zuoraService.getAccountIds, () => LocalDate.now)
-      lazy val zuoraRestClient = new rest.Client(config.zuoraRest, new ServiceMetrics(Config.stage, Config.appName, "zuora-rest-client"))
       lazy val paymentService = new PaymentService(_stripeService)
       lazy val commonPaymentService = new CommonPaymentService(_stripeService, zuoraService, this.catalogService.unsafeCatalog.productMap)
       lazy val zuoraProperties = config.zuoraProperties
