@@ -94,9 +94,12 @@
             <div class="checkout-container__sidebar js-basket">
                 @fragments.checkout.basketPreview(productData.plans.default)
 
-                <label class ='label js-currency-override-label' @if(productData.plans.default.product != WeeklyZoneB) { hidden="true" } >
-                    <input type="checkbox" name="currencyOverride" value="true" class="js-currency-override-checkbox"> Pay in £GBP
-                </label>
+                @if(productData.plans.default.product == WeeklyZoneB) {
+                    <label class ='label js-currency-override-label'>
+                        <input type="checkbox" name="currencyOverride" value="true" class="js-currency-override-checkbox"> Pay in £GBP
+                    </label>
+                }
+
 
                 @if(productData.plans.list.length > 1) {
                     <div class="basket-options-toggle u-note prose">
@@ -163,7 +166,7 @@
                             <a href="#yourDetails" class="text-button u-button-reset js-edit-your-details" title="Edit your personal details">Edit</a>
                         </div>
                         <div class="field-panel__fields">
-                            @fragments.checkout.fieldsPersonal(personalData, countryAndCurrencySettings.availableCountries)
+                            @fragments.checkout.fieldsPersonal(personalData)
                             @defining(if(productData.isDigitalPack) "#billingAddress" else "#deliveryDetails") { goto =>
                                 @continueButton(goto, "js-checkout-your-details-submit")
                             }
@@ -172,17 +175,19 @@
                 </div>
 
                 @* ===== Delivery details ===== *@
-                @if(productData.isPhysical) {
+
+                @for(deliveryCountries <- countryAndCurrencySettings.availableDeliveryCountries) {
+
                         <div id="deliveryDetails" class="field-panel is-collapsed js-fieldset-delivery-details">
                             <fieldset>
                                 <legend class="field-panel__legend">
                                     Delivery address
                                 </legend>
                                 <div class="field-panel__fields">
-                                    @if(productData.isHomeDelivery || productData.isGuardianWeekly) {
-                                        @fragments.checkout.fieldsDelivery(productData, countryAndCurrencySettings.availableCountries)
+                                    @if(productData.isVoucher) {
+                                        @fragments.checkout.fieldsVoucher(productData, deliveryCountries)
                                     }else{
-                                        @fragments.checkout.fieldsVoucher(productData, countryAndCurrencySettings.availableCountries)
+                                        @fragments.checkout.fieldsDelivery(productData, deliveryCountries)
                                     }
                                     @continueButton("#paymentDetails", "js-checkout-delivery-details-submit")
                                 </div>
@@ -205,7 +210,7 @@
                             <a href="#yourDetails" class="text-button u-button-reset js-edit-billing-address" title="Edit your personal details">Edit</a>
                         </div>
                         <div class="field-panel__fields">
-                            @fragments.checkout.fieldsBilling(personalData.map(_.address), canBeHidden = !productData.isDigitalPack, countryAndCurrencySettings.availableCountries, productData.plans.default, !productData.isPhysical)
+                            @fragments.checkout.fieldsBilling(personalData.map(_.address), canBeHidden = !productData.isDigitalPack, countryAndCurrencySettings.availableBillingCountries, productData.plans.default, !productData.isPhysical)
                             @continueButton("#paymentDetails", "js-checkout-billing-address-submit")
                         </div>
                     </fieldset>

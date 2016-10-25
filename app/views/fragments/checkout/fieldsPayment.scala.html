@@ -1,35 +1,35 @@
 @(stripeCheckout: Boolean)
 
 @* ===== Payment type ===== *@
-
-<div data-country="GB">
-    <div class="label u-margin-bottom">How would you like to pay?</div>
-    <div class="field-group js-checkout-payment-method">
-        <div class="field-group__item">
-            <label class="option">
-                <span class="option__input">
-                    <input class="js-option-switch" data-option-switch=".js-payment-type-direct-debit"
-                    type="radio" name="payment.type" value="direct-debit" checked>
-                </span>
-                <span class="option__label">Direct Debit</span>
-            </label>
-        </div>
-        <div class="field-group__item">
-            <label class="option">
-                <span class="option__input">
-                    <input class="js-option-switch" data-option-switch=".js-payment-type-card"
-                    type="radio" name="payment.type" value="card">
-                </span>
-                <span class="option__label">Credit/Debit card</span>
-            </label>
+<div data-currency="GBP">
+    <div data-billing-country="GB">
+        <div class="label u-margin-bottom">How would you like to pay?</div>
+        <div class="field-group js-checkout-payment-method">
+            <div class="field-group__item">
+                <label class="option">
+                    <span class="option__input">
+                        <input class="js-option-switch" data-option-switch=".js-payment-type-direct-debit"
+                        type="radio" name="payment.type" value="direct-debit" checked>
+                    </span>
+                    <span class="option__label">Direct Debit</span>
+                </label>
+            </div>
+            <div class="field-group__item">
+                <label class="option">
+                    <span class="option__input">
+                        <input class="js-option-switch" data-option-switch=".js-payment-type-card"
+                        type="radio" name="payment.type" value="card">
+                    </span>
+                    <span class="option__label">Credit/Debit card</span>
+                </label>
+            </div>
         </div>
     </div>
+    <input type="hidden" name="payment.token" class="js-payment-token"/>
+    <div class="payment-type payment-type--direct-debit js-payment-type-direct-debit" data-billing-country="GB">
+        @fragments.checkout.fieldsDirectDebit()
+    </div>
 </div>
-<input type="hidden" name="payment.token" class="js-payment-token"/>
-<div class="payment-type payment-type--direct-debit js-payment-type-direct-debit" data-country="GB">
-    @fragments.checkout.fieldsDirectDebit()
-</div>
-
 <div class="payment-type payment-type--card js-payment-type-card">
     @if(stripeCheckout){
         @fragments.checkout.fieldsStripeCheckout()

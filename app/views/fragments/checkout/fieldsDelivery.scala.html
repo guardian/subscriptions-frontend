@@ -6,6 +6,7 @@
 
 @(data: ProductPopulationData, countriesWithCurrency: List[CountryWithCurrency])
 
+
 @defining(
     data.plans.default.product match {
         case _: Product.WeeklyZoneA | _: Product.WeeklyZoneB => false
@@ -18,7 +19,7 @@
         countriesWithCurrency = countriesWithCurrency,
         plan = data.plans.default,
         usePostcodeLookup = usePostcodeLookup,
-        determinesCurrency = true)
+        determinesLocalization = true)
 
 }
 
@@ -32,9 +33,13 @@
         <label class="label" for="address-town">Date of first paper</label>
         <div id="deliveryDatePicker" class="form-field__react-datepicker"></div>
     </div>
+
     <input type="hidden" name="delivered-product" value="paper" disabled>
     <input type="hidden" name="voucher" value="false">
     <input type="hidden" name="digipack" value="false">
+
+
+
 </div>
 
 

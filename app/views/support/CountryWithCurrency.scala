@@ -22,4 +22,4 @@ object CountryWithCurrency {
   implicit def toCountry(countryWithCurrency: CountryWithCurrency): Country = countryWithCurrency.country
 }
 
-case class CountryAndCurrencySettings(availableCountries: List[CountryWithCurrency], defaultCountry: Option[Country], defaultCurrency: Currency)
+case class CountryAndCurrencySettings(availableDeliveryCountries: Option[List[CountryWithCurrency]], availableBillingCountries: List[CountryWithCurrency], defaultCountry: Option[Country], defaultCurrency: Currency)

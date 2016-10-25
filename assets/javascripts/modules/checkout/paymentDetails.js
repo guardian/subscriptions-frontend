@@ -53,6 +53,7 @@ define([
 
         eventTracking.completedPaymentDetails();
         impressionTracking.paymentReviewTracking();
+        formEls.$CURRENCY_OVERRIDE_LABEL.hide();
     }
 
     function handleValidation() {

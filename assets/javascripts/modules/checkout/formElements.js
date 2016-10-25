@@ -33,7 +33,7 @@ define(['$'], function ($) {
             $COUNTRY_SELECT: $('.js-country', $COUNTRY_CONTAINER[0]),
             getPostcode$: function() { return $('.js-input', $POSTCODE_CONTAINER[0]); },
             getSubdivision$: function() { return $('.js-input', $SUBDIVISION_CONTAINER[0]); },
-            determinesCurrency: function(){ return $(container).data('currency-address') === true} };
+            determinesLocalization: function(){ return $(container).data('localization-address') === true} };
     };
 
     var getPaperCheckoutField = function() {
@@ -133,7 +133,7 @@ define(['$'], function ($) {
         PAPER_CHECKOUT_DATE_PICKER_ID: 'deliveryDatePicker',
         VOUCHER_CHECKOUT_DATE_PICKER_ID: 'deliveryDatePicker',
         $DELIVERED_PRODUCT_TYPE: $('input[name="delivered-product"]'),
-
+        $CURRENCY_OVERRIDE_LABEL: $('.js-currency-override-label'),
         $BASKET: $('.js-basket'),
 
         getPaperCheckoutField: getPaperCheckoutField,

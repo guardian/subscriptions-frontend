@@ -1,12 +1,9 @@
 define(['$'], function ($) {
     'use strict';
+//TODO THIS IS A GENERAL PURPOSE SWITCHER NOW SINCE YOU CAN PASS ANY OBJECT WITH VALUES AND IT WILL UPDATE THEM, IT NEVER ASSUMES THAT IT IS RELATED TO LOCATION
 
-    var model = {
-       currency: null,
-       country: null
-    };
-    var refresh = function () {
-        ['currency', 'country'].forEach(function (param) {
+    var refresh = function (model) {
+        Object.keys(model).forEach(function (param) {
             var dataAttr = 'data-' + param;
             $('[' + dataAttr + ']').each(function(el) {
                 var $el = $(el);
@@ -26,13 +23,7 @@ define(['$'], function ($) {
 
     };
 
-    var set = function (currency, country) {
-        model.currency = currency;
-        model.country = country;
-        refresh();
-    };
-
     return {
-        set: set
+        refresh: refresh
     };
 });
