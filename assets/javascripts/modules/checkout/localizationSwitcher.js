@@ -1,6 +1,5 @@
 define(['$'], function ($) {
     'use strict';
-//TODO THIS IS A GENERAL PURPOSE SWITCHER NOW SINCE YOU CAN PASS ANY OBJECT WITH VALUES AND IT WILL UPDATE THEM, IT NEVER ASSUMES THAT IT IS RELATED TO LOCATION
 
     var refresh = function (model) {
         Object.keys(model).forEach(function (param) {
