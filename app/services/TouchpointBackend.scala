@@ -37,7 +37,6 @@ trait TouchpointBackend {
   def catalogService : subsv2.services.CatalogService[Future]
   def zuoraService: zuora.api.ZuoraService
   def subscriptionService: subsv2.services.SubscriptionService[Future]
-  def zuoraRestClient: zuora.rest.Client
   def paymentService: PaymentService
   def commonPaymentService: CommonPaymentService
   def zuoraProperties: ZuoraProperties
@@ -74,10 +73,9 @@ object TouchpointBackend {
       lazy val environmentName = config.environmentName
       lazy val salesforceService = new SalesforceServiceImp(sfSimpleContactRepo)
       lazy val catalogService = new subsv2.services.CatalogService[Future](newProductIds, simpleRestClient, Await.result(_, 10.seconds), backendType.name)
-      lazy val zuoraService = new zuora.ZuoraService(soapClient, this.zuoraRestClient)
+      lazy val zuoraService = new zuora.ZuoraService(soapClient)
       val map = this.catalogService.catalog.map(_.fold[CatalogMap](error => {println(s"error: ${error.list.mkString}"); Map()}, _.map))
       lazy val subscriptionService = new subsv2.services.SubscriptionService[Future](newProductIds, map, simpleRestClient, zuoraService.getAccountIds, () => LocalDate.now)
-      lazy val zuoraRestClient = new rest.Client(config.zuoraRest, new ServiceMetrics(Config.stage, Config.appName, "zuora-rest-client"))
       lazy val paymentService = new PaymentService(_stripeService)
       lazy val commonPaymentService = new CommonPaymentService(_stripeService, zuoraService, this.catalogService.unsafeCatalog.productMap)
       lazy val zuoraProperties = config.zuoraProperties
