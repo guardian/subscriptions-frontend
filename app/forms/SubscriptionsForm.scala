@@ -194,5 +194,5 @@ object SubscriptionsForm {
     "promoCode" -> optional(of[PromoCode]),
     "currency" -> of[Currency]
   )(SubscriptionData.apply)(SubscriptionData.unapply)
-    .verifying("DirectDebit is only available in the UK", PaymentValidation.validateDirectDebit _))
+    .verifying("DirectDebit is only available for GBP transactions in the UK", PaymentValidation.validateDirectDebit _))
 }
