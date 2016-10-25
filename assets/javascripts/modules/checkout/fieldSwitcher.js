@@ -11,70 +11,65 @@ define([
     'use strict';
 
     var currentState = {
-        currencyOverrideChecked: false,
         deliveryAsBilling: true,
-        localizationPrefix:null,
-        localization: {}, //todo maybe later replace with a function that gets the correct settings based on the prefix
+        localizationPrefix: null,
+        localization: {},
         delivery: {},
         billing: {}
     };
-    //TODO come up with a better name or something
 
-    var billingData = null;
 
-    var check = function(domEl) {
+    var billingFields = null;
+
+    var check = function (domEl) {
         $(domEl).attr('checked', 'checked');
         bean.fire(domEl, 'change');
     };
+
     var checkPlanInput = function (ratePlanId, currency) {
         ratePlanChoice.selectRatePlanForIdAndCurrency(ratePlanId, currency);
     };
 
-    // Change the payment method to Direct Debit for UK users,
-    // Credit Card for international users
+
     var refreshPaymentMethods = function () {
-        if (currentState.billing.country === 'GB' && currentState.localization.currency =='GBP') {
+        if (currentState.billing.country === 'GB' && currentState.localization.currency == 'GBP') {
             check(formElements.$DIRECT_DEBIT_TYPE[0]);
         } else {
             check(formElements.$CARD_TYPE[0]);
         }
     };
-    var isEmptyObject = function(obj) {
-        return Object.keys(obj).length === 0 && obj.constructor === Object
-    }
-    var updateLocalization = function() {
 
+    var isEmptyObject = function (obj) {
+        return Object.keys(obj).length === 0 && obj.constructor === Object
+    };
+
+    var updateLocalization = function () {
         var updateParams = {};
-        if(!isEmptyObject(currentState.delivery)) {
+        if (!isEmptyObject(currentState.delivery)) {
             updateParams['delivery-currency'] = currentState.delivery.currency;
             updateParams['delivery-country'] = currentState.delivery.country;
         }
-        if(!isEmptyObject(currentState.billing)) {
+        if (!isEmptyObject(currentState.billing)) {
             updateParams['billing-currency'] = currentState.billing.currency;
             updateParams['billing-country'] = currentState.billing.country;
         }
-        if(!isEmptyObject(currentState.localization)) {
+        if (!isEmptyObject(currentState.localization)) {
             updateParams['currency'] = currentState.localization.currency;
             updateParams['country'] = currentState.localization.country;
         }
 
         localizationSwitcher.refresh(updateParams);
-
         checkPlanInput(currentState.localization.ratePlanId, currentState.localization.currency);
-
         refreshPaymentMethods();
-
-
     };
 
     var setDeliveryAsBillingAddress = function (deliveryAsBilling) {
         currentState.deliveryAsBilling = deliveryAsBilling;
-
         if (deliveryAsBilling) {
             currentState.billing = currentState.delivery;
         }
         else {
-            billingData.refresh();
+            billingFields.refresh();
         }
         updateLocalization()
     };
@@ -82,8 +77,7 @@ define([
     var initCurrencyOverride = function () {
         $('.js-currency-override-checkbox').each(function (currencyOverrideCheckbox) {
             bean.on(currencyOverrideCheckbox, 'change', function () {
-                currentState.currencyOverrideChecked = currencyOverrideCheckbox.checked;
-                if (currentState.currencyOverrideChecked) {
+                if (currencyOverrideCheckbox.checked) {
                     currentState.localization.currency = 'GBP';
                 }
                 else {
@@ -94,8 +88,6 @@ define([
             });
         });
     };
-
-
 
     var redrawCurrencyOverride = function () {
         $('.js-currency-override-checkbox').attr('checked', false);
@@ -109,14 +101,14 @@ define([
         }
     };
 
-    var everything = function(addressObject, prefix) {
+    var addressOps = function (addressObject, prefix) {
         var $postcode = addressObject.$POSTCODE_CONTAINER,
             $subdivision = addressObject.$SUBDIVISION_CONTAINER,
             countryChoice = countryChoiceFunction(addressObject),
             shouldUpdateMainLocalization = addressObject.determinesLocalization();
 
 
-        var redrawAddressField = function($container, newField, modelValue) {
+        var redrawAddressField = function ($container, newField, modelValue) {
 
             $('.js-input', $container).replaceWith(newField.input);
             $('label', $container).replaceWith(newField.label);
@@ -130,7 +122,7 @@ define([
             }
         };
 
-        var redrawAddressFields = function(model) {
+        var redrawAddressFields = function (model) {
 
             var newPostcode = addressFields.postcode(
                 addressObject.getPostcode$().attr('name'),
@@ -147,13 +139,13 @@ define([
             redrawAddressField($subdivision, newSubdivision, model.subdivision);
         };
 
-        var redraw = function() {
+        var redraw = function () {
             var model = currentState[prefix];
             redrawAddressFields(model);
             updateLocalization();
         };
 
-        var getCurrentState = function() {
+        var getCurrentState = function () {
             var currentCountryOption = $(countryChoice.getCurrentCountryOption()),
                 rules = countryChoice.addressRules(),
                 currency = currentCountryOption.attr('data-currency-choice') || guardian.currency;
@@ -170,7 +162,7 @@ define([
             };
         };
 
-        var updateGuardianPageInfo = function() {
+        var updateGuardianPageInfo = function () {
             var pageInfo = guardian.pageInfo;
             if (pageInfo) {
                 pageInfo.billingCountry = currentState.localization.country; // should this be billing country instead?
@@ -195,13 +187,13 @@ define([
             updateGuardianPageInfo();
         };
 
-        var refreshOnChange = function(el) {
-            bean.on(el[0], 'change', function() {
+        var refreshOnChange = function (el) {
+            bean.on(el[0], 'change', function () {
                 refresh();
             });
         };
 
-        var init = function() {
+        var init = function () {
             if (addressObject.$COUNTRY_SELECT.length) {
                 countryChoice.preselectCountry(guardian.country);
                 refreshOnChange(addressObject.$COUNTRY_SELECT);
@@ -216,10 +208,10 @@ define([
     };
 
     return {
-        init: function() {
-           billingData = everything(formElements.BILLING, 'billing');
-           billingData.init();
-            everything(formElements.DELIVERY, 'delivery').init();
+        init: function () {
+            billingFields = addressOps(formElements.BILLING, 'billing');
+            billingFields.init();
+            addressOps(formElements.DELIVERY, 'delivery').init();
             initCurrencyOverride();
         },
         setDeliveryAsBillingAddress: setDeliveryAsBillingAddress
