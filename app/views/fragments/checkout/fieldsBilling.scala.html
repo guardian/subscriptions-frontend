@@ -20,7 +20,7 @@
   </div>
 }
 @* ===== Address ===== *@
-<div class="js-billing-address @{if(canBeHidden && billingAddress.forall(_.isEmpty)) "is-hidden" else ""}"   data-localization-address="@determinesLocalization">
+<div class="js-billing-address @{if(canBeHidden && billingAddress.forall(_.isEmpty)) "is-hidden" else ""}"   data-determines-localization="@determinesLocalization">
     @address(
         address = billingAddress,
         namePrefix = "personal.address",
