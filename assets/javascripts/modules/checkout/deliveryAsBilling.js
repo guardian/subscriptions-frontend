@@ -5,7 +5,6 @@ define(['modules/checkout/formElements', '$', 'bean', 'modules/checkout/fieldSwi
     var $BILLING_ADDRESS = formEls.BILLING.$CONTAINER;
 
     function disableOrEnableBillingAddress() {
-
         var $elems = $('input, select', $BILLING_ADDRESS[0]);
         var deliveryAsBilling = false;
         if ($BILLING_ADDRESS.hasClass('is-hidden')) {

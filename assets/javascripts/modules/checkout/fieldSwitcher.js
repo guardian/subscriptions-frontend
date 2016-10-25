@@ -18,7 +18,6 @@ define([
         billing: {}
     };
 
-
     var billingFields = null;
 
     var check = function (domEl) {
@@ -149,7 +148,6 @@ define([
             var currentCountryOption = $(countryChoice.getCurrentCountryOption()),
                 rules = countryChoice.addressRules(),
                 currency = currentCountryOption.attr('data-currency-choice') || guardian.currency;
-
 
             return {
                 postcode: $('input', $postcode).val(),
