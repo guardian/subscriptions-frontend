@@ -188,6 +188,7 @@ class CheckoutService(identityService: IdentityService,
       ratePlans = NonEmptyList(plan),
       name = personalData,
       address = personalData.address,
+      email = personalData.email,
       paymentDelay = paymentDelay,
       ipAddress = requestData.ipAddress.map(_.getHostAddress),
       supplierCode = requestData.supplierCode
