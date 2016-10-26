@@ -11,7 +11,7 @@
 
     <dt class="mma-section__list--title">Current plan</dt>
     <dd class="mma-section__list--content">
-        <div>@if(subscription.plan.name == "Echo-Legacy") { Multi-day } else { subscription.plan.name }</div>
+        <div>@if(subscription.plan.name == "Echo-Legacy") { Multi-day } else { @subscription.plan.name }</div>
         <div>(@subscription.plan.description)</div>
         <div>@subscription.plan.charges.prettyPricing(subscription.plan.charges.price.currencies.head)</div>
     </dd>
