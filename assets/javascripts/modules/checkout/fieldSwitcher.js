@@ -11,6 +11,7 @@ define([
     'use strict';
 
     var currentState = {
+        ratePlanId:null,
         deliveryAsBilling: true,
         localizationPrefix: null,
         localization: {},
@@ -58,7 +59,7 @@ define([
         }
 
         dataSwitcher.refresh(updateParams);
-        checkPlanInput(currentState.localization.ratePlanId, currentState.localization.currency);
+        checkPlanInput(currentState.ratePlanId, currentState.localization.currency);
         refreshPaymentMethods();
     };
 
@@ -82,7 +83,7 @@ define([
                 else {
                     currentState.localization.currency = 'USD';
                 }
-                currentState.localization.ratePlanId = ratePlanChoice.getSelectedRatePlanId();
+                currentState.ratePlanId = ratePlanChoice.getSelectedRatePlanId();
                 updateLocalization();
                 refreshPaymentMethods();
             });
@@ -156,8 +157,7 @@ define([
                 subdivision: $('input', $subdivision).val(),
                 subdivisionRules: rules.subdivision,
                 currency: currency,
-                country: currentCountryOption.val(),
-                ratePlanId: ratePlanChoice.getSelectedRatePlanId()
+                country: currentCountryOption.val()
             };
         };
 
@@ -179,6 +179,7 @@ define([
             if (currentState.deliveryAsBilling && prefix == 'delivery') {
                 currentState.billing = currentState.delivery;
             }
+            currentState.ratePlanId = ratePlanChoice.getSelectedRatePlanId();
             redraw();
             if (shouldUpdateMainLocalization) {
                 redrawCurrencyOverride();
