@@ -4,10 +4,10 @@ define([
     'bean',
     'modules/checkout/countryChoice',
     'modules/checkout/addressFields',
-    'modules/checkout/localizationSwitcher',
+    'modules/checkout/dataSwitcher',
     'modules/checkout/formElements',
     'modules/checkout/ratePlanChoice'
-], function ($, bean, countryChoiceFunction, addressFields, localizationSwitcher, formElements, ratePlanChoice) {
+], function ($, bean, countryChoiceFunction, addressFields, dataSwitcher, formElements, ratePlanChoice) {
     'use strict';
 
     var currentState = {
@@ -57,7 +57,7 @@ define([
             updateParams['country'] = currentState.localization.country;
         }
 
-        localizationSwitcher.refresh(updateParams);
+        dataSwitcher.refresh(updateParams);
         checkPlanInput(currentState.localization.ratePlanId, currentState.localization.currency);
         refreshPaymentMethods();
     };
