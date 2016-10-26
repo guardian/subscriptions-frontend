@@ -1,0 +1,26 @@
+@import com.gu.memsub.subsv2._
+
+@import model.WeeklyRegion
+@(options: List[WeeklyRegion])
+
+@main(title = "Guardian Weekly") {
+    <main class="page-container gs-container">
+
+        @fragments.page.header("Guardian Weekly", Some("Subscribe to a unique blend of international news, politics, culture and comment from award-winning journalists around the globe"), Nil)
+
+        <section class="section-slice">
+
+            <h2 class="page-heading">Where do you live?</h2>
+
+            @for(option <- options) {
+                <a href="@option.url.toString" class="package">
+                    <div class="package__info">
+                        <span class="package__title">@option.title</span>
+                        <span class="package__description">@option.description</span>
+                    </div>
+                </a>
+            }
+        </section>
+
+    </main>
+}
