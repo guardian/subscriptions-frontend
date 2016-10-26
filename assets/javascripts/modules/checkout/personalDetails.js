@@ -5,6 +5,7 @@ define([
     'modules/forms/checkFields',
     'modules/checkout/validatePersonal',
     'modules/forms/loader',
+    'modules/checkout/fieldSwitcher',
     'modules/checkout/eventTracking',
     'modules/checkout/impressionTracking'
 ], function (
@@ -14,6 +15,7 @@ define([
     checkFields,
     validatePersonal,
     loader,
+    fieldSwitcher,
     eventTracking,
     impressionTracking
 ) {
@@ -70,6 +72,7 @@ define([
     }
 
     function init() {
+        fieldSwitcher.init();
         var $actionEl = formEls.$YOUR_DETAILS_SUBMIT;
         var actionEl = $actionEl[0];
         impressionTracking.personalDetailsTracking();

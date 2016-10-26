@@ -11,7 +11,6 @@ define([
     'modules/checkout/promoCode',
     'modules/checkout/billingDetails',
     'modules/checkout/deliveryDetails',
-    'modules/checkout/fieldSwitcher',
     'modules/checkout/deliveryAsBilling',
     'modules/checkout/ratePlanChoice',
     'modules/checkout/eventTracking',
@@ -27,7 +26,6 @@ define([
     promoCode,
     billingAddress,
     deliveryDetails,
-    fieldSwitcher,
     deliveryAsBilling,
     ratePlanChoice,
     eventTracking,
@@ -38,7 +36,6 @@ define([
         if (formElements.$CHECKOUT_FORM.length) {
             optionMirror.init();
             personalDetails.init();
-            fieldSwitcher.init();
             paymentDetails.init();
             editFieldsets.init();
             reviewDetails.init();
