@@ -82,6 +82,7 @@ define([
                 else {
                     currentState.localization.currency = 'USD';
                 }
+                currentState.localization.ratePlanId = ratePlanChoice.getSelectedRatePlanId();
                 updateLocalization();
                 refreshPaymentMethods();
             });
