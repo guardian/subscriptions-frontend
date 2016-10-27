@@ -1,0 +1,92 @@
+@import com.gu.memsub.promo.PromoCode
+@import com.gu.memsub.promo.Promotion.PromoWithNewspaperLandingPage
+@import com.gu.memsub.promo.Promotion.asAnyPromotion
+@import views.support.LandingPageOps._
+@import views.support.MarkdownRenderer
+@import com.gu.memsub.subsv2.Catalog
+@import model.Subscriptions._
+
+@(catalog: Catalog, promoCode: PromoCode, promotion: PromoWithNewspaperLandingPage, md: MarkdownRenderer)
+@voucherPlans = @{catalog.voucher.list.filter(p => promotion.appliesTo.productRatePlanIds.contains(p.id))}
+@deliveryPlans = @{catalog.delivery.list.filter(p => promotion.appliesTo.productRatePlanIds.contains(p.id))}
+@anyPromotion = @{asAnyPromotion(promotion)}
+@title = @{"Subscribe to the Guardian and Observer"}
+@hash = @{s"#${promotion.landingPage.defaultProduct}"}
+@products = @{
+    val adapter = planToOptions(promoCode, anyPromotion) _
+    val voucherProduct = CollectionSubscriptionProduct(
+        title = "",
+        description = "",
+        altPackagePath = "#delivery",
+        options = {
+            voucherPlans.filter(_.charges.digipack.isEmpty).map(adapter).sortBy(_.weeklyPrice).reverse ++
+            voucherPlans.filter(_.charges.digipack.isDefined).map(adapter).sortBy(_.weeklyPrice).reverse
+        },
+        isDiscounted = promotion.asDiscount.isDefined
+    )
+    val deliveryProduct = DeliverySubscriptionProduct(
+        title = "",
+        description = "",
+        altPackagePath = "#voucher",
+        options = {
+            deliveryPlans.filter(_.charges.digipack.isEmpty).map(adapter).sortBy(_.weeklyPrice).reverse ++
+            deliveryPlans.filter(_.charges.digipack.isDefined).map(adapter).sortBy(_.weeklyPrice).reverse
+        },
+        isDiscounted = promotion.asDiscount.isDefined
+    )
+    if (promotion.landingPage.defaultProduct == "voucher") {
+        Seq(voucherProduct, deliveryProduct).filterNot(_.options.isEmpty)
+    } else {
+        Seq(deliveryProduct, voucherProduct).filterNot(_.options.isEmpty)
+    }
+}
+@main(
+    title = s"$title | The Guardian"
+) {
+    <main class="page-container gs-container">
+
+        @fragments.page.header(title)
+
+        <section class="promotion-description">
+            <p>@promotion.description</p>
+
+            @promotion.asIncentive.map { p =>
+                <h4>Redemption instructions</h4>
+                <p>@p.promotionType.redemptionInstructions</p>
+            }
+        </section>
+
+        @for(product <- products) {
+            <div class="product" id="@product.id" style="display: none">
+                @fragments.shipping.shipping(product)
+            </div>
+        }
+
+        <section class="section-slice promotion-terms">
+            @fragments.promotion.promotionTermsAndConditions(anyPromotion, md)
+            <p>For full promotion terms and conditions visit <a class="u-link" href="/p/@promoCode.get/terms">subscribe.theguardian.com/p/@promoCode.get/terms</a></p>
+            @fragments.promotion.subscriptionTermsAndConditions(catalog, anyPromotion)
+            @fragments.promotion.copyrightNotice()
+        </section>
+
+    </main>
+    <script>
+        window.onhashchange = function () {
+            if (location.hash === '' || location.hash === '#') { return; }
+
+            var sectionMatchingHash = document.querySelector(location.hash);
+            if (sectionMatchingHash) {
+                [].forEach.call(document.querySelectorAll('.product'), function(el) {
+                    el.style.display = 'none';
+                });
+                sectionMatchingHash.style.display = 'block';
+            }
+        };
+
+        if (location.hash === '' || location.hash === '#') {
+            location.hash = '@hash';
+        }
+
+        window.onhashchange();
+    </script>
+}

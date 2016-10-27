@@ -3,8 +3,8 @@
 @import com.gu.memsub.subsv2.CatalogPlan
 @import com.gu.memsub.Month
 @import model.DigitalEdition
-@import org.joda.time.Days
-@(edition: DigitalEdition, plan: CatalogPlan.Digipack[Month], promoCode: PromoCode, promotion: AnyPromotion, defaultTrial: Days)
+
+@(edition: DigitalEdition, plan: CatalogPlan.Digipack[Month], promoCode: PromoCode, promotion: AnyPromotion)
 <div>
     <div class="digital-tablet-previews hide-above-phablet">
         <img src="@controllers.CachedAssets.hashedPathFor("images/backgrounds/bg-digital-tablet-previews.jpg")"/>
@@ -44,7 +44,7 @@
                     <h3>Every day; every section; every supplement</h3>
                     <div class="feature__text">The Guide; Cook; and food Monthly plus our daily crossword tailored for your tablet.</div>
                     <div class="feature__cta">
-                        @fragments.promotion.pricingCta(defaultTrial, edition, plan, promoCode, promotion)
+                        @fragments.promotion.pricingCta(edition, plan, promoCode, promotion)
                         @fragments.promotion.subscribeNow(edition, promoCode)
                     </div>
                 </div>

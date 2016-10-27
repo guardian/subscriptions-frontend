@@ -1,5 +1,8 @@
 package model
 
+import com.gu.memsub.Product.{Delivery, Voucher}
+import play.twirl.api.Html
+
 object Subscriptions {
 
   case class SubscriptionOption(
@@ -9,27 +12,32 @@ object Subscriptions {
     weeklySaving: Option[String],
     monthlyPrice: Float,
     description: String,
-    url: String
+    url: String,
+    paymentDetails: Option[Html] = None
   )
 
   trait SubscriptionProduct {
+    val id: String
     val title: String
     val description: String
-    val packageType: String
+    val altPackagePath: String
     val options: Seq[SubscriptionOption]
     val stepsHeading: String
     val steps: Seq[String]
     val insideM25: Boolean
+    val isDiscounted: Boolean
     def capitalizedTitle = title.split("\\s").map(_.capitalize).mkString(" ")
   }
 
   case class DeliverySubscriptionProduct(
     title: String,
     description: String,
-    packageType: String,
-    options: Seq[SubscriptionOption]
+    altPackagePath: String,
+    options: Seq[SubscriptionOption],
+    isDiscounted: Boolean = false
   ) extends SubscriptionProduct {
     override val insideM25 = true
+    override val id = Delivery.name
     val stepsHeading = "This is how direct delivery works"
     val steps = Seq(
       "Pick the perfect package for you",
@@ -41,10 +49,12 @@ object Subscriptions {
   case class CollectionSubscriptionProduct(
     title: String,
     description: String,
-    packageType: String,
-    options: Seq[SubscriptionOption]
+    altPackagePath: String,
+    options: Seq[SubscriptionOption],
+    isDiscounted: Boolean = false
   ) extends SubscriptionProduct {
     override val insideM25 = false
+    override val id = Voucher.name
     val stepsHeading = "This is how the voucher scheme works"
     val steps = Seq(
       "Pick the perfect package for you",

@@ -209,6 +209,19 @@
     padding-top: ($gs-baseline / 3);
 }
 
+.promotion-applies-to {
+    @include mq(mobileLandscape) {
+        columns: 2;
+        -webkit-columns: 2;
+        -moz-columns: 2;
+    }
+    @include mq(phablet) {
+        columns: 3;
+        -webkit-columns: 3;
+        -moz-columns: 3;
+    }
+}
+
 .promotion-description--bordered {
     border-color: $c-neutral2;
     border-style: dotted;
@@ -234,6 +247,11 @@
 .promotion-terms {
     @include fs-textSans(2);
     color: $c-neutral2;
+
+    h3, h4 {
+        font-size: 1em;
+        font-weight: 900;
+    }
 
     .page-slice__content {
         margin-top: $gs-baseline * 2;

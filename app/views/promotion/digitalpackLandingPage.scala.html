@@ -1,16 +1,12 @@
 @import com.gu.memsub.promo.PromoCode
-@import com.gu.memsub.promo.Promotion.PromoWithDigipackLandingPage
-@import com.gu.memsub.promo.Promotion.asAnyPromotion
-@import com.gu.memsub.promo._
+@import com.gu.memsub.promo.Promotion.{PromoWithDigitalPackLandingPage, asAnyPromotion}
+@import com.gu.memsub.subsv2.Catalog
 @import model.DigitalEdition
-@import views.support.Dates._
-@import com.gu.memsub.subsv2.CatalogPlan
 @import views.support.LandingPageOps._
-@import org.joda.time.Days
 @import views.support.MarkdownRenderer
-@import com.gu.memsub.Month
 
-@(edition: DigitalEdition, plan: CatalogPlan.Digipack[Month], promoCode: PromoCode, promotion: PromoWithDigipackLandingPage, defaultTrial: Days, md: MarkdownRenderer)
+@(edition: DigitalEdition, catalog: Catalog, promoCode: PromoCode, promotion: PromoWithDigitalPackLandingPage, md: MarkdownRenderer)
+@plan = @{catalog.digipack.month}
 @anyPromotion = @{asAnyPromotion(promotion)}
 @main(
     title = "Subscribe to the Guardian Digital Pack offer | The Guardian (${edition.name})",
@@ -34,7 +30,7 @@
             <div class="gs-container gs-container--slim page-slice">
                 <div class="page-slice__content">
                     <h2 class="promo-landing-page__section-head">Discover the Guardian Daily Edition</h2>
-                    @fragments.promotion.discover(edition, plan, promoCode, anyPromotion, defaultTrial)
+                    @fragments.promotion.discover(edition, plan, promoCode, anyPromotion)
                 </div>
             </div>
         </section>
@@ -66,18 +62,17 @@
             <div class="gs-container gs-container--slim page-slice page-slice">
                 <div class="page-slice__content">
                     <h2 class="promo-landing-page__section-head">Subscribe&nbsp;to&nbsp;the Digital&nbsp;Pack</h2>
-                    @fragments.promotion.promotionCta(edition, plan, promoCode, anyPromotion, defaultTrial)
+                    @fragments.promotion.promotionCta(edition, plan, promoCode, anyPromotion)
                 </div>
             </div>
         </section>
         <section class="section-white section--dark-sides promotion-terms">
             <div class="gs-container gs-container--slim page-slice">
                 <div class="page-slice__content">
-                    <h4>Terms and conditions</h4>
-                    <p>@promotion.expires.map { e => Customers must subscribe by @prettyDate(e.minusSeconds(1)) to be eligible for the offer. } Offer subject to availability. Guardian News and Media Limited ("GNM") reserves the right to withdraw this promotion at any time.</p>
-                    @fragments.promotion.incentiveTermsAndConditions(anyPromotion, md)
-                    @fragments.promotion.subscriptionTermsAndConditions(defaultTrial, plan, anyPromotion)
-                    <p>Guardian News and Media Limited – a member of Guardian Media Group plc. Registered office: Kings Place, 90 York Way, London, N1 9GU. Registered in England No. 908396</p>
+                    @fragments.promotion.promotionTermsAndConditions(anyPromotion, md)
+                    <p>For full promotion terms and conditions visit <a class="u-link" href="/p/@promoCode.get/terms">subscribe.theguardian.com/p/@promoCode.get/terms</a></p>
+                    @fragments.promotion.subscriptionTermsAndConditions(catalog, anyPromotion)
+                    @fragments.promotion.copyrightNotice()
                 </div>
             </div>
         </section>

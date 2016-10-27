@@ -1,51 +1,62 @@
+@import com.gu.i18n.CountryGroup.UK
 @import com.gu.memsub.promo.PromoCode
 @import com.gu.memsub.promo.Promotion.AnyPromotion
-@import views.support.Dates._
+@import com.gu.memsub.subsv2.Catalog
+@import org.joda.time.Days
+@import views.support.Dates.prettyDate
 @import views.support.MarkdownRenderer
-
-@(promoCode: PromoCode, promotion: AnyPromotion, md: MarkdownRenderer)
+@(promoCode: PromoCode, promotion: AnyPromotion, md: MarkdownRenderer, catalog: Catalog)
+@title = @{s"Promo code: ${promoCode.get}"}
 @main(
-    title = s"$promoCode Promotion Details | The Guardian",
-    bodyClasses = Seq("is-wide")
+    title = s"$title | The Guardian"
 ) {
 
-    <main class="page-container promo-landing-page">
-        <section class="section-white section--dark-sides">
-            <div class="gs-container gs-container--slim page-slice">
-                <div class="page-slice__content">
-                @fragments.page.header("Promotion Details", Some(promotion.description))
-                @promotion.asIncentive.map { i =>
-                    <h4>Redemption instructions</h4>
-                    <p>@i.promotionType.redemptionInstructions</p>
+    <main class="page-container gs-container">
+
+        @fragments.page.header(title)
+
+        <section class="promotion-description">
+
+            <h4>Promotion details</h4>
+            <p>@promotion.description</p>
+
+            @promotion.expires.map { expiryDate =>
+                <h4>Valid until</h4>
+                <div>@prettyDate(expiryDate)</div>
+            }
+
+            <br/>
+
+            <h4>Applies to products</h4>
+            <ul class="promotion-applies-to">
+                @catalog.allSubs.flatten.filter(plan => promotion.appliesTo.productRatePlanIds.contains(plan.id)).map { plan =>
+                    <li><a href="@routes.Checkout.renderCheckout(UK, None, None, plan.slug).url">@{plan.product.toString.replace("Digipack", "")} @plan.name</a></li>
                 }
-                @if(promotion.starts.isAfterNow) {
-                    <h4>Launches</h4>
-                    <div>@prettyDate(promotion.starts)</div>
-                } else {
-                    <h4>Launched</h4>
-                    <div>@prettyDate(promotion.starts)</div>
-                }
-                @promotion.expires.map { e =>
-                    <h4>Expires</h4>
-                    <div>@prettyDate(e)</div>
-                }
-                @if(promotion.expires.isEmpty || promotion.expires.exists(_.isAfterNow)) {
-                    <div>
-                        <a href="/p/@promoCode">See more</a>
+            </ul>
+
+            <br/>
+
+            @promotion.asIncentive.map { i =>
+                <h4>Redemption instructions</h4>
+                <p>@i.promotionType.redemptionInstructions</p>
+            }
+
+            @if(promotion.expires.isEmpty || promotion.expires.exists(_.isAfterNow)) {
+                <div class="pricing-cta">
+                    <div class="pricing-cta__action">
+                        <a class="button button--large button--primary"
+                        href="/p/@promoCode.get"
+                        >Get this offer</a>
                     </div>
-                }
                 </div>
-            </div>
+                <br/>
+            }
         </section>
-        <section class="section-white section--dark-sides promotion-terms">
-            <div class="gs-container gs-container--slim page-slice">
-                <div class="page-slice__content">
-                    <h4>Terms and conditions</h4>
-                    <p>Subscriptions available to people aged 18 and over with a valid email address. @promotion.expires.map { e => Customers must subscribe by @prettyDate(e.minusSeconds(1)) to be eligible for the offer. } Offer subject to availability. Guardian News and Media Limited ("GNM") reserves the right to withdraw this promotion at any time.</p>
-                    @fragments.promotion.incentiveTermsAndConditions(promotion, md)
-                    <p>Guardian News and Media Limited – a member of Guardian Media Group plc. Registered office: Kings Place, 90 York Way, London, N1 9GU. Registered in England No. 908396</p>
-                </div>
-            </div>
+        <section class="section-slice promotion-terms">
+            @fragments.promotion.subscriptionTermsAndConditions(catalog, promotion)
+            @fragments.promotion.promotionTermsAndConditions(promotion, md)
+            @fragments.promotion.incentiveLegalTerms(promotion, md)
+            @fragments.promotion.copyrightNotice()
         </section>
     </main>
 }

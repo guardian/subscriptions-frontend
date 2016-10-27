@@ -63,6 +63,7 @@ GET         /test-users                      controllers.Testing.testUser
 
 # Promotions
 GET         /p/:promoCodeStr                 controllers.PromoLandingPage.render(promoCodeStr: String)
+GET         /p/:promoCodeStr/terms           controllers.PromoLandingPage.terms(promoCodeStr: String)
 
 # NOCSRF
 POST        /q                               controllers.PromoLandingPage.preview

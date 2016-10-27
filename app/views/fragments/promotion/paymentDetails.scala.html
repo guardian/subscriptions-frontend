@@ -1,0 +1,17 @@
+@import com.gu.memsub.subsv2.CatalogPlan
+@import com.gu.memsub.promo.Promotion._
+@import views.support.Catalog._
+
+@(plan: CatalogPlan.Paid, promotion: AnyPromotion)
+
+@promotion.asDiscount.find(_.promotionType.durationMonths.isDefined).fold {
+    Monthly price <strong>@formatPrice(plan, promotion)</strong>
+} { p =>
+    @if(p.promotionType.durationMonths.get > 1) {
+        <strong>@formatPrice(plan, promotion)</strong> per month for @p.promotionType.durationMonths.get months
+    } else {
+        <strong>@formatPrice(plan, promotion)</strong> for 1 month
+    }
+    <br/>
+    Then <strong>@formatPrice(plan)</strong> every month thereafter
+}

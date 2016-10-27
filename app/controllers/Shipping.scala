@@ -25,7 +25,7 @@ object Shipping extends Controller {
     index(CollectionSubscriptionProduct(
       title = "Paper + digital voucher subscription",
       description = "Save money on your newspapers and digital content. Plus start using the daily edition and premium live news app immediately.",
-      packageType = "paper-digital",
+      altPackagePath = "/collection/paper-digital",
       options = catalog.voucher.list.filter(_.charges.digipack.isDefined).map(planToOptions).sortBy(_.weeklyPrice).reverse
     ))
   }
@@ -34,7 +34,7 @@ object Shipping extends Controller {
     index(CollectionSubscriptionProduct(
       title = "Paper voucher subscription",
       description = "Save money on your newspapers.",
-      packageType = "paper",
+      altPackagePath = "/collection/paper",
       options = catalog.voucher.list.filter(_.charges.digipack.isEmpty).map(planToOptions).sortBy(_.weeklyPrice).reverse
     ))
   }
@@ -44,7 +44,7 @@ object Shipping extends Controller {
       title = "Paper + digital home delivery subscription",
       description = """|If you live within the M25 you can have your papers delivered by 7am Monday - Saturday and 8.30am on Sunday.
                       |Plus you can start using the daily edition and premium live news app immediately.""".stripMargin,
-      packageType = "paper-digital",
+      altPackagePath = "/delivery/paper-digital",
       options = catalog.delivery.list.filter(_.charges.digipack.isDefined).map(planToOptions).sortBy(_.weeklyPrice).reverse
     ))
   }
@@ -53,7 +53,7 @@ object Shipping extends Controller {
     index(DeliverySubscriptionProduct(
       title = "Paper home delivery subscription",
       description = "If you live within the M25 you can have your papers delivered by 7am Monday - Saturday and 8.30 on Sunday.",
-      packageType = "paper",
+      altPackagePath = "/delivery/paper",
       options = catalog.delivery.list.filter(_.charges.digipack.isEmpty).map(planToOptions).sortBy(_.weeklyPrice).reverse
     ))
   }
