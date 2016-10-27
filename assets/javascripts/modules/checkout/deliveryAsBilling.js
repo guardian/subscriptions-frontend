@@ -1,28 +1,27 @@
-define(['modules/checkout/formElements', '$', 'bean', 'modules/checkout/fieldSwitcher'], function (formEls, $, bean, fieldSwitcher) {
+define(['modules/checkout/formElements',
+        'modules/checkout/fieldSwitcher', '$', 'bean'], function (formEls,fieldSwitcher, $, bean) {
     'use strict';
 
-    var BILLING_ADDRESS_AS_DELIVERY_ADDRESS_PICKER = $('.js-checkout-delivery-sames-as-billing')[0];
+    var billingAsDeliveryCheckbox = formEls.$BILLING_ADDRESS_AS_DELIVERY_ADDRESS_PICKER[0];
     var $BILLING_ADDRESS = formEls.BILLING.$CONTAINER;
 
     function disableOrEnableBillingAddress() {
         var $elems = $('input, select', $BILLING_ADDRESS[0]);
-        var deliveryAsBilling = false;
         if ($BILLING_ADDRESS.hasClass('is-hidden')) {
             $elems.attr('disabled', 'disabled');
-            deliveryAsBilling = true;
         } else {
             $elems.removeAttr('disabled');
         }
-        fieldSwitcher.setDeliveryAsBillingAddress(deliveryAsBilling);
+        fieldSwitcher.update();
     }
 
     return {
         init: function() {
-            if (!BILLING_ADDRESS_AS_DELIVERY_ADDRESS_PICKER) {
+            if (!billingAsDeliveryCheckbox) {
                 return;
             }
             disableOrEnableBillingAddress();
-            bean.on(BILLING_ADDRESS_AS_DELIVERY_ADDRESS_PICKER, 'change', function () {
+            bean.on(billingAsDeliveryCheckbox, 'change', function () {
                 $BILLING_ADDRESS.toggleClass('is-hidden');
                 disableOrEnableBillingAddress();
             });
