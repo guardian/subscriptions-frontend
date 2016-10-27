@@ -11,7 +11,7 @@ object ABTest {
 
     request.getQueryString("stripe").flatMap((str) => if (str == "checkout") {Some(2)} else {Some(1)}).
       getOrElse(((request.cookies.get(TestIdCookieName) map (_.value.toInt)).
-        getOrElse(Random.nextInt(Int.MaxValue))))
+        getOrElse(Random.nextInt(2))))
   }
 
   def testIdCookie(id: Int) = Cookie(TestIdCookieName, id.toString, maxAge = Some(604800))

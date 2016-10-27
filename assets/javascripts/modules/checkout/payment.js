@@ -8,7 +8,6 @@ define([
     'modules/raven'
 ], function (ajax, regex, formElements, validatePaymentFormat, stripeCheckout, raven) {
     'use strict';
-    //TODO: STRIPE CHECKOUT
     var ACCOUNT_CHECK_ENDPOINT = '/checkout/check-account';
 
     function accountCheck(accountNumber, sortCode, accountHolderName) {

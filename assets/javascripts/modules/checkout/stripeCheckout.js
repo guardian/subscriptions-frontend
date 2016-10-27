@@ -1,13 +1,15 @@
 /* global guardian, StripeCheckout */
 
-define(['bean',    'modules/checkout/formElements'
-],function(bean,formElements){
+define([
+    'bean',
+    'modules/checkout/formElements',
+    'raven-js'
+], function (bean, formElements, raven) {
     function openCheckout() {
         return new Promise(function (resolve, reject) {
             var handler;
             if (!('StripeCheckout' in window)) {
-                console.error('handle this with raven');
-                //TODO: raven
+                raven.captureMessage('StripeCheckout not present');
                 resolve(false);
             }
 
@@ -30,7 +32,7 @@ define(['bean',    'modules/checkout/formElements'
                     resolve(token);
                 },
                 closed: function () {
-                    if(!successfulCharge){
+                    if (!successfulCharge) {
                         reject();
                     }
                 }
@@ -38,11 +40,13 @@ define(['bean',    'modules/checkout/formElements'
         });
 
     }
+
     function setPaymentToken(token) {
         var field = document.querySelector('.js-payment-token');
         field.value = token
     }
-    return({
+
+    return ({
         setPaymentToken: setPaymentToken,
         openCheckout: openCheckout
     })
