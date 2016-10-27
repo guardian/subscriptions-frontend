@@ -6,6 +6,8 @@ define(['modules/analytics/analyticsEnabled',
     'use strict';
 
     var _EVENT_QUEUE = [];
+    var experienceIsSet = 'stripeCheckout' in guardian;
+    var experience = guardian.stripeCheckout?'stripeCheckout':'stripeJS';
 
     function init() {
 
@@ -60,6 +62,10 @@ define(['modules/analytics/analyticsEnabled',
         }
 
         ga('membershipPropertyTracker.set', 'dimension13', isCustomerAgent);  // customerAgent
+        if(experienceIsSet){
+            ga('membershipPropertyTracker.set', 'dimension16', experience);  // experience
+
+        }
 
         if (camCodeBusinessUnit && camCodeBusinessUnit[1]) {
             ga('membershipPropertyTracker.set', 'dimension14', camCodeBusinessUnit[1]);  // CamCodeBusinessUnit
@@ -85,7 +91,7 @@ define(['modules/analytics/analyticsEnabled',
 
         _EVENT_QUEUE.forEach(function (obj) {
             var upgrading = (obj.eventLabel === 'Rate Plan Change' && guardian.pageInfo.productData.initialProduct !== guardian.pageInfo.productData.productPurchasing) ? 1 : 0;
-            ga('membershipPropertyTracker.send', 'event', {
+            var event = {
                 eventCategory: 'Subscriptions Checkout',
                 eventAction:  guardian.pageInfo.productData.productType,
                 eventLabel: obj.eventLabel,
@@ -93,7 +99,11 @@ define(['modules/analytics/analyticsEnabled',
                 dimension13: !!guardian.supplierCode,
                 metric1: upgrading,
                 metric2: obj.elapsedTime
-            });
+            };
+            if(experienceIsSet){
+                event.dimension16 = experience;
+            }
+            ga('membershipPropertyTracker.send', 'event', event);
         });
 
         _EVENT_QUEUE = [];

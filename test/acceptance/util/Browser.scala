@@ -17,7 +17,7 @@ trait Browser extends WebBrowser {
   def pageHasText(text: String): Boolean =
     waitUntil(ExpectedConditions.textToBePresentInElementLocated(By.tagName("body"), text))
 
-  def pageHasElement(q: Query): Boolean =
+  def  pageHasElement(q: Query): Boolean =
     waitUntil(ExpectedConditions.visibilityOfElementLocated(q.by))
 
   def elementIsPresent(q: Query): Boolean =
@@ -46,6 +46,13 @@ trait Browser extends WebBrowser {
     if (pageHasElement(q))
       q.webElement.sendKeys(value)
     else
+      throw new MissingPageElementException(q)
+  }
+
+  def clearValue(q: Query): Unit = {
+    if (pageHasElement(q)) {
+      q.webElement.clear()
+    } else
       throw new MissingPageElementException(q)
   }
 

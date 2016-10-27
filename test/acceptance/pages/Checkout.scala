@@ -1,8 +1,10 @@
 package acceptance.pages
 
-import acceptance.util.{Browser, TestUser, Config}
+import acceptance.util.{Browser, Config, Driver, TestUser}
 import Config.baseUrl
+import org.openqa.selenium.By
 import org.scalatest.selenium.Page
+import views.fragments.ABTest
 
 case class Checkout(testUser: TestUser, endpoint: String = "checkout") extends Page with Browser {
   val url = s"$baseUrl/$endpoint"
@@ -29,6 +31,10 @@ case class Checkout(testUser: TestUser, endpoint: String = "checkout") extends P
 
   def fillInCreditCardPaymentDetails(): Unit = CreditCardPaymentDetails.fillIn()
 
+  def fillInCreditCardPaymentDetailsStripe(): Unit = StripeCheckout.fillIn()
+
+  def setInStripeTest(b: Boolean) = StripeCheckout.setInTest(b)
+
   def clickCredictCardPaymentContinueButton() = CreditCardPaymentDetails.continue()
 
   def selectCreditCardPaymentOption() = setRadioButtonValue(CreditCardPaymentDetails.paymentType, "card")
@@ -44,6 +50,18 @@ case class Checkout(testUser: TestUser, endpoint: String = "checkout") extends P
   def billingAddressSectionHasLoaded(): Boolean = pageHasElement(BillingAddress.continueButton)
 
   def cardSectionHasLoaded(): Boolean = pageHasElement(CreditCardPaymentDetails.continueButton)
+
+  def switchToStripe() = driver.switchTo().frame(driver.findElement(StripeCheckout.container.by))
+
+  def stripeCheckoutHasLoaded(): Boolean = pageHasElement(StripeCheckout.container)
+
+  def stripeCheckoutHasCC(): Boolean = pageHasElement(StripeCheckout.cardNumber)
+
+  def stripeCheckoutHasCVC(): Boolean = pageHasElement(StripeCheckout.cardCvc)
+
+  def stripeCheckoutHasExph(): Boolean = pageHasElement(StripeCheckout.cardExp)
+
+  def stripeCheckoutHasSubmit(): Boolean = pageHasElement(StripeCheckout.submitButton)
 
   def reviewSectionHasLoaded(): Boolean = pageHasElement(ReviewSection.submitPaymentButton)
 
@@ -165,5 +183,65 @@ case class Checkout(testUser: TestUser, endpoint: String = "checkout") extends P
 
   private object ReviewSection {
     val submitPaymentButton = cssSelector(".js-checkout-submit")
+  }
+
+  private object StripeCheckout {
+    val container = name("stripe_checkout_app")
+    val cardNumber = id("card_number")
+    val cardExp = id("cc-exp")
+    val cardCvc = id("cc-csc")
+    val submitButton = id("submitButton")
+
+    def setInTest(inTest: Boolean) = {
+
+      Driver.addCookie(ABTest.TestIdCookieName, if (inTest) {
+        "2"
+      } else {
+        "1"
+      })
+    }
+
+    private def fillInHelper(cardNum: String) = {
+
+      setValueSlowly(cardNumber, cardNum)
+      setValueSlowly(cardExp, "1019")
+      setValueSlowly(cardCvc, "111")
+      continue()
+      Thread.sleep(5000)
+    }
+
+    /*
+    * Stripe wants you to pause between month and year and between each quartet in the cc
+    * This causes pain when you use Selenium. There are a few stack overflow posts- but nothing really useful.
+    * */
+    private def setValueSlowly(q: Query, value: String): Unit = {
+      for {
+        c <- value
+      } yield {
+        setValue(q, c.toString)
+        Thread.sleep(100)
+      }
+    }
+
+    def fillIn(): Unit = fillInHelper("4242 4242 4242 4242")
+
+    /* https://stripe.com/docs/testing */
+
+    // Charge will be declined with a card_declined code.
+    def fillInCardDeclined(): Unit = fillInHelper("4000000000000002")
+
+    // Charge will be declined with a card_declined code and a fraudulent reason.
+    def fillInCardDeclinedFraud(): Unit = fillInHelper("4100000000000019")
+
+    // Charge will be declined with an incorrect_cvc code.
+    def fillInCardDeclinedCvc(): Unit = fillInHelper("4000000000000127")
+
+    // Charge will be declined with an expired_card code.
+    def fillInCardDeclinedExpired(): Unit = fillInHelper("4000000000000069")
+
+    // Charge will be declined with a processing_error code.
+    def fillInCardDeclinedProcessError(): Unit = fillInHelper("4000000000000119")
+
+    def continue(): Unit = clickOn(submitButton)
   }
 }

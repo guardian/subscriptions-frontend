@@ -1,31 +1,21 @@
 define([
+    '$',
     'bean',
     'utils/ajax',
     'utils/text',
     'utils/serializer',
     'modules/forms/loader',
     'modules/forms/toggleError',
-    'modules/checkout/formElements',
-    'modules/checkout/payment',
-    'modules/checkout/eventTracking',
-    'modules/checkout/stripeErrorMessages',
-    'modules/raven'
-], function (
-    bean,
-    ajax,
-    textUtils,
-    serializer,
-    loader,
-    toggleError,
-    formEls,
-    payment,
-    eventTracking,
-    paymentErrorMessages,
-    raven
-) {
+    'modules/checkout/formElements'
+], function ($,
+             bean,
+             ajax,
+             textUtils,
+             serializer,
+             loader,
+             toggleError,
+             formEls) {
     'use strict';
-
-    var FIELDSET_COLLAPSED = 'is-collapsed';
 
     function clickHelper($elem, callback) {
         if ($elem.length) {
@@ -34,6 +24,10 @@ define([
                 callback();
             });
         }
+    }
+
+    function useCheckout() {
+        return guardian.stripeCheckout && formEls.$CARD_TYPE[0].checked
     }
 
     function populateDetails() {
@@ -81,14 +75,21 @@ define([
         formEls.$REVIEW_ACCOUNT.text(formEls.$ACCOUNT.val());
         formEls.$REVIEW_SORTCODE.text(formEls.$SORTCODE.val());
         formEls.$REVIEW_HOLDER.text(formEls.$HOLDER.val());
+        if (useCheckout()) {
+            $('.js-payment-review').hide();
+        } else {
+            $('.js-payment-review').show();
+            var obscuredCardNumber;
+            if (formEls.$CARD_NUMBER && formEls.$CARD_NUMBER.val()) {
+                obscuredCardNumber = textUtils.obscure(formEls.$CARD_NUMBER.val(), 4, '*');
+            }
+            formEls.$REVIEW_CARD_NUMBER.text(obscuredCardNumber);
+            formEls.$REVIEW_CARD_EXPIRY.text(textUtils.mergeValues([
 
-        var obscuredCardNumber = textUtils.obscure(formEls.$CARD_NUMBER.val(), 4, '*');
-        formEls.$REVIEW_CARD_NUMBER.text(obscuredCardNumber);
-        formEls.$REVIEW_CARD_EXPIRY.text(textUtils.mergeValues([
-            formEls.$CARD_EXPIRY_MONTH.val(),
-            formEls.$CARD_EXPIRY_YEAR.val()
-        ], '/'));
-
+                formEls.$CARD_EXPIRY_MONTH.val(),
+                formEls.$CARD_EXPIRY_YEAR.val()
+            ], '/'));
+        }
         formEls.$REVIEW_DELIVERY_INSTRUCTIONS.text(formEls.getDeliveryInstructions().val());
         formEls.$REVIEW_DELIVERY_START_DATE.text(formEls.getPaperCheckoutField().val());
     }
@@ -97,71 +98,9 @@ define([
         clickHelper(formEls.$PAYMENT_DETAILS_SUBMIT, populateDetails);
     }
 
-    function submitHandler() {
-        var submitEl;
-        if (formEls.$CHECKOUT_SUBMIT.length) {
-            submitEl = formEls.$CHECKOUT_SUBMIT[0];
-
-            var form = formEls.$CHECKOUT_FORM[0];
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
-
-                loader.setLoaderElem(document.querySelector('.js-loader'));
-                loader.startLoader();
-                submitEl.setAttribute('disabled', 'disabled');
-
-                var data = serializer([].slice.call(form.elements));
-
-                if (data['payment.type'] === 'card') {
-                    data['payment.token'] = payment.getStripeToken();
-                }
-
-                ajax({
-                    url: '/checkout',
-                    method: 'post',
-                    data: data,
-                    success: function(successData) {
-                        eventTracking.completedReviewDetails();
-                        window.location.assign(successData.redirect);
-                    },
-                    error: function(err) {
-                        loader.stopLoader();
-                        submitEl.removeAttribute('disabled');
-
-                        formEls.$FIELDSET_PAYMENT_DETAILS
-                            .removeClass(FIELDSET_COLLAPSED);
-
-                        formEls.$FIELDSET_REVIEW
-                            .addClass(FIELDSET_COLLAPSED);
-
-                        formEls.$FIELDSET_YOUR_DETAILS[0]
-                            .scrollIntoView();
-
-                        toggleError(formEls.$CARD_CONTAINER, true);
-
-                        var paymentErr;
-
-                        try {
-                            paymentErr = JSON.parse(err.response);
-                        } catch (e) {
-                            raven.Raven.captureException(e);
-                        }
-
-                        var userMessage = paymentErrorMessages.getMessage(paymentErr);
-                        var errorElement = paymentErrorMessages.getElement(paymentErr);
-                        if (errorElement) {
-                            errorElement.textContent = userMessage;
-                        }
-                    }
-                });
-            }, false);
-        }
-
-    }
 
     function init() {
         registerPopulateDetails();
-        submitHandler();
     }
 
     return {

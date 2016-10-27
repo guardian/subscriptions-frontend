@@ -12,6 +12,7 @@
 @import com.gu.i18n.Currency
 @import com.gu.i18n._
 @import model.DigitalEdition
+@import controllers.CachedAssets.hashedPathFor
 @import com.gu.memsub.Product.WeeklyZoneB
 @import views.support.CountryAndCurrencySettings
 @(
@@ -22,6 +23,7 @@
     promoCode: Option[PromoCode],
     supplierCode: Option[SupplierCode],
     edition: DigitalEdition,
+    stripeCheckoutTest: Boolean,
     countryAndCurrencySettings: CountryAndCurrencySettings
 )(implicit request: RequestHeader)
 
@@ -35,10 +37,12 @@
             data-option-mirror-payment="@plan.charges.prettyPricing(currency)"
             data-option-mirror-description="@for(s <- plan.subtitle) {(@s)}"
             data-option-mirror-package="@plan.title"
-            data-amount="@plan.charges.gbpPrice.amount"
+            data-amount="@plan.charges.unsafePrice(currency).prettyAmount"
             data-name="@plan.name"
             data-number-of-months="@plan.charges.billingPeriod.numberOfMonths"
+
             data-currency="@currency"
+            data-frequency="@plan.charges.billingPeriod.frequencyInMonths"
             value="@plan.id.get"
             @if(plan == productData.plans.default && currency == countryAndCurrencySettings.defaultCurrency){ checked="checked" }
             >
@@ -63,10 +67,18 @@
     edition = edition
 ) {
 <script>
-    guardian.supplierCode = '@{supplierCode.mkString}'
+    guardian.supplierCode = '@{supplierCode.mkString}';
     guardian.pageInfo.productData.initialProduct = '@{productData.plans.default.name}';
     guardian.pageInfo.productData.productPurchasing = '@{productData.plans.default.name}';
     guardian.pageInfo.productData.productType = '@{productData.productType}';
+    guardian.stripeCheckout = @if(stripeCheckoutTest){
+    {   key: guardian.stripePublicKey,
+        image: '@hashedPathFor("images/logos/gu.png")',
+        locale: 'auto',
+        name: 'Guardian',
+        zipCode: false}
+    }else{false} ;
+
 </script>
     @fragments.analytics.tagmanager()
 
@@ -200,7 +212,7 @@
                 </div>
 
                 @* ===== Payment ===== *@
-                <div id="paymentDetails" class="field-panel is-collapsed js-fieldset-payment-details">
+                <div id="paymentDetails" class="field-panel is-collapsed js-fieldset-payment-details" @if(stripeCheckoutTest){data-country="GB"}>
                     <fieldset>
                         <legend class="field-panel__legend">
                             Payment details
@@ -214,7 +226,7 @@
                             <a href="#paymentDetails" class="text-button u-button-reset js-edit-payment-details" title="Edit your payment details">Edit</a>
                         </div>
                         <div class="field-panel__fields">
-                            @fragments.checkout.fieldsPayment()
+                            @fragments.checkout.fieldsPayment(stripeCheckoutTest)
 
                             <div class="actions">
                                 <a href="#formReview" class="button button--primary button--large js-checkout-payment-details-submit">Continue</a>

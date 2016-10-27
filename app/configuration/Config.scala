@@ -118,6 +118,8 @@ object Config {
 
   val suspendableWeeks = 6
 
+  val stripeCheckout = config.getBoolean("stripe.checkout.flag")
+
   val getAddressIOApiUrl = config.getString("get-address-io-api.url")
   val getAddressIOApiKey = config.getString("get-address-io-api.key")
 

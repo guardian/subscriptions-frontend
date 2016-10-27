@@ -7,6 +7,7 @@ define([
     'modules/checkout/paymentDetails',
     'modules/checkout/editFieldsets',
     'modules/checkout/reviewDetails',
+    'modules/checkout/submit',
     'modules/checkout/promoCode',
     'modules/checkout/billingDetails',
     'modules/checkout/deliveryDetails',
@@ -21,6 +22,7 @@ define([
     paymentDetails,
     editFieldsets,
     reviewDetails,
+    submit,
     promoCode,
     billingAddress,
     deliveryDetails,
@@ -37,6 +39,7 @@ define([
             paymentDetails.init();
             editFieldsets.init();
             reviewDetails.init();
+            submit.init();
             promoCode.init();
             deliveryDetails.init();
             deliveryAsBilling.init();
@@ -62,10 +65,13 @@ define([
                 }
             });
         }
-
-        curl('js!stripe').then(function() {
-            Stripe.setPublishableKey(guardian.stripePublicKey);
-        });
+        if(guardian.stripeCheckout){
+            curl('js!stripeCheckout');
+        } else {
+            curl('js!stripe').then(function () {
+                Stripe.setPublishableKey(guardian.stripePublicKey);
+            });
+        }
     }
 
     return {
