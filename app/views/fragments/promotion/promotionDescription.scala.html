@@ -1,11 +1,11 @@
 @import org.joda.time.DateTime.now
 @import views.support.Dates.dayInMonthWithSuffixAndMonth
-@import views.support.LandingPageOps.ForPromotionsWithALandingPage
-@import com.gu.memsub.promo.Promotion.PromoWithDigipackLandingPage
+@import views.support.LandingPageOps.ForPromoWithDigitalPackLandingPage
+@import com.gu.memsub.promo.Promotion.PromoWithDigitalPackLandingPage
 @import org.pegdown.PegDownProcessor
 @import views.support.MarkdownRenderer
 
-@(promotion: PromoWithDigipackLandingPage, md: MarkdownRenderer)
+@(promotion: PromoWithDigitalPackLandingPage, md: MarkdownRenderer)
 <div class="promotion-description @promotion.getDescriptionBorder">
     @promotion.landingPage.description.fold {
         <p>@promotion.description</p>

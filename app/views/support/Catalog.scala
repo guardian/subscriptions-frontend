@@ -3,13 +3,13 @@ package views.support
 import com.gu.memsub.Subscription.ProductRatePlanId
 import com.gu.memsub.promo.PercentDiscount._
 import com.gu.memsub.promo.Promotion.AnyPromotion
+import com.gu.memsub.subsv2.{CatalogPlan, Catalog => Cat}
 import com.gu.memsub.{Price, BillingPeriod => Period}
-import com.gu.memsub.subsv2.{Catalog => Cat, CatalogPlan}
-import com.gu.memsub.Month
-import scalaz.{NonEmptyList, \/}
+
 import scalaz.std.option._
 import scalaz.syntax.applicative._
 import scalaz.syntax.std.option._
+import scalaz.{NonEmptyList, \/}
 
 object Catalog {
   type Val[A] = NonEmptyList[String] \/ A
@@ -68,11 +68,14 @@ object Catalog {
         ).some, _ => None)
   }
 
-  def formatPrice(plan: CatalogPlan.Digipack[Month], promotion: AnyPromotion): String = {
-    promotion.asDiscount.fold(plan.charges.gbpPrice.pretty)(_.promotionType.applyDiscount(plan.charges.gbpPrice, plan.charges.billingPeriod).pretty)
+  def adjustPrice(plan: CatalogPlan.Paid, promotion: AnyPromotion): Price =
+    promotion.asDiscount.fold(plan.charges.gbpPrice)(_.promotionType.applyDiscount(plan.charges.gbpPrice, plan.charges.billingPeriod))
+  
+  def formatPrice(plan: CatalogPlan.Paid, promotion: AnyPromotion): String = {
+    adjustPrice(plan, promotion).pretty
   }
 
-  def formatPrice(plan: CatalogPlan.Digipack[Month]): String = {
+  def formatPrice(plan: CatalogPlan.Paid): String = {
     plan.charges.gbpPrice.pretty
   }
 }

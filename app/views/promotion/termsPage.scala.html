@@ -1,0 +1,62 @@
+@import com.gu.i18n.CountryGroup.UK
+@import com.gu.memsub.promo.PromoCode
+@import com.gu.memsub.promo.Promotion.AnyPromotion
+@import com.gu.memsub.subsv2.Catalog
+@import org.joda.time.Days
+@import views.support.Dates.prettyDate
+@import views.support.MarkdownRenderer
+@(promoCode: PromoCode, promotion: AnyPromotion, md: MarkdownRenderer, catalog: Catalog)
+@title = @{s"Promo code: ${promoCode.get}"}
+@main(
+    title = s"$title | The Guardian"
+) {
+
+    <main class="page-container gs-container">
+
+        @fragments.page.header(title)
+
+        <section class="promotion-description">
+
+            <h4>Promotion details</h4>
+            <p>@promotion.description</p>
+
+            @promotion.expires.map { expiryDate =>
+                <h4>Valid until</h4>
+                <div>@prettyDate(expiryDate)</div>
+            }
+
+            <br/>
+
+            <h4>Applies to products</h4>
+            <ul class="promotion-applies-to">
+                @catalog.allSubs.flatten.filter(plan => promotion.appliesTo.productRatePlanIds.contains(plan.id)).map { plan =>
+                    <li><a href="@routes.Checkout.renderCheckout(UK, None, None, plan.slug).url">@{plan.product.toString.replace("Digipack", "")} @plan.name</a></li>
+                }
+            </ul>
+
+            <br/>
+
+            @promotion.asIncentive.map { i =>
+                <h4>Redemption instructions</h4>
+                <p>@i.promotionType.redemptionInstructions</p>
+            }
+
+            @if(promotion.expires.isEmpty || promotion.expires.exists(_.isAfterNow)) {
+                <div class="pricing-cta">
+                    <div class="pricing-cta__action">
+                        <a class="button button--large button--primary"
+                        href="/p/@promoCode.get"
+                        >Get this offer</a>
+                    </div>
+                </div>
+                <br/>
+            }
+        </section>
+        <section class="section-slice promotion-terms">
+            @fragments.promotion.subscriptionTermsAndConditions(catalog, promotion)
+            @fragments.promotion.promotionTermsAndConditions(promotion, md)
+            @fragments.promotion.incentiveLegalTerms(promotion, md)
+            @fragments.promotion.copyrightNotice()
+        </section>
+    </main>
+}

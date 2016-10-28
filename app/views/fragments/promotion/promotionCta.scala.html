@@ -4,7 +4,7 @@
 @import com.gu.memsub.Month
 @import model.DigitalEdition
 @import org.joda.time.Days
-@(edition: DigitalEdition, plan: CatalogPlan.Digipack[Month], promoCode: PromoCode, promotion: AnyPromotion, defaultTrialDays: Days)
+@(edition: DigitalEdition, plan: CatalogPlan.Digipack[Month], promoCode: PromoCode, promotion: AnyPromotion)
 <div class="promotion-cta">
     <div class="grid grid--3up-step-phablet grid--flex">
         <div class="grid__item grid__item--flex-2-columns">
@@ -14,7 +14,7 @@
         </div>
         <div class="grid__item u-vertically-center-flexbox">
             <div class="promotion-cta__pricing">
-                @fragments.promotion.pricingCta(defaultTrialDays, edition, plan, promoCode, promotion)
+                @fragments.promotion.pricingCta(edition, plan, promoCode, promotion)
                 @fragments.promotion.subscribeNow(edition, promoCode)
             </div>
         </div>

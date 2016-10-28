@@ -1,15 +1,19 @@
 package views.support
 
+import com.gu.i18n.CountryGroup
 import com.gu.memsub.promo.Promotion._
 import com.gu.memsub.promo._
+import com.gu.memsub.subsv2.CatalogPlan
+import controllers.routes
+import model.Subscriptions.SubscriptionOption
 import org.joda.time.DateTime.now
-import scalaz.Id._
+import views.support.Catalog._
 
 object LandingPageOps {
 
   private def getSectionColour(landingPage: DigitalPackLandingPage) = landingPage.sectionColour.getOrElse(Blue)
 
-  implicit class ForPromotionsWithALandingPage(promotion: PromoWithDigipackLandingPage) {
+  implicit class ForPromoWithDigitalPackLandingPage(promotion: PromoWithDigitalPackLandingPage) {
     def landingPageSectionColour: String = {
       getSectionColour(promotion.landingPage) match {
         case Blue => "section-blue"
@@ -33,8 +37,26 @@ object LandingPageOps {
 
   implicit class ForAnyPromotions(promotion: AnyPromotion) {
     def getIncentiveTermsAndConditions: String = {
-      promotion.asIncentive.fold("") { p => p.promotionType.termsAndConditions.mkString }
+      promotion.asIncentive.flatMap(_.promotionType.termsAndConditions).mkString
+    }
+    def getIncentiveLegalTerms: String = {
+      promotion.asIncentive.flatMap(_.promotionType.legalTerms).mkString
     }
   }
 
+  def planToOptions(promoCode: PromoCode, promotion: AnyPromotion)(in: CatalogPlan.Paid): SubscriptionOption = {
+    val planPrice = promotion.asDiscount.map(adjustPrice(in, _)).getOrElse(in.charges.gbpPrice)
+    val saving = if (promotion.asDiscount.isDefined) None else in.saving
+    val paymentDetails = promotion.asDiscount.map(views.html.fragments.promotion.paymentDetails(in, _))
+
+    SubscriptionOption(in.id.get,
+      in.name,
+      planPrice.amount * 12 / 52,
+      saving.map(_.toString + "%"),
+      planPrice.amount,
+      in.description,
+      routes.Checkout.renderCheckout(CountryGroup.UK, Some(promoCode), None, in.slug).url,
+      paymentDetails
+    )
+  }
 }
