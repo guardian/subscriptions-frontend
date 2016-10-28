@@ -2,9 +2,8 @@
 @import com.gu.memsub.subsv2.Subscription
 @import views.support.Dates._
 @import views.support.Pricing._
-@import com.gu.memsub.subsv2.SubscriptionPlan.Paper
 
-@(subscription: Subscription[Paper])(extra: Html = Html(""))
+@(subscription: Subscription[SubscriptionPlan.PaperPlan])(extra: Html = Html(""))
 <dl class="mma-section__list">
     <dt class="mma-section__list--title">Subscriber ID</dt>
     <dd class="mma-section__list--content">@subscription.name.get</dd>

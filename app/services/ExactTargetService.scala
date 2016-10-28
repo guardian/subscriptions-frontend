@@ -62,7 +62,7 @@ class ExactTargetService(
     val zuoraPaidSubscription: Future[Subscription[Plan.Paid]] =
       Retry(2, s"Failed to get Zuora paid subscription ${subscribeResult.subscriptionName} for ${purchaserIds.identityId}") {
         subscriptionData.productData.fold(
-          { paper => subscriptionService.get[Plan.Paper](Name(subscribeResult.subscriptionName)).map(_.get) },
+          { paper => subscriptionService.get[Plan.PaperPlan](Name(subscribeResult.subscriptionName)).map(_.get) },
           { digipack => subscriptionService.get[Plan.Digipack](Name(subscribeResult.subscriptionName)).map(_.get) })}
 
     val zuoraPaymentMethod: Future[PaymentMethod] =

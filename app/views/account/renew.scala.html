@@ -3,16 +3,16 @@
 @import com.gu.memsub.subsv2.Subscription
 @import model.DigitalEdition.UK
 @(
-    subscription: Subscription[SubscriptionPlan.DailyPaper], billingSchedule: BillingSchedule
+    subscription: Subscription[SubscriptionPlan.WeeklyPlan], billingSchedule: BillingSchedule
 )(implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackend.Resolution)
 
-@main("Your Guardian subscription | The Guardian", bodyClasses = List("is-wide"), edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
+@main("Your Guardian Weekly subscription | The Guardian", bodyClasses = List("is-wide"), edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
 
     <main class="page-container gs-container">
         <section class="suspend-container">
 
             <div class="suspend-header">
-                <h1 class="suspend-header__title">Your Guardian subscription</h1>
+                <h1 class="suspend-header__title">Your Guardian Weekly subscription --- TEST PAGE</h1>
             </div>
 
             <section class="mma-section">
