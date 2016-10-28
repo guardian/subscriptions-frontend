@@ -1,3 +1,4 @@
+/* globals StripeCheckout */
 define([
     '$',
     'bean',
@@ -10,7 +11,8 @@ define([
     'modules/checkout/eventTracking',
     'modules/checkout/stripeErrorMessages',
     'modules/checkout/stripeCheckout',
-    'modules/raven'
+    'modules/raven',
+    'modules/checkout/formElements'
 ], function ($,
              bean,
              ajax,
@@ -22,7 +24,8 @@ define([
              eventTracking,
              paymentErrorMessages,
              stripeCheckout,
-             raven) {
+             raven,
+             formElements) {
     'use strict';
 
     var FIELDSET_COLLAPSED = 'is-collapsed';
@@ -32,11 +35,10 @@ define([
     }
 
 
-
     function submitHandler() {
         if (formEls.$CHECKOUT_SUBMIT.length) {
 
-            formEls.$CHECKOUT_FORM[0].addEventListener('submit', submit, false);
+            formEls.$CHECKOUT_SUBMIT[0].addEventListener('click', submit, false);
         }
 
     }
@@ -54,11 +56,40 @@ define([
             return;
         }
 
-        stripeCheckout.openCheckout().then(send, function () {
-                loader.stopLoader();
-                submitEl.removeAttribute('disabled');
+        var handler;
+        if (!('StripeCheckout' in window)) {
+            raven.captureMessage('StripeCheckout not present');
+            loader.stopLoader();
+            submitEl.removeAttribute('disabled');
+        }
+
+        handler = StripeCheckout.configure(guardian.stripeCheckout);
+        bean.on(window, 'popstate', function () {
+            handler.close()
+        });
+
+        var successfulCharge = false;
+        var ratePlan = document.querySelector('.js-rate-plans input:checked').dataset;
+        handler.open({
+            allowRememberMe: false,
+            currency: ratePlan.currency,
+            description: ratePlan.optionMirrorPackage,
+            panelLabel: 'Subscribe',
+            email: formElements.$EMAIL.val(),
+            token: function (token) {
+                successfulCharge = token;
+                stripeCheckout.setPaymentToken(token.id);
+                send();
+            },
+            closed: function () {
+                if (!successfulCharge) {
+                    loader.stopLoader();
+                    submitEl.removeAttribute('disabled');
+                }
             }
-        );
+        });
+
+
     }
 
     function send() {
