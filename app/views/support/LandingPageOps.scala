@@ -37,16 +37,16 @@ object LandingPageOps {
 
   implicit class ForAnyPromotions(promotion: AnyPromotion) {
     def getIncentiveTermsAndConditions: String = {
-      promotion.asIncentive.fold("") { p => p.promotionType.termsAndConditions.mkString }
+      promotion.asIncentive.flatMap(_.promotionType.termsAndConditions).mkString
     }
     def getIncentiveLegalTerms: String = {
-      promotion.asIncentive.fold("") { p => p.promotionType.legalTerms.mkString }
+      promotion.asIncentive.flatMap(_.promotionType.legalTerms).mkString
     }
   }
 
   def planToOptions(promoCode: PromoCode, promotion: AnyPromotion)(in: CatalogPlan.Paid): SubscriptionOption = {
-    val planPrice = promotion.asDiscount.fold(in.charges.gbpPrice)(adjustPrice(in, _))
-    val saving = promotion.asDiscount.fold(in.saving)(_ => None)
+    val planPrice = promotion.asDiscount.map(adjustPrice(in, _)).getOrElse(in.charges.gbpPrice)
+    val saving = if (promotion.asDiscount.isDefined) None else in.saving
     val paymentDetails = promotion.asDiscount.map(views.html.fragments.promotion.paymentDetails(in, _))
 
     SubscriptionOption(in.id.get,

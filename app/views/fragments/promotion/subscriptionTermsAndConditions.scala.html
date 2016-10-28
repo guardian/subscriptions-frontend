@@ -5,13 +5,7 @@
 @import configuration.Config.Zuora.paymentDelay
 
 @(catalog: Catalog, promotion: AnyPromotion)
-@promotion.asDigitalPack.fold {
-    <h4>Subscription terms and conditions</h4>
-    <p>Subscriptions available to people aged 18 and over with a valid email address.</p>
-    <p>
-        For full subscription terms and conditions visit <a class="u-link" href="@Links.paperTerms.href" target="_blank">theguardian.com/subscriber-direct/subscription-terms-and-conditions</a>
-    </p>
-} { _ =>
+@if(promotion.asDigitalPack.isDefined) {
     <h4>Digital subscription terms and conditions</h4>
     <p>
         Subscriptions available to people aged 18 and over with a valid email address. Free trial open to new digital pack subscribers only. Free trial period lasts
@@ -24,5 +18,11 @@
     <p>
         For full details of the digital pack and its terms and conditions - see
         <a class="u-link" href="@Links.digipackTerms.href" target="_blank">theguardian.com/digital-subscriptions-terms-conditions</a>.
+    </p>
+} else {
+    <h4>Subscription terms and conditions</h4>
+    <p>Subscriptions available to people aged 18 and over with a valid email address.</p>
+    <p>
+        For full subscription terms and conditions visit <a class="u-link" href="@Links.paperTerms.href" target="_blank">theguardian.com/subscriber-direct/subscription-terms-and-conditions</a>
     </p>
 }
