@@ -7,8 +7,8 @@ define([
     'modules/checkout/dataSwitcher',
     'modules/checkout/formElements',
     'modules/checkout/ratePlanChoice',
-    'modules/checkout/formElements'
-], function ($, bean, countryChoiceFunction, addressFields, dataSwitcher, formElements, ratePlanChoice, formEls) {
+    'modules/checkout/deliveryAsBilling'
+], function ($, bean, countryChoiceFunction, addressFields, dataSwitcher, formElements, ratePlanChoice, deliveryAsBilling) {
     'use strict';
 
     var addressData = {
@@ -51,13 +51,7 @@ define([
         var updateParams = {};
 
         var addFieldsFor = function (addressType) {
-
-            var prefix = '';
-
-            if (addressType != 'localization') {
-                prefix = addressType + '-';
-            }
-
+            var prefix = addressType == 'localization' ? '' : addressType + '-';
             var values = currentState[addressType];
             if (!isEmptyObject(values)) {
                 if (values.currency.length > 0) {
@@ -78,14 +72,9 @@ define([
         refreshPaymentMethods(currentState);
     };
 
-    var isDeliveryAsBillingEnabled = function () {
-        return formEls.$BILLING_ADDRESS_AS_DELIVERY_ADDRESS_PICKER[0].checked
-    };
-
-
     var getCurrentState = function () {
         var deliveryState = addressData.delivery.getState();
-        var billingState = isDeliveryAsBillingEnabled() ? deliveryState : addressData.billing.getState();
+        var billingState = deliveryAsBilling.isEnabled() ? deliveryState : addressData.billing.getState();
         var localizationState = billingState.determinesLocalization ? billingState : deliveryState;
 
         if (isCurrencyOverrideChecked()) {
@@ -231,6 +220,7 @@ define([
             addressData.init();
             initCurrencyOverride();
             update();
+            deliveryAsBilling.registerOnChangeAction(update);
 
         },
         update: update

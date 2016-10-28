@@ -134,7 +134,6 @@ define(['$'], function ($) {
         VOUCHER_CHECKOUT_DATE_PICKER_ID: 'deliveryDatePicker',
         $DELIVERED_PRODUCT_TYPE: $('input[name="delivered-product"]'),
         $CURRENCY_OVERRIDE_LABEL: $('.js-currency-override-label'),
-        $BILLING_ADDRESS_AS_DELIVERY_ADDRESS_PICKER : $('.js-checkout-delivery-sames-as-billing'),
         $BASKET: $('.js-basket'),
 
         getPaperCheckoutField: getPaperCheckoutField,
