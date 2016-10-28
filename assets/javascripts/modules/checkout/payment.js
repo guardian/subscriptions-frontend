@@ -1,4 +1,4 @@
-/* global Stripe */
+/* global guardian, Stripe */
 define([
     'utils/ajax',
     'modules/forms/regex',
@@ -55,6 +55,7 @@ define([
         return new Promise(function (resolve) {
             if (validity.allValid) {
                 if (data.paymentMethod === 'direct-debit') {
+                    guardian.experience = 'direct-debit';
                     accountCheck(data.accountNumber, data.sortCode, data.accountHolderName).then(function (accountValid) {
                         validity.accountNumberValid = accountValid;
                         validity.allValid = accountValid;
@@ -62,6 +63,7 @@ define([
 
                     });
                 } else {
+                    guardian.experience = guardian.stripeCheckout?'stripeCheckout':'stripeJS';
 
                     if (guardian.stripeCheckout) {
                         validity.allValid = true;// valid;

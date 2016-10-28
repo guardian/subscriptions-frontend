@@ -7,7 +7,7 @@ define(['modules/analytics/analyticsEnabled',
 
     var _EVENT_QUEUE = [];
     var experienceIsSet = 'stripeCheckout' in guardian;
-    var experience = guardian.stripeCheckout?'stripeCheckout':'stripeJS';
+    guardian.experience = guardian.stripeCheckout?'stripeCheckout':'stripeJS';
 
     function init() {
 
@@ -63,7 +63,7 @@ define(['modules/analytics/analyticsEnabled',
 
         ga('membershipPropertyTracker.set', 'dimension13', isCustomerAgent);  // customerAgent
         if(experienceIsSet){
-            ga('membershipPropertyTracker.set', 'dimension16', experience);  // experience
+            ga('membershipPropertyTracker.set', 'dimension16', guardian.experience);  // experience
 
         }
 
@@ -101,7 +101,7 @@ define(['modules/analytics/analyticsEnabled',
                 metric2: obj.elapsedTime
             };
             if(experienceIsSet){
-                event.dimension16 = experience;
+                event.dimension16 = guardian.experience;
             }
             ga('membershipPropertyTracker.send', 'event', event);
         });
