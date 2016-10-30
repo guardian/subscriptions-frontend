@@ -7,7 +7,7 @@
 
 @if(holidayRefunds.nonEmpty) {
     <div class="prose">
-        You have @suspendedDays @if(suspendedDays == 1) { day } else { days } lined up:
+        You have @suspendedDays @if(suspendedDays == 1) { day } else { days } already lined up:
         <dl class="mma-section__list">
             @for((refund, holiday) <- holidayRefunds) {
                 <dt class="mma-section__list--title">@formattedDateRange(holiday.start, holiday.finish)</dt>
