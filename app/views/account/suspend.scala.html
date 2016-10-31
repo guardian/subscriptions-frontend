@@ -8,10 +8,12 @@
 @import views.support.AccountManagementOps._
 @import com.gu.memsub.BillingPeriod
 @import com.gu.memsub.subsv2.SubscriptionPlan.Delivery
+@import com.gu.memsub.PaperDay
 @(
     subscription: Subscription[Delivery],
     holidayRefunds: Seq[HolidayRefund] = Seq.empty,
     billingSchedule: BillingSchedule,
+    chosenPaperDays: List[PaperDay],
     suspendableDays: Int,
     suspendedDays: Int,
     errorCodes: Set[String]
@@ -30,7 +32,7 @@
                 <h3 class="mma-section__header">
                     Your details
                 </h3>
-                @views.html.account.fragments.yourDetails(subscription) {
+                @views.html.account.fragments.yourDetails(subscription, chosenPaperDays) {
                     <dt class="mma-section__list--title">Available holiday</dt>
                     <dd class="mma-section__list--content">
                         <span class="mma-section__list--plan-title">@{
