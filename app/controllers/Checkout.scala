@@ -92,12 +92,12 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
       def renderCheckoutFor(planList: PlanList[CatalogPlan.ContentSubscription]) = {
 
         val supportedCurrencies = planList.default.charges.price.currencies
-        val billingCountriesWithCurrencyOrGDP =  CountryWithCurrency.whitelisted(supportedCurrencies, GBP)
+        val billingCountriesWithCurrencyOrGBP =  CountryWithCurrency.whitelisted(supportedCurrencies, GBP)
 
         val personalData = user.map(PersonalData.fromIdUser)
 
         def getSettings(availableDeliveryCountries: Option[List[CountryWithCurrency]], fallbackCountry: Option[Country], fallbackCurrency: Currency) = {
-          val availableCountries = availableDeliveryCountries.getOrElse(billingCountriesWithCurrencyOrGDP)
+          val availableCountries = availableDeliveryCountries.getOrElse(billingCountriesWithCurrencyOrGBP)
 
           def availableCountryWithCurrencyFor(country: Option[Country]) = country.flatMap(c => availableCountries.find(_.country == c))
           val personalDataCountry = personalData.flatMap(data => data.address.country)
@@ -106,7 +106,7 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
 
           CountryAndCurrencySettings(
             availableDeliveryCountries = availableDeliveryCountries,
-            availableBillingCountries = billingCountriesWithCurrencyOrGDP,
+            availableBillingCountries = billingCountriesWithCurrencyOrGBP,
             defaultCountry = defaultCountryWithCurrency.map(_.country),
             defaultCurrency = defaultCountryWithCurrency.map(_.currency).getOrElse(fallbackCurrency)
           )

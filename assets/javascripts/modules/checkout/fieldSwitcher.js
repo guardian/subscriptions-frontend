@@ -176,14 +176,6 @@ define([
             };
         };
 
-        var updateGuardianPageInfo = function (currentState) {
-            var pageInfo = guardian.pageInfo;
-            if (pageInfo) {
-                pageInfo.billingCountry = currentState.localization.country; // should this be billing country instead?
-                pageInfo.billingCurrency = currentState.localization.currency;
-            }
-        };
-
         var refresh = function () {
             var currentState = getCurrentState();
 
@@ -191,7 +183,6 @@ define([
                  redrawCurrencyOverride(currentState);
              }
            redraw(currentState);
-           updateGuardianPageInfo(currentState);
         };
 
         var refreshOnChange = function (el) {
