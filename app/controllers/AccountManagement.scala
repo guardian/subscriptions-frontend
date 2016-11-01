@@ -1,8 +1,10 @@
 package controllers
 
+import _root_.services.AuthenticationService._
+import _root_.services.TouchpointBackend
 import actions.CommonActions._
 import com.github.nscala_time.time.OrderingImplicits.LocalDateOrdering
-import com.gu.memsub.{Weekly, BillingPeriod, Product}
+import com.gu.memsub.Product
 import com.gu.memsub.Subscription.Name
 import com.gu.memsub.subsv2._
 import com.gu.subscriptions.suspendresume.SuspensionService
@@ -13,8 +15,6 @@ import configuration.{Config, ProfileLinks}
 import forms.{AccountManagementLoginForm, AccountManagementLoginRequest, SuspendForm}
 import org.joda.time.LocalDate
 import play.api.mvc.{AnyContent, Controller, Request}
-import _root_.services.AuthenticationService._
-import _root_.services.TouchpointBackend
 import utils.TestUsers.PreSigninTestCookie
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -54,7 +54,7 @@ object AccountManagement extends Controller with LazyLogging {
     } yield zuoraSubscription).orElse(for {
       identityUser <- OptionT(Future.successful(authenticatedUserFor(request)))
       salesForceUser <- OptionT(tpBackend.salesforceService.repo.get(identityUser.user.id))
-      zuoraSubscription <- OptionT(tpBackend.subscriptionService.current[SubscriptionPlan.PaperPlan](salesForceUser).map(_.headOption))
+      zuoraSubscription <- OptionT(tpBackend.subscriptionService.current[SubscriptionPlan.PaperPlan](salesForceUser).map(_.headOption/*FIXME if they have more than one they can only manage the first*/))
     } yield zuoraSubscription).run
   }
 
@@ -64,8 +64,6 @@ object AccountManagement extends Controller with LazyLogging {
 
     def detailsMatch(zuoraContact: Contact, loginRequest: AccountManagementLoginRequest): Boolean = {
       def format(str: String): String = str.filter(_.isLetterOrDigit).toLowerCase
-
-      println(s"$zuoraContact")
 
       format(zuoraContact.lastName) == format(loginRequest.lastname) &&
         zuoraContact.postalCode.map(format).contains(format(loginRequest.postcode))
@@ -95,35 +93,30 @@ object AccountManagement extends Controller with LazyLogging {
     val subscription = subscriptionFromRequest
     val errorCodes = errorCode.toSeq.flatMap(_.split(',').map(_.trim)).filterNot(_.isEmpty).toSet
 
-    object SubMatch {
-      def unapply[A <: Product.Paper, B <: PaidChargeList](sub: Subscription[PaidSubscriptionPlan[A, B]]): Option[(A, B, Subscription[PaidSubscriptionPlan[A, B]])] =
-        Some((sub.plan.product, sub.plan.charges, sub))
-    }
-
     (for {
       sub <- OptionT(subscription)
       allHolidays <- OptionT(tpBackend.suspensionService.getHolidays(sub.name).map(_.toOption))
       billingSchedule <- OptionT(tpBackend.commonPaymentService.billingSchedule(sub.id, numberOfBills = 12))
       suspendableDays = Config.suspendableWeeks * sub.plan.charges.benefits.size
-    } yield
-      // we can't pattern match on sub as the generic type is lost, so we pattern match on the components.
-      // we still then match on the whole thing even though erasure happens, so we have the cast Subscription
-      // unfortunately despite that, the compiler doesn't check sub's type matches, so be careful of typos
-      sub match {
-        case SubMatch(Product.Delivery, charges: PaperCharges, sub: Subscription[PaidSubscriptionPlan[Product.Delivery, PaperCharges]]) =>
+    } yield {
+      (sub.plan.product match {
+        case Product.Delivery => sub.asDelivery.map { sub =>
           val pendingHolidays = pendingHolidayRefunds(allHolidays)
-          val suspendedDays = SuspensionService.holidayToSuspendedDays(pendingHolidays, charges.days.toList)
+          val suspendedDays = SuspensionService.holidayToSuspendedDays(pendingHolidays, sub.plan.charges.dayPrices.keys.toList)
           Ok(views.html.account.suspend(sub, pendingHolidayRefunds(allHolidays), billingSchedule, suspendableDays, suspendedDays, errorCodes))
-        case SubMatch(Product.Voucher, _, sub: Subscription[PaidSubscriptionPlan[Product.Voucher, PaperCharges]]) =>
+        }
+        case Product.Voucher => sub.asVoucher.map { sub =>
           Ok(views.html.account.voucher(sub, billingSchedule))
-        case SubMatch(_: Product.Weekly, _, sub: Subscription[PaidSubscriptionPlan[Product.Weekly, PaidCharge[Weekly.type, BillingPeriod]]]) =>
-          // they can renew
+        }
+        case _: Product.Weekly => sub.asWeekly.map { sub =>
           Ok(views.html.account.renew(sub, billingSchedule))
-        case _ =>
-          // this wasn't a paper subscription so can't manage
-          Ok(views.html.account.details(None))
+        }
+      }).getOrElse {
+        // the product type didn't have the right charges
+        Ok(views.html.account.details(None))
       }
-    ).getOrElse(Ok(views.html.account.details(subscriberId)))
+    }
+      ).getOrElse(Ok(views.html.account.details(subscriberId)))
   }
 
   def logout = accountManagementAction { implicit request =>
@@ -171,8 +164,8 @@ object AccountManagement extends Controller with LazyLogging {
       newBS <- EitherT(tpBackend.commonPaymentService.billingSchedule(sub.id, numberOfBills = 12).map(_ \/> "Error getting billing schedule"))
       newHolidays <- EitherT(tpBackend.suspensionService.getHolidays(sub.name)).leftMap(_ => "Error getting holidays")
       pendingHolidays = pendingHolidayRefunds(newHolidays)
-      suspendableDays = Config.suspendableWeeks * sub.plan.charges.days.size
-      suspendedDays = SuspensionService.holidayToSuspendedDays(pendingHolidays, sub.plan.charges.days.toList)
+      suspendableDays = Config.suspendableWeeks * sub.plan.charges.dayPrices.keys.size
+      suspendedDays = SuspensionService.holidayToSuspendedDays(pendingHolidays, sub.plan.charges.dayPrices.keys.toList)
     } yield {
       tpBackend.exactTargetService.enqueueETHolidaySuspensionEmail(sub, sub.plan.name, newBS, pendingHolidays.size, suspendableDays, suspendedDays).onFailure { case e: Throwable =>
         logger.error(s"Failed to generate data needed to enqueue ${sub.name.get}'s holiday suspension email. Reason: ${e.getMessage}")
