@@ -62,6 +62,7 @@ define([
         var paymentDetails = {paymentMethod: paymentMethod};
 
         if (paymentMethod === 'direct-debit') {
+            guardian.experience = 'direct-debit';
             assign(paymentDetails, {
                 accountNumber: formEls.$ACCOUNT.val(),
                 accountHolderName: formEls.$HOLDER.val(),
@@ -69,6 +70,7 @@ define([
                 detailsConfirmed: formEls.$CONFIRM_PAYMENT[0].checked
             });
         } else if (paymentMethod === 'card') {
+            guardian.experience = guardian.stripeCheckout ? 'stripeCheckout' : 'stripeJS';
             toggleError(formEls.$CARD_CONTAINER, false);
             assign(paymentDetails, {
                 cardNumber: formEls.$CARD_NUMBER.val(),
@@ -94,15 +96,14 @@ define([
     function init() {
         var $actionEl = formEls.$PAYMENT_DETAILS_SUBMIT;
         if ($actionEl.length) {
-                bean.on($actionEl[0], 'click', function (evt) {
-                    evt.preventDefault();
-                    handleValidation();
-                });
+            bean.on($actionEl[0], 'click', function (evt) {
+                evt.preventDefault();
+                handleValidation();
+            });
         }
 
         var $cardNumberEl = formEls.$CARD_NUMBER;
         if ($cardNumberEl.length) {
-
             bean.on($cardNumberEl[0], 'keyup blur', function (e) {
                 var input = e && e.target;
                 displayCardImg(input.value);
