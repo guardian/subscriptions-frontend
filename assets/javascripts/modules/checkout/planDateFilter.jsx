@@ -4,10 +4,10 @@ define([
 ], function (formElements, ratePlanChoice) {
     'use strict';
 
+
     return function() {
         let packageName = ratePlanChoice.getSelectedRatePlanName();
         let deliveredProduct = formElements.$DELIVERED_PRODUCT_TYPE.val();
-        let isPaper = 'paper' === deliveredProduct;
 
         let validDays = {
             voucher: {
@@ -21,12 +21,25 @@ define([
                 sunday: (date) => date.day() === 0,
                 weekend: (date) => date.day() === 6 || date.day() === 0,
                 allDays: (date) => true
-            }
+            },
+            weekly: (date) => date.day() === 5
         };
 
-        let filters = isPaper ? validDays.paper : validDays.voucher;
+        function getFilters() {
+            if ('paper' === deliveredProduct) {
+                return validDays.paper;
+            }
+            if ('weekly' === deliveredProduct) {
+                return validDays.weekly;
+            }
+            return validDays.voucher;
+        }
+
+        let filters = getFilters();
 
         switch (true) {
+            case /Weekly/i.test(packageName):
+                return filters;
             case /Sunday/i.test(packageName):
                 return filters.sunday;
             case /Sixday/i.test(packageName):

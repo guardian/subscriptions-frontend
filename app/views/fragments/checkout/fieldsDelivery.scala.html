@@ -1,41 +1,36 @@
 @import views.support.CountryWithCurrency
 @import views.html.fragments.checkout.address
-
+@import views.support.PlanOps._
 @import views.support.ProductPopulationData
-@import com.gu.memsub.Product
 
 @(data: ProductPopulationData, countriesWithCurrency: List[CountryWithCurrency])
 
-@defining(
-    data.plans.default.product match {
-        case _: Product.WeeklyZoneA | _: Product.WeeklyZoneB => false
-        case _ => true
-    }
-) { usePostcodeLookup =>
-    @address(
-        address = data.deliveryAddress,
-        namePrefix = "delivery",
-        countriesWithCurrency = countriesWithCurrency,
-        plan = data.plans.default,
-        usePostcodeLookup = usePostcodeLookup,
-        determinesCurrency = true)
+@renderFields(usePostcodeLookup: Boolean, productName: String, firstPaperLabel: String) = {
+@address(
+    address = data.deliveryAddress,
+    namePrefix = "delivery",
+    countriesWithCurrency = countriesWithCurrency,
+    plan = data.plans.default,
+    usePostcodeLookup = usePostcodeLookup,
+    determinesCurrency = true)
 
+    <div class="js-checkout-delivery-data" id="deliveryFields">
+        <div class="form-field js-checkout-delivery">
+            <label class="label" for="address-town">Delivery instructions</label>
+            <div id="deliveryInstructionsCharacterCountedTextArea"></div>
+        </div>
+        <div class="form-field js-checkout-delivery">
+            <label class="label" for="address-town">@firstPaperLabel</label>
+            <div id="deliveryDatePicker" class="form-field__react-datepicker"></div>
+        </div>
+        <input type="hidden" name="delivered-product" value=@productName disabled>
+        <input type="hidden" name="voucher" value="false">
+        <input type="hidden" name="digipack" value="false">
+    </div>
 }
 
-
-<div class="js-checkout-delivery-data" id="deliveryFields">
-    <div class="form-field js-checkout-delivery">
-        <label class="label" for="address-town">Delivery instructions</label>
-        <div id="deliveryInstructionsCharacterCountedTextArea"></div>
-    </div>
-    <div class="form-field js-checkout-delivery">
-        <label class="label" for="address-town">Date of first paper</label>
-        <div id="deliveryDatePicker" class="form-field__react-datepicker"></div>
-    </div>
-    <input type="hidden" name="delivered-product" value="paper" disabled>
-    <input type="hidden" name="voucher" value="false">
-    <input type="hidden" name="digipack" value="false">
-</div>
-
-
-
+@if(data.plans.default.isGuardianWeekly) {
+    @renderFields(usePostcodeLookup = false, productName = "weekly", firstPaperLabel = "Start Issue")
+} else {
+    @renderFields(usePostcodeLookup = true, productName = "paper", firstPaperLabel = "Date of first paper")
+}
