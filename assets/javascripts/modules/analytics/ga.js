@@ -19,6 +19,7 @@ define(['modules/analytics/analyticsEnabled',
         var isCustomerAgent = !!guardian.supplierCode;
         var camCodeBusinessUnit = new RegExp('CMP_BUNIT=([^&]*)').exec(location.search);
         var camCodeTeam = new RegExp('CMP_TU=([^&]*)').exec(location.search);
+        var experience = guardian.experience;
 
         /* Google analytics snippet */
         /*eslint-disable */
@@ -62,9 +63,9 @@ define(['modules/analytics/analyticsEnabled',
         }
 
         ga('membershipPropertyTracker.set', 'dimension13', isCustomerAgent);  // customerAgent
-        if(experienceIsSet){
-            ga('membershipPropertyTracker.set', 'dimension16', guardian.experience);  // experience
 
+        if(experience){
+            ga('membershipPropertyTracker.set', 'dimension16', experience);   // Experience
         }
 
         if (camCodeBusinessUnit && camCodeBusinessUnit[1]) {
