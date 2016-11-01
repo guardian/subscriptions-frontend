@@ -1,12 +1,10 @@
 /* global guardian, Stripe */
 define([
     'utils/ajax',
-    'modules/forms/regex',
-    'modules/checkout/formElements',
     'modules/checkout/validatePaymentFormat',
     'modules/checkout/stripeCheckout',
     'modules/raven'
-], function (ajax, regex, formElements, validatePaymentFormat, stripeCheckout, raven) {
+], function (ajax, validatePaymentFormat, stripeCheckout, raven) {
     'use strict';
     var ACCOUNT_CHECK_ENDPOINT = '/checkout/check-account';
 
@@ -55,7 +53,6 @@ define([
         return new Promise(function (resolve) {
             if (validity.allValid) {
                 if (data.paymentMethod === 'direct-debit') {
-                    guardian.experience = 'direct-debit';
                     accountCheck(data.accountNumber, data.sortCode, data.accountHolderName).then(function (accountValid) {
                         validity.accountNumberValid = accountValid;
                         validity.allValid = accountValid;
@@ -63,10 +60,8 @@ define([
 
                     });
                 } else {
-                    guardian.experience = guardian.stripeCheckout?'stripeCheckout':'stripeJS';
-
                     if (guardian.stripeCheckout) {
-                        validity.allValid = true;// valid;
+                        validity.allValid = true;
                         resolve(validity);
                         return;
                     }

@@ -6,8 +6,6 @@ define(['modules/analytics/analyticsEnabled',
     'use strict';
 
     var _EVENT_QUEUE = [];
-    var experienceIsSet = 'stripeCheckout' in guardian;
-    guardian.experience = guardian.stripeCheckout?'stripeCheckout':'stripeJS';
 
     function init() {
 
@@ -101,7 +99,7 @@ define(['modules/analytics/analyticsEnabled',
                 metric1: upgrading,
                 metric2: obj.elapsedTime
             };
-            if(experienceIsSet){
+            if(guardian.experience){
                 event.dimension16 = guardian.experience;
             }
             ga('membershipPropertyTracker.send', 'event', event);
