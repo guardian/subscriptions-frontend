@@ -25,17 +25,7 @@ define([
             weekly: (date) => date.day() === 5
         };
 
-        function getFilters() {
-            if ('paper' === deliveredProduct) {
-                return validDays.paper;
-            }
-            if ('weekly' === deliveredProduct) {
-                return validDays.weekly;
-            }
-            return validDays.voucher;
-        }
-
-        let filters = getFilters();
+        let filters = validDays[deliveredProduct];
 
         switch (true) {
             case /Weekly/i.test(packageName):
