@@ -71,5 +71,8 @@ POST        /q                               controllers.PromoLandingPage.previe
 # Promotions
 GET         /s/:supplierCodeStr              controllers.Homepage.supplierRedirect(supplierCodeStr: String)
 
+# Paths from legacy redirects
+GET         /Voucher                         controllers.Homepage.index
+
 # Editions hommepage or 404
 GET         /:edition                        controllers.Homepage.landingPage(edition: String)
