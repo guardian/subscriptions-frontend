@@ -97,17 +97,17 @@ object AccountManagement extends Controller with LazyLogging {
       sub <- OptionT(subscription)
       allHolidays <- OptionT(tpBackend.suspensionService.getHolidays(sub.name).map(_.toOption))
       billingSchedule <- OptionT(tpBackend.commonPaymentService.billingSchedule(sub.id, numberOfBills = 13))
-      chosenPaperDays = sub.plan.charges.chargedDays.toList.sortBy(_.dayOfTheWeekIndex)
-      suspendableDays = Config.suspendableWeeks * chosenPaperDays.size
     } yield {
       (sub.plan.product match {
         case Product.Delivery => sub.asDelivery.map { deliverySubscription =>
           val pendingHolidays = pendingHolidayRefunds(allHolidays)
           val suspendedDays = SuspensionService.holidayToSuspendedDays(pendingHolidays, deliverySubscription.plan.charges.chargedDays.toList)
+          val chosenPaperDays = deliverySubscription.plan.charges.chargedDays.toList.sortBy(_.dayOfTheWeekIndex)
+          val suspendableDays = Config.suspendableWeeks * chosenPaperDays.size
           Ok(views.html.account.suspend(deliverySubscription, pendingHolidayRefunds(allHolidays), billingSchedule, chosenPaperDays, suspendableDays, suspendedDays, errorCodes))
         }
         case Product.Voucher => sub.asVoucher.map { voucherSubscription =>
-          Ok(views.html.account.voucher(sub, billingSchedule))
+          Ok(views.html.account.voucher(voucherSubscription, billingSchedule))
         }
         case _: Product.Weekly => sub.asWeekly.map { weeklySubscription =>
           Ok(views.html.account.renew(weeklySubscription, billingSchedule))
