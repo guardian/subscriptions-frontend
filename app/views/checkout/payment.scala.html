@@ -95,9 +95,16 @@
                 @fragments.checkout.basketPreview(productData.plans.default)
 
                 @if(productData.plans.default.product == WeeklyZoneB) {
-                    <label class ='label js-currency-override-label'>
-                        <input type="checkbox" name="currencyOverride" value="true" class="js-currency-override-checkbox"> Pay in £GBP
-                    </label>
+                    <div class="js-checkout-currency-override">
+                        <label class="option" disabled="true">
+                            <span class="option__input">
+                                <input type="checkbox" name="currencyOverride" value="true" class="js-currency-override-checkbox">
+                            </span>
+                            <span class="option__label">
+                                Pay in £GBP
+                            </span>
+                        </label>
+                    </div>
                 }
 
 

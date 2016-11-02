@@ -133,7 +133,7 @@ define(['$'], function ($) {
         PAPER_CHECKOUT_DATE_PICKER_ID: 'deliveryDatePicker',
         VOUCHER_CHECKOUT_DATE_PICKER_ID: 'deliveryDatePicker',
         $DELIVERED_PRODUCT_TYPE: $('input[name="delivered-product"]'),
-        $CURRENCY_OVERRIDE_LABEL: $('.js-currency-override-label'),
+        $CURRENCY_OVERRIDE_CHECKBOX: $('.js-currency-override-checkbox'),
         $BASKET: $('.js-basket'),
 
         getPaperCheckoutField: getPaperCheckoutField,

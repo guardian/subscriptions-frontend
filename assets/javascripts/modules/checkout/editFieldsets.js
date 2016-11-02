@@ -31,7 +31,7 @@ define([
     }
 
     function enableCurrencyOverride() {
-        formEls.$CURRENCY_OVERRIDE_LABEL.show();
+        formEls.$CURRENCY_OVERRIDE_CHECKBOX.removeAttr('disabled');
     }
 
     function init() {

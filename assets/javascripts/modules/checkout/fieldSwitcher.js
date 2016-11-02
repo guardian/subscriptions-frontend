@@ -108,7 +108,7 @@ define([
     var redrawCurrencyOverride = function (currentState) {
         $('.js-currency-override-checkbox').attr('checked', false);
 
-        var currencySelector = $('.js-currency-override-label, .js-currency-selector');
+        var currencySelector = $('.js-checkout-currency-override');
 
         if (currentState.localization.currency == 'USD') {
             currencySelector.show();
