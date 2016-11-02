@@ -56,7 +56,6 @@ define([
                 collapseFieldsetsExcept(formEls.$FIELDSET_PAYMENT_DETAILS);
                 formEls.$FIELDSET_PAYMENT_DETAILS.removeClass(FIELDSET_COMPLETE);
                 impressionTracking.paymentDetailsTracking();
-                enableCurrencyOverride();
             });
 
             if ($editDelivery.length) {

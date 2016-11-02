@@ -53,7 +53,6 @@ define([
 
         eventTracking.completedPaymentDetails();
         impressionTracking.paymentReviewTracking();
-        formEls.$CURRENCY_OVERRIDE_CHECKBOX.attr('disabled', true);
     }
 
     function handleValidation() {
