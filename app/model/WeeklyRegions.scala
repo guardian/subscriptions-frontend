@@ -15,7 +15,7 @@ object WeeklyRegion {
 }
 
 object Uk extends WeeklyRegion {
-  override val title = "United Kingdown"
+  override val title = "United Kingdom"
   override val description = "Includes Isle of Man and Channel Islands"
   override val url = Uri.parse("checkout/weeklyzonea-guardianweeklyquarterly?countryGroup=uk")
 }
