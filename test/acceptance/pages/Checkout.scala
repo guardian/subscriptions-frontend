@@ -185,12 +185,13 @@ case class Checkout(testUser: TestUser, endpoint: String = "checkout") extends P
     val submitPaymentButton = cssSelector(".js-checkout-submit")
   }
 
+  // Temporary hack to identify elements on Stripe Checkout form using xpath, since the ids are no longer consistently set.
   private object StripeCheckout {
     val container = name("stripe_checkout_app")
-    val cardNumber = id("card_number")
-    val cardExp = id("cc-exp")
-    val cardCvc = id("cc-csc")
-    val submitButton = id("submitButton")
+    val cardNumber = xpath("//div[label/text() = \"Card number\"]/input")
+    val cardExp = xpath("//div[label/text() = \"Expiry\"]/input")
+    val cardCvc = xpath("//div[label/text() = \"CVC\"]/input")
+    val submitButton = xpath("//div[button]")
 
     def setInTest(inTest: Boolean) = {
 

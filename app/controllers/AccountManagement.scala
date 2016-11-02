@@ -1,8 +1,12 @@
 package controllers
 
+import _root_.services.AuthenticationService._
+import _root_.services.TouchpointBackend
 import actions.CommonActions._
-import com.gu.memsub.Subscription.Name
 import com.github.nscala_time.time.OrderingImplicits.LocalDateOrdering
+import com.gu.memsub.Product
+import com.gu.memsub.Subscription.Name
+import com.gu.memsub.subsv2._
 import com.gu.subscriptions.suspendresume.SuspensionService
 import com.gu.subscriptions.suspendresume.SuspensionService.{BadZuoraJson, ErrNel, HolidayRefund, PaymentHoliday}
 import com.gu.zuora.soap.models.Queries.Contact
@@ -11,17 +15,11 @@ import configuration.{Config, ProfileLinks}
 import forms.{AccountManagementLoginForm, AccountManagementLoginRequest, SuspendForm}
 import org.joda.time.LocalDate
 import play.api.mvc.{AnyContent, Controller, Request}
-import services.AuthenticationService._
-import services.TouchpointBackend
 import utils.TestUsers.PreSigninTestCookie
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import com.gu.memsub.subsv2.{Subscription, SubscriptionPlan => Plan}
-
 import scala.concurrent.Future
-import scalaz.std.option._
 import scalaz.std.scalaFuture._
-import scalaz.syntax.std.boolean._
 import scalaz.syntax.std.option._
 import scalaz.{EitherT, OptionT, \/}
 
@@ -31,21 +29,36 @@ object AccountManagement extends Controller with LazyLogging {
 
   val SUBSCRIPTION_SESSION_KEY = "subscriptionId"
 
-  private def subscriptionFromRequest(implicit request: Request[AnyContent]): Future[Option[Subscription[Plan.Delivery] \/ Subscription[Plan.Voucher]]] = {
+  @deprecated("use the other one and pattern match on the plan")
+  private def subscriptionFromRequestOld(implicit request: Request[AnyContent]): Future[Option[Subscription[SubscriptionPlan.Delivery] \/ Subscription[SubscriptionPlan.Voucher]]] = {
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
 
     (for {
       subscriptionId <- OptionT(Future.successful(request.session.data.get(SUBSCRIPTION_SESSION_KEY)))
-      zuoraSubscription <- OptionT(tpBackend.subscriptionService.either[Plan.Delivery, Plan.Voucher](Name(subscriptionId)))
+      zuoraSubscription <- OptionT(tpBackend.subscriptionService.either[SubscriptionPlan.Delivery, SubscriptionPlan.Voucher](Name(subscriptionId)))
     } yield zuoraSubscription).orElse(for {
       identityUser <- OptionT(Future.successful(authenticatedUserFor(request)))
       salesForceUser <- OptionT(tpBackend.salesforceService.repo.get(identityUser.user.id))
-      zuoraSubscription <- OptionT(tpBackend.subscriptionService.either[Plan.Delivery, Plan.Voucher](salesForceUser))
+      zuoraSubscription <- OptionT(tpBackend.subscriptionService.either[SubscriptionPlan.Delivery, SubscriptionPlan.Voucher](salesForceUser))
     } yield zuoraSubscription).run
   }
 
-  private def subscriptionFromUserDetails(loginRequestOpt: Option[AccountManagementLoginRequest])(implicit request: Request[AnyContent]): Future[Option[Subscription[Plan.Paper]]] = {
+  private def subscriptionFromRequest(implicit request: Request[AnyContent]): Future[Option[Subscription[SubscriptionPlan.PaperPlan]]] = {
+    implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
+    implicit val tpBackend = resolution.backend
+
+    (for {
+      subscriptionId <- OptionT(Future.successful(request.session.data.get(SUBSCRIPTION_SESSION_KEY)))
+      zuoraSubscription <- OptionT(tpBackend.subscriptionService.get[SubscriptionPlan.PaperPlan](Name(subscriptionId)))
+    } yield zuoraSubscription).orElse(for {
+      identityUser <- OptionT(Future.successful(authenticatedUserFor(request)))
+      salesForceUser <- OptionT(tpBackend.salesforceService.repo.get(identityUser.user.id))
+      zuoraSubscription <- OptionT(tpBackend.subscriptionService.current[SubscriptionPlan.PaperPlan](salesForceUser).map(_.headOption/*FIXME if they have more than one they can only manage the first*/))
+    } yield zuoraSubscription).run
+  }
+
+  private def subscriptionFromUserDetails(loginRequestOpt: Option[AccountManagementLoginRequest])(implicit request: Request[AnyContent]): Future[Option[Subscription[SubscriptionPlan.PaperPlan]]] = {
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
 
@@ -56,13 +69,19 @@ object AccountManagement extends Controller with LazyLogging {
         zuoraContact.postalCode.map(format).contains(format(loginRequest.postcode))
     }
 
-    (for {
-      loginRequest <- OptionT(Future.successful(loginRequestOpt))
-      zuoraSubscription <- OptionT(tpBackend.subscriptionService.get[Plan.Paper](Name(loginRequest.subscriptionId)))
-      zuoraAccount <- OptionT(tpBackend.zuoraService.getAccount(zuoraSubscription.accountId).map(a => Option(a)))
-      zuoraContact <- OptionT(tpBackend.zuoraService.getContact(zuoraAccount.billToId).map(c => Option(c)))
-      _ <- OptionT(Future.successful(detailsMatch(zuoraContact, loginRequest).unlessM[Option, Nothing](None)))
-    } yield zuoraSubscription).run
+    def subscriptionDetailsMatch(loginRequest: AccountManagementLoginRequest, zuoraSubscription: Subscription[SubscriptionPlan.PaperPlan]): Future[Boolean] = {
+      for {
+        zuoraAccount <- tpBackend.zuoraService.getAccount(zuoraSubscription.accountId)
+        zuoraContact <- tpBackend.zuoraService.getContact(zuoraAccount.billToId)
+      } yield detailsMatch(zuoraContact, loginRequest)
+    }
+
+    loginRequestOpt.map { loginRequest =>
+      (for {
+        zuoraSubscription <- OptionT(tpBackend.subscriptionService.get[SubscriptionPlan.PaperPlan](Name(loginRequest.subscriptionId)))
+        result <- OptionT(subscriptionDetailsMatch(loginRequest, zuoraSubscription).map(matches => if (matches) Some(zuoraSubscription) else None))
+      } yield result).run
+    }.getOrElse(Future.successful(None))
 
   }
 
@@ -75,20 +94,29 @@ object AccountManagement extends Controller with LazyLogging {
     val errorCodes = errorCode.toSeq.flatMap(_.split(',').map(_.trim)).filterNot(_.isEmpty).toSet
 
     (for {
-      subEither <- OptionT(subscription)
-      sub = subEither.fold(identity, identity)
+      sub <- OptionT(subscription)
       allHolidays <- OptionT(tpBackend.suspensionService.getHolidays(sub.name).map(_.toOption))
       billingSchedule <- OptionT(tpBackend.commonPaymentService.billingSchedule(sub.id, numberOfBills = 13))
-      chosenPaperDays = sub.plan.charges.chargedDays.toList.sortBy(_.dayOfTheWeekIndex)
-      suspendableDays = Config.suspendableWeeks * chosenPaperDays.size
-    } yield
-      subEither.fold({ deliverySubscription =>
-        val pendingHolidays = pendingHolidayRefunds(allHolidays)
-        val suspendedDays = SuspensionService.holidayToSuspendedDays(pendingHolidays, deliverySubscription.plan.charges.chargedDays.toList)
-        Ok(views.html.account.suspend(deliverySubscription, pendingHolidayRefunds(allHolidays), billingSchedule, chosenPaperDays, suspendableDays, suspendedDays, errorCodes))
-      },{ voucherSubscription =>
-        Ok(views.html.account.voucher(voucherSubscription, billingSchedule))
-      })
+    } yield {
+      (sub.plan.product match {
+        case Product.Delivery => sub.asDelivery.map { deliverySubscription =>
+          val pendingHolidays = pendingHolidayRefunds(allHolidays)
+          val suspendedDays = SuspensionService.holidayToSuspendedDays(pendingHolidays, deliverySubscription.plan.charges.chargedDays.toList)
+          val chosenPaperDays = deliverySubscription.plan.charges.chargedDays.toList.sortBy(_.dayOfTheWeekIndex)
+          val suspendableDays = Config.suspendableWeeks * chosenPaperDays.size
+          Ok(views.html.account.suspend(deliverySubscription, pendingHolidayRefunds(allHolidays), billingSchedule, chosenPaperDays, suspendableDays, suspendedDays, errorCodes))
+        }
+        case Product.Voucher => sub.asVoucher.map { voucherSubscription =>
+          Ok(views.html.account.voucher(voucherSubscription, billingSchedule))
+        }
+        case _: Product.Weekly => sub.asWeekly.map { weeklySubscription =>
+          Ok(views.html.account.renew(weeklySubscription, billingSchedule))
+        }
+      }).getOrElse {
+        // the product type didn't have the right charges
+        Ok(views.html.account.details(None))
+      }
+    }
     ).getOrElse(Ok(views.html.account.details(subscriberId)))
   }
 
@@ -129,7 +157,7 @@ object AccountManagement extends Controller with LazyLogging {
 
     (for {
       form <- EitherT(Future.successful(SuspendForm.mappings.bindFromRequest().value \/> "Please check your selections and try again"))
-      sub <- EitherT(subscriptionFromRequest.map(_ \/> noSub).map(_.flatMap(_.swap.leftMap(_ => noSub))))
+      sub <- EitherT(subscriptionFromRequestOld.map(_ \/> noSub).map(_.flatMap(_.swap.leftMap(_ => noSub))))
       newHoliday = PaymentHoliday(sub.name, form.startDate, form.endDate)
       // 14 because + 2 extra months needed in calculation to cover setting a 6-week suspension on the day before your 12th billing day!
       oldBS <- EitherT(tpBackend.commonPaymentService.billingSchedule(sub.id, numberOfBills = 14).map(_ \/> "Error getting billing schedule"))

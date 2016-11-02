@@ -128,7 +128,7 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
           case Product.Voucher => ukMainLandSettings.copy(availableDeliveryCountries = Some(CountryWithCurrency.fromCountryGroup(ukAndIsleOfMan)))
           case Product.WeeklyZoneA => getSettings(
             availableDeliveryCountries = Some(CountryWithCurrency.whitelisted(supportedCurrencies, GBP, weeklyZoneAGroups)),
-            fallbackCountry = Some(Country.UK),
+            fallbackCountry = countryGroup.defaultCountry,
             fallbackCurrency = GBP
           )
           case Product.WeeklyZoneB => getSettings(
