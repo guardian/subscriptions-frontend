@@ -96,27 +96,28 @@ object AccountManagement extends Controller with LazyLogging {
     (for {
       sub <- OptionT(subscription)
       allHolidays <- OptionT(tpBackend.suspensionService.getHolidays(sub.name).map(_.toOption))
-      billingSchedule <- OptionT(tpBackend.commonPaymentService.billingSchedule(sub.id, numberOfBills = 12))
-      suspendableDays = Config.suspendableWeeks * sub.plan.charges.benefits.size
+      billingSchedule <- OptionT(tpBackend.commonPaymentService.billingSchedule(sub.id, numberOfBills = 13))
+      chosenPaperDays = sub.plan.charges.chargedDays.toList.sortBy(_.dayOfTheWeekIndex)
+      suspendableDays = Config.suspendableWeeks * chosenPaperDays.size
     } yield {
       (sub.plan.product match {
-        case Product.Delivery => sub.asDelivery.map { sub =>
+        case Product.Delivery => sub.asDelivery.map { deliverySubscription =>
           val pendingHolidays = pendingHolidayRefunds(allHolidays)
-          val suspendedDays = SuspensionService.holidayToSuspendedDays(pendingHolidays, sub.plan.charges.dayPrices.keys.toList)
-          Ok(views.html.account.suspend(sub, pendingHolidayRefunds(allHolidays), billingSchedule, suspendableDays, suspendedDays, errorCodes))
+          val suspendedDays = SuspensionService.holidayToSuspendedDays(pendingHolidays, deliverySubscription.plan.charges.chargedDays.toList)
+          Ok(views.html.account.suspend(deliverySubscription, pendingHolidayRefunds(allHolidays), billingSchedule, chosenPaperDays, suspendableDays, suspendedDays, errorCodes))
         }
-        case Product.Voucher => sub.asVoucher.map { sub =>
+        case Product.Voucher => sub.asVoucher.map { voucherSubscription =>
           Ok(views.html.account.voucher(sub, billingSchedule))
         }
-        case _: Product.Weekly => sub.asWeekly.map { sub =>
-          Ok(views.html.account.renew(sub, billingSchedule))
+        case _: Product.Weekly => sub.asWeekly.map { weeklySubscription =>
+          Ok(views.html.account.renew(weeklySubscription, billingSchedule))
         }
       }).getOrElse {
         // the product type didn't have the right charges
         Ok(views.html.account.details(None))
       }
     }
-      ).getOrElse(Ok(views.html.account.details(subscriberId)))
+    ).getOrElse(Ok(views.html.account.details(subscriberId)))
   }
 
   def logout = accountManagementAction { implicit request =>
@@ -164,8 +165,8 @@ object AccountManagement extends Controller with LazyLogging {
       newBS <- EitherT(tpBackend.commonPaymentService.billingSchedule(sub.id, numberOfBills = 12).map(_ \/> "Error getting billing schedule"))
       newHolidays <- EitherT(tpBackend.suspensionService.getHolidays(sub.name)).leftMap(_ => "Error getting holidays")
       pendingHolidays = pendingHolidayRefunds(newHolidays)
-      suspendableDays = Config.suspendableWeeks * sub.plan.charges.dayPrices.keys.size
-      suspendedDays = SuspensionService.holidayToSuspendedDays(pendingHolidays, sub.plan.charges.dayPrices.keys.toList)
+      suspendableDays = Config.suspendableWeeks * sub.plan.charges.chargedDays.size
+      suspendedDays = SuspensionService.holidayToSuspendedDays(pendingHolidays, sub.plan.charges.chargedDays.toList)
     } yield {
       tpBackend.exactTargetService.enqueueETHolidaySuspensionEmail(sub, sub.plan.name, newBS, pendingHolidays.size, suspendableDays, suspendedDays).onFailure { case e: Throwable =>
         logger.error(s"Failed to generate data needed to enqueue ${sub.name.get}'s holiday suspension email. Reason: ${e.getMessage}")

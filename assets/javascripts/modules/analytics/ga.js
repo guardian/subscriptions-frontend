@@ -6,8 +6,6 @@ define(['modules/analytics/analyticsEnabled',
     'use strict';
 
     var _EVENT_QUEUE = [];
-    var experienceIsSet = 'stripeCheckout' in guardian;
-    var experience = guardian.stripeCheckout?'stripeCheckout':'stripeJS';
 
     function init() {
 
@@ -19,6 +17,7 @@ define(['modules/analytics/analyticsEnabled',
         var isCustomerAgent = !!guardian.supplierCode;
         var camCodeBusinessUnit = new RegExp('CMP_BUNIT=([^&]*)').exec(location.search);
         var camCodeTeam = new RegExp('CMP_TU=([^&]*)').exec(location.search);
+        var experience = guardian.experience;
 
         /* Google analytics snippet */
         /*eslint-disable */
@@ -62,9 +61,9 @@ define(['modules/analytics/analyticsEnabled',
         }
 
         ga('membershipPropertyTracker.set', 'dimension13', isCustomerAgent);  // customerAgent
-        if(experienceIsSet){
-            ga('membershipPropertyTracker.set', 'dimension16', experience);  // experience
 
+        if(experience){
+            ga('membershipPropertyTracker.set', 'dimension16', experience);   // Experience
         }
 
         if (camCodeBusinessUnit && camCodeBusinessUnit[1]) {
@@ -100,8 +99,8 @@ define(['modules/analytics/analyticsEnabled',
                 metric1: upgrading,
                 metric2: obj.elapsedTime
             };
-            if(experienceIsSet){
-                event.dimension16 = experience;
+            if(guardian.experience){
+                event.dimension16 = guardian.experience;
             }
             ga('membershipPropertyTracker.send', 'event', event);
         });

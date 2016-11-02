@@ -27,7 +27,7 @@
                 Thank you. Your newspaper delivery will be suspended
                 @if(newRefund._2.start == newRefund._2.finish) { on @prettyDate(newRefund._2.start) } else { from @prettyDate(newRefund._2.start) to @prettyDate(newRefund._2.finish) }.
             </p>
-            <p>@Price(newRefund._1, GBP).pretty will be deducted from your next payment on or after @prettyDate(newRefund._2.start).</p>
+            <p>@Price(newRefund._1, currency).pretty will be deducted from your next payment on or after @prettyDate(newRefund._2.start).</p>
             <p>Have a great holiday.</p>
         </section>
 

@@ -1,12 +1,10 @@
-/* global Stripe */
+/* global guardian, Stripe */
 define([
     'utils/ajax',
-    'modules/forms/regex',
-    'modules/checkout/formElements',
     'modules/checkout/validatePaymentFormat',
     'modules/checkout/stripeCheckout',
     'modules/raven'
-], function (ajax, regex, formElements, validatePaymentFormat, stripeCheckout, raven) {
+], function (ajax, validatePaymentFormat, stripeCheckout, raven) {
     'use strict';
     var ACCOUNT_CHECK_ENDPOINT = '/checkout/check-account';
 
@@ -62,9 +60,8 @@ define([
 
                     });
                 } else {
-
                     if (guardian.stripeCheckout) {
-                        validity.allValid = true;// valid;
+                        validity.allValid = true;
                         resolve(validity);
                         return;
                     }

@@ -11,7 +11,7 @@ define(['lodash/object/extend'], function (extend) {
     var serializer = function (elems, mixin) {
         var data = extend({}, mixin);
         elems.filter(function (elem) {
-            return elem.name !== '' && elem.type && (elem.type !== 'checkbox' && elem.type !== 'radio' || elem.checked);
+            return elem.name !== '' && !elem.disabled && elem.type && (elem.type !== 'checkbox' && elem.type !== 'radio' || elem.checked);
         }).map(function (elem) {
             data[elem.name] = elem.value;
         });
