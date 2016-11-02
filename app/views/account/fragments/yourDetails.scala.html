@@ -1,10 +1,11 @@
+@import com.gu.memsub.subsv2.SubscriptionPlan
 @import com.gu.memsub.subsv2.Subscription
 @import views.support.Dates._
 @import views.support.Pricing._
-@import com.gu.memsub.subsv2.SubscriptionPlan.Paper
 @import com.gu.memsub.PaperDay
 @import scala.collection.immutable.List.empty
-@(subscription: Subscription[Paper], chosenPaperDays: List[PaperDay] = empty)(extra: Html = Html(""))
+
+@(subscription: Subscription[SubscriptionPlan.PaperPlan], chosenPaperDays: List[PaperDay] = empty)(extra: Html = Html(""))
 <dl class="mma-section__list">
     <dt class="mma-section__list--title">Subscriber ID</dt>
     <dd class="mma-section__list--content">@subscription.name.get</dd>
