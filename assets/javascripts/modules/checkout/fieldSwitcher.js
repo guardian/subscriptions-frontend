@@ -35,7 +35,7 @@ define([
 
 
     var refreshPaymentMethods = function (currentState) {
-        if (currentState.billing.country === 'GB' && currentState.localization.currency == 'GBP') {
+        if (currentState.billing.country === 'GB' && currentState.priceBanding.currency == 'GBP') {
             check(formElements.$DIRECT_DEBIT_TYPE[0]);
         } else {
             check(formElements.$CARD_TYPE[0]);
@@ -47,11 +47,11 @@ define([
     };
 
 
-    var updateLocalization = function (currentState) {
+    var updatePriceBanding = function (currentState) {
         var updateParams = {};
 
         var addFieldsFor = function (addressType) {
-            var prefix = addressType == 'localization' ? '' : addressType + '-';
+            var prefix = addressType == 'priceBanding' ? '' : addressType + '-';
             var values = currentState[addressType];
             if (!isEmptyObject(values)) {
                 if (values.currency.length > 0) {
@@ -65,30 +65,30 @@ define([
 
         addFieldsFor('delivery');
         addFieldsFor('billing');
-        addFieldsFor('localization');
+        addFieldsFor('priceBanding');
         var selectedPlanBeforeUpdate = ratePlanChoice.getSelectedRatePlanId();
         dataSwitcher.refresh(updateParams);
-        checkPlanInput(selectedPlanBeforeUpdate, currentState.localization.currency);
+        checkPlanInput(selectedPlanBeforeUpdate, currentState.priceBanding.currency);
         refreshPaymentMethods(currentState);
     };
 
     var getCurrentState = function () {
         var deliveryState = addressData.delivery.getState();
         var billingState = deliveryAsBilling.isEnabled() ? deliveryState : addressData.billing.getState();
-        var localizationState = billingState.determinesLocalization ? billingState : deliveryState;
+        var priceBandingState = billingState.determinesPriceBanding ? billingState : deliveryState;
 
         if (isCurrencyOverrideChecked()) {
-            localizationState.currency = 'GBP';
+            priceBandingState.currency = 'GBP';
         }
         return {
             delivery: deliveryState,
             billing: billingState,
-            localization: localizationState
+            priceBanding: priceBandingState
         }
     };
     var update = function () {
         var currentState = getCurrentState();
-        updateLocalization(currentState)
+        updatePriceBanding(currentState)
     };
 
     var isCurrencyOverrideChecked = function() {
@@ -110,7 +110,7 @@ define([
 
         var currencySelector = $('.js-checkout-currency-override');
 
-        if (currentState.localization.currency == 'USD') {
+        if (currentState.priceBanding.currency == 'USD') {
             currencySelector.show();
         } else {
             currencySelector.hide();
@@ -121,7 +121,7 @@ define([
         var $postcode = addressObject.$POSTCODE_CONTAINER,
             $subdivision = addressObject.$SUBDIVISION_CONTAINER,
             countryChoice = countryChoiceFunction(addressObject),
-            determinesLocalization = addressObject.determinesLocalization();
+            determinesPriceBanding = addressObject.determinesPriceBanding();
 
 
         var redrawAddressField = function ($container, newField, modelValue) {
@@ -158,7 +158,7 @@ define([
         var redraw = function (currentState) {
             var model = currentState[prefix];
             redrawAddressFields(model);
-            updateLocalization(currentState);
+            updatePriceBanding(currentState);
         };
 
         var getState = function () {
@@ -179,7 +179,7 @@ define([
         var refresh = function () {
             var currentState = getCurrentState();
 
-             if (determinesLocalization) {
+             if (determinesPriceBanding) {
                  redrawCurrencyOverride(currentState);
              }
            redraw(currentState);
@@ -201,7 +201,7 @@ define([
         return {
             init: init,
             getState: getState,
-            determinesLocalization: determinesLocalization,
+            determinesPriceBanding: determinesPriceBanding,
             refresh: refresh
         };
     };

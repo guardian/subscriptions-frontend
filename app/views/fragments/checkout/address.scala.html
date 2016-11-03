@@ -5,7 +5,7 @@
 @import views.support.CountryWithCurrency
 @import views.support.PlanOps._
 
-@(address: Option[Address], namePrefix: String, countriesWithCurrency: List[CountryWithCurrency], plan: CatalogPlan.Paid, usePostcodeLookup: Boolean, determinesLocalization: Boolean)
+@(address: Option[Address], namePrefix: String, countriesWithCurrency: List[CountryWithCurrency], plan: CatalogPlan.Paid, usePostcodeLookup: Boolean, determinesPriceBanding: Boolean)
 
 
 @attrs(field: String) = @{
@@ -41,7 +41,7 @@
 }
 
 @* ===== Address ===== *@
-<div class="js-checkout-@{namePrefix.replace('.', '-')}" data-determines-localization="@determinesLocalization">
+<div class="js-checkout-@{namePrefix.replace('.', '-')}" data-determines-price-banding="@determinesPriceBanding">
     @if(usePostcodeLookup) {
         @postcode
     }

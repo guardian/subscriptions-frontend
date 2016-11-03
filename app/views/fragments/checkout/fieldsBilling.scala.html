@@ -5,7 +5,7 @@
 @import com.gu.memsub.subsv2.CatalogPlan
 @import views.html.fragments.checkout.address
 
-@(billingAddress: Option[Address], canBeHidden: Boolean, countriesWithCurrency: List[CountryWithCurrency], plan: CatalogPlan.Paid, determinesLocalization : Boolean)
+@(billingAddress: Option[Address], canBeHidden: Boolean, countriesWithCurrency: List[CountryWithCurrency], plan: CatalogPlan.Paid, determinesPriceBanding : Boolean)
 
 @if(canBeHidden) {
   <div class="js-checkout-use-delivery">
@@ -20,12 +20,12 @@
   </div>
 }
 @* ===== Address ===== *@
-<div class="js-billing-address @{if(canBeHidden && billingAddress.forall(_.isEmpty)) "is-hidden" else ""}"   data-determines-localization="@determinesLocalization">
+<div class="js-billing-address @{if(canBeHidden && billingAddress.forall(_.isEmpty)) "is-hidden" else ""}"   data-determines-price-banding="@determinesPriceBanding">
     @address(
         address = billingAddress,
         namePrefix = "personal.address",
         countriesWithCurrency = countriesWithCurrency,
         plan = plan,
         usePostcodeLookup = false,
-        determinesLocalization = determinesLocalization)
+        determinesPriceBanding = determinesPriceBanding)
 </div>

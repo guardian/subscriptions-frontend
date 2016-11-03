@@ -33,7 +33,7 @@ define(['$'], function ($) {
             $COUNTRY_SELECT: $('.js-country', $COUNTRY_CONTAINER[0]),
             getPostcode$: function() { return $('.js-input', $POSTCODE_CONTAINER[0]); },
             getSubdivision$: function() { return $('.js-input', $SUBDIVISION_CONTAINER[0]); },
-            determinesLocalization: function(){ return $(container).data('determines-localization') === true} };
+            determinesPriceBanding: function(){ return $(container).data('determines-price-banding') === true} };
     };
 
     var getPaperCheckoutField = function() {
