@@ -1,0 +1,24 @@
+@import com.gu.memsub.subsv2.CatalogPlan
+@import views.support.PlanOps._
+@import model.DigitalEdition
+@(digitalEdition: DigitalEdition, plan: Option[CatalogPlan.Paid] = None)
+
+@main(
+    title = "Down for maintenance",
+    plan = plan,
+    edition = digitalEdition
+) {
+    <main class="page-container gs-container">
+        @fragments.page.header("Down for maintenance")
+        <div class="prose">
+            <p>
+                Sorry, we are currently down for scheduled maintenance.
+            </p>
+            <p>
+                Please come back again in a few hours, or email
+                    <a href="mailto:@plan.fold("subscriptions@theguardian.com")(_.email)">@plan.fold("subscriptions@theguardian.com")(_.email)</a>.
+            </p>
+        </div>
+    </main>
+}
+
