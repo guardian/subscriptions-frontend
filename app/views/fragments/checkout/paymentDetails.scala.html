@@ -1,0 +1,24 @@
+@(stripeCheckoutTest:Boolean)
+<div id="paymentDetails" class="field-panel is-collapsed js-fieldset-payment-details">
+<fieldset>
+    <legend class="field-panel__legend">
+        Payment details
+    </legend>
+    <div class="field-panel__intro">
+        <div class="field-note field-note--offset">
+        @fragments.forms.securityNote()
+        </div>
+    </div>
+    <div class="field-panel__edit">
+        <a href="#paymentDetails" class="text-button u-button-reset js-edit-payment-details" title="Edit your payment details">Edit</a>
+    </div>
+    <div class="field-panel__fields">
+    @fragments.checkout.fieldsPayment(stripeCheckoutTest)
+
+    <div class="actions">
+        <a href="#formReview" class="button button--primary button--large js-checkout-payment-details-submit">Continue</a>
+        <div class="loader js-payment-details-validating">Validating...</div>
+    </div>
+</div>
+</fieldset>
+</div>

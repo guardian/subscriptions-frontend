@@ -94,9 +94,19 @@
             <div class="checkout-container__sidebar js-basket">
                 @fragments.checkout.basketPreview(productData.plans.default)
 
-                <label class ='label js-currency-override-label' @if(productData.plans.default.product != WeeklyZoneB) { hidden="true" } >
-                    <input type="checkbox" name="currencyOverride" value="true" class="js-currency-override-checkbox"> Pay in £GBP
-                </label>
+                @if(productData.plans.default.product == WeeklyZoneB) {
+                    <div class="js-checkout-currency-override">
+                        <label class="option">
+                            <span class="option__input">
+                                <input type="checkbox" name="currencyOverride" value="true" class="js-currency-override-checkbox">
+                            </span>
+                            <span class="option__label">
+                                Pay in £GBP
+                            </span>
+                        </label>
+                    </div>
+                }
+
 
                 @if(productData.plans.list.length > 1) {
                     <div class="basket-options-toggle u-note prose">
@@ -163,7 +173,7 @@
                             <a href="#yourDetails" class="text-button u-button-reset js-edit-your-details" title="Edit your personal details">Edit</a>
                         </div>
                         <div class="field-panel__fields">
-                            @fragments.checkout.fieldsPersonal(personalData, countryAndCurrencySettings.availableCountries)
+                            @fragments.checkout.fieldsPersonal(personalData)
                             @defining(if(productData.isDigitalPack) "#billingAddress" else "#deliveryDetails") { goto =>
                                 @continueButton(goto, "js-checkout-your-details-submit")
                             }
@@ -172,17 +182,19 @@
                 </div>
 
                 @* ===== Delivery details ===== *@
-                @if(productData.isPhysical) {
+
+                @for(deliveryCountries <- countryAndCurrencySettings.availableDeliveryCountries) {
+
                         <div id="deliveryDetails" class="field-panel is-collapsed js-fieldset-delivery-details">
                             <fieldset>
                                 <legend class="field-panel__legend">
                                     Delivery address
                                 </legend>
                                 <div class="field-panel__fields">
-                                    @if(productData.isHomeDelivery || productData.isGuardianWeekly) {
-                                        @fragments.checkout.fieldsDelivery(productData, countryAndCurrencySettings.availableCountries)
+                                    @if(productData.isVoucher) {
+                                        @fragments.checkout.fieldsVoucher(productData, deliveryCountries)
                                     }else{
-                                        @fragments.checkout.fieldsVoucher(productData, countryAndCurrencySettings.availableCountries)
+                                        @fragments.checkout.fieldsDelivery(productData, deliveryCountries)
                                     }
                                     @continueButton("#paymentDetails", "js-checkout-delivery-details-submit")
                                 </div>
@@ -205,37 +217,22 @@
                             <a href="#yourDetails" class="text-button u-button-reset js-edit-billing-address" title="Edit your personal details">Edit</a>
                         </div>
                         <div class="field-panel__fields">
-                            @fragments.checkout.fieldsBilling(personalData.map(_.address), canBeHidden = !productData.isDigitalPack, countryAndCurrencySettings.availableCountries, productData.plans.default, !productData.isPhysical)
+                            @fragments.checkout.fieldsBilling(personalData.map(_.address), canBeHidden = !productData.isDigitalPack, countryAndCurrencySettings.availableBillingCountries, productData.plans.default, !productData.isPhysical)
                             @continueButton("#paymentDetails", "js-checkout-billing-address-submit")
                         </div>
                     </fieldset>
                 </div>
 
                 @* ===== Payment ===== *@
-                <div id="paymentDetails" class="field-panel is-collapsed js-fieldset-payment-details" @if(stripeCheckoutTest){data-country="GB"}>
-                    <fieldset>
-                        <legend class="field-panel__legend">
-                            Payment details
-                        </legend>
-                        <div class="field-panel__intro">
-                            <div class="field-note field-note--offset">
-                                @fragments.forms.securityNote()
-                            </div>
-                        </div>
-                        <div class="field-panel__edit">
-                            <a href="#paymentDetails" class="text-button u-button-reset js-edit-payment-details" title="Edit your payment details">Edit</a>
-                        </div>
-                        <div class="field-panel__fields">
-                            @fragments.checkout.fieldsPayment(stripeCheckoutTest)
-
-                            <div class="actions">
-                                <a href="#formReview" class="button button--primary button--large js-checkout-payment-details-submit">Continue</a>
-                                <div class="loader js-payment-details-validating">Validating...</div>
-                            </div>
-                        </div>
-                    </fieldset>
-                </div>
-
+                @if(stripeCheckoutTest) {
+                    <span data-currency="GBP">
+                        <span data-billing-country="GB">
+                        @fragments.checkout.paymentDetails(true)
+                        </span>
+                    </span>
+                } else {
+                    @fragments.checkout.paymentDetails(false)
+                }
                 @* ===== Review ===== *@
                 <div id="formReview" class="field-panel field-panel--single is-collapsed js-fieldset-review">
                     <fieldset>

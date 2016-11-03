@@ -4,63 +4,127 @@ define([
     'bean',
     'modules/checkout/countryChoice',
     'modules/checkout/addressFields',
-    'modules/checkout/localizationSwitcher',
+    'modules/checkout/dataSwitcher',
     'modules/checkout/formElements',
-    'modules/checkout/ratePlanChoice'
-], function ($, bean, countryChoiceFunction, addressFields, localizationSwitcher, formElements, ratePlanChoice) {
+    'modules/checkout/ratePlanChoice',
+    'modules/checkout/deliveryAsBilling'
+], function ($, bean, countryChoiceFunction, addressFields, dataSwitcher, formElements, ratePlanChoice, deliveryAsBilling) {
     'use strict';
-    var latestCurrencyAddressModel = null;
-    var check = function(domEl) {
+
+    var addressData = {
+        billing : {},
+        delivery: {},
+        init : function() {
+            this.billing = addressOps(formElements.BILLING, 'billing');
+            this.delivery = addressOps(formElements.DELIVERY, 'delivery');
+            this.billing.init();
+            this.delivery.init();
+            this.billing.refresh();
+            this.delivery.refresh();
+        }
+    };
+
+    var check = function (domEl) {
         $(domEl).attr('checked', 'checked');
         bean.fire(domEl, 'change');
     };
+
     var checkPlanInput = function (ratePlanId, currency) {
         ratePlanChoice.selectRatePlanForIdAndCurrency(ratePlanId, currency);
     };
 
-    // Change the payment method to Direct Debit for UK users,
-    // Credit Card for international users
-    var selectPaymentMethod = function (country) {
-        if (country === 'GB') {
+
+    var refreshPaymentMethods = function (currentState) {
+        if (currentState.billing.country === 'GB' && currentState.priceBanding.currency == 'GBP') {
             check(formElements.$DIRECT_DEBIT_TYPE[0]);
         } else {
             check(formElements.$CARD_TYPE[0]);
         }
     };
 
-    var switchLocalization = function (model) {
-        var currency = model.currency || guardian.currency;
-        localizationSwitcher.set(currency, model.country);
+    var isEmptyObject = function (obj) {
+       return (Object.keys(obj).length === 0 && obj.constructor === Object);
     };
 
-    var switchCurrency = function(model) {
-        switchLocalization(model);
-        checkPlanInput(model.ratePlanId, model.currency);
-        selectPaymentMethod(model.country);
+
+    var updatePriceBanding = function (currentState) {
+        var updateParams = {};
+
+        var addFieldsFor = function (addressType) {
+            var prefix = addressType == 'priceBanding' ? '' : addressType + '-';
+            var values = currentState[addressType];
+            if (!isEmptyObject(values)) {
+                if (values.currency.length > 0) {
+                    updateParams[prefix + 'currency'] = values.currency;
+                }
+                if (values.country.length > 0) {
+                    updateParams[prefix + 'country'] = values.country;
+                }
+            }
+        };
+
+        addFieldsFor('delivery');
+        addFieldsFor('billing');
+        addFieldsFor('priceBanding');
+        var selectedPlanBeforeUpdate = ratePlanChoice.getSelectedRatePlanId();
+        dataSwitcher.refresh(updateParams);
+        checkPlanInput(selectedPlanBeforeUpdate, currentState.priceBanding.currency);
+        refreshPaymentMethods(currentState);
     };
+
+    var getCurrentState = function () {
+        var deliveryState = addressData.delivery.getState();
+        var billingState = deliveryAsBilling.isEnabled() ? deliveryState : addressData.billing.getState();
+        var priceBandingState = billingState.determinesPriceBanding ? billingState : deliveryState;
+
+        if (isCurrencyOverrideChecked()) {
+            priceBandingState.currency = 'GBP';
+        }
+        return {
+            delivery: deliveryState,
+            billing: billingState,
+            priceBanding: priceBandingState
+        }
+    };
+    var update = function () {
+        var currentState = getCurrentState();
+        updatePriceBanding(currentState)
+    };
+
+    var isCurrencyOverrideChecked = function() {
+        var currencyOverrudeCheckbox = $('.js-currency-override-checkbox');
+        return currencyOverrudeCheckbox.length >0 && currencyOverrudeCheckbox[0].checked;
+
+    };
+
     var initCurrencyOverride = function () {
-        var currencyOverrideCheckbox = $('.js-currency-override-checkbox')[0];
-        bean.on(currencyOverrideCheckbox, 'change', function () {
-            if (currencyOverrideCheckbox.checked) {
-                overrideCurrency('GBP');
-            }
-            else {
-                overrideCurrency('USD');
-            }
+        $('.js-currency-override-checkbox').each(function (currencyOverrideCheckbox) {
+            bean.on(currencyOverrideCheckbox, 'change', function () {
+              update();
+            });
         });
     };
-    var overrideCurrency = function(currency) {
-        latestCurrencyAddressModel.currency = currency;
-        switchCurrency(latestCurrencyAddressModel);
+
+    var redrawCurrencyOverride = function (currentState) {
+        $('.js-currency-override-checkbox').attr('checked', false);
+
+        var currencySelector = $('.js-checkout-currency-override');
+
+        if (currentState.priceBanding.currency == 'USD') {
+            currencySelector.show();
+        } else {
+            currencySelector.hide();
+        }
     };
 
-    var everything = function(addressObject) {
+    var addressOps = function (addressObject, prefix) {
         var $postcode = addressObject.$POSTCODE_CONTAINER,
             $subdivision = addressObject.$SUBDIVISION_CONTAINER,
             countryChoice = countryChoiceFunction(addressObject),
-            shouldUpdateCurrency = addressObject.determinesCurrency();
+            determinesPriceBanding = addressObject.determinesPriceBanding();
 
-        var redrawAddressField = function($container, newField, modelValue) {
+
+        var redrawAddressField = function ($container, newField, modelValue) {
 
             $('.js-input', $container).replaceWith(newField.input);
             $('label', $container).replaceWith(newField.label);
@@ -74,8 +138,7 @@ define([
             }
         };
 
-        var redrawAddressFields = function(model) {
-
+        var redrawAddressFields = function (model) {
             var newPostcode = addressFields.postcode(
                 addressObject.getPostcode$().attr('name'),
                 model.postcodeRules.required,
@@ -91,82 +154,66 @@ define([
             redrawAddressField($subdivision, newSubdivision, model.subdivision);
         };
 
-        var redrawCountryOverride = function (selectedCurrency) {
-            $('.js-currency-override-checkbox').attr('checked', false);
 
-            var checkboxLabel = $('.js-currency-override-label');
-            if (selectedCurrency == 'USD') {
-                checkboxLabel.show();
-            } else {
-                checkboxLabel.hide();
-            }
-        };
-        var redraw = function(model) {
+        var redraw = function (currentState) {
+            var model = currentState[prefix];
             redrawAddressFields(model);
-            if (shouldUpdateCurrency) {
-                switchCurrency(model);
-                redrawCountryOverride(model.currency);
-            }
+            updatePriceBanding(currentState);
         };
-        var getCurrentState = function() {
+
+        var getState = function () {
             var currentCountryOption = $(countryChoice.getCurrentCountryOption()),
-                rules = countryChoice.addressRules();
+                rules = countryChoice.addressRules(),
+                currency = currentCountryOption.attr('data-currency-choice') || guardian.currency;
 
             return {
                 postcode: $('input', $postcode).val(),
                 postcodeRules: rules.postcode,
                 subdivision: $('input', $subdivision).val(),
                 subdivisionRules: rules.subdivision,
-                currency: currentCountryOption.attr('data-currency-choice'),
-                country: currentCountryOption.val(),
-                ratePlanId: ratePlanChoice.getSelectedRatePlanId()
+                currency: currency,
+                country: currentCountryOption.val()
             };
         };
 
-        var updateGuardianPageInfo = function(model) {
-            var pageInfo = guardian.pageInfo;
-            if (pageInfo) {
-                pageInfo.billingCountry = model.country;
-                pageInfo.billingCurrency = model.currency;
-            }
-        };
-
         var refresh = function () {
-            var model = getCurrentState();
-            if (shouldUpdateCurrency) {
-                latestCurrencyAddressModel= model;
-            }
-            redraw(model);
-            updateGuardianPageInfo(model);
+            var currentState = getCurrentState();
+
+             if (determinesPriceBanding) {
+                 redrawCurrencyOverride(currentState);
+             }
+           redraw(currentState);
         };
 
-        var refreshOnChange = function(el) {
-            bean.on(el[0], 'change', function() {
+        var refreshOnChange = function (el) {
+            bean.on(el[0], 'change', function () {
                 refresh();
             });
         };
 
-        var init = function() {
+        var init = function () {
             if (addressObject.$COUNTRY_SELECT.length) {
                 countryChoice.preselectCountry(guardian.country);
                 refreshOnChange(addressObject.$COUNTRY_SELECT);
-                refresh();
             }
         };
 
         return {
             init: init,
-            initCurrencyOverride:initCurrencyOverride
+            getState: getState,
+            determinesPriceBanding: determinesPriceBanding,
+            refresh: refresh
         };
     };
 
     return {
-        init: function() {
-            everything(formElements.BILLING).init();
-            everything(formElements.DELIVERY).init();
+        init: function () {
+            addressData.init();
             initCurrencyOverride();
+            update();
+            deliveryAsBilling.registerOnChangeAction(update);
 
-        }
-
+        },
+        update: update
     };
 });

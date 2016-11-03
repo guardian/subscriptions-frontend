@@ -1,10 +1,8 @@
-@import views.support.CountryOps._
-@import views.support.AddressValidationRulesOps._
 @import views.support.CountryWithCurrency
 @import com.gu.i18n.Title
 @import model.PersonalData
 
-@(form: Option[PersonalData], countriesWithCurrency: List[CountryWithCurrency])
+@(form: Option[PersonalData])
 
 @signedInAttrs = @{ if (form.isDefined) "required readonly" else "" }
 

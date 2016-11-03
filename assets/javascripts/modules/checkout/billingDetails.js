@@ -31,6 +31,8 @@ define([
         eventTracking.completedBillingDetails();
         impressionTracking.paymentDetailsTracking();
         reviewDetails.repopulateDetails();
+        formEls.$CURRENCY_OVERRIDE_CHECKBOX.attr('disabled', true);
+
         //                                     you didn't see this \/
         if(formEls.$FIELDSET_PAYMENT_DETAILS[0].offsetHeight == 0){
             paymentDetails.nextStep();

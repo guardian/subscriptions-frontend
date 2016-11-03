@@ -30,6 +30,10 @@ define([
         });
     }
 
+    function enableCurrencyOverride() {
+        formEls.$CURRENCY_OVERRIDE_CHECKBOX.removeAttr('disabled');
+    }
+
     function init() {
         var $editDetails = formEls.$EDIT_YOUR_DETAILS;
         var $editPayment = formEls.$EDIT_PAYMENT_DETAILS;
@@ -44,6 +48,7 @@ define([
                 formEls.$FIELDSET_PAYMENT_DETAILS.removeClass(FIELDSET_COMPLETE);
                 formEls.$NOTICES.attr('hidden', true);
                 impressionTracking.personalDetailsTracking();
+                enableCurrencyOverride();
             });
 
             bean.on($editPayment[0], 'click', function(e) {
@@ -59,6 +64,7 @@ define([
                     collapseFieldsetsExcept(formEls.$FIELDSET_DELIVERY_DETAILS);
                     formEls.$FIELDSET_DELIVERY_DETAILS.removeClass(FIELDSET_COMPLETE);
                     impressionTracking.deliveryDetailsTracking();
+                    enableCurrencyOverride();
                 });
             }
 
@@ -68,6 +74,7 @@ define([
                     collapseFieldsetsExcept(formEls.$FIELDSET_BILLING_ADDRESS);
                     formEls.$FIELDSET_BILLING_ADDRESS.removeClass(FIELDSET_COMPLETE);
                     impressionTracking.billingDetailsTracking();
+                    enableCurrencyOverride();
                 });
             }
         }
