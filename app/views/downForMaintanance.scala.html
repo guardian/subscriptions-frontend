@@ -16,7 +16,7 @@
             </p>
             <p>
                 Please come back again in a few hours, or email
-                    <a href="mailto:@plan.fold("subscriptions@theguardian.com")(_.email)">@plan.fold("subscriptions@theguardian.com")(_.email)</a>.
+                    <a href="mailto:@plan.map(_.email).getOrElse("subscriptions@theguardian.com")">@plan.map(_.email).getOrElse("subscriptions@theguardian.com")</a>.
             </p>
         </div>
     </main>
