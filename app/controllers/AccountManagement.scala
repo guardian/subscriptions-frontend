@@ -110,7 +110,10 @@ object AccountManagement extends Controller with LazyLogging {
           Ok(views.html.account.voucher(voucherSubscription, billingSchedule))
         }
         case _: Product.Weekly => sub.asWeekly.map { weeklySubscription =>
-          Ok(views.html.account.renew(weeklySubscription, billingSchedule))
+          if (weeklySubscription.readerType == ReaderType.Direct)
+            Ok(views.html.account.renew(weeklySubscription, billingSchedule))
+          else
+            Ok(views.html.account.details(None))// don't support gifts (yet) as they have related contacts in salesforce of unknown structure
         }
       }).getOrElse {
         // the product type didn't have the right charges
