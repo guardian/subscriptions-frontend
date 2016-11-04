@@ -3,7 +3,6 @@ package controllers
 import actions.CommonActions._
 import com.gu.i18n._
 import com.gu.identity.play.ProxiedIP
-import com.gu.memsub.Product.WeeklyZoneB
 import com.gu.memsub.Subscription.ProductRatePlanId
 import com.gu.memsub.promo.Formatters.PromotionFormatters._
 import com.gu.memsub.promo.Promotion.{AnyPromotion, _}
@@ -19,7 +18,7 @@ import model.IdUserOps._
 import model._
 import model.error.CheckoutService._
 import model.error.SubsError
-import org.joda.time.LocalDate
+import org.joda.time.{DateTime, LocalDate}
 import play.api.data.Form
 import play.api.libs.json._
 import play.api.mvc._
@@ -65,6 +64,19 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
     others.sortBy(_.charges.gbpPrice.amount).dropWhile(_.charges.gbpPrice.amount <= plan.charges.gbpPrice.amount)
 
   def renderCheckout(countryGroup: CountryGroup, promoCode: Option[PromoCode], supplierCode: Option[SupplierCode], forThisPlan: String) = NoCacheAction.async { implicit request =>
+    implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
+    implicit val tpBackend = resolution.backend
+
+    if (DateTime.now.isAfter(DateTime.parse("2016-11-06T02:00:00Z")) && DateTime.now.isBefore(DateTime.parse("2016-11-06T05:00:00Z"))) {
+      val plan = catalog.allSubs.flatten.find(_.slug == forThisPlan)
+      val digitalEdition = model.DigitalEdition.getForCountry(countryGroup.defaultCountry)
+      Future.successful(Ok(views.html.downForMaintanance(digitalEdition, plan)))
+    } else {
+      renderCheckoutNormal(countryGroup, promoCode, supplierCode, forThisPlan)
+    }
+  }
+
+  def renderCheckoutNormal(countryGroup: CountryGroup, promoCode: Option[PromoCode], supplierCode: Option[SupplierCode], forThisPlan: String)(implicit request: Request[AnyContent]) = {
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
 
