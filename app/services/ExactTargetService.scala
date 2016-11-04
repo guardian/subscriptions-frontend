@@ -85,8 +85,18 @@ class ExactTargetService(
             subscriptionDetails = subscriptionDetails,
             promotionDescription = promotionDescription
           )
-        } else {
-          PaperVoucherWelcome1DataExtensionRow(
+        } else if (paperData.plan.isGuardianWeekly) {
+          GuardianWeeklyWelcome1DataExtensionRow(
+            paperData = paperData,
+            personalData = personalData,
+            subscription = sub,
+            paymentMethod = pm,
+            subscriptionDetails = subscriptionDetails,
+            promotionDescription = promotionDescription
+          )
+        }
+        else {
+          PaperHomeDeliveryWelcome1DataExtensionRow(
             paperData = paperData,
             personalData = personalData,
             subscription = sub,
