@@ -30,7 +30,7 @@
             <h4>Applies to products</h4>
             <ul class="promotion-applies-to">
                 @catalog.allSubs.flatten.filter(plan => promotion.appliesTo.productRatePlanIds.contains(plan.id)).map { plan =>
-                    <li><a href="@routes.Checkout.renderCheckout(UK, None, None, plan.slug).url">@{plan.product.toString.replace("Digipack", "")} @plan.name</a></li>
+                    <li><a class="u-link" href="@routes.Checkout.renderCheckout(UK, None, None, plan.slug).url">@{plan.product.toString.replace("Digipack", "")} @plan.name</a></li>
                 }
             </ul>
 
