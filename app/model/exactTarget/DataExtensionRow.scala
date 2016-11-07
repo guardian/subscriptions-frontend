@@ -175,10 +175,10 @@ object PaperHomeDeliveryWelcome1DataExtensionRow {
              promotionDescription: Option[String] = None
            ): PaperHomeDeliveryWelcome1DataExtensionRow = {
 
-    val commonFilters = PaperFieldsGenerator.fieldsFor(paperData, personalData, subscription, paymentMethod, subscriptionDetails, promotionDescription)
+    val commonFields = PaperFieldsGenerator.fieldsFor(paperData, personalData, subscription, paymentMethod, subscriptionDetails, promotionDescription)
     val additionalFields = Seq("delivery_instructions" -> paperData.deliveryInstructions.getOrElse(""))
 
-    PaperHomeDeliveryWelcome1DataExtensionRow(personalData.email, commonFilters ++ additionalFields)
+    PaperHomeDeliveryWelcome1DataExtensionRow(personalData.email, commonFields ++ additionalFields)
 
   }
 }

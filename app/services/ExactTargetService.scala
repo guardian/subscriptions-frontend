@@ -96,7 +96,7 @@ class ExactTargetService(
           )
         }
         else {
-          PaperHomeDeliveryWelcome1DataExtensionRow(
+          PaperVoucherWelcome1DataExtensionRow(
             paperData = paperData,
             personalData = personalData,
             subscription = sub,
