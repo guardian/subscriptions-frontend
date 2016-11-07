@@ -220,7 +220,7 @@ class CheckoutService(identityService: IdentityService,
         case paymentData@DirectDebitData(_, _, _) =>
           paymentService.makeDirectDebitPayment(paymentData, subscriptionData.genericData.personalData, purchaserIds.memberId)
         case paymentData@CreditCardData(_) =>
-          paymentService.makeCreditCardPayment(paymentData, subscriptionData.genericData.personalData, purchaserIds, subscriptionData.productData.fold(_.plan, _.plan))
+          paymentService.makeCreditCardPayment(paymentData, subscriptionData.genericData.currency, purchaserIds, subscriptionData.productData.fold(_.plan, _.plan))
       }
       Future.successful(\/.right(payment))
     } catch {

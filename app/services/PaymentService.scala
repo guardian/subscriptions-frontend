@@ -45,10 +45,9 @@ class PaymentService(val stripeService: StripeService) {
 
   def makeCreditCardPayment(
      paymentData: CreditCardData,
-     personalData: PersonalData,
+     desiredCurrency: Currency,
      purchaserIds: PurchaserIdentifiers,
      plan: CatalogPlan.Paid) = {
-    val desiredCurrency = personalData.currency
     val currency = if (plan.charges.price.currencies.contains(desiredCurrency)) desiredCurrency else GBP
 
     new CreditCardPayment(paymentData, currency, purchaserIds)
