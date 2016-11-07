@@ -62,7 +62,8 @@ object DigipackWelcome1DataExtensionRow extends LazyLogging {
              paymentMethod: PaymentMethod,
              gracePeriod: Days,
              subscriptionDetails: String,
-             promotionDescription: Option[String] = None
+             promotionDescription: Option[String] = None,
+             currency:Currency
            ): DigipackWelcome1DataExtensionRow = {
 
     val paymentDelay = daysBetween(subscription.startDate, subscription.firstPaymentDate).minus(gracePeriod)
@@ -96,7 +97,7 @@ object DigipackWelcome1DataExtensionRow extends LazyLogging {
         "Post Code" -> personalData.address.postCode,
         "Country" -> personalData.address.country.fold(personalData.address.countryName)(_.name),
         "Date of first payment" -> formatDate(subscription.firstPaymentDate),
-        "Currency" -> personalData.currency.glyph,
+        "Currency" -> currency.glyph,
         "Trial period" -> paymentDelay.getDays.toString,
         "Subscription details" -> subscriptionDetails
       ) ++ paymentFields ++ promotionFields

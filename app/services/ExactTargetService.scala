@@ -111,7 +111,8 @@ class ExactTargetService(
           paymentMethod = pm,
           gracePeriod = gracePeriod,
           subscriptionDetails = subscriptionDetails,
-          promotionDescription = promotionDescription
+          promotionDescription = promotionDescription,
+          currency = subscriptionData.genericData.currency
         )
       )
     }
