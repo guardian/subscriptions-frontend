@@ -11,6 +11,7 @@ define([
     var $inputBox           = formElements.$PROMO_CODE,
         $ratePlanFields     = $('input[name="ratePlanId"]'),
         $promoCodeSnippet   = $('.js-promo-code-snippet'),
+        $promoCodeTsAndCs   = $('.js-promo-code-tsandcs'),
         $promoCodeError     = $('.js-promo-code .js-error-message'),
         $promoCodeApplied   = $('.js-promo-code-applied'),
         lookupUrl           = $inputBox.data('lookup-url');
@@ -64,6 +65,7 @@ define([
     function clearDown() {
         $promoCodeError.text('');
         $promoCodeSnippet.html('');
+        $promoCodeTsAndCs.attr('href', '#');
         $promoCodeApplied.hide();
         toggleError($promoCodeError.parent(), false);
         removePromotionFromRatePlans();
@@ -77,10 +79,11 @@ define([
 
     }
 
-    function displayPromotion(response) {
+    function displayPromotion(response, promoCode) {
         clearDown();
         $promoCodeApplied.show();
         $promoCodeSnippet.html(response.promotion.description);
+        $promoCodeTsAndCs.attr('href', '/p/' + promoCode + '/terms');
         applyPromotionToRatePlans(response.adjustedRatePlans);
     }
 
@@ -104,7 +107,7 @@ define([
             }
         }).then(function (a) {
             if (a.isValid) {
-                displayPromotion(a);
+                displayPromotion(a, promoCode);
                 bindExtraKeyListener();
             } else {
                 displayError(a.errorMessage);

@@ -3,4 +3,4 @@
 @import views.support.LandingPageOps._
 
 @(promotion: AnyPromotion, md: MarkdownRenderer)
-@Html(md.render(promotion.getIncentiveLegalTerms))
+<p>@Html(md.render(promotion.getIncentiveLegalTerms))</p>
