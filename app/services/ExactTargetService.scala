@@ -73,7 +73,7 @@ class ExactTargetService(
     def buildRow(sub: Subscription[Plan.Paid], pm: PaymentMethod) = {
       val personalData = subscriptionData.genericData.personalData
       val promotionDescription = validPromotion.filterNot(_.promotion.promotionType == Tracking).map(_.promotion.description)
-      val subscriptionDetails = getPlanDescription(validPromotion, personalData.currency, sub.plan)
+      val subscriptionDetails = getPlanDescription(validPromotion, subscriptionData.genericData.currency, sub.plan)
 
       subscriptionData.productData.fold(
         paperData => if (paperData.plan.isHomeDelivery) {
