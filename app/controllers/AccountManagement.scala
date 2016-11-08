@@ -6,6 +6,7 @@ import _root_.services.TouchpointBackend.Resolution
 import actions.CommonActions._
 import com.github.nscala_time.time.OrderingImplicits.LocalDateOrdering
 import com.gu.memsub.Subscription.Name
+import com.gu.memsub.services.GetSalesforceContactForSub
 import com.gu.memsub.subsv2.SubscriptionPlan.{Delivery, WeeklyPlan}
 import com.gu.memsub.subsv2._
 import com.gu.memsub.{BillingSchedule, Product}
@@ -17,7 +18,6 @@ import configuration.{Config, ProfileLinks}
 import forms.{AccountManagementLoginForm, AccountManagementLoginRequest, SuspendForm}
 import org.joda.time.LocalDate
 import play.api.mvc.{AnyContent, Controller, Request, Result}
-import utils.GetSalesforceContactForSub
 import utils.TestUsers.PreSigninTestCookie
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -139,7 +139,7 @@ object ManageWeekly extends LazyLogging {
     implicit val flash = request.flash
     if (weeklySubscription.readerType == ReaderType.Direct) {
       // go to SF to get the contact mailing information etc
-      val contact = GetSalesforceContactForSub(weeklySubscription)(tpBackend.zuoraService, tpBackend.salesforceService)
+      val contact = GetSalesforceContactForSub(weeklySubscription)(tpBackend.zuoraService, tpBackend.salesforceService.repo, global)
       contact.map { contact =>
         Ok(views.html.account.renew(weeklySubscription, billingSchedule, contact))
       }
