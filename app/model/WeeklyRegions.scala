@@ -11,18 +11,18 @@ trait WeeklyRegion {
 }
 
 object WeeklyRegion {
-  val all = List(Uk, NorthAmerica, Row)
+  val all = List(UnitedKingdom, UnitedStates, Row)
 }
 
-object Uk extends WeeklyRegion {
+object UnitedKingdom extends WeeklyRegion {
   override val title = "United Kingdom"
   override val description = "Includes Isle of Man and Channel Islands"
   override val url = Uri.parse("checkout/weeklyzonea-guardianweeklyquarterly?countryGroup=uk")
 }
 
-object NorthAmerica extends WeeklyRegion {
-  override val title = "North America"
-  override val description = "Canada and USA"
+object UnitedStates extends WeeklyRegion {
+  override val title = "United States"
+  override val description = "Includes Alaska and Hawaii"
   override val url = Uri.parse("checkout/weeklyzonea-guardianweeklyquarterly?countryGroup=us")
 }
 

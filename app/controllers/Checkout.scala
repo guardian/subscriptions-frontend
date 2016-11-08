@@ -3,7 +3,6 @@ package controllers
 import actions.CommonActions._
 import com.gu.i18n._
 import com.gu.identity.play.ProxiedIP
-import com.gu.memsub.Product.WeeklyZoneB
 import com.gu.memsub.Subscription.ProductRatePlanId
 import com.gu.memsub.promo.Formatters.PromotionFormatters._
 import com.gu.memsub.promo.Promotion.{AnyPromotion, _}
@@ -49,7 +48,7 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
       Country("JE", "Jersey")
     ))
 
-  val weeklyZoneAGroups = List(weeklyUkCountries, CountryGroup.US, CountryGroup.Canada)
+  val weeklyZoneAGroups = List(weeklyUkCountries, CountryGroup.US)
   val weeklyZoneBGroups = {
     val rowUk = CountryGroup("Row Uk", "uk", None, CountryGroup.UK.countries.filterNot(weeklyUkCountries.countries.contains(_)), GBP, PostCode)
     rowUk :: CountryGroup.allGroups.filterNot(group => (CountryGroup.UK :: weeklyZoneAGroups) contains group)
