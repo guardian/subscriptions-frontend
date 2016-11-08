@@ -35,7 +35,7 @@ case class Checkout(testUser: TestUser, endpoint: String = "checkout") extends P
 
   def setInStripeTest(b: Boolean) = StripeCheckout.setInTest(b)
 
-  def clickCredictCardPaymentContinueButton() = CreditCardPaymentDetails.continue()
+  def clickCreditCardPaymentContinueButton() = CreditCardPaymentDetails.continue()
 
   def selectCreditCardPaymentOption() = setRadioButtonValue(CreditCardPaymentDetails.paymentType, "card")
 
