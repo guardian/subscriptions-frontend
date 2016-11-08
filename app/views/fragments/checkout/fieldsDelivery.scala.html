@@ -5,7 +5,7 @@
 
 @(data: ProductPopulationData, countriesWithCurrency: List[CountryWithCurrency])
 
-@renderFields(usePostcodeLookup: Boolean,showDeliveryInstructions:Boolean, productName: String, firstPaperLabel: String) = {
+@renderFields(usePostcodeLookup: Boolean, showDeliveryInstructions: Boolean, productName: String, firstPaperLabel: String) = {
 @address(
     address = data.deliveryAddress,
     namePrefix = "delivery",
