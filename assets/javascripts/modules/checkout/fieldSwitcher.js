@@ -106,8 +106,6 @@ define([
     };
 
     var redrawCurrencyOverride = function (currentState) {
-        $('.js-currency-override-checkbox').attr('checked', false);
-
         var currencySelector = $('.js-checkout-currency-override');
 
         if (currentState.priceBanding.currency == 'USD') {
@@ -177,6 +175,10 @@ define([
         };
 
         var refresh = function () {
+            if (determinesPriceBanding) {
+                $('.js-currency-override-checkbox').attr('checked', false);
+            }
+            
             var currentState = getCurrentState();
 
              if (determinesPriceBanding) {
