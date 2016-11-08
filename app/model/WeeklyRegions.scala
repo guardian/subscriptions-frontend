@@ -16,13 +16,13 @@ object WeeklyRegion {
 
 object UnitedKingdom extends WeeklyRegion {
   override val title = "United Kingdom"
-  override val description = "Including Isle of Man and Channel Islands"
+  override val description = "Includes Isle of Man and Channel Islands"
   override val url = Uri.parse("checkout/weeklyzonea-guardianweeklyquarterly?countryGroup=uk")
 }
 
 object UnitedStates extends WeeklyRegion {
   override val title = "United States"
-  override val description = "Mainland US including Alaska and Hawaii"
+  override val description = "Includes Alaska and Hawaii"
   override val url = Uri.parse("checkout/weeklyzonea-guardianweeklyquarterly?countryGroup=us")
 }
 
