@@ -6,6 +6,7 @@ import com.gu.memsub.subsv2.SubscriptionPlan._
 import com.gu.salesforce.Contact
 import com.gu.zuora.api.ZuoraService
 import services.SalesforceService
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 import scala.concurrent.Future
 

@@ -74,7 +74,7 @@ object ManageDelivery extends LazyLogging{
 
   import play.api.mvc.Results._
 
-  def apply(errorCodes: Set[String], allHolidays: Seq[(Float, PaymentHoliday)], billingSchedule: BillingSchedule, deliverySubscription: Subscription[Delivery]) = {
+  def apply(errorCodes: Set[String], allHolidays: Seq[(Float, PaymentHoliday)], billingSchedule: BillingSchedule, deliverySubscription: Subscription[Delivery])(implicit request: Request[AnyContent], touchpoint: TouchpointBackend.Resolution) = {
     val pendingHolidays = pendingHolidayRefunds(allHolidays)
     val suspendedDays = SuspensionService.holidayToSuspendedDays(pendingHolidays, deliverySubscription.plan.charges.chargedDays.toList)
     val chosenPaperDays = deliverySubscription.plan.charges.chargedDays.toList.sortBy(_.dayOfTheWeekIndex)
@@ -84,7 +84,7 @@ object ManageDelivery extends LazyLogging{
 
   private def pendingHolidayRefunds(allHolidays: Seq[HolidayRefund]) = allHolidays.filterNot(_._2.finish.isBefore(LocalDate.now)).sortBy(_._2.start)
 
-  def suspend(tpBackend: TouchpointBackend): Future[Result] = {
+  def suspend(tpBackend: TouchpointBackend)(implicit request: Request[AnyContent], touchpoint: TouchpointBackend.Resolution): Future[Result] = {
     val noSub = "Could not find an active subscription"
     (for {
       form <- EitherT(Future.successful(SuspendForm.mappings.bindFromRequest().value \/> "Please check your selections and try again"))
@@ -134,7 +134,9 @@ object ManageWeekly extends LazyLogging {
 
   import play.api.mvc.Results._
 
-  def apply(tpBackend: TouchpointBackend, billingSchedule: BillingSchedule, weeklySubscription: Subscription[WeeklyPlan]) = {
+  def apply(billingSchedule: BillingSchedule, weeklySubscription: Subscription[WeeklyPlan])(implicit request: Request[AnyContent], resolution: TouchpointBackend.Resolution) = {
+    implicit val tpBackend = resolution.backend
+    implicit val flash = request.flash
     if (weeklySubscription.readerType == ReaderType.Direct) {
       // go to SF to get the contact mailing information etc
       val contact = GetSalesforceContactForSub(weeklySubscription)(tpBackend.zuoraService, tpBackend.salesforceService)
@@ -198,7 +200,7 @@ object AccountManagement extends Controller with LazyLogging {
           Future.successful(Ok(views.html.account.voucher(voucherSubscription, billingSchedule)))
         }
         case _: Product.Weekly => subscription.asWeekly.map { weeklySubscription =>
-          ManageWeekly(tpBackend, billingSchedule, weeklySubscription)
+          ManageWeekly(billingSchedule, weeklySubscription)
         }
       }
       maybeFutureManagePage.getOrElse {
