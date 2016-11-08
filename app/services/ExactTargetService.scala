@@ -6,26 +6,26 @@ import com.amazonaws.services.sqs.model._
 import com.gu.i18n.Currency
 import com.gu.lib.Retry
 import com.gu.memsub.Subscription._
-import com.gu.memsub.{Subscription => _, _}
 import com.gu.memsub.promo.Promotion._
 import com.gu.memsub.promo._
 import com.gu.memsub.services.{PaymentService => CommonPaymentService}
-import com.gu.memsub.subsv2.{Subscription, SubscriptionPlan => Plan}
-import com.gu.memsub.subsv2.reads.SubPlanReads._
 import com.gu.memsub.subsv2.reads.ChargeListReads._
-import com.gu.memsub.subsv2.Subscription
+import com.gu.memsub.subsv2.reads.SubPlanReads._
+import com.gu.memsub.subsv2.{Subscription, SubscriptionPlan => Plan}
+import com.gu.memsub.{Subscription => _, _}
 import com.gu.zuora.api.ZuoraService
 import com.gu.zuora.soap.models.Results.SubscribeResult
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
 import model.exactTarget.HolidaySuspensionBillingScheduleDataExtensionRow.constructSalutation
-import model.{PurchaserIdentifiers, SubscribeRequest}
 import model.exactTarget._
+import model.{PurchaserIdentifiers, SubscribeRequest}
 import org.joda.time.Days
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json._
-import views.support.Pricing._
+import utils.GetSalesforceContactForSub
 import views.support.PlanOps._
+import views.support.Pricing._
 
 import scala.concurrent.Future
 import scala.reflect.internal.util.StringOps
@@ -151,25 +151,19 @@ class ExactTargetService(
       daysAllowed: Int): Future[Unit] = {
 
     val buildDataExtensionRow =
-      for {
-        zuoraAccount <- Retry(2, s"Failed to get Zuora account for subscription: ${subscription.name.get}") {
-          zuoraService.getAccount(subscription.accountId)
-        }
-        sfContactId <- zuoraAccount.sfContactId.fold[Future[String]](Future.failed(new IllegalStateException(s"Zuora record for ${subscription.accountId} has no sfContactId")))(Future.successful)
-        salesforceContact <- Retry(2, s"Failed to get Salesforce Contact for sfContactId: $sfContactId") {
-          salesforceService.repo.getByContactId(sfContactId).map(_.getOrElse(throw new IllegalStateException(s"Cannot find salesforce contact for $sfContactId")))
-        }
-      } yield HolidaySuspensionBillingScheduleDataExtensionRow(
-        email = StringOps.oempty(salesforceContact.email).headOption,
-        saltuation = constructSalutation(salesforceContact.title, salesforceContact.firstName, Some(salesforceContact.lastName)),
-        subscriptionName = subscription.name.get,
-        subscriptionCurrency = subscription.plan.charges.price.currencies.head,
-        packageName = packageName,
-        billingSchedule = billingSchedule,
-        numberOfSuspensionsLinedUp,
-        daysUsed,
-        daysAllowed
-      )
+      GetSalesforceContactForSub(subscription)(zuoraService, salesforceService).map { salesforceContact =>
+        HolidaySuspensionBillingScheduleDataExtensionRow(
+          email = StringOps.oempty(salesforceContact.email).headOption,
+          saltuation = constructSalutation(salesforceContact.title, salesforceContact.firstName, Some(salesforceContact.lastName)),
+          subscriptionName = subscription.name.get,
+          subscriptionCurrency = subscription.plan.charges.price.currencies.head,
+          packageName = packageName,
+          billingSchedule = billingSchedule,
+          numberOfSuspensionsLinedUp,
+          daysUsed,
+          daysAllowed
+        )
+      }
 
     for {
       row <- buildDataExtensionRow

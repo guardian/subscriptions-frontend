@@ -2,8 +2,9 @@
 @import com.gu.memsub.subsv2.SubscriptionPlan
 @import com.gu.memsub.subsv2.Subscription
 @import model.DigitalEdition.UK
+@import com.gu.salesforce.Contact
 @(
-    subscription: Subscription[SubscriptionPlan.WeeklyPlan], billingSchedule: BillingSchedule
+    subscription: Subscription[SubscriptionPlan.WeeklyPlan], billingSchedule: BillingSchedule, contact: Contact
 )(implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackend.Resolution)
 
 @main("Your Guardian Weekly subscription | The Guardian", bodyClasses = List("is-wide"), edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
@@ -19,7 +20,7 @@
                 <h3 class="mma-section__header">
                     Your details
                 </h3>
-                @views.html.account.fragments.yourDetails(subscription)()
+                @views.html.account.fragments.yourDetails(subscription, maybeContact = Some(contact))()
             </section>
 
             <section class="mma-section">
