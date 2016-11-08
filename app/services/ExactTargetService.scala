@@ -73,7 +73,7 @@ class ExactTargetService(
     def buildRow(sub: Subscription[Plan.Paid], pm: PaymentMethod) = {
       val personalData = subscriptionData.genericData.personalData
       val promotionDescription = validPromotion.filterNot(_.promotion.promotionType == Tracking).map(_.promotion.description)
-      val subscriptionDetails = getPlanDescription(validPromotion, personalData.currency, sub.plan)
+      val subscriptionDetails = getPlanDescription(validPromotion, subscriptionData.genericData.currency, sub.plan)
 
       subscriptionData.productData.fold(
         paperData => if (paperData.plan.isHomeDelivery) {
@@ -85,7 +85,17 @@ class ExactTargetService(
             subscriptionDetails = subscriptionDetails,
             promotionDescription = promotionDescription
           )
-        } else {
+        } else if (paperData.plan.isGuardianWeekly) {
+          GuardianWeeklyWelcome1DataExtensionRow(
+            paperData = paperData,
+            personalData = personalData,
+            subscription = sub,
+            paymentMethod = pm,
+            subscriptionDetails = subscriptionDetails,
+            promotionDescription = promotionDescription
+          )
+        }
+        else {
           PaperVoucherWelcome1DataExtensionRow(
             paperData = paperData,
             personalData = personalData,
@@ -101,7 +111,8 @@ class ExactTargetService(
           paymentMethod = pm,
           gracePeriod = gracePeriod,
           subscriptionDetails = subscriptionDetails,
-          promotionDescription = promotionDescription
+          promotionDescription = promotionDescription,
+          currency = subscriptionData.genericData.currency
         )
       )
     }
