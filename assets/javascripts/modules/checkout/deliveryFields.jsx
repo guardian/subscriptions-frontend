@@ -40,10 +40,13 @@ function getDefaultProps() {
 
 export default {
     renderDeliveryInstructions () {
-        ReactDOM.render(
-            <CharacterCountedTextArea name="deliveryInstructions" maxLength="250" className="input-text js-input" rows="4"/>,
-            document.getElementById(formElements.DELIVERY_INSTRUCTIONS_ID)
-        )
+        let deliveryInstructionElement = document.getElementById(formElements.DELIVERY_INSTRUCTIONS_ID);
+        if(deliveryInstructionElement) {
+            ReactDOM.render(
+                <CharacterCountedTextArea name="deliveryInstructions" maxLength="250" className="input-text js-input" rows="4"/>,
+                deliveryInstructionElement
+            )
+        }
     },
     renderDatePicker (container, defaultState) {
         if (!(container && defaultState)) return;

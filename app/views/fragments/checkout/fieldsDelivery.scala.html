@@ -5,7 +5,7 @@
 
 @(data: ProductPopulationData, countriesWithCurrency: List[CountryWithCurrency])
 
-@renderFields(usePostcodeLookup: Boolean, productName: String, firstPaperLabel: String) = {
+@renderFields(usePostcodeLookup: Boolean, showDeliveryInstructions: Boolean, productName: String, firstPaperLabel: String) = {
 @address(
     address = data.deliveryAddress,
     namePrefix = "delivery",
@@ -15,10 +15,12 @@
     determinesPriceBanding = true)
 
     <div class="js-checkout-delivery-data" id="deliveryFields">
-        <div class="form-field js-checkout-delivery">
-            <label class="label" for="address-town">Delivery instructions</label>
-            <div id="deliveryInstructionsCharacterCountedTextArea"></div>
-        </div>
+        @if(showDeliveryInstructions) {
+            <div class="form-field js-checkout-delivery">
+                <label class="label" for="address-town">Delivery instructions</label>
+                <div id="deliveryInstructionsCharacterCountedTextArea"></div>
+            </div>
+        }
         <div class="form-field js-checkout-delivery">
             <label class="label" for="address-town">@firstPaperLabel</label>
             <div id="deliveryDatePicker" class="form-field__react-datepicker"></div>
@@ -30,7 +32,7 @@
 }
 
 @if(data.plans.default.isGuardianWeekly) {
-    @renderFields(usePostcodeLookup = false, productName = "weekly", firstPaperLabel = "Start Issue")
+    @renderFields(usePostcodeLookup = false, showDeliveryInstructions = false, productName = "weekly", firstPaperLabel = "Start Issue")
 } else {
-    @renderFields(usePostcodeLookup = true, productName = "paper", firstPaperLabel = "Date of first paper")
+    @renderFields(usePostcodeLookup = true, showDeliveryInstructions = true, productName = "paper", firstPaperLabel = "Date of first paper")
 }
