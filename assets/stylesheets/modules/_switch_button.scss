@@ -1,0 +1,162 @@
+/**
+ * React Switch Button control style.
+ *
+ * $author          =undo= <g.fazioli$undolog.com>
+ * $date            2016-02-17
+ * $version         2.0.0
+ *
+ */
+
+// Variables
+// ---------------------------------------------------------------------------------------------------------------------
+$rsbc-transtion-delay: 0.4s;
+$rsbc-theme-flat-color-on: $c-brand;
+$rsbc-theme-flat-color-on-border: $c-brand-dark;
+$rsbc-theme-flat-color-off: $c-neutral3;
+$rsbc-theme-flat-color-off-border: $c-neutral2;
+$rsbc-theme-flat-color-disabled: $c-neutral6;
+$rsbc-theme-flat-color-disabled-border: $c-neutral5;
+
+
+// Main Switch Button container
+.rsbc-switch-button
+{
+    position       : relative;
+    line-height    : 100%;
+    display        : inline-block;
+    vertical-align : middle;
+    margin         : 0;
+    box-sizing: border-box;
+
+    label {
+        cursor: pointer;
+    }
+
+    &.disabled {
+        label {
+            cursor: not-allowed;
+        }
+    }
+
+    // Hide the default input checkbox
+    input[type="checkbox"]
+    {
+        position    : absolute;
+        margin-left : -9999px;
+        visibility  : hidden;
+    }
+
+    // Default left label
+    > label:first-child
+    {
+        display    : inline-block;
+        margin     : 0 6px 0 0px;
+    }
+
+    // Right label
+    label + label
+    {
+        margin-left : 6px;
+    }
+
+    input[type="checkbox"] + label
+    {
+        display  : inline-block;
+        position : relative;
+        margin   : 0;
+        outline  : none;
+        user-select:none;
+        box-sizing:border-box;
+    }
+
+    // Theme
+    &.rsbc-switch-button-flat-round input[type="checkbox"] + label
+    {
+        padding          : 2px;
+        width            : 48px;
+        height           : 24px;
+        vertical-align   : middle;
+        background-color : $rsbc-theme-flat-color-off;
+        border-radius:60px;
+        transition:background 0.4s;
+    }
+
+    &.rsbc-switch-button-flat-round.disabled input[type="checkbox"] + label
+    {
+        background-color : $rsbc-theme-flat-color-disabled;
+    }
+
+    &.rsbc-switch-button-flat-round:hover input[type="checkbox"] + label
+    {
+        background-color : $rsbc-theme-flat-color-on;
+    }
+
+    &.rsbc-switch-button-flat-round.disabled:hover input[type="checkbox"] + label
+    {
+        background-color : $rsbc-theme-flat-color-disabled;
+    }
+
+    &.rsbc-switch-button-flat-round input[type="checkbox"] + label:before,
+    &.rsbc-switch-button-flat-round input[type="checkbox"] + label:after
+    {
+        display  : inline-block;
+        position : absolute;
+        content  : "";
+    }
+
+    // inner background
+    &.rsbc-switch-button-flat-round input[type="checkbox"] + label:before
+    {
+        top              : 2px;
+        left             : 2px;
+        bottom           : 2px;
+        right            : 2px;
+        background-color : #fff;
+        border-radius:60px;
+        transition:background 0.4s;
+    }
+
+    &.rsbc-switch-button-flat-round input[type="checkbox"] + label:after
+    {
+        top              : 4px;
+        left             : 4px;
+        bottom           : 4px;
+        width            : 16px;
+        background-color : $rsbc-theme-flat-color-off-border;
+        border-radius:52px;
+        transition:margin 0.4s, background 0.4s;
+    }
+
+    &.rsbc-switch-button-flat-round.disabled input[type="checkbox"] + label:after
+    {
+        background-color : $rsbc-theme-flat-color-disabled-border;
+    }
+
+    &.rsbc-switch-button-flat-round:hover input[type="checkbox"]:checked + label
+    {
+        background-color : $rsbc-theme-flat-color-off;
+    }
+
+    &.rsbc-switch-button-flat-round input[type="checkbox"]:checked + label
+    {
+        background-color : $rsbc-theme-flat-color-on;
+    }
+
+    &.rsbc-switch-button-flat-round.disabled input[type="checkbox"]:checked + label
+    {
+        background-color : $rsbc-theme-flat-color-disabled;
+    }
+
+    &.rsbc-switch-button-flat-round input[type="checkbox"]:checked + label:after
+    {
+        margin-left      : 24px;
+        background-color : $rsbc-theme-flat-color-on-border;
+    }
+
+    &.rsbc-switch-button-flat-round.disabled input[type="checkbox"]:checked + label:after
+    {
+        margin-left      : 24px;
+        background-color : $rsbc-theme-flat-color-disabled-border;
+    }
+
+}

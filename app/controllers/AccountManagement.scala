@@ -19,6 +19,7 @@ import forms.{AccountManagementLoginForm, AccountManagementLoginRequest, Suspend
 import org.joda.time.LocalDate
 import play.api.mvc.{AnyContent, Controller, Request, Result}
 import utils.TestUsers.PreSigninTestCookie
+import views.support.Pricing._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -147,7 +148,7 @@ object ManageWeekly extends LazyLogging {
       })
   }
 
-  case class WeeklyPlanInfo(id: ProductRatePlanId, price: Price, billingPeriod: BillingPeriod)
+  case class WeeklyPlanInfo(id: ProductRatePlanId, price: String)
 
   def apply(billingSchedule: BillingSchedule, weeklySubscription: Subscription[WeeklyPlan])(implicit request: Request[AnyContent], resolution: TouchpointBackend.Resolution): Future[Result] = {
     implicit val tpBackend = resolution.backend
@@ -168,7 +169,7 @@ object ManageWeekly extends LazyLogging {
               sequence(weeklyPlans.map { plan =>
                 account.currency.toRight(s"could not deserialise currency for account ${account.id}").right.flatMap { existingCurrency =>
                   val price = plan.charges.price.getPrice(existingCurrency).toRight(s"could not find price in $existingCurrency for plan ${plan.id} ${plan.name}").right
-                  price.map(price => WeeklyPlanInfo(plan.id, price, plan.charges.billingPeriod))
+                  price.map(price => WeeklyPlanInfo(plan.id, plan.charges.prettyPricing(price.currency)))
                 }
               }).fold( { error =>
                 logger.info(s"couldn't get new rate/currency for renewal: $error")

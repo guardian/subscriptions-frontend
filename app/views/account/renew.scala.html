@@ -19,9 +19,7 @@
             @plans.map { plan =>
                 {
                     id: '@plan.id.get',
-                    price: '@plan.price.prettyAmount',
-                    currency: '@plan.price.currency',
-                    billingPeriod: '@plan.billingPeriod.noun',
+                    price: '@plan.price'
                 },
             }
         ]
@@ -56,36 +54,29 @@
                 @contact.email
             </section>
 
-            <section class="mma-section">
-                <h3 class="mma-section__header">
-                    Subscription end date
-                </h3>
-                @prettyDate(subscription.termEndDate)
+                <section class="mma-section">
+                    <h3 class="mma-section__header">
+                        Subscription end date
+                    </h3>
+                    @prettyDate(subscription.termEndDate)
+                </section>
+                <section class="mma-section">
+                    <h3 class="mma-section__header">Renew</h3>
+                    @helper.CSRF.formField
+                    <p>
+                        Here is some copy about renewing your subscription, which is a very fulfilling thing to do and should probably fill one to two lines of text telling the user what renewing their subscription entails.
+                    </p>
+                    <div class="js-weekly-renew" data-email="@contact.email" data-country="@contact.mailingCountry"/>
+                </section>
+                <section class="mma-section">
+                    <h3 class="mma-section__header">
+                        Your billing schedule
+                    </h3>
+                    @views.html.account.fragments.billingSchedule(billingSchedule, subscription.plan.charges.price.currencies.head)
+                </section>
+                <section class="mma-section">
+                    <a class="button button--primary button--large" href="@routes.AccountManagement.logout">Sign Out</a>
+                </section>
             </section>
-
-            <section class="mma-section">
-                <h3 class="mma-section__header">
-                    available subs to renew onto
-                </h3>
-                <ul>
-                @plans.map { plan =>
-                    <li>@plan.id
-                    <li>@plan.price.prettyAmount
-                    <li>@plan.price.currency
-                    <li>@plan.billingPeriod
-                }
-                </ul>
-            </section>
-
-            <section class="mma-section">
-                <h3 class="mma-section__header">
-                    Your billing schedule
-                </h3>
-                @views.html.account.fragments.billingSchedule(billingSchedule, subscription.plan.charges.price.currencies.head)
-            </section>
-            <section class="mma-section">
-                <a class="button button--primary button--large" href="@routes.AccountManagement.logout">Sign Out</a>
-            </section>
-        </section>
-    </main>
-}
+        </main>
+    }

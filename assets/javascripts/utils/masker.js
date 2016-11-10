@@ -33,6 +33,7 @@ define(function () {
             }
 
             prevValue = this.value;
+            return value;
         };
     };
 

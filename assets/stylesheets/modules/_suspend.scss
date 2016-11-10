@@ -63,7 +63,7 @@
 
 .mma-section__list--title {
     margin-right: 40px;
-    min-width: 120px;
+    min-width: 220px;
     clear: left;
     float: left;
 }
@@ -72,6 +72,9 @@
     margin-bottom: 10px;
     clear: right;
     float: left;
+    input[type="radio"]{
+        margin-right:10px;
+    }
 }
 
 .mma-section__list--currency {
@@ -163,3 +166,9 @@
 .mma-error-list__item {
     display: list-item;
 }
+
+.mma-error{
+    color: guss-colour(error);
+    font-weight: 900;
+}
+

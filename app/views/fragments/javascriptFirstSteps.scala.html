@@ -42,10 +42,11 @@
     ) {
     guardian.stripeCheckout = {
         key: '@backend.paymentService.stripeService.publicKey',
-        image: '@hashedPathFor("images/logos/gu.png")',
+        image: 'https://d24w1tjgih0o9s.cloudfront.net/gu.png',
         locale: 'auto',
         name: 'Guardian',
-        zipCode: false
+        zipCode: false,
+        allowRememberMe: false
     };
     guardian.experience = '';
     }
