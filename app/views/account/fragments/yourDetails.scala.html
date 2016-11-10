@@ -4,8 +4,9 @@
 @import views.support.Pricing._
 @import com.gu.memsub.PaperDay
 @import scala.collection.immutable.List.empty
+@import com.gu.salesforce.Contact
 
-@(subscription: Subscription[SubscriptionPlan.PaperPlan], chosenPaperDays: List[PaperDay] = empty)(extra: Html = Html(""))
+@(subscription: Subscription[SubscriptionPlan.PaperPlan], chosenPaperDays: List[PaperDay] = empty, maybeContact: Option[Contact] = None)(extra: Html = Html(""))
 <dl class="mma-section__list">
     <dt class="mma-section__list--title">Subscriber ID</dt>
     <dd class="mma-section__list--content">@subscription.name.get</dd>
@@ -30,5 +31,16 @@
         @prettyDate(subscription.firstPaymentDate)
     }
     </dd>
+@maybeContact.map { contact =>
+    <dt class="mma-section__list--title">Delivery details</dt>
+    <dd class="mma-section__list--content">
+        <div>@contact.firstName @contact.lastName</div>
+        <div>@contact.mailingStreet
+        @contact.mailingCity
+        @contact.mailingState
+        @contact.mailingPostcode
+        @contact.mailingCountry</div>
+    </dd>
+}
     @extra
 </dl>
