@@ -8,6 +8,7 @@ import com.github.nscala_time.time.OrderingImplicits.LocalDateOrdering
 import com.gu.memsub.Subscription.{ProductRatePlanId, Name}
 import com.gu.memsub.services.GetSalesforceContactForSub
 import com.gu.memsub.subsv2.SubscriptionPlan.{Delivery, WeeklyPlan}
+import com.gu.memsub.Subscription.Name
 import com.gu.memsub.subsv2._
 import com.gu.memsub.{BillingPeriod, Price, BillingSchedule, Product}
 import com.gu.subscriptions.suspendresume.SuspensionService
@@ -15,7 +16,7 @@ import com.gu.subscriptions.suspendresume.SuspensionService.{BadZuoraJson, ErrNe
 import com.gu.zuora.soap.models.Queries.Contact
 import com.typesafe.scalalogging.LazyLogging
 import configuration.{Config, ProfileLinks}
-import forms.{AccountManagementLoginForm, AccountManagementLoginRequest, SuspendForm}
+import forms._
 import org.joda.time.LocalDate
 import play.api.mvc.{AnyContent, Controller, Request, Result}
 import utils.TestUsers.PreSigninTestCookie
@@ -284,6 +285,22 @@ object AccountManagement extends Controller with LazyLogging {
 
   def redirect = NoCacheAction { implicit request =>
     Redirect(routes.AccountManagement.manage(None, None).url)
+  }
+
+
+
+
+  def processRenewal = accountManagementAction.async { implicit request =>
+
+    //TODO check if this code is correct (authentication / session etc)
+    implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
+    implicit val tpBackend = resolution.backend
+
+    RenewalForm.mappings.bindFromRequest.value.map(renewal =>
+      subscriptionFromRequest map { sub =>
+        Ok(sub.toString)
+      }
+    ).getOrElse(Future.successful(BadRequest("")))
   }
 }
 

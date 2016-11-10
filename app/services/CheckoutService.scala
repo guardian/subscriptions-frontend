@@ -7,13 +7,16 @@ import com.gu.memsub.promo._
 import com.gu.memsub.services.PromoService
 import com.gu.memsub.subsv2.Catalog
 import com.gu.memsub.{Address, Product}
+import com.gu.memsub.subsv2.{Catalog, CatalogPlan, Subscription, SubscriptionPlan}
 import com.gu.salesforce.ContactId
 import com.gu.stripe.Stripe
 import com.gu.zuora.api.ZuoraService
 import com.gu.zuora.soap.models.Commands._
+import com.gu.zuora.soap.models.Commands.{Account, PaymentMethod, RatePlan, Subscribe}
 import com.gu.zuora.soap.models.Results.SubscribeResult
 import com.gu.zuora.soap.models.errors._
 import com.typesafe.scalalogging.LazyLogging
+import forms.Renewal
 import model._
 import model.error.CheckoutService._
 import model.error.IdentityService._
@@ -242,5 +245,10 @@ class CheckoutService(identityService: IdentityService,
         None,
         Some(e.getMessage())))))
     }
+  }
+  //TODO NOT SURE THIS SHOULD BE HERE BUT IT WILL REUSE SOME CODE SO AT LEAST FOR NOW IT IS
+  //todo not sure about the type of the sub here
+  def renewSubscription(subscription: Subscription[SubscriptionPlan.PaperPlan], renewal: Renewal) = {
+
   }
 }
