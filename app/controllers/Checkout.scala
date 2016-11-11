@@ -91,12 +91,11 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
       def renderCheckoutFor(planList: PlanList[CatalogPlan.ContentSubscription]) = {
 
         val supportedCurrencies = planList.default.charges.price.currencies
-        val billingCountriesWithCurrencyOrGBP =  CountryWithCurrency.whitelisted(supportedCurrencies, GBP)
 
         val personalData = user.map(PersonalData.fromIdUser)
 
-        def getSettings(availableDeliveryCountries: Option[List[CountryWithCurrency]], fallbackCountry: Option[Country], fallbackCurrency: Currency) = {
-          val availableCountries = availableDeliveryCountries.getOrElse(billingCountriesWithCurrencyOrGBP)
+        def getSettings(availableDeliveryCountries: Option[List[CountryWithCurrency]], availableBillingCountries: List[CountryWithCurrency], fallbackCountry: Option[Country], fallbackCurrency: Currency) = {
+          val availableCountries = availableDeliveryCountries.getOrElse(availableBillingCountries)
 
           def availableCountryWithCurrencyFor(country: Option[Country]) = country.flatMap(c => availableCountries.find(_.country == c))
           val personalDataCountry = personalData.flatMap(data => data.address.country)
@@ -105,33 +104,48 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
 
           CountryAndCurrencySettings(
             availableDeliveryCountries = availableDeliveryCountries,
-            availableBillingCountries = billingCountriesWithCurrencyOrGBP,
+            availableBillingCountries = availableBillingCountries,
             defaultCountry = defaultCountryWithCurrency.map(_.country),
             defaultCurrency = defaultCountryWithCurrency.map(_.currency).getOrElse(fallbackCurrency)
           )
         }
-
-        val ukMainLandSettings = getSettings(
-          availableDeliveryCountries = Some(List(CountryWithCurrency(Country.UK, GBP))),
-          fallbackCountry = Some(Country.UK),
-          fallbackCurrency = GBP
-        )
+        def allCountriesWithCurrencyOrGBP = CountryWithCurrency.whitelisted(supportedCurrencies, GBP)
 
         val countryAndCurrencySettings = planList.default.product match {
+
           case Product.Digipack => getSettings(
             availableDeliveryCountries = None,
+            availableBillingCountries = allCountriesWithCurrencyOrGBP,
             fallbackCountry = countryGroup.defaultCountry,
             fallbackCurrency = GBP
           )
-          case Product.Delivery => ukMainLandSettings
-          case Product.Voucher => ukMainLandSettings.copy(availableDeliveryCountries = Some(CountryWithCurrency.fromCountryGroup(ukAndIsleOfMan)))
+          case Product.Delivery => {
+            val deliveryCountries = List(CountryWithCurrency(Country.UK, GBP))
+            getSettings(
+              availableDeliveryCountries = Some(deliveryCountries),
+              availableBillingCountries = deliveryCountries,
+              fallbackCountry = Some(Country.UK),
+              fallbackCurrency = GBP
+            )
+          }
+          case Product.Voucher => {
+            val voucherCountries = CountryWithCurrency.fromCountryGroup(ukAndIsleOfMan)
+            getSettings(
+              availableDeliveryCountries = Some(voucherCountries),
+              availableBillingCountries = voucherCountries,
+              fallbackCountry = Some(Country.UK),
+              fallbackCurrency = GBP
+            )
+          }
           case Product.WeeklyZoneA => getSettings(
             availableDeliveryCountries = Some(CountryWithCurrency.whitelisted(supportedCurrencies, GBP, weeklyZoneAGroups)),
+            availableBillingCountries = allCountriesWithCurrencyOrGBP,
             fallbackCountry = countryGroup.defaultCountry,
             fallbackCurrency = GBP
           )
           case Product.WeeklyZoneB => getSettings(
             availableDeliveryCountries = Some(CountryWithCurrency.whitelisted(supportedCurrencies, USD, weeklyZoneBGroups)),
+            availableBillingCountries = allCountriesWithCurrencyOrGBP,
             fallbackCountry = None,
             fallbackCurrency = USD
           )
