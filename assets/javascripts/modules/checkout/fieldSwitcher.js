@@ -97,7 +97,7 @@ define([
     };
 
     var isCurrencyOverrideChecked = function() {
-        var currencyOverrideCheckbox = formElements.$CURRENCY_OVERRIDE_CHECKBOX
+        var currencyOverrideCheckbox = formElements.$CURRENCY_OVERRIDE_CHECKBOX;
         return currencyOverrideCheckbox.length > 0 && !currencyOverrideCheckbox.hasClass('js-ignore') && currencyOverrideCheckbox[0].checked;
 
     };
