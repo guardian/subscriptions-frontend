@@ -72,45 +72,52 @@ define([
         refreshPaymentMethods(currentState);
     };
 
-    var getCurrentState = function () {
+    var getCurrentStateWithoutCurrencyOverride = function () {
         var deliveryState = addressData.delivery.getState();
         var billingState = deliveryAsBilling.isEnabled() ? deliveryState : addressData.billing.getState();
         var priceBandingState = billingState.determinesPriceBanding ? billingState : deliveryState;
-
-        if (isCurrencyOverrideChecked()) {
-            priceBandingState.currency = 'GBP';
-        }
         return {
             delivery: deliveryState,
             billing: billingState,
             priceBanding: priceBandingState
         }
     };
+
+    var getCurrentState = function () {
+        var state = getCurrentStateWithoutCurrencyOverride();
+        if (isCurrencyOverrideChecked()) {
+            state.priceBanding.currency = 'GBP';
+        }
+        return state;
+    };
+
     var update = function () {
         var currentState = getCurrentState();
         updatePriceBanding(currentState)
     };
 
     var isCurrencyOverrideChecked = function() {
-        var currencyOverrudeCheckbox = $('.js-currency-override-checkbox');
-        return currencyOverrudeCheckbox.length >0 && currencyOverrudeCheckbox[0].checked;
+        var currencyOverrideCheckbox = formElements.$CURRENCY_OVERRIDE_CHECKBOX;
+        return currencyOverrideCheckbox.length > 0 && !currencyOverrideCheckbox.hasClass('js-ignore') && currencyOverrideCheckbox[0].checked;
 
     };
 
     var initCurrencyOverride = function () {
-        $('.js-currency-override-checkbox').each(function (currencyOverrideCheckbox) {
+        formElements.$CURRENCY_OVERRIDE_CHECKBOX.each(function (currencyOverrideCheckbox) {
             bean.on(currencyOverrideCheckbox, 'change', function () {
-              update();
+                update();
             });
         });
     };
 
-    var redrawCurrencyOverride = function (currentState) {
+    var redrawCurrencyOverride = function (selectedCurrency) {
         var currencySelector = $('.js-checkout-currency-override');
 
-        if (currentState.priceBanding.currency == 'USD') {
+        if (selectedCurrency == 'USD') {
+            formElements.$CURRENCY_OVERRIDE_CHECKBOX.removeClass('js-ignore');
             currencySelector.show();
         } else {
+            formElements.$CURRENCY_OVERRIDE_CHECKBOX.addClass('js-ignore');
             currencySelector.hide();
         }
     };
@@ -176,15 +183,10 @@ define([
 
         var refresh = function () {
             if (determinesPriceBanding) {
-                $('.js-currency-override-checkbox').attr('checked', false);
+                var selectedCountryCurrency = getCurrentStateWithoutCurrencyOverride().priceBanding.currency;
+                redrawCurrencyOverride(selectedCountryCurrency);
             }
-            
-            var currentState = getCurrentState();
-
-             if (determinesPriceBanding) {
-                 redrawCurrencyOverride(currentState);
-             }
-           redraw(currentState);
+            redraw(getCurrentState());
         };
 
         var refreshOnChange = function (el) {
