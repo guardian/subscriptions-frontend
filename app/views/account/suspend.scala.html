@@ -6,6 +6,7 @@
 @import model.DigitalEdition.UK
 @import views.support.Dates.prettyDate
 @import views.support.AccountManagementOps._
+@import org.joda.time.Days
 @import com.gu.memsub.BillingPeriod
 @import com.gu.memsub.subsv2.SubscriptionPlan.DailyPaper
 @import com.gu.memsub.PaperDay
@@ -18,7 +19,10 @@
     suspendedDays: Int,
     errorCodes: Set[String]
 )(implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackend.Resolution)
-
+@avgPeriodBetweenInvoices = @{
+    val dates = billingSchedule.invoices.list.filter(_.amount > 0).map(_.date)
+    Math.floor(Days.daysBetween(dates.head, dates.last).getDays / dates.size)
+}
 @main("Cancel your papers while you're away | The Guardian", bodyClasses = List("is-wide"), edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
 
     <main class="page-container gs-container">
@@ -42,12 +46,13 @@
                 }
             </section>
 
-            @if(subscription.plan.charges.billingPeriod == BillingPeriod.month && (suspendableDays - suspendedDays) > 0) {
+            @if((suspendableDays - suspendedDays) > 0) {
                 <section class="mma-section">
+                @if(subscription.plan.charges.billingPeriod == BillingPeriod.month && avgPeriodBetweenInvoices <= 31) {
                     <form class="form js-suspend-form" action="@routes.AccountManagement.processSuspension().url" method="POST" novalidate>
                         <fieldset>
                             <legend class="mma-section__header">
-                                Create a suspension
+                                Book a delivery holiday
                             </legend>
                             @helper.CSRF.formField
 
@@ -71,13 +76,19 @@
                         </fieldset>
                     </form>
                     <span class="mma-dates__request">
-                        Please give us at least 5 days notice to process the suspension. You can suspend up to @suspendableWeeks weeks. <strong>
-                        All dates are inclusive</strong>.</span>
+                        Please give us at least 5 days notice to process the delivery holiday. You can line up to @suspendableWeeks weeks of holidays.<strong>
+                        All dates are inclusive</strong>.
+                    </span>
+                } else {
+                    <h3 class="mma-section__header">Book a delivery holiday</h3>
+                    <p>Unfortunately you cannot set up a delivery holiday online at the moment. Please call Customer Services on <a class="u-link" href="tel:+44 330 333 6767">+44 (0) 330 333 6767</a>
+                        or email <a class="u-link" href="mailto:homedelivery@@theguardian.com">homedelivery@@theguardian.com</a>.</p>
+                }
                 </section>
             }
 
             <section class="mma-section">
-                <h3 class="mma-section__header">Scheduled suspensions</h3>
+                <h3 class="mma-section__header">Upcoming delivery holidays</h3>
                 @account.fragments.suspensions(holidayRefunds, suspendableDays, suspendedDays)
             </section>
 
