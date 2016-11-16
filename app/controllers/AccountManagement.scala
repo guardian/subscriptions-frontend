@@ -8,7 +8,8 @@ import com.github.nscala_time.time.OrderingImplicits.LocalDateOrdering
 import com.gu.memsub.Subscription.{ProductRatePlanId, Name}
 import com.gu.memsub.services.GetSalesforceContactForSub
 import com.gu.memsub.subsv2.SubscriptionPlan.{Delivery, WeeklyPlan}
-import com.gu.memsub.Subscription.Name
+import com.gu.memsub.Subscription.{Name, ProductRatePlanId}
+import com.gu.memsub.services.GetSalesforceContactForSub
 import com.gu.memsub.subsv2._
 import com.gu.memsub.{BillingPeriod, Price, BillingSchedule, Product}
 import com.gu.subscriptions.suspendresume.SuspensionService
@@ -18,15 +19,17 @@ import com.typesafe.scalalogging.LazyLogging
 import configuration.{Config, ProfileLinks}
 import forms._
 import org.joda.time.LocalDate
+import play.api.libs.json.{JsError, JsSuccess, Json}
 import play.api.mvc.{AnyContent, Controller, Request, Result}
 import utils.TestUsers.PreSigninTestCookie
 import views.support.Pricing._
+
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scalaz.std.scalaFuture._
 import scalaz.syntax.std.option._
-import scalaz.{EitherT, OptionT, \/}
+import scalaz.{-\/, EitherT, OptionT, \/, \/-}
 
 // this handles putting subscriptions in and out of the session
 object SessionSubscription {
@@ -56,7 +59,7 @@ object SessionSubscription {
     } yield zuoraSubscription).run
   }
 
-  def subscriptionFromRequest(implicit request: Request[AnyContent]): Future[Option[Subscription[SubscriptionPlan.PaperPlan]]] = {
+  def subscriptionFromRequest(implicit request: Request[_]): Future[Option[Subscription[SubscriptionPlan.PaperPlan]]] = {
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
 
@@ -206,9 +209,7 @@ object AccountManagement extends Controller with LazyLogging {
 
     def detailsMatch(zuoraContact: Contact, loginRequest: AccountManagementLoginRequest): Boolean = {
       def format(str: String): String = str.filter(_.isLetterOrDigit).toLowerCase
-
-      format(zuoraContact.lastName) == format(loginRequest.lastname) &&
-        zuoraContact.postalCode.map(format).contains(format(loginRequest.postcode))
+      format(zuoraContact.lastName) == format(loginRequest.lastname)
     }
 
     def subscriptionDetailsMatch(loginRequest: AccountManagementLoginRequest, zuoraSubscription: Subscription[SubscriptionPlan.PaperPlan]): Future[Boolean] = {
@@ -288,19 +289,30 @@ object AccountManagement extends Controller with LazyLogging {
   }
 
 
-
-
   def processRenewal = accountManagementAction.async { implicit request =>
-
-    //TODO check if this code is correct (authentication / session etc)
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
 
-    RenewalForm.mappings.bindFromRequest.value.map(renewal =>
-      subscriptionFromRequest map { sub =>
-        Ok(sub.toString)
+    SessionSubscription.subscriptionFromRequest map { s =>
+      val response = for {
+        sub <- s.toRightDisjunction("no subscription in request")
+        renew <- parseRenewalRequest(request, tpBackend.catalogService.unsafeCatalog)
+      } yield {
+       tpBackend.checkoutService.renewSubscription(sub,renew)
+        Ok(renew.toString + sub.toString)
       }
-    ).getOrElse(Future.successful(BadRequest("")))
+      response.valueOr(BadRequest(_))
+    }
   }
+
+  def parseRenewalRequest(request: Request[AnyContent], catalog: Catalog): \/[String, Renewal] = {
+    implicit val renewalReads = new RenewalReads(catalog).renewalReads
+    request.body.asJson.map(_.validate[Renewal]) match {
+      case Some(JsSuccess(renewal, _)) => \/-(renewal)
+      case Some(JsError(err)) => -\/(err.mkString(","))
+      case None => -\/("invalid json")
+    }
+  }
+
 }
 

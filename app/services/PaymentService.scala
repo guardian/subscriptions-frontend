@@ -58,6 +58,7 @@ class PaymentService(val stripeService: StripeService) {
      desiredCurrency: Currency,
      purchaserIds: PurchaserIdentifiers,
      plan: CatalogPlan.Paid) = {
+    //TODO maybe remove the plan as a parameter and assume we get a correct currency instead of a desired currency and do this outside before calling this
     val currency = if (plan.charges.price.currencies.contains(desiredCurrency)) desiredCurrency else GBP
 
     new CreditCardPayment(paymentData, currency, purchaserIds)

@@ -74,7 +74,7 @@ class CheckoutService(identityService: IdentityService,
       _ <- Monad[SubNel].whenM(userExists && authenticatedUserOpt.isEmpty)(emailError)
       memberId <- EitherT(createOrUpdateUserInSalesforce(subscriptionData, idMinimalUser))
       purchaserIds = PurchaserIdentifiers(memberId, idMinimalUser)
-      payment <- EitherT(createPaymentType(requestData, purchaserIds, subscriptionData))
+      payment <- EitherT(createPaymentType(purchaserIds, subscriptionData))
       defaultPaymentDelay = CheckoutService.paymentDelay(subscriptionData.productData, zuoraProperties)
       paymentMethod <- EitherT(attachPaymentMethodToStripeCustomer(payment, purchaserIds))
       subscribe = createSubscribeRequest(personalData, soldToContact, requestData, plan, purchaserIds, paymentMethod, payment.makeAccount, Some(defaultPaymentDelay))
@@ -225,10 +225,7 @@ class CheckoutService(identityService: IdentityService,
     }
   }
 
-  private def createPaymentType(
-      requestData: SubscriptionRequestData,
-      purchaserIds: PurchaserIdentifiers,
-      subscriptionData: SubscribeRequest): Future[NonEmptyList[SubsError] \/ PaymentService#Payment] = {
+  private def createPaymentType( purchaserIds: PurchaserIdentifiers, subscriptionData: SubscribeRequest): Future[NonEmptyList[SubsError] \/ PaymentService#Payment] = {
 
     try {
       val payment = subscriptionData.genericData.paymentData match {
@@ -248,7 +245,8 @@ class CheckoutService(identityService: IdentityService,
   }
   //TODO NOT SURE THIS SHOULD BE HERE BUT IT WILL REUSE SOME CODE SO AT LEAST FOR NOW IT IS
   //todo not sure about the type of the sub here
-  def renewSubscription(subscription: Subscription[SubscriptionPlan.PaperPlan], renewal: Renewal) = {
-
+  def renewSubscription(subscription: Subscription[SubscriptionPlan.PaperPlan], renewal: Renewal ) = {
+    val contact = GetSalesforceContactForSub(subscription)(zuoraService, salesforceService.repo, global)
+    contact.map(println(_))
   }
 }
