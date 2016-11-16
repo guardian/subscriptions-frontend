@@ -27,12 +27,7 @@ function getFirstSelectableDate(filterFn) {
     var weeksToAdd = currentWeekday >= CUTOFF_WEEKDAY && currentHour >= CUTOFF_HOUR ? EXTRA_DELIVERY_DELAY : NORMAL_DELIVERY_DELAY;
     var firstSelectableDate = mostRecentMonday.add(weeksToAdd, 'weeks');
     while (filterFn && !filterFn(firstSelectableDate)) {
-        // Weekend / Sunday subs can have an earlier first voucher than weekday-starting books.
-        if (/Weekend|Sunday/i.test(ratePlanChoice.getSelectedRatePlanName())) {
-            firstSelectableDate.subtract(1, 'day');
-        } else {
-            firstSelectableDate.add(1, 'day');
-        }
+        firstSelectableDate.add(1, 'day');
     }
     return firstSelectableDate;
 }
