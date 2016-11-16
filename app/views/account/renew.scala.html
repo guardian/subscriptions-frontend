@@ -25,6 +25,13 @@
 
             <section class="mma-section">
                 <h3 class="mma-section__header">
+                    Email address
+                </h3>
+                @contact.email
+            </section>
+
+            <section class="mma-section">
+                <h3 class="mma-section__header">
                     Your billing schedule
                 </h3>
                 @views.html.account.fragments.billingSchedule(billingSchedule, subscription.plan.charges.price.currencies.head)
