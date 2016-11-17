@@ -5,45 +5,46 @@
 @import services.UserId.{paramName => userIdParam}
 
 @guestAccountForm.map { form =>
+    <div class="finish-account">
+        <form action="@routes.Checkout.convertGuestUser" method="POST" class="form js-finish-account" autocomplete="off">
+            @helper.CSRF.formField
+            <div class="grid grid--flex grid--3up-step-mobile-landscape">
+                <div class="grid-item grid__item--flex-2-columns grid__item--rightpad">
+                    <div class="form-field js-checkout-finish-account-password">
 
-    <form action="@routes.Checkout.convertGuestUser" method="POST" class="form js-finish-account" autocomplete="off">
-        @helper.CSRF.formField
-        <div class="grid grid--flex grid--3up-step">
-            <div class="grid-item grid__item--flex-2-columns">
-                <div class="form-field js-checkout-finish-account-password">
+                        <input name="@userIdParam" type="hidden" value="@form.data.get(userIdParam)">
+                        <input name="@identityTokenParam" type="hidden" value="@form.data.get(identityTokenParam)">
 
-                    <input name="@userIdParam" type="hidden" value="@form.data.get(userIdParam)">
-                    <input name="@identityTokenParam" type="hidden" value="@form.data.get(identityTokenParam)">
+                        <input
+                        class="input-text js-input js-password-strength"
+                        id="password"
+                        name="password"
+                        type="password"
+                        minlength="6"
+                        maxlength="20"
+                        value=""
+                        required
+                        />
+                        @fragments.forms.errorMessage("Password too short")
 
-                    <input
-                    class="input-text js-input js-password-strength"
-                    id="password"
-                    name="password"
-                    type="password"
-                    minlength="6"
-                    maxlength="20"
-                    value=""
-                    required
-                    />
-                    @fragments.forms.errorMessage("Password too short")
-
+                    </div>
+                    @fragments.forms.passwordStrengthIndicator()
                 </div>
-                @fragments.forms.passwordStrengthIndicator()
+                <div class="grid-item actions">
+                    <button class="button button--primary button--large js-checkout-finish-account-submit">Confirm</button>
+                </div>
             </div>
-            <div class="grid-item actions">
-                <button class="button button--primary button--large js-checkout-finish-account-submit">Confirm</button>
-            </div>
-        </div>
-    </form>
+        </form>
 
-    <div class="js-finish-account-success is-hidden">
-        <p>Account created</p>
-        <p>You can edit your personal details in your Profile area</p>
-        <div class="actions">
-            <a href="@webAppProfileUrl" class="button button--primary button--large">My profile</a>
+        <div class="js-finish-account-success is-hidden">
+            <p>Account created</p>
+            <p>You can edit your personal details in your Profile area</p>
+            <div class="actions">
+                <a href="@webAppProfileUrl" class="button button--primary button--large">My profile</a>
+            </div>
         </div>
-    </div>
-    <div class="js-finish-account-error is-hidden finish-account-error">
-        <p>An internal server error occurred while trying to set a password for your account. Please try again later.</p>
+        <div class="js-finish-account-error is-hidden finish-account-error">
+            <p>An internal server error occurred while trying to set a password for your account. Please try again later.</p>
+        </div>
     </div>
 }

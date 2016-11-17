@@ -62,13 +62,13 @@
                     <h4 class="steps__title">You will then receive your personalised book of vouchers.</h4>
                     <h4 class="steps__title">Take your vouchers to your newsagent or where you buy your paper.</h4>
                 }
-                <h4 class="steps__title">
-                    You can enter a password to manage your subscription online:
+                @if(guestAccountForm.isDefined) {
+                    <h4 class="steps__title">You can enter a password to manage your subscription online:</h4>
                     @fragments.confirmation.registerGuestAccount(guestAccountForm)
-                </h4>
+                }
                 @if(plan.isHomeDelivery || plan.isGuardianWeekly) {
-                    <h4 class="steps__title">Now you can easily set up delivery holidays in our <a class="u-link" href="/manage">Subscription Management</a> area.</h4>
                     <h4 class="steps__title">Your first paper will be delivered on @startDate. </h4>
+                    <h4 class="steps__title">You can set up any delivery holidays in our <a class="u-link" href="/manage">Subscription Management</a> area.</h4>
                 }
                 @if(plan.hasDigitalPack) { @fragments.confirmation.appSteps() }
             </div>

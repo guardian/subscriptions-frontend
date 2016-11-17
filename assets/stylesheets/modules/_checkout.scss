@@ -254,7 +254,12 @@ $sprite-card-offset-visa:               -355px;
 /* ==========================================================================
    Thank you page
    ========================================================================== */
-
+.finish-account {
+    @include fs-bodyCopy(2);
+    background: $c-neutral7;
+    margin-bottom: $gs-gutter / 2;
+    padding: $gs-gutter / 2;
+}
 .finish-account-error {
     color: guss-colour(error);
 }
