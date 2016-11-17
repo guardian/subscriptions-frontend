@@ -58,17 +58,20 @@
 
             <div class="steps">
                 <h4 class="steps__title">We’ll send you an email confirming your subscription and payment information.</h4>
-                @if(plan.isHomeDelivery) {
-                    <h4 class="steps__title">Your first paper will be delivered on @startDate. </h4>
-                }
                 @if(plan.isVoucher) {
                     <h4 class="steps__title">You will then receive your personalised book of vouchers.</h4>
                     <h4 class="steps__title">Take your vouchers to your newsagent or where you buy your paper.</h4>
                 }
+                @if(guestAccountForm.isDefined) {
+                    <h4 class="steps__title">You can enter a password to manage your subscription online:</h4>
+                    @fragments.confirmation.registerGuestAccount(guestAccountForm)
+                }
+                @if(plan.isHomeDelivery || plan.isGuardianWeekly) {
+                    <h4 class="steps__title">Your first paper will be delivered on @startDate. </h4>
+                    <h4 class="steps__title">You can set up any delivery holidays in our <a class="u-link" href="/manage">Subscription Management</a> area.</h4>
+                }
                 @if(plan.hasDigitalPack) { @fragments.confirmation.appSteps() }
             </div>
-
-            @fragments.confirmation.registerGuestAccount(guestAccountForm)
 
             <br/>
             <h4>We hope you enjoy your subscription.</h4>
