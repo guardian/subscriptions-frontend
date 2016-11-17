@@ -53,8 +53,6 @@ class SubscriptionsForm(catalog: Catalog) {
 
   private def validationError(key:String, msg:String) = \/.left(Seq(FormError(key, msg)))
 
-  private def validCurrency(selectedCurrency: Currency, settings: CountryWithCurrency) = settings.currency == selectedCurrency || selectedCurrency == GBP && settings.currency == USD && settings.country != Country.US
-
   private def invalidCurrencyError = validationError("currency", "invalid plan, currency and country combination")
 
   def toSubscribeRequest(subscriptionData: SubscriptionData, digipackData: DigipackData): Seq[FormError] \/ SubscribeRequest = {
@@ -66,7 +64,7 @@ class SubscriptionsForm(catalog: Catalog) {
 
     selectedCountrySettings match {
       case None => validationError("country", "invalid Country")
-      case Some(settings) => if (validCurrency(subscriptionData.currency, settings)) \/.right(SubscribeRequest(subscriptionData, Right(digipackData))) else invalidCurrencyError
+      case Some(settings) => if (PaymentValidation.validateCurrency(subscriptionData.currency, settings, digipackData.plan)) \/.right(SubscribeRequest(subscriptionData, Right(digipackData))) else invalidCurrencyError
     }
   }
 
@@ -87,7 +85,7 @@ class SubscriptionsForm(catalog: Catalog) {
     (billingCountrySettings, deliveryCountrySettings) match {
       case (None, _) => validationError("billing address", "invalid billing country")
       case (_, None) => validationError("delivery address", "invalid delivery country")
-      case (Some(billingSettings), Some(deliverySEttings)) => if (validCurrency(subscriptionData.currency, deliverySEttings)) \/.right(SubscribeRequest(subscriptionData, Left(paperData))) else invalidCurrencyError
+      case (Some(billingSettings), Some(deliverySettings)) => if (PaymentValidation.validateCurrency(subscriptionData.currency, deliverySettings, paperData.plan)) \/.right(SubscribeRequest(subscriptionData, Left(paperData))) else invalidCurrencyError
     }
   }
 
