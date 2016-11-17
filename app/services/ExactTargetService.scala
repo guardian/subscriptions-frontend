@@ -152,32 +152,24 @@ class ExactTargetService(
 
     val buildDataExtensionRow =
       GetSalesforceContactForSub(subscription)(zuoraService, salesforceService.repo, defaultContext).map { salesforceContact =>
-        salesforceContact.email.toRightDisjunction(s"no email in salesforce for ${subscription.id.get}").map { email =>
-          HolidaySuspensionBillingScheduleDataExtensionRow(
-            email = StringOps.oempty(email).headOption,
-            saltuation = constructSalutation(salesforceContact.title, salesforceContact.firstName, Some(salesforceContact.lastName)),
-            subscriptionName = subscription.name.get,
-            subscriptionCurrency = subscription.plan.charges.price.currencies.head,
-            packageName = packageName,
-            billingSchedule = billingSchedule,
-            numberOfSuspensionsLinedUp,
-            daysUsed,
-            daysAllowed
-          )
-        }
+        HolidaySuspensionBillingScheduleDataExtensionRow(
+          email = salesforceContact.email,
+          saluation = constructSalutation(salesforceContact.title, salesforceContact.firstName, Some(salesforceContact.lastName)),
+          subscriptionName = subscription.name.get,
+          subscriptionCurrency = subscription.plan.charges.price.currencies.head,
+          packageName = packageName,
+          billingSchedule = billingSchedule,
+          numberOfSuspensionsLinedUp = numberOfSuspensionsLinedUp,
+          daysUsed = daysUsed,
+          daysAllowed = daysAllowed
+        )
       }
 
-    buildDataExtensionRow.flatMap { maybeRow =>
-      val maybeFutureQueued = maybeRow.map { row =>
-        SqsClient.sendDataExtensionToQueue(Config.holidaySuspensionEmailQueue, row).map {
-          case Success(sendMsgResult) => logger.info(s"Successfully enqueued ${subscription.name.get}'s updated billing schedule email.")
-          case Failure(e) => logger.error(s"Failed to enqueue ${subscription.name.get}'s updated billing schedule email. Details were: " + row.toString, e)
-        }
+    buildDataExtensionRow.flatMap { row =>
+      SqsClient.sendDataExtensionToQueue(Config.holidaySuspensionEmailQueue, row).map {
+        case Success(sendMsgResult) => logger.info(s"Successfully enqueued ${subscription.name.get}'s updated billing schedule email.")
+        case Failure(e) => logger.error(s"Failed to enqueue ${subscription.name.get}'s updated billing schedule email. Details were: " + row.toString, e)
       }
-      maybeFutureQueued.fold({error =>
-        logger.info(s"couldn't queue email: $error")
-        Future.successful(())
-      }, unit => unit)
     }
   }
 }

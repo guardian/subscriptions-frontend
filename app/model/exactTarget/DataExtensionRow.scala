@@ -219,7 +219,7 @@ object HolidaySuspensionBillingScheduleDataExtensionRow {
 
   def apply(
            email: Option[String],
-           saltuation: String,
+           saluation: String,
            subscriptionName: String,
            subscriptionCurrency: Currency,
            packageName: String,
@@ -247,7 +247,7 @@ object HolidaySuspensionBillingScheduleDataExtensionRow {
         "EmailAddress" -> emailAddress,
         "uuid" -> UUID.randomUUID().toString,
         "subscriber_id" -> subscriptionName,
-        "customer_salutation" -> saltuation,
+        "customer_salutation" -> saluation,
         "package_name" -> packageName,
         "days_allowed" -> daysAllowed.toString,
         "days_used" -> daysUsed.toString,
