@@ -3,6 +3,8 @@
 @import com.gu.memsub.subsv2.Subscription
 @import model.DigitalEdition.UK
 @import com.gu.salesforce.Contact
+@import views.support.Dates.prettyDate
+
 @(
     subscription: Subscription[SubscriptionPlan.WeeklyPlan], billingSchedule: BillingSchedule, contact: Contact
 )(implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackend.Resolution)
@@ -21,6 +23,20 @@
                     Your details
                 </h3>
                 @views.html.account.fragments.yourDetails(subscription, maybeContact = Some(contact))()
+            </section>
+
+            <section class="mma-section">
+                <h3 class="mma-section__header">
+                    Email address
+                </h3>
+                @contact.email
+            </section>
+
+            <section class="mma-section">
+                <h3 class="mma-section__header">
+                    Subscription end date
+                </h3>
+                @prettyDate(subscription.termEndDate)
             </section>
 
             <section class="mma-section">

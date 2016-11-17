@@ -29,6 +29,7 @@ import views.support.Pricing._
 import scala.concurrent.Future
 import scala.reflect.internal.util.StringOps
 import scala.util.{Failure, Success, Try}
+import scalaz.syntax.std.option._
 
 /**
   * Sends welcome email message to Amazon SQS queue which is consumed by membership-workflow.
@@ -152,23 +153,20 @@ class ExactTargetService(
     val buildDataExtensionRow =
       GetSalesforceContactForSub(subscription)(zuoraService, salesforceService.repo, defaultContext).map { salesforceContact =>
         HolidaySuspensionBillingScheduleDataExtensionRow(
-          email = StringOps.oempty(salesforceContact.email).headOption,
-          saltuation = constructSalutation(salesforceContact.title, salesforceContact.firstName, Some(salesforceContact.lastName)),
+          email = salesforceContact.email,
+          saluation = constructSalutation(salesforceContact.title, salesforceContact.firstName, Some(salesforceContact.lastName)),
           subscriptionName = subscription.name.get,
           subscriptionCurrency = subscription.plan.charges.price.currencies.head,
           packageName = packageName,
           billingSchedule = billingSchedule,
-          numberOfSuspensionsLinedUp,
-          daysUsed,
-          daysAllowed
+          numberOfSuspensionsLinedUp = numberOfSuspensionsLinedUp,
+          daysUsed = daysUsed,
+          daysAllowed = daysAllowed
         )
       }
 
-    for {
-      row <- buildDataExtensionRow
-      response <- SqsClient.sendDataExtensionToQueue(Config.holidaySuspensionEmailQueue, row)
-    } yield {
-      response match {
+    buildDataExtensionRow.flatMap { row =>
+      SqsClient.sendDataExtensionToQueue(Config.holidaySuspensionEmailQueue, row).map {
         case Success(sendMsgResult) => logger.info(s"Successfully enqueued ${subscription.name.get}'s updated billing schedule email.")
         case Failure(e) => logger.error(s"Failed to enqueue ${subscription.name.get}'s updated billing schedule email. Details were: " + row.toString, e)
       }
@@ -193,6 +191,7 @@ object SqsClient extends LazyLogging {
         "DataExtensionName" -> row.forExtension.name
       ).toString()
 
+      // FIXME the sendToQueue method is blocking, use an async way if there is one
       def sendToQueue(msg: String): SendMessageResult = {
         val queueUrl = sqsClient.createQueue(new CreateQueueRequest(queueName)).getQueueUrl
         sqsClient.sendMessage(new SendMessageRequest(queueUrl, msg))
