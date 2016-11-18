@@ -90,6 +90,7 @@ define(['modules/analytics/analyticsEnabled',
 
         _EVENT_QUEUE.forEach(function (obj) {
             var upgrading = (obj.eventLabel === 'Rate Plan Change' && guardian.pageInfo.productData.initialProduct !== guardian.pageInfo.productData.productPurchasing) ? 1 : 0;
+            var converted = (obj.eventLabel === 'Review and confirm') ? 1 : 0;
             var event = {
                 eventCategory: 'Subscriptions Checkout',
                 eventAction:  guardian.pageInfo.productData.productType,
@@ -97,9 +98,10 @@ define(['modules/analytics/analyticsEnabled',
                 dimension11: guardian.pageInfo.productData.productType + ' - ' + guardian.pageInfo.productData.productPurchasing,
                 dimension13: !!guardian.supplierCode,
                 metric1: upgrading,
-                metric2: obj.elapsedTime
+                metric2: obj.elapsedTime,
+                metric10: converted
             };
-            if(guardian.experience){
+            if (guardian.experience){
                 event.dimension16 = guardian.experience;
             }
             ga('membershipPropertyTracker.send', 'event', event);
