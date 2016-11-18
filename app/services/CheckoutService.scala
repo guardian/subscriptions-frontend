@@ -272,7 +272,7 @@ class CheckoutService(identityService: IdentityService,
       contact <- GetSalesforceContactForSub(subscription)(zuoraService, salesforceService.repo, global)
       payment = getPayment(contact)
       paymentMethod <- payment.makePaymentMethod
-      createPaymentMethod = CreatePaymentMethod(subscription.accountId, paymentMethod)
+      createPaymentMethod = CreatePaymentMethod(subscription.accountId, paymentMethod, payment.makeAccount)
       updateResult <- zuoraService.createPaymentMethod(createPaymentMethod)
 
     }
