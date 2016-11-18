@@ -18,7 +18,7 @@ class PaymentService(val stripeService: StripeService) {
     def makePaymentMethod: Future[PaymentMethod]
   }
 
-  case class DirectDebitPayment(paymentData: DirectDebitData, personalData: PersonalData, memberId: ContactId) extends Payment {
+  case class DirectDebitPayment(paymentData: DirectDebitData, firstName: String, lastName: String, memberId: ContactId) extends Payment {
     override def makeAccount = Account.goCardless(memberId, GBP, autopay = true)
 
     override def makePaymentMethod =
@@ -26,8 +26,8 @@ class PaymentService(val stripeService: StripeService) {
         accountNumber = paymentData.account,
         sortCode = paymentData.sortCode,
         accountHolderName = paymentData.holder,
-        firstName = personalData.first,
-        lastName = personalData.last,
+        firstName = firstName,
+        lastName = lastName,
         countryCode = UK.alpha2
       ))
   }
@@ -48,19 +48,15 @@ class PaymentService(val stripeService: StripeService) {
     }
   }
 
-  def makeDirectDebitPayment(paymentData: DirectDebitData, personalData: PersonalData, memberId: ContactId) = {
-    require(personalData.address.country.contains(UK), "Direct Debit payment only works in the UK right now")
-    DirectDebitPayment(paymentData, personalData, memberId)
-  }
+  def makeDirectDebitPayment(
+      paymentData: DirectDebitData,
+      firstName: String,
+      lastName: String,
+      memberId: ContactId) = DirectDebitPayment(paymentData, firstName,lastName, memberId)
 
   def makeCreditCardPayment(
      paymentData: CreditCardData,
-     desiredCurrency: Currency,
-     purchaserIds: PurchaserIdentifiers,
-     plan: CatalogPlan.Paid) = {
-    //TODO maybe remove the plan as a parameter and assume we get a correct currency instead of a desired currency and do this outside before calling this
-    val currency = if (plan.charges.price.currencies.contains(desiredCurrency)) desiredCurrency else GBP
+     currency: Currency,
+     purchaserIds: PurchaserIdentifiers) = new CreditCardPayment(paymentData, currency, purchaserIds)
 
-    new CreditCardPayment(paymentData, currency, purchaserIds)
-  }
 }

@@ -1,18 +1,20 @@
 package services
 
+import com.gocardless.services.PaymentService
 import com.gu.config.DiscountRatePlanIds
-import com.gu.i18n.Country
+import com.gu.i18n.{Country, GBP}
 import com.gu.identity.play.{AuthenticatedIdUser, IdMinimalUser}
 import com.gu.memsub.promo._
 import com.gu.memsub.services.PromoService
 import com.gu.memsub.subsv2.Catalog
 import com.gu.memsub.{Address, Product}
 import com.gu.memsub.subsv2.{Catalog, CatalogPlan, Subscription, SubscriptionPlan}
-import com.gu.salesforce.ContactId
+import com.gu.salesforce.{Contact, ContactId}
 import com.gu.stripe.Stripe
 import com.gu.zuora.api.ZuoraService
 import com.gu.zuora.soap.models.Commands._
 import com.gu.zuora.soap.models.Commands.{Account, PaymentMethod, RatePlan, Subscribe}
+import com.gu.zuora.soap.models.Commands._
 import com.gu.zuora.soap.models.Results.SubscribeResult
 import com.gu.zuora.soap.models.errors._
 import com.typesafe.scalalogging.LazyLogging
@@ -25,11 +27,13 @@ import org.joda.time.{Days, LocalDate}
 import touchpoint.ZuoraProperties
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scalaz.{EitherT, Monad, NonEmptyList, \/, \/-}
 import scala.concurrent.Future
 import scalaz.std.option._
 import scalaz.std.scalaFuture._
 import scalaz.syntax.monad._
 import scalaz.{EitherT, Monad, NonEmptyList, \/}
+
 
 object CheckoutService {
   def paymentDelay(in: Either[PaperData, DigipackData], zuora: ZuoraProperties)(implicit now: LocalDate): Days = in.fold(
@@ -230,9 +234,14 @@ class CheckoutService(identityService: IdentityService,
     try {
       val payment = subscriptionData.genericData.paymentData match {
         case paymentData@DirectDebitData(_, _, _) =>
-          paymentService.makeDirectDebitPayment(paymentData, subscriptionData.genericData.personalData, purchaserIds.memberId)
+          val personalData = subscriptionData.genericData.personalData
+          require(personalData.address.country.contains(Country.UK), "Direct Debit payment only works in the UK right now")
+          paymentService.makeDirectDebitPayment(paymentData, personalData.first, personalData.last, purchaserIds.memberId)
         case paymentData@CreditCardData(_) =>
-          paymentService.makeCreditCardPayment(paymentData, subscriptionData.genericData.currency, purchaserIds, subscriptionData.productData.fold(_.plan, _.plan))
+          val plan = subscriptionData.productData.fold(_.plan, _.plan)
+          val desiredCurrency = subscriptionData.genericData.currency
+          val currency = if (plan.charges.price.currencies.contains(desiredCurrency)) desiredCurrency else GBP
+          paymentService.makeCreditCardPayment(paymentData, currency, purchaserIds)
       }
       Future.successful(\/.right(payment))
     } catch {
@@ -243,10 +252,35 @@ class CheckoutService(identityService: IdentityService,
         Some(e.getMessage())))))
     }
   }
-  //TODO NOT SURE THIS SHOULD BE HERE BUT IT WILL REUSE SOME CODE SO AT LEAST FOR NOW IT IS
-  //todo not sure about the type of the sub here
+
+
+
   def renewSubscription(subscription: Subscription[SubscriptionPlan.PaperPlan], renewal: Renewal ) = {
-    val contact = GetSalesforceContactForSub(subscription)(zuoraService, salesforceService.repo, global)
-    contact.map(println(_))
+
+    def getPayment(contact:Contact):PaymentService#Payment = {
+      val idMinimalUser = IdMinimalUser(contact.identityId, None)
+      val pid = PurchaserIdentifiers(contact, Some(idMinimalUser))
+      renewal.paymentData match {
+        case cd: CreditCardData =>
+          val currency = subscription.plan.charges.currencies.head // TODO why is it a set and what if there is none (or more than one) ?
+          paymentService.makeCreditCardPayment(cd, currency, pid)
+        case dd: DirectDebitData => paymentService.makeDirectDebitPayment(dd, contact.firstName.getOrElse(""), contact.lastName, contact) //todo what to do if first name is missing from salesforce?
+      }
+    }
+
+    val paymentMethod = for {
+      contact <- GetSalesforceContactForSub(subscription)(zuoraService, salesforceService.repo, global)
+      payment = getPayment(contact)
+      paymentMethod <- payment.makePaymentMethod
+      createPaymentMethod = CreatePaymentMethod(subscription.accountId, paymentMethod)
+      updateResult <- zuoraService.createPaymentMethod(createPaymentMethod)
+
+    }
+      yield {
+        updateResult
+      }
+
+    paymentMethod.recover{case e =>  e.printStackTrace()}//TODO SEE WHAT TO RETURN!
+
   }
 }
