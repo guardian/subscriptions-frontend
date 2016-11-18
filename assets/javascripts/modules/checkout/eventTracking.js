@@ -1,4 +1,3 @@
-/* global guardian */
 define(['modules/analytics/ga', 'modules/checkout/ratePlanChoice'], function (ga, ratePlanChoice) {
     'use strict';
 
@@ -9,7 +8,7 @@ define(['modules/analytics/ga', 'modules/checkout/ratePlanChoice'], function (ga
     }
 
     function trackEvent(eventName) {
-        return function () {
+        return function() {
             ga.trackEvent(eventName, getElapsedSeconds());
         };
     }

@@ -3,6 +3,7 @@ define([
     'modules/forms/checkFields',
     'modules/checkout/formElements',
     'modules/checkout/eventTracking',
+    'modules/checkout/impressionTracking',
     'modules/checkout/reviewDetails',
     'modules/checkout/paymentDetails'
 ], function (
@@ -10,6 +11,7 @@ define([
     checkFields,
     formEls,
     eventTracking,
+    impressionTracking,
     reviewDetails,
     paymentDetails
 ) {
@@ -27,11 +29,12 @@ define([
         formEls.$FIELDSET_PAYMENT_DETAILS[0].scrollIntoView();
 
         eventTracking.completedBillingDetails();
+        impressionTracking.paymentDetailsTracking();
         reviewDetails.repopulateDetails();
         formEls.$CURRENCY_OVERRIDE_CHECKBOX.attr('disabled', true);
 
         //                                     you didn't see this \/
-        if (formEls.$FIELDSET_PAYMENT_DETAILS[0].offsetHeight === 0) {
+        if(formEls.$FIELDSET_PAYMENT_DETAILS[0].offsetHeight == 0){
             paymentDetails.nextStep();
         }
     }
