@@ -1,23 +1,21 @@
+/* global guardian */
+
 define([
-    '$',
     'modules/forms/toggleError',
     'modules/checkout/formElements',
     'modules/forms/checkFields',
     'modules/checkout/validatePersonal',
     'modules/forms/loader',
     'modules/checkout/fieldSwitcher',
-    'modules/checkout/eventTracking',
-    'modules/checkout/impressionTracking'
+    'modules/checkout/eventTracking'
 ], function (
-    $,
     toggleError,
     formEls,
     checkFields,
     validatePersonal,
     loader,
     fieldSwitcher,
-    eventTracking,
-    impressionTracking
+    eventTracking
 ) {
     'use strict';
 
@@ -50,7 +48,6 @@ define([
         formEls.$NOTICES.removeAttr('hidden');
 
         eventTracking.completedPersonalDetails();
-        impressionTracking.billingDetailsTracking();
     }
 
     function handleValidation(personalDetails) {
@@ -75,7 +72,6 @@ define([
         fieldSwitcher.init();
         var $actionEl = formEls.$YOUR_DETAILS_SUBMIT;
         var actionEl = $actionEl[0];
-        impressionTracking.personalDetailsTracking();
 
         if ($actionEl.length) {
             actionEl.addEventListener('click', function(e) {
