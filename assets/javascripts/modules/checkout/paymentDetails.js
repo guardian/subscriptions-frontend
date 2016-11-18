@@ -8,6 +8,7 @@ define([
     'modules/checkout/displayCardImg',
     'modules/checkout/payment',
     'modules/checkout/eventTracking',
+    'modules/checkout/impressionTracking',
     'lodash/collection/find',
     'modules/forms/loader',
     'lodash/object/assign'
@@ -18,6 +19,7 @@ define([
              displayCardImg,
              payment,
              eventTracking,
+             impressionTracking,
              find,
              loader,
              assign) {
@@ -50,6 +52,7 @@ define([
             .scrollIntoView();
 
         eventTracking.completedPaymentDetails();
+        impressionTracking.paymentReviewTracking();
     }
 
     function handleValidation() {
