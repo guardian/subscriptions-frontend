@@ -1,6 +1,6 @@
 package forms
 
-import com.gu.i18n.{CountryGroup, Currency, Title}
+import com.gu.i18n._
 import com.gu.memsub.Address
 import com.gu.memsub.Subscription.ProductRatePlanId
 import com.gu.memsub.promo.PromoCode
@@ -8,12 +8,14 @@ import com.gu.memsub.subsv2.CatalogPlan
 import com.gu.memsub.subsv2.Catalog
 import com.gu.memsub.BillingPeriod
 import forms.SubscriptionsForm._
-import model._
+import model.{SubscribeRequest, _}
 import play.api.data.Forms._
 import play.api.data.format.Formats._
 import play.api.data.format.Formatter
 import play.api.data.{Form, _}
 import play.api.mvc.{AnyContent, Request}
+import model.ContentSubscriptionPlanOps._
+import views.support.CountryWithCurrency
 
 import scalaz.\/
 
@@ -49,10 +51,48 @@ class SubscriptionsForm(catalog: Catalog) {
     def asEither: Either[Seq[FormError], A] = in.fold(e => Left(e.errors), Right(_))
   }
 
+  private def validationError(key:String, msg:String) = \/.left(Seq(FormError(key, msg)))
+
+  private def invalidCurrencyError = validationError("currency", "invalid plan, currency and country combination")
+
+  def toSubscribeRequest(subscriptionData: SubscriptionData, digipackData: DigipackData): Seq[FormError] \/ SubscribeRequest = {
+    val selectedCountrySettings = for {
+      country <- subscriptionData.personalData.address.country
+      validBillingCountries = digipackData.plan.localizationSettings.availableBillingCountriesWithCurrency
+      countrySettings <- validBillingCountries.find(_.country == country)
+    } yield (countrySettings)
+
+    selectedCountrySettings match {
+      case None => validationError("country", "invalid Country")
+      case Some(settings) => if (PaymentValidation.validateCurrency(subscriptionData.currency, settings, digipackData.plan)) \/.right(SubscribeRequest(subscriptionData, Right(digipackData))) else invalidCurrencyError
+    }
+  }
+
+  def toSubscribeRequest (subscriptionData: SubscriptionData, paperData: PaperData): Seq[FormError] \/ SubscribeRequest = {
+    val localizationSettings = paperData.plan.localizationSettings
+    val billingCountrySettings = for {
+      country <- subscriptionData.personalData.address.country
+      validBillingCountries = localizationSettings.availableBillingCountriesWithCurrency
+      countrySettings <- validBillingCountries.find(_.country == country)
+    } yield (countrySettings)
+
+    val deliveryCountrySettings = for {
+      country <- paperData.deliveryAddress.country
+      validDeliveryCountries <- localizationSettings.availableDeliveryCountriesWithCurrency
+      countrySettings <- validDeliveryCountries.find(_.country == country)
+    } yield (countrySettings)
+
+    (billingCountrySettings, deliveryCountrySettings) match {
+      case (None, _) => validationError("billing address", "invalid billing country")
+      case (_, None) => validationError("delivery address", "invalid delivery country")
+      case (Some(billingSettings), Some(deliverySettings)) => if (PaymentValidation.validateCurrency(subscriptionData.currency, deliverySettings, paperData.plan)) \/.right(SubscribeRequest(subscriptionData, Left(paperData))) else invalidCurrencyError
+    }
+  }
+
   def bindFromRequest(implicit r: Request[AnyContent]): Seq[FormError] \/ SubscribeRequest = {
     (subsForm.bindFromRequest().asEither, digipackForm.bindFromRequest().asEither, paperForm.bindFromRequest().asEither) match {
-      case(Right(a), Right(d), Left(_)) => \/.right(SubscribeRequest(a, Right(d)))
-      case(Right(a), Left(_), Right(p)) => \/.right(SubscribeRequest(a, Left(p)))
+      case(Right(a), Right(d), Left(_)) => toSubscribeRequest(a,d)
+      case(Right(a), Left(_), Right(p)) => toSubscribeRequest(a,p)
       case(a, b, c) => \/.left(a.left.toOption.toSeq.flatten ++ b.left.toOption.toSeq.flatten ++ c.left.toOption.toSeq.flatten)
     }
   }

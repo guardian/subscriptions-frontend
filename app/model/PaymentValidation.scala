@@ -1,6 +1,9 @@
 package model
 
-import com.gu.i18n.{Country, Currency, GBP}
+import com.gu.i18n.{Country, Currency, GBP, USD}
+import com.gu.memsub.Product
+import com.gu.memsub.subsv2.CatalogPlan
+import views.support.CountryWithCurrency
 
 object PaymentValidation {
   def validateDirectDebit(subscriptionData: SubscriptionData): Boolean = {
@@ -9,5 +12,15 @@ object PaymentValidation {
         subscriptionData.personalData.address.country.contains(Country.UK) && subscriptionData.currency == GBP
       case _ => true
     }
+  }
+
+  def validateCurrency(currency: Currency, settings: CountryWithCurrency, plan: CatalogPlan.ContentSubscription): Boolean = {
+
+    def isValidCurrencyOverride = plan.product match {
+      case Product.WeeklyZoneB => currency == GBP && settings.currency == USD && settings.country != Country.US
+      case _ => false
+    }
+
+    settings.currency == currency || isValidCurrencyOverride
   }
 }

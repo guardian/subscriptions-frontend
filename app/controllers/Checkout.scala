@@ -36,24 +36,8 @@ import scalaz.std.option._
 import scalaz.std.scalaFuture._
 import scalaz.syntax.applicative._
 import scalaz.{NonEmptyList, OptionT}
-
+import model.ContentSubscriptionPlanOps._
 object Checkout extends Controller with LazyLogging with CatalogProvider {
-
-  val ukAndIsleOfMan = CountryGroup.UK.copy(countries = List(Country.UK, Country("IM", "Isle of Man")))
-  val weeklyUkCountries = CountryGroup.UK.copy(
-    countries = List(
-      Country.UK,
-      Country("GG", "Guernsey"),
-      Country("IM", "Isle of Man"),
-      Country("JE", "Jersey")
-    ))
-
-  val weeklyZoneAGroups = List(weeklyUkCountries, CountryGroup.US)
-  val weeklyZoneBGroups = {
-    val rowUk = CountryGroup("Row Uk", "uk", None, CountryGroup.UK.countries.filterNot(weeklyUkCountries.countries.contains(_)), GBP, PostCode)
-    rowUk :: CountryGroup.allGroups.filterNot(group => (CountryGroup.UK :: weeklyZoneAGroups) contains group)
-  }
-
 
   import SessionKeys.{Currency => _, UserId => _, _}
 
@@ -90,12 +74,11 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
 
       def renderCheckoutFor(planList: PlanList[CatalogPlan.ContentSubscription]) = {
 
-        val supportedCurrencies = planList.default.charges.price.currencies
-
         val personalData = user.map(PersonalData.fromIdUser)
 
-        def getSettings(availableDeliveryCountries: Option[List[CountryWithCurrency]], availableBillingCountries: List[CountryWithCurrency], fallbackCountry: Option[Country], fallbackCurrency: Currency) = {
-          val availableCountries = availableDeliveryCountries.getOrElse(availableBillingCountries)
+        def getSettings(fallbackCountry: Option[Country], fallbackCurrency: Currency) = {
+          val localizationSettings = planList.default.localizationSettings
+          val availableCountries = localizationSettings.availableDeliveryCountriesWithCurrency.getOrElse(localizationSettings.availableBillingCountriesWithCurrency)
 
           def availableCountryWithCurrencyFor(country: Option[Country]) = country.flatMap(c => availableCountries.find(_.country == c))
           val personalDataCountry = personalData.flatMap(data => data.address.country)
@@ -103,52 +86,19 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
           val defaultCountryWithCurrency = availableCountryWithCurrencyFor(personalDataCountry) orElse availableCountryWithCurrencyFor(fallbackCountry)
 
           CountryAndCurrencySettings(
-            availableDeliveryCountries = availableDeliveryCountries,
-            availableBillingCountries = availableBillingCountries,
+            availableDeliveryCountries = localizationSettings.availableDeliveryCountriesWithCurrency,
+            availableBillingCountries = localizationSettings.availableBillingCountriesWithCurrency,
             defaultCountry = defaultCountryWithCurrency.map(_.country),
             defaultCurrency = defaultCountryWithCurrency.map(_.currency).getOrElse(fallbackCurrency)
           )
         }
-        def allCountriesWithCurrencyOrGBP = CountryWithCurrency.whitelisted(supportedCurrencies, GBP)
 
         val countryAndCurrencySettings = planList.default.product match {
-
-          case Product.Digipack => getSettings(
-            availableDeliveryCountries = None,
-            availableBillingCountries = allCountriesWithCurrencyOrGBP,
-            fallbackCountry = countryGroup.defaultCountry,
-            fallbackCurrency = GBP
-          )
-          case Product.Delivery => {
-            val deliveryCountries = List(CountryWithCurrency(Country.UK, GBP))
-            getSettings(
-              availableDeliveryCountries = Some(deliveryCountries),
-              availableBillingCountries = deliveryCountries,
-              fallbackCountry = Some(Country.UK),
-              fallbackCurrency = GBP
-            )
-          }
-          case Product.Voucher => {
-            val voucherCountries = CountryWithCurrency.fromCountryGroup(ukAndIsleOfMan)
-            getSettings(
-              availableDeliveryCountries = Some(voucherCountries),
-              availableBillingCountries = voucherCountries,
-              fallbackCountry = Some(Country.UK),
-              fallbackCurrency = GBP
-            )
-          }
-          case Product.WeeklyZoneA => getSettings(
-            availableDeliveryCountries = Some(CountryWithCurrency.whitelisted(supportedCurrencies, GBP, weeklyZoneAGroups)),
-            availableBillingCountries = allCountriesWithCurrencyOrGBP,
-            fallbackCountry = countryGroup.defaultCountry,
-            fallbackCurrency = GBP
-          )
-          case Product.WeeklyZoneB => getSettings(
-            availableDeliveryCountries = Some(CountryWithCurrency.whitelisted(supportedCurrencies, USD, weeklyZoneBGroups)),
-            availableBillingCountries = allCountriesWithCurrencyOrGBP,
-            fallbackCountry = None,
-            fallbackCurrency = USD
-          )
+          case Product.Digipack => getSettings(countryGroup.defaultCountry, GBP)
+          case Product.Delivery => getSettings(Some(Country.UK), GBP)
+          case Product.Voucher => getSettings(Some(Country.UK), GBP)
+          case Product.WeeklyZoneA => getSettings(countryGroup.defaultCountry, GBP)
+          case Product.WeeklyZoneB => getSettings(None, USD)
         }
 
         val digitalEdition = model.DigitalEdition.getForCountry(countryAndCurrencySettings.defaultCountry)
