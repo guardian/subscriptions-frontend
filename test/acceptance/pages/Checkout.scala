@@ -4,7 +4,6 @@ import acceptance.util.{Browser, Config, Driver, TestUser}
 import Config.baseUrl
 import org.openqa.selenium.By
 import org.scalatest.selenium.Page
-import views.fragments.ABTest
 
 case class Checkout(testUser: TestUser, endpoint: String = "checkout") extends Page with Browser {
   val url = s"$baseUrl/$endpoint"
