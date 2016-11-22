@@ -40,7 +40,6 @@ define([
                 } else {
                     validity.allValid = true;
                     resolve(validity);
-                    return;
                 }
             } else {
                 validity.allValid = false;

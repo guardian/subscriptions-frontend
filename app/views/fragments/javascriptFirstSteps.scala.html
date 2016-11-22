@@ -5,10 +5,10 @@
 @(jsVars: JsVars, touchpointBackendResolutionOpt: Option[services.TouchpointBackend.Resolution])
 
 <!--[if lte IE 9]>
-<script src="  @hashedPathFor("javascripts/vendor/polyfills.js")"></script>
+<script src="@hashedPathFor("javascripts/vendor/polyfills.js")"></script>
 <![endif]-->
 <!--[if lt IE 9]>
-<script src="@hashedPathFor("javascripts/vendor/html5shiv.js")  "></script>
+<script src="@hashedPathFor("javascripts/vendor/html5shiv.js")"></script>
 <![endif]-->
 
 <script id="gu">
@@ -48,11 +48,10 @@
         zipCode: false
     }
     guardian.experience = 'stripeCheckout';
-    @*TODO: SHOULD THIS REMAIN*@
     };
 
 
-    (function (isModern) {
+    (function(isModern) {
         // We want to add/remove classes to HTML ASAP to avoid FOUC
         var htmlClassNames = ['js-on'];
         document.documentElement.className = document.documentElement.className.replace(/\bjs-off\b/g, '') + ' ' + htmlClassNames.join(' ');
@@ -70,11 +69,9 @@
         function loadData(url, cb) {
             var xhr = new XMLHttpRequest();
             xhr.open('GET', url, true);
-            xhr.onreadystatechange = function () {
+            xhr.onreadystatechange = function() {
                 if (xhr.readyState === 4 && xhr.status === 200) {
-                    if (cb) {
-                        cb.call(this, xhr);
-                    }
+                    if (cb) { cb.call(this, xhr); }
                 }
             };
             xhr.timeout = 5000;
