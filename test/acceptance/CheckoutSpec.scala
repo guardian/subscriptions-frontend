@@ -53,7 +53,7 @@ class CheckoutSpec extends FeatureSpec with Browser
 
   feature("Subscription checkout") {
 
-    scenario("Guest users subscribe with direct debit", Acceptance) {
+    scenario("Guest users subscribe for the Digital Pack with direct debit", Acceptance) {
       checkDependenciesAreAvailable
       val testUser = new TestUser
 
@@ -113,19 +113,16 @@ class CheckoutSpec extends FeatureSpec with Browser
         assert(Driver.cookiesSet.map(_.getName).contains(idCookie)) }
     }
 
-    scenario("Identity user subscribes with credit card", Acceptance) {
+    scenario("Identity user subscribes for Guardian Weekly with direct debit", Acceptance) {
       withRegisteredIdentityUserFixture { testUser =>
 
-        Given("registered and signed in Identity users want to subscribe by clicking on " +
-          "'Start your free trial'")
-
-        Then("they should land on 'Checkout' page,")
-        val checkout = pages.Checkout(testUser)
+        When("users visit the Guardian Weekly 'Checkout' page,")
+        val checkout = pages.Checkout(testUser, "checkout/weeklyzonea-guardianweeklyquarterly")
         checkout.setInStripeTest(false)
-        go.to(checkout.url + "?stripe=old")
+        go.to(checkout)
         assert(checkout.pageHasLoaded())
 
-        And("should be signed in with their Identity account,")
+        Then("they should be signed in with their Identity account,")
         assert(checkout.userIsSignedIn)
 
         And("first name, last name, and email address should be pre-filled,")
@@ -139,26 +136,37 @@ class CheckoutSpec extends FeatureSpec with Browser
         And("the section 'Your details' should load.")
         assert(checkout.yourDetailsSectionHasLoaded())
 
-        Then("Go along to the address details")
+        When("the user clicks on the 'Continue' button")
         checkout.clickPersonalDetailsContinueButton()
 
-        When("they fill in the address,")
-        checkout.fillInBillingAddress()
+        Then("the section 'Delivery Address' should load.")
+        assert(checkout.deliveryAddressSectionHasLoaded())
 
-        And("click on 'Continue' button,")
+        When("they fill in delivery address details,")
+        checkout.fillInDeliveryAddressDetails()
+
+        And("click on the 'Continue' button,")
+        checkout.clickDeliveryAddressDetailsContinueButton()
+
+        Then("section 'Billing Address' should load.")
+        assert(checkout.billingAddressSectionHasLoaded())
+
+        Given("checkbox 'Bill my delivery address' is pre-selected,")
+
+        When("they click on 'Continue' button,")
         checkout.clickBillingDetailsContinueButton()
 
         Then("the section 'Payment Details' should load.")
         assert(checkout.directDebitSectionHasLoaded())
 
-        When("Users select credit card payment option,")
-        checkout.selectCreditCardPaymentOption()
+        When("they fill in direct debit payment details")
+        checkout.fillInDirectDebitPaymentDetails()
 
-        And("fill in credit card payment details,")
-        checkout.fillInCreditCardPaymentDetails()
+        And("select 'Confirm account holder' checkbox,")
+        checkout.selectConfirmAccountHolder()
 
         And("click on 'Continue' button,")
-        checkout.clickCredictCardPaymentContinueButton()
+        checkout.clickDebitPaymentContinueButton()
 
         Then("the section 'Confirm and Review' should load.")
         assert(checkout.reviewSectionHasLoaded())
@@ -175,13 +183,13 @@ class CheckoutSpec extends FeatureSpec with Browser
       }
     }
 
-    scenario("Guest users subscribe to Voucher Everyday package", Acceptance) {
+    scenario("Guest users subscribe to Voucher Everyday package with a credit card", Acceptance) {
       checkDependenciesAreAvailable
       val testUser = new TestUser
 
       val checkout = Checkout(testUser, "checkout/voucher-everyday")
       When("users visit the 'Voucher Everyday Checkout' page,")
-      go.to(checkout)
+      go.to(checkout.url + "?stripe=old")
       assert(checkout.pageHasLoaded())
 
       Then("section 'Your details' should load.")
@@ -213,14 +221,14 @@ class CheckoutSpec extends FeatureSpec with Browser
       Then("section 'Payment Details' should load.")
       assert(checkout.directDebitSectionHasLoaded())
 
-      When("they fill in direct debit payment details,")
-      checkout.fillInDirectDebitPaymentDetails()
+      When("Users select credit card payment option,")
+      checkout.selectCreditCardPaymentOption()
 
-      And("select 'Confirm account holder' checkbox,")
-      checkout.selectConfirmAccountHolder()
+      And("fill in credit card payment details,")
+      checkout.fillInCreditCardPaymentDetails()
 
       And("click on 'Continue' button,")
-      checkout.clickDebitPaymentContinueButton()
+      checkout.clickCreditCardPaymentContinueButton()
 
       Then("section 'Review and Confirm' should load.")
       assert(checkout.reviewSectionHasLoaded())
@@ -243,7 +251,7 @@ class CheckoutSpec extends FeatureSpec with Browser
         assert(Driver.cookiesSet.map(_.getName).contains(idCookie)) }
     }
 
-    scenario("Identity user subscribes with credit card through Stripe Checkout", Acceptance) {
+    scenario("Identity user subscribes for Digital Pack, with credit card through Stripe Checkout", Acceptance) {
       withRegisteredIdentityUserFixture { testUser =>
 
         Given("registered and signed in Identity users want to subscribe by clicking on " +
@@ -286,7 +294,7 @@ class CheckoutSpec extends FeatureSpec with Browser
         checkout.selectCreditCardPaymentOption()
 
         And("click on 'Continue' button,")
-        checkout.clickCredictCardPaymentContinueButton()
+        checkout.clickCreditCardPaymentContinueButton()
 
         Then("the section 'Confirm and Review' should load.")
         assert(checkout.reviewSectionHasLoaded())
