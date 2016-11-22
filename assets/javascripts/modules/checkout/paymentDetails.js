@@ -1,11 +1,10 @@
-/* global guardian  */
+/* global guardian */
 
 define([
     'bean',
     'utils/ajax',
     'modules/forms/toggleError',
     'modules/checkout/formElements',
-    'modules/checkout/displayCardImg',
     'modules/checkout/payment',
     'modules/checkout/eventTracking',
     'lodash/collection/find',
@@ -15,7 +14,6 @@ define([
              ajax,
              toggleError,
              formEls,
-             displayCardImg,
              payment,
              eventTracking,
              find,
@@ -67,7 +65,7 @@ define([
                 detailsConfirmed: formEls.$CONFIRM_PAYMENT[0].checked
             });
         } else if (paymentMethod === 'card') {
-            guardian.experience = guardian.stripeCheckout ? 'stripeCheckout' : 'stripeJS';
+            guardian.experience = 'stripeCheckout';
             toggleError(formEls.$CARD_CONTAINER, false);
             assign(paymentDetails, {
                 cardNumber: formEls.$CARD_NUMBER.val(),
@@ -96,14 +94,6 @@ define([
             bean.on($actionEl[0], 'click', function (evt) {
                 evt.preventDefault();
                 handleValidation();
-            });
-        }
-
-        var $cardNumberEl = formEls.$CARD_NUMBER;
-        if ($cardNumberEl.length) {
-            bean.on($cardNumberEl[0], 'keyup blur', function (e) {
-                var input = e && e.target;
-                displayCardImg(input.value);
             });
         }
     }

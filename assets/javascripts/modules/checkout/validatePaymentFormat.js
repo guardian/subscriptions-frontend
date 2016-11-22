@@ -1,4 +1,3 @@
-/* global Stripe */
 define(['modules/forms/regex'], function (regex) {
     'use strict';
 
@@ -44,25 +43,10 @@ define(['modules/forms/regex'], function (regex) {
 
         }
 
-        if (guardian.stripeCheckout && data.paymentMethod === 'card') {
+        if (data.paymentMethod === 'card') {
             validity.allValid = true;
             return validity;
-
         }
-        if (data.paymentMethod === 'card') {
-            validity.cardNumberValid = Stripe.card.validateCardNumber(data.cardNumber);
-            validity.cardCVCValid = Stripe.card.validateCVC(data.cardCVC);
-            validity.cardExpiryValid = Stripe.card.validateExpiry(data.cardExpiryMonth, data.cardExpiryYear);
-
-            validity.allValid = (
-                validity.cardNumberValid &&
-                validity.cardCVCValid &&
-                validity.cardExpiryValid
-            );
-            return validity;
-        }
-
-
     };
 
 });

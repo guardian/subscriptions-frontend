@@ -7,10 +7,10 @@
 @(jsVars: JsVars, touchpointBackendResolutionOpt: Option[services.TouchpointBackend.Resolution])
 
 <!--[if lte IE 9]>
-<script src="@hashedPathFor("javascripts/vendor/polyfills.js")"></script>
+<script src="  @hashedPathFor("javascripts/vendor/polyfills.js")"></script>
 <![endif]-->
 <!--[if lt IE 9]>
-<script src="@hashedPathFor("javascripts/vendor/html5shiv.js")"></script>
+<script src="@hashedPathFor("javascripts/vendor/html5shiv.js")  "></script>
 <![endif]-->
 
 <script id="gu">
@@ -23,7 +23,7 @@
         trackingId: '@Config.googleAnalyticsTrackingId',
         cookieDomain: @if(Config.stage == "PROD") { 'auto' } else { 'none' }
     };
-    guardian.isModernBrowser =  (
+    guardian.isModernBrowser = (
         'querySelector' in document
         && 'addEventListener' in window
         && 'localStorage' in window
@@ -42,10 +42,19 @@
         touchpointBackendResolution <- touchpointBackendResolutionOpt;
         backend = touchpointBackendResolution.backend
     ) {
-        guardian.stripePublicKey = '@backend.paymentService.stripeService.publicKey';
+    guardian.stripeCheckout = {
+        key: '@backend.paymentService.stripeService.publicKey',
+        image: '@hashedPathFor("images/logos/gu.png")',
+        locale: 'auto',
+        name: 'Guardian',
+        zipCode: false
     }
+    guardian.experience = 'stripeCheckout';
+    @*TODO: SHOULD THIS REMAIN*@
+    };
 
-    (function(isModern) {
+
+    (function (isModern) {
         // We want to add/remove classes to HTML ASAP to avoid FOUC
         var htmlClassNames = ['js-on'];
         document.documentElement.className = document.documentElement.className.replace(/\bjs-off\b/g, '') + ' ' + htmlClassNames.join(' ');
@@ -60,34 +69,40 @@
         /**
          * Simple XHR abstraction
          */
-        function loadData( url, cb ) {
+        function loadData(url, cb) {
             var xhr = new XMLHttpRequest();
             xhr.open('GET', url, true);
-            xhr.onreadystatechange = function() {
+            xhr.onreadystatechange = function () {
                 if (xhr.readyState === 4 && xhr.status === 200) {
-                    if (cb) { cb.call(this, xhr); }
+                    if (cb) {
+                        cb.call(this, xhr);
+                    }
                 }
             };
             xhr.timeout = 5000;
             xhr.send();
         }
+
         /**
          * Add data to local storage, with buildNumber key
          * Break cache if buildNumber has changed.
          */
         function updateLocalStorage(prefix, data) {
             var expr = new RegExp('^' + prefix + '.', 'g');
-            Object.keys(localStorage).forEach(function(key) {
+            Object.keys(localStorage).forEach(function (key) {
                 if (key.match(expr)) {
                     try {
                         localStorage.removeItem(key);
-                    } catch(e) { }
+                    } catch (e) {
+                    }
                 }
             });
             try {
                 localStorage.setItem(prefix + '.' + guardian.buildNumber, data);
-            } catch(e) {}
+            } catch (e) {
+            }
         }
+
         /**
          * Insert SVG sprite into document
          */
@@ -103,7 +118,7 @@
             if (data) {
                 inlineSvg(data);
             } else {
-                loadData("@hashedPathFor("images/svg-sprite.svg")", function(xhr) {
+                loadData("@hashedPathFor("images/svg-sprite.svg")", function (xhr) {
                     inlineSvg(xhr.responseText);
                     updateLocalStorage('icons', xhr.responseText);
                 });

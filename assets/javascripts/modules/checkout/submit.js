@@ -1,4 +1,4 @@
-/* globals StripeCheckout */
+/* global StripeCheckout */
 define([
     '$',
     'bean',
@@ -30,11 +30,6 @@ define([
 
     var FIELDSET_COLLAPSED = 'is-collapsed';
 
-    function useCheckout() {
-        return guardian.stripeCheckout && formEls.$CARD_TYPE[0].checked
-    }
-
-
     function submitHandler() {
         if (formEls.$CHECKOUT_SUBMIT.length) {
 
@@ -51,7 +46,7 @@ define([
 
         submitEl.setAttribute('disabled', 'disabled');
 
-        if (!useCheckout()) {
+        if (!formEls.$CARD_TYPE[0].checked) {
             send();
             return;
         }

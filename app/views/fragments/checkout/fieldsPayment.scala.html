@@ -1,5 +1,4 @@
 @(stripeCheckout: Boolean)
-
 @* ===== Payment type ===== *@
 <div data-currency="GBP">
     <div data-billing-country="GB">
@@ -31,9 +30,5 @@
     </div>
 </div>
 <div class="payment-type payment-type--card js-payment-type-card">
-    @if(stripeCheckout){
-        @fragments.checkout.fieldsStripeCheckout()
-    }else {
-        @fragments.checkout.fieldsCard()
-    }
+@fragments.checkout.fieldsStripeCheckout()
 </div>
