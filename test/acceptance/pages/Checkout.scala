@@ -29,11 +29,7 @@ case class Checkout(testUser: TestUser, endpoint: String = "checkout") extends P
 
   def clickDebitPaymentContinueButton(): Unit = DebitCardPaymentDetails.continue()
 
-  def fillInCreditCardPaymentDetails(): Unit = CreditCardPaymentDetails.fillIn()
-
   def fillInCreditCardPaymentDetailsStripe(): Unit = StripeCheckout.fillIn()
-
-  def setInStripeTest(b: Boolean) = StripeCheckout.setInTest(b)
 
   def clickCredictCardPaymentContinueButton() = CreditCardPaymentDetails.continue()
 
@@ -146,37 +142,7 @@ case class Checkout(testUser: TestUser, endpoint: String = "checkout") extends P
 
   private object CreditCardPaymentDetails {
     val paymentType = name("payment.type")
-    val cardNumber = id("payment-card-number")
-    val cardExpiryMonth = id("payment-card-expiry-month")
-    val cardExpiryYear = id("payment-card-expiry-year")
-    val cardCvc = id("payment-card-cvc")
     val continueButton = cssSelector(".js-checkout-payment-details-submit")
-
-    private def fillInHelper(cardNum: String) = {
-      setValue(cardNumber, "4242424242424242")
-      setValue(cardExpiryMonth, "10")
-      setValue(cardExpiryYear, "19")
-      setValue(cardCvc, "111")
-    }
-
-    def fillIn(): Unit = fillInHelper("4242424242424242")
-
-    /* https://stripe.com/docs/testing */
-
-    // Charge will be declined with a card_declined code.
-    def fillInCardDeclined(): Unit = fillInHelper("4000000000000002")
-
-    // Charge will be declined with a card_declined code and a fraudulent reason.
-    def fillInCardDeclinedFraud(): Unit = fillInHelper("4100000000000019")
-
-    // Charge will be declined with an incorrect_cvc code.
-    def fillInCardDeclinedCvc(): Unit = fillInHelper("4000000000000127")
-
-    // Charge will be declined with an expired_card code.
-    def fillInCardDeclinedExpired(): Unit = fillInHelper("4000000000000069")
-
-    // Charge will be declined with a processing_error code.
-    def fillInCardDeclinedProcessError(): Unit = fillInHelper("4000000000000119")
 
     def continue(): Unit = clickOn(continueButton)
   }
@@ -192,15 +158,6 @@ case class Checkout(testUser: TestUser, endpoint: String = "checkout") extends P
     val cardExp = xpath("//div[label/text() = \"Expiry\"]/input")
     val cardCvc = xpath("//div[label/text() = \"CVC\"]/input")
     val submitButton = xpath("//div[button]")
-
-    def setInTest(inTest: Boolean) = {
-
-      Driver.addCookie(ABTest.TestIdCookieName, if (inTest) {
-        "2"
-      } else {
-        "1"
-      })
-    }
 
     private def fillInHelper(cardNum: String) = {
 
