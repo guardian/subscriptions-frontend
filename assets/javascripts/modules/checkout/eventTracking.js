@@ -32,6 +32,11 @@ define(['modules/analytics/ga', 'modules/checkout/ratePlanChoice'], function (ga
         completedDeliveryDetails: trackEvent('Delivery address'),
         init: function () {
             ratePlanChoice.registerOnChangeAction(trackRatePlanChange);
+
+            // Trigger the Converted metric if the product was already purchased upon page initialisation.
+            if (guardian.productData.productPurchased) {
+                trackEvent('Converted');
+            }
         }
     };
 });
