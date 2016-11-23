@@ -15,7 +15,7 @@ object DigitalPack extends Controller {
     Redirect(routes.DigitalPack.landingPage(digitalEdition.id).url, request.queryString, SEE_OTHER)
 
   def redirect = NoCacheAction { implicit request =>
-    val countryGroup = request.getFastlyCountry.getOrElse(UK)     // UK fallback for when no GEO-IP country (test env)
+    val countryGroup = request.getFastlyCountryGroup.getOrElse(UK)     // UK fallback for when no GEO-IP country (test env)
     val digitalEdition = getForCountryGroup(countryGroup)
     redirectResult(digitalEdition)
   }
