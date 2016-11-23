@@ -297,8 +297,6 @@ class CheckoutService(identityService: IdentityService,
       val effective = currentSubEnd
       val contractEffective = nextFridayFrom(effective)
       val customerAcceptance = contractEffective
-      println(s"sub ends $currentSubEnd effective is $effective contract effective is $contractEffective")
-     // case class RatePlan(productRatePlanId: String, chargeOverride: Option[ChargeOverride], featureIds: Seq[String] = Nil)
 
       val newRatePlan = RatePlan(renewal.plan.id.get, None) // TODO IS IT OK TO GENERATE THIS LIKE THIS?
 
