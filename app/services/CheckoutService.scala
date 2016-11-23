@@ -15,16 +15,19 @@ import com.gu.zuora.api.ZuoraService
 import com.gu.zuora.soap.models.Commands._
 import com.gu.zuora.soap.models.Commands.{Account, PaymentMethod, RatePlan, Subscribe}
 import com.gu.zuora.soap.models.Commands._
+import com.gu.zuora.soap.models.Queries
 import com.gu.zuora.soap.models.Results.SubscribeResult
 import com.gu.zuora.soap.models.errors._
+import com.gu.zuora.soap.writers.Command
 import com.typesafe.scalalogging.LazyLogging
 import forms.Renewal
 import model._
 import model.error.CheckoutService._
 import model.error.IdentityService._
 import model.error.SubsError
-import org.joda.time.{Days, LocalDate}
+import org.joda.time.{DateTimeConstants, Days, LocalDate}
 import touchpoint.ZuoraProperties
+import views.html.account.renew
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scalaz.{EitherT, Monad, NonEmptyList, \/, \/-}
@@ -257,30 +260,68 @@ class CheckoutService(identityService: IdentityService,
 
   def renewSubscription(subscription: Subscription[SubscriptionPlan.PaperPlan], renewal: Renewal ) = {
 
-    def getPayment(contact:Contact):PaymentService#Payment = {
+    def getPayment(contact:Contact, billto: Queries.Contact):PaymentService#Payment = {
       val idMinimalUser = IdMinimalUser(contact.identityId, None)
       val pid = PurchaserIdentifiers(contact, Some(idMinimalUser))
       renewal.paymentData match {
         case cd: CreditCardData =>
           val currency = subscription.plan.charges.currencies.head // TODO why is it a set and what if there is none (or more than one) ?
           paymentService.makeCreditCardPayment(cd, currency, pid)
-        case dd: DirectDebitData => paymentService.makeDirectDebitPayment(dd, contact.firstName.getOrElse(""), contact.lastName, contact) //todo what to do if first name is missing from salesforce?
+        case dd: DirectDebitData => paymentService.makeDirectDebitPayment(dd, billto.firstName, billto.lastName, contact)
       }
     }
 
-    val paymentMethod = for {
-      contact <- GetSalesforceContactForSub(subscription)(zuoraService, salesforceService.repo, global)
-      payment = getPayment(contact)
-      paymentMethod <- payment.makePaymentMethod
-      createPaymentMethod = CreatePaymentMethod(subscription.accountId, paymentMethod, payment.makeAccount)
-      updateResult <- zuoraService.createPaymentMethod(createPaymentMethod)
+//    case class Amend(
+//                      subscriptionId: String,
+//                      plansToRemove: Seq[String],
+//                      newRatePlans: NonEmptyList[RatePlan],
+//                      promoCode: Option[PromoCode] = None,
+//                      previewMode: Boolean = false
+//                    )
+//
+    val ratePlan = RatePlan(renewal.plan.id.get, None, Nil) //TODO is this ok ?
+    val amend =   Amend(subscriptionId = subscription.id.get,
+                        plansToRemove = Nil,
+                        newRatePlans = NonEmptyList(ratePlan)) //TODO PROMO CODE? PREVIEW MODE?
+    def addPlan = {
+      //TODO ADD TEST FOR THIS!!! (AND SEE IF THERE IS A BETTER WAY)
+      def nextFridayFrom(d: LocalDate) = {
+        val nearestFriday = d.withDayOfWeek(DateTimeConstants.FRIDAY)
+        if (!nearestFriday.isBefore(d)) {
+          nearestFriday
+        } else {
+          d.plusWeeks(1).withDayOfWeek(DateTimeConstants.FRIDAY)
+        }
+      }
+      val currentSubEnd = subscription.plan.end
+      val effective = currentSubEnd
+      val contractEffective = nextFridayFrom(effective)
+      val customerAcceptance = contractEffective
+      println(s"sub ends $currentSubEnd effective is $effective contract effective is $contractEffective")
+     // case class RatePlan(productRatePlanId: String, chargeOverride: Option[ChargeOverride], featureIds: Seq[String] = Nil)
 
+      val newRatePlan = RatePlan(renewal.plan.id.get, None) // TODO IS IT OK TO GENERATE THIS LIKE THIS?
+
+      val renewCommand =  Renew(subscription.id.get, newRatePlan, effective, contractEffective)
+      zuoraService.renewSubscription(renewCommand)
+    }
+
+    val response = for {
+      //TODO TOO MANY API CALLS to get the bill to I have to make 2 calls (in rest it comes with the account)?
+      account <- zuoraService.getAccount(subscription.accountId)
+      billto <- zuoraService.getContact(account.billToId)
+      contact <- GetSalesforceContactForSub(subscription)(zuoraService, salesforceService.repo, global)
+      payment = getPayment(contact, billto)
+      paymentMethod <- payment.makePaymentMethod
+      createPaymentMethod = CreatePaymentMethod(subscription.accountId, paymentMethod, payment.makeAccount.paymentGateway, billto)
+      updateResult <- zuoraService.createPaymentMethod(createPaymentMethod)
+      amendResult <- addPlan
     }
       yield {
         updateResult
       }
 
-    paymentMethod.recover{case e =>  e.printStackTrace()}//TODO SEE WHAT TO RETURN!
+    response.recover{case e =>  e.printStackTrace()}//TODO SEE WHAT TO RETURN!
 
   }
 }
