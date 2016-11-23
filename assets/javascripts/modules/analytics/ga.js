@@ -83,6 +83,8 @@ define(['modules/analytics/analyticsEnabled',
             'cookieDomain': 'auto'
         });
         ga('jellyfishGA.send', 'pageview');
+
+        flushEventQueue();
     }
 
     function flushEventQueue() {
