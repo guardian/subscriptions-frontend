@@ -34,7 +34,7 @@ define(['modules/analytics/ga', 'modules/checkout/ratePlanChoice'], function (ga
             ratePlanChoice.registerOnChangeAction(trackRatePlanChange);
 
             // Trigger the Converted metric if the product was already purchased upon page initialisation.
-            if (guardian.productData.productPurchased) {
+            if (guardian.pageInfo.productData.productPurchased) {
                 trackEvent('Converted');
             }
         }
