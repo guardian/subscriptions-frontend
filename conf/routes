@@ -28,8 +28,8 @@ GET         /checkout/findAddress            controllers.Checkout.findAddress(po
 
 # Checkout pages
 GET         /checkout/thank-you              controllers.Checkout.thankYou()
-GET         /checkout                        controllers.Checkout.renderCheckout(countryGroup: CountryGroup ?= CountryGroup.UK, promoCode: Option[PromoCode], supplierCode: Option[SupplierCode], forThisPlan = "digitalpack-digitalpackmonthly")
-GET         /checkout/:forThisPlan           controllers.Checkout.renderCheckout(countryGroup: CountryGroup ?= CountryGroup.UK, promoCode: Option[PromoCode], supplierCode: Option[SupplierCode], forThisPlan: String)
+GET         /checkout                        controllers.Checkout.renderCheckout(countryGroup: String ?= CountryGroup.UK.id, promoCode: Option[PromoCode], supplierCode: Option[SupplierCode], forThisPlan = "digitalpack-digitalpackmonthly")
+GET         /checkout/:forThisPlan           controllers.Checkout.renderCheckout(countryGroup: String ?= CountryGroup.UK.id, promoCode: Option[PromoCode], supplierCode: Option[SupplierCode], forThisPlan: String)
 
 # collection and delivery
 GET         /collection/paper-digital        controllers.Shipping.viewCollectionPaperDigital

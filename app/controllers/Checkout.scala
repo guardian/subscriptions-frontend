@@ -47,9 +47,12 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
   def getBetterPlans[A <: CatalogPlan.Paid](plan: A, others: List[A]) =
     others.sortBy(_.charges.gbpPrice.amount).dropWhile(_.charges.gbpPrice.amount <= plan.charges.gbpPrice.amount)
 
-  def renderCheckout(countryGroup: CountryGroup, promoCode: Option[PromoCode], supplierCode: Option[SupplierCode], forThisPlan: String) = NoCacheAction.async { implicit request =>
+  def renderCheckout(countryGroup: String, promoCode: Option[PromoCode], supplierCode: Option[SupplierCode], forThisPlan: String) = NoCacheAction.async { implicit request =>
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
+
+    // countryGroup String above basically means now 'countryOrCountryGroup' so we'll use the fromHint API on DetermineCountryGroup
+    val determinedCountryGroup = DetermineCountryGroup.fromHint(countryGroup) getOrElse CountryGroup.UK
 
     val matchingPlanList: Option[PlanList[CatalogPlan.ContentSubscription]] = {
 
@@ -94,10 +97,10 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
         }
 
         val countryAndCurrencySettings = planList.default.product match {
-          case Product.Digipack => getSettings(countryGroup.defaultCountry, GBP)
+          case Product.Digipack => getSettings(determinedCountryGroup.defaultCountry, GBP)
           case Product.Delivery => getSettings(Some(Country.UK), GBP)
           case Product.Voucher => getSettings(Some(Country.UK), GBP)
-          case Product.WeeklyZoneA => getSettings(countryGroup.defaultCountry, GBP)
+          case Product.WeeklyZoneA => getSettings(determinedCountryGroup.defaultCountry, GBP)
           case Product.WeeklyZoneB => getSettings(None, USD)
         }
 
@@ -117,7 +120,7 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
         Ok(views.html.checkout.payment(
           personalData = personalData,
           productData = productData,
-          countryGroup = countryGroup,
+          countryGroup = determinedCountryGroup,
           touchpointBackendResolution = resolution,
           promoCode = promo.left.toOption,
           supplierCode = resolvedSupplierCode,
