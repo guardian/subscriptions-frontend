@@ -10,7 +10,6 @@ define([
     'modules/checkout/formElements',
     'modules/checkout/eventTracking',
     'modules/checkout/stripeErrorMessages',
-    'modules/checkout/stripeCheckout',
     'modules/raven',
     'modules/checkout/formElements'
 ], function ($,
@@ -23,7 +22,6 @@ define([
              formEls,
              eventTracking,
              paymentErrorMessages,
-             stripeCheckout,
              raven,
              formElements) {
     'use strict';
@@ -34,6 +32,13 @@ define([
         if (formEls.$CHECKOUT_SUBMIT.length) {
             formEls.$CHECKOUT_SUBMIT[0].addEventListener('click', submit, false);
         }
+    }
+
+    function setPaymentToken(token) {
+        var tokenField = document.querySelector('.js-payment-token');
+        var countryField = document.querySelector('.js-payment-card-country');
+        tokenField.value = token.id;
+        countryField.value = token.card.country;
     }
 
     function submit(e) {
@@ -71,7 +76,7 @@ define([
             email: formElements.$EMAIL.val(),
             token: function (token) {
                 successfulCharge = token;
-                stripeCheckout.setPaymentToken(token.id);
+                setPaymentToken(token);
                 send();
             },
             closed: function () {
