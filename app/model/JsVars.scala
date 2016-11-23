@@ -16,12 +16,8 @@ object JsVars {
 
       val optionalCountry = Json.obj("country" -> jsVars.country.map(_.alpha2))
 
-      val optionalStripe = jsVars.stripePublicKey match {
-        case Some(stripePublicKey) => Json.obj("stripePublicKey" -> stripePublicKey)
-        case None => Json.obj()
-      }
 
-      mandatory ++ optionalCountry ++ optionalStripe
+      mandatory ++ optionalCountry
     }
   }
 }
@@ -29,7 +25,6 @@ object JsVars {
 case class JsVars(
   userIsSignedIn: Boolean = false,
   ignorePageLoadTracking: Boolean = false,
-  stripePublicKey: Option[String] = None,
   currency: Currency = GBP,
   country: Option[Country] = None
 )

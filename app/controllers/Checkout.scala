@@ -25,7 +25,6 @@ import play.api.mvc._
 import services.AuthenticationService.authenticatedUserFor
 import services._
 import utils.TestUsers.{NameEnteredInForm, PreSigninTestCookie}
-import views.fragments.ABTest
 import views.html.{checkout => view}
 import views.support.{PlanList, BillingPeriod => _, _}
 
@@ -114,8 +113,6 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
         val supplierCodeSessionData = resolvedSupplierCode.map(code => Seq(SupplierTrackingCode -> code.get)).getOrElse(Seq.empty)
         val productData = ProductPopulationData(user.map(_.address), planList)
 
-        val testId = ABTest.testIdFor
-
         Ok(views.html.checkout.payment(
           personalData = personalData,
           productData = productData,
@@ -124,9 +121,8 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
           promoCode = promo.left.toOption,
           supplierCode = resolvedSupplierCode,
           edition = digitalEdition,
-          countryAndCurrencySettings = countryAndCurrencySettings,
-          stripeCheckoutTest = Config.stripeCheckout && (testId % 2 == 0)
-        )).withSession(trackingCodeSessionData ++ supplierCodeSessionData: _*).withCookies(ABTest.testIdCookie(testId))
+          countryAndCurrencySettings = countryAndCurrencySettings
+        )).withSession(trackingCodeSessionData ++ supplierCodeSessionData: _*)
       }
 
       matchingPlanList match {

@@ -1,4 +1,4 @@
-/* global guardian, Stripe */
+/* global guardian */
 define([
     'utils/ajax',
     'modules/checkout/validatePaymentFormat',
@@ -25,28 +25,6 @@ define([
         });
     }
 
-    function cardCheck(cardNumber, cardCVC, cardExpiryMonth, cardExpiryYear) {
-        return new Promise(function (resolve) {
-            Stripe.card.createToken({
-                number: cardNumber,
-                cvc: cardCVC,
-                exp_month: cardExpiryMonth,
-                exp_year: cardExpiryYear
-            }, function (status, response) {
-                if (response.error) {
-                    // Since we've already validated the card details clientside using Stripe's
-                    // library, an error during token creation is unexpected. For simplicity we
-                    // just log the error and display a message against the card number in such cases.
-                    raven.Raven.captureMessage(response.error.code + ' ' + response.error.message);
-                    resolve(false);
-                } else {
-                    stripeCheckout.setPaymentToken(response.id);
-                    resolve(true);
-                }
-            });
-        });
-    }
-
 
     function validate(data) {
         var validity = validatePaymentFormat(data);
@@ -60,17 +38,8 @@ define([
 
                     });
                 } else {
-                    if (guardian.stripeCheckout) {
-                        validity.allValid = true;
-                        resolve(validity);
-                        return;
-                    }
-                    cardCheck(data.cardNumber, data.cardCVC, data.cardExpiryMonth, data.cardExpiryYear).then(function (cardValid) {
-                        validity.cardNumberValid = cardValid;
-                        validity.allValid = cardValid;
-                        resolve(validity);
-                    });
-
+                    validity.allValid = true;
+                    resolve(validity);
                 }
             } else {
                 validity.allValid = false;

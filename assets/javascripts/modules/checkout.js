@@ -1,4 +1,3 @@
-/*global Stripe*/
 /*global guardian*/
 define([
     'modules/optionMirror',
@@ -65,13 +64,7 @@ define([
                 }
             });
         }
-        if(guardian.stripeCheckout){
-            curl('js!stripeCheckout');
-        } else {
-            curl('js!stripe').then(function () {
-                Stripe.setPublishableKey(guardian.stripePublicKey);
-            });
-        }
+        curl('js!stripeCheckout');
     }
 
     return {

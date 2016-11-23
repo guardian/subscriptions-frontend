@@ -23,7 +23,6 @@
     promoCode: Option[PromoCode],
     supplierCode: Option[SupplierCode],
     edition: DigitalEdition,
-    stripeCheckoutTest: Boolean,
     countryAndCurrencySettings: CountryAndCurrencySettings
 )(implicit request: RequestHeader)
 
@@ -71,14 +70,7 @@
     guardian.pageInfo.productData.initialProduct = '@{productData.plans.default.name}';
     guardian.pageInfo.productData.productPurchasing = '@{productData.plans.default.name}';
     guardian.pageInfo.productData.productType = '@{productData.productType}';
-    guardian.stripeCheckout = @if(stripeCheckoutTest){
-    {   key: guardian.stripePublicKey,
-        image: '@hashedPathFor("images/logos/gu.png")',
-        locale: 'auto',
-        name: 'Guardian',
-        zipCode: false}
-    }else{false} ;
-    guardian.experience = guardian.stripeCheckout ? 'stripeCheckout' : 'stripeJS';
+
 </script>
     @fragments.analytics.tagmanager()
 
@@ -224,15 +216,12 @@
                 </div>
 
                 @* ===== Payment ===== *@
-                @if(stripeCheckoutTest) {
+                @* This hides the payment details panel for the UK *@
                     <span data-currency="GBP">
                         <span data-billing-country="GB">
                         @fragments.checkout.paymentDetails(true)
                         </span>
                     </span>
-                } else {
-                    @fragments.checkout.paymentDetails(false)
-                }
                 @* ===== Review ===== *@
                 <div id="formReview" class="field-panel field-panel--single is-collapsed js-fieldset-review">
                     <fieldset>
