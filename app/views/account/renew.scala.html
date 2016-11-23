@@ -4,9 +4,10 @@
 @import model.DigitalEdition.UK
 @import com.gu.salesforce.Contact
 @import views.support.Dates.prettyDate
+@import com.gu.i18n.Country
 
 @(
-    subscription: Subscription[SubscriptionPlan.WeeklyPlan], billingSchedule: BillingSchedule, contact: Contact
+    subscription: Subscription[SubscriptionPlan.WeeklyPlan], billingSchedule: BillingSchedule, contact: Contact, billToCountry: Country
 )(implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackend.Resolution)
 
 @main("Your Guardian Weekly subscription | The Guardian", bodyClasses = List("is-wide"), edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
@@ -23,6 +24,13 @@
                     Your details
                 </h3>
                 @views.html.account.fragments.yourDetails(subscription, maybeContact = Some(contact))()
+            </section>
+
+            <section class="mma-section">
+                <h3 class="mma-section__header">
+                    Bill to country
+                </h3>
+                @billToCountry
             </section>
 
             <section class="mma-section">

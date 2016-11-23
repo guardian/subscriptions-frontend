@@ -1,6 +1,7 @@
 package services
 import com.gu.i18n.Country.UK
-import com.gu.i18n.{Currency, GBP}
+import com.gu.i18n.Currency
+import com.gu.i18n.Currency.GBP
 import com.gu.memsub.subsv2.CatalogPlan
 import com.gu.salesforce.ContactId
 import com.gu.stripe.StripeService

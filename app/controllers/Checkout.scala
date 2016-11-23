@@ -2,6 +2,7 @@ package controllers
 
 import actions.CommonActions._
 import com.gu.i18n._
+import Currency._
 import com.gu.identity.play.ProxiedIP
 import com.gu.memsub.Subscription.ProductRatePlanId
 import com.gu.memsub.promo.Formatters.PromotionFormatters._

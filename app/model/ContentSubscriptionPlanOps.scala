@@ -1,6 +1,7 @@
 package model
 
 import com.gu.i18n._
+import Currency._
 import com.gu.memsub.Product
 import com.gu.memsub.subsv2.CatalogPlan
 import views.support.CountryWithCurrency
