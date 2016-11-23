@@ -1,6 +1,6 @@
 package views.support
 
-import com.gu.i18n.CountryGroup
+import com.gu.i18n.CountryGroup.UK
 import com.gu.memsub.promo.Promotion._
 import com.gu.memsub.promo._
 import com.gu.memsub.subsv2.CatalogPlan
@@ -55,7 +55,7 @@ object LandingPageOps {
       saving.map(_.toString + "%"),
       planPrice.amount,
       in.description,
-      routes.Checkout.renderCheckout(CountryGroup.UK, Some(promoCode), None, in.slug).url,
+      routes.Checkout.renderCheckout(UK.id, Some(promoCode), None, in.slug).url,
       paymentDetails
     )
   }

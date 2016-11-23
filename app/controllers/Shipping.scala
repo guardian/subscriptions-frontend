@@ -1,6 +1,6 @@
 package controllers
 import actions.CommonActions._
-import com.gu.i18n.CountryGroup
+import com.gu.i18n.CountryGroup.UK
 import com.gu.memsub.subsv2.CatalogPlan
 import model.Subscriptions._
 import play.api.mvc._
@@ -18,7 +18,7 @@ object Shipping extends Controller {
   def planToOptions(in: CatalogPlan.Paid): SubscriptionOption =
     SubscriptionOption(in.slug,
       in.name, in.charges.gbpPrice.amount * 12 / 52, in.saving.map(_.toString + "%"), in.charges.gbpPrice.amount, in.description,
-      routes.Checkout.renderCheckout(CountryGroup.UK, None, None, in.slug).url
+      routes.Checkout.renderCheckout(UK.id, None, None, in.slug).url
     )
 
   def viewCollectionPaperDigital() = CachedAction {

@@ -23,3 +23,20 @@ object CountryWithCurrency {
 }
 
 case class CountryAndCurrencySettings(availableDeliveryCountries: Option[List[CountryWithCurrency]], availableBillingCountries: List[CountryWithCurrency], defaultCountry: Option[Country], defaultCurrency: Currency)
+
+object DetermineCountryGroup {
+
+  /***
+    * This method takes a hint String and returns a CountryGroup if it can map to it. If the hint also implies a Country
+    * which exists within the CountryGroup, then it sets the defaultCountry within that CountryGroup to that Country.
+    * @param hint a CountryCode ID or a Country.alpha2 value.
+    * @return a potentially modified CountryGroup
+    */
+  def fromHint(hint: String): Option[CountryGroup] = {
+    val possibleCountryGroup = CountryGroup.byId(hint) orElse CountryGroup.byCountryCode(hint.toUpperCase)
+    possibleCountryGroup.map { foundCountryGroup =>
+      val determinedCountry = CountryGroup.countryByCode(hint.toUpperCase) orElse foundCountryGroup.defaultCountry
+      foundCountryGroup.copy(defaultCountry = determinedCountry)
+    }
+  }
+}
