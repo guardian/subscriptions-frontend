@@ -1,6 +1,7 @@
 package views.support
 
-import com.gu.i18n.{Currency, GBP}
+import com.gu.i18n.Currency
+import com.gu.i18n.Currency.GBP
 import com.gu.memsub.promo.PercentDiscount.getDiscountScaledToPeriod
 import com.gu.memsub.promo.{LandingPage, PercentDiscount, Promotion}
 import com.gu.memsub.{BillingPeriod => BP, _}

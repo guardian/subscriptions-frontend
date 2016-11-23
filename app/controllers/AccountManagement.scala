@@ -134,16 +134,27 @@ object ManageWeekly extends LazyLogging {
 
   import play.api.mvc.Results._
 
-  def apply(billingSchedule: BillingSchedule, weeklySubscription: Subscription[WeeklyPlan])(implicit request: Request[AnyContent], resolution: TouchpointBackend.Resolution) = {
+  def apply(billingSchedule: BillingSchedule, weeklySubscription: Subscription[WeeklyPlan])(implicit request: Request[AnyContent], resolution: TouchpointBackend.Resolution): Future[Result] = {
     implicit val tpBackend = resolution.backend
     implicit val flash = request.flash
     if (weeklySubscription.readerType == ReaderType.Direct) {
       // go to SF to get the contact mailing information etc
-      val contact = GetSalesforceContactForSub(weeklySubscription)(tpBackend.zuoraService, tpBackend.salesforceService.repo, global)
-      contact.map { contact =>
-        Ok(views.html.account.renew(weeklySubscription, billingSchedule, contact))
+      GetSalesforceContactForSub.zuoraAccountFromSub(weeklySubscription)(tpBackend.zuoraService, tpBackend.salesforceService.repo, global).flatMap { account =>
+        val futureSfContact = GetSalesforceContactForSub.sfContactForZuoraAccount(account)(tpBackend.zuoraService, tpBackend.salesforceService.repo, global)
+        val futureZuoraBillToContact = tpBackend.zuoraService.getContact(account.billToId)
+        futureSfContact.flatMap { contact =>
+          futureZuoraBillToContact.map { zuoraContact =>
+            zuoraContact.country.map { billToCountry =>
+              Ok(views.html.account.renew(weeklySubscription, billingSchedule, contact, billToCountry))
+            }.getOrElse {
+              logger.info(s"no valid bill to country for ${weeklySubscription.id}")
+              Ok(views.html.account.details(None))
+            }
+          }
+        }
       }
     } else {
+      logger.info(s"don't support gifts, can't manage ${weeklySubscription.id}")
       Future.successful(Ok(views.html.account.details(None))) // don't support gifts (yet) as they have related contacts in salesforce of unknown structure
     }
   }
