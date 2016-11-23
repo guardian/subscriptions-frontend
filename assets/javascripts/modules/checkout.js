@@ -44,7 +44,6 @@ define([
             deliveryAsBilling.init();
             billingAddress.init();
             ratePlanChoice.init();
-            eventTracking.init();
             if (formElements.$DELIVERY_FIELDS.length) {
                 require(['modules/checkout/deliveryFields', 'modules/checkout/addressFinder'], function(deliveryFields, addressFinder) {
                     deliveryFields.default.init();
@@ -63,8 +62,9 @@ define([
                     event.stopPropagation();
                 }
             });
+            curl('js!stripeCheckout');
         }
-        curl('js!stripeCheckout');
+        eventTracking.init();
     }
 
     return {
