@@ -271,14 +271,6 @@ class CheckoutService(identityService: IdentityService,
       }
     }
 
-//    case class Amend(
-//                      subscriptionId: String,
-//                      plansToRemove: Seq[String],
-//                      newRatePlans: NonEmptyList[RatePlan],
-//                      promoCode: Option[PromoCode] = None,
-//                      previewMode: Boolean = false
-//                    )
-//
     val ratePlan = RatePlan(renewal.plan.id.get, None, Nil) //TODO is this ok ?
     val amend =   Amend(subscriptionId = subscription.id.get,
                         plansToRemove = Nil,
