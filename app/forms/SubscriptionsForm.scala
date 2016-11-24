@@ -207,7 +207,7 @@ object SubscriptionsForm {
     }
     override def unbind(key: String, value: PaymentData): Map[String, String] = {
       val unPrefixed = value match {
-        case CreditCardData(stripeToken) => Seq("type" -> CreditCard.toKey)
+        case CreditCardData(stripeToken, cardCountry) => Seq("type" -> CreditCard.toKey)
         case DirectDebitData(account, sortCode, holder) =>
           Seq(
             "account" -> account,

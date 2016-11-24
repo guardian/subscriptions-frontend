@@ -232,7 +232,7 @@ class CheckoutService(identityService: IdentityService,
       val payment = subscriptionData.genericData.paymentData match {
         case paymentData@DirectDebitData(_, _, _) =>
           paymentService.makeDirectDebitPayment(paymentData, subscriptionData.genericData.personalData, purchaserIds.memberId)
-        case paymentData@CreditCardData(_) =>
+        case paymentData@CreditCardData(_,_) =>
           paymentService.makeCreditCardPayment(paymentData, subscriptionData.genericData.currency, purchaserIds, subscriptionData.productData.fold(_.plan, _.plan))
       }
       Future.successful(\/.right(payment))
