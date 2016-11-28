@@ -18,10 +18,10 @@
         guardian.plans = [
             @plans.map { plan =>
                 {
-                    id: '@plan.id.get'
-                    price: '@plan.price.prettyAmount'
-                    currency: '@plan.price.currency'
-                    billingPeriod: '@plan.billingPeriod.noun'
+                    id: '@plan.id.get',
+                    price: '@plan.price.prettyAmount',
+                    currency: '@plan.price.currency',
+                    billingPeriod: '@plan.billingPeriod.noun',
                 },
             }
         ]
