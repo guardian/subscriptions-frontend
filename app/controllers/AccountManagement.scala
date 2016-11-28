@@ -5,11 +5,11 @@ import _root_.services.TouchpointBackend
 import _root_.services.TouchpointBackend.Resolution
 import actions.CommonActions._
 import com.github.nscala_time.time.OrderingImplicits.LocalDateOrdering
-import com.gu.memsub.Subscription.Name
+import com.gu.memsub.Subscription.{ProductRatePlanId, Name}
 import com.gu.memsub.services.GetSalesforceContactForSub
 import com.gu.memsub.subsv2.SubscriptionPlan.{Delivery, WeeklyPlan}
 import com.gu.memsub.subsv2._
-import com.gu.memsub.{BillingSchedule, Product}
+import com.gu.memsub.{BillingPeriod, Price, BillingSchedule, Product}
 import com.gu.subscriptions.suspendresume.SuspensionService
 import com.gu.subscriptions.suspendresume.SuspensionService.{BadZuoraJson, ErrNel, HolidayRefund, PaymentHoliday}
 import com.gu.zuora.soap.models.Queries.Contact
@@ -134,6 +134,21 @@ object ManageWeekly extends LazyLogging {
 
   import play.api.mvc.Results._
 
+  // this sequencing concatenates errors if any, otherwise aggregates rights
+  def sequence[A](list: List[Either[String, A]]): Either[String, List[A]] = {
+    val errors = list collect {
+      case Left(x) => x
+    }
+    if (errors.nonEmpty)
+      Left(errors.mkString(", "))
+    else
+      Right(list collect {
+        case Right(x) => x
+      })
+  }
+
+  case class WeeklyPlanInfo(id: ProductRatePlanId, price: Price, billingPeriod: BillingPeriod)
+
   def apply(billingSchedule: BillingSchedule, weeklySubscription: Subscription[WeeklyPlan])(implicit request: Request[AnyContent], resolution: TouchpointBackend.Resolution): Future[Result] = {
     implicit val tpBackend = resolution.backend
     implicit val flash = request.flash
@@ -145,7 +160,23 @@ object ManageWeekly extends LazyLogging {
         futureSfContact.flatMap { contact =>
           futureZuoraBillToContact.map { zuoraContact =>
             zuoraContact.country.map { billToCountry =>
-              Ok(views.html.account.renew(weeklySubscription, billingSchedule, contact, billToCountry))
+              val catalog = tpBackend.catalogService.unsafeCatalog
+                  val weeklyPlans = weeklySubscription.plan.product match {
+                    case Product.WeeklyZoneA => catalog.weeklyZoneA.toList
+                    case Product.WeeklyZoneB => catalog.weeklyZoneB.toList
+                  }
+              sequence(weeklyPlans.map { plan =>
+                account.currency.toRight(s"could not deserialise currency for account ${account.id}").right.flatMap { existingCurrency =>
+                  val price = plan.charges.price.getPrice(existingCurrency).toRight(s"could not find price in $existingCurrency for plan ${plan.id} ${plan.name}").right
+                  price.map(price => WeeklyPlanInfo(plan.id, price, plan.charges.billingPeriod))
+                }
+              }).fold( { error =>
+                logger.info(s"couldn't get new rate/currency for renewal: $error")
+                Ok(views.html.account.details(None))
+              },
+                {
+                weeklyPlans => Ok(views.html.account.renew(weeklySubscription, billingSchedule, contact, billToCountry, plans = weeklyPlans))
+              })
             }.getOrElse {
               logger.info(s"no valid bill to country for ${weeklySubscription.id}")
               Ok(views.html.account.details(None))

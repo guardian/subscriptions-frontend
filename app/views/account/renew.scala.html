@@ -5,12 +5,28 @@
 @import com.gu.salesforce.Contact
 @import views.support.Dates.prettyDate
 @import com.gu.i18n.Country
+@import controllers.ManageWeekly.WeeklyPlanInfo
 
 @(
-    subscription: Subscription[SubscriptionPlan.WeeklyPlan], billingSchedule: BillingSchedule, contact: Contact, billToCountry: Country
+    subscription: Subscription[SubscriptionPlan.WeeklyPlan], billingSchedule: BillingSchedule, contact: Contact, billToCountry: Country, plans: List[WeeklyPlanInfo]
 )(implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackend.Resolution)
 
 @main("Your Guardian Weekly subscription | The Guardian", bodyClasses = List("is-wide"), edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
+
+    <script>
+
+        guardian.plans = [
+            @plans.map { plan =>
+                {
+                    id: '@plan.id.get',
+                    price: '@plan.price.prettyAmount',
+                    currency: '@plan.price.currency',
+                    billingPeriod: '@plan.billingPeriod.noun',
+                },
+            }
+        ]
+
+    </script>
 
     <main class="page-container gs-container">
         <section class="suspend-container">
@@ -45,6 +61,20 @@
                     Subscription end date
                 </h3>
                 @prettyDate(subscription.termEndDate)
+            </section>
+
+            <section class="mma-section">
+                <h3 class="mma-section__header">
+                    available subs to renew onto
+                </h3>
+                <ul>
+                @plans.map { plan =>
+                    <li>@plan.id
+                    <li>@plan.price.prettyAmount
+                    <li>@plan.price.currency
+                    <li>@plan.billingPeriod
+                }
+                </ul>
             </section>
 
             <section class="mma-section">
