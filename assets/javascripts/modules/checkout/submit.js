@@ -32,10 +32,8 @@ define([
 
     function submitHandler() {
         if (formEls.$CHECKOUT_SUBMIT.length) {
-
             formEls.$CHECKOUT_SUBMIT[0].addEventListener('click', submit, false);
         }
-
     }
 
     function submit(e) {
@@ -51,6 +49,8 @@ define([
             return;
         }
 
+        guardian.experience = 'stripeCheckout';
+
         var handler;
         if (!('StripeCheckout' in window)) {
             raven.captureMessage('StripeCheckout not present');
@@ -59,9 +59,7 @@ define([
         }
 
         handler = StripeCheckout.configure(guardian.stripeCheckout);
-        bean.on(window, 'popstate', function () {
-            handler.close()
-        });
+        bean.on(window, 'popstate', handler.close);
 
         var successfulCharge = false;
         var ratePlan = document.querySelector('.js-rate-plans input:checked').dataset;
@@ -112,8 +110,6 @@ define([
                 formEls.$FIELDSET_YOUR_DETAILS[0]
                     .scrollIntoView();
 
-                toggleError(formEls.$CARD_CONTAINER, true);
-
                 var paymentErr;
 
                 try {
@@ -128,15 +124,11 @@ define([
                     errorElement.textContent = userMessage;
                 }
             }
-        })
-    }
-
-    function init() {
-        submitHandler();
+        });
     }
 
     return {
-        init: init
+        init: submitHandler
     };
 
 });

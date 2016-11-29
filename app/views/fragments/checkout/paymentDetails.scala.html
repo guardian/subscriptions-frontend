@@ -1,4 +1,3 @@
-@(stripeCheckoutTest:Boolean)
 <div id="paymentDetails" class="field-panel is-collapsed js-fieldset-payment-details">
 <fieldset>
     <legend class="field-panel__legend">
@@ -13,7 +12,7 @@
         <a href="#paymentDetails" class="text-button u-button-reset js-edit-payment-details" title="Edit your payment details">Edit</a>
     </div>
     <div class="field-panel__fields">
-    @fragments.checkout.fieldsPayment(stripeCheckoutTest)
+    @fragments.checkout.fieldsPayment()
 
     <div class="actions">
         <a href="#formReview" class="button button--primary button--large js-checkout-payment-details-submit">Continue</a>
