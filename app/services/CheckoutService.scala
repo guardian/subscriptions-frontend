@@ -62,7 +62,7 @@ class CheckoutService(identityService: IdentityService,
     val plan = RatePlan(subscriptionData.productRatePlanId.get, None)
     def emailError: SubNel[Unit] = EitherT(Future.successful(\/.left(NonEmptyList(CheckoutIdentityFailure("Email in use")))))
     val idMinimalUser = authenticatedUserOpt.map(_.user)
-    val soldToOverride = subscriptionData.productData.left.toOption.filter(isGuardianWeekly).map(x => x.deliveryAddress)
+    val soldToContact = subscriptionData.productData.left.toOption.filter(isGuardianWeekly).map(_.deliveryAddress)
 
     implicit val today = LocalDate.now()
 
@@ -74,7 +74,7 @@ class CheckoutService(identityService: IdentityService,
       payment <- EitherT(createPaymentType(requestData, purchaserIds, subscriptionData))
       defaultPaymentDelay = CheckoutService.paymentDelay(subscriptionData.productData, zuoraProperties)
       paymentMethod <- EitherT(attachPaymentMethodToStripeCustomer(payment, purchaserIds))
-      subscribe = createSubscribeRequest(personalData, soldToOverride, requestData, plan, purchaserIds, paymentMethod, payment.makeAccount, Some(defaultPaymentDelay))
+      subscribe = createSubscribeRequest(personalData, soldToContact, requestData, plan, purchaserIds, paymentMethod, payment.makeAccount, Some(defaultPaymentDelay))
       validPromotion = promoCode.flatMap(promoService.validate[NewUsers](_, personalData.address.country.getOrElse(Country.UK), subscriptionData.productRatePlanId).toOption)
       withPromo = validPromotion.map(v => p.apply(v, prpId => catalog.paid.find(_.id == prpId).map(_.charges.billingPeriod).get, promoPlans)(subscribe)).getOrElse(subscribe)
       result <- EitherT(createSubscription(withPromo, purchaserIds))
@@ -180,7 +180,7 @@ class CheckoutService(identityService: IdentityService,
 
   private def createSubscribeRequest(
       personalData: PersonalData,
-      soldToOverride: Option[Address],
+      soldToContact: Option[Address],
       requestData: SubscriptionRequestData,
       plan: RatePlan,
       purchaserIds: PurchaserIdentifiers,
@@ -195,7 +195,7 @@ class CheckoutService(identityService: IdentityService,
       name = personalData,
       address = personalData.address,
       email = personalData.email,
-      soldToContact = soldToOverride.map(address => SoldToContact(
+      soldToContact = soldToContact.map(address => SoldToContact(
         name = personalData,        // TODO once we have gifting change this to the Giftee's name
         address = address,
         email = personalData.email  // TODO once we have gifting change this to the Giftee's email address
