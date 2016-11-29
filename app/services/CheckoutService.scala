@@ -3,16 +3,14 @@ package services
 import com.gu.config.DiscountRatePlanIds
 import com.gu.i18n.Country
 import com.gu.identity.play.{AuthenticatedIdUser, IdMinimalUser}
-import com.gu.memsub.Address
-import com.gu.memsub.promo.PromotionApplicator._
 import com.gu.memsub.promo._
 import com.gu.memsub.services.PromoService
-import com.gu.memsub.subsv2.CatalogPlan
 import com.gu.memsub.subsv2.Catalog
+import com.gu.memsub.{Address, Product}
 import com.gu.salesforce.ContactId
 import com.gu.stripe.Stripe
 import com.gu.zuora.api.ZuoraService
-import com.gu.zuora.soap.models.Commands.{RatePlan, Subscribe, PaymentMethod, Account}
+import com.gu.zuora.soap.models.Commands._
 import com.gu.zuora.soap.models.Results.SubscribeResult
 import com.gu.zuora.soap.models.errors._
 import com.typesafe.scalalogging.LazyLogging
@@ -24,11 +22,11 @@ import org.joda.time.{Days, LocalDate}
 import touchpoint.ZuoraProperties
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scalaz.{EitherT, Monad, NonEmptyList, \/}
 import scala.concurrent.Future
+import scalaz.std.option._
 import scalaz.std.scalaFuture._
 import scalaz.syntax.monad._
-import scalaz.std.option._
+import scalaz.{EitherT, Monad, NonEmptyList, \/}
 
 object CheckoutService {
   def paymentDelay(in: Either[PaperData, DigipackData], zuora: ZuoraProperties)(implicit now: LocalDate): Days = in.fold(
@@ -51,6 +49,10 @@ class CheckoutService(identityService: IdentityService,
   type SubNel[A] = EitherT[Future, NonEmptyList[SubsError], A]
   type FatalErrors = NonEmptyList[SubsError]
 
+  private def isGuardianWeekly(paperData: PaperData): Boolean = {
+    paperData.plan.product == Product.WeeklyZoneA || paperData.plan.product == Product.WeeklyZoneB
+  }
+
   def processSubscription(subscriptionData: SubscribeRequest,
                           authenticatedUserOpt: Option[AuthenticatedIdUser],
                           requestData: SubscriptionRequestData
@@ -60,6 +62,8 @@ class CheckoutService(identityService: IdentityService,
     val plan = RatePlan(subscriptionData.productRatePlanId.get, None)
     def emailError: SubNel[Unit] = EitherT(Future.successful(\/.left(NonEmptyList(CheckoutIdentityFailure("Email in use")))))
     val idMinimalUser = authenticatedUserOpt.map(_.user)
+    val soldToContact = subscriptionData.productData.left.toOption.filter(isGuardianWeekly).map(_.deliveryAddress)
+
     implicit val today = LocalDate.now()
 
     (for {
@@ -70,7 +74,7 @@ class CheckoutService(identityService: IdentityService,
       payment <- EitherT(createPaymentType(requestData, purchaserIds, subscriptionData))
       defaultPaymentDelay = CheckoutService.paymentDelay(subscriptionData.productData, zuoraProperties)
       paymentMethod <- EitherT(attachPaymentMethodToStripeCustomer(payment, purchaserIds))
-      subscribe = createSubscribeRequest(personalData, requestData, plan, purchaserIds, paymentMethod, payment.makeAccount, Some(defaultPaymentDelay))
+      subscribe = createSubscribeRequest(personalData, soldToContact, requestData, plan, purchaserIds, paymentMethod, payment.makeAccount, Some(defaultPaymentDelay))
       validPromotion = promoCode.flatMap(promoService.validate[NewUsers](_, personalData.address.country.getOrElse(Country.UK), subscriptionData.productRatePlanId).toOption)
       withPromo = validPromotion.map(v => p.apply(v, prpId => catalog.paid.find(_.id == prpId).map(_.charges.billingPeriod).get, promoPlans)(subscribe)).getOrElse(subscribe)
       result <- EitherT(createSubscription(withPromo, purchaserIds))
@@ -176,6 +180,7 @@ class CheckoutService(identityService: IdentityService,
 
   private def createSubscribeRequest(
       personalData: PersonalData,
+      soldToContact: Option[Address],
       requestData: SubscriptionRequestData,
       plan: RatePlan,
       purchaserIds: PurchaserIdentifiers,
@@ -184,11 +189,17 @@ class CheckoutService(identityService: IdentityService,
       paymentDelay: Option[Days]): Subscribe =
 
     Subscribe(
-      account = acc, Some(paymentMethod),
+      account = acc,
+      paymentMethod = Some(paymentMethod),
       ratePlans = NonEmptyList(plan),
       name = personalData,
       address = personalData.address,
       email = personalData.email,
+      soldToContact = soldToContact.map(address => SoldToContact(
+        name = personalData,        // TODO once we have gifting change this to the Giftee's name
+        address = address,
+        email = personalData.email  // TODO once we have gifting change this to the Giftee's email address
+      )),
       paymentDelay = paymentDelay,
       ipAddress = requestData.ipAddress.map(_.getHostAddress),
       supplierCode = requestData.supplierCode
