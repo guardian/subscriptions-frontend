@@ -1,7 +1,7 @@
 @import com.gu.i18n.Country
 @import com.gu.memsub.Subscription.ProductRatePlanId
 @import com.gu.memsub.promo.PromoCode
-@import controllers.routes.Promotion.validatePromoCode
+@import controllers.routes.Promotion.validateForProductRatePlan
 @(promoCode: Option[PromoCode])
 @if(false) {
     <div class="promo-code-applied">✓&nbsp; Promotion applied</div>
@@ -17,7 +17,7 @@
 } else {
     @defining(
         // use Play reverse routing to get the action request path
-        validatePromoCode(
+        validateForProductRatePlan(
             PromoCode("_"),
             ProductRatePlanId("_"),
             Country.UK).path.replaceFirst("\\?.*", "")) { lookupUrl =>
