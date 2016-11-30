@@ -10,11 +10,7 @@ import com.gu.memsub.{Address, Product}
 import com.gu.salesforce.ContactId
 import com.gu.stripe.Stripe
 import com.gu.zuora.api.ZuoraService
-<<<<<<< 20f9279213aedc1a0da538d393cbe61811d0dcce
 import com.gu.zuora.soap.models.Commands._
-=======
-import com.gu.zuora.soap.models.Commands.{Account, PaymentMethod, RatePlan, Subscribe}
->>>>>>> Wire up request data to Subscribe command. Just need to get the cardCountry from the form now.
 import com.gu.zuora.soap.models.Results.SubscribeResult
 import com.gu.zuora.soap.models.errors._
 import com.typesafe.scalalogging.LazyLogging
