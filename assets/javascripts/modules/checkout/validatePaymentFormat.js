@@ -6,11 +6,7 @@ define(['modules/forms/regex'], function (regex) {
             accountNumberValid: true,
             accountHolderNameValid: true,
             sortCodeValid: true,
-            detailsConfirmedValid: true,
-
-            cardNumberValid: true,
-            cardCVCValid: true,
-            cardExpiryValid: true
+            detailsConfirmedValid: true
         };
 
         if (data.paymentMethod === 'direct-debit') {

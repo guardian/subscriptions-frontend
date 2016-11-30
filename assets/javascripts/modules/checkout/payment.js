@@ -1,10 +1,8 @@
-/* global guardian */
 define([
     'utils/ajax',
     'modules/checkout/validatePaymentFormat',
-    'modules/checkout/stripeCheckout',
     'modules/raven'
-], function (ajax, validatePaymentFormat, stripeCheckout, raven) {
+], function (ajax, validatePaymentFormat, raven) {
     'use strict';
     var ACCOUNT_CHECK_ENDPOINT = '/checkout/check-account';
 

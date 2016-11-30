@@ -26,10 +26,6 @@ define([
         }
     }
 
-    function useCheckout() {
-        return guardian.stripeCheckout && formEls.$CARD_TYPE[0].checked
-    }
-
     function populateDetails() {
         formEls.$REVIEW_NAME.text(textUtils.mergeValues([
             formEls.$TITLE.val(),
@@ -75,21 +71,6 @@ define([
         formEls.$REVIEW_ACCOUNT.text(formEls.$ACCOUNT.val());
         formEls.$REVIEW_SORTCODE.text(formEls.$SORTCODE.val());
         formEls.$REVIEW_HOLDER.text(formEls.$HOLDER.val());
-        if (useCheckout()) {
-            $('.js-payment-review').hide();
-        } else {
-            $('.js-payment-review').show();
-            var obscuredCardNumber;
-            if (formEls.$CARD_NUMBER && formEls.$CARD_NUMBER.val()) {
-                obscuredCardNumber = textUtils.obscure(formEls.$CARD_NUMBER.val(), 4, '*');
-            }
-            formEls.$REVIEW_CARD_NUMBER.text(obscuredCardNumber);
-            formEls.$REVIEW_CARD_EXPIRY.text(textUtils.mergeValues([
-
-                formEls.$CARD_EXPIRY_MONTH.val(),
-                formEls.$CARD_EXPIRY_YEAR.val()
-            ], '/'));
-        }
         formEls.$REVIEW_DELIVERY_INSTRUCTIONS.text(formEls.getDeliveryInstructions().val());
         formEls.$REVIEW_DELIVERY_START_DATE.text(formEls.getPaperCheckoutField().val());
     }

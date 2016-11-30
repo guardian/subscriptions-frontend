@@ -80,15 +80,7 @@ define(['$'], function ($) {
         $CONFIRM_PAYMENT: $('.js-checkout-confirm-payment .js-input'),
 
         // Credit Card
-        $CARD_CONTAINER: $('.js-payment-type-card'),
         $CARD_TYPE: $('input[name="payment.type"][value="card"]'),
-        $CARD_NUMBER_CONTAINER: $('.js-checkout-card-number'),
-        $CARD_CVC_CONTAINER: $('.js-checkout-card-cvc'),
-        $CARD_EXPIRY_CONTAINER: $('.js-checkout-card-expiry'),
-        $CARD_NUMBER: $('.js-checkout-card-number .js-input'),
-        $CARD_CVC: $('.js-checkout-card-cvc .js-input'),
-        $CARD_EXPIRY_MONTH: $('.js-checkout-card-expiry-month .js-input'),
-        $CARD_EXPIRY_YEAR: $('.js-checkout-card-expiry-year .js-input'),
 
         $FIRST_NAME_CONTAINER: $('.js-checkout-first'),
         $LAST_NAME_CONTAINER: $('.js-checkout-last'),

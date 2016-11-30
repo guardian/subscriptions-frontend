@@ -1,5 +1,3 @@
-/* global guardian */
-
 define([
     'bean',
     'utils/ajax',
@@ -30,10 +28,6 @@ define([
         toggleError(formEls.$HOLDER_CONTAINER, !validity.accountHolderNameValid);
         toggleError(formEls.$SORTCODE_CONTAINER, !validity.sortCodeValid);
         toggleError(formEls.$CONFIRM_PAYMENT_CONTAINER, !validity.detailsConfirmedValid);
-
-        toggleError(formEls.$CARD_NUMBER_CONTAINER, !validity.cardNumberValid);
-        toggleError(formEls.$CARD_CVC_CONTAINER, !validity.cardCVCValid);
-        toggleError(formEls.$CARD_EXPIRY_CONTAINER, !validity.cardExpiryValid);
     }
 
     function nextStep() {
@@ -66,13 +60,6 @@ define([
             });
         } else if (paymentMethod === 'card') {
             guardian.experience = 'stripeCheckout';
-            toggleError(formEls.$CARD_CONTAINER, false);
-            assign(paymentDetails, {
-                cardNumber: formEls.$CARD_NUMBER.val(),
-                cardCVC: formEls.$CARD_CVC.val(),
-                cardExpiryMonth: formEls.$CARD_EXPIRY_MONTH.val(),
-                cardExpiryYear: formEls.$CARD_EXPIRY_YEAR.val()
-            });
         } else {
             throw new Error('Invalid payment method ' + paymentMethod);
         }
