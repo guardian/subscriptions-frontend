@@ -37,6 +37,8 @@ import scalaz.std.scalaFuture._
 import scalaz.syntax.applicative._
 import scalaz.{NonEmptyList, OptionT}
 import model.ContentSubscriptionPlanOps._
+import utils.RequestCountry._
+
 object Checkout extends Controller with LazyLogging with CatalogProvider {
 
   import SessionKeys.{Currency => _, UserId => _, _}
@@ -159,7 +161,13 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
       )
     )
 
-    val requestData = SubscriptionRequestData(ProxiedIP.getIP(request), supplierCode = sessionSupplierCode.map(SupplierCode))
+    val requestData = SubscriptionRequestData(
+      ipAddress = ProxiedIP.getIP(request),
+      ipCountry = request.getFastlyCountry,
+      supplierCode = sessionSupplierCode.map(SupplierCode),
+      cardCountry = None
+    )
+
     val checkoutResult = checkoutService.processSubscription(subscribeRequest, idUserOpt, requestData)
 
     def failure(seqErr: NonEmptyList[SubsError]) = {

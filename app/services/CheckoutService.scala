@@ -202,7 +202,9 @@ class CheckoutService(identityService: IdentityService,
       )),
       paymentDelay = paymentDelay,
       ipAddress = requestData.ipAddress.map(_.getHostAddress),
-      supplierCode = requestData.supplierCode
+      supplierCode = requestData.supplierCode,
+      ipCountry = requestData.ipCountry,
+      cardCountry = requestData.cardCountry
     )
 
   private def createSubscription(

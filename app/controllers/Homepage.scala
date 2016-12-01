@@ -13,7 +13,7 @@ import utils.Tracking.internalCampaignCode
 object Homepage extends Controller {
 
   def index = NoCacheAction { implicit request =>
-    val countryGroup = request.getFastlyCountry.getOrElse(CountryGroup.UK)
+    val countryGroup = request.getFastlyCountryGroup.getOrElse(CountryGroup.UK)
     val digitalEdition = getById(countryGroup.id).getOrElse(INT)
     Redirect(routes.Homepage.landingPage(digitalEdition.id).url, request.queryString, SEE_OTHER)
   }
