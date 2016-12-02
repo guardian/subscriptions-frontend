@@ -15,7 +15,6 @@ class Register(val testUser: TestUser) extends LoadablePage with Browser {
     val firstName = id("register_field_firstname")
     val lastName = id("register_field_lastname")
     val email = id("register_field_email")
-    val username = id("register_field_username")
     val password = id("register_field_password")
 
     def fillIn() = {
@@ -23,7 +22,6 @@ class Register(val testUser: TestUser) extends LoadablePage with Browser {
       setValue(firstName, testUser.username)
       setValue(lastName, testUser.username)
       setValue(email, s"${testUser.username}@gu.com")
-      setValue(username, testUser.username)
       setValue(password, testUser.username)
     }
 
@@ -31,7 +29,6 @@ class Register(val testUser: TestUser) extends LoadablePage with Browser {
       clearValue(firstName)
       clearValue(lastName)
       clearValue(email)
-      clearValue(username)
       clearValue(password)
     }
   }
