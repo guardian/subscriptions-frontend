@@ -23,6 +23,7 @@ import play.api.libs.concurrent.Akka
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.mvc.RequestHeader
 import touchpoint.TouchpointBackendConfig.BackendType
+import touchpoint.TouchpointBackendConfig.BackendType.Testing
 import touchpoint.{TouchpointBackendConfig, ZuoraProperties}
 import utils.TestUsers._
 
@@ -90,11 +91,8 @@ object TouchpointBackend {
     }
   }
 
-  val BackendsByType = logE(BackendType.All.map(typ => typ -> TouchpointBackend(typ)).toMap)
-
-  val Normal = logE(BackendsByType(BackendType.Default))
-  val Test = logE(BackendsByType(BackendType.Testing))
-  val All = logE(BackendsByType.values.toSeq)
+  lazy val Normal = logE(TouchpointBackend(BackendType.Default))
+  lazy val Test = logE(TouchpointBackend(BackendType.Testing))
 
   case class Resolution(
     backend: TouchpointBackend,
@@ -110,7 +108,7 @@ object TouchpointBackend {
     implicit request: RequestHeader): Resolution = {
     val validTestUserCredentialOpt = isTestUser(permittedAltCredentialType, altCredentialSource)
     val backendType = if (validTestUserCredentialOpt.isDefined) BackendType.Testing else BackendType.Default
-    Resolution(BackendsByType(backendType), backendType, validTestUserCredentialOpt)
+    Resolution(if (backendType == Testing) Test else Normal, backendType, validTestUserCredentialOpt)
   }
 }
 
