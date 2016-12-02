@@ -1,7 +1,5 @@
 package model
 
-import java.lang.Math.min
-
 object HomeDeliveryPostCodes {
   private val London = Set(
     "E1", "EC1", "N1", "NW1", "SE1", "SW1", "W1", "WC1",
@@ -53,6 +51,8 @@ object HomeDeliveryPostCodes {
     "TW8",
     "TW9"
   )
+
+  // Our supplier will deliver to these regions, but we don't offer them as the delivery cost is too high.
   private val Outer = Set(
     "AL1", "BR8", "EN6", "GU1", "HP1", "KT11", "OX1", "RG1", "RM14", "SL0", "TN1", "TW19", "WD3",
     "AL2", "GU14", "KT14", "OX2", "RG10", "SL1", "TN11", "TW20", "WD4",
@@ -71,7 +71,7 @@ object HomeDeliveryPostCodes {
     "GU4"
   )
 
-  private val availableDistricts = London ++ M25 ++ Outer
+  private val availableDistricts = London ++ M25
 
   def findDistrict(postCode: String): Option[String] = {
     val sanitised = postCode.toUpperCase.trim
