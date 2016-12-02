@@ -287,12 +287,6 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
 
   }
 
-
-  def validateDelivery(postCode: String) = CachedAction { implicit request =>
-    val availableDistricts = HomeDeliveryPostCodes.getAvailableDistricts(postCode)
-    if (availableDistricts.isEmpty) NotAcceptable("") else Ok(Json.obj("availableDistricts" -> availableDistricts))
-  }
-
   def checkIdentity(email: String) = CachedAction.async { implicit request =>
     for {
       doesUserExist <- IdentityService.doesUserExist(email)
