@@ -1,20 +1,19 @@
 package controllers
 
 import actions.CommonActions._
+import com.gu.i18n.Currency._
 import com.gu.i18n._
-import Currency._
 import com.gu.identity.play.ProxiedIP
 import com.gu.memsub.Subscription.ProductRatePlanId
-import com.gu.memsub.promo.Formatters.PromotionFormatters._
-import com.gu.memsub.promo.Promotion.{AnyPromotion, _}
+import com.gu.memsub.promo.Promotion._
 import com.gu.memsub.promo.{NewUsers, PromoCode}
-import com.gu.memsub.subsv2.{CatalogPlan, PaidChargeList}
+import com.gu.memsub.subsv2.CatalogPlan
 import com.gu.memsub.{Product, SupplierCode}
 import com.gu.zuora.soap.models.errors._
 import com.typesafe.scalalogging.LazyLogging
-import configuration.Config
 import configuration.Config.Identity.webAppProfileUrl
 import forms.{FinishAccountForm, SubscriptionsForm}
+import model.ContentSubscriptionPlanOps._
 import model.IdUserOps._
 import model._
 import model.error.CheckoutService._
@@ -25,6 +24,7 @@ import play.api.libs.json._
 import play.api.mvc._
 import services.AuthenticationService.authenticatedUserFor
 import services._
+import utils.RequestCountry._
 import utils.TestUsers.{NameEnteredInForm, PreSigninTestCookie}
 import views.html.{checkout => view}
 import views.support.{PlanList, BillingPeriod => _, _}
@@ -36,8 +36,6 @@ import scalaz.std.option._
 import scalaz.std.scalaFuture._
 import scalaz.syntax.applicative._
 import scalaz.{NonEmptyList, OptionT}
-import model.ContentSubscriptionPlanOps._
-import utils.RequestCountry._
 
 object Checkout extends Controller with LazyLogging with CatalogProvider {
 
@@ -291,7 +289,8 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
 
 
   def validateDelivery(postCode: String) = CachedAction { implicit request =>
-    HomeDeliveryPostCodes.findDistrict(postCode).fold(NotAcceptable(""))(pc => Ok(Json.obj("availableDistrict" -> pc)))
+    val availableDistricts = HomeDeliveryPostCodes.getAvailableDistricts(postCode)
+    if (availableDistricts.isEmpty) NotAcceptable("") else Ok(Json.obj("availableDistricts" -> availableDistricts))
   }
 
   def checkIdentity(email: String) = CachedAction.async { implicit request =>
