@@ -11,8 +11,8 @@ require('react-datepicker/dist/react-datepicker.css');
 
 const MAX_WEEKS_AVAILABLE = 4;
 
-// The cut off for getting vouchers in two weeks is Wednesday (day #2 in ISO format) at 6 AM GMT
-const CUTOFF_WEEKDAY = 2;
+// The cut off for getting vouchers in two weeks is Wednesday (day #3 in ISO format) at 6 AM GMT
+const CUTOFF_WEEKDAY = 3;
 const CUTOFF_HOUR = 6;
 
 const NORMAL_DELIVERY_DELAY = 2;
