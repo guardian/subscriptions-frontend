@@ -64,7 +64,6 @@ define([
         var successfulCharge = false;
         var ratePlan = document.querySelector('.js-rate-plans input:checked').dataset;
         handler.open({
-            allowRememberMe: false,
             currency: ratePlan.currency,
             description: ratePlan.optionMirrorPackage,
             panelLabel: 'Subscribe',

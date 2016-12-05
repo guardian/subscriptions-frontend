@@ -14,6 +14,7 @@ require([
     'modules/confirmation',
     'modules/patterns',
     'modules/cas/form',
+    'modules/renew/loader',
     // Add new dependencies ABOVE this
     'promise-polyfill'
 ], function (
@@ -30,8 +31,9 @@ require([
     checkout,
     suspend,
     confirmation,
-    cas,
     patterns,
+    cas,
+    renew,
     promise
 ) {
     'use strict';
@@ -53,4 +55,6 @@ require([
     confirmation.init();
     cas.init();
     patterns.init();
+
+    renew.init();
 });
