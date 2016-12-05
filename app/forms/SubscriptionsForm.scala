@@ -182,7 +182,7 @@ object SubscriptionsForm {
     "holder" -> text
   )(DirectDebitData.apply)(DirectDebitData.unapply)
 
-  val creditCardDataMapping = mapping("token" -> text)(CreditCardData)(CreditCardData.unapply)
+  val creditCardDataMapping = mapping("token" -> text, "cardCountry" -> text)(CreditCardData)(CreditCardData.unapply)
 
   implicit val currencyFormatter = new Formatter[Currency] {
     override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Currency] = data.get(key).flatMap(Currency.fromString).toRight(Seq(FormError(key, "Invalid currency")))
@@ -207,7 +207,7 @@ object SubscriptionsForm {
     }
     override def unbind(key: String, value: PaymentData): Map[String, String] = {
       val unPrefixed = value match {
-        case CreditCardData(stripeToken) => Seq("type" -> CreditCard.toKey)
+        case CreditCardData(stripeToken, cardCountry) => Seq("type" -> CreditCard.toKey)
         case DirectDebitData(account, sortCode, holder) =>
           Seq(
             "account" -> account,

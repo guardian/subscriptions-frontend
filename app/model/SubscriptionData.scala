@@ -33,7 +33,7 @@ sealed trait PaymentData
 case class DirectDebitData(account: String, sortCodeValue: String, holder: String) extends PaymentData {
   val sortCode = sortCodeValue.filter(_.isDigit)
 }
-case class CreditCardData(stripeToken: String) extends PaymentData
+case class CreditCardData(stripeToken: String, cardCountry: String) extends PaymentData
 
 case class PersonalData(first: String,
                         last: String,
