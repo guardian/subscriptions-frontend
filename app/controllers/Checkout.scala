@@ -162,8 +162,7 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
     val requestData = SubscriptionRequestData(
       ipAddress = ProxiedIP.getIP(request),
       ipCountry = request.getFastlyCountry,
-      supplierCode = sessionSupplierCode.map(SupplierCode),
-      cardCountry = None
+      supplierCode = sessionSupplierCode.map(SupplierCode)
     )
 
     val checkoutResult = checkoutService.processSubscription(subscribeRequest, idUserOpt, requestData)
