@@ -91,25 +91,32 @@ class WeeklyRenew extends React.Component {
             promosStatus: status.LOADING
         });
 
-        validatePromo(this.state.promoCode, this.props.country).then((a)=>{
-            let update = validatePromoForPlans(a,this.state.plans);
-            if(update){
+        validatePromo(this.state.promoCode, this.props.country).then((a) => {
+            let newPlans = validatePromoForPlans(a, this.state.plans);
+            let update = newPlans.map((plan) => {
+                return 'promo' in plan
+            }).reduce((a, b) => {
+                return a || b
+            }, false)
+            if (update) {
                 //This is a weekly promotion
                 this.setState({
                     promoStatus: status.VALID,
-                    plans: update,
+                    plans: newPlans,
                     promo: a.promotion.description
                 })
-            }else{
+            } else {
                 //It's a good promotion, but it's not a weekly one
                 this.setState({
                     promoStatus: status.INVALID,
                     plans: this.props.plans
                 })
             }
-        }).catch((a)=>{
-            console.log(a);
-            console.log('oh no',a);
+        }).catch((a) => {
+            this.setState({
+                promoStatus: status.INVALID,
+                plans: this.props.plans
+            })
         });
     }
 
@@ -132,7 +139,7 @@ class WeeklyRenew extends React.Component {
     }
 
     handleAccountHolder(e) {
-        let name = e.target.value.substring(0,18);
+        let name = e.target.value.substring(0, 18);
         this.setState({accountHolder: {value: name, isValid: name.length > 0}});
     }
 
@@ -158,8 +165,10 @@ class WeeklyRenew extends React.Component {
     }
 
     buttonText() {
-        let string = 'Pay ' + this.getPlan().price + (this.state.paymentType === DIRECT_DEBIT ? ' by Direct Debit' : ' by Card');
-        return (string);
+        let plan = this.getPlan();
+        let price = plan.promo ? plan.promo : plan.price;
+        let method = this.state.paymentType === DIRECT_DEBIT ? 'by Direct Debit' : 'by Card';
+        return ['Pay', price, method].join(' ');
     }
 
     render() {
@@ -168,13 +177,15 @@ class WeeklyRenew extends React.Component {
             {this.state.error && <div className="mma-error"> {this.state.error}</div>}
             {!this.state.loading && !this.state.error &&
             <div>
-                <PromoCode
-                    value={this.state.promoCode}
-                    handler={this.handlePromo}
-                    send={this.validatePromo}
-                    status={this.state.promoStatus}
-                />
+
                 <dl className="mma-section__list">
+                    <PromoCode
+                        value={this.state.promoCode}
+                        handler={this.handlePromo}
+                        send={this.validatePromo}
+                        status={this.state.promoStatus}
+                        copy={this.state.promo}
+                    />
                     <PlanChooser plans={this.state.plans} selected={this.getPlan()} handleChange={this.handlePlan}/>
                     {this.showEmail &&
                     <EmailField value={this.state.email.value}
@@ -283,7 +294,7 @@ class PlanChooser extends React.Component {
     render() {
         let plans = this.props.plans.map((plan) => {
             let checked = plan == this.props.selected;
-            return <Plan id={plan.id} price={plan.price} checked={checked}
+            return <Plan id={plan.id} price={plan.price} promo={plan.promo} checked={checked}
                          handleChange={this.props.handleChange(plan)}/>
         });
         return <div>
@@ -295,9 +306,21 @@ class PlanChooser extends React.Component {
     }
 }
 class Plan extends React.Component {
+    price() {
+        if (this.props.promo) {
+            return <span>
+                <s>{this.props.price} </s>
+                <strong>{this.props.promo}</strong>
+            </span>
+        }
+        return this.props.price
+    }
+
     render() {
         return <label className="option"><input type="radio" name="planchooser" value={this.props.id}
                                                 checked={this.props.checked}
-                                                onChange={this.props.handleChange}/>{this.props.price}</label>
+                                                onChange={this.props.handleChange}/>
+            {this.price()}
+        </label>
     }
 }

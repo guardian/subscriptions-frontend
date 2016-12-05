@@ -108,16 +108,12 @@ export function validatePromo(code, country) {
 
 export function validatePromoForPlans(promo, plans) {
     let newPlans = promo.adjustedRatePlans;
-    console.log('here goes');
-    console.log(newPlans);
-    console.log(plans);
-    plans.map((plan) => {
+    return plans.map((plan) => {
         if (plan.id in newPlans) {
             return Object.assign(plan, {promo: newPlans[plan.id]})
         }
         else {
-            return false;
+            return plan;
         }
-
     })
 }

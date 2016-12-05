@@ -236,6 +236,7 @@
         max-width: 406px;
     }
 }
+
 .promotion-cta__pricing {
     margin-left: 70px;
 
@@ -256,4 +257,17 @@
     .page-slice__content {
         margin-top: $gs-baseline * 2;
     }
+}
+
+.input-text--promo {
+    margin-right: $gs-gutter / 2;
+    width: unset;
+}
+
+.button--promo__valid {
+    @include button-colour(green, white, green)
+}
+
+.button--promo__invalid {
+    @include button-colour(darkred, white, darkred)
 }
