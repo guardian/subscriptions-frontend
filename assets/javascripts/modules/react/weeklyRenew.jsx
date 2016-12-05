@@ -82,7 +82,7 @@ class WeeklyRenew extends React.Component {
     }
 
     handleAccountHolder(e) {
-        let name = e.target.value;
+        let name = e.target.value.substring(0,18);
         this.setState({accountHolder: {value: name, isValid: name.length > 0}});
     }
 

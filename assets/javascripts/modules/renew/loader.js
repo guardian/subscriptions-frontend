@@ -1,6 +1,6 @@
 define(['$'],function($){
     'use strict';
-    var $WEEKLY = $('.js-weekly-renew');//TODO: Or something.
+    var $WEEKLY = $('.js-weekly-renew');
 
     function init(){
         if($WEEKLY.length){
