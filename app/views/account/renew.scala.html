@@ -12,7 +12,9 @@
 )(implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackend.Resolution)
 
 @main("Your Guardian Weekly subscription | The Guardian", bodyClasses = List("is-wide"), edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
-
+    @helper.javascriptRouter("jsRoutes")(
+        routes.javascript.Promotion.validate
+    )
     <script>
 
         guardian.plans = [
@@ -25,7 +27,6 @@
         ]
 
     </script>
-
     <main class="page-container gs-container">
         <section class="suspend-container">
 
@@ -66,7 +67,7 @@
                     <p>
                         Here is some copy about renewing your subscription, which is a very fulfilling thing to do and should probably fill one to two lines of text telling the user what renewing their subscription entails.
                     </p>
-                    <div class="js-weekly-renew" data-email="@contact.email" data-country="@contact.mailingCountry"/>
+                    <div class="js-weekly-renew" data-email="@contact.email" data-country="@billToCountry.alpha2" />
                 </section>
                 <section class="mma-section">
                     <h3 class="mma-section__header">
