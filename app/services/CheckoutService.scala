@@ -1,24 +1,20 @@
 package services
 
-import com.gocardless.services.PaymentService
 import com.gu.config.DiscountRatePlanIds
-import com.gu.i18n.{Country, GBP}
+import com.gu.i18n.Country
+import com.gu.i18n.Currency.GBP
 import com.gu.identity.play.{AuthenticatedIdUser, IdMinimalUser}
 import com.gu.memsub.promo._
-import com.gu.memsub.services.PromoService
-import com.gu.memsub.subsv2.Catalog
+import com.gu.memsub.services.{GetSalesforceContactForSub, PromoService}
+import com.gu.memsub.subsv2.{Catalog, Subscription, SubscriptionPlan}
 import com.gu.memsub.{Address, Product}
-import com.gu.memsub.subsv2.{Catalog, CatalogPlan, Subscription, SubscriptionPlan}
 import com.gu.salesforce.{Contact, ContactId}
 import com.gu.stripe.Stripe
 import com.gu.zuora.api.ZuoraService
-import com.gu.zuora.soap.models.Commands._
-import com.gu.zuora.soap.models.Commands.{Account, PaymentMethod, RatePlan, Subscribe}
-import com.gu.zuora.soap.models.Commands._
+import com.gu.zuora.soap.models.Commands.{Account, PaymentMethod, RatePlan, Subscribe, _}
 import com.gu.zuora.soap.models.Queries
 import com.gu.zuora.soap.models.Results.SubscribeResult
 import com.gu.zuora.soap.models.errors._
-import com.gu.zuora.soap.writers.Command
 import com.typesafe.scalalogging.LazyLogging
 import forms.Renewal
 import model._
@@ -27,10 +23,8 @@ import model.error.IdentityService._
 import model.error.SubsError
 import org.joda.time.{DateTimeConstants, Days, LocalDate}
 import touchpoint.ZuoraProperties
-import views.html.account.renew
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scalaz.{EitherT, Monad, NonEmptyList, \/, \/-}
 import scala.concurrent.Future
 import scalaz.std.option._
 import scalaz.std.scalaFuture._
