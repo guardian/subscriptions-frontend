@@ -40,7 +40,8 @@ object PlanOps {
     def email: String = (
       in.isHomeDelivery.option("homedelivery@theguardian.com") orElse
       in.isVoucher.option("vouchersubs@theguardian.com") orElse
-      in.hasDigitalPack.option("digitalpack@theguardian.com")
+      in.hasDigitalPack.option("digitalpack@theguardian.com") orElse
+      in.isGuardianWeekly.option("gwsubs@theguardian.com")
     ).getOrElse("subscriptions@theguardian.com")
 
     def isHomeDelivery: Boolean = in.product == Delivery
@@ -55,7 +56,7 @@ object PlanOps {
 
     def hasDigitalPack: Boolean = in.charges.benefits.list.contains(Digipack)
 
-    def phone: String = "0330 333 6767"
+    def phone: String = "+44 (0) 330 333 6767"
 
     def productType: String = {
       if (isHomeDelivery) {
