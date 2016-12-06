@@ -3,9 +3,13 @@ package acceptance.pages
 import acceptance.util.{TestUser, LoadablePage, Browser, Config}
 
 class Register(val testUser: TestUser) extends LoadablePage with Browser {
-  val url = s"${Config.identityFrontendUrl}/register?skipConfirmation=true"
+  val url = s"${Config.identityFrontendUrl}/register?skipConfirmation=true&returnUrl=${Config.baseUrl}/uk"
 
   def hasLoaded(): Boolean = pageHasElement(createAccountButton)
+
+  def hasCreated(): Boolean = pageHasElement(subscriptionsUKDigital)
+  // just anything we expect on config.baseurl page
+  private lazy val subscriptionsUKDigital = xpath("//*[@data-test-id='subscriptions-uk-digital']")
 
   def fillInPersonalDetails(): Unit = RegisterFields.fillIn()
 
@@ -16,6 +20,7 @@ class Register(val testUser: TestUser) extends LoadablePage with Browser {
     val lastName = id("register_field_lastname")
     val email = id("register_field_email")
     val password = id("register_field_password")
+    val displayName = id("register_field_displayName")
 
     def fillIn() = {
       clear()
@@ -23,6 +28,10 @@ class Register(val testUser: TestUser) extends LoadablePage with Browser {
       setValue(lastName, testUser.username)
       setValue(email, s"${testUser.username}@gu.com")
       setValue(password, testUser.username)
+      if (pageHasElement(displayName)) {
+        // must be the normal rather than membership signup
+        setValue(displayName, testUser.username)
+      }
     }
 
     def clear() = {
@@ -30,6 +39,9 @@ class Register(val testUser: TestUser) extends LoadablePage with Browser {
       clearValue(lastName)
       clearValue(email)
       clearValue(password)
+      if (pageHasElement(displayName)) {
+        clearValue(displayName)
+      }
     }
   }
 

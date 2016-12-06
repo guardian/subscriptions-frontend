@@ -47,6 +47,7 @@ class CheckoutSpec extends FeatureSpec with Browser
 
     // And they submit the form to create Identity account
     register.createAccount()
+    assert(register.hasCreated())
 
     testFun(testUser)
   }
