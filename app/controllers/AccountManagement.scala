@@ -293,15 +293,15 @@ object AccountManagement extends Controller with LazyLogging {
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
 
-    SessionSubscription.subscriptionFromRequest map { s =>
+
+    SessionSubscription.subscriptionFromRequest flatMap { maybeSub =>
       val response = for {
-        sub <- s.toRightDisjunction("no subscription in request")
+        sub <- maybeSub.toRightDisjunction("no subscription in request")
         renew <- parseRenewalRequest(request, tpBackend.catalogService.unsafeCatalog)
       } yield {
-       tpBackend.checkoutService.renewSubscription(sub,renew)
-        Ok(renew.toString + sub.toString)
+        tpBackend.checkoutService.renewSubscription(sub, renew).map(res => Ok(res.id))
       }
-      response.valueOr(BadRequest(_))
+      response.valueOr(error => Future(BadRequest(error)))
     }
   }
 

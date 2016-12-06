@@ -251,47 +251,44 @@ class CheckoutService(identityService: IdentityService,
   }
 
 
+  private def nextFridayFrom(d: LocalDate) = {
+    val nearestFriday = d.withDayOfWeek(DateTimeConstants.FRIDAY)
+    if (!nearestFriday.isBefore(d)) {
+      nearestFriday
+    } else {
+      d.plusWeeks(1).withDayOfWeek(DateTimeConstants.FRIDAY)
+    }
+  }
 
   def renewSubscription(subscription: Subscription[SubscriptionPlan.PaperPlan], renewal: Renewal ) = {
 
-    def getPayment(contact:Contact, billto: Queries.Contact):PaymentService#Payment = {
+    def getPayment(contact: Contact, billto: Queries.Contact): PaymentService#Payment = {
       val idMinimalUser = IdMinimalUser(contact.identityId, None)
       val pid = PurchaserIdentifiers(contact, Some(idMinimalUser))
       renewal.paymentData match {
         case cd: CreditCardData =>
-          val currency = subscription.plan.charges.currencies.head // TODO why is it a set and what if there is none (or more than one) ?
+          val currency = subscription.plan.charges.currencies.head
           paymentService.makeCreditCardPayment(cd, currency, pid)
         case dd: DirectDebitData => paymentService.makeDirectDebitPayment(dd, billto.firstName, billto.lastName, contact)
       }
     }
 
-    val ratePlan = RatePlan(renewal.plan.id.get, None, Nil) //TODO is this ok ?
-    val amend =   Amend(subscriptionId = subscription.id.get,
-                        plansToRemove = Nil,
-                        newRatePlans = NonEmptyList(ratePlan)) //TODO PROMO CODE? PREVIEW MODE?
+    val ratePlan = RatePlan(renewal.plan.id.get, None, Nil)
+    val amend =   Amend(subscriptionId = subscription.id.get, plansToRemove = Nil, newRatePlans = NonEmptyList(ratePlan))
+
     def addPlan = {
-      //TODO ADD TEST FOR THIS!!! (AND SEE IF THERE IS A BETTER WAY)
-      def nextFridayFrom(d: LocalDate) = {
-        val nearestFriday = d.withDayOfWeek(DateTimeConstants.FRIDAY)
-        if (!nearestFriday.isBefore(d)) {
-          nearestFriday
-        } else {
-          d.plusWeeks(1).withDayOfWeek(DateTimeConstants.FRIDAY)
-        }
-      }
-      val currentSubEnd = subscription.plan.end
-      val effective = currentSubEnd
-      val contractEffective = nextFridayFrom(effective)
-      val customerAcceptance = contractEffective
 
-      val newRatePlan = RatePlan(renewal.plan.id.get, None) // TODO IS IT OK TO GENERATE THIS LIKE THIS?
+      //TODO I think we are supposed to use the next friday date for everything but that causes a zuora error : "contract effective date should not be later than the term end date of the sub"
+      val contractEffective = subscription.plan.end
+      val customerAcceptance = nextFridayFrom(contractEffective)
 
-      val renewCommand =  Renew(subscription.id.get, newRatePlan, effective, contractEffective)
+      val newRatePlan = RatePlan(renewal.plan.id.get, None)
+
+      val renewCommand =  Renew(subscription.id.get, newRatePlan, contractEffective, customerAcceptance)
       zuoraService.renewSubscription(renewCommand)
     }
 
-    val response = for {
-      //TODO TOO MANY API CALLS to get the bill to I have to make 2 calls (in rest it comes with the account)?
+    for {
       account <- zuoraService.getAccount(subscription.accountId)
       billto <- zuoraService.getContact(account.billToId)
       contact <- GetSalesforceContactForSub(subscription)(zuoraService, salesforceService.repo, global)
@@ -304,8 +301,5 @@ class CheckoutService(identityService: IdentityService,
       yield {
         updateResult
       }
-
-    response.recover{case e =>  e.printStackTrace()}//TODO SEE WHAT TO RETURN!
-
   }
 }
