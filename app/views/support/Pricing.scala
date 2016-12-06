@@ -53,6 +53,8 @@ object Pricing {
             } else {
               s"${discountAmount.pretty} for 1 year, then ${originalAmount.pretty} every year thereafter"
             }
+          case oneYear: OneYear => s"${discountAmount.pretty} for 1 year"
+
         }
       }
     }
