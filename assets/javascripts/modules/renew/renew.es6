@@ -1,5 +1,5 @@
 import ajax from 'ajax';
-import {check} from '../PromoCode';
+import {check} from '../promoCode';
 
 let stripeHandler = null;
 

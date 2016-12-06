@@ -103,6 +103,7 @@ class AccountHolder extends React.Component {
                     value={this.props.value}
                     onChange={this.props.onChange}
                     className="input-text"
+                    maxLength="18"
                 />
                 {invalid && <p className="mma-error">
                     This field is required
