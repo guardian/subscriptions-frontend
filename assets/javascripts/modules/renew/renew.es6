@@ -1,5 +1,5 @@
 import ajax from 'ajax';
-
+import {check} from '../promoCode';
 
 let stripeHandler = null;
 
@@ -43,7 +43,7 @@ export function validState(state) {
         && state.directDebitConfirmed.isValid;
 }
 
-export function send(state,errorHandler) {
+export function send(state, errorHandler) {
     let stripePayload = (token) => {
         return {
             type: 'card',
@@ -68,7 +68,7 @@ export function send(state,errorHandler) {
         }
     };
 
-    let post = (paymentData)=> {
+    let post = (paymentData) => {
         let payload = {
             email: state.email.value,
             plan: state.plan.id,
@@ -85,14 +85,14 @@ export function send(state,errorHandler) {
             data: JSON.stringify(payload)
         }).then((response) => {
             window.location.assign(response.redirect);
-    }).catch((r)=>{
+        }).catch((r) => {
             errorHandler(r);
         });
     };
     if (state.paymentType === STRIPE) {
-        getStripe()
+        getStripe();
     } else {
-        post(directDebitPayload())
+        post(directDebitPayload());
     }
 }
 
@@ -100,3 +100,20 @@ export function init() {
     stripeHandler = window.StripeCheckout.configure(guardian.stripeCheckout);
 }
 
+export function validatePromo(code, country) {
+    console.log('validating promo');
+    return check(code, country);
+}
+
+
+export function validatePromoForPlans(promo, plans) {
+    let newPlans = promo.adjustedRatePlans;
+    return plans.map((plan) => {
+        if (plan.id in newPlans) {
+            return Object.assign(plan, {promo: newPlans[plan.id]})
+        }
+        else {
+            return plan;
+        }
+    })
+}

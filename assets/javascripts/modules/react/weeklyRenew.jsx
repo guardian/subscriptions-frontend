@@ -1,8 +1,11 @@
 import React from 'react'
 import ReactDOM from 'react-dom';
 import {DirectDebit} from 'modules/react/directDebit'
+import {PromoCode, status} from 'modules/react/promoCode'
 import {
     SortCode,
+    validatePromo,
+    validatePromoForPlans,
     validAccount,
     validEmail,
     validState,
@@ -20,7 +23,7 @@ const empty = {
 };
 export function init(container) {
     stripeInit();
-    let showPaymentType = container.dataset.country === 'United Kingdom';
+    let showPaymentType = container.dataset.country === 'GB';
     let plans = window.guardian.plans;
     ReactDOM.render(<WeeklyRenew showPaymentType={showPaymentType} email={container.dataset.email}
                                  country={container.dataset.country} plans={plans}/>, container);
@@ -39,9 +42,15 @@ class WeeklyRenew extends React.Component {
             directDebitConfirmed: empty,
             loading: false,
             showValidity: false,
-            plan: this.props.plans[0]
+            plan: this.props.plans[0].id,
+            plans: this.props.plans,
+            promoCode: '',
+            promoStatus: status.NOTCHECKED,
+            promo: null
+
         };
         this.showEmail = !("email" in this.props);
+        this.handlePromo = this.handlePromo.bind(this);
         this.handleError = this.handleError.bind(this);
         this.handleEmail = this.handleEmail.bind(this);
         this.handlePaymentType = this.handlePaymentType.bind(this);
@@ -51,7 +60,9 @@ class WeeklyRenew extends React.Component {
         this.handleDirectDebitConfirmation = this.handleDirectDebitConfirmation.bind(this);
         this.click = this.click.bind(this);
         this.buttonText = this.buttonText.bind(this);
-        this.handlePlan = this.handlePlan.bind(this)
+        this.validatePromo = this.validatePromo.bind(this);
+        this.handlePlan = this.handlePlan.bind(this);
+        this.getPlan = this.getPlan.bind(this);
     }
 
 
@@ -59,8 +70,54 @@ class WeeklyRenew extends React.Component {
         this.setState({showValidity: true});
         if (validState(this.state)) {
             this.setState({loading: true});
-            send(this.state,this.handleError);
+            send(this.state, this.handleError);
         }
+    }
+
+    handlePromo(e) {
+        let update = {
+            promoCode: e.target.value.trim(),
+            promoStatus: status.NOTCHECKED
+        };
+        if (this.state.promoStatus === status.VALID) {
+            update.plans = this.props.plans
+        }
+        this.setState(update);
+
+    };
+
+    validatePromo() {
+        this.setState({
+            promosStatus: status.LOADING
+        });
+
+        validatePromo(this.state.promoCode, this.props.country).then((a) => {
+            let newPlans = validatePromoForPlans(a, this.state.plans);
+            let update = newPlans.map((plan) => {
+                return 'promo' in plan
+            }).reduce((a, b) => {
+                return a || b
+            }, false)
+            if (update) {
+                //This is a weekly promotion
+                this.setState({
+                    promoStatus: status.VALID,
+                    plans: newPlans,
+                    promo: a.promotion.description
+                })
+            } else {
+                //It's a good promotion, but it's not a weekly one
+                this.setState({
+                    promoStatus: status.INVALID,
+                    plans: this.props.plans
+                })
+            }
+        }).catch((a) => {
+            this.setState({
+                promoStatus: status.INVALID,
+                plans: this.props.plans
+            })
+        });
     }
 
     handleEmail(e) {
@@ -82,7 +139,7 @@ class WeeklyRenew extends React.Component {
     }
 
     handleAccountHolder(e) {
-        let name = e.target.value.substring(0,18);
+        let name = e.target.value;
         this.setState({accountHolder: {value: name, isValid: name.length > 0}});
     }
 
@@ -92,18 +149,26 @@ class WeeklyRenew extends React.Component {
     }
 
     handlePlan(plan) {
-        return ()=> {
-            this.setState({plan: plan});
+        return () => {
+            this.setState({plan: plan.id});
         }
     }
 
-    handleError(error){
-        this.setState({error:error,loading:false});
+    getPlan() {
+        return this.state.plans.filter((plan) => {
+            return plan.id == this.state.plan
+        })[0]
+    }
+
+    handleError(error) {
+        this.setState({error: error, loading: false});
     }
 
     buttonText() {
-        let string = 'Pay ' + this.state.plan.price + (this.state.paymentType === DIRECT_DEBIT ? ' by Direct Debit' : ' by Card');
-        return (string);
+        let plan = this.getPlan();
+        let price = plan.promo ? plan.promo : plan.price;
+        let method = this.state.paymentType === DIRECT_DEBIT ? 'by Direct Debit' : 'by Card';
+        return ['Pay', price, method].join(' ');
     }
 
     render() {
@@ -112,8 +177,17 @@ class WeeklyRenew extends React.Component {
             {this.state.error && <div className="mma-error"> {this.state.error}</div>}
             {!this.state.loading && !this.state.error &&
             <div>
+
                 <dl className="mma-section__list">
-                    <PlanChooser plans={this.props.plans} selected={this.state.plan} handleChange={this.handlePlan}/>
+
+                    <PlanChooser plans={this.state.plans} selected={this.getPlan()} handleChange={this.handlePlan}/>
+                    <PromoCode
+                        value={this.state.promoCode}
+                        handler={this.handlePromo}
+                        send={this.validatePromo}
+                        status={this.state.promoStatus}
+                        copy={this.state.promo}
+                    />
                     {this.showEmail &&
                     <EmailField value={this.state.email.value}
                                 valid={!this.state.showValidity || this.state.email.isValid}
@@ -219,9 +293,9 @@ class PaymentType extends React.Component {
 
 class PlanChooser extends React.Component {
     render() {
-        let plans = this.props.plans.map((plan)=> {
+        let plans = this.props.plans.map((plan) => {
             let checked = plan == this.props.selected;
-            return <Plan id={plan.id} price={plan.price} checked={checked}
+            return <Plan id={plan.id} price={plan.price} promo={plan.promo} checked={checked}
                          handleChange={this.props.handleChange(plan)}/>
         });
         return <div>
@@ -233,9 +307,21 @@ class PlanChooser extends React.Component {
     }
 }
 class Plan extends React.Component {
+    price() {
+        if (this.props.promo) {
+            return <span>
+                <s>{this.props.price} </s>
+                <strong>{this.props.promo}</strong>
+            </span>
+        }
+        return this.props.price
+    }
+
     render() {
         return <label className="option"><input type="radio" name="planchooser" value={this.props.id}
                                                 checked={this.props.checked}
-                                                onChange={this.props.handleChange}/>{this.props.price}</label>
+                                                onChange={this.props.handleChange}/>
+            {this.price()}
+        </label>
     }
 }
