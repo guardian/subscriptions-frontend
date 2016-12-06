@@ -179,6 +179,8 @@ class WeeklyRenew extends React.Component {
             <div>
 
                 <dl className="mma-section__list">
+
+                    <PlanChooser plans={this.state.plans} selected={this.getPlan()} handleChange={this.handlePlan}/>
                     <PromoCode
                         value={this.state.promoCode}
                         handler={this.handlePromo}
@@ -186,7 +188,6 @@ class WeeklyRenew extends React.Component {
                         status={this.state.promoStatus}
                         copy={this.state.promo}
                     />
-                    <PlanChooser plans={this.state.plans} selected={this.getPlan()} handleChange={this.handlePlan}/>
                     {this.showEmail &&
                     <EmailField value={this.state.email.value}
                                 valid={!this.state.showValidity || this.state.email.isValid}

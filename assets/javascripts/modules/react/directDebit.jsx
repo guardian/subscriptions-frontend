@@ -35,7 +35,7 @@ class SortCodeComponent extends React.Component {
             <dd className="mma-section__list--content">
                 <input value={this.props.value} onChange={this.props.onChange}
                        type="text"
-                       className="input-text input-text--small js-input"
+                       className="input-text js-input"
                        placeholder="00-00-00"
                 />
                 {invalid && <p className="mma-error">

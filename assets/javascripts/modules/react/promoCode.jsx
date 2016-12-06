@@ -9,7 +9,7 @@ export const status = {
 
 export class PromoCode extends React.Component {
 render(){
-    let href = '/p/'+this.props.value+'/terms/'
+    let href = '/p/'+this.props.value+'/terms/';
     return <div>
         <dt className="mma-section__list--title">
             <label className="label" for="promo">Promo Code</label>
@@ -17,8 +17,8 @@ render(){
         <dd className="mma-section__list--content">
         <PromoField value={this.props.value} handler={this.props.handler}/>
         <PromoButton status={this.props.status} onClick={this.props.send} />
-            {this.props.status == status.VALID && <div><p><strong>✓&nbsp;&nbsp;Promotion applied</strong></p>
-            <p>{this.props.copy}</p>
+            {this.props.status == status.VALID && <div className="u-note">
+            {this.props.copy}<br />
                 <a className="u-link" href={href}>Terms and conditions</a></div>}
         </dd>
     </div>
@@ -38,7 +38,7 @@ class PromoButton extends React.Component {
         };
         let text = ()=>{
             if (this.props.status === status.VALID){
-                return 'Valid';
+                return 'Promotion Applied';
             }
             if (this.props.status === status.INVALID){
                 return 'Invalid';
@@ -46,13 +46,13 @@ class PromoButton extends React.Component {
             return 'Apply';
         };
         return <button
-            className={`button ${state()} button--large button--arrow-right`}
+            className={`button ${state()} button--large button--arrow-right grid__item`}
             onClick={this.props.onClick}>{text()}</button>
     }
 }
 class PromoField extends React.Component {
     render(){
-        return <input className="input-text input-text--promo" value={this.props.value} onChange={this.props.handler}/>
+        return <input className="input-text input-text--promo grid__item" value={this.props.value} onChange={this.props.handler}/>
     }
 
 }
