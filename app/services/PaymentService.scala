@@ -1,12 +1,13 @@
 package services
 import com.gu.i18n.Country.UK
-import com.gu.i18n.Currency
+import com.gu.i18n.{CountryGroup, Currency}
 import com.gu.i18n.Currency.GBP
 import com.gu.memsub.subsv2.CatalogPlan
 import com.gu.salesforce.ContactId
 import com.gu.stripe.StripeService
 import com.gu.zuora.soap.models.Commands.{Account, BankTransfer, CreditCardReferenceTransaction, PaymentMethod}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
+
 import scala.concurrent.Future
 import model._
 
@@ -35,7 +36,15 @@ class PaymentService(val stripeService: StripeService) {
     override def makeAccount = Account.stripe(purchaserIds.memberId, currency, autopay = true)
     override def makePaymentMethod = {
       stripeService.Customer.create(description = purchaserIds.description, card = paymentData.stripeToken)
-        .map(a => CreditCardReferenceTransaction(a.card.id, a.id))
+        .map(a => CreditCardReferenceTransaction(
+          cardId = a.card.id,
+          customerId = a.id,
+          last4 = a.card.last4,
+          cardCountry = CountryGroup.countryByCode(a.card.country),
+          expirationMonth = a.card.exp_month,
+          expirationYear = a.card.exp_year,
+          cardType = a.card.`type`
+        ))
     }
   }
 
