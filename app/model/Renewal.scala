@@ -20,8 +20,13 @@ class RenewalReads(catalog: Catalog) {
 
   implicit val paymentDataReads = new Reads[PaymentData] {
 
+    def loadPaymentType(jsValue: JsValue) = jsValue match {
+      case JsString(k) => PaymentType.fromKey(k)
+      case _ => None
+    }
+
     def getPaymentType(jsonVal:JsValue) : Option[PaymentType] = jsonVal match {
-      case JsObject(paymentData) => paymentData.get("type").flatMap { case JsString(k) => PaymentType.fromKey(k) }
+      case JsObject(paymentData) => paymentData.get("type").flatMap(loadPaymentType)
       case _ => None
     }
 
