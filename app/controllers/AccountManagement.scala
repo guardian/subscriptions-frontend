@@ -5,13 +5,11 @@ import _root_.services.TouchpointBackend
 import _root_.services.TouchpointBackend.Resolution
 import actions.CommonActions._
 import com.github.nscala_time.time.OrderingImplicits.LocalDateOrdering
-import com.gu.memsub.Subscription.{ProductRatePlanId, Name}
-import com.gu.memsub.services.GetSalesforceContactForSub
 import com.gu.memsub.subsv2.SubscriptionPlan.{Delivery, WeeklyPlan}
 import com.gu.memsub.Subscription.{Name, ProductRatePlanId}
 import com.gu.memsub.services.GetSalesforceContactForSub
 import com.gu.memsub.subsv2._
-import com.gu.memsub.{BillingPeriod, Price, BillingSchedule, Product}
+import com.gu.memsub.{BillingSchedule, Product}
 import com.gu.subscriptions.suspendresume.SuspensionService
 import com.gu.subscriptions.suspendresume.SuspensionService.{BadZuoraJson, ErrNel, HolidayRefund, PaymentHoliday}
 import com.gu.zuora.soap.models.Queries.Contact
@@ -23,8 +21,6 @@ import play.api.libs.json.{JsError, JsSuccess, Json}
 import play.api.mvc.{AnyContent, Controller, Request, Result}
 import utils.TestUsers.PreSigninTestCookie
 import views.support.Pricing._
-
-
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scalaz.std.scalaFuture._
@@ -69,7 +65,7 @@ object SessionSubscription {
     } yield zuoraSubscription).orElse(for {
       identityUser <- OptionT(Future.successful(authenticatedUserFor(request)))
       salesForceUser <- OptionT(tpBackend.salesforceService.repo.get(identityUser.user.id))
-      zuoraSubscription <- OptionT(tpBackend.subscriptionService.current[SubscriptionPlan.PaperPlan](salesForceUser).map(_.headOption)/*FIXME if they have more than one they can only manage first*/)
+      zuoraSubscription <- OptionT(tpBackend.subscriptionService.current[SubscriptionPlan.PaperPlan](salesForceUser).map(_.headOption/*FIXME if they have more than one they can only manage the first*/))
     } yield zuoraSubscription).run
   }
 
