@@ -1,8 +1,7 @@
-package forms
+package model
 
 import com.gu.memsub.subsv2.Catalog
 import com.gu.memsub.subsv2.CatalogPlan.Paper
-import model._
 import play.api.libs.json._
 
 

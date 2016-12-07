@@ -16,8 +16,7 @@ import com.gu.zuora.soap.models.Queries
 import com.gu.zuora.soap.models.Results.SubscribeResult
 import com.gu.zuora.soap.models.errors._
 import com.typesafe.scalalogging.LazyLogging
-import forms.Renewal
-import model._
+import model.{Renewal, _}
 import model.error.CheckoutService._
 import model.error.IdentityService._
 import model.error.SubsError
