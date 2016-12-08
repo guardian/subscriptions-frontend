@@ -102,6 +102,7 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
           case Product.Voucher => getSettings(Some(Country.UK), GBP)
           case Product.WeeklyZoneA => getSettings(determinedCountryGroup.defaultCountry, GBP)
           case Product.WeeklyZoneB => getSettings(None, USD)
+          case Product.WeeklyZoneC => getSettings(None, USD)
         }
 
         val digitalEdition = model.DigitalEdition.getForCountry(countryAndCurrencySettings.defaultCountry)

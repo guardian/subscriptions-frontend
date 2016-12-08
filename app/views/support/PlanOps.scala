@@ -50,7 +50,7 @@ object PlanOps {
 
     def isDigitalPack: Boolean = in.product == com.gu.memsub.Product.Digipack
 
-    def isGuardianWeekly: Boolean = in.product == Product.WeeklyZoneA || in.product == Product.WeeklyZoneB // TODO is this right to include both?
+    def isGuardianWeekly: Boolean = in.product.isInstanceOf[Product.Weekly]
 
     def hasPhysicalBenefits: Boolean = in.charges.benefits.list.exists(_.isPhysical)
 

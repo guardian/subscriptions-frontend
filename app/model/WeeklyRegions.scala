@@ -1,5 +1,6 @@
 package model
 
+import com.gu.memsub.subsv2.Catalog
 import com.netaporter.uri.Uri
 
 trait WeeklyRegion {
@@ -11,24 +12,23 @@ trait WeeklyRegion {
 }
 
 object WeeklyRegion {
-  val all = List(UnitedKingdom, UnitedStates, Row)
+  def all(catalog: Catalog): List[WeeklyRegion] = List(UnitedKingdom(catalog), UnitedStates(catalog), Row(catalog))
 }
 
-object UnitedKingdom extends WeeklyRegion {
+case class UnitedKingdom(catalog: Catalog) extends WeeklyRegion {
   override val title = "United Kingdom"
   override val description = "Includes Isle of Man and Channel Islands"
-  override val url = Uri.parse("checkout/weeklyzonea-guardianweeklyquarterly?countryGroup=uk")
+  override val url = Uri.parse(catalog.weeklyZoneA.quarter.slug).addParam("countryGroup", "uk")
 }
 
-object UnitedStates extends WeeklyRegion {
+case class UnitedStates(catalog: Catalog) extends WeeklyRegion {
   override val title = "United States"
   override val description = "Includes Alaska and Hawaii"
-  override val url = Uri.parse("checkout/weeklyzonea-guardianweeklyquarterly?countryGroup=us")
+  override val url = Uri.parse(catalog.weeklyZoneA.quarter.slug).addParam("countryGroup", "us")
 }
 
-object Row extends WeeklyRegion {
+case class Row(catalog: Catalog) extends WeeklyRegion {
   override val title = "Rest of the world"
-  override val description = "Posted to you by Air Mail"
-  override val url = Uri.parse("checkout/weeklyzoneb-guardianweeklyquarterly")
+  override val description = "Posted to you by air mail"
+  override val url = Uri.parse(catalog.weeklyZoneB.quarter.slug)
 }
-
