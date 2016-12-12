@@ -276,14 +276,10 @@ class CheckoutService(identityService: IdentityService,
     val amend =   Amend(subscriptionId = subscription.id.get, plansToRemove = Nil, newRatePlans = NonEmptyList(ratePlan))
 
     def addPlan = {
-
-      //TODO I think we are supposed to use the next friday date for everything but that causes a zuora error : "contract effective date should not be later than the term end date of the sub"
-      val contractEffective = subscription.plan.end
+      val contractEffective = subscription.termEndDate
       val customerAcceptance = nextFridayFrom(contractEffective)
-
       val newRatePlan = RatePlan(renewal.plan.id.get, None)
-
-      val renewCommand =  Renew(subscription.id.get, newRatePlan, contractEffective, customerAcceptance)
+      val renewCommand =  Renew(subscription.id.get, subscription.startDate, newRatePlan, contractEffective, customerAcceptance)
       zuoraService.renewSubscription(renewCommand)
     }
 
