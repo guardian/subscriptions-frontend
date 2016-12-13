@@ -27,6 +27,7 @@ $rsbc-theme-flat-color-disabled-border: $c-neutral5;
     vertical-align : middle;
     margin         : 0;
     box-sizing: border-box;
+    padding: ($gs-baseline / 2) 0;
 
     label {
         cursor: pointer;
