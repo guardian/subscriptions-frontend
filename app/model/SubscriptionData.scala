@@ -21,11 +21,11 @@ object PaymentType {
 }
 
 case object DirectDebit extends PaymentType {
-  override def toKey = "direct-debit"
+  override val toKey = "direct-debit"
 }
 
 case object CreditCard extends PaymentType {
-  override def toKey = "card"
+  override val toKey = "card"
 }
 
 sealed trait PaymentData

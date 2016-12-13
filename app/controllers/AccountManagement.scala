@@ -5,18 +5,20 @@ import _root_.services.TouchpointBackend
 import _root_.services.TouchpointBackend.Resolution
 import actions.CommonActions._
 import com.github.nscala_time.time.OrderingImplicits.LocalDateOrdering
-import com.gu.memsub.Subscription.{ProductRatePlanId, Name}
-import com.gu.memsub.services.GetSalesforceContactForSub
 import com.gu.memsub.subsv2.SubscriptionPlan.{Delivery, WeeklyPlan}
+import com.gu.memsub.Subscription.{Name, ProductRatePlanId}
+import com.gu.memsub.services.GetSalesforceContactForSub
 import com.gu.memsub.subsv2._
-import com.gu.memsub.{BillingPeriod, Price, BillingSchedule, Product}
+import com.gu.memsub.{BillingSchedule, Product}
 import com.gu.subscriptions.suspendresume.SuspensionService
 import com.gu.subscriptions.suspendresume.SuspensionService.{BadZuoraJson, ErrNel, HolidayRefund, PaymentHoliday}
 import com.gu.zuora.soap.models.Queries.Contact
 import com.typesafe.scalalogging.LazyLogging
 import configuration.{Config, ProfileLinks}
-import forms.{AccountManagementLoginForm, AccountManagementLoginRequest, SuspendForm}
+import forms._
+import model.{Renewal, RenewalReads}
 import org.joda.time.LocalDate
+import play.api.libs.json.{JsError, JsSuccess, Json}
 import play.api.mvc.{AnyContent, Controller, Request, Result}
 import utils.TestUsers.PreSigninTestCookie
 import views.support.Pricing._
@@ -25,7 +27,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scalaz.std.scalaFuture._
 import scalaz.syntax.std.option._
-import scalaz.{EitherT, OptionT, \/}
+import scalaz.{-\/, EitherT, OptionT, \/, \/-}
 
 // this handles putting subscriptions in and out of the session
 object SessionSubscription {
@@ -55,7 +57,7 @@ object SessionSubscription {
     } yield zuoraSubscription).run
   }
 
-  def subscriptionFromRequest(implicit request: Request[AnyContent]): Future[Option[Subscription[SubscriptionPlan.PaperPlan]]] = {
+  def subscriptionFromRequest(implicit request: Request[_]): Future[Option[Subscription[SubscriptionPlan.PaperPlan]]] = {
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
 
@@ -203,9 +205,7 @@ object AccountManagement extends Controller with LazyLogging {
 
     def detailsMatch(zuoraContact: Contact, loginRequest: AccountManagementLoginRequest): Boolean = {
       def format(str: String): String = str.filter(_.isLetterOrDigit).toLowerCase
-
-      format(zuoraContact.lastName) == format(loginRequest.lastname) &&
-        zuoraContact.postalCode.map(format).contains(format(loginRequest.postcode))
+      format(zuoraContact.lastName) == format(loginRequest.lastname)
     }
 
     def subscriptionDetailsMatch(loginRequest: AccountManagementLoginRequest, zuoraSubscription: Subscription[SubscriptionPlan.PaperPlan]): Future[Boolean] = {
@@ -283,5 +283,32 @@ object AccountManagement extends Controller with LazyLogging {
   def redirect = NoCacheAction { implicit request =>
     Redirect(routes.AccountManagement.manage(None, None).url)
   }
+
+
+  def processRenewal = accountManagementAction.async { implicit request =>
+    implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
+    implicit val tpBackend = resolution.backend
+
+
+    SessionSubscription.subscriptionFromRequest flatMap { maybeSub =>
+      val response = for {
+        sub <- maybeSub.toRightDisjunction("no subscription in request")
+        renew <- parseRenewalRequest(request, tpBackend.catalogService.unsafeCatalog)
+      } yield {
+        tpBackend.checkoutService.renewSubscription(sub, renew).map(res => Ok(res.id))
+      }
+      response.valueOr(error => Future(BadRequest(error)))
+    }
+  }
+
+  def parseRenewalRequest(request: Request[AnyContent], catalog: Catalog): \/[String, Renewal] = {
+    implicit val renewalReads = new RenewalReads(catalog).renewalReads
+    request.body.asJson.map(_.validate[Renewal]) match {
+      case Some(JsSuccess(renewal, _)) => \/-(renewal)
+      case Some(JsError(err)) => -\/(err.mkString(","))
+      case None => -\/("invalid json")
+    }
+  }
+
 }
 

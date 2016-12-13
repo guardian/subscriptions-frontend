@@ -2,23 +2,25 @@ package services
 
 import com.gu.config.DiscountRatePlanIds
 import com.gu.i18n.Country
+import com.gu.i18n.Currency.GBP
 import com.gu.identity.play.{AuthenticatedIdUser, IdMinimalUser}
 import com.gu.memsub.promo._
-import com.gu.memsub.services.PromoService
-import com.gu.memsub.subsv2.Catalog
+import com.gu.memsub.services.{GetSalesforceContactForSub, PromoService}
+import com.gu.memsub.subsv2.{Catalog, Subscription, SubscriptionPlan}
 import com.gu.memsub.{Address, Product}
-import com.gu.salesforce.ContactId
+import com.gu.salesforce.{Contact, ContactId}
 import com.gu.stripe.Stripe
 import com.gu.zuora.api.ZuoraService
-import com.gu.zuora.soap.models.Commands._
+import com.gu.zuora.soap.models.Commands.{Account, PaymentMethod, RatePlan, Subscribe, _}
+import com.gu.zuora.soap.models.Queries
 import com.gu.zuora.soap.models.Results.SubscribeResult
 import com.gu.zuora.soap.models.errors._
 import com.typesafe.scalalogging.LazyLogging
-import model._
+import model.{Renewal, _}
 import model.error.CheckoutService._
 import model.error.IdentityService._
 import model.error.SubsError
-import org.joda.time.{Days, LocalDate}
+import org.joda.time.{DateTimeConstants, Days, LocalDate}
 import touchpoint.ZuoraProperties
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -27,6 +29,7 @@ import scalaz.std.option._
 import scalaz.std.scalaFuture._
 import scalaz.syntax.monad._
 import scalaz.{EitherT, Monad, NonEmptyList, \/}
+
 
 object CheckoutService {
   def paymentDelay(in: Either[PaperData, DigipackData], zuora: ZuoraProperties)(implicit now: LocalDate): Days = in.fold(
@@ -71,7 +74,7 @@ class CheckoutService(identityService: IdentityService,
       _ <- Monad[SubNel].whenM(userExists && authenticatedUserOpt.isEmpty)(emailError)
       memberId <- EitherT(createOrUpdateUserInSalesforce(subscriptionData, idMinimalUser))
       purchaserIds = PurchaserIdentifiers(memberId, idMinimalUser)
-      payment <- EitherT(createPaymentType(requestData, purchaserIds, subscriptionData))
+      payment <- EitherT(createPaymentType(purchaserIds, subscriptionData))
       defaultPaymentDelay = CheckoutService.paymentDelay(subscriptionData.productData, zuoraProperties)
       paymentMethod <- EitherT(attachPaymentMethodToStripeCustomer(payment, purchaserIds))
       subscribe = createSubscribeRequest(personalData, soldToContact, requestData, plan, purchaserIds, paymentMethod, payment.makeAccount, Some(defaultPaymentDelay))
@@ -222,17 +225,19 @@ class CheckoutService(identityService: IdentityService,
     }
   }
 
-  private def createPaymentType(
-      requestData: SubscriptionRequestData,
-      purchaserIds: PurchaserIdentifiers,
-      subscriptionData: SubscribeRequest): Future[NonEmptyList[SubsError] \/ PaymentService#Payment] = {
+  private def createPaymentType( purchaserIds: PurchaserIdentifiers, subscriptionData: SubscribeRequest): Future[NonEmptyList[SubsError] \/ PaymentService#Payment] = {
 
     try {
       val payment = subscriptionData.genericData.paymentData match {
         case paymentData@DirectDebitData(_, _, _) =>
-          paymentService.makeDirectDebitPayment(paymentData, subscriptionData.genericData.personalData, purchaserIds.memberId)
+          val personalData = subscriptionData.genericData.personalData
+          require(personalData.address.country.contains(Country.UK), "Direct Debit payment only works in the UK right now")
+          paymentService.makeDirectDebitPayment(paymentData, personalData.first, personalData.last, purchaserIds.memberId)
         case paymentData@CreditCardData(_) =>
-          paymentService.makeCreditCardPayment(paymentData, subscriptionData.genericData.currency, purchaserIds, subscriptionData.productData.fold(_.plan, _.plan))
+          val plan = subscriptionData.productData.fold(_.plan, _.plan)
+          val desiredCurrency = subscriptionData.genericData.currency
+          val currency = if (plan.charges.price.currencies.contains(desiredCurrency)) desiredCurrency else GBP
+          paymentService.makeCreditCardPayment(paymentData, currency, purchaserIds)
       }
       Future.successful(\/.right(payment))
     } catch {
@@ -242,5 +247,54 @@ class CheckoutService(identityService: IdentityService,
         None,
         Some(e.getMessage())))))
     }
+  }
+
+
+  private def nextFridayFrom(d: LocalDate) = {
+    val nearestFriday = d.withDayOfWeek(DateTimeConstants.FRIDAY)
+    if (!nearestFriday.isBefore(d)) {
+      nearestFriday
+    } else {
+      d.plusWeeks(1).withDayOfWeek(DateTimeConstants.FRIDAY)
+    }
+  }
+
+  def renewSubscription(subscription: Subscription[SubscriptionPlan.PaperPlan], renewal: Renewal ) = {
+
+    def getPayment(contact: Contact, billto: Queries.Contact): PaymentService#Payment = {
+      val idMinimalUser = IdMinimalUser(contact.identityId, None)
+      val pid = PurchaserIdentifiers(contact, Some(idMinimalUser))
+      renewal.paymentData match {
+        case cd: CreditCardData =>
+          val currency = subscription.plan.charges.currencies.head
+          paymentService.makeCreditCardPayment(cd, currency, pid)
+        case dd: DirectDebitData => paymentService.makeDirectDebitPayment(dd, billto.firstName, billto.lastName, contact)
+      }
+    }
+
+    val ratePlan = RatePlan(renewal.plan.id.get, None, Nil)
+    val amend =   Amend(subscriptionId = subscription.id.get, plansToRemove = Nil, newRatePlans = NonEmptyList(ratePlan))
+
+    def addPlan = {
+      val contractEffective = subscription.termEndDate
+      val customerAcceptance = nextFridayFrom(contractEffective)
+      val newRatePlan = RatePlan(renewal.plan.id.get, None)
+      val renewCommand =  Renew(subscription.id.get, subscription.startDate, newRatePlan, contractEffective, customerAcceptance)
+      zuoraService.renewSubscription(renewCommand)
+    }
+
+    for {
+      account <- zuoraService.getAccount(subscription.accountId)
+      billto <- zuoraService.getContact(account.billToId)
+      contact <- GetSalesforceContactForSub(subscription)(zuoraService, salesforceService.repo, global)
+      payment = getPayment(contact, billto)
+      paymentMethod <- payment.makePaymentMethod
+      createPaymentMethod = CreatePaymentMethod(subscription.accountId, paymentMethod, payment.makeAccount.paymentGateway, billto)
+      updateResult <- zuoraService.createPaymentMethod(createPaymentMethod)
+      amendResult <- addPlan
+    }
+      yield {
+        updateResult
+      }
   }
 }

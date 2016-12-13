@@ -67,12 +67,6 @@
                                     value="" maxlength="50" required>
                                     @fragments.forms.errorMessage("This field is required")
                                 </div>
-                                <div class="form-field js-suspend-last">
-                                    <label class="label" for="last">Post code</label>
-                                    <input type="text" class="input-text js-input" name="postcode" id="last"
-                                    value="" maxlength="50" required>
-                                    @fragments.forms.errorMessage("This field is required")
-                                </div>
                                 @if(flash.get("error").isDefined) {
                                     <div class="form-field__error-message-visible">@flash.get("error")</div>
                                 }
