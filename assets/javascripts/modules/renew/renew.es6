@@ -71,7 +71,7 @@ export function send(state, errorHandler) {
     let post = (paymentData) => {
         let payload = {
             email: state.email.value,
-            plan: state.plan.id,
+            plan: state.plan,
             paymentData: paymentData
         };
         ajax({
