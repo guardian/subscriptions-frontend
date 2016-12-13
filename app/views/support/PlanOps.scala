@@ -50,7 +50,10 @@ object PlanOps {
 
     def isDigitalPack: Boolean = in.product == com.gu.memsub.Product.Digipack
 
-    def isGuardianWeekly: Boolean = in.product.isInstanceOf[Product.Weekly]
+    def isGuardianWeekly: Boolean = in.product match {
+      case _:Product.Weekly => true
+      case _ => false
+    }
 
     def hasPhysicalBenefits: Boolean = in.charges.benefits.list.exists(_.isPhysical)
 
