@@ -28,6 +28,7 @@ import scala.concurrent.Future
 import scalaz.std.scalaFuture._
 import scalaz.syntax.std.option._
 import scalaz.{-\/, EitherT, OptionT, \/, \/-}
+import model.SubscriptionOps._
 
 // this handles putting subscriptions in and out of the session
 object SessionSubscription {
@@ -289,13 +290,15 @@ object AccountManagement extends Controller with LazyLogging {
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
 
+    def validateRenewable(sub: Subscription[SubscriptionPlan.PaperPlan]) = if (sub.renewable) \/-(sub) else -\/("subscription is not renewable")
 
     SessionSubscription.subscriptionFromRequest flatMap { maybeSub =>
       val response = for {
         sub <- maybeSub.toRightDisjunction("no subscription in request")
+        renewableSub <- validateRenewable(sub)
         renew <- parseRenewalRequest(request, tpBackend.catalogService.unsafeCatalog)
       } yield {
-        tpBackend.checkoutService.renewSubscription(sub, renew).map(res => Ok(res.id))
+        tpBackend.checkoutService.renewSubscription(renewableSub, renew).map(res => Ok(res.id))
       }
       response.valueOr(error => Future(BadRequest(error)))
     }

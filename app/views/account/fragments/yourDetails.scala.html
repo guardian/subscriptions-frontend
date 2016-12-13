@@ -5,6 +5,7 @@
 @import com.gu.memsub.PaperDay
 @import scala.collection.immutable.List.empty
 @import com.gu.salesforce.Contact
+@import model.SubscriptionOps._
 
 @(subscription: Subscription[SubscriptionPlan.PaperPlan], chosenPaperDays: List[PaperDay] = empty, maybeContact: Option[Contact] = None)(extra: Html = Html(""))
 <dl class="mma-section__list">
@@ -12,25 +13,30 @@
     <dd class="mma-section__list--content">@subscription.name.get</dd>
 
     <dt class="mma-section__list--title">Current plan</dt>
-    <dd class="mma-section__list--content">
-        <div>
-        @if(subscription.plan.name == "Echo-Legacy") {
-            Multi-day (@{chosenPaperDays.map(_.id.replace("Print ", "")).mkString(", ")})
-        } else {
-            @subscription.plan.name
-        }
-        </div>
-        <div>@subscription.plan.charges.prettyPricing(subscription.plan.charges.price.currencies.head)</div>
-    </dd>
+    @defining(subscription.latestPlan) { plan =>
 
-    <dt class="mma-section__list--title">Start date</dt>
-    <dd class="mma-section__list--content">
-    @if(subscription.plan.name == "Echo-Legacy") {
-        @prettyDate(subscription.startDate)
-    } else {
-        @prettyDate(subscription.firstPaymentDate)
+        <dd class="mma-section__list--content">
+            <div>
+            @if(plan.name == "Echo-Legacy") {
+                Multi-day (@{
+                chosenPaperDays.map(_.id.replace("Print ", "")).mkString(", ")
+            })
+            } else {
+                @plan.name
+            }
+            </div>
+            <div>@plan.charges.prettyPricing(plan.charges.price.currencies.head)</div>
+        </dd>
+
+        <dt class="mma-section__list--title">Start date</dt>
+        <dd class="mma-section__list--content">
+        @if(plan.name == "Echo-Legacy") {
+            @prettyDate(subscription.startDate)
+        } else {
+            @prettyDate(subscription.firstPaymentDate)
+        }
+        </dd>
     }
-    </dd>
 @maybeContact.map { contact =>
     <dt class="mma-section__list--title">Delivery details</dt>
     <dd class="mma-section__list--content">
