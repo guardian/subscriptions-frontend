@@ -20,6 +20,7 @@ object ContentSubscriptionPlanOps {
     val rowUk = CountryGroup("Row Uk", "uk", None, CountryGroup.UK.countries.filterNot(weeklyUkCountries.countries.contains(_)), GBP, PostCode)
     rowUk :: CountryGroup.allGroups.filterNot(group => (CountryGroup.UK :: weeklyZoneAGroups) contains group)
   }
+  val weeklyZoneCGroups = weeklyZoneBGroups
   val ukAndIsleOfMan = CountryGroup.UK.copy(countries = List(Country.UK, Country("IM", "Isle of Man")))
 
   implicit class EnrichedContentSubscriptionPlan[+A <: CatalogPlan.ContentSubscription](in: A) {
@@ -43,6 +44,8 @@ object ContentSubscriptionPlanOps {
         case Product.WeeklyZoneA => LocalizationSettings(Some(CountryWithCurrency.whitelisted(supportedCurrencies, GBP, weeklyZoneAGroups)), allCountriesWithCurrencyOrGBP)
 
         case Product.WeeklyZoneB => LocalizationSettings(Some(CountryWithCurrency.whitelisted(supportedCurrencies, USD, weeklyZoneBGroups)), allCountriesWithCurrencyOrGBP)
+
+        case Product.WeeklyZoneC => LocalizationSettings(Some(CountryWithCurrency.whitelisted(supportedCurrencies, USD, weeklyZoneCGroups)), allCountriesWithCurrencyOrGBP)
       }
     }
   }

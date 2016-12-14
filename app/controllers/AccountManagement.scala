@@ -167,6 +167,7 @@ object ManageWeekly extends LazyLogging {
                   val weeklyPlans = weeklySubscription.plan.product match {
                     case Product.WeeklyZoneA => catalog.weeklyZoneA.toList
                     case Product.WeeklyZoneB => catalog.weeklyZoneB.toList
+                    case Product.WeeklyZoneC => catalog.weeklyZoneC.toList
                   }
               sequence(weeklyPlans.map { plan =>
                 account.currency.toRight(s"could not deserialise currency for account ${account.id}").right.flatMap { existingCurrency =>

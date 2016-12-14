@@ -22,6 +22,9 @@
         <div class="actions">
             <h2>Subscribe as a <em>guest</em> user to:</h2>
             @for(group <- products) {
+                @group.headOption.map { plan =>
+                    <h4>@plan.product.name.capitalize:</h4>
+                }
                 <dl>
                 @for(plan <- group.sortBy(_.charges.gbpPrice.amount)) {
                     <a href="@routes.Checkout.renderCheckout(UK.id, None, None, plan.slug)" style="margin-bottom: 10px" class="button button--primary button--large">@plan.name (@{(plan.charges.gbpPrice * 12 / 52).pretty}/w, @plan.charges.gbpPrice.pretty/m)</a>
@@ -35,6 +38,9 @@
         <div class="actions">
             <h2>Register as an Identity user, redirecting to checkout for:</h2>
             @for(group <- products) {
+                @group.headOption.map { plan =>
+                    <h4>@plan.product.name.capitalize:</h4>
+                }
                 <dl>
                     @for(plan <- group.sortBy(_.charges.gbpPrice.amount)) {
                         <a href="@idWebAppRegisterUrl(routes.Checkout.renderCheckout(UK.id, None, None, plan.slug))" style="margin-bottom: 10px" class="button button--primary button--large">@plan.name (@{(plan.charges.gbpPrice * 12 / 52).pretty}/w, @plan.charges.gbpPrice.pretty/m)</a>

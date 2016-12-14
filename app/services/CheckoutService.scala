@@ -52,8 +52,9 @@ class CheckoutService(identityService: IdentityService,
   type SubNel[A] = EitherT[Future, NonEmptyList[SubsError], A]
   type FatalErrors = NonEmptyList[SubsError]
 
-  private def isGuardianWeekly(paperData: PaperData): Boolean = {
-    paperData.plan.product == Product.WeeklyZoneA || paperData.plan.product == Product.WeeklyZoneB
+  private def isGuardianWeekly(paperData: PaperData): Boolean = paperData.plan.product match {
+    case _:Product.Weekly => true
+    case _ => false
   }
 
   def processSubscription(subscriptionData: SubscribeRequest,
