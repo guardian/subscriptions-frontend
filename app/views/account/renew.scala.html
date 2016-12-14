@@ -6,7 +6,7 @@
 @import views.support.Dates.prettyDate
 @import com.gu.i18n.Country
 @import controllers.ManageWeekly.WeeklyPlanInfo
-
+@import model.SubscriptionOps._
 @(
     subscription: Subscription[SubscriptionPlan.WeeklyPlan], billingSchedule: BillingSchedule, contact: Contact, billToCountry: Country, plans: List[WeeklyPlanInfo]
 )(implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackend.Resolution)
@@ -60,15 +60,20 @@
                         Subscription end date
                     </h3>
                     @prettyDate(subscription.termEndDate)
-                </section>
-                <section class="mma-section">
-                    <h3 class="mma-section__header">Renew</h3>
                     @helper.CSRF.formField
-                    <p>
-                        Here is some copy about renewing your subscription, which is a very fulfilling thing to do and should probably fill one to two lines of text telling the user what renewing their subscription entails.
-                    </p>
-                    <div class="js-weekly-renew" data-email="@contact.email" data-country="@billToCountry.alpha2" />
                 </section>
+
+                @if(subscription.renewable){
+                        <section class="mma-section">
+                        <h3 class="mma-section__header">Renew</h3>
+
+                        <p>
+                        Here is some copy about renewing your subscription, which is a very fulfilling thing to do and should probably fill one to two lines of text telling the user what renewing their subscription entails.
+                        </p>
+                            <div class="js-weekly-renew" data-email="@contact.email" data-country="@billToCountry.alpha2" />
+                        </section>
+                    }
+
                 <section class="mma-section">
                     <h3 class="mma-section__header">
                         Your billing schedule
