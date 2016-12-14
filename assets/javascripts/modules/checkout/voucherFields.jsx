@@ -15,17 +15,17 @@ const MAX_WEEKS_AVAILABLE = 4;
 const CUTOFF_WEEKDAY = 3;
 const CUTOFF_HOUR = 6;
 
-const NORMAL_DELIVERY_DELAY = 2;
-const EXTRA_DELIVERY_DELAY  = 3;
+const NORMAL_DELIVERY_DELAY = 3;
+const EXTRA_DELIVERY_DELAY  = 4;
 
 
 function getFirstSelectableDate(filterFn) {
-    var now = moment.utc();
-    var currentWeekday = now.isoWeekday();
-    var currentHour = now.hour();
-    var mostRecentMonday = moment().startOf('isoWeek');
-    var weeksToAdd = currentWeekday >= CUTOFF_WEEKDAY && currentHour >= CUTOFF_HOUR ? EXTRA_DELIVERY_DELAY : NORMAL_DELIVERY_DELAY;
-    var firstSelectableDate = mostRecentMonday.add(weeksToAdd, 'weeks');
+    const now = moment.utc();
+    const currentWeekday = now.isoWeekday();
+    const currentHour = now.hour();
+    const mostRecentMonday = moment().startOf('isoWeek');
+    const weeksToAdd = currentWeekday >= CUTOFF_WEEKDAY && currentHour >= CUTOFF_HOUR ? EXTRA_DELIVERY_DELAY : NORMAL_DELIVERY_DELAY;
+    const firstSelectableDate = mostRecentMonday.add(weeksToAdd, 'weeks');
     while (filterFn && !filterFn(firstSelectableDate)) {
         firstSelectableDate.add(1, 'day');
     }
@@ -33,7 +33,7 @@ function getFirstSelectableDate(filterFn) {
 }
 
 function getLastSelectableDate(firstSelectableDate) {
-    var startDate = firstSelectableDate || moment();
+    const startDate = firstSelectableDate || moment();
     return moment(startDate).add(MAX_WEEKS_AVAILABLE, 'weeks');
 }
 
