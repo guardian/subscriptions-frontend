@@ -4,28 +4,47 @@
     subscriberId: Option[String]
 )(implicit request: RequestHeader, flash: Flash, touchpointBackendResolution: services.TouchpointBackend.Resolution)
 
-@main("Cancel your papers when you're away | The Guardian", edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
+@main("Manage your subscription | The Guardian", edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
 
     <main class="page-container gs-container">
 
         <section class="suspend-container">
 
             <div class="suspend-header">
-                <h1 class="suspend-header__title">Cancel your papers while you're away</h1>
+                <h1 class="suspend-header__title">Manage your Guardian subscription</h1>
             </div>
+
+            <div>
+                <p>In this section all subscribers can see their subscription details and billing schedule.</p>
+                <ul>
+                    <li>Home Delivery subscribers can also create holiday suspensions</li>
+                    <li>Voucher subscribers can also see when they next book will be delivered</li>
+                    <li>Guardian Weekly subscribers can also renew their 1/2/3-year plans</li>
+                </ul>
+                @*
+                <h4>Coming soon:</h4>
+                <ul>
+                    <li>Guardian Weekly subscribers will be able to browse and download digital copies</li>
+                    <li>All subscribers will be able to link their subscription to a <a class="u-link" target="_blank" href="@idWebAppSigninUrl(routes.AccountManagement.manage(None, None))">Guardian account</a></li>
+                    <li>Customers who have multiple subscriptions can manage each one independently</li>
+                    <li>Update card or Direct Debit details (will require signing in to your Guardian account)</li>
+                    <li>Update paper delivery address details (will require signing in to your Guardian account)</li>
+                    <li>Upgrade paper subscription to include the <a class="u-link" target="_blank" href="@routes.DigitalPack.redirect()">Guardian Digital Pack</a></li>
+                    <li>Online subscription cancellation</li>
+                </ul>
+                *@
+            </div>
+
+            <br/>
 
             <div class="prose">
                 <p>
-                    You can use this service to temporarily suspend delivery of your newspapers.
-                    You will need your ​​Subscriber ID​, which you can find on any correspondence.
+                    Please log in below using your ​​Subscriber ID​, which you can find on any correspondence.
                 </p>
                 <p>
-                    Please give us at least 5 days notice, and we will reduce the first payment after you go away by the value of the cancelled papers, including delivery.
-                </p>
-                <p>
-                    If you do not have your Subscriber ID to hand, or you have any other customer service enquir​ies,
-                    please contact us on: <a class="u-link" href="tel:+44 330 333 6767">+44 (0) 330 333 6767</a>
-                    or email <a class="u-link" href="mailto:homedelivery@@theguardian.com">homedelivery@@theguardian.com</a>.
+                    If you do not have your Subscriber ID to hand, or need anything else,
+                    please contact customer services on: <a class="u-link" href="tel:+44 330 333 6767">+44 (0) 330 333 6767</a>
+                    or email <a class="u-link" href="mailto:subscriptions@@theguardian.com">subscriptions@@theguardian.com</a>.
                 </p>
             </div>
 
