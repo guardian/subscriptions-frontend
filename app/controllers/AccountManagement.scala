@@ -287,12 +287,10 @@ object AccountManagement extends Controller with LazyLogging with CatalogProvide
     Redirect(routes.AccountManagement.manage(None, None).url)
   }
 
-
-
   def processRenewal = accountManagementAction.async { implicit request =>
-Ok("bla")
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
+
     def validateRenewable(sub: Subscription[SubscriptionPlan.PaperPlan]) = if (sub.renewable) \/-(sub) else -\/("subscription is not renewable")
 
     def jsonError(message: String) = Json.toJson(Json.obj("errorMessage" -> message))
@@ -308,7 +306,6 @@ Ok("bla")
           case e: Throwable => InternalServerError(jsonError("Unexpected error while renewing subscription."))
         }
       }
-
       response.valueOr(error => Future(BadRequest(jsonError(error))))
     }
   }
@@ -333,10 +330,7 @@ Ok("bla")
     }yield {
       Ok(thankyou_renew(subscription.latestPlan,billingSchedule, resolution))
     }
-    res.run.map(_.getOrElse(Redirect(routes.Homepage.index()).withNewSession
-    ))
-
-
+    res.run.map(_.getOrElse(Redirect(routes.Homepage.index()).withNewSession))
   }
 }
 
