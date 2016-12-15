@@ -18,6 +18,7 @@ export class SortCode {
 
 
 }
+let renewErrorMessage = 'Sorry, your subscription could not be renewed. Please contact us at gwsubs@theguardian.com or call +44 (0) 330 333 6767. Lines open weekdays 8am-8pm, weekend 8pm-6pm';
 
 export function validAccount(accountNumber) {
     return /^\d{6,10}$/.test(accountNumber);
@@ -86,12 +87,7 @@ export function send(state, errorHandler) {
         }).then((response) => {
             window.location.assign(response.redirect);
         }).catch((r) => {
-            try {
-                let parsedResponse = JSON.parse(r.response);
-                errorHandler(parsedResponse.errorMessage);
-            } catch(e) {
-                errorHandler("could not renew subscription");
-            }
+            errorHandler(renewErrorMessage);
         });
     };
     if (state.paymentType === STRIPE) {
