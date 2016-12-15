@@ -49,7 +49,7 @@ class WeeklyRenew extends React.Component {
             promo: null
 
         };
-        this.showEmail = !("email" in this.props);
+        this.showEmail = !this.state.email.isValid;
         this.handlePromo = this.handlePromo.bind(this);
         this.handleError = this.handleError.bind(this);
         this.handleEmail = this.handleEmail.bind(this);
