@@ -29,7 +29,7 @@ import scalaz.std.scalaFuture._
 import scalaz.syntax.std.option._
 import scalaz.{-\/, EitherT, OptionT, \/, \/-}
 import model.SubscriptionOps._
-import views.html.account.thankyou_renew
+import views.html.account.thankYouRenew
 
 // this handles putting subscriptions in and out of the session
 object SessionSubscription {
@@ -303,7 +303,10 @@ object AccountManagement extends Controller with LazyLogging with CatalogProvide
       } yield {
         tpBackend.checkoutService.renewSubscription(renewableSub, renew).map(res => Ok(Json.obj("redirect" -> routes.AccountManagement.renewThankYou.url)))
         .recover{
-          case e: Throwable => InternalServerError(jsonError("Unexpected error while renewing subscription."))
+          case e: Throwable =>
+            val errorMessage = "Unexpected error while renewing subscription"
+            logger.error(errorMessage, e)
+            InternalServerError(jsonError(errorMessage))
         }
       }
       response.valueOr(error => Future(BadRequest(jsonError(error))))
@@ -328,7 +331,7 @@ object AccountManagement extends Controller with LazyLogging with CatalogProvide
     subscription <- OptionT( SessionSubscription.subscriptionFromRequest)
     billingSchedule <- OptionT(tpBackend.commonPaymentService.billingSchedule(subscription.id, numberOfBills = 13))
     }yield {
-      Ok(thankyou_renew(subscription.latestPlan,billingSchedule, resolution))
+      Ok(thankYouRenew(subscription.latestPlan,billingSchedule, resolution))
     }
     res.run.map(_.getOrElse(Redirect(routes.Homepage.index()).withNewSession))
   }
