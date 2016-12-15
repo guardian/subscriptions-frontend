@@ -54,7 +54,7 @@ GET         /manage/suspend                     controllers.AccountManagement.re
 POST        /manage/suspend                     controllers.AccountManagement.processSuspension
 GET         /manage/signout                     controllers.AccountManagement.logout
 POST        /manage/renew                       controllers.AccountManagement.processRenewal
-GET         /manage/renew/thank-you             controllers.AccountManagement.renewThankYou()
+GET         /manage/renew/thank-you             controllers.AccountManagement.renewThankYou
 
 
 # Pattern Library
