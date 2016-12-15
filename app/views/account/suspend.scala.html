@@ -36,7 +36,12 @@
                 <h3 class="mma-section__header">
                     Your details
                 </h3>
-                @views.html.account.fragments.yourDetails(subscription, chosenPaperDays) {
+                @views.html.account.fragments.yourDetails(
+                    subscriptionName = subscription.name.get,
+                    plan = subscription.plan,
+                    maybeStartDate = Some(if(subscription.plan.name == "Echo-Legacy") subscription.startDate else subscription.firstPaymentDate),
+                    chosenPaperDays= chosenPaperDays
+                ) {
                     <dt class="mma-section__list--title">Available holiday</dt>
                     <dd class="mma-section__list--content">
                         <span class="mma-section__list--plan-title">@{

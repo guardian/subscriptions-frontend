@@ -6,16 +6,15 @@
 @import scala.collection.immutable.List.empty
 @import com.gu.salesforce.Contact
 @import model.SubscriptionOps._
+@import org.joda.time.LocalDate
 
-@(subscription: Subscription[SubscriptionPlan.PaperPlan], chosenPaperDays: List[PaperDay] = empty, maybeContact: Option[Contact] = None)(extra: Html = Html(""))
+@(subscriptionName: String, plan: SubscriptionPlan.PaperPlan, maybeStartDate: Option[LocalDate], chosenPaperDays: List[PaperDay] = empty, maybeContact: Option[Contact] = None)(extra: Html = Html(""))
 <dl class="mma-section__list">
     <dt class="mma-section__list--title">Subscriber ID</dt>
-    <dd class="mma-section__list--content">@subscription.name.get</dd>
+    <dd class="mma-section__list--content">@subscriptionName</dd>
 
     <dt class="mma-section__list--title">Current plan</dt>
-    @defining(subscription.latestPlan) { plan =>
-
-        <dd class="mma-section__list--content">
+    <dd class="mma-section__list--content">
             <div>
             @if(plan.name == "Echo-Legacy") {
                 Multi-day (@{
@@ -28,25 +27,22 @@
             <div>@plan.charges.prettyPricing(plan.charges.price.currencies.head)</div>
         </dd>
 
+    @maybeStartDate.map { startDate =>
         <dt class="mma-section__list--title">Start date</dt>
         <dd class="mma-section__list--content">
-        @if(plan.name == "Echo-Legacy") {
-            @prettyDate(subscription.startDate)
-        } else {
-            @prettyDate(subscription.firstPaymentDate)
+            @prettyDate(startDate)
+        </dd>
         }
+    @maybeContact.map { contact =>
+        <dt class="mma-section__list--title">Delivery details</dt>
+        <dd class="mma-section__list--content">
+            <div>@contact.firstName @contact.lastName</div>
+            <div>@contact.mailingStreet
+            @contact.mailingCity
+            @contact.mailingState
+            @contact.mailingPostcode
+            @contact.mailingCountry</div>
         </dd>
     }
-@maybeContact.map { contact =>
-    <dt class="mma-section__list--title">Delivery details</dt>
-    <dd class="mma-section__list--content">
-        <div>@contact.firstName @contact.lastName</div>
-        <div>@contact.mailingStreet
-        @contact.mailingCity
-        @contact.mailingState
-        @contact.mailingPostcode
-        @contact.mailingCountry</div>
-    </dd>
-}
     @extra
 </dl>

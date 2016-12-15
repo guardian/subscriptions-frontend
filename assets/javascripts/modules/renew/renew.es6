@@ -86,7 +86,12 @@ export function send(state, errorHandler) {
         }).then((response) => {
             window.location.assign(response.redirect);
         }).catch((r) => {
-            errorHandler(r);
+            try {
+                let parsedResponse = JSON.parse(r.response);
+                errorHandler(parsedResponse.errorMessage);
+            } catch(e) {
+                errorHandler("could not renew subscription");
+            }
         });
     };
     if (state.paymentType === STRIPE) {

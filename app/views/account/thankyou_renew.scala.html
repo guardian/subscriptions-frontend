@@ -1,0 +1,30 @@
+@import com.gu.memsub.subsv2.SubscriptionPlan
+@import views.support.PlanOps._
+@import com.gu.memsub.BillingSchedule
+@import views.support.Pricing._
+
+@(plan : SubscriptionPlan.PaperPlan,
+    billingSchedule: BillingSchedule,
+    touchpointBackendResolution: services.TouchpointBackend.Resolution
+)(implicit request: RequestHeader)
+
+@main(s"Confirmation | The Guardian", bodyClasses=List("is-wide"), touchpointBackendResolutionOpt = Some(touchpointBackendResolution), plan = None) {
+    <main class="page-container gs-container gs-container--slim">
+        @fragments.page.header("Thank you", None, List("l-padded"))
+        <section class="section-slice section-slice--bleed section-slice--limited">
+            <p>Your Guardian Weekly subscription has been renewed. We will take @plan.charges.prettyPricing(plan.charges.currencies.head) from your account.</p>
+        </section>
+        <section class="section-slice--bleed section-slice--limited">
+            <h3 class="mma-section__header">
+                Your billing schedule
+            </h3>
+            @views.html.account.fragments.billingSchedule(billingSchedule, plan.charges.price.currencies.head)
+
+        </section>
+        <section class="mma-section">
+            <a class="button button--primary button--large" href="@routes.AccountManagement.processLogin">
+                back to subscription details</a>
+        </section>
+
+    </main>
+}
