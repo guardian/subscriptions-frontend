@@ -181,7 +181,10 @@ object ManageWeekly extends LazyLogging {
                 Ok(views.html.account.details(None))
               },
                 {
-                weeklyPlans => Ok(views.html.account.renew(weeklySubscription, billingSchedule, contact, billToCountry, plans = weeklyPlans))
+                weeklyPlans => {
+                  if (weeklySubscription.renewable) Ok(views.html.account.weeklyRenew(weeklySubscription, billingSchedule, contact, billToCountry, plans = weeklyPlans))
+                  else Ok(views.html.account.weeklyDetails(weeklySubscription, billingSchedule, contact, billToCountry, plans = weeklyPlans))
+                }
               })
             }.getOrElse {
               logger.info(s"no valid bill to country for ${weeklySubscription.id}")

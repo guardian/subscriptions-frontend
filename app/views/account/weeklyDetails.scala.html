@@ -1,0 +1,47 @@
+@import com.gu.memsub.BillingSchedule
+@import com.gu.memsub.subsv2.SubscriptionPlan
+@import com.gu.memsub.subsv2.Subscription
+@import model.DigitalEdition.UK
+@import com.gu.salesforce.Contact
+@import com.gu.i18n.Country
+@import controllers.ManageWeekly.WeeklyPlanInfo
+@import model.SubscriptionOps._
+@import org.joda.time.LocalDate
+@(
+    subscription: Subscription[SubscriptionPlan.WeeklyPlan], billingSchedule: BillingSchedule, contact: Contact, billToCountry: Country, plans: List[WeeklyPlanInfo]
+)(implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackend.Resolution)
+
+@main("Your Guardian Weekly subscription | The Guardian", bodyClasses = List("is-wide"), edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
+    @helper.javascriptRouter("jsRoutes")(
+        routes.javascript.Promotion.validate
+    )
+    <main class="page-container gs-container">
+        <section class="suspend-container">
+
+            <div class="suspend-header">
+                <h1 class="suspend-header__title">Your Guardian Weekly subscription</h1>
+            </div>
+
+            <section class="mma-section">
+                <h3 class="mma-section__header">
+                    Your details
+                </h3>
+                @views.html.account.fragments.yourDetails(
+                    subscriptionName = subscription.name.get,
+                    plan = subscription.latestPlan,
+                    maybeStartDate = Some(subscription.firstPaymentDate).filter(d => d.isAfter(LocalDate.now.minusMonths(1))),
+                    maybeContact = Some(contact))()
+            </section>
+
+            <section class="mma-section">
+                <h3 class="mma-section__header">
+                    Your billing schedule
+                </h3>
+                @views.html.account.fragments.billingSchedule(billingSchedule, subscription.plan.charges.price.currencies.head)
+            </section>
+            <section class="mma-section">
+                <a class="button button--primary button--large" href="@routes.AccountManagement.logout">Sign Out</a>
+            </section>
+        </section>
+    </main>
+}

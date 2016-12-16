@@ -33,7 +33,7 @@
         <section class="suspend-container">
 
             <div class="suspend-header">
-                <h1 class="suspend-header__title">Your Guardian Weekly subscription --- TEST PAGE</h1>
+                <h1 class="suspend-header__title">Your Guardian Weekly subscription</h1>
             </div>
 
             <section class="mma-section">
@@ -48,47 +48,20 @@
             </section>
 
             <section class="mma-section">
-                <h3 class="mma-section__header">
-                    Bill to country
-                </h3>
-                @billToCountry
-            </section>
+                <h3 class="mma-section__header">Renew your subscription</h3>
 
+                <p>
+                @if(subscription.termEndDate.isAfter(LocalDate.now)) {
+                    Your current subscription is due to expire on @prettyDate(subscription.termEndDate).
+                } else {
+                    Your subscription expired on @prettyDate(subscription.termEndDate).
+                }
+                Please complete the form below to renew your subscription.
+                </p>
+
+                <div class="js-weekly-renew" data-email="@contact.email" data-country="@billToCountry.alpha2" />
+            </section>
             <section class="mma-section">
-                <h3 class="mma-section__header">
-                    Email address
-                </h3>
-                @contact.email
-                @helper.CSRF.formField
-            </section>
-
-                @if(subscription.renewable){
-
-                    <section class="mma-section">
-                        <h3 class="mma-section__header">
-                            Subscription end date
-                        </h3>
-                        @prettyDate(subscription.termEndDate)
-
-                    </section>
-
-                        <section class="mma-section">
-                        <h3 class="mma-section__header">Renew</h3>
-
-                        <p>
-                        Here is some copy about renewing your subscription, which is a very fulfilling thing to do and should probably fill one to two lines of text telling the user what renewing their subscription entails.
-                        </p>
-                            <div class="js-weekly-renew" data-email="@contact.email" data-country="@billToCountry.alpha2" />
-                        </section>
-                    }
-
-                <section class="mma-section">
-                    <h3 class="mma-section__header">
-                        Your billing schedule
-                    </h3>
-                    @views.html.account.fragments.billingSchedule(billingSchedule, subscription.plan.charges.price.currencies.head)
-                </section>
-                <section class="mma-section">
                     <a class="button button--primary button--large" href="@routes.AccountManagement.logout">Sign Out</a>
                 </section>
             </section>
