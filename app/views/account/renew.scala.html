@@ -7,6 +7,8 @@
 @import com.gu.i18n.Country
 @import controllers.ManageWeekly.WeeklyPlanInfo
 @import model.SubscriptionOps._
+@import org.joda.time.LocalDate
+
 @(
     subscription: Subscription[SubscriptionPlan.WeeklyPlan], billingSchedule: BillingSchedule, contact: Contact, billToCountry: Country, plans: List[WeeklyPlanInfo]
 )(implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackend.Resolution)
@@ -38,7 +40,11 @@
                 <h3 class="mma-section__header">
                     Your details
                 </h3>
-                @views.html.account.fragments.yourDetails(subscription, maybeContact = Some(contact))()
+                @views.html.account.fragments.yourDetails(
+                    subscriptionName = subscription.name.get,
+                    plan = subscription.latestPlan,
+                    maybeStartDate = Some(subscription.firstPaymentDate).filter(d => d.isAfter(LocalDate.now.minusMonths(1))),
+                    maybeContact = Some(contact))()
             </section>
 
             <section class="mma-section">
@@ -53,17 +59,19 @@
                     Email address
                 </h3>
                 @contact.email
+                @helper.CSRF.formField
             </section>
 
-                <section class="mma-section">
-                    <h3 class="mma-section__header">
-                        Subscription end date
-                    </h3>
-                    @prettyDate(subscription.termEndDate)
-                    @helper.CSRF.formField
-                </section>
-
                 @if(subscription.renewable){
+
+                    <section class="mma-section">
+                        <h3 class="mma-section__header">
+                            Subscription end date
+                        </h3>
+                        @prettyDate(subscription.termEndDate)
+
+                    </section>
+
                         <section class="mma-section">
                         <h3 class="mma-section__header">Renew</h3>
 

@@ -18,7 +18,7 @@ import configuration.{Config, ProfileLinks}
 import forms._
 import model.{Renewal, RenewalReads}
 import org.joda.time.LocalDate
-import play.api.libs.json.{JsError, JsSuccess, Json}
+import play.api.libs.json._
 import play.api.mvc.{AnyContent, Controller, Request, Result}
 import utils.TestUsers.PreSigninTestCookie
 import views.support.Pricing._
@@ -29,6 +29,7 @@ import scalaz.std.scalaFuture._
 import scalaz.syntax.std.option._
 import scalaz.{-\/, EitherT, OptionT, \/, \/-}
 import model.SubscriptionOps._
+import views.html.account.thankYouRenew
 
 // this handles putting subscriptions in and out of the session
 object SessionSubscription {
@@ -197,7 +198,7 @@ object ManageWeekly extends LazyLogging {
 
 }
 
-object AccountManagement extends Controller with LazyLogging {
+object AccountManagement extends Controller with LazyLogging with CatalogProvider {
 
   val accountManagementAction = NoCacheAction
 
@@ -286,12 +287,13 @@ object AccountManagement extends Controller with LazyLogging {
     Redirect(routes.AccountManagement.manage(None, None).url)
   }
 
-
   def processRenewal = accountManagementAction.async { implicit request =>
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
 
     def validateRenewable(sub: Subscription[SubscriptionPlan.PaperPlan]) = if (sub.renewable) \/-(sub) else -\/("subscription is not renewable")
+
+    def jsonError(message: String) = Json.toJson(Json.obj("errorMessage" -> message))
 
     SessionSubscription.subscriptionFromRequest flatMap { maybeSub =>
       val response = for {
@@ -299,9 +301,15 @@ object AccountManagement extends Controller with LazyLogging {
         renewableSub <- validateRenewable(sub)
         renew <- parseRenewalRequest(request, tpBackend.catalogService.unsafeCatalog)
       } yield {
-        tpBackend.checkoutService.renewSubscription(renewableSub, renew).map(res => Ok(res.id))
+        tpBackend.checkoutService.renewSubscription(renewableSub, renew).map(res => Ok(Json.obj("redirect" -> routes.AccountManagement.renewThankYou.url)))
+        .recover{
+          case e: Throwable =>
+            val errorMessage = "Unexpected error while renewing subscription"
+            logger.error(errorMessage, e)
+            InternalServerError(jsonError(errorMessage))
+        }
       }
-      response.valueOr(error => Future(BadRequest(error)))
+      response.valueOr(error => Future(BadRequest(jsonError(error))))
     }
   }
 
@@ -314,5 +322,18 @@ object AccountManagement extends Controller with LazyLogging {
     }
   }
 
+  def renewThankYou() = accountManagementAction.async { implicit request =>
+    implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
+    implicit val tpBackend = resolution.backend
+    import model.SubscriptionOps._
+
+    val res = for {
+    subscription <- OptionT( SessionSubscription.subscriptionFromRequest)
+    billingSchedule <- OptionT(tpBackend.commonPaymentService.billingSchedule(subscription.id, numberOfBills = 13))
+    }yield {
+      Ok(thankYouRenew(subscription.latestPlan,billingSchedule, resolution))
+    }
+    res.run.map(_.getOrElse(Redirect(routes.Homepage.index()).withNewSession))
+  }
 }
 
