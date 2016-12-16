@@ -287,12 +287,15 @@ class CheckoutService(identityService: IdentityService,
     for {
       account <- zuoraService.getAccount(subscription.accountId)
       billto <- zuoraService.getContact(account.billToId)
-      contact <- GetSalesforceContactForSub(subscription)(zuoraService, salesforceService.repo, global)
+      contact <- GetSalesforceContactForSub.sfContactForZuoraAccount(account)(zuoraService, salesforceService.repo, global)
       payment = getPayment(contact, billto)
       paymentMethod <- payment.makePaymentMethod
       createPaymentMethod = CreatePaymentMethod(subscription.accountId, paymentMethod, payment.makeAccount.paymentGateway, billto)
       updateResult <- zuoraService.createPaymentMethod(createPaymentMethod)
       amendResult <- addPlan
+      _ <- if (contact.email.isDefined) Future.successful(\/.right(())) else salesforceService.repo.addEmail(contact, renewal.email).map { either =>
+        either.fold[Unit]({err => logger.error(s"couldn't update email for sub: ${subscription.id}: $err")}, u => u)
+      }
     }
       yield {
         updateResult
