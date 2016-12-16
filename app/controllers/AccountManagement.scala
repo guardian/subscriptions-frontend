@@ -164,7 +164,6 @@ object ManageWeekly extends LazyLogging {
         val futureZuoraBillToContact = tpBackend.zuoraService.getContact(account.billToId)
         futureSfContact.flatMap { contact =>
           futureZuoraBillToContact.map { zuoraContact =>
-            logger.info(zuoraContact.toString())
             zuoraContact.country.map { billToCountry =>
               val catalog = tpBackend.catalogService.unsafeCatalog
                   val weeklyPlans = weeklySubscription.plan.product match {
