@@ -15,19 +15,6 @@
     @helper.javascriptRouter("jsRoutes")(
         routes.javascript.Promotion.validate
     )
-    <script>
-
-        guardian.plans = [
-            @plans.map { plan =>
-            {
-                id: '@plan.id.get',
-                price: '@plan.price'
-            },
-            }
-        ]
-
-    </script>
-
     <main class="page-container gs-container">
         <section class="suspend-container">
 
