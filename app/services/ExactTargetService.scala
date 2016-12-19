@@ -5,22 +5,25 @@ import com.amazonaws.services.sqs.AmazonSQSClient
 import com.amazonaws.services.sqs.model._
 import com.gu.i18n.Currency
 import com.gu.lib.Retry
+import com.gu.memsub
 import com.gu.memsub.Subscription._
 import com.gu.memsub.promo.Promotion._
 import com.gu.memsub.promo._
-import com.gu.memsub.services.{PaymentService => CommonPaymentService, GetSalesforceContactForSub}
+import com.gu.memsub.services.{GetSalesforceContactForSub, PaymentService => CommonPaymentService}
+import com.gu.memsub.subsv2.SubscriptionPlan.PaperPlan
 import com.gu.memsub.subsv2.reads.ChargeListReads._
 import com.gu.memsub.subsv2.reads.SubPlanReads._
-import com.gu.memsub.subsv2.{Subscription, SubscriptionPlan => Plan}
+import com.gu.memsub.subsv2.{CatalogPlan, Subscription, SubscriptionPlan => Plan}
 import com.gu.memsub.{Subscription => _, _}
+import com.gu.salesforce.Contact
 import com.gu.zuora.api.ZuoraService
 import com.gu.zuora.soap.models.Results.SubscribeResult
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
 import model.exactTarget.HolidaySuspensionBillingScheduleDataExtensionRow.constructSalutation
 import model.exactTarget._
-import model.{PurchaserIdentifiers, SubscribeRequest}
-import org.joda.time.Days
+import model.{PaperData, PurchaserIdentifiers, SubscribeRequest}
+import org.joda.time.{Days, LocalDate}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json._
 import views.support.PlanOps._
@@ -30,6 +33,7 @@ import scala.concurrent.Future
 import scala.reflect.internal.util.StringOps
 import scala.util.{Failure, Success, Try}
 import scalaz.syntax.std.option._
+
 
 /**
   * Sends welcome email message to Amazon SQS queue which is consumed by membership-workflow.
@@ -172,6 +176,28 @@ class ExactTargetService(
       }
     }
   }
+
+  def enqueueRenewalEmail(subscriptionName: memsub.Subscription.Name, subscriptionDetails: String, contact: Contact, email: String, customerAcceptance: LocalDate): Future[Unit] = {
+
+    import model.SubscriptionOps._
+    val buildDataExtensionRow =
+      subscriptionService.get[PaperPlan](subscriptionName).flatMap { subscription =>
+        val newSub = subscription.get //TODO REMOVE THIS GET!!
+
+        val plan = newSub.latestPlan
+        paymentService.getPaymentMethod(newSub.accountId).map( paymentMethod =>
+          GuardianWeeklyRenewalDataExtensionRow(newSub, plan, contact, paymentMethod.get, email, customerAcceptance, subscriptionDetails)
+        )
+      }
+
+    buildDataExtensionRow.map { row =>
+      SqsClient.sendDataExtensionToQueue(Config.holidaySuspensionEmailQueue, row).map {
+        case Success(sendMsgResult) => logger.info(s"Successfully enqueued ${subscriptionName.get}'s guardian weekly renewal email.")
+        case Failure(e) => logger.error(s"Failed to enqueue ${subscriptionName.get}'s guardian weekly renewal email. Details were: " + row.toString, e)
+      }
+    }
+
+  }
 }
 
 object SqsClient extends LazyLogging {
@@ -194,6 +220,9 @@ object SqsClient extends LazyLogging {
       // FIXME the sendToQueue method is blocking, use an async way if there is one
       def sendToQueue(msg: String): SendMessageResult = {
         val queueUrl = sqsClient.createQueue(new CreateQueueRequest(queueName)).getQueueUrl
+        //TODO UNDO THIS, JUST FOR TEST!!!
+        println(s"sending to queue $queueName:")
+        println(msg)
         sqsClient.sendMessage(new SendMessageRequest(queueUrl, msg))
       }
 

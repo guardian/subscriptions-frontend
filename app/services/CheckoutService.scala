@@ -5,7 +5,7 @@ import com.gu.i18n.Country
 import com.gu.i18n.Currency.GBP
 import com.gu.identity.play.{AuthenticatedIdUser, IdMinimalUser}
 import com.gu.memsub.promo._
-import com.gu.memsub.services.{GetSalesforceContactForSub, PromoService}
+import com.gu.memsub.services.{GetSalesforceContactForSub, PromoService, PaymentService => CommonPaymentService}
 import com.gu.memsub.subsv2.{Catalog, Subscription, SubscriptionPlan}
 import com.gu.memsub.{Address, Product}
 import com.gu.salesforce.{Contact, ContactId}
@@ -28,7 +28,7 @@ import scala.concurrent.Future
 import scalaz.std.option._
 import scalaz.std.scalaFuture._
 import scalaz.syntax.monad._
-import scalaz.{EitherT, Monad, NonEmptyList, \/}
+import scalaz.{EitherT, Monad, NonEmptyList, OptionT, \/}
 
 
 object CheckoutService {
@@ -45,7 +45,8 @@ class CheckoutService(identityService: IdentityService,
                       exactTargetService: ExactTargetService,
                       zuoraProperties: ZuoraProperties,
                       promoService: PromoService,
-                      promoPlans: DiscountRatePlanIds) extends LazyLogging {
+                      promoPlans: DiscountRatePlanIds,
+                      commonPaymentService: CommonPaymentService) extends LazyLogging {
 
   type NonFatalErrors = Seq[SubsError]
   type PostSubscribeResult = (Option[UserIdData], NonFatalErrors)
@@ -260,7 +261,8 @@ class CheckoutService(identityService: IdentityService,
     }
   }
 
-  def renewSubscription(subscription: Subscription[SubscriptionPlan.PaperPlan], renewal: Renewal ) = {
+  def renewSubscription(subscription: Subscription[SubscriptionPlan.WeeklyPlan], renewal: Renewal, subscriptionDetails: String ) = {
+    import model.SubscriptionOps._
 
     def getPayment(contact: Contact, billto: Queries.Contact): PaymentService#Payment = {
       val idMinimalUser = IdMinimalUser(contact.identityId, None)
@@ -276,12 +278,16 @@ class CheckoutService(identityService: IdentityService,
     val ratePlan = RatePlan(renewal.plan.id.get, None, Nil)
     val amend =   Amend(subscriptionId = subscription.id.get, plansToRemove = Nil, newRatePlans = NonEmptyList(ratePlan))
 
+    val contractEffective = subscription.termEndDate
+    val customerAcceptance = nextFridayFrom(contractEffective)
     def addPlan = {
-      val contractEffective = subscription.termEndDate
-      val customerAcceptance = nextFridayFrom(contractEffective)
       val newRatePlan = RatePlan(renewal.plan.id.get, None)
       val renewCommand =  Renew(subscription.id.get, subscription.startDate, newRatePlan, contractEffective, customerAcceptance)
       zuoraService.renewSubscription(renewCommand)
+    }
+
+    def ensureEmail(contact:Contact) =  if (contact.email.isDefined) Future.successful(\/.right(())) else salesforceService.repo.addEmail(contact, renewal.email).map { either =>
+      either.fold[Unit]({err => logger.error(s"couldn't update email for sub: ${subscription.id}: $err")}, u => u)
     }
 
     for {
@@ -293,9 +299,8 @@ class CheckoutService(identityService: IdentityService,
       createPaymentMethod = CreatePaymentMethod(subscription.accountId, paymentMethod, payment.makeAccount.paymentGateway, billto)
       updateResult <- zuoraService.createPaymentMethod(createPaymentMethod)
       amendResult <- addPlan
-      _ <- if (contact.email.isDefined) Future.successful(\/.right(())) else salesforceService.repo.addEmail(contact, renewal.email).map { either =>
-        either.fold[Unit]({err => logger.error(s"couldn't update email for sub: ${subscription.id}: $err")}, u => u)
-      }
+      _ <- ensureEmail(contact)
+      _ <- exactTargetService.enqueueRenewalEmail(subscription.name, subscriptionDetails, contact, renewal.email, customerAcceptance)
     }
       yield {
         updateResult

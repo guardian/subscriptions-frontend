@@ -30,7 +30,7 @@ import scalaz.syntax.std.option._
 import scalaz.{-\/, EitherT, OptionT, \/, \/-}
 import model.SubscriptionOps._
 import views.html.account.thankYouRenew
-
+import views.support.Pricing._
 // this handles putting subscriptions in and out of the session
 object SessionSubscription {
 
@@ -294,17 +294,19 @@ object AccountManagement extends Controller with LazyLogging with CatalogProvide
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
 
-    def validateRenewable(sub: Subscription[SubscriptionPlan.PaperPlan]) = if (sub.renewable) \/-(sub) else -\/("subscription is not renewable")
+    def validateRenewable(sub: Subscription[SubscriptionPlan.WeeklyPlan]) = if (sub.renewable) \/-(sub) else -\/("subscription is not renewable")
 
     def jsonError(message: String) = Json.toJson(Json.obj("errorMessage" -> message))
+    def prettyPrice(renew: Renewal) = renew.plan.charges.prettyPricing(renew.plan.charges.currencies.head)
 
-    SessionSubscription.subscriptionFromRequest flatMap { maybeSub =>
+      SessionSubscription.subscriptionFromRequest flatMap { maybeSub =>
       val response = for {
         sub <- maybeSub.toRightDisjunction("no subscription in request")
-        renewableSub <- validateRenewable(sub)
+        weeklySub <- sub.asWeekly.toRightDisjunction("subscription is not weekly")
+        renewableSub <- validateRenewable(weeklySub)
         renew <- parseRenewalRequest(request, tpBackend.catalogService.unsafeCatalog)
       } yield {
-        tpBackend.checkoutService.renewSubscription(renewableSub, renew).map(res => Ok(Json.obj("redirect" -> routes.AccountManagement.renewThankYou.url)))
+        tpBackend.checkoutService.renewSubscription(renewableSub, renew, prettyPrice(renew)).map(res => Ok(Json.obj("redirect" -> routes.AccountManagement.renewThankYou.url)))
         .recover{
           case e: Throwable =>
             val errorMessage = "Unexpected error while renewing subscription"
