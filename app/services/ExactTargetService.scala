@@ -237,9 +237,6 @@ object SqsClient extends LazyLogging {
       // FIXME the sendToQueue method is blocking, use an async way if there is one
       def sendToQueue(msg: String): SendMessageResult = {
         val queueUrl = sqsClient.createQueue(new CreateQueueRequest(queueName)).getQueueUrl
-        //TODO UNDO THIS, JUST FOR TEST!!!
-        println(s"sending to queue $queueName:")
-        println(msg)
         sqsClient.sendMessage(new SendMessageRequest(queueUrl, msg))
       }
 
