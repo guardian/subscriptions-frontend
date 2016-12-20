@@ -304,7 +304,6 @@ object HolidaySuspensionBillingScheduleDataExtensionRow {
 
 
 object GuardianWeeklyRenewalDataExtensionRow {
-  //TODO A LOT OF getOrElse("") here!!!
 
   private def extractAddress(contact: Contact) = Address(
     lineOne = contact.mailingStreet.getOrElse(""),

@@ -5,15 +5,13 @@ import com.amazonaws.services.sqs.AmazonSQSClient
 import com.amazonaws.services.sqs.model._
 import com.gu.i18n.Currency
 import com.gu.lib.Retry
-import com.gu.memsub
 import com.gu.memsub.Subscription._
 import com.gu.memsub.promo.Promotion._
 import com.gu.memsub.promo._
 import com.gu.memsub.services.{GetSalesforceContactForSub, PaymentService => CommonPaymentService}
-import com.gu.memsub.subsv2.SubscriptionPlan.PaperPlan
 import com.gu.memsub.subsv2.reads.ChargeListReads._
 import com.gu.memsub.subsv2.reads.SubPlanReads._
-import com.gu.memsub.subsv2.{CatalogPlan, Subscription, SubscriptionPlan => Plan}
+import com.gu.memsub.subsv2.{ Subscription, SubscriptionPlan => Plan}
 import com.gu.memsub.{Subscription => _, _}
 import com.gu.salesforce.Contact
 import com.gu.zuora.api.ZuoraService
@@ -30,10 +28,9 @@ import views.support.PlanOps._
 import views.support.Pricing._
 
 import scala.concurrent.Future
-import scala.reflect.internal.util.StringOps
 import scala.util.{Failure, Success, Try}
-import scalaz.syntax.std.option._
-
+import scalaz.{-\/, EitherT, \/, \/-}
+import scalaz.Scalaz._
 
 /**
   * Sends welcome email message to Amazon SQS queue which is consumed by membership-workflow.
@@ -186,24 +183,37 @@ class ExactTargetService(
     customerAcceptance: LocalDate,
     contractEffective: LocalDate): Future[Unit] = {
 
-    val buildDataExtensionRow = paymentService.getPaymentMethod(oldSub.accountId).map( paymentMethod =>
-          GuardianWeeklyRenewalDataExtensionRow(oldSub.name,
-                                                renewal.plan.name,
-                                                subscriptionDetails,
-                                                contact,
-                                                paymentMethod.get,
-                                                email,
-                                                customerAcceptance,
-                                                contractEffective)
-        )
+    sealed trait Error {
+      def msg : String
+    }
+    case class ExceptionThrown(msg: String, e: Throwable) extends Error
+    case class SimpleError(msg :String) extends Error
 
-    buildDataExtensionRow.map { row =>
-      SqsClient.sendDataExtensionToQueue(Config.weeklyRenewalEmailQueue, row).map {
-        case Success(sendMsgResult) => logger.info(s"Successfully enqueued ${oldSub.name.get}'s guardian weekly renewal email.")
-        case Failure(e) => logger.error(s"Failed to enqueue ${oldSub.name.get}'s guardian weekly renewal email. Details were: " + row.toString, e)
-      }
+    def getPaymentMethod(accountId: AccountId): Future[\/[Error, PaymentMethod]] = paymentService.getPaymentMethod(oldSub.accountId).map(_.toRightDisjunction(SimpleError("No payment method found in account")))
+
+    def sendToQueue(row: GuardianWeeklyRenewalDataExtensionRow): Future[\/[Error, SendMessageResult]] = SqsClient.sendDataExtensionToQueue(Config.holidaySuspensionEmailQueue, row).map {
+      case Success(sendMsgResult) => \/-(sendMsgResult)
+      case Failure(e) => -\/(ExceptionThrown(s"Failed to enqueue ${oldSub.name.get}'s guardian weekly renewal email. Details were: " + row.toString, e))
     }
 
+    val sentMessage = (for {
+      paymentMethod <- EitherT(getPaymentMethod(oldSub.accountId))
+      row = GuardianWeeklyRenewalDataExtensionRow(oldSub.name,
+        renewal.plan.name,
+        subscriptionDetails,
+        contact,
+        paymentMethod,
+        email,
+        customerAcceptance,
+        contractEffective)
+      sendMessage <- EitherT(sendToQueue(row))
+    } yield (sendMessage)).run
+
+   sentMessage.map{
+        case \/-(sendMsgResult) => logger.info(s"Successfully enqueued ${oldSub.name.get}'s guardian weekly renewal email.")
+        case -\/(SimpleError(msg)) => logger.error(msg)
+        case -\/(ExceptionThrown(msg, ex)) => logger.error(msg, ex)
+      }
   }
 }
 
