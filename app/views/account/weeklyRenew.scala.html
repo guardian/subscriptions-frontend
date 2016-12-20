@@ -40,6 +40,7 @@
                 <h3 class="mma-section__header">
                     Your details
                 </h3>
+                @helper.CSRF.formField
                 @views.html.account.fragments.yourDetails(
                     subscriptionName = subscription.name.get,
                     plan = subscription.latestPlan,
