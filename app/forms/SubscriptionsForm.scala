@@ -15,7 +15,6 @@ import play.api.data.format.Formatter
 import play.api.data.{Form, _}
 import play.api.mvc.{AnyContent, Request}
 import model.ContentSubscriptionPlanOps._
-import views.support.CountryWithCurrency
 
 import scalaz.\/
 

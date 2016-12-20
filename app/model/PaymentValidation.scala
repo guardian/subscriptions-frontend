@@ -18,7 +18,7 @@ object PaymentValidation {
   def validateCurrency(currency: Currency, settings: CountryWithCurrency, plan: CatalogPlan.ContentSubscription): Boolean = {
 
     def isValidCurrencyOverride = plan.product match {
-      case Product.WeeklyZoneB => currency == GBP && settings.currency == USD && settings.country != Country.US
+      case Product.WeeklyZoneC => currency == GBP && settings.currency == USD && settings.country != Country.US
       case _ => false
     }
 
