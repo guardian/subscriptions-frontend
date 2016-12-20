@@ -8,7 +8,7 @@ import play.api.libs.json._
 case class Renewal(email: String, plan: Paper, paymentData: PaymentData)
 
 class RenewalReads(catalog: Catalog) {
-  val weeklyPlans = catalog.weeklyZoneA.toList ++ catalog.weeklyZoneB.toList
+  val weeklyPlans = catalog.weeklyZoneA.toList ++ catalog.weeklyZoneB.toList ++ catalog.weeklyZoneC.toList
   implicit val paperReads = new Reads[Paper] {
     override def reads(json: JsValue): JsResult[Paper] = json match {
       case JsString(ratePlanId) => weeklyPlans.find(_.id.get == ratePlanId).map(JsSuccess(_)).getOrElse(JsError("invalid plan"))

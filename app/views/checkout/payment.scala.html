@@ -1,4 +1,3 @@
-@import com.gu.memsub.BillingPeriod
 @import model.JsVars
 @import configuration.Config.Identity._
 @import views.support.BillingPeriod._
@@ -12,9 +11,8 @@
 @import com.gu.i18n.Currency
 @import com.gu.i18n._
 @import model.DigitalEdition
-@import controllers.CachedAssets.hashedPathFor
-@import com.gu.memsub.Product.WeeklyZoneB
 @import views.support.CountryAndCurrencySettings
+@import com.gu.memsub.Product.WeeklyZoneC
 @(
     personalData: Option[PersonalData],
     productData: ProductPopulationData,
@@ -86,7 +84,7 @@
             <div class="checkout-container__sidebar js-basket">
                 @fragments.checkout.basketPreview(productData.plans.default)
 
-                @if(productData.plans.default.product == WeeklyZoneB) {
+                @if(productData.plans.default.product == WeeklyZoneC) {
                     <div class="js-checkout-currency-override">
                         <label class="option">
                             <span class="option__input">
