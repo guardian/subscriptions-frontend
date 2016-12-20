@@ -37,6 +37,7 @@ class RenewalReads(catalog: Catalog) {
         case None => JsError("invalid payment data type")
       }
   }
+  implicit val promoReads = Json.reads[PromoCode]
   implicit val renewalReads = Json.reads[Renewal]
 }
 

@@ -304,6 +304,7 @@ object AccountManagement extends Controller with LazyLogging with CatalogProvide
         renewableSub <- validateRenewable(sub)
         renew <- parseRenewalRequest(request, tpBackend.catalogService.unsafeCatalog)
       } yield {
+        logger.info(s"renewing ${renew.plan.name} for ${renewableSub.id} with promo code: ${renew.promoCode}")
         tpBackend.checkoutService.renewSubscription(renewableSub, renew).map(res => Ok(Json.obj("redirect" -> routes.AccountManagement.renewThankYou.url)))
         .recover{
           case e: Throwable =>
