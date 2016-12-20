@@ -299,7 +299,6 @@ class CheckoutService(identityService: IdentityService,
       createPaymentMethod = CreatePaymentMethod(subscription.accountId, paymentMethod, payment.makeAccount.paymentGateway, billto)
       updateResult <- zuoraService.createPaymentMethod(createPaymentMethod)
       amendResult <- addPlan
-    //TODO these post renewal steps should probably not make the whole process fail if they encounter an error
       _ <- ensureEmail(contact)
       _ <- exactTargetService.enqueueRenewalEmail(subscription, renewal, subscriptionDetails, contact, renewal.email, customerAcceptance, contractEffective)
     }
