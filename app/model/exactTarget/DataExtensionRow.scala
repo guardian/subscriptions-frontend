@@ -321,7 +321,7 @@ object GuardianWeeklyRenewalDataExtensionRow {
             paymentMethod: PaymentMethod,
             email: String,
             customerAcceptance: LocalDate,
-            startDate: LocalDate
+            contractEffective: LocalDate
            ): GuardianWeeklyRenewalDataExtensionRow = {
 
 
@@ -333,7 +333,7 @@ object GuardianWeeklyRenewalDataExtensionRow {
       title = contact.title.flatMap(Title.fromString),
       firstName = contact.firstName.getOrElse(""),
       lastName = contact.lastName,
-      startDate= startDate,
+      startDate= contractEffective,
       firstPaymentDate = customerAcceptance,
       planName = planName,
       subscriptionName = subscriptionName,
