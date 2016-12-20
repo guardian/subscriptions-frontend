@@ -22,7 +22,7 @@ import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
 import model.exactTarget.HolidaySuspensionBillingScheduleDataExtensionRow.constructSalutation
 import model.exactTarget._
-import model.{PaperData, PurchaserIdentifiers, SubscribeRequest}
+import model.{PaperData, PurchaserIdentifiers, Renewal, SubscribeRequest}
 import org.joda.time.{Days, LocalDate}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json._
@@ -177,23 +177,30 @@ class ExactTargetService(
     }
   }
 
-  def enqueueRenewalEmail(subscriptionName: memsub.Subscription.Name, subscriptionDetails: String, contact: Contact, email: String, customerAcceptance: LocalDate): Future[Unit] = {
+  def enqueueRenewalEmail(
+    oldSub:Subscription[Plan.WeeklyPlan],
+    renewal: Renewal,
+    subscriptionDetails: String,
+    contact: Contact,
+    email: String,
+    customerAcceptance: LocalDate,
+    contractEffective: LocalDate): Future[Unit] = {
 
-    import model.SubscriptionOps._
-    val buildDataExtensionRow =
-      subscriptionService.get[PaperPlan](subscriptionName).flatMap { subscription =>
-        val newSub = subscription.get //TODO REMOVE THIS GET!!
-
-        val plan = newSub.latestPlan
-        paymentService.getPaymentMethod(newSub.accountId).map( paymentMethod =>
-          GuardianWeeklyRenewalDataExtensionRow(newSub, plan, contact, paymentMethod.get, email, customerAcceptance, subscriptionDetails)
+    val buildDataExtensionRow = paymentService.getPaymentMethod(oldSub.accountId).map( paymentMethod =>
+          GuardianWeeklyRenewalDataExtensionRow(oldSub.name,
+                                                renewal.plan.name,
+                                                subscriptionDetails,
+                                                contact,
+                                                paymentMethod.get,
+                                                email,
+                                                customerAcceptance,
+                                                contractEffective)
         )
-      }
 
     buildDataExtensionRow.map { row =>
-      SqsClient.sendDataExtensionToQueue(Config.holidaySuspensionEmailQueue, row).map {
-        case Success(sendMsgResult) => logger.info(s"Successfully enqueued ${subscriptionName.get}'s guardian weekly renewal email.")
-        case Failure(e) => logger.error(s"Failed to enqueue ${subscriptionName.get}'s guardian weekly renewal email. Details were: " + row.toString, e)
+      SqsClient.sendDataExtensionToQueue(Config.weeklyRenewalEmailQueue, row).map {
+        case Success(sendMsgResult) => logger.info(s"Successfully enqueued ${oldSub.name.get}'s guardian weekly renewal email.")
+        case Failure(e) => logger.error(s"Failed to enqueue ${oldSub.name.get}'s guardian weekly renewal email. Details were: " + row.toString, e)
       }
     }
 

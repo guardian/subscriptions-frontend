@@ -300,7 +300,7 @@ class CheckoutService(identityService: IdentityService,
       updateResult <- zuoraService.createPaymentMethod(createPaymentMethod)
       amendResult <- addPlan
       _ <- ensureEmail(contact)
-      _ <- exactTargetService.enqueueRenewalEmail(subscription.name, subscriptionDetails, contact, renewal.email, customerAcceptance)
+      _ <- exactTargetService.enqueueRenewalEmail(subscription, renewal, subscriptionDetails, contact, renewal.email, customerAcceptance, contractEffective)
     }
       yield {
         updateResult

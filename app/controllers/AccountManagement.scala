@@ -299,14 +299,15 @@ object AccountManagement extends Controller with LazyLogging with CatalogProvide
     def jsonError(message: String) = Json.toJson(Json.obj("errorMessage" -> message))
     def prettyPrice(renew: Renewal) = renew.plan.charges.prettyPricing(renew.plan.charges.currencies.head)
 
-      SessionSubscription.subscriptionFromRequest flatMap { maybeSub =>
+    def description(sub:Subscription[SubscriptionPlan.WeeklyPlan], renewal: Renewal) = renewal.plan.charges.prettyPricing(sub.plan.charges.currencies.head)
+    SessionSubscription.subscriptionFromRequest flatMap { maybeSub =>
       val response = for {
         sub <- maybeSub.toRightDisjunction("no subscription in request")
         weeklySub <- sub.asWeekly.toRightDisjunction("subscription is not weekly")
         renewableSub <- validateRenewable(weeklySub)
         renew <- parseRenewalRequest(request, tpBackend.catalogService.unsafeCatalog)
       } yield {
-        tpBackend.checkoutService.renewSubscription(renewableSub, renew, prettyPrice(renew)).map(res => Ok(Json.obj("redirect" -> routes.AccountManagement.renewThankYou.url)))
+        tpBackend.checkoutService.renewSubscription(renewableSub, renew, description(renewableSub, renew)).map(res => Ok(Json.obj("redirect" -> routes.AccountManagement.renewThankYou.url)))
         .recover{
           case e: Throwable =>
             val errorMessage = "Unexpected error while renewing subscription"

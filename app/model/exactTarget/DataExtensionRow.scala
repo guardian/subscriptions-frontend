@@ -5,6 +5,7 @@ import java.util.UUID
 
 import com.gu.exacttarget._
 import com.gu.i18n.{Currency, Title}
+import com.gu.memsub
 import com.gu.memsub.subsv2.SubscriptionPlan.{Digipack => _, _}
 import com.gu.memsub.subsv2.{Subscription, SubscriptionPlan => Plan}
 import com.gu.memsub.{Subscription => _, _}
@@ -122,7 +123,7 @@ object PaperFieldsGenerator {
 
     fieldsFor(
       deliveryAddress = paperData.deliveryAddress,
-      billingAddress = personalData.address,
+      maybeBillingAddress = Some(personalData.address),
       includesDigipack = paperData.plan.charges.benefits.list.contains(Digipack),
       email = personalData.email,
       title = personalData.title,
@@ -131,7 +132,7 @@ object PaperFieldsGenerator {
       startDate= paperData.startDate,
       firstPaymentDate = subscription.firstPaymentDate,
       planName = paperData.plan.name,
-      subscription = subscription,
+      subscriptionName = subscription.name,
       paymentMethod = paymentMethod,
       subscriptionDetails = subscriptionDetails,
       promotionDescription = promotionDescription
@@ -140,7 +141,7 @@ object PaperFieldsGenerator {
 
   def fieldsFor(
                  deliveryAddress: Address,
-                 billingAddress: Address,
+                 maybeBillingAddress: Option[Address],
                  includesDigipack: Boolean,
                  email: String,
                  title: Option[Title],
@@ -149,7 +150,7 @@ object PaperFieldsGenerator {
                  startDate: LocalDate,
                  firstPaymentDate: LocalDate,
                  planName : String,
-                 subscription: Subscription[Plan.Paid],
+                 subscriptionName: memsub.Subscription.Name,
                  paymentMethod: PaymentMethod,
                  subscriptionDetails: String,
                  promotionDescription: Option[String]
@@ -167,8 +168,8 @@ object PaperFieldsGenerator {
 
     val promotionFields = promotionDescription.map(d => "promotion_details" -> trimPromotionDescription(d))
 
-    val billingAddressFields =
-      if (!billingAddress.equals(deliveryAddress)) Seq(
+    val billingAddressFields = maybeBillingAddress.map( billingAddress =>
+      if (billingAddress != deliveryAddress) Seq(
         "billing_address_line_1" -> billingAddress.lineOne,
         "billing_address_line_2" -> billingAddress.lineTwo,
         "billing_address_town" -> billingAddress.town,
@@ -177,13 +178,13 @@ object PaperFieldsGenerator {
         "billing_country" -> billingAddress.country.fold(billingAddress.countryName)(_.name)
       )
       else Seq.empty
-
+    ).getOrElse(Seq.empty)
 
     Seq(
-      "ZuoraSubscriberId" -> subscription.name.get,
+      "ZuoraSubscriberId" -> subscriptionName.get,
       "SubscriberKey" -> email,
       "EmailAddress" -> email,
-      "subscriber_id" -> subscription.name.get,
+      "subscriber_id" -> subscriptionName.get,
       "IncludesDigipack" -> includesDigipack.toString,
       "title" -> title.fold("")(_.title),
       "first_name" -> firstName,
@@ -300,40 +301,43 @@ object HolidaySuspensionBillingScheduleDataExtensionRow {
     titleOpt.flatMap(title => lastNameOpt.map(lastName => s"$title $lastName")).getOrElse(firstNameOpt.getOrElse("Subscriber"))
 }
 
-object GuardianWeeklyRenewalDataExtensionRow {
 
-  def apply(subscription: Subscription[PaperPlan],
-            plan:PaperPlan,
+
+object GuardianWeeklyRenewalDataExtensionRow {
+  //TODO A LOT OF getOrElse("") here!!!
+
+  private def extractAddress(contact: Contact) = Address(
+    lineOne = contact.mailingStreet.getOrElse(""),
+    lineTwo = "",
+    town = contact.mailingCity.getOrElse(""),
+    countyOrState = contact.mailingState.getOrElse(""),
+    postCode = contact.mailingPostcode.getOrElse(""),
+    countryName = contact.mailingCountry.getOrElse("")
+  )
+
+  def apply(subscriptionName: memsub.Subscription.Name,
+            subscriptionDetails: String,
+            planName: String,
             contact: Contact,
             paymentMethod: PaymentMethod,
             email: String,
             customerAcceptance: LocalDate,
-            subscriptionDetails : String
+            startDate: LocalDate
            ): GuardianWeeklyRenewalDataExtensionRow = {
-    //TODO SEE WHERE TO GET THE PROPER BILLING AND DELIVERY ADDRESS
-    val address = Address(
-      lineOne= contact.mailingStreet.getOrElse(""),
-      lineTwo="",
-      town= contact.mailingCity.getOrElse(""),
-      countyOrState=contact.mailingState.getOrElse(""),
-      postCode= contact.mailingPostcode.getOrElse(""),
-      countryName= contact.mailingCountry.getOrElse("")
-    )
-
 
 
     val commonFields = PaperFieldsGenerator.fieldsFor(
-      deliveryAddress = address,
-      billingAddress = address,
+      deliveryAddress = extractAddress(contact),
+      maybeBillingAddress = None,
       includesDigipack = false,
       email = email,
-      title = contact.title.flatMap(Title.fromString), //todo
-      firstName = contact.firstName.getOrElse(""), //todo
+      title = contact.title.flatMap(Title.fromString),
+      firstName = contact.firstName.getOrElse(""),
       lastName = contact.lastName,
-      startDate= plan.start,
+      startDate= startDate,
       firstPaymentDate = customerAcceptance,
-      planName = plan.name,
-      subscription = subscription,
+      planName = planName,
+      subscriptionName = subscriptionName,
       paymentMethod = paymentMethod,
       subscriptionDetails = subscriptionDetails,
       promotionDescription = None
