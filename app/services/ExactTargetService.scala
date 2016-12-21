@@ -184,10 +184,10 @@ class ExactTargetService(
     contractEffective: LocalDate): Future[Unit] = {
 
     sealed trait Error {
-      def msg : String
+      def msg: String
     }
     case class ExceptionThrown(msg: String, e: Throwable) extends Error
-    case class SimpleError(msg :String) extends Error
+    case class SimpleError(msg: String) extends Error
 
     def getPaymentMethod(accountId: AccountId): Future[\/[Error, PaymentMethod]] = paymentService.getPaymentMethod(oldSub.accountId).map(_.toRightDisjunction(SimpleError("No payment method found in account")))
 
@@ -209,11 +209,11 @@ class ExactTargetService(
       sendMessage <- EitherT(sendToQueue(row))
     } yield (sendMessage)).run
 
-   sentMessage.map{
-        case \/-(sendMsgResult) => logger.info(s"Successfully enqueued ${oldSub.name.get}'s guardian weekly renewal email.")
-        case -\/(SimpleError(msg)) => logger.error(msg)
-        case -\/(ExceptionThrown(msg, ex)) => logger.error(msg, ex)
-      }
+    sentMessage.map {
+      case \/-(sendMsgResult) => logger.info(s"Successfully enqueued ${oldSub.name.get}'s guardian weekly renewal email.")
+      case -\/(SimpleError(msg)) => logger.error(msg)
+      case -\/(ExceptionThrown(msg, ex)) => logger.error(msg, ex)
+    }
   }
 }
 

@@ -297,7 +297,8 @@ object AccountManagement extends Controller with LazyLogging with CatalogProvide
     def validateRenewable(sub: Subscription[SubscriptionPlan.WeeklyPlan]) = if (sub.renewable) \/-(sub) else -\/("subscription is not renewable")
 
     def jsonError(message: String) = Json.toJson(Json.obj("errorMessage" -> message))
-    def description(sub:Subscription[SubscriptionPlan.WeeklyPlan], renewal: Renewal) = renewal.plan.charges.prettyPricing(sub.plan.charges.currencies.head)
+
+    def description(sub: Subscription[SubscriptionPlan.WeeklyPlan], renewal: Renewal) = renewal.plan.charges.prettyPricing(sub.plan.charges.currencies.head)
 
     SessionSubscription.subscriptionFromRequest flatMap { maybeSub =>
       val response = for {

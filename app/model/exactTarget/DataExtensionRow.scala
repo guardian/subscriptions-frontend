@@ -333,7 +333,7 @@ object GuardianWeeklyRenewalDataExtensionRow {
       title = contact.title.flatMap(Title.fromString),
       firstName = contact.firstName.getOrElse(""),
       lastName = contact.lastName,
-      startDate= contractEffective,
+      startDate = contractEffective,
       firstPaymentDate = customerAcceptance,
       planName = planName,
       subscriptionName = subscriptionName,

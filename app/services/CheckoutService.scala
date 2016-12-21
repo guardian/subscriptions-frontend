@@ -286,9 +286,10 @@ class CheckoutService(identityService: IdentityService,
       zuoraService.renewSubscription(renewCommand)
     }
 
-    def ensureEmail(contact:Contact) =  if (contact.email.isDefined) Future.successful(\/.right(())) else salesforceService.repo.addEmail(contact, renewal.email).map { either =>
-      either.fold[Unit]({err => logger.error(s"couldn't update email for sub: ${subscription.id}: $err")}, u => u)
-    }
+    def ensureEmail(contact: Contact) = if (contact.email.isDefined) Future.successful(\/.right(()))
+      else salesforceService.repo.addEmail(contact, renewal.email).map { either =>
+        either.fold[Unit]({ err => logger.error(s"couldn't update email for sub: ${subscription.id}: $err") }, u => u)
+      }
 
     for {
       account <- zuoraService.getAccount(subscription.accountId)
