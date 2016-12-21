@@ -26,7 +26,7 @@ export function init(container) {
     let showPaymentType = container.dataset.country === 'GB';
     let plans = window.guardian.plans;
     ReactDOM.render(<WeeklyRenew showPaymentType={showPaymentType} email={container.dataset.email}
-                                 country={container.dataset.country} plans={plans}/>, container);
+                                 country={container.dataset.country} plans={plans} promo={container.dataset.promotion}/>, container);
 }
 
 class WeeklyRenew extends React.Component {
@@ -44,7 +44,7 @@ class WeeklyRenew extends React.Component {
             showValidity: false,
             plan: this.props.plans[0].id,
             plans: this.props.plans,
-            promoCode: '',
+            promoCode: this.props.promo,
             promoStatus: status.NOTCHECKED,
             promo: null
 
@@ -63,6 +63,11 @@ class WeeklyRenew extends React.Component {
         this.validatePromo = this.validatePromo.bind(this);
         this.handlePlan = this.handlePlan.bind(this);
         this.getPlan = this.getPlan.bind(this);
+
+        if(this.props.promo!==''){
+            console.log('he');
+            this.validatePromo();
+        }
     }
 
 
@@ -75,14 +80,11 @@ class WeeklyRenew extends React.Component {
     }
 
     handlePromo(e) {
-        let update = {
+        this.setState({
             promoCode: e.target.value.trim(),
-            promoStatus: status.NOTCHECKED
-        };
-        if (this.state.promoStatus === status.VALID) {
-            update.plans = this.props.plans
-        }
-        this.setState(update);
+            promoStatus: status.NOTCHECKED,
+            plans: this.props.plans
+        });
 
     };
 
@@ -108,12 +110,15 @@ class WeeklyRenew extends React.Component {
             } else {
                 //It's a good promotion, but it's not a weekly one
                 this.setState({
+                    promo:'The promotion you have entered is not currently valid for any of the availble payment methods.',
                     promoStatus: status.INVALID,
                     plans: this.props.plans
                 })
             }
-        }).catch((a) => {
+        }).catch((payload) => {
+            let response = JSON.parse(payload.response);
             this.setState({
+                promo: response.errorMessage,
                 promoStatus: status.INVALID,
                 plans: this.props.plans
             })
