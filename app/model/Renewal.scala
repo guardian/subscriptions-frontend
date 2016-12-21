@@ -1,11 +1,12 @@
 package model
 
+import com.gu.memsub.promo.PromoCode
 import com.gu.memsub.subsv2.Catalog
 import com.gu.memsub.subsv2.CatalogPlan.Paper
 import play.api.libs.json._
 
 
-case class Renewal(email: String, plan: Paper, paymentData: PaymentData)
+case class Renewal(email: String, plan: Paper, paymentData: PaymentData, promoCode: Option[PromoCode])
 
 class RenewalReads(catalog: Catalog) {
   val weeklyPlans = catalog.weeklyZoneA.toList ++ catalog.weeklyZoneB.toList ++ catalog.weeklyZoneC.toList
@@ -36,6 +37,7 @@ class RenewalReads(catalog: Catalog) {
         case None => JsError("invalid payment data type")
       }
   }
+  implicit val promoReads = Json.reads[PromoCode]
   implicit val renewalReads = Json.reads[Renewal]
 }
 
