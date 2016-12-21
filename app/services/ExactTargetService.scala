@@ -175,7 +175,7 @@ class ExactTargetService(
   }
 
   def enqueueRenewalEmail(
-    oldSub:Subscription[Plan.WeeklyPlan],
+    oldSub: Subscription[Plan.WeeklyPlan],
     renewal: Renewal,
     subscriptionDetails: String,
     contact: Contact,
