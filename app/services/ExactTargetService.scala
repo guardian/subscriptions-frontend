@@ -185,11 +185,17 @@ class ExactTargetService(
 
     sealed trait Error {
       def msg: String
+      def code: String
+      def fullDescription = s"$code: $msg"
     }
-    case class ExceptionThrown(msg: String, e: Throwable) extends Error
-    case class SimpleError(msg: String) extends Error
+    case class ExceptionThrown(msg: String, exception: Throwable) extends Error{
+      val code = "ET001"
+    }
+    case class SimpleError(msg: String) extends Error{
+      val code = "ET002"
+    }
 
-    def getPaymentMethod(accountId: AccountId): Future[\/[Error, PaymentMethod]] = paymentService.getPaymentMethod(oldSub.accountId).map(_.toRightDisjunction(SimpleError("No payment method found in account")))
+    def getPaymentMethod(accountId: AccountId): Future[\/[Error, PaymentMethod]] = paymentService.getPaymentMethod(oldSub.accountId).map(_.toRightDisjunction(SimpleError(s"Failed to enqueue ${oldSub.name.get}'s guardian weekly renewal email. No payment method found in account")))
 
     def sendToQueue(row: GuardianWeeklyRenewalDataExtensionRow): Future[\/[Error, SendMessageResult]] = SqsClient.sendDataExtensionToQueue(Config.holidaySuspensionEmailQueue, row).map {
       case Success(sendMsgResult) => \/-(sendMsgResult)
@@ -211,8 +217,8 @@ class ExactTargetService(
 
     sentMessage.map {
       case \/-(sendMsgResult) => logger.info(s"Successfully enqueued ${oldSub.name.get}'s guardian weekly renewal email.")
-      case -\/(SimpleError(msg)) => logger.error(msg)
-      case -\/(ExceptionThrown(msg, ex)) => logger.error(msg, ex)
+      case -\/(se@SimpleError(_)) => logger.error(se.fullDescription)
+      case -\/(et@ExceptionThrown(_,exception)) => logger.error(et.fullDescription, exception)
     }
   }
 }
