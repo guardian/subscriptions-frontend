@@ -4,9 +4,12 @@ import java.lang.Math.min
 import java.util.UUID
 
 import com.gu.exacttarget._
-import com.gu.i18n.Currency
+import com.gu.i18n.{Currency, Title}
+import com.gu.memsub
+import com.gu.memsub.subsv2.SubscriptionPlan.{Digipack => _, _}
 import com.gu.memsub.subsv2.{Subscription, SubscriptionPlan => Plan}
 import com.gu.memsub.{Subscription => _, _}
+import com.gu.salesforce.Contact
 import com.typesafe.scalalogging.LazyLogging
 import model.exactTarget.DataExtensionRowHelpers._
 import model.{PaperData, PersonalData}
@@ -108,6 +111,7 @@ object DigipackWelcome1DataExtensionRow extends LazyLogging {
 }
 
 object PaperFieldsGenerator {
+
   def fieldsFor(
                  paperData: PaperData,
                  personalData: PersonalData,
@@ -115,6 +119,41 @@ object PaperFieldsGenerator {
                  paymentMethod: PaymentMethod,
                  subscriptionDetails: String,
                  promotionDescription: Option[String] = None
+               ): Seq[(String, String)] = {
+
+    fieldsFor(
+      deliveryAddress = paperData.deliveryAddress,
+      maybeBillingAddress = Some(personalData.address),
+      includesDigipack = paperData.plan.charges.benefits.list.contains(Digipack),
+      email = personalData.email,
+      title = personalData.title,
+      firstName = personalData.first,
+      lastName = personalData.last,
+      startDate= paperData.startDate,
+      firstPaymentDate = subscription.firstPaymentDate,
+      planName = paperData.plan.name,
+      subscriptionName = subscription.name,
+      paymentMethod = paymentMethod,
+      subscriptionDetails = subscriptionDetails,
+      promotionDescription = promotionDescription
+    )
+  }
+
+  def fieldsFor(
+                 deliveryAddress: Address,
+                 maybeBillingAddress: Option[Address],
+                 includesDigipack: Boolean,
+                 email: String,
+                 title: Option[Title],
+                 firstName: String,
+                 lastName: String,
+                 startDate: LocalDate,
+                 firstPaymentDate: LocalDate,
+                 planName : String,
+                 subscriptionName: memsub.Subscription.Name,
+                 paymentMethod: PaymentMethod,
+                 subscriptionDetails: String,
+                 promotionDescription: Option[String]
                ): Seq[(String, String)] = {
     val paymentFields = paymentMethod match {
       case GoCardless(mandateId, accName, accNumber, sortCode) => Seq(
@@ -129,36 +168,36 @@ object PaperFieldsGenerator {
 
     val promotionFields = promotionDescription.map(d => "promotion_details" -> trimPromotionDescription(d))
 
-    val billingAddressFields =
-      if (!personalData.address.equals(paperData.deliveryAddress)) Seq(
-        "billing_address_line_1" -> personalData.address.lineOne,
-        "billing_address_line_2" -> personalData.address.lineTwo,
-        "billing_address_town" -> personalData.address.town,
-        "billing_county" -> personalData.address.countyOrState,
-        "billing_postcode" -> personalData.address.postCode,
-        "billing_country" -> personalData.address.country.fold(personalData.address.countryName)(_.name)
+    val billingAddressFields = maybeBillingAddress.map( billingAddress =>
+      if (billingAddress != deliveryAddress) Seq(
+        "billing_address_line_1" -> billingAddress.lineOne,
+        "billing_address_line_2" -> billingAddress.lineTwo,
+        "billing_address_town" -> billingAddress.town,
+        "billing_county" -> billingAddress.countyOrState,
+        "billing_postcode" -> billingAddress.postCode,
+        "billing_country" -> billingAddress.country.fold(billingAddress.countryName)(_.name)
       )
       else Seq.empty
-
+    ).getOrElse(Seq.empty)
 
     Seq(
-      "ZuoraSubscriberId" -> subscription.name.get,
-      "SubscriberKey" -> personalData.email,
-      "EmailAddress" -> personalData.email,
-      "subscriber_id" -> subscription.name.get,
-      "IncludesDigipack" -> paperData.plan.charges.benefits.list.contains(Digipack).toString,
-      "title" -> personalData.title.fold("")(_.title),
-      "first_name" -> personalData.first,
-      "last_name" -> personalData.last,
-      "delivery_address_line_1" -> paperData.deliveryAddress.lineOne,
-      "delivery_address_line_2" -> paperData.deliveryAddress.lineTwo,
-      "delivery_address_town" -> paperData.deliveryAddress.town,
-      "delivery_county" -> paperData.deliveryAddress.countyOrState,
-      "delivery_postcode" -> paperData.deliveryAddress.postCode,
-      "delivery_country" -> paperData.deliveryAddress.country.fold(paperData.deliveryAddress.countryName)(_.name),
-      "date_of_first_paper" -> formatDate(paperData.startDate),
-      "date_of_first_payment" -> formatDate(subscription.firstPaymentDate),
-      "package" -> paperData.plan.name,
+      "ZuoraSubscriberId" -> subscriptionName.get,
+      "SubscriberKey" -> email,
+      "EmailAddress" -> email,
+      "subscriber_id" -> subscriptionName.get,
+      "IncludesDigipack" -> includesDigipack.toString,
+      "title" -> title.fold("")(_.title),
+      "first_name" -> firstName,
+      "last_name" -> lastName,
+      "delivery_address_line_1" -> deliveryAddress.lineOne,
+      "delivery_address_line_2" -> deliveryAddress.lineTwo,
+      "delivery_address_town" -> deliveryAddress.town,
+      "delivery_county" -> deliveryAddress.countyOrState,
+      "delivery_postcode" -> deliveryAddress.postCode,
+      "delivery_country" -> deliveryAddress.country.fold(deliveryAddress.countryName)(_.name),
+      "date_of_first_paper" -> formatDate(startDate),
+      "date_of_first_payment" -> formatDate(firstPaymentDate),
+      "package" -> planName,
       "subscription_rate" -> subscriptionDetails
     ) ++ billingAddressFields ++ paymentFields ++ promotionFields
 
@@ -262,6 +301,54 @@ object HolidaySuspensionBillingScheduleDataExtensionRow {
     titleOpt.flatMap(title => lastNameOpt.map(lastName => s"$title $lastName")).getOrElse(firstNameOpt.getOrElse("Subscriber"))
 }
 
+
+
+object GuardianWeeklyRenewalDataExtensionRow {
+
+  private def extractAddress(contact: Contact) = Address(
+    lineOne = contact.mailingStreet.getOrElse(""),
+    lineTwo = "",
+    town = contact.mailingCity.getOrElse(""),
+    countyOrState = contact.mailingState.getOrElse(""),
+    postCode = contact.mailingPostcode.getOrElse(""),
+    countryName = contact.mailingCountry.getOrElse("")
+  )
+
+  def apply(subscriptionName: memsub.Subscription.Name,
+            subscriptionDetails: String,
+            planName: String,
+            contact: Contact,
+            paymentMethod: PaymentMethod,
+            email: String,
+            customerAcceptance: LocalDate,
+            contractEffective: LocalDate
+           ): GuardianWeeklyRenewalDataExtensionRow = {
+
+
+    val commonFields = PaperFieldsGenerator.fieldsFor(
+      deliveryAddress = extractAddress(contact),
+      maybeBillingAddress = None,
+      includesDigipack = false,
+      email = email,
+      title = contact.title.flatMap(Title.fromString),
+      firstName = contact.firstName.getOrElse(""),
+      lastName = contact.lastName,
+      startDate = contractEffective,
+      firstPaymentDate = customerAcceptance,
+      planName = planName,
+      subscriptionName = subscriptionName,
+      paymentMethod = paymentMethod,
+      subscriptionDetails = subscriptionDetails,
+      promotionDescription = None
+    )
+
+    GuardianWeeklyRenewalDataExtensionRow(email, commonFields)
+  }
+
+  def constructSalutation(titleOpt: Option[String], firstNameOpt: Option[String], lastNameOpt: Option[String]): String =
+    titleOpt.flatMap(title => lastNameOpt.map(lastName => s"$title $lastName")).getOrElse(firstNameOpt.getOrElse("Subscriber"))
+}
+
 case class DigipackWelcome1DataExtensionRow(email: String, fields: Seq[(String, String)]) extends DataExtensionRow {
   override def forExtension = DigipackDataExtension
 }
@@ -279,4 +366,7 @@ case class GuardianWeeklyWelcome1DataExtensionRow(email: String, fields: Seq[(St
 
 case class HolidaySuspensionBillingScheduleDataExtensionRow(email: String, fields: Seq[(String, String)]) extends DataExtensionRow {
   override def forExtension = HolidaySuspensionBillingScheduleExtension
+}
+case class GuardianWeeklyRenewalDataExtensionRow(email: String, fields: Seq[(String, String)]) extends DataExtensionRow {
+  override def forExtension = GuardianWeeklyRenewalDataExtension
 }
