@@ -37,7 +37,14 @@ class RenewalReads(catalog: Catalog) {
         case None => JsError("invalid payment data type")
       }
   }
-  implicit val promoReads = Json.reads[PromoCode]
+
+  implicit val promoReads = new Reads[PromoCode] {
+    override def reads(json: JsValue): JsResult[PromoCode] = json match {
+      case JsString(s) => JsSuccess(PromoCode(s))
+      case _ => JsError("invalid value for promo code")
+    }
+  }
+
   implicit val renewalReads = Json.reads[Renewal]
 }
 
