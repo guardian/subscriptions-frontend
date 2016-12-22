@@ -72,6 +72,7 @@ export function send(state, errorHandler) {
     let post = (paymentData) => {
         let payload = {
             email: state.email.value,
+            promoCode: state.promoCode,
             plan: state.plan,
             paymentData: paymentData
         };
@@ -111,7 +112,7 @@ export function validatePromoForPlans(promo, plans) {
     let newPlans = promo.adjustedRatePlans;
     return plans.map((plan) => {
         if (plan.id in newPlans) {
-            return Object.assign(plan, {promo: newPlans[plan.id]})
+            return Object.assign({},plan, {promo: newPlans[plan.id]})
         }
         else {
             return plan;
