@@ -1,6 +1,0 @@
-@import com.gu.memsub.promo.Promotion.AnyPromotion
-@import views.support.MarkdownRenderer
-@import views.support.LandingPageOps._
-
-@(promotion: AnyPromotion, md: MarkdownRenderer)
-<p>@Html(md.render(promotion.getIncentiveLegalTerms))</p>

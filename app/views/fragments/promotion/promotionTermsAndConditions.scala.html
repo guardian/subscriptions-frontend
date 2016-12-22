@@ -1,12 +1,9 @@
-@import com.gu.memsub.promo.PromoCode
 @import com.gu.memsub.promo.Promotion.AnyPromotion
 @import views.support.MarkdownRenderer
 @import views.support.LandingPageOps._
-
 @(promotion: AnyPromotion, md: MarkdownRenderer)
 <h4>Promotion terms and conditions</h4>
 <p>Offer subject to availability. Guardian News and Media Limited ("GNM") reserves the right to withdraw this promotion at any time.</p>
-
 @promotion.asIncentive.map { p =>
     @if(p.promotionType.termsAndConditions.isDefined) {
         @Html(md.render(p.getIncentiveTermsAndConditions))
