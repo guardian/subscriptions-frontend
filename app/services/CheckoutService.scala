@@ -282,7 +282,7 @@ class CheckoutService(identityService: IdentityService,
     val customerAcceptance = nextFridayFrom(contractEffective)
     def addPlan = {
       val newRatePlan = RatePlan(renewal.plan.id.get, None)
-      val renewCommand = Renew(subscription.id.get, subscription.startDate, newRatePlan, contractEffective, customerAcceptance)
+      val renewCommand = Renew(subscription.id.get, subscription.startDate, NonEmptyList(newRatePlan), contractEffective, customerAcceptance)
       zuoraService.renewSubscription(renewCommand)
     }
 
