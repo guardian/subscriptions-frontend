@@ -110,7 +110,7 @@ class WeeklyRenew extends React.Component {
             } else {
                 //It's a good promotion, but it's not a weekly one
                 this.setState({
-                    promo:'The promotion you have entered is not currently valid for any of the availble payment methods.',
+                    promo:'The promotion you have entered is not currently valid for any of the available billing periods.',
                     promoStatus: status.INVALID,
                     plans: this.props.plans
                 })
