@@ -72,11 +72,14 @@ export function send(state, errorHandler) {
     let post = (paymentData) => {
         let payload = {
             email: state.email.value,
-            promoCode: state.promoCode,
             plan: state.plan,
             paymentData: paymentData
         };
-        ajax({
+        let promoCode = state.promoCode;
+        if(promoCode){
+            payload.promoCode = promoCode;
+        }
+            ajax({
             type: 'json',
             method: 'POST',
             url: '/manage/renew',
