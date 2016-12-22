@@ -61,7 +61,7 @@ class CheckoutService(identityService: IdentityService,
   def processSubscription(subscriptionData: SubscribeRequest,
                           authenticatedUserOpt: Option[AuthenticatedIdUser],
                           requestData: SubscriptionRequestData
-                         )(implicit p: PromotionApplicator[NewUsers, Subscribe]): Future[NonEmptyList[SubsError] \/ CheckoutSuccess] = {
+                         )(implicit p: PromotionApplicator[PromoContext.Renewal, Subscribe]): Future[NonEmptyList[SubsError] \/ CheckoutSuccess] = {
 
     import subscriptionData.genericData._
     val plan = RatePlan(subscriptionData.productRatePlanId.get, None)
@@ -80,7 +80,7 @@ class CheckoutService(identityService: IdentityService,
       defaultPaymentDelay = CheckoutService.paymentDelay(subscriptionData.productData, zuoraProperties)
       paymentMethod <- EitherT(attachPaymentMethodToStripeCustomer(payment, purchaserIds))
       subscribe = createSubscribeRequest(personalData, soldToContact, requestData, plan, purchaserIds, paymentMethod, payment.makeAccount, Some(defaultPaymentDelay))
-      validPromotion = promoCode.flatMap(promoService.validate[NewUsers](_, personalData.address.country.getOrElse(Country.UK), subscriptionData.productRatePlanId).toOption)
+      validPromotion = promoCode.flatMap(promoService.validate[PromoContext.Renewal](_, personalData.address.country.getOrElse(Country.UK), subscriptionData.productRatePlanId).toOption)
       withPromo = validPromotion.map(v => p.apply(v, prpId => catalog.paid.find(_.id == prpId).map(_.charges.billingPeriod).get, promoPlans)(subscribe)).getOrElse(subscribe)
       result <- EitherT(createSubscription(withPromo, purchaserIds))
       out <- postSubscribeSteps(authenticatedUserOpt, memberId, result, subscriptionData, validPromotion)
