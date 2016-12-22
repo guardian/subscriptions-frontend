@@ -2,7 +2,6 @@
 @import com.gu.memsub.promo.PromoCode
 @import com.gu.memsub.promo.Promotion.AnyPromotion
 @import com.gu.memsub.subsv2.Catalog
-@import org.joda.time.Days
 @import views.support.Dates.prettyDate
 @import views.support.MarkdownRenderer
 @(promoCode: PromoCode, promotion: AnyPromotion, md: MarkdownRenderer, catalog: Catalog)
@@ -30,7 +29,7 @@
             <h4>Applies to products</h4>
             <ul class="promotion-applies-to">
                 @catalog.allSubs.flatten.filter(plan => promotion.appliesTo.productRatePlanIds.contains(plan.id)).map { plan =>
-                    <li><a class="u-link" href="@routes.Checkout.renderCheckout(UK.id, None, None, plan.slug).url">@{plan.product.toString.replace("Digipack", "")} @plan.name</a></li>
+                    <li>@{plan.product.toString.replace("Digipack", "")} @plan.name</li>
                 }
             </ul>
 
@@ -53,9 +52,8 @@
             }
         </section>
         <section class="section-slice promotion-terms">
-            @fragments.promotion.subscriptionTermsAndConditions(catalog, promotion)
             @fragments.promotion.promotionTermsAndConditions(promotion, md)
-            @fragments.promotion.incentiveLegalTerms(promotion, md)
+            @fragments.promotion.fullTermsAndConditions(promoCode, catalog, promotion, md)
             @fragments.promotion.copyrightNotice()
         </section>
     </main>

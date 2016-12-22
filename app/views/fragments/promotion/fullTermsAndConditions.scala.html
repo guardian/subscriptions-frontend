@@ -1,0 +1,17 @@
+@import com.gu.memsub.promo.Promotion.AnyPromotion
+@import views.support.MarkdownRenderer
+@import views.support.LandingPageOps._
+@import com.gu.memsub.subsv2.Catalog
+@import com.gu.memsub.promo.PromoCode
+
+@(promoCode: PromoCode, catalog: Catalog, promotion: AnyPromotion, md: MarkdownRenderer)
+@isDigipack = @{catalog.digipack.toList.exists(plan => promotion.appliesTo.productRatePlanIds.contains(plan.id))}
+@if(promotion.asIncentive.isDefined) {
+    <p>@Html(md.render(promotion.getIncentiveLegalTerms))</p>
+} else {
+    @if(isDigipack) {
+        <p>@fragments.promotion.digitalpackLegalTerms(promoCode, promotion, md)</p>
+    } else {
+        <p>@fragments.promotion.newspaperLegalTerms(promoCode, promotion, md)</p>
+    }
+}
