@@ -31,7 +31,9 @@ object SalesforceService {
     Keys.BILLING_COUNTRY -> personalData.address.countryName,
     Keys.BILLING_STATE -> personalData.address.countyOrState,
     Keys.ALLOW_GU_RELATED_MAIL -> personalData.receiveGnmMarketing
-  ) ++ paperData.map(_.deliveryAddress).fold(Json.obj())(addr => Json.obj(
+  ) ++ personalData.title.fold(Json.obj())(title => Json.obj(
+    Keys.TITLE -> title.title
+  )) ++ paperData.map(_.deliveryAddress).fold(Json.obj())(addr => Json.obj(
     Keys.MAILING_STREET -> addr.line,
     Keys.MAILING_CITY -> addr.town,
     Keys.MAILING_POSTCODE -> addr.postCode,

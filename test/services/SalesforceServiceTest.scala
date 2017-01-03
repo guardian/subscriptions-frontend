@@ -33,6 +33,7 @@ class SalesforceServiceTest extends Specification {
     "Serialise your good old fashioned basic fields" in {
       SalesforceService.createSalesforceUserData(personalData = data, None) mustEqual Json.obj(
         EMAIL -> data.email,
+        TITLE -> data.title.map(_.title),
         FIRST_NAME -> data.first,
         LAST_NAME -> data.last,
         BILLING_STREET -> data.address.line,
