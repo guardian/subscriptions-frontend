@@ -256,18 +256,18 @@ object AccountManagement extends Controller with LazyLogging with CatalogProvide
       }
       maybeFutureManagePage.getOrElse {
         // the product type didn't have the right charges
-        Future.successful(Ok(views.html.account.details(None,promoCode)))
+        Future.successful(Ok(views.html.account.details(None, promoCode)))
       }
     }
 
     futureMaybeFutureManagePage.getOrElse {
       // not a valid AS number or some unnamed problem getting the details
-      Future.successful(Ok(views.html.account.details(subscriberId,promoCode)))
+      Future.successful(Ok(views.html.account.details(subscriberId, promoCode)))
     }.flatMap(identity)
   }
 
   def logout = accountManagementAction { implicit request =>
-    SessionSubscription.clear(Redirect(ProfileLinks.signOut.href,SEE_OTHER))
+    SessionSubscription.clear(Redirect(ProfileLinks.signOut.href, SEE_OTHER))
   }
 
   def processLogin = accountManagementAction.async { implicit request =>

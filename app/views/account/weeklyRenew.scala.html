@@ -71,7 +71,7 @@
                 />
 =======
 
-                <div class="js-weekly-renew" data-email="@contact.email" data-country="@contact.mailingCountry" data-direct-debit="@{billToCountry == Country.UK}" @promoCode.map { promo =>
+                <div class="js-weekly-renew" data-email="@contact.email" data-country="@contact.mailingCountryParsed.map(_.alpha2)" data-direct-debit="@{billToCountry == Country.UK}" @promoCode.map { promo =>
               data-promotion="@promo"
             } />
 >>>>>>> Feed promotions to renew
