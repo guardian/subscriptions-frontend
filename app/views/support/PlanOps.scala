@@ -14,6 +14,16 @@ object PlanOps {
 
     def title: String = in.charges.benefits.list match {
       case Digipack :: Nil => "Guardian Digital Pack"
+      case Weekly :: Nil => "Guardian Weekly"
+      case x =>
+        if (x.toSet == Set(Digipack, SundayPaper)) "Observer Newspaper"
+        else if (x.contains(SundayPaper)) "Guardian and Observer Newspapers"
+        else "Guardian Newspaper"
+    }
+
+    def packageName: String = in.charges.benefits.list match {
+      case Digipack :: Nil => "Guardian Digital Pack"
+      case Weekly :: Nil => "Guardian Weekly"
       case _ => s"${in.name} package"
     }
 
@@ -33,7 +43,6 @@ object PlanOps {
 
     def changeRatePlanText: String = in.charges.benefits.list match {
       case Digipack :: Nil | Weekly :: Nil=> "Change payment frequency"
-
       case _ => "Add more"
     }
 
@@ -70,21 +79,19 @@ object PlanOps {
         "Digital Pack"
       } else if (isGuardianWeekly) {
         "Guardian Weekly"
-      }
-      else {
+      } else {
         "Unknown"
       }
     }
   }
 
   implicit class ProductPopulationDataOps(in: ProductPopulationData) {
-    val products = in.plans.list.head
+    val products = in.plans.default
     def isHomeDelivery: Boolean = products.isHomeDelivery
     def isGuardianWeekly: Boolean = products.isGuardianWeekly
     def isPhysical: Boolean = products.hasPhysicalBenefits
     def isVoucher: Boolean = products.isVoucher
     def isDigitalPack: Boolean = products.isDigitalPack
-    def productType: String = products.productType
   }
 
 }
