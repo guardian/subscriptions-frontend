@@ -15,10 +15,7 @@ object PlanOps {
     def title: String = in.charges.benefits.list match {
       case Digipack :: Nil => "Guardian Digital Pack"
       case Weekly :: Nil => "Guardian Weekly"
-      case x =>
-        if (x.toSet == Set(Digipack, SundayPaper)) "Observer Newspaper"
-        else if (x.contains(SundayPaper)) "Guardian and Observer Newspapers"
-        else "Guardian Newspaper"
+      case x => "Guardian/Observer Newspapers"
     }
 
     def packageName: String = in.charges.benefits.list match {
@@ -34,11 +31,20 @@ object PlanOps {
 
     def packImage: ResponsiveImageGroup = in.charges.benefits.list match {
       case Digipack :: Nil =>
-        ResponsiveImageGroup(availableImages = Seq(ResponsiveImage(controllers.CachedAssets.hashedPathFor("images/digital-pack.png"), 300)))
+        ResponsiveImageGroup(
+          availableImages = Seq(ResponsiveImage(controllers.CachedAssets.hashedPathFor("images/digital-pack.png"), 300)),
+            altText = Some("Guardian apps demoed on Apple, Android and Kindle Fire devices")
+        )
       case Weekly :: Nil =>
-        ResponsiveImageGroup(availableImages = ResponsiveImageGenerator("1961260fc68598c31c0b882d8f4da8e8ec34e7d0/0_0_1000_1333", Seq(375, 750, 1000), "png"))
+        ResponsiveImageGroup(
+          availableImages = ResponsiveImageGenerator("1961260fc68598c31c0b882d8f4da8e8ec34e7d0/0_0_1000_1333", Seq(375, 750, 1000), "png"),
+          altText = Some("Stack of The Guardian Weekly editions")
+        )
       case _ =>
-        ResponsiveImageGroup(availableImages = ResponsiveImageGenerator("05129395fe0461071f176f526d7a4ae2b1d9b9bf/0_0_5863_5116", Seq(140, 500, 1000, 2000)))
+        ResponsiveImageGroup(
+          availableImages = ResponsiveImageGenerator("05129395fe0461071f176f526d7a4ae2b1d9b9bf/0_0_5863_5116", Seq(140, 500, 1000, 2000)),
+          altText = Some("Stack of The Guardian newspapers")
+        )
     }
 
     def changeRatePlanText: String = in.charges.benefits.list match {
