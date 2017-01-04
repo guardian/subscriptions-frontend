@@ -17,11 +17,10 @@
     <div class="review-panel__item">
         <h4 class="review-panel__label">Your subscription:</h4>
         <div class="review-panel__details">
-            <div>@plan.title</div>
+            <div>@plan.packageName</div>
             @for(subtitle <- plan.subtitle) {
                 <em>(@subtitle)</em>
             }
-
         </div>
     </div>
     <div class="review-panel__item">

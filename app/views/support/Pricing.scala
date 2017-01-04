@@ -64,7 +64,7 @@ object Pricing {
 
     def prefix = in.charges.benefits.list match {
       case Digipack :: Nil => ""
-      case _ => s"${in.title} - "
+      case _ => s"${in.packageName} - "
     }
 
     def prettyName(currency: Currency): String = in.charges.benefits.list match {

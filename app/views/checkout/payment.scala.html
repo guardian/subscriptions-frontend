@@ -33,7 +33,7 @@
             data-option-mirror-payment-default="@plan.charges.prettyPricing(currency)"
             data-option-mirror-payment="@plan.charges.prettyPricing(currency)"
             data-option-mirror-description="@for(s <- plan.subtitle) {(@s)}"
-            data-option-mirror-package="@plan.title"
+            data-option-mirror-package="@plan.packageName"
             data-amount="@plan.charges.unsafePrice(currency).prettyAmount"
             data-name="@plan.name"
             data-number-of-months="@plan.charges.billingPeriod.monthsInPeriod"
@@ -44,7 +44,7 @@
             @if(plan == productData.plans.default && currency == countryAndCurrencySettings.defaultCurrency){ checked="checked" }
             >
         </span>
-        <span class="option__label" id="label-for-@plan.id.get-@currency" title="@plan.title">@plan.prettyName(currency)</span>
+        <span class="option__label" id="label-for-@plan.id.get-@currency">@plan.prettyName(currency)</span>
     </label>
 }
 
@@ -67,8 +67,7 @@
     guardian.supplierCode = '@{supplierCode.mkString}';
     guardian.pageInfo.productData.initialProduct = '@{productData.plans.default.name}';
     guardian.pageInfo.productData.productPurchasing = '@{productData.plans.default.name}';
-    guardian.pageInfo.productData.productType = '@{productData.productType}';
-
+    guardian.pageInfo.productData.productType = '@{productData.plans.default.productType}';
 </script>
     @fragments.analytics.tagmanager()
 

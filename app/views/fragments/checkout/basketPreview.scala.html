@@ -13,15 +13,15 @@
             src="@plan.packImage.defaultImage"
             srcset="@plan.packImage.srcset"
             sizes="(max-width: 980px) 150px, 300px"
-            alt="@plan.title">
+            alt="@plan.packImage.metadataAltText">
     </div>
     <div class="basket-preview__product">
         <span class="basket-preview__product__title js-option-mirror-package-display">
-            @plan.title
+            @plan.packageName
         </span>
-            <span class="basket-preview__product__caption js-option-mirror-description-display">
-                (@plan.subtitle)
-            </span>
+        <span class="basket-preview__product__caption js-option-mirror-description-display">
+            (@plan.subtitle)
+        </span>
         <span class="basket-preview__product__payment js-option-mirror-payment-display"></span>
     </div>
 </div>
