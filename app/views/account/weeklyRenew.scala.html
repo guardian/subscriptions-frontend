@@ -9,8 +9,9 @@
 @import model.SubscriptionOps._
 @import org.joda.time.LocalDate
 
+@import com.gu.i18n.Currency
 @(
-    subscription: Subscription[SubscriptionPlan.WeeklyPlan], billingSchedule: BillingSchedule, contact: Contact, billToCountry: Country, plans: List[WeeklyPlanInfo]
+    subscription: Subscription[SubscriptionPlan.WeeklyPlan], billingSchedule: BillingSchedule, contact: Contact, billToCountry: Country, plans: List[WeeklyPlanInfo], currency: Currency
 )(implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackend.Resolution)
 
 @main("Your Guardian Weekly subscription | The Guardian", bodyClasses = List("is-wide"), edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
@@ -19,6 +20,8 @@
     )
     <script>
 
+        guardian.currency = '@currency.iso';
+
         guardian.plans = [
             @plans.map { plan =>
                 {
@@ -26,7 +29,7 @@
                     price: '@plan.price'
                 },
             }
-        ]
+        ];
 
     </script>
     <main class="page-container gs-container">

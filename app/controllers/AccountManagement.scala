@@ -171,21 +171,23 @@ object ManageWeekly extends LazyLogging {
                     case Product.WeeklyZoneB => catalog.weeklyZoneB.toList
                     case Product.WeeklyZoneC => catalog.weeklyZoneC.toList
                   }
-              sequence(weeklyPlans.map { plan =>
-                account.currency.toRight(s"could not deserialise currency for account ${account.id}").right.flatMap { existingCurrency =>
+              val curr = account.currency.toRight(s"could not deserialise currency for account ${account.id}")
+              val weeklyPlanInfo = curr.right.flatMap { existingCurrency =>
+                sequence(weeklyPlans.map { plan =>
                   val price = plan.charges.price.getPrice(existingCurrency).toRight(s"could not find price in $existingCurrency for plan ${plan.id} ${plan.name}").right
                   price.map(price => WeeklyPlanInfo(plan.id, plan.charges.prettyPricing(price.currency)))
-                }
-              }).fold( { error =>
-                logger.info(s"couldn't get new rate/currency for renewal: $error")
-                Ok(views.html.account.details(None))
-              },
-                {
-                weeklyPlans => {
-                  if (weeklySubscription.renewable) Ok(views.html.account.weeklyRenew(weeklySubscription, billingSchedule, contact, billToCountry, plans = weeklyPlans))
-                  else Ok(views.html.account.weeklyDetails(weeklySubscription, billingSchedule, contact, billToCountry, plans = weeklyPlans))
-                }
-              })
+                }).right.map(r => (existingCurrency, r))
+              }
+              weeklyPlanInfo match {
+                case Left(error) =>
+                  logger.info(s"couldn't get new rate/currency for renewal: $error")
+                  Ok(views.html.account.details(None) )
+                case Right((existingCurrency, weeklyPlanInfoList)) =>
+                  if (weeklySubscription.renewable)
+                    Ok(views.html.account.weeklyRenew(weeklySubscription, billingSchedule, contact, billToCountry, plans = weeklyPlanInfoList, existingCurrency) )
+                  else
+                    Ok(views.html.account.weeklyDetails(weeklySubscription, billingSchedule, contact) )
+              }
             }.getOrElse {
               logger.info(s"no valid bill to country for ${weeklySubscription.id}")
               Ok(views.html.account.details(None))
