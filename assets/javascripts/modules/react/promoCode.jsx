@@ -19,7 +19,7 @@ render(){
         <PromoButton status={this.props.status} onClick={this.props.send} />
             {this.props.status == status.VALID && <div className="u-note">
             {this.props.copy}<br />
-                <a className="u-link" href={href}>Terms and conditions</a></div>}
+                <a className="u-link" href={href} target="_blank">See full terms and conditions</a></div>}
         </dd>
     </div>
 }
