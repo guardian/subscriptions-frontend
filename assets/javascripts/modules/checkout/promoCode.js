@@ -1,3 +1,4 @@
+/* global jsRoutes */
 define([
     '$',
     'bean',
@@ -13,8 +14,7 @@ define([
         $promoCodeSnippet   = $('.js-promo-code-snippet'),
         $promoCodeTsAndCs   = $('.js-promo-code-tsandcs'),
         $promoCodeError     = $('.js-promo-code .js-error-message'),
-        $promoCodeApplied   = $('.js-promo-code-applied'),
-        lookupUrl           = $inputBox.data('lookup-url');
+        $promoCodeApplied   = $('.js-promo-code-applied');
 
     function bindExtraKeyListener() {
         if (bindExtraKeyListener.alreadyBound) {
@@ -88,23 +88,23 @@ define([
     }
 
     function validate() {
-        var country = formElements.BILLING.$COUNTRY_SELECT.val().trim(),
-            promoCode = $inputBox.val().trim();
+        var promoCode = $inputBox.val().trim(),
+            ratePlanId = ratePlanChoice.getSelectedRatePlanId(),
+            country = formElements.DELIVERY.$COUNTRY_SELECT.val().trim() || formElements.BILLING.$COUNTRY_SELECT.val().trim(),
+            currency = document.querySelector('.js-rate-plans input:checked').dataset.currency;
 
-        if (country === '' || promoCode === '') {
+        if (promoCode === '') {
             clearDown();
             return;
+        }
+        if (country === '') {
+            displayError('Please choose a billing or delivery country to validate this promo code');
         }
 
         ajax({
             type: 'json',
             method: 'GET',
-            url: lookupUrl,
-            data: {
-                promoCode: promoCode,
-                productRatePlanId: ratePlanChoice.getSelectedRatePlanId(),
-                country: country
-            }
+            url: jsRoutes.controllers.Promotion.validateForProductRatePlan(promoCode, ratePlanId, country, currency).url
         }).then(function (a) {
             if (a.isValid) {
                 displayPromotion(a, promoCode);
@@ -127,15 +127,28 @@ define([
 
     return {
         init: function () {
-            var $countrySelectBox = formElements.BILLING.$COUNTRY_SELECT,
-                $promoCodeButton = formElements.$PROMO_CODE_BTN;
+            var changeListeners = [
+                    formElements.DELIVERY.$COUNTRY_SELECT,
+                    formElements.BILLING.$COUNTRY_SELECT,
+                    formElements.$CURRENCY_OVERRIDE_CHECKBOX
+                ],
+                clickListeners = [
+                    formElements.$PROMO_CODE_BTN
+                ];
 
-            if ($countrySelectBox.length && $promoCodeButton.length) {
-                bean.on($countrySelectBox[0], 'change', validate);
-                bean.on($promoCodeButton[0], 'click', validate);
-                if ($inputBox.val() !== '') {
-                    validate();
+            changeListeners.forEach(function ($el) {
+                if ($el.length) {
+                    bean.on($el[0], 'change', validate);
                 }
+            });
+            clickListeners.forEach(function ($el) {
+                if ($el.length) {
+                    bean.on($el[0], 'click', validate);
+                }
+            });
+
+            if ($inputBox.val() !== '') {
+                validate();
             }
         }
     };

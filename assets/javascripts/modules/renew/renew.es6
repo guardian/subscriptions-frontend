@@ -102,19 +102,3 @@ export function init() {
     stripeHandler = window.StripeCheckout.configure(guardian.stripeCheckout);
 }
 
-export function validatePromo(code, country) {
-    return check(code, country);
-}
-
-
-export function validatePromoForPlans(promotion, plans) {
-    let newPlans = promotion.adjustedRatePlans;
-    return plans.map((plan) => {
-        if (plan.id in newPlans) {
-            return Object.assign({},plan, {promotionalPrice: newPlans[plan.id]})
-        }
-        else {
-            return plan;
-        }
-    })
-}

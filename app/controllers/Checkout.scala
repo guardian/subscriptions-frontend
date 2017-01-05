@@ -110,22 +110,27 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
         val digitalEdition = model.DigitalEdition.getForCountry(countryAndCurrencySettings.defaultCountry)
 
         // either a code to send to the form (left) or a tracking code for the session (right)
-        val promo: Either[PromoCode, Seq[(String, String)]] = (promoCode |@| countryAndCurrencySettings.defaultCountry) (
+        val countryToValidatePromotionAgainst = countryAndCurrencySettings.defaultCountry orElse determinedCountryGroup.defaultCountry
+        val validatedPromoCode: Either[PromoCode, Seq[(String, String)]] = (promoCode |@| countryToValidatePromotionAgainst) (
           tpBackend.promoService.validate[NewUsers](_: PromoCode, _: Country, planList.default.id)
         ).flatMap(_.toOption).map(vp => vp.promotion.asTracking.map(_ => Seq(PromotionTrackingCode -> vp.code.get)).toRight(vp.code))
           .getOrElse(Right(Seq.empty))
 
         val resolvedSupplierCode = supplierCode orElse request.session.get(SupplierTrackingCode).map(SupplierCode) // query param wins
-        val trackingCodeSessionData = promo.right.toSeq.flatten
+        val trackingCodeSessionData = validatedPromoCode.right.toSeq.flatten
         val supplierCodeSessionData = resolvedSupplierCode.map(code => Seq(SupplierTrackingCode -> code.get)).getOrElse(Seq.empty)
         val productData = ProductPopulationData(user.map(_.address), planList)
+        val promoCodeExists = for {
+          code <- promoCode
+          promotion <- tpBackend.promoService.findPromotion(code)
+        } yield code
 
         Ok(views.html.checkout.payment(
           personalData = personalData,
           productData = productData,
           countryGroup = determinedCountryGroup,
           touchpointBackendResolution = resolution,
-          promoCode = promo.left.toOption,
+          promoCode = validatedPromoCode.left.toOption orElse promoCodeExists,
           supplierCode = resolvedSupplierCode,
           edition = digitalEdition,
           countryAndCurrencySettings = countryAndCurrencySettings
