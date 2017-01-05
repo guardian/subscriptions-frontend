@@ -103,16 +103,15 @@ export function init() {
 }
 
 export function validatePromo(code, country) {
-    console.log('validating promo');
     return check(code, country);
 }
 
 
-export function validatePromoForPlans(promo, plans) {
-    let newPlans = promo.adjustedRatePlans;
+export function validatePromoForPlans(promotion, plans) {
+    let newPlans = promotion.adjustedRatePlans;
     return plans.map((plan) => {
         if (plan.id in newPlans) {
-            return Object.assign({},plan, {promo: newPlans[plan.id]})
+            return Object.assign({},plan, {promotionalPrice: newPlans[plan.id]})
         }
         else {
             return plan;
