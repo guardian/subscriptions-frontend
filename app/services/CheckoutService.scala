@@ -1,7 +1,7 @@
 package services
 
 import com.gu.config.DiscountRatePlanIds
-import com.gu.i18n.Country
+import com.gu.i18n.{Country, CountryGroup}
 import com.gu.i18n.Currency.GBP
 import com.gu.identity.play.{AuthenticatedIdUser, IdMinimalUser}
 import com.gu.memsub.promo._
@@ -261,7 +261,8 @@ class CheckoutService(identityService: IdentityService,
     }
   }
 
-  def renewSubscription(subscription: Subscription[SubscriptionPlan.WeeklyPlan], renewal: Renewal, subscriptionDetails: String ) = {
+  def renewSubscription(subscription: Subscription[SubscriptionPlan.WeeklyPlan], renewal: Renewal, subscriptionDetails: String )
+    (implicit p: PromotionApplicator[NewUsers, Renew])= {
     import model.SubscriptionOps._
 
     def getPayment(contact: Contact, billto: Queries.Contact): PaymentService#Payment = {
@@ -280,10 +281,17 @@ class CheckoutService(identityService: IdentityService,
 
     val contractEffective = subscription.termEndDate
     val customerAcceptance = nextFridayFrom(contractEffective)
-    def addPlan = {
+    def addPlan(contact: Contact) = {
       val newRatePlan = RatePlan(renewal.plan.id.get, None)
       val renewCommand = Renew(subscription.id.get, subscription.startDate, NonEmptyList(newRatePlan), contractEffective, customerAcceptance)
-      zuoraService.renewSubscription(renewCommand)
+      val validPromotion = for {
+        code <- renewal.promoCode
+        deliveryCountryString <- contact.mailingCountry
+        deliveryCountry <- CountryGroup.countryByName(deliveryCountryString)
+        validPromotion <- promoService.validate[NewUsers](code, deliveryCountry, renewal.plan.id).toOption // would be better to have valid/invalid/tracking
+      } yield validPromotion
+      val withPromo = validPromotion.map(v => p.apply(v, prpId => catalog.paid.find(_.id == prpId).map(_.charges.billingPeriod).get, promoPlans)(renewCommand)).getOrElse(renewCommand)
+      zuoraService.renewSubscription(withPromo)
     }
 
     def ensureEmail(contact: Contact) = if (contact.email.isDefined) Future.successful(\/.right(()))
@@ -299,7 +307,7 @@ class CheckoutService(identityService: IdentityService,
       paymentMethod <- payment.makePaymentMethod
       createPaymentMethod = CreatePaymentMethod(subscription.accountId, paymentMethod, payment.makeAccount.paymentGateway, billto)
       updateResult <- zuoraService.createPaymentMethod(createPaymentMethod)
-      amendResult <- addPlan
+      amendResult <- addPlan(contact)
       _ <- ensureEmail(contact)
       _ <- exactTargetService.enqueueRenewalEmail(subscription, renewal, subscriptionDetails, contact, renewal.email, customerAcceptance, contractEffective)
     }
