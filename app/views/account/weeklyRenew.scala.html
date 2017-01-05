@@ -11,7 +11,7 @@
 
 @import com.gu.i18n.Currency
 @(
-    subscription: Subscription[SubscriptionPlan.WeeklyPlan], billingSchedule: BillingSchedule, contact: Contact, billToCountry: Country, plans: List[WeeklyPlanInfo]], currency: Currency, promoCode: Option[String]
+    subscription: Subscription[SubscriptionPlan.WeeklyPlan], billingSchedule: BillingSchedule, contact: Contact, billToCountry: Country, plans: List[WeeklyPlanInfo], currency: Currency, promoCode: Option[String]
 )(implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackend.Resolution)
 
 @main("Your Guardian Weekly subscription | The Guardian", bodyClasses = List("is-wide"), edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
@@ -71,7 +71,7 @@
                 />
 =======
 
-                <div class="js-weekly-renew" data-email="@contact.email" data-country="@contact.mailingCountryParsed.map(_.alpha2)" data-direct-debit="@{billToCountry == Country.UK}" @promoCode.map { promo =>
+                <div class="js-weekly-renew" data-email="@contact.email" data-country="@contact.mailingCountry" data-direct-debit="@{billToCountry == Country.UK}" @promoCode.map { promo =>
               data-promotion="@promo"
             } />
 >>>>>>> Feed promotions to renew

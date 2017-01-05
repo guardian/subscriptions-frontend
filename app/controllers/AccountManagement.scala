@@ -181,10 +181,10 @@ object ManageWeekly extends LazyLogging {
               weeklyPlanInfo match {
                 case Left(error) =>
                   logger.info(s"couldn't get new rate/currency for renewal: $error")
-                  Ok(views.html.account.details(None) )
+                  Ok(views.html.account.details(None, promoCode))
                 case Right((existingCurrency, weeklyPlanInfoList)) =>
                   if (weeklySubscription.renewable)
-                    Ok(views.html.account.weeklyRenew(weeklySubscription, billingSchedule, contact, billToCountry, plans = weeklyPlanInfoList, existingCurrency) )
+                    Ok(views.html.account.weeklyRenew(weeklySubscription, billingSchedule, contact, billToCountry, weeklyPlanInfoList, existingCurrency, promoCode) )
                   else
                     Ok(views.html.account.weeklyDetails(weeklySubscription, billingSchedule, contact) )
               }
