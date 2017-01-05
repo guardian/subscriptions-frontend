@@ -3,12 +3,10 @@
 @import com.gu.memsub.subsv2.Subscription
 @import model.DigitalEdition.UK
 @import com.gu.salesforce.Contact
-@import com.gu.i18n.Country
-@import controllers.ManageWeekly.WeeklyPlanInfo
 @import model.SubscriptionOps._
 @import org.joda.time.LocalDate
 @(
-    subscription: Subscription[SubscriptionPlan.WeeklyPlan], billingSchedule: BillingSchedule, contact: Contact, billToCountry: Country, plans: List[WeeklyPlanInfo]
+    subscription: Subscription[SubscriptionPlan.WeeklyPlan], billingSchedule: BillingSchedule, contact: Contact
 )(implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackend.Resolution)
 
 @main("Your Guardian Weekly subscription | The Guardian", bodyClasses = List("is-wide"), edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
