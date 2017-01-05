@@ -16,11 +16,11 @@ import utils.TestUsers.PreSigninTestCookie
 import views.html.{checkout => view}
 import views.support.Pricing._
 import views.support.{BillingPeriod => _}
-
+import scala.concurrent.ExecutionContext.Implicits.global
 
 object Promotion extends Controller with LazyLogging with CatalogProvider {
 
-  def getAdjustedRatePlans(promo: AnyPromotion, country:Country)(implicit tpBackend:TouchpointBackend): Option[Map[String, String]] = {
+  def getAdjustedRatePlans(promo: AnyPromotion, country: Country)(implicit tpBackend: TouchpointBackend): Option[Map[String, String]] = {
     case class RatePlanPrice(ratePlanId: ProductRatePlanId, chargeList: PaidChargeList)
     promo.asDiscount.map { discountPromo =>
       catalog.allSubs.flatten
@@ -33,32 +33,33 @@ object Promotion extends Controller with LazyLogging with CatalogProvider {
   }
 
 
-  def validateForProductRatePlan(promoCode: PromoCode, prpId: ProductRatePlanId, country: Country) = NoCacheAction { implicit request =>
+  def validateForProductRatePlan(promoCode: PromoCode, prpId: ProductRatePlanId, country: Country) = NoCacheAction.async { implicit request =>
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
-
-    tpBackend.promoService.findPromotion(promoCode).fold {
-      NotFound(Json.obj("errorMessage" -> s"Sorry, we can't find that code."))
-    } { promo =>
-      val result = promo.validateFor(prpId, country)
-      val body = Json.obj(
-        "promotion" -> Json.toJson(promo),
-        "adjustedRatePlans" -> Json.toJson(getAdjustedRatePlans(promo,country)),
-        "isValid" -> result.isRight,
-        "errorMessage" -> result.swap.toOption.map(_.msg)
-      )
-      result.fold(_ => NotAcceptable(body), _ => Ok(body))
+    tpBackend.promoService.findPromotionFuture(promoCode).map { promotion =>
+      promotion.fold {
+        NotFound(Json.obj("errorMessage" -> s"Sorry, we can't find that code."))
+      } {
+        promo =>
+          val result = promo.validateFor(prpId, country)
+          val body = Json.obj(
+            "promotion" -> Json.toJson(promo),
+            "adjustedRatePlans" -> Json.toJson(getAdjustedRatePlans(promo, country)),
+            "isValid" -> result.isRight,
+            "errorMessage" -> result.swap.toOption.map(_.msg)
+          )
+          result.fold(_ => NotAcceptable(body), _ => Ok(body))
+      }
     }
   }
 
-  def validate(promoCode: PromoCode, country: Country) = NoCacheAction { implicit request =>
+
+  def validate(promoCode: PromoCode, country: Country) = NoCacheAction.async { implicit request =>
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
-    if (tpBackend.promoService.isEmpty) {
-      logger.error("No promotions loaded.")
-      InternalServerError("")
-    } else {
-      tpBackend.promoService.findPromotion(promoCode).fold {
+
+    tpBackend.promoService.findPromotionFuture(promoCode).map { promotion =>
+      promotion.fold {
         NotFound(Json.obj("errorMessage" -> s"Sorry, we can't find that code."))
       } { promo =>
         val result = promo.validate(country)
@@ -72,6 +73,4 @@ object Promotion extends Controller with LazyLogging with CatalogProvider {
       }
     }
   }
-
-
 }

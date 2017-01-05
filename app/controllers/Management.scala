@@ -46,7 +46,7 @@ object Management extends Controller with LazyLogging {
   private def tests =
     boolTest(CloudWatchHealth.hasPushedMetricSuccessfully, "CloudWatch") +++
     boolTest(zuoraService.lastPingTimeWithin(2.minutes), "ZuoraPing") +++
-    boolTest(promoCollection.all.nonEmpty, "Promotions") +++
+    boolTest(promoCollection.futureAll.isCompleted, "Promotions") +++
     catalogWorkedOkay
 
   def healthcheck() = Action {
