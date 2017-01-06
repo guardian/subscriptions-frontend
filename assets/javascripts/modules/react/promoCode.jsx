@@ -15,7 +15,7 @@ render(){
             <label className="label" for="promoCode">Promo code</label>
         </dt>
         <dd className="mma-section__list--content">
-        <PromoField value={this.props.value} handler={this.props.handler} />
+        <PromoField value={this.props.value} handler={this.props.handler}/>
         <PromoButton status={this.props.status} onClick={this.props.send} />
             {this.props.status == status.VALID && <div className="u-note">
             {this.props.copy}<br />

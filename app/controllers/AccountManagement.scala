@@ -116,7 +116,7 @@ object ManageDelivery extends LazyLogging{
         suspendedDays = suspendedDays,
         currency = sub.plan.charges.price.currencies.head
       ))
-    }).valueOr(errorCode => Redirect(routes.AccountManagement.manage(None, Some(errorCode),None).url))
+    }).valueOr(errorCode => Redirect(routes.AccountManagement.manage(None, Some(errorCode)).url))
   }
 
   /**
@@ -154,7 +154,7 @@ object ManageWeekly extends LazyLogging {
 
   case class WeeklyPlanInfo(id: ProductRatePlanId, price: String)
 
-  def apply(billingSchedule: BillingSchedule, weeklySubscription: Subscription[WeeklyPlan], promoCode: Option[String])(implicit request: Request[AnyContent], resolution: TouchpointBackend.Resolution): Future[Result] = {
+  def apply(billingSchedule: BillingSchedule, weeklySubscription: Subscription[WeeklyPlan])(implicit request: Request[AnyContent], resolution: TouchpointBackend.Resolution): Future[Result] = {
     implicit val tpBackend = resolution.backend
     implicit val flash = request.flash
     if (weeklySubscription.readerType == ReaderType.Direct) {
@@ -181,23 +181,23 @@ object ManageWeekly extends LazyLogging {
               weeklyPlanInfo match {
                 case Left(error) =>
                   logger.info(s"couldn't get new rate/currency for renewal: $error")
-                  Ok(views.html.account.details(None, promoCode))
+                  Ok(views.html.account.details(None) )
                 case Right((existingCurrency, weeklyPlanInfoList)) =>
                   if (weeklySubscription.renewable)
-                    Ok(views.html.account.weeklyRenew(weeklySubscription, billingSchedule, contact, billToCountry, weeklyPlanInfoList, existingCurrency, promoCode) )
+                    Ok(views.html.account.weeklyRenew(weeklySubscription, billingSchedule, contact, billToCountry, plans = weeklyPlanInfoList, existingCurrency) )
                   else
                     Ok(views.html.account.weeklyDetails(weeklySubscription, billingSchedule, contact) )
               }
             }.getOrElse {
               logger.info(s"no valid bill to country for ${weeklySubscription.id}")
-              Ok(views.html.account.details(None,promoCode))
+              Ok(views.html.account.details(None))
             }
           }
         }
       }
     } else {
       logger.info(s"don't support gifts, can't manage ${weeklySubscription.id}")
-      Future.successful(Ok(views.html.account.details(None,promoCode))) // don't support gifts (yet) as they have related contacts in salesforce of unknown structure
+      Future.successful(Ok(views.html.account.details(None))) // don't support gifts (yet) as they have related contacts in salesforce of unknown structure
     }
   }
 
@@ -232,7 +232,7 @@ object AccountManagement extends Controller with LazyLogging with CatalogProvide
 
   }
 
-  def manage(subscriberId: Option[String] = None, errorCode: Option[String] = None, promoCode: Option[String]= None) = accountManagementAction.async { implicit request =>
+  def manage(subscriberId: Option[String] = None, errorCode: Option[String] = None) = accountManagementAction.async { implicit request =>
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
     val eventualMaybeSubscription = SessionSubscription.subscriptionFromRequest
@@ -251,31 +251,31 @@ object AccountManagement extends Controller with LazyLogging with CatalogProvide
           Future.successful(Ok(views.html.account.voucher(voucherSubscription, billingSchedule)))
         }
         case _: Product.Weekly => subscription.asWeekly.map { weeklySubscription =>
-          ManageWeekly(billingSchedule, weeklySubscription, promoCode)
+          ManageWeekly(billingSchedule, weeklySubscription)
         }
       }
       maybeFutureManagePage.getOrElse {
         // the product type didn't have the right charges
-        Future.successful(Ok(views.html.account.details(None, promoCode)))
+        Future.successful(Ok(views.html.account.details(None)))
       }
     }
 
     futureMaybeFutureManagePage.getOrElse {
       // not a valid AS number or some unnamed problem getting the details
-      Future.successful(Ok(views.html.account.details(subscriberId, promoCode)))
+      Future.successful(Ok(views.html.account.details(subscriberId)))
     }.flatMap(identity)
   }
 
   def logout = accountManagementAction { implicit request =>
-    SessionSubscription.clear(Redirect(ProfileLinks.signOut.href, SEE_OTHER))
+    SessionSubscription.clear(Redirect(ProfileLinks.signOut.href,SEE_OTHER))
   }
 
   def processLogin = accountManagementAction.async { implicit request =>
     val loginRequest = AccountManagementLoginForm.mappings.bindFromRequest().value
-    val promoCode = loginRequest.flatMap(_.promoCode)
+
     subscriptionFromUserDetails(loginRequest).map {
-        case Some(sub) => SessionSubscription.set(Redirect(routes.AccountManagement.manage(None,None,promoCode)), sub)
-        case _ => Redirect(routes.AccountManagement.manage(None, None,None)).flashing(
+        case Some(sub) => SessionSubscription.set(Redirect(routes.AccountManagement.manage(None, None)), sub)
+        case _ => Redirect(routes.AccountManagement.manage(None, None)).flashing(
           "error" -> "Unable to verify your details."
         )
     }
@@ -289,7 +289,7 @@ object AccountManagement extends Controller with LazyLogging with CatalogProvide
   }
 
   def redirect = NoCacheAction { implicit request =>
-    Redirect(routes.AccountManagement.manage(None, None, None).url)
+    Redirect(routes.AccountManagement.manage(None, None).url)
   }
 
   def processRenewal = accountManagementAction.async { implicit request =>
@@ -345,3 +345,4 @@ object AccountManagement extends Controller with LazyLogging with CatalogProvide
     res.run.map(_.getOrElse(Redirect(routes.Homepage.index()).withNewSession))
   }
 }
+
