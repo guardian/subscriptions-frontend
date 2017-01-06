@@ -120,10 +120,7 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
         val trackingCodeSessionData = validatedPromoCode.right.toSeq.flatten
         val supplierCodeSessionData = resolvedSupplierCode.map(code => Seq(SupplierTrackingCode -> code.get)).getOrElse(Seq.empty)
         val productData = ProductPopulationData(user.map(_.address), planList)
-        val promoCodeExists = for {
-          code <- promoCode
-          promotion <- tpBackend.promoService.findPromotion(code)
-        } yield code
+        val promoCodeExists = promoCode.filter(tpBackend.promoService.findPromotion(_).isDefined)
 
         Ok(views.html.checkout.payment(
           personalData = personalData,
