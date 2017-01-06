@@ -155,6 +155,19 @@ object ManageWeekly extends LazyLogging {
 
   case class WeeklyPlanInfo(id: ProductRatePlanId, price: String)
 
+  object WeeklyPlanInfo {
+
+    import play.api.libs.json._
+    import play.api.libs.functional.syntax._
+
+    implicit def writer: Writes[WeeklyPlanInfo] =
+      (
+        (JsPath \ "id").write[String].contramap[ProductRatePlanId](_.get) and
+          (JsPath \ "price").write[String]
+        )(unlift(WeeklyPlanInfo.unapply))
+
+  }
+
   def apply(billingSchedule: BillingSchedule, weeklySubscription: Subscription[WeeklyPlan], promoCode: Option[PromoCode])(implicit request: Request[AnyContent], resolution: TouchpointBackend.Resolution): Future[Result] = {
     implicit val tpBackend = resolution.backend
     implicit val flash = request.flash

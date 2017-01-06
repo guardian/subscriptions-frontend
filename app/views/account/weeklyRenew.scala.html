@@ -8,6 +8,7 @@
 @import controllers.ManageWeekly.WeeklyPlanInfo
 @import model.SubscriptionOps._
 @import org.joda.time.LocalDate
+@import play.api.libs.json.Json
 
 @import com.gu.i18n.Currency
 @import com.gu.memsub.promo.PromoCode
@@ -21,14 +22,7 @@
     )
     <script>
 
-        guardian.plans = [
-            @plans.map { plan =>
-                {
-                    id: '@plan.id.get',
-                    price: '@plan.price'
-                },
-            }
-        ];
+        guardian.plans = @Html(Json.stringify(Json.toJson(plans)))
 
     </script>
     <main class="page-container gs-container">
