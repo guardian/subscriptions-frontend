@@ -1,8 +1,9 @@
 @import model.DigitalEdition.UK
 @import configuration.Config.Identity.idWebAppSigninUrl
+@import com.gu.memsub.promo.PromoCode
 @(
     subscriberId: Option[String],
-    promoCode: Option[String]
+    promoCode: Option[PromoCode]
 )(implicit request: RequestHeader, flash: Flash, touchpointBackendResolution: services.TouchpointBackend.Resolution)
 
 @main("Manage your subscription | The Guardian", edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {

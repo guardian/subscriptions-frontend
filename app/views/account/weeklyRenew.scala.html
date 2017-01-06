@@ -10,8 +10,9 @@
 @import org.joda.time.LocalDate
 
 @import com.gu.i18n.Currency
+@import com.gu.memsub.promo.PromoCode
 @(
-    subscription: Subscription[SubscriptionPlan.WeeklyPlan], billingSchedule: BillingSchedule, contact: Contact, billToCountry: Country, plans: List[WeeklyPlanInfo], currency: Currency, promoCode: Option[String]
+    subscription: Subscription[SubscriptionPlan.WeeklyPlan], billingSchedule: BillingSchedule, contact: Contact, billToCountry: Country, plans: List[WeeklyPlanInfo], currency: Currency, promoCode: Option[PromoCode]
 )(implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackend.Resolution)
 
 @main("Your Guardian Weekly subscription | The Guardian", bodyClasses = List("is-wide"), edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
@@ -64,9 +65,9 @@
                 <div class="js-weekly-renew"
                 data-email="@contact.email"
                 data-billing-country="@billToCountry.alpha2"
-                data-promo-code=""
+                data-promo-code="@promoCode.map(_.get)"
                 data-currency="@currency.iso"
-                data-delivery-country="@contact.mailingCountryParsed.map(_.alpha2).getOrElse("")"
+                data-delivery-country="@contact.mailingCountryParsed.map(_.alpha2).getOrElse(billToCountry.alpha2)"
                 />
 
             </section>
