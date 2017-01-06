@@ -7,6 +7,7 @@ import actions.CommonActions._
 import com.github.nscala_time.time.OrderingImplicits.LocalDateOrdering
 import com.gu.memsub.subsv2.SubscriptionPlan.{Delivery, WeeklyPlan}
 import com.gu.memsub.Subscription.{Name, ProductRatePlanId}
+import com.gu.memsub.promo.{NormalisedPromoCode, PromoCode}
 import com.gu.memsub.services.GetSalesforceContactForSub
 import com.gu.memsub.subsv2._
 import com.gu.memsub.{BillingSchedule, Product}
@@ -154,7 +155,7 @@ object ManageWeekly extends LazyLogging {
 
   case class WeeklyPlanInfo(id: ProductRatePlanId, price: String)
 
-  def apply(billingSchedule: BillingSchedule, weeklySubscription: Subscription[WeeklyPlan], promoCode: Option[String])(implicit request: Request[AnyContent], resolution: TouchpointBackend.Resolution): Future[Result] = {
+  def apply(billingSchedule: BillingSchedule, weeklySubscription: Subscription[WeeklyPlan], promoCode: Option[PromoCode])(implicit request: Request[AnyContent], resolution: TouchpointBackend.Resolution): Future[Result] = {
     implicit val tpBackend = resolution.backend
     implicit val flash = request.flash
     if (weeklySubscription.readerType == ReaderType.Direct) {
@@ -232,7 +233,7 @@ object AccountManagement extends Controller with LazyLogging with CatalogProvide
 
   }
 
-  def manage(subscriberId: Option[String] = None, errorCode: Option[String] = None, promoCode: Option[String]= None) = accountManagementAction.async { implicit request =>
+  def manage(subscriberId: Option[String] = None, errorCode: Option[String] = None, promoCode: Option[PromoCode]= None) = accountManagementAction.async { implicit request =>
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
     val eventualMaybeSubscription = SessionSubscription.subscriptionFromRequest
@@ -272,7 +273,7 @@ object AccountManagement extends Controller with LazyLogging with CatalogProvide
 
   def processLogin = accountManagementAction.async { implicit request =>
     val loginRequest = AccountManagementLoginForm.mappings.bindFromRequest().value
-    val promoCode = loginRequest.flatMap(_.promoCode)
+    val promoCode = loginRequest.flatMap(_.promoCode).map(NormalisedPromoCode.safeFromString)
     subscriptionFromUserDetails(loginRequest).map {
         case Some(sub) => SessionSubscription.set(Redirect(routes.AccountManagement.manage(None,None,promoCode)), sub)
         case _ => Redirect(routes.AccountManagement.manage(None, None,None)).flashing(
