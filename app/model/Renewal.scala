@@ -1,6 +1,6 @@
 package model
 
-import com.gu.memsub.promo.{NormalisedPromoCode, PromoCode}
+import com.gu.memsub.promo.PromoCode
 import com.gu.memsub.subsv2.Catalog
 import com.gu.memsub.subsv2.CatalogPlan.Paper
 import play.api.libs.json._
@@ -40,7 +40,7 @@ class RenewalReads(catalog: Catalog) {
 
   implicit val promoReads = new Reads[PromoCode] {
     override def reads(json: JsValue): JsResult[PromoCode] = json match {
-      case JsString(s) => JsSuccess(NormalisedPromoCode.safeFromString(s))
+      case JsString(s) => JsSuccess(PromoCode(s))
       case _ => JsError("invalid value for promo code")
     }
   }

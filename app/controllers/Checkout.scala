@@ -6,7 +6,7 @@ import com.gu.i18n._
 import com.gu.identity.play.ProxiedIP
 import com.gu.memsub.Subscription.ProductRatePlanId
 import com.gu.memsub.promo.Promotion._
-import com.gu.memsub.promo.{NewUsers, NormalisedPromoCode, PromoCode}
+import com.gu.memsub.promo.{NewUsers, PromoCode}
 import com.gu.memsub.subsv2.CatalogPlan
 import com.gu.memsub.{Product, SupplierCode}
 import com.gu.zuora.soap.models.errors._
@@ -285,7 +285,7 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
         const(None)
       } // Don't display the user registration form if the user is logged in
 
-      val promotion = session.get(AppliedPromoCode).flatMap(code => resolution.backend.promoService.findPromotion(NormalisedPromoCode.safeFromString(code)))
+      val promotion = session.get(AppliedPromoCode).flatMap(code => resolution.backend.promoService.findPromotion(PromoCode(code)))
       Ok(view.thankyou(subsName, passwordForm, resolution, plan, promotion, currency, startDate))
     }
 

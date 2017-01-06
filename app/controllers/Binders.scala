@@ -4,7 +4,6 @@ import com.gu.i18n.{Country, CountryGroup, Currency}
 import com.gu.memsub.{ProductFamily, SupplierCode, SupplierCodeBuilder}
 import com.gu.memsub.Subscription.ProductRatePlanId
 import com.gu.memsub.promo.PromoCode
-import com.gu.memsub.promo.NormalisedPromoCode
 import play.api.mvc.QueryStringBindable.{Parsing => QueryParsing}
 import play.api.mvc.PathBindable.{Parsing => PathParsing}
 
@@ -26,7 +25,7 @@ object Binders {
   )
 
   implicit object bindablePromoCode extends QueryParsing[PromoCode](
-    applyNonEmpty(NormalisedPromoCode.safeFromString), _.get, (key: String, e: Exception) => s"URL parameter $key is not a valid PromoCode. ${e.getMessage}"
+    applyNonEmpty(PromoCode), _.get, (key: String, e: Exception) => s"URL parameter $key is not a valid PromoCode. ${e.getMessage}"
   )
 
   implicit object bindableSupplierCode extends QueryParsing[SupplierCode](
