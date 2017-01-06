@@ -32,11 +32,6 @@ object DigitalEdition {
       case INT => None
     }
 
-    def guardianWeeklySaving = edition match {
-      case INT | UK => None
-      case US => Some(23)
-      case AU => Some(9)
-    }
   }
 
 }
