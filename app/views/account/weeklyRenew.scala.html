@@ -61,7 +61,6 @@
                 Please complete the form below to renew your subscription.
                 </p>
 
-<<<<<<< 3bc3f0ff4104f0b695a581f5320297cd6d5e9fb0
                 <div class="js-weekly-renew"
                 data-email="@contact.email"
                 data-billing-country="@billToCountry.alpha2"
@@ -69,12 +68,7 @@
                 data-currency="@currency.iso"
                 data-delivery-country="@contact.mailingCountryParsed.map(_.alpha2).getOrElse("")"
                 />
-=======
 
-                <div class="js-weekly-renew" data-email="@contact.email" data-country="@contact.mailingCountry" data-direct-debit="@{billToCountry == Country.UK}" @promoCode.map { promo =>
-              data-promotion="@promo"
-            } />
->>>>>>> Feed promotions to renew
             </section>
             <section class="mma-section">
                     <a class="button button--primary button--large" href="@routes.AccountManagement.logout">Sign Out</a>
