@@ -16,9 +16,10 @@ import utils.TestUsers.PreSigninTestCookie
 import views.html.{checkout => view}
 import views.support.Pricing._
 import views.support.{BillingPeriod => _}
-
+import scala.concurrent.ExecutionContext.Implicits.global
 
 object Promotion extends Controller with LazyLogging with CatalogProvider {
+
 
   private val fallbackCurrency = CountryGroup.UK.currency
 
@@ -37,41 +38,47 @@ object Promotion extends Controller with LazyLogging with CatalogProvider {
     }
   }
 
-  def validateForProductRatePlan(promoCode: PromoCode, prpId: ProductRatePlanId, country: Country, currency: Option[Currency]) = NoCacheAction { implicit request =>
+
+
+  def validateForProductRatePlan(promoCode: PromoCode, prpId: ProductRatePlanId, country: Country, currency: Option[Currency]) = NoCacheAction.async { implicit request =>
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
-
-    tpBackend.promoService.findPromotion(promoCode).fold {
-      NotFound(Json.obj("errorMessage" -> s"Sorry, we can't find that code."))
-    } { promo =>
-      val result = promo.validateFor(prpId, country)
-      val body = Json.obj(
-        "promotion" -> Json.toJson(promo),
-        "adjustedRatePlans" -> Json.toJson(getAdjustedRatePlans(promo, country, currency)),
-        "isValid" -> result.isRight,
-        "errorMessage" -> result.swap.toOption.map(_.msg)
-      )
-      result.fold(_ => NotAcceptable(body), _ => Ok(body))
-    }
-  }
-
-  def validate(promoCode: PromoCode, country: Country, currency: Option[Currency]) = NoCacheAction { implicit request =>
-    implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
-    implicit val tpBackend = resolution.backend
-
-    tpBackend.promoService.findPromotion(promoCode).fold {
-      NotFound(Json.obj("errorMessage" -> s"Sorry, we can't find that code."))
-    } { promo =>
-      val result = promo.validate(country)
-      val body = Json.obj(
-        "promotion" -> Json.toJson(promo),
-        "adjustedRatePlans" -> Json.toJson(getAdjustedRatePlans(promo, country, currency)),
-        "isValid" -> result.isRight,
-        "errorMessage" -> result.swap.toOption.map(_.msg)
-      )
-      result.fold(_ => NotAcceptable/*should be 404*/(body), _ => Ok(body))
+    tpBackend.promoService.findPromotionFuture(promoCode).map { promotion =>
+      promotion.fold {
+        NotFound(Json.obj("errorMessage" -> s"Sorry, we can't find that code."))
+      } {
+        promo =>
+          val result = promo.validateFor(prpId, country)
+          val body = Json.obj(
+            "promotion" -> Json.toJson(promo),
+            "adjustedRatePlans" -> Json.toJson(getAdjustedRatePlans(promo, country, currency)),
+            "isValid" -> result.isRight,
+            "errorMessage" -> result.swap.toOption.map(_.msg)
+          )
+          result.fold(_ => NotAcceptable(body), _ => Ok(body))
+      }
     }
   }
 
 
+  def validate(promoCode: PromoCode, country: Country, currency: Option[Currency]) = NoCacheAction.async { implicit request =>
+    implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
+    implicit val tpBackend = resolution.backend
+
+    tpBackend.promoService.findPromotionFuture(promoCode).map { promotion =>
+      promotion.fold {
+        NotFound(Json.obj("errorMessage" -> s"Sorry, we can't find that code."))
+      } { promo =>
+        val result = promo.validate(country)
+        val body = Json.obj(
+          "promotion" -> Json.toJson(promo),
+          "adjustedRatePlans" -> Json.toJson(getAdjustedRatePlans(promo, country, currency)),
+          "isValid" -> result.isRight,
+          "errorMessage" -> result.swap.toOption.map(_.msg)
+        )
+        result.fold(_ => NotAcceptable(body), _ => Ok(body))
+      }
+
+    }
+  }
 }
