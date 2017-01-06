@@ -9,7 +9,7 @@ export const status = {
 
 export class PromoCode extends React.Component {
 render(){
-    let href = '/p/'+this.props.value+'/terms/';
+    let href = '/p/'+this.props.value+'/terms';
     return <div>
         <dt className="mma-section__list--title">
             <label className="label" for="promoCode">Promo code</label>

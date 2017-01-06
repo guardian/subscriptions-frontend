@@ -22,8 +22,8 @@ POST        /checkout                        controllers.Checkout.handleCheckout
 GET         /checkout/check-identity         controllers.Checkout.checkIdentity(email: String)
 POST        /checkout/check-account          controllers.Checkout.checkAccount
 POST        /checkout/register-guest-user    controllers.Checkout.convertGuestUser
-GET         /checkout/lookupPromotion        controllers.Promotion.validateForProductRatePlan(promoCode: PromoCode, productRatePlanId: ProductRatePlanId, country: Country)
-GET         /promotion/validate              controllers.Promotion.validate(promoCode: PromoCode, country: Country)
+GET         /checkout/lookupPromotion        controllers.Promotion.validateForProductRatePlan(promoCode: PromoCode, productRatePlanId: ProductRatePlanId, country: Country, currency: Option[Currency])
+GET         /promotion/validate              controllers.Promotion.validate(promoCode: PromoCode, country: Country, currency: Option[Currency])
 GET         /checkout/findAddress            controllers.Checkout.findAddress(postCode: String)
 
 # Checkout pages

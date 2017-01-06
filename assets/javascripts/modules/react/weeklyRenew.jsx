@@ -2,10 +2,9 @@ import React from 'react'
 import ReactDOM from 'react-dom';
 import {DirectDebit} from 'modules/react/directDebit'
 import {PromoCode, status} from 'modules/react/promoCode'
+import {validatePromoCode, validatePromotionForPlans} from '../promoCode';
 import {
     SortCode,
-    validatePromo,
-    validatePromoForPlans,
     validAccount,
     validEmail,
     validState,
@@ -23,10 +22,10 @@ const empty = {
 };
 export function init(container) {
     stripeInit();
-    let showPaymentType = container.dataset.country === 'GB';
+    let showPaymentType = container.dataset.billingCountry === 'GB';
     let plans = window.guardian.plans;
-    ReactDOM.render(<WeeklyRenew showPaymentType={showPaymentType} email={container.dataset.email}
-                                 country={container.dataset.country} plans={plans} promoCode={container.dataset.promoCode}/>, container);
+    ReactDOM.render(<WeeklyRenew showPaymentType={showPaymentType} email={container.dataset.email} currency={container.dataset.currency}
+                                 country={container.dataset.deliveryCountry} plans={plans} promoCode={container.dataset.promoCode}/>, container);
 }
 
 class WeeklyRenew extends React.Component {
@@ -91,8 +90,8 @@ class WeeklyRenew extends React.Component {
             promosStatus: status.LOADING
         });
 
-        validatePromo(this.state.promoCode, this.props.country).then((a) => {
-            let newPlans = validatePromoForPlans(a, this.state.plans);
+        validatePromoCode(this.state.promoCode, this.props.country, this.props.currency).then((a) => {
+            let newPlans = validatePromotionForPlans(a, this.state.plans);
             let update = newPlans.map((plan) => {
                 return 'promotionalPrice' in plan
             }).reduce((a, b) => {

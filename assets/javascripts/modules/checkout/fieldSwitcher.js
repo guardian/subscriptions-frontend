@@ -93,7 +93,7 @@ define([
 
     var update = function () {
         var currentState = getCurrentState();
-        updatePriceBanding(currentState)
+        updatePriceBanding(currentState);
     };
 
     var isCurrencyOverrideChecked = function() {
