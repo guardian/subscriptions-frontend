@@ -1,6 +1,6 @@
 package controllers
 
-import com.gu.i18n.{Country, CountryGroup}
+import com.gu.i18n.{Country, CountryGroup, Currency}
 import com.gu.memsub.{ProductFamily, SupplierCode, SupplierCodeBuilder}
 import com.gu.memsub.Subscription.ProductRatePlanId
 import com.gu.memsub.promo.PromoCode
@@ -42,5 +42,9 @@ object Binders {
 
   implicit object bindableCountry extends QueryParsing[Country](
     CountryGroup.countryByCode(_).get, _.alpha2, (key: String, _: Exception) => s"URL parameter $key is not a valid Country"
+  )
+
+  implicit object bindableCurrency extends QueryParsing[Currency](
+    Currency.fromString(_).get, _.iso, (key: String, _: Exception) => s"URL parameter $key is not a valid Currency"
   )
 }

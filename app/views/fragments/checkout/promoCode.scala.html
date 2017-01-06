@@ -1,42 +1,22 @@
-@import com.gu.i18n.Country
-@import com.gu.memsub.Subscription.ProductRatePlanId
 @import com.gu.memsub.promo.PromoCode
-@import controllers.routes.Promotion.validateForProductRatePlan
-@(promoCode: Option[PromoCode])
-@if(false) {
-    <div class="promo-code-applied">✓&nbsp; Promotion applied</div>
-    <div class="promo-code-snippet">
-        <ul>
-            <li><strong>50% off for your first 3 months</strong></li>
-            <li><strong>14 day free trial before first payment</strong></li>
-            <li>Access to the daily edition</li>
-            <li>Ad free experience on the live news app</li>
-        </ul>
-    </div>
-    <input name="promoCode" type="hidden" value="@promoCode.map(_.get)"/>
-} else {
-    @defining(
-        // use Play reverse routing to get the action request path
-        validateForProductRatePlan(
-            PromoCode("_"),
-            ProductRatePlanId("_"),
-            Country.UK).path.replaceFirst("\\?.*", "")) { lookupUrl =>
-        <div class="checkout-promo-code js-promo-code">
-            <label class="label" for="promo-code">Promo code</label>
-            <div class="form-field field-group__item">
-                <div class="col-2">
-                    <input id="promo-code" name="promoCode" value="@promoCode.map(_.get)" class="input-text js-input" data-lookup-url="@lookupUrl"/>
-                    <a class="button button--primary button--large button--arrow-right js-promo-code-validate">Apply</a>
-                </div>
-                @fragments.forms.errorMessage("Please enter a valid promo code.")
-            </div>
-            <div class="js-promo-code-applied promo-code-applied" style="display: none">
-                <div><strong>✓&nbsp;&nbsp;Promotion applied</strong></div>
-                <div class="js-promo-code-snippet"></div>
-                <div class="u-note">
-                     <a class="u-link js-promo-code-tsandcs" href="#" target="_blank">See full terms and conditions</a>
-                </div>
-            </div>
+@(promoCode: Option[PromoCode])(implicit r: RequestHeader)
+@helper.javascriptRouter("jsRoutes")(
+    routes.javascript.Promotion.validateForProductRatePlan
+)
+<div class="checkout-promo-code js-promo-code">
+    <label class="label" for="promo-code">Promo code</label>
+    <div class="form-field field-group__item">
+        <div class="col-2">
+            <input id="promo-code" name="promoCode" value="@promoCode.map(_.get)" class="input-text js-input"/>
+            <a class="button button--primary button--large button--arrow-right js-promo-code-validate">Apply</a>
         </div>
-    }
-}
+        @fragments.forms.errorMessage("Please enter a valid promo code.")
+    </div>
+    <div class="js-promo-code-applied promo-code-applied" style="display: none">
+        <div><strong>✓&nbsp;&nbsp;Promotion applied</strong></div>
+        <div class="js-promo-code-snippet"></div>
+        <div class="u-note">
+             <a class="u-link js-promo-code-tsandcs" href="#" target="_blank">See full terms and conditions</a>
+        </div>
+    </div>
+</div>

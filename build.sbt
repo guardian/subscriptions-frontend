@@ -27,6 +27,7 @@ lazy val root = (project in file(".")).enablePlugins(
       "model.DigitalEdition",
       "com.gu.i18n.CountryGroup",
       "com.gu.i18n.Country",
+      "com.gu.i18n.Currency",
       "com.gu.memsub.promo.PromoCode",
       "com.gu.memsub.SupplierCode",
       "com.gu.memsub.Subscription.ProductRatePlanId"

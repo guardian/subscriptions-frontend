@@ -20,20 +20,24 @@ import views.support.{BillingPeriod => _}
 
 object Promotion extends Controller with LazyLogging with CatalogProvider {
 
-  def getAdjustedRatePlans(promo: AnyPromotion, country:Country)(implicit tpBackend:TouchpointBackend): Option[Map[String, String]] = {
+  private val fallbackCurrency = CountryGroup.UK.currency
+
+  private def getDefaultCurrencyForCountry(country: Country) = CountryGroup.byCountryCode(country.alpha2).map(_.currency)
+
+  def getAdjustedRatePlans(promo: AnyPromotion, country:Country, requestedCurrency: Option[Currency])(implicit tpBackend:TouchpointBackend): Option[Map[String, String]] = {
+    val currency = requestedCurrency orElse getDefaultCurrencyForCountry(country) getOrElse fallbackCurrency
+
     case class RatePlanPrice(ratePlanId: ProductRatePlanId, chargeList: PaidChargeList)
     promo.asDiscount.map { discountPromo =>
       catalog.allSubs.flatten
         .filter(plan => promo.appliesTo.productRatePlanIds.contains(plan.id))
         .map(plan => RatePlanPrice(plan.id, plan.charges)).map { ratePlanPrice =>
-        val currency = CountryGroup.byCountryCode(country.alpha2).getOrElse(CountryGroup.UK).currency
         ratePlanPrice.ratePlanId.get -> ratePlanPrice.chargeList.prettyPricingForDiscountedPeriod(discountPromo, currency)
       }.toMap
     }
   }
 
-
-  def validateForProductRatePlan(promoCode: PromoCode, prpId: ProductRatePlanId, country: Country) = NoCacheAction { implicit request =>
+  def validateForProductRatePlan(promoCode: PromoCode, prpId: ProductRatePlanId, country: Country, currency: Option[Currency]) = NoCacheAction { implicit request =>
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
 
@@ -43,7 +47,7 @@ object Promotion extends Controller with LazyLogging with CatalogProvider {
       val result = promo.validateFor(prpId, country)
       val body = Json.obj(
         "promotion" -> Json.toJson(promo),
-        "adjustedRatePlans" -> Json.toJson(getAdjustedRatePlans(promo,country)),
+        "adjustedRatePlans" -> Json.toJson(getAdjustedRatePlans(promo, country, currency)),
         "isValid" -> result.isRight,
         "errorMessage" -> result.swap.toOption.map(_.msg)
       )
@@ -51,7 +55,7 @@ object Promotion extends Controller with LazyLogging with CatalogProvider {
     }
   }
 
-  def validate(promoCode: PromoCode, country: Country) = NoCacheAction { implicit request =>
+  def validate(promoCode: PromoCode, country: Country, currency: Option[Currency]) = NoCacheAction { implicit request =>
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
 
@@ -61,7 +65,7 @@ object Promotion extends Controller with LazyLogging with CatalogProvider {
       val result = promo.validate(country)
       val body = Json.obj(
         "promotion" -> Json.toJson(promo),
-        "adjustedRatePlans" -> Json.toJson(getAdjustedRatePlans(promo,country)),
+        "adjustedRatePlans" -> Json.toJson(getAdjustedRatePlans(promo, country, currency)),
         "isValid" -> result.isRight,
         "errorMessage" -> result.swap.toOption.map(_.msg)
       )
