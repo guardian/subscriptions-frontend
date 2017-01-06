@@ -48,7 +48,12 @@
         @fragments.page.header(title)
 
         <section class="promotion-description">
-            <p>@promotion.description</p>
+            @promotion.landingPage.description.fold {
+                <p>@promotion.description</p>
+            } { d =>
+                <div>@Html(md.render(d))</div>
+                <br/>
+            }
 
             @promotion.asIncentive.map { p =>
                 <h4>Redemption instructions</h4>
