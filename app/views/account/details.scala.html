@@ -1,7 +1,8 @@
 @import model.DigitalEdition.UK
 @import configuration.Config.Identity.idWebAppSigninUrl
 @(
-    subscriberId: Option[String]
+    subscriberId: Option[String],
+    promoCode: Option[String]
 )(implicit request: RequestHeader, flash: Flash, touchpointBackendResolution: services.TouchpointBackend.Resolution)
 
 @main("Manage your subscription | The Guardian", edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
@@ -67,7 +68,7 @@
                                 </div>
                                 <div class="field-note field-note--offset prose">
                                     <span class="field-note__label">Already have a Guardian account?</span>
-                                    <a href="@idWebAppSigninUrl(routes.AccountManagement.manage(None, None))">Sign in</a>
+                                    <a href="@idWebAppSigninUrl(routes.AccountManagement.manage(None, None, promoCode))">Sign in</a>
                                 </div>
                             </div>
                             <div class="field-panel__edit">
@@ -86,6 +87,9 @@
                                     value="" maxlength="50" required>
                                     @fragments.forms.errorMessage("This field is required")
                                 </div>
+                                @promoCode.map{promo=>
+                                    <input type="hidden" value="@promo" name="promoCode"/>
+                                }
                                 @if(flash.get("error").isDefined) {
                                     <div class="form-field__error-message-visible">@flash.get("error")</div>
                                 }
