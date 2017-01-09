@@ -30,7 +30,9 @@ export function init(container) {
         currency={container.dataset.currency}
         country={container.dataset.deliveryCountry}
         plans={plans}
-        promoCode={container.dataset.promoCode}/>,
+        promoCode={container.dataset.promoCode}
+        directDebitLogo={container.dataset.directDebitLogo}
+        />,
         container);
 }
 
@@ -216,6 +218,7 @@ class WeeklyRenew extends React.Component {
                         validAccountNumber={!this.state.showValidity || this.state.accountNumber.isValid}
                         validAccountHolder={!this.state.showValidity || this.state.accountHolder.isValid}
                         validDirectDebitConfirmed={!this.state.showValidity || this.state.directDebitConfirmed.isValid}
+                        directDebitLogo={this.props.directDebitLogo}
                     />
                 </dl>
                 <button
@@ -275,6 +278,7 @@ class Payment extends React.Component {
                 validAccountNumber={this.props.validAccountNumber}
                 validAccountHolder={this.props.validAccountHolder}
                 validDirectDebitConfirmed={this.props.validDirectDebitConfirmed}
+                directDebitLogo={this.props.directDebitLogo}
             />}
         </div>
     }

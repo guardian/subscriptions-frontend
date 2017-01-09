@@ -9,6 +9,12 @@ export class DirectDebit extends React.Component {
 
     render() {
         return <div>
+            <dt className="mma-section__list--title">
+
+            </dt>
+            <dd className="mma-section__list--content">
+            <img src={this.props.directDebitLogo} alt="The Direct Debit logo" />
+            </dd>
             <SortCodeComponent value={this.props.sortCode} onChange={this.props.handleSortCode}
                                valid={this.props.validSortCode}/>
             <AccountNumber onChange={this.props.handleAccountNumber} value={this.props.AccountNumber}
