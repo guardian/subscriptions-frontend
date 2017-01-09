@@ -197,10 +197,11 @@ object ManageWeekly extends LazyLogging {
                   logger.info(s"couldn't get new rate/currency for renewal: $error")
                   Ok(views.html.account.details(None, promoCode))
                 case Right((existingCurrency, weeklyPlanInfoList)) =>
-                  if (weeklySubscription.renewable)
-                    Ok(views.html.account.weeklyRenew(weeklySubscription, billingSchedule, contact, billToCountry, weeklyPlanInfoList, existingCurrency, promoCode) )
-                  else
-                    Ok(views.html.account.weeklyDetails(weeklySubscription, billingSchedule, contact) )
+                  Ok(weeklySubscription.asRenewable.map { renewableSub =>
+                    views.html.account.weeklyRenew(renewableSub, billingSchedule, contact, billToCountry, weeklyPlanInfoList, existingCurrency, promoCode)
+                  } getOrElse {
+                    views.html.account.weeklyDetails(weeklySubscription, billingSchedule, contact)
+                  })
               }
             }.getOrElse {
               logger.info(s"no valid bill to country for ${weeklySubscription.id}")
@@ -310,8 +311,6 @@ object AccountManagement extends Controller with LazyLogging with CatalogProvide
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
 
-    def validateRenewable(sub: Subscription[SubscriptionPlan.WeeklyPlan]) = if (sub.renewable) \/-(sub) else -\/("subscription is not renewable")
-
     def jsonError(message: String) = Json.toJson(Json.obj("errorMessage" -> message))
 
     def description(sub: Subscription[SubscriptionPlan.WeeklyPlan], renewal: Renewal) = renewal.plan.charges.prettyPricing(sub.plan.charges.currencies.head)
@@ -320,7 +319,7 @@ object AccountManagement extends Controller with LazyLogging with CatalogProvide
       val response = for {
         sub <- maybeSub.toRightDisjunction("no subscription in request")
         weeklySub <- sub.asWeekly.toRightDisjunction("subscription is not weekly")
-        renewableSub <- validateRenewable(weeklySub)
+        renewableSub <- weeklySub.asRenewable.toRightDisjunction("subscription is not renewable")
         renew <- parseRenewalRequest(request, tpBackend.catalogService.unsafeCatalog)
       } yield {
         logger.info(s"renewing ${renew.plan.name} for ${renewableSub.id} with promo code: ${renew.promoCode}")

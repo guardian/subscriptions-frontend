@@ -14,7 +14,7 @@
 @import com.gu.i18n.Currency
 @import com.gu.memsub.promo.PromoCode
 @(
-    subscription: Subscription[SubscriptionPlan.WeeklyPlan], billingSchedule: BillingSchedule, contact: Contact, billToCountry: Country, plans: List[WeeklyPlanInfo], currency: Currency, promoCode: Option[PromoCode]
+    subscription: Subscription[WeeklyPlanOneOff], billingSchedule: BillingSchedule, contact: Contact, billToCountry: Country, plans: List[WeeklyPlanInfo], currency: Currency, promoCode: Option[PromoCode]
 )(implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackend.Resolution)
 
 @main("Your Guardian Weekly subscription | The Guardian", bodyClasses = List("is-wide"), edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
@@ -50,9 +50,9 @@
 
                 <p>
                 @if(subscription.termEndDate.isAfter(LocalDate.now)) {
-                    Your current subscription is due to expire on @prettyDate(subscription.termEndDate).
+                    Your current subscription is due to expire on @prettyDate(subscription.renewalDate).
                 } else {
-                    Your subscription expired on @prettyDate(subscription.termEndDate).
+                    Your subscription expired on @prettyDate(subscription.renewalDate).
                 }
                 Please complete the form below to renew your subscription.
                 </p>

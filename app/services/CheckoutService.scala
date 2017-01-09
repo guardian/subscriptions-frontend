@@ -16,6 +16,7 @@ import com.gu.zuora.soap.models.Queries
 import com.gu.zuora.soap.models.Results.SubscribeResult
 import com.gu.zuora.soap.models.errors._
 import com.typesafe.scalalogging.LazyLogging
+import model.SubscriptionOps.WeeklyPlanOneOff
 import model.{Renewal, _}
 import model.error.CheckoutService._
 import model.error.IdentityService._
@@ -251,19 +252,10 @@ class CheckoutService(identityService: IdentityService,
     }
   }
 
-
-  private def nextFridayFrom(d: LocalDate) = {
-    val nearestFriday = d.withDayOfWeek(DateTimeConstants.FRIDAY)
-    if (!nearestFriday.isBefore(d)) {
-      nearestFriday
-    } else {
-      d.plusWeeks(1).withDayOfWeek(DateTimeConstants.FRIDAY)
-    }
-  }
-
-  def renewSubscription(subscription: Subscription[SubscriptionPlan.WeeklyPlan], renewal: Renewal, subscriptionDetails: String )
+  def renewSubscription(subscription: Subscription[WeeklyPlanOneOff], renewal: Renewal, subscriptionDetails: String )
     (implicit p: PromotionApplicator[NewUsers, Renew])= {
-    import model.SubscriptionOps._
+
+    import model.SubscriptionOps.EnrichedRenewableSubscription
 
     def getPayment(contact: Contact, billto: Queries.Contact): PaymentService#Payment = {
       val idMinimalUser = IdMinimalUser(contact.identityId, None)
@@ -279,8 +271,9 @@ class CheckoutService(identityService: IdentityService,
     val ratePlan = RatePlan(renewal.plan.id.get, None, Nil)
     val amend =   Amend(subscriptionId = subscription.id.get, plansToRemove = Nil, newRatePlans = NonEmptyList(ratePlan))
 
-    val contractEffective = subscription.termEndDate
-    val customerAcceptance = nextFridayFrom(contractEffective)
+    val contractEffective = subscription.renewalDate
+    val customerAcceptance = contractEffective
+
     def addPlan(contact: Contact) = {
       val newRatePlan = RatePlan(renewal.plan.id.get, None)
       val renewCommand = Renew(subscription.id.get, subscription.startDate, NonEmptyList(newRatePlan), contractEffective, customerAcceptance)

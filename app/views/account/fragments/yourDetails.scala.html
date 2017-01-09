@@ -8,6 +8,7 @@
 @import model.SubscriptionOps._
 @import org.joda.time.LocalDate
 
+@import org.joda.time.LocalDate.now
 @(subscriptionName: String, plan: SubscriptionPlan.PaperPlan, maybeStartDate: Option[LocalDate], chosenPaperDays: List[PaperDay] = empty, maybeContact: Option[Contact] = None)(extra: Html = Html(""))
 <dl class="mma-section__list">
     <dt class="mma-section__list--title">Subscriber ID</dt>
@@ -15,35 +16,38 @@
 
     <dt class="mma-section__list--title">Current plan</dt>
     <dd class="mma-section__list--content">
-            <div>
-            @if(plan.name == "Echo-Legacy") {
-                Multi-day (@{
-                chosenPaperDays.map(_.id.replace("Print ", "")).mkString(", ")
-            })
-            } else {
-                @plan.name
-            }
-            </div>
-            <div>@plan.charges.prettyPricing(plan.charges.price.currencies.head)</div>
-        </dd>
+        <div>
+        @if(plan.name == "Echo-Legacy") {
+            Multi-day (@{
+            chosenPaperDays.map(_.id.replace("Print ", "")).mkString(", ")
+        })
+        } else {
+            @plan.name
+        }
+        </div>
+        <div>@plan.charges.prettyPricing(plan.charges.price.currencies.head)</div>
+    </dd>
 
     @maybeStartDate.map { startDate =>
         <dt class="mma-section__list--title">Start date</dt>
-        <dd class="mma-section__list--content">
-            @prettyDate(startDate)
-        </dd>
+        <dd class="mma-section__list--content">@prettyDate(startDate)</dd>
+
+        @if(plan.start.isAfter(startDate)) {
+            <dt class="mma-section__list--title">@if(plan.start.isAfter(now)) { Renews } else { Renewed }</dt>
+            <dd class="mma-section__list--content">@prettyDate(plan.start)</dd>
         }
-    
-@maybeContact.map { contact =>
-    <dt class="mma-section__list--title">Delivery details</dt>
-    <dd class="mma-section__list--content">
-        <div>@contact.firstName @contact.lastName</div>
-        <div>@contact.mailingStreet
-        @contact.mailingCity
-        @contact.mailingState
-        @contact.mailingPostcode
-        @contact.mailingCountry</div>
-    </dd>
-}
+    }
+
+    @maybeContact.map { contact =>
+        <dt class="mma-section__list--title">Delivery details</dt>
+        <dd class="mma-section__list--content">
+            <div>@contact.firstName @contact.lastName</div>
+            <div>@contact.mailingStreet
+            @contact.mailingCity
+            @contact.mailingState
+            @contact.mailingPostcode
+            @contact.mailingCountry</div>
+        </dd>
+    }
     @extra
 </dl>
