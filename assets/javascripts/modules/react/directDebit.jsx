@@ -13,8 +13,15 @@ export class DirectDebit extends React.Component {
             <AccountNumber onChange={this.props.handleAccountNumber} value={this.props.AccountNumber} valid={this.props.validAccountNumber}/>
             <AccountHolder onChange={this.props.handleAccountHolder} value={this.props.AccountHolder} valid={this.props.validAccountHolder}/>
             <Confirmation checked={this.props.directDebitConfirmed} onChange={this.props.handleDirectDebitConfirmation} valid={this.props.validDirectDebitConfirmed}/>
-            <dd className="mma-section__list--content"><p>This is some copy about Direct Debit and our legal
-                requirements and a logo etc.</p></dd>
+            <dt className="mma-section__list--title">
+                Advance Notice
+            </dt>
+            <dd className="mma-section__list--content">
+                <p>The details of your Direct Debit instruction including payment schedule, due date, frequency and amount will be sent to you within three working days. All the normal Direct Debit safeguards and guarantees apply.</p>
+                <p>The Guardian, Unit 16, Coalfield Way, Ashby Park, Ashby-De-La-Zouch, LE65 1JT United Kingdom
+                </p>
+                <p>Tel: +44 (0) 330 333 6767</p><p>
+                digitalpack@theguardian.com</p></dd>
         </div>
     }
 
