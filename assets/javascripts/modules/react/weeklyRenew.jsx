@@ -22,10 +22,16 @@ const empty = {
 };
 export function init(container) {
     stripeInit();
-    let showPaymentType = container.dataset.billingCountry === 'GB';
+    let showPaymentType = container.dataset.billingCountry === 'GB' && container.dataset.currency === 'GBP';
     let plans = window.guardian.plans;
-    ReactDOM.render(<WeeklyRenew showPaymentType={showPaymentType} email={container.dataset.email} currency={container.dataset.currency}
-                                 country={container.dataset.deliveryCountry} plans={plans} promoCode={container.dataset.promoCode}/>, container);
+    ReactDOM.render(<WeeklyRenew
+        showPaymentType={showPaymentType}
+        email={container.dataset.email}
+        currency={container.dataset.currency}
+        country={container.dataset.deliveryCountry}
+        plans={plans}
+        promoCode={container.dataset.promoCode}/>,
+        container);
 }
 
 class WeeklyRenew extends React.Component {
