@@ -33,7 +33,10 @@ object Management extends Controller with LazyLogging {
       Ok(views.html.staff.catalog(Diagnostic.fromCatalogs(test, normal)))
     }
   }
-
+  private def salesforce = {
+    TouchpointBackend.Normal.salesforceService.isAuthenticated
+    //The authagent holds an option type, so if it's not been initialised then it will hold None
+  }
   private def catalogWorkedOkay: ValidationNel[String, Unit] = (for {
     catalogTry <- catalogService.catalog.value \/> "Catalog not parsed from Zuora yet".wrapNel
     catalogDisjunction <- catalogTry.toOption \/> catalogTry.failed.map(_.getMessage).getOrElse("").wrapNel
@@ -44,6 +47,7 @@ object Management extends Controller with LazyLogging {
     result.fold(Validation.success(()), Validation.failureNel(s"Test $name failed. health check will fail"))
 
   private def tests =
+    boolTest(salesforce,"Salesforce") +++
     boolTest(CloudWatchHealth.hasPushedMetricSuccessfully, "CloudWatch") +++
     boolTest(zuoraService.lastPingTimeWithin(2.minutes), "ZuoraPing") +++
     boolTest(promoCollection.all.nonEmpty, "Promotions") +++
