@@ -9,12 +9,34 @@ export class DirectDebit extends React.Component {
 
     render() {
         return <div>
-            <SortCodeComponent value={this.props.sortCode} onChange={this.props.handleSortCode} valid={this.props.validSortCode}/>
-            <AccountNumber onChange={this.props.handleAccountNumber} value={this.props.AccountNumber} valid={this.props.validAccountNumber}/>
-            <AccountHolder onChange={this.props.handleAccountHolder} value={this.props.AccountHolder} valid={this.props.validAccountHolder}/>
-            <Confirmation checked={this.props.directDebitConfirmed} onChange={this.props.handleDirectDebitConfirmation} valid={this.props.validDirectDebitConfirmed}/>
-            <dd className="mma-section__list--content"><p>This is some copy about Direct Debit and our legal
-                requirements and a logo etc.</p></dd>
+            <dt className="mma-section__list--title">
+
+            </dt>
+            <dd className="mma-section__list--content">
+            <img src={this.props.directDebitLogo} alt="The Direct Debit logo" />
+            </dd>
+            <SortCodeComponent value={this.props.sortCode} onChange={this.props.handleSortCode}
+                               valid={this.props.validSortCode}/>
+            <AccountNumber onChange={this.props.handleAccountNumber} value={this.props.AccountNumber}
+                           valid={this.props.validAccountNumber}/>
+            <AccountHolder onChange={this.props.handleAccountHolder} value={this.props.AccountHolder}
+                           valid={this.props.validAccountHolder}/>
+            <Confirmation checked={this.props.directDebitConfirmed} onChange={this.props.handleDirectDebitConfirmation}
+                          valid={this.props.validDirectDebitConfirmed}/>
+            <dt className="mma-section__list--title">
+                Advance Notice
+            </dt>
+            <dd className="mma-section__list--content">
+                <div className="mma-section__list--restricted prose">
+                    <p>The details of your Direct Debit instruction including payment schedule, due date, frequency and
+                        amount will be sent to you within three working days. All the normal Direct Debit safeguards and
+                        guarantees apply.</p>
+                    <p>The Guardian, Unit 16, Coalfield Way, Ashby Park, Ashby-De-La-Zouch, LE65 1JT United Kingdom
+                    </p>
+                    <p>Tel: +44 (0) 330 333 6767</p>
+                    <p><a href="mailto:gwsubs@theguardian.com">gwsubs@theguardian.com</a></p>
+                </div>
+            </dd>
         </div>
     }
 
@@ -114,11 +136,6 @@ class AccountHolder extends React.Component {
 }
 
 class Confirmation extends React.Component {
-    constructor(props) {
-        super(props)
-
-    }
-
     render() {
         let invalid = this.props.valid === false;
         return <div>
@@ -126,21 +143,24 @@ class Confirmation extends React.Component {
                 Confirmation
             </dt>
             <dd className="mma-section__list--content">
-                <label className="option">
+                <div className="mma-section__list--restricted">
+
+                    <label className="option">
                 <span className="option__input">
                     <input type="checkbox"
                            onChange={this.props.onChange}
                            checked={this.props.checked}
                     />
                 </span>
-                    <span className="option__label">
+                        <span className="option__label">
                     I confirm that I am the account holder and I am solely able to authorise debit from the account
         </span>
 
-                </label>
-                {invalid && <p className="mma-error">
-                    Please confirm that you are the account holder
-                </p>}
+                    </label>
+                    {invalid && <p className="mma-error">
+                        Please confirm that you are the account holder
+                    </p>}
+                </div>
             </dd>
         </div>
     }

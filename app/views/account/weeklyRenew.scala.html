@@ -9,6 +9,7 @@
 @import model.SubscriptionOps._
 @import org.joda.time.LocalDate
 @import play.api.libs.json.Json
+@import controllers.CachedAssets.hashedPathFor
 
 @import com.gu.i18n.Currency
 @import com.gu.memsub.promo.PromoCode
@@ -62,6 +63,7 @@
                 data-promo-code="@promoCode.map(_.get)"
                 data-currency="@currency.iso"
                 data-delivery-country="@contact.mailingCountryParsed.map(_.alpha2).getOrElse(billToCountry.alpha2)"
+                data-direct-debit-logo="@hashedPathFor("images/direct-debit-black.png")"
                 />
 
             </section>

@@ -69,6 +69,10 @@
     padding-bottom: $gs-baseline;
 }
 
+.mma-section__list--restricted {
+    max-width: 660px;
+}
+
 .mma-section__list--content {
     margin-bottom: 10px;
     clear: right;
