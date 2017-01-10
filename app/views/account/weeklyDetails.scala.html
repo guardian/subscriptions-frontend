@@ -4,7 +4,7 @@
 @import model.DigitalEdition.UK
 @import com.gu.salesforce.Contact
 @import model.SubscriptionOps._
-@import org.joda.time.LocalDate
+@import org.joda.time.LocalDate.now
 @(
     subscription: Subscription[SubscriptionPlan.WeeklyPlan], billingSchedule: BillingSchedule, contact: Contact
 )(implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackend.Resolution)
@@ -26,16 +26,18 @@
                 </h3>
                 @views.html.account.fragments.yourDetails(
                     subscriptionName = subscription.name.get,
-                    plan = subscription.latestPlan,
-                    maybeStartDate = Some(subscription.firstPaymentDate).filter(d => d.isAfter(LocalDate.now.minusMonths(1))),
-                    maybeContact = Some(contact))()
+                    plan = subscription.currentPlan,
+                    maybeStartDate = Some(subscription.currentPlan.start),
+                    maybeContact = Some(contact),
+                    maybeFuturePlan = if (subscription.latestPlan.start.isAfter(now)) Some(subscription.latestPlan) else None
+                )()
             </section>
 
             <section class="mma-section">
                 <h3 class="mma-section__header">
                     Your billing schedule
                 </h3>
-                @views.html.account.fragments.billingSchedule(billingSchedule, subscription.plan.charges.price.currencies.head)
+                @views.html.account.fragments.billingSchedule(billingSchedule, subscription.latestPlan.charges.price.currencies.head)
             </section>
             <section class="mma-section">
                 <a class="button button--primary button--large" href="@routes.AccountManagement.logout">Sign Out</a>

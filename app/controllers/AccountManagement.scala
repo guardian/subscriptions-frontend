@@ -180,11 +180,11 @@ object ManageWeekly extends LazyLogging {
           futureZuoraBillToContact.map { zuoraContact =>
             zuoraContact.country.map { billToCountry =>
               val catalog = tpBackend.catalogService.unsafeCatalog
-                  val weeklyPlans = weeklySubscription.plan.product match {
-                    case Product.WeeklyZoneA => catalog.weeklyZoneA.toList
-                    case Product.WeeklyZoneB => catalog.weeklyZoneB.toList
-                    case Product.WeeklyZoneC => catalog.weeklyZoneC.toList
-                  }
+              val weeklyPlans = weeklySubscription.currentPlan.product match {
+                case Product.WeeklyZoneA => catalog.weeklyZoneA.toList
+                case Product.WeeklyZoneB => catalog.weeklyZoneB.toList
+                case Product.WeeklyZoneC => catalog.weeklyZoneC.toList
+              }
               val currency = account.currency.toRight(s"could not deserialise currency for account ${account.id}")
               val weeklyPlanInfo = currency.right.flatMap { existingCurrency =>
                 sequence(weeklyPlans.map { plan =>
@@ -258,7 +258,7 @@ object AccountManagement extends Controller with LazyLogging with CatalogProvide
       allHolidays <- OptionT(tpBackend.suspensionService.getHolidays(subscription.name).map(_.toOption))
       billingSchedule <- OptionT(tpBackend.commonPaymentService.billingSchedule(subscription.id, numberOfBills = 13))
     } yield {
-      val maybeFutureManagePage = subscription.plan.product match {
+      val maybeFutureManagePage = subscription.currentPlan.product match {
         case Product.Delivery => subscription.asDelivery.map { deliverySubscription =>
           Future.successful(ManageDelivery(errorCodes, allHolidays, billingSchedule, deliverySubscription))
         }
@@ -313,7 +313,7 @@ object AccountManagement extends Controller with LazyLogging with CatalogProvide
 
     def jsonError(message: String) = Json.toJson(Json.obj("errorMessage" -> message))
 
-    def description(sub: Subscription[SubscriptionPlan.WeeklyPlan], renewal: Renewal) = renewal.plan.charges.prettyPricing(sub.plan.charges.currencies.head)
+    def description(sub: Subscription[SubscriptionPlan.WeeklyPlan], renewal: Renewal) = renewal.plan.charges.prettyPricing(sub.currentPlan.charges.currencies.head)
 
     SessionSubscription.subscriptionFromRequest flatMap { maybeSub =>
       val response = for {
