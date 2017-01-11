@@ -26,10 +26,10 @@
                 </h3>
                 @views.html.account.fragments.yourDetails(
                     subscriptionName = subscription.name.get,
-                    plan = subscription.currentOrExpiredPlan,
-                    maybeStartDate = Some(subscription.currentOrExpiredPlan.start),
+                    plan = subscription.planToManage,
+                    maybeStartDate = Some(subscription.planToManage.start),
                     maybeContact = Some(contact),
-                    maybeFuturePlan = Some(subscription.latestPlan).filter(_.start.isAfter(now))
+                    maybeFuturePlan = Some(subscription.nextPlan).filter(_.start.isAfter(now))
                 )()
             </section>
 

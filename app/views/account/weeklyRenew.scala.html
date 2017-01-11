@@ -39,8 +39,8 @@
                 @helper.CSRF.formField
                 @views.html.account.fragments.yourDetails(
                     subscriptionName = subscription.name.get,
-                    plan = subscription.latestPlan,
-                    maybeStartDate = Some(subscription.latestPlan.start),
+                    plan = subscription.nextPlan,
+                    maybeStartDate = Some(subscription.nextPlan.start),
                     maybeContact = Some(contact))()
             </section>
 

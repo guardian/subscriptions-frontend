@@ -180,7 +180,7 @@ object ManageWeekly extends LazyLogging {
           futureZuoraBillToContact.map { zuoraContact =>
             zuoraContact.country.map { billToCountry =>
               val catalog = tpBackend.catalogService.unsafeCatalog
-              val weeklyPlans = weeklySubscription.currentOrExpiredPlan.product match {
+              val weeklyPlans = weeklySubscription.planToManage.product match {
                 case Product.WeeklyZoneA => catalog.weeklyZoneA.toList
                 case Product.WeeklyZoneB => catalog.weeklyZoneB.toList
                 case Product.WeeklyZoneC => catalog.weeklyZoneC.toList
@@ -258,7 +258,7 @@ object AccountManagement extends Controller with LazyLogging with CatalogProvide
       allHolidays <- OptionT(tpBackend.suspensionService.getHolidays(subscription.name).map(_.toOption))
       billingSchedule <- OptionT(tpBackend.commonPaymentService.billingSchedule(subscription.id, numberOfBills = 13))
     } yield {
-      val maybeFutureManagePage = subscription.currentOrExpiredPlan.product match {
+      val maybeFutureManagePage = subscription.planToManage.product match {
         case Product.Delivery => subscription.asDelivery.map { deliverySubscription =>
           Future.successful(ManageDelivery(errorCodes, allHolidays, billingSchedule, deliverySubscription))
         }
@@ -353,7 +353,7 @@ object AccountManagement extends Controller with LazyLogging with CatalogProvide
     subscription <- OptionT( SessionSubscription.subscriptionFromRequest)
     billingSchedule <- OptionT(tpBackend.commonPaymentService.billingSchedule(subscription.id, numberOfBills = 13))
     }yield {
-      Ok(thankYouRenew(subscription.latestPlan,billingSchedule, resolution))
+      Ok(thankYouRenew(subscription.nextPlan,billingSchedule, resolution))
     }
     res.run.map(_.getOrElse(Redirect(routes.Homepage.index()).withNewSession))
   }
