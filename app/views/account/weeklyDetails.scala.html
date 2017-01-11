@@ -29,7 +29,7 @@
                     plan = subscription.currentOrExpiredPlan,
                     maybeStartDate = Some(subscription.currentOrExpiredPlan.start),
                     maybeContact = Some(contact),
-                    maybeFuturePlan = if (subscription.latestPlan.start.isAfter(now)) Some(subscription.latestPlan) else None
+                    maybeFuturePlan = Some(subscription.latestPlan).filter(_.start.isAfter(now))
                 )()
             </section>
 
