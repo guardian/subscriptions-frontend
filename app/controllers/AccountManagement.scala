@@ -22,7 +22,6 @@ import org.joda.time.LocalDate
 import play.api.libs.json._
 import play.api.mvc.{AnyContent, Controller, Request, Result}
 import utils.TestUsers.PreSigninTestCookie
-import views.support.Pricing._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -32,6 +31,7 @@ import scalaz.{-\/, EitherT, OptionT, \/, \/-}
 import model.SubscriptionOps._
 import views.html.account.thankYouRenew
 import views.support.Pricing._
+
 // this handles putting subscriptions in and out of the session
 object SessionSubscription {
 
@@ -115,7 +115,7 @@ object ManageDelivery extends LazyLogging{
         billingSchedule = newBS,
         suspendableDays = suspendableDays,
         suspendedDays = suspendedDays,
-        currency = sub.plan.charges.price.currencies.head
+        currency = sub.currency
       ))
     }).valueOr(errorCode => Redirect(routes.AccountManagement.manage(None, Some(errorCode),None).url))
   }
@@ -180,11 +180,11 @@ object ManageWeekly extends LazyLogging {
           futureZuoraBillToContact.map { zuoraContact =>
             zuoraContact.country.map { billToCountry =>
               val catalog = tpBackend.catalogService.unsafeCatalog
-                  val weeklyPlans = weeklySubscription.plan.product match {
-                    case Product.WeeklyZoneA => catalog.weeklyZoneA.toList
-                    case Product.WeeklyZoneB => catalog.weeklyZoneB.toList
-                    case Product.WeeklyZoneC => catalog.weeklyZoneC.toList
-                  }
+              val weeklyPlans = weeklySubscription.planToManage.product match {
+                case Product.WeeklyZoneA => catalog.weeklyZoneA.toList
+                case Product.WeeklyZoneB => catalog.weeklyZoneB.toList
+                case Product.WeeklyZoneC => catalog.weeklyZoneC.toList
+              }
               val currency = account.currency.toRight(s"could not deserialise currency for account ${account.id}")
               val weeklyPlanInfo = currency.right.flatMap { existingCurrency =>
                 sequence(weeklyPlans.map { plan =>
@@ -197,10 +197,11 @@ object ManageWeekly extends LazyLogging {
                   logger.info(s"couldn't get new rate/currency for renewal: $error")
                   Ok(views.html.account.details(None, promoCode))
                 case Right((existingCurrency, weeklyPlanInfoList)) =>
-                  if (weeklySubscription.renewable)
-                    Ok(views.html.account.weeklyRenew(weeklySubscription, billingSchedule, contact, billToCountry, weeklyPlanInfoList, existingCurrency, promoCode) )
-                  else
-                    Ok(views.html.account.weeklyDetails(weeklySubscription, billingSchedule, contact) )
+                  Ok(weeklySubscription.asRenewable.map { renewableSub =>
+                    views.html.account.weeklyRenew(renewableSub, billingSchedule, contact, billToCountry, weeklyPlanInfoList, existingCurrency, promoCode)
+                  } getOrElse {
+                    views.html.account.weeklyDetails(weeklySubscription, billingSchedule, contact)
+                  })
               }
             }.getOrElse {
               logger.info(s"no valid bill to country for ${weeklySubscription.id}")
@@ -257,7 +258,7 @@ object AccountManagement extends Controller with LazyLogging with CatalogProvide
       allHolidays <- OptionT(tpBackend.suspensionService.getHolidays(subscription.name).map(_.toOption))
       billingSchedule <- OptionT(tpBackend.commonPaymentService.billingSchedule(subscription.id, numberOfBills = 13))
     } yield {
-      val maybeFutureManagePage = subscription.plan.product match {
+      val maybeFutureManagePage = subscription.planToManage.product match {
         case Product.Delivery => subscription.asDelivery.map { deliverySubscription =>
           Future.successful(ManageDelivery(errorCodes, allHolidays, billingSchedule, deliverySubscription))
         }
@@ -310,17 +311,15 @@ object AccountManagement extends Controller with LazyLogging with CatalogProvide
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
 
-    def validateRenewable(sub: Subscription[SubscriptionPlan.WeeklyPlan]) = if (sub.renewable) \/-(sub) else -\/("subscription is not renewable")
-
     def jsonError(message: String) = Json.toJson(Json.obj("errorMessage" -> message))
 
-    def description(sub: Subscription[SubscriptionPlan.WeeklyPlan], renewal: Renewal) = renewal.plan.charges.prettyPricing(sub.plan.charges.currencies.head)
+    def description(sub: Subscription[SubscriptionPlan.WeeklyPlan], renewal: Renewal) = renewal.plan.charges.prettyPricing(sub.currency)
 
     SessionSubscription.subscriptionFromRequest flatMap { maybeSub =>
       val response = for {
         sub <- maybeSub.toRightDisjunction("no subscription in request")
         weeklySub <- sub.asWeekly.toRightDisjunction("subscription is not weekly")
-        renewableSub <- validateRenewable(weeklySub)
+        renewableSub <- weeklySub.asRenewable.toRightDisjunction("subscription is not renewable")
         renew <- parseRenewalRequest(request, tpBackend.catalogService.unsafeCatalog)
       } yield {
         logger.info(s"renewing ${renew.plan.name} for ${renewableSub.id} with promo code: ${renew.promoCode}")
@@ -354,7 +353,7 @@ object AccountManagement extends Controller with LazyLogging with CatalogProvide
     subscription <- OptionT( SessionSubscription.subscriptionFromRequest)
     billingSchedule <- OptionT(tpBackend.commonPaymentService.billingSchedule(subscription.id, numberOfBills = 13))
     }yield {
-      Ok(thankYouRenew(subscription.latestPlan,billingSchedule, resolution))
+      Ok(thankYouRenew(subscription.nextPlan,billingSchedule, resolution))
     }
     res.run.map(_.getOrElse(Redirect(routes.Homepage.index()).withNewSession))
   }

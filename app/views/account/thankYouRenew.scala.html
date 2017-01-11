@@ -1,18 +1,19 @@
 @import com.gu.memsub.subsv2.SubscriptionPlan
-@import views.support.PlanOps._
 @import com.gu.memsub.BillingSchedule
 @import views.support.Pricing._
+@import views.support.Dates._
+@import org.joda.time.LocalDate.now
 
-@(plan : SubscriptionPlan.PaperPlan,
-    billingSchedule: BillingSchedule,
-    touchpointBackendResolution: services.TouchpointBackend.Resolution
+@(plan: SubscriptionPlan.PaperPlan,
+  billingSchedule: BillingSchedule,
+  touchpointBackendResolution: services.TouchpointBackend.Resolution
 )(implicit request: RequestHeader)
 
 @main(s"Confirmation | The Guardian", bodyClasses=List("is-wide"), touchpointBackendResolutionOpt = Some(touchpointBackendResolution), plan = None) {
     <main class="page-container gs-container gs-container--slim">
         @fragments.page.header("Thank you", None, List("l-padded"))
         <section class="section-slice section-slice--bleed section-slice--limited">
-            <p>Your Guardian Weekly subscription has been renewed. We will take @plan.charges.prettyPricing(plan.charges.currencies.head) from your account.</p>
+            <p>Your Guardian Weekly subscription has been renewed. We will take @plan.charges.prettyPricing(plan.charges.currencies.head) from your account, starting @if(plan.start.isAfter(now)) { @prettyDate(plan.start). } else { today. }</p>
         </section>
         <section class="section-slice--bleed section-slice--limited">
             <h3 class="mma-section__header">
@@ -21,9 +22,9 @@
             @views.html.account.fragments.billingSchedule(billingSchedule, plan.charges.price.currencies.head)
 
         </section>
-        <section class="mma-section">
+        <section class="section-slice--bleed mma-section">
             <a class="button button--primary button--large" href="@routes.AccountManagement.processLogin">
-                back to subscription details</a>
+                Back to subscription details</a>
         </section>
 
     </main>

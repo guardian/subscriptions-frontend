@@ -1,5 +1,4 @@
 @import com.gu.memsub.BillingSchedule
-@import com.gu.memsub.subsv2.SubscriptionPlan
 @import com.gu.memsub.subsv2.Subscription
 @import model.DigitalEdition.UK
 @import com.gu.salesforce.Contact
@@ -7,14 +6,14 @@
 @import com.gu.i18n.Country
 @import controllers.ManageWeekly.WeeklyPlanInfo
 @import model.SubscriptionOps._
-@import org.joda.time.LocalDate
 @import play.api.libs.json.Json
 @import controllers.CachedAssets.hashedPathFor
 
 @import com.gu.i18n.Currency
 @import com.gu.memsub.promo.PromoCode
+@import org.joda.time.LocalDate.now
 @(
-    subscription: Subscription[SubscriptionPlan.WeeklyPlan], billingSchedule: BillingSchedule, contact: Contact, billToCountry: Country, plans: List[WeeklyPlanInfo], currency: Currency, promoCode: Option[PromoCode]
+    subscription: Subscription[WeeklyPlanOneOff], billingSchedule: BillingSchedule, contact: Contact, billToCountry: Country, plans: List[WeeklyPlanInfo], currency: Currency, promoCode: Option[PromoCode]
 )(implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackend.Resolution)
 
 @main("Your Guardian Weekly subscription | The Guardian", bodyClasses = List("is-wide"), edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
@@ -40,8 +39,8 @@
                 @helper.CSRF.formField
                 @views.html.account.fragments.yourDetails(
                     subscriptionName = subscription.name.get,
-                    plan = subscription.latestPlan,
-                    maybeStartDate = Some(subscription.firstPaymentDate).filter(d => d.isAfter(LocalDate.now.minusMonths(1))),
+                    plan = subscription.nextPlan,
+                    maybeStartDate = Some(subscription.nextPlan.start),
                     maybeContact = Some(contact))()
             </section>
 
@@ -49,7 +48,7 @@
                 <h3 class="mma-section__header">Renew your subscription</h3>
 
                 <p>
-                @if(subscription.termEndDate.isAfter(LocalDate.now)) {
+                @if(subscription.termEndDate.isAfter(now)) {
                     Your current subscription is due to expire on @prettyDate(subscription.termEndDate).
                 } else {
                     Your subscription expired on @prettyDate(subscription.termEndDate).

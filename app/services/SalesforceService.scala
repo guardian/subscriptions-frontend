@@ -13,11 +13,14 @@ import scala.concurrent.Future
 trait SalesforceService extends LazyLogging {
   def repo: SimpleContactRepository
   def createOrUpdateUser(personalData: PersonalData, paperData: Option[PaperData], userId: Option[IdMinimalUser]): Future[ContactId]
+  def isAuthenticated: Boolean
 }
 
 class SalesforceServiceImp(val repo: SimpleContactRepository) extends SalesforceService {
   override def createOrUpdateUser(personalData: PersonalData, paperData: Option[PaperData], userId: Option[IdMinimalUser]): Future[ContactId] =
     repo.upsert(userId.map(_.id), SalesforceService.createSalesforceUserData(personalData, paperData))
+
+  override def isAuthenticated = repo.salesforce.isAuthenticated
 }
 
 object SalesforceService {

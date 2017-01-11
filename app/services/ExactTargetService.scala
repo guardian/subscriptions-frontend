@@ -20,7 +20,8 @@ import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
 import model.exactTarget.HolidaySuspensionBillingScheduleDataExtensionRow.constructSalutation
 import model.exactTarget._
-import model.{PaperData, PurchaserIdentifiers, Renewal, SubscribeRequest}
+import model.{PaperData, PurchaserIdentifiers, Renewal, SubscribeRequest, SubscriptionOps}
+import model.SubscriptionOps._
 import org.joda.time.{Days, LocalDate}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json._
@@ -157,7 +158,7 @@ class ExactTargetService(
           email = salesforceContact.email,
           saluation = constructSalutation(salesforceContact.title, salesforceContact.firstName, Some(salesforceContact.lastName)),
           subscriptionName = subscription.name.get,
-          subscriptionCurrency = subscription.plan.charges.price.currencies.head,
+          subscriptionCurrency = subscription.currency,
           packageName = packageName,
           billingSchedule = billingSchedule,
           numberOfSuspensionsLinedUp = numberOfSuspensionsLinedUp,

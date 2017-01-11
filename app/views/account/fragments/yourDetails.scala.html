@@ -1,49 +1,53 @@
 @import com.gu.memsub.subsv2.SubscriptionPlan
-@import com.gu.memsub.subsv2.Subscription
 @import views.support.Dates._
 @import views.support.Pricing._
 @import com.gu.memsub.PaperDay
 @import scala.collection.immutable.List.empty
 @import com.gu.salesforce.Contact
-@import model.SubscriptionOps._
 @import org.joda.time.LocalDate
 
-@(subscriptionName: String, plan: SubscriptionPlan.PaperPlan, maybeStartDate: Option[LocalDate], chosenPaperDays: List[PaperDay] = empty, maybeContact: Option[Contact] = None)(extra: Html = Html(""))
+@import org.joda.time.LocalDate.now
+@(subscriptionName: String, plan: SubscriptionPlan.PaperPlan, maybeStartDate: Option[LocalDate], chosenPaperDays: List[PaperDay] = empty, maybeContact: Option[Contact] = None, maybeFuturePlan: Option[SubscriptionPlan.PaperPlan] = None)(extra: Html = Html(""))
 <dl class="mma-section__list">
     <dt class="mma-section__list--title">Subscriber ID</dt>
     <dd class="mma-section__list--content">@subscriptionName</dd>
 
     <dt class="mma-section__list--title">Current plan</dt>
     <dd class="mma-section__list--content">
-            <div>
-            @if(plan.name == "Echo-Legacy") {
-                Multi-day (@{
-                chosenPaperDays.map(_.id.replace("Print ", "")).mkString(", ")
-            })
-            } else {
-                @plan.name
-            }
-            </div>
-            <div>@plan.charges.prettyPricing(plan.charges.price.currencies.head)</div>
-        </dd>
-
-    @maybeStartDate.map { startDate =>
-        <dt class="mma-section__list--title">Start date</dt>
-        <dd class="mma-section__list--content">
-            @prettyDate(startDate)
-        </dd>
+        <div>
+        @if(plan.name == "Echo-Legacy") {
+            Multi-day (@{
+            chosenPaperDays.map(_.id.replace("Print ", "")).mkString(", ")
+        })
+        } else {
+            @plan.name
         }
-    
-@maybeContact.map { contact =>
-    <dt class="mma-section__list--title">Delivery details</dt>
-    <dd class="mma-section__list--content">
-        <div>@contact.firstName @contact.lastName</div>
-        <div>@contact.mailingStreet
-        @contact.mailingCity
-        @contact.mailingState
-        @contact.mailingPostcode
-        @contact.mailingCountry</div>
+        </div>
+        <div>@plan.charges.prettyPricing(plan.charges.price.currencies.head)</div>
+        @maybeStartDate.map { startDate =>
+            <div>@if(startDate.isAfter(now)) { Starts: } else { Started: } @prettyDate(startDate)</div>
+        }
     </dd>
-}
+
+    @maybeFuturePlan.map { futurePlan =>
+        <dt class="mma-section__list--title">Renewal plan</dt>
+        <dd class="mma-section__list--content">
+            <div>@futurePlan.name</div>
+            <div>@futurePlan.charges.prettyPricing(futurePlan.charges.price.currencies.head)</div>
+            <div>Starts: @prettyDate(futurePlan.start)</div>
+        </dd>
+    }
+
+    @maybeContact.map { contact =>
+        <dt class="mma-section__list--title">Delivery details</dt>
+        <dd class="mma-section__list--content">
+            <div>@contact.firstName @contact.lastName</div>
+            <div>@contact.mailingStreet,
+            @contact.mailingCity,
+            @contact.mailingState,
+            @contact.mailingPostcode,
+            @contact.mailingCountry</div>
+        </dd>
+    }
     @extra
 </dl>

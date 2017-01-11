@@ -1,5 +1,6 @@
 package services
 
+import com.github.nscala_time.time.OrderingImplicits._
 import com.gu.config.DiscountRatePlanIds
 import com.gu.i18n.{Country, CountryGroup}
 import com.gu.i18n.Currency.GBP
@@ -16,10 +17,12 @@ import com.gu.zuora.soap.models.Queries
 import com.gu.zuora.soap.models.Results.SubscribeResult
 import com.gu.zuora.soap.models.errors._
 import com.typesafe.scalalogging.LazyLogging
+import model.SubscriptionOps._
 import model.{Renewal, _}
 import model.error.CheckoutService._
 import model.error.IdentityService._
 import model.error.SubsError
+import org.joda.time.LocalDate.now
 import org.joda.time.{DateTimeConstants, Days, LocalDate}
 import touchpoint.ZuoraProperties
 
@@ -69,7 +72,7 @@ class CheckoutService(identityService: IdentityService,
     val idMinimalUser = authenticatedUserOpt.map(_.user)
     val soldToContact = subscriptionData.productData.left.toOption.filter(isGuardianWeekly).map(_.deliveryAddress)
 
-    implicit val today = LocalDate.now()
+    implicit val today = now()
 
     (for {
       userExists <- EitherT(IdentityService.doesUserExist(personalData.email).map(\/.right[FatalErrors, Boolean]))
@@ -251,27 +254,14 @@ class CheckoutService(identityService: IdentityService,
     }
   }
 
-
-  private def nextFridayFrom(d: LocalDate) = {
-    val nearestFriday = d.withDayOfWeek(DateTimeConstants.FRIDAY)
-    if (!nearestFriday.isBefore(d)) {
-      nearestFriday
-    } else {
-      d.plusWeeks(1).withDayOfWeek(DateTimeConstants.FRIDAY)
-    }
-  }
-
-  def renewSubscription(subscription: Subscription[SubscriptionPlan.WeeklyPlan], renewal: Renewal, subscriptionDetails: String )
+  def renewSubscription(subscription: Subscription[WeeklyPlanOneOff], renewal: Renewal, subscriptionDetails: String )
     (implicit p: PromotionApplicator[NewUsers, Renew])= {
-    import model.SubscriptionOps._
 
     def getPayment(contact: Contact, billto: Queries.Contact): PaymentService#Payment = {
       val idMinimalUser = IdMinimalUser(contact.identityId, None)
       val pid = PurchaserIdentifiers(contact, Some(idMinimalUser))
       renewal.paymentData match {
-        case cd: CreditCardData =>
-          val currency = subscription.plan.charges.currencies.head
-          paymentService.makeCreditCardPayment(cd, currency, pid)
+        case cd: CreditCardData => paymentService.makeCreditCardPayment(cd, subscription.currency, pid)
         case dd: DirectDebitData => paymentService.makeDirectDebitPayment(dd, billto.firstName, billto.lastName, contact)
       }
     }
@@ -279,11 +269,12 @@ class CheckoutService(identityService: IdentityService,
     val ratePlan = RatePlan(renewal.plan.id.get, None, Nil)
     val amend =   Amend(subscriptionId = subscription.id.get, plansToRemove = Nil, newRatePlans = NonEmptyList(ratePlan))
 
-    val contractEffective = subscription.termEndDate
-    val customerAcceptance = nextFridayFrom(contractEffective)
+    val contractEffective = Seq(subscription.termEndDate, now).max // The sub may have 'expired' before the customer gets round to renewing it.
+    val customerAcceptance = contractEffective
+
     def addPlan(contact: Contact) = {
       val newRatePlan = RatePlan(renewal.plan.id.get, None)
-      val renewCommand = Renew(subscription.id.get, subscription.startDate, NonEmptyList(newRatePlan), contractEffective, customerAcceptance)
+      val renewCommand = Renew(subscription.id.get, subscription.termStartDate, subscription.termEndDate, NonEmptyList(newRatePlan), contractEffective, customerAcceptance)
       val validPromotion = for {
         code <- renewal.promoCode
         deliveryCountryString <- contact.mailingCountry
