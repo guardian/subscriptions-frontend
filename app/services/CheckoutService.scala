@@ -261,9 +261,7 @@ class CheckoutService(identityService: IdentityService,
       val idMinimalUser = IdMinimalUser(contact.identityId, None)
       val pid = PurchaserIdentifiers(contact, Some(idMinimalUser))
       renewal.paymentData match {
-        case cd: CreditCardData =>
-          val currency = subscription.currentPlan.charges.currencies.head
-          paymentService.makeCreditCardPayment(cd, currency, pid)
+        case cd: CreditCardData => paymentService.makeCreditCardPayment(cd, subscription.currency, pid)
         case dd: DirectDebitData => paymentService.makeDirectDebitPayment(dd, billto.firstName, billto.lastName, contact)
       }
     }

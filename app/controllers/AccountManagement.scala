@@ -22,7 +22,6 @@ import org.joda.time.LocalDate
 import play.api.libs.json._
 import play.api.mvc.{AnyContent, Controller, Request, Result}
 import utils.TestUsers.PreSigninTestCookie
-import views.support.Pricing._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -32,6 +31,7 @@ import scalaz.{-\/, EitherT, OptionT, \/, \/-}
 import model.SubscriptionOps._
 import views.html.account.thankYouRenew
 import views.support.Pricing._
+
 // this handles putting subscriptions in and out of the session
 object SessionSubscription {
 
@@ -180,7 +180,7 @@ object ManageWeekly extends LazyLogging {
           futureZuoraBillToContact.map { zuoraContact =>
             zuoraContact.country.map { billToCountry =>
               val catalog = tpBackend.catalogService.unsafeCatalog
-              val weeklyPlans = weeklySubscription.currentPlan.product match {
+              val weeklyPlans = weeklySubscription.currentOrExpiredPlan.product match {
                 case Product.WeeklyZoneA => catalog.weeklyZoneA.toList
                 case Product.WeeklyZoneB => catalog.weeklyZoneB.toList
                 case Product.WeeklyZoneC => catalog.weeklyZoneC.toList
@@ -258,7 +258,7 @@ object AccountManagement extends Controller with LazyLogging with CatalogProvide
       allHolidays <- OptionT(tpBackend.suspensionService.getHolidays(subscription.name).map(_.toOption))
       billingSchedule <- OptionT(tpBackend.commonPaymentService.billingSchedule(subscription.id, numberOfBills = 13))
     } yield {
-      val maybeFutureManagePage = subscription.currentPlan.product match {
+      val maybeFutureManagePage = subscription.currentOrExpiredPlan.product match {
         case Product.Delivery => subscription.asDelivery.map { deliverySubscription =>
           Future.successful(ManageDelivery(errorCodes, allHolidays, billingSchedule, deliverySubscription))
         }
@@ -313,7 +313,7 @@ object AccountManagement extends Controller with LazyLogging with CatalogProvide
 
     def jsonError(message: String) = Json.toJson(Json.obj("errorMessage" -> message))
 
-    def description(sub: Subscription[SubscriptionPlan.WeeklyPlan], renewal: Renewal) = renewal.plan.charges.prettyPricing(sub.currentPlan.charges.currencies.head)
+    def description(sub: Subscription[SubscriptionPlan.WeeklyPlan], renewal: Renewal) = renewal.plan.charges.prettyPricing(sub.currency)
 
     SessionSubscription.subscriptionFromRequest flatMap { maybeSub =>
       val response = for {
