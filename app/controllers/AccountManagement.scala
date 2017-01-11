@@ -115,7 +115,7 @@ object ManageDelivery extends LazyLogging{
         billingSchedule = newBS,
         suspendableDays = suspendableDays,
         suspendedDays = suspendedDays,
-        currency = sub.plan.charges.price.currencies.head
+        currency = sub.currency
       ))
     }).valueOr(errorCode => Redirect(routes.AccountManagement.manage(None, Some(errorCode),None).url))
   }

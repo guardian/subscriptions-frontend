@@ -37,7 +37,7 @@
                 <h3 class="mma-section__header">
                     Your billing schedule
                 </h3>
-                @views.html.account.fragments.billingSchedule(billingSchedule, subscription.latestPlan.charges.price.currencies.head)
+                @views.html.account.fragments.billingSchedule(billingSchedule, subscription.currency)
             </section>
             <section class="mma-section">
                 <a class="button button--primary button--large" href="@routes.AccountManagement.logout">Sign Out</a>

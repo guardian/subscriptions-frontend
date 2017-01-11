@@ -2,6 +2,7 @@
 @import com.gu.memsub.subsv2.SubscriptionPlan
 @import com.gu.memsub.subsv2.Subscription
 @import model.DigitalEdition.UK
+@import model.SubscriptionOps._
 @(
     subscription: Subscription[SubscriptionPlan.DailyPaper], billingSchedule: BillingSchedule
 )(implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackend.Resolution)
@@ -30,7 +31,7 @@
                 <h3 class="mma-section__header">
                     Your billing schedule
                 </h3>
-                @views.html.account.fragments.billingSchedule(billingSchedule, subscription.plan.charges.price.currencies.head)
+                @views.html.account.fragments.billingSchedule(billingSchedule, subscription.currency)
             </section>
             <section class="mma-section">
                 <a class="button button--primary button--large" href="@routes.AccountManagement.logout">Sign Out</a>
