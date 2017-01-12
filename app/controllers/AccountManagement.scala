@@ -29,6 +29,7 @@ import scalaz.std.scalaFuture._
 import scalaz.syntax.std.option._
 import scalaz.{-\/, EitherT, OptionT, \/, \/-}
 import model.SubscriptionOps._
+import org.joda.time.LocalDate.now
 import views.html.account.thankYouRenew
 import views.support.Pricing._
 
@@ -80,7 +81,7 @@ object ManageDelivery extends LazyLogging{
 
   import play.api.mvc.Results._
 
-  def apply(errorCodes: Set[String], allHolidays: Seq[(Float, PaymentHoliday)], billingSchedule: BillingSchedule, deliverySubscription: Subscription[Delivery])(implicit request: Request[AnyContent], touchpoint: TouchpointBackend.Resolution) = {
+  def apply(errorCodes: Set[String], allHolidays: Seq[HolidayRefund], billingSchedule: BillingSchedule, deliverySubscription: Subscription[Delivery])(implicit request: Request[AnyContent], touchpoint: TouchpointBackend.Resolution) = {
     val pendingHolidays = pendingHolidayRefunds(allHolidays)
     val suspendedDays = SuspensionService.holidayToSuspendedDays(pendingHolidays, deliverySubscription.plan.charges.chargedDays.toList)
     val chosenPaperDays = deliverySubscription.plan.charges.chargedDays.toList.sortBy(_.dayOfTheWeekIndex)
@@ -92,14 +93,18 @@ object ManageDelivery extends LazyLogging{
 
   def suspend(tpBackend: TouchpointBackend)(implicit request: Request[AnyContent], touchpoint: TouchpointBackend.Resolution): Future[Result] = {
     val noSub = "Could not find an active subscription"
+    val numberOfBillsForCalculation = 14 // 14 because + 2 extra months needed in calculation to cover setting a 6-week suspension on the day before your 12th billing day!
+    val numberOfBillsForDisplay = 12
+    def intToEither(i: Int): \/[String, Int] = \/-(i)
+
     (for {
       form <- EitherT(Future.successful(SuspendForm.mappings.bindFromRequest().value \/> "Please check your selections and try again"))
       sub <- EitherT(SessionSubscription.subscriptionFromRequestOld.map(_ \/> noSub).map(_.flatMap(_.swap.leftMap(_ => noSub))))
+      billCycleDay <- EitherT(tpBackend.zuoraService.getAccount(sub.accountId).map(_.billCycleDay).map(intToEither))
       newHoliday = PaymentHoliday(sub.name, form.startDate, form.endDate)
-      // 14 because + 2 extra months needed in calculation to cover setting a 6-week suspension on the day before your 12th billing day!
-      oldBS <- EitherT(tpBackend.commonPaymentService.billingSchedule(sub.id, numberOfBills = 14).map(_ \/> "Error getting billing schedule"))
-      result <- EitherT(tpBackend.suspensionService.addHoliday(newHoliday, oldBS)).leftMap(getAndLogRefundError(_).map(_.code).list.mkString(","))
-      newBS <- EitherT(tpBackend.commonPaymentService.billingSchedule(sub.id, numberOfBills = 12).map(_ \/> "Error getting billing schedule"))
+      oldBS <- EitherT(tpBackend.commonPaymentService.billingSchedule(sub.id, numberOfBills = numberOfBillsForCalculation).map(_ \/> "Error getting billing schedule"))
+      result <- EitherT(tpBackend.suspensionService.addHoliday(newHoliday, oldBS, now, billCycleDay)).leftMap(getAndLogRefundError(_).map(_.code).list.mkString(","))
+      newBS <- EitherT(tpBackend.commonPaymentService.billingSchedule(sub.id, numberOfBills = numberOfBillsForDisplay).map(_ \/> "Error getting billing schedule"))
       newHolidays <- EitherT(tpBackend.suspensionService.getHolidays(sub.name)).leftMap(_ => "Error getting holidays")
       pendingHolidays = pendingHolidayRefunds(newHolidays)
       suspendableDays = Config.suspendableWeeks * sub.plan.charges.chargedDays.size
