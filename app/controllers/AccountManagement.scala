@@ -18,7 +18,6 @@ import com.typesafe.scalalogging.LazyLogging
 import configuration.{Config, ProfileLinks}
 import forms._
 import model.{Renewal, RenewalReads}
-import org.joda.time.LocalDate
 import play.api.libs.json._
 import play.api.mvc.{AnyContent, Controller, Request, Result}
 import utils.TestUsers.PreSigninTestCookie
@@ -46,21 +45,6 @@ object SessionSubscription {
   def clear(result: Result)(implicit request: Request[AnyContent]): Result =
     result.withSession(request.session - SUBSCRIPTION_SESSION_KEY)
 
-  @deprecated("use the other one and pattern match on the plan")
-  def subscriptionFromRequestOld(implicit request: Request[AnyContent]): Future[Option[Subscription[SubscriptionPlan.Delivery] \/ Subscription[SubscriptionPlan.Voucher]]] = {
-    implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
-    implicit val tpBackend = resolution.backend
-
-    (for {
-      subscriptionId <- OptionT(Future.successful(request.session.data.get(SUBSCRIPTION_SESSION_KEY)))
-      zuoraSubscription <- OptionT(tpBackend.subscriptionService.either[SubscriptionPlan.Delivery, SubscriptionPlan.Voucher](Name(subscriptionId)))
-    } yield zuoraSubscription).orElse(for {
-      identityUser <- OptionT(Future.successful(authenticatedUserFor(request)))
-      salesForceUser <- OptionT(tpBackend.salesforceService.repo.get(identityUser.user.id))
-      zuoraSubscription <- OptionT(tpBackend.subscriptionService.either[SubscriptionPlan.Delivery, SubscriptionPlan.Voucher](salesForceUser))
-    } yield zuoraSubscription).run
-  }
-
   def subscriptionFromRequest(implicit request: Request[_]): Future[Option[Subscription[SubscriptionPlan.PaperPlan]]] = {
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
@@ -77,11 +61,11 @@ object SessionSubscription {
 
 }
 
-object ManageDelivery extends LazyLogging{
+object ManageDelivery extends LazyLogging {
 
   import play.api.mvc.Results._
 
-  def apply(errorCodes: Set[String], allHolidays: Seq[HolidayRefund], billingSchedule: BillingSchedule, deliverySubscription: Subscription[Delivery])(implicit request: Request[AnyContent], touchpoint: TouchpointBackend.Resolution) = {
+  def apply(errorCodes: Set[String], allHolidays: Seq[HolidayRefund], billingSchedule: BillingSchedule, deliverySubscription: Subscription[Delivery])(implicit request: Request[AnyContent], touchpoint: TouchpointBackend.Resolution): Result = {
     val pendingHolidays = pendingHolidayRefunds(allHolidays)
     val suspendedDays = SuspensionService.holidayToSuspendedDays(pendingHolidays, deliverySubscription.plan.charges.chargedDays.toList)
     val chosenPaperDays = deliverySubscription.plan.charges.chargedDays.toList.sortBy(_.dayOfTheWeekIndex)
@@ -89,22 +73,17 @@ object ManageDelivery extends LazyLogging{
     Ok(views.html.account.suspend(deliverySubscription, pendingHolidayRefunds(allHolidays), billingSchedule, chosenPaperDays, suspendableDays, suspendedDays, errorCodes))
   }
 
-  private def pendingHolidayRefunds(allHolidays: Seq[HolidayRefund]) = allHolidays.filterNot(_._2.finish.isBefore(LocalDate.now)).sortBy(_._2.start)
-
   def suspend(tpBackend: TouchpointBackend)(implicit request: Request[AnyContent], touchpoint: TouchpointBackend.Resolution): Future[Result] = {
-    val noSub = "Could not find an active subscription"
-    val numberOfBillsForCalculation = 14 // 14 because + 2 extra months needed in calculation to cover setting a 6-week suspension on the day before your 12th billing day!
-    val numberOfBillsForDisplay = 12
-    def intToEither(i: Int): \/[String, Int] = \/-(i)
-
     (for {
       form <- EitherT(Future.successful(SuspendForm.mappings.bindFromRequest().value \/> "Please check your selections and try again"))
-      sub <- EitherT(SessionSubscription.subscriptionFromRequestOld.map(_ \/> noSub).map(_.flatMap(_.swap.leftMap(_ => noSub))))
+      maybeDeliverySub <- EitherT(SessionSubscription.subscriptionFromRequest.map(_ \/> "Could not find an active subscription"))
+      sub <- EitherT(Future.successful(maybeDeliverySub.asDelivery \/> "Is not a Home Delivery subscription"))
       billCycleDay <- EitherT(tpBackend.zuoraService.getAccount(sub.accountId).map(_.billCycleDay).map(intToEither))
       newHoliday = PaymentHoliday(sub.name, form.startDate, form.endDate)
-      oldBS <- EitherT(tpBackend.commonPaymentService.billingSchedule(sub.id, numberOfBills = numberOfBillsForCalculation).map(_ \/> "Error getting billing schedule"))
-      result <- EitherT(tpBackend.suspensionService.addHoliday(newHoliday, oldBS, now, billCycleDay)).leftMap(getAndLogRefundError(_).map(_.code).list.mkString(","))
-      newBS <- EitherT(tpBackend.commonPaymentService.billingSchedule(sub.id, numberOfBills = numberOfBillsForDisplay).map(_ \/> "Error getting billing schedule"))
+      // 14 because + 2 extra months needed in calculation to cover setting a 6-week suspension on the day before your 12th billing day!
+      oldBS <- EitherT(tpBackend.commonPaymentService.billingSchedule(sub.id, numberOfBills = 14).map(_ \/> "Error getting billing schedule"))
+      result <- EitherT(tpBackend.suspensionService.addHoliday(newHoliday, oldBS, billCycleDay)).leftMap(getAndLogRefundError(_).map(_.code).list.mkString(","))
+      newBS <- EitherT(tpBackend.commonPaymentService.billingSchedule(sub.id, numberOfBills = 12).map(_ \/> "Error getting billing schedule"))
       newHolidays <- EitherT(tpBackend.suspensionService.getHolidays(sub.name)).leftMap(_ => "Error getting holidays")
       pendingHolidays = pendingHolidayRefunds(newHolidays)
       suspendableDays = Config.suspendableWeeks * sub.plan.charges.chargedDays.size
@@ -114,7 +93,7 @@ object ManageDelivery extends LazyLogging{
         logger.error(s"Failed to generate data needed to enqueue ${sub.name.get}'s holiday suspension email. Reason: ${e.getMessage}")
       }
       Ok(views.html.account.success(
-        newRefund = (result.refund, newHoliday),
+        newRefund = result.refund -> newHoliday,
         holidayRefunds = pendingHolidays,
         subscription = sub,
         billingSchedule = newBS,
@@ -122,7 +101,17 @@ object ManageDelivery extends LazyLogging{
         suspendedDays = suspendedDays,
         currency = sub.currency
       ))
-    }).valueOr(errorCode => Redirect(routes.AccountManagement.manage(None, Some(errorCode),None).url))
+    }).valueOr(errorCode => Redirect(routes.AccountManagement.manage(None, Some(errorCode), None).url))
+  }
+
+  /**
+    * Takes a sequence of HolidayRefunds and filters out those that haven't finished yet. Sorting by their start date.
+    *
+    * @param allHolidays a sequence of HolidayRefunds
+    * @return a filtered and sorted sequence of HolidayRefunds
+    */
+  private def pendingHolidayRefunds(allHolidays: Seq[HolidayRefund]): Seq[HolidayRefund] = {
+    allHolidays.filterNot(_._2.finish.isBefore(now)).sortBy(_._2.start)
   }
 
   /**
@@ -139,6 +128,14 @@ object ManageDelivery extends LazyLogging{
     r
   }
 
+  /**
+    * Takes an Int and returns a ScalaZ Right of it, with String labelled as the left. This is just to save some ugly
+    * ScalaZ syntax being in the middle of the for comprehension above
+    *
+    * @param i an Int
+    * @return \/[String, Int]
+    */
+  private def intToEither(i: Int): \/[String, Int] = \/-(i)
 }
 
 object ManageWeekly extends LazyLogging {
