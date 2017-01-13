@@ -39,7 +39,7 @@ object SubscriptionOps extends LazyLogging {
   implicit class EnrichedPaperSubscription[P <: PaperPlan](subscription: Subscription[P]) {
     val renewable = !subscription.autoRenew &&
       // A sub it not renewable if the customer is waiting to start, or has not yet started their earlier-renewed term
-      subscription.termStartDate.isAfter(now) &&
+      !subscription.termStartDate.isAfter(now) &&
       // Currently, only subscriptions containing a OneOffPeriod plan are currently renewable
       subscription.planToManage.charges.billingPeriod.isInstanceOf[OneOffPeriod]
   }
