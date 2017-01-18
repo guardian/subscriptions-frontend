@@ -5,10 +5,10 @@ import _root_.services.TouchpointBackend
 import _root_.services.TouchpointBackend.Resolution
 import actions.CommonActions._
 import com.github.nscala_time.time.OrderingImplicits.LocalDateOrdering
-import com.gu.memsub.subsv2.SubscriptionPlan.{Delivery, WeeklyPlan}
 import com.gu.memsub.Subscription.{Name, ProductRatePlanId}
 import com.gu.memsub.promo.{NormalisedPromoCode, PromoCode}
 import com.gu.memsub.services.GetSalesforceContactForSub
+import com.gu.memsub.subsv2.SubscriptionPlan.{AnyPlan, Delivery, WeeklyPlan}
 import com.gu.memsub.subsv2._
 import com.gu.memsub.{BillingSchedule, Product}
 import com.gu.subscriptions.suspendresume.SuspensionService
@@ -17,20 +17,20 @@ import com.gu.zuora.soap.models.Queries.Contact
 import com.typesafe.scalalogging.LazyLogging
 import configuration.{Config, ProfileLinks}
 import forms._
+import model.SubscriptionOps._
 import model.{Renewal, RenewalReads}
+import org.joda.time.LocalDate.now
 import play.api.libs.json._
 import play.api.mvc.{AnyContent, Controller, Request, Result}
 import utils.TestUsers.PreSigninTestCookie
+import views.html.account.thankYouRenew
+import views.support.Pricing._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scalaz.std.scalaFuture._
 import scalaz.syntax.std.option._
 import scalaz.{-\/, EitherT, OptionT, \/, \/-}
-import model.SubscriptionOps._
-import org.joda.time.LocalDate.now
-import views.html.account.thankYouRenew
-import views.support.Pricing._
 
 // this handles putting subscriptions in and out of the session
 object SessionSubscription {
@@ -61,7 +61,7 @@ object SessionSubscription {
 
 }
 
-object ManageDelivery extends LazyLogging {
+object ManageDelivery extends ContextLogging {
 
   import play.api.mvc.Results._
 
@@ -90,7 +90,7 @@ object ManageDelivery extends LazyLogging {
       suspendedDays = SuspensionService.holidayToSuspendedDays(pendingHolidays, sub.plan.charges.chargedDays.toList)
     } yield {
       tpBackend.exactTargetService.enqueueETHolidaySuspensionEmail(sub, sub.plan.name, newBS, pendingHolidays.size, suspendableDays, suspendedDays).onFailure { case e: Throwable =>
-        logger.error(s"Failed to generate data needed to enqueue ${sub.name.get}'s holiday suspension email. Reason: ${e.getMessage}")
+        error(s"Failed to generate data needed to enqueue ${sub.name.get}'s holiday suspension email. Reason: ${e.getMessage}")(sub)
       }
       Ok(views.html.account.success(
         newRefund = result.refund -> newHoliday,
@@ -138,7 +138,7 @@ object ManageDelivery extends LazyLogging {
   private def intToEither(i: Int): \/[String, Int] = \/-(i)
 }
 
-object ManageWeekly extends LazyLogging {
+object ManageWeekly extends ContextLogging {
 
   import play.api.mvc.Results._
 
@@ -173,6 +173,7 @@ object ManageWeekly extends LazyLogging {
   def apply(billingSchedule: BillingSchedule, weeklySubscription: Subscription[WeeklyPlan], promoCode: Option[PromoCode])(implicit request: Request[AnyContent], resolution: TouchpointBackend.Resolution): Future[Result] = {
     implicit val tpBackend = resolution.backend
     implicit val flash = request.flash
+    implicit val subContext = weeklySubscription
     if (weeklySubscription.readerType == ReaderType.Direct) {
       // go to SF to get the contact mailing information etc
       GetSalesforceContactForSub.zuoraAccountFromSub(weeklySubscription)(tpBackend.zuoraService, tpBackend.salesforceService.repo, global).flatMap { account =>
@@ -196,31 +197,48 @@ object ManageWeekly extends LazyLogging {
               }
               weeklyPlanInfo match {
                 case Left(error) =>
-                  logger.info(s"couldn't get new rate/currency for renewal: $error")
+                  info(s"couldn't get new rate/currency for renewal: $error")
                   Ok(views.html.account.details(None, promoCode))
                 case Right((existingCurrency, weeklyPlanInfoList)) =>
                   Ok(weeklySubscription.asRenewable.map { renewableSub =>
+                    info(s"sub is renewable - showing weeklyRenew page")
                     views.html.account.weeklyRenew(renewableSub, billingSchedule, contact, billToCountry, weeklyPlanInfoList, existingCurrency, promoCode)
                   } getOrElse {
+                    info(s"sub is not renewable - showing weeklyDetails page")
                     views.html.account.weeklyDetails(weeklySubscription, billingSchedule, contact)
                   })
               }
             }.getOrElse {
-              logger.info(s"no valid bill to country for ${weeklySubscription.id}")
+              info(s"no valid bill to country for account")
               Ok(views.html.account.details(None,promoCode))
             }
           }
         }
       }
     } else {
-      logger.info(s"don't support gifts, can't manage ${weeklySubscription.id}")
+      info(s"don't support gifts, can't manage sub")
       Future.successful(Ok(views.html.account.details(None,promoCode))) // don't support gifts (yet) as they have related contacts in salesforce of unknown structure
     }
   }
 
 }
 
-object AccountManagement extends Controller with LazyLogging with CatalogProvider {
+trait ContextLogging extends LazyLogging {
+
+  // as long as there's an implicit subscription context available, log will output the subscription name automatically
+  def info[P <: AnyPlan : Subscription](message: String) = {
+    val context = implicitly[Subscription[P]]
+    logger.info(s"{sub: ${context.name.get}} $message")
+  }
+
+  def error[P <: AnyPlan : Subscription](message: String) = {
+    val context = implicitly[Subscription[P]]
+    logger.info(s"{sub: ${context.name.get}} $message")
+  }
+
+}
+
+object AccountManagement extends Controller with ContextLogging with CatalogProvider {
 
   val accountManagementAction = NoCacheAction
 
@@ -324,7 +342,7 @@ object AccountManagement extends Controller with LazyLogging with CatalogProvide
         renewableSub <- weeklySub.asRenewable.toRightDisjunction("subscription is not renewable")
         renew <- parseRenewalRequest(request, tpBackend.catalogService.unsafeCatalog)
       } yield {
-        logger.info(s"renewing ${renew.plan.name} for ${renewableSub.id} with promo code: ${renew.promoCode}")
+        info(s"renewing ${renew.plan.name} for ${renewableSub.id} with promo code: ${renew.promoCode}")(sub)
         tpBackend.checkoutService.renewSubscription(renewableSub, renew, description(renewableSub, renew)).map(res => Ok(Json.obj("redirect" -> routes.AccountManagement.renewThankYou.url)))
         .recover{
           case e: Throwable =>
