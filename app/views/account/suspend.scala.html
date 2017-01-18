@@ -21,7 +21,7 @@
     errorCodes: Set[String]
 )(implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackend.Resolution)
 @avgPeriodBetweenInvoices = @{
-    val dates = billingSchedule.invoices.list.map(_.date)
+    val dates = billingSchedule.invoices.list.filter(_.totalGross > 0).map(_.date)
     Math.floor(Days.daysBetween(dates.head, dates.last).getDays / dates.size)
 }
 @main("Cancel your papers while you're away | The Guardian", bodyClasses = List("is-wide"), edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
