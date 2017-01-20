@@ -255,7 +255,9 @@ class CheckoutService(identityService: IdentityService,
   }
 
   def renewSubscription(subscription: Subscription[WeeklyPlanOneOff], renewal: Renewal, subscriptionDetails: String )
-    (implicit p: PromotionApplicator[NewUsers, Renew])= {
+    (implicit p: PromotionApplicator[com.gu.memsub.promo.Renewal, Renew]) = {
+
+    import LogImplicit._
 
     def getPayment(contact: Contact, billto: Queries.Contact): PaymentService#Payment = {
       val idMinimalUser = IdMinimalUser(contact.identityId, None)
@@ -276,10 +278,10 @@ class CheckoutService(identityService: IdentityService,
       val newRatePlan = RatePlan(renewal.plan.id.get, None)
       val renewCommand = Renew(subscription.id.get, subscription.termStartDate, subscription.termEndDate, NonEmptyList(newRatePlan), contractEffective, customerAcceptance)
       val validPromotion = for {
-        code <- renewal.promoCode
-        deliveryCountryString <- contact.mailingCountry
-        deliveryCountry <- CountryGroup.countryByName(deliveryCountryString)
-        validPromotion <- promoService.validate[NewUsers](code, deliveryCountry, renewal.plan.id).toOption // would be better to have valid/invalid/tracking
+        code <- renewal.promoCode.withLogging("promo code from client")
+        deliveryCountryString <- contact.mailingCountry.withLogging("salesforce mailing country")
+        deliveryCountry <- CountryGroup.countryByName(deliveryCountryString).withLogging("delivery country object")
+        validPromotion <- promoService.validate[com.gu.memsub.promo.Renewal](code, deliveryCountry, renewal.plan.id).withLogging("validated promotion").toOption
       } yield validPromotion
       val withPromo = validPromotion.map(v => p.apply(v, prpId => catalog.paid.find(_.id == prpId).map(_.charges.billingPeriod).get, promoPlans)(renewCommand)).getOrElse(renewCommand)
       zuoraService.renewSubscription(withPromo)
