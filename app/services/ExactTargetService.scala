@@ -3,6 +3,7 @@ package services
 import com.amazonaws.regions.{Region, Regions}
 import com.amazonaws.services.sqs.AmazonSQSClient
 import com.amazonaws.services.sqs.model._
+import com.gu.aws.CredentialsProvider
 import com.gu.i18n.Currency
 import com.gu.lib.Retry
 import com.gu.memsub.Subscription._
@@ -11,7 +12,7 @@ import com.gu.memsub.promo._
 import com.gu.memsub.services.{GetSalesforceContactForSub, PaymentService => CommonPaymentService}
 import com.gu.memsub.subsv2.reads.ChargeListReads._
 import com.gu.memsub.subsv2.reads.SubPlanReads._
-import com.gu.memsub.subsv2.{ Subscription, SubscriptionPlan => Plan}
+import com.gu.memsub.subsv2.{Subscription, SubscriptionPlan => Plan}
 import com.gu.memsub.{Subscription => _, _}
 import com.gu.salesforce.Contact
 import com.gu.zuora.api.ZuoraService
@@ -225,7 +226,7 @@ class ExactTargetService(
 }
 
 object SqsClient extends LazyLogging {
-  private val sqsClient = new AmazonSQSClient()
+  private val sqsClient = new AmazonSQSClient(CredentialsProvider)
   sqsClient.setRegion(Region.getRegion(Regions.EU_WEST_1))
 
   def sendDataExtensionToQueue(queueName: String, row: DataExtensionRow): Future[Try[SendMessageResult]] = {
