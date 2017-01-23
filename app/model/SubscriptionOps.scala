@@ -5,6 +5,7 @@ import com.gu.memsub.subsv2.{PaidCharge, PaidSubscriptionPlan, Subscription}
 import com.gu.memsub.subsv2.SubscriptionPlan.{Paid, PaperPlan, WeeklyPlan}
 import com.github.nscala_time.time.OrderingImplicits._
 import com.typesafe.scalalogging.LazyLogging
+import controllers.ContextLogging
 import org.joda.time.LocalDate.now
 
 object SubscriptionOps extends LazyLogging {
@@ -36,12 +37,15 @@ object SubscriptionOps extends LazyLogging {
     }
   }
 
-  implicit class EnrichedPaperSubscription[P <: PaperPlan](subscription: Subscription[P]) {
-    val renewable = !subscription.autoRenew &&
-      // A sub it not renewable if the customer is waiting to start, or has not yet started their earlier-renewed term
-      !subscription.termStartDate.isAfter(now) &&
-      // Currently, only subscriptions containing a OneOffPeriod plan are currently renewable
-      subscription.planToManage.charges.billingPeriod.isInstanceOf[OneOffPeriod]
+  implicit class EnrichedPaperSubscription[P <: PaperPlan](subscription: Subscription[P]) extends ContextLogging {
+    implicit val subContext = subscription
+    val renewable = {
+      val wontAutoRenew = !subscription.autoRenew
+      val startedAlready = !subscription.termStartDate.isAfter(now)
+      val isOneOffPlan = subscription.planToManage.charges.billingPeriod.isInstanceOf[OneOffPeriod]
+      info(s"testing if renewable - wontAutoRenew: $wontAutoRenew, startedAlready: $startedAlready, isOneOffPlan: $isOneOffPlan")
+      wontAutoRenew && startedAlready && isOneOffPlan
+    }
   }
 
   implicit class EnrichedWeeklySubscription[P <: WeeklyPlan](subscription: Subscription[P]) {
