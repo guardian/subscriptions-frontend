@@ -78,12 +78,12 @@ object ManageDelivery extends ContextLogging {
       form <- EitherT(Future.successful(SuspendForm.mappings.bindFromRequest().value \/> "Please check your selections and try again"))
       maybeDeliverySub <- EitherT(SessionSubscription.subscriptionFromRequest.map(_ \/> "Could not find an active subscription"))
       sub <- EitherT(Future.successful(maybeDeliverySub.asDelivery \/> "Is not a Home Delivery subscription"))
-      billCycleDay <- EitherT(tpBackend.zuoraService.getAccount(sub.accountId).map(_.billCycleDay).map(intToEither))
+      account <- EitherT(tpBackend.zuoraService.getAccount(sub.accountId).map(toScalaZRight))
       newHoliday = PaymentHoliday(sub.name, form.startDate, form.endDate)
       // 14 because + 2 extra months needed in calculation to cover setting a 6-week suspension on the day before your 12th billing day!
-      oldBS <- EitherT(tpBackend.commonPaymentService.billingSchedule(sub.id, numberOfBills = 14).map(_ \/> "Error getting billing schedule"))
-      result <- EitherT(tpBackend.suspensionService.addHoliday(newHoliday, oldBS, billCycleDay, sub.termEndDate)).leftMap(getAndLogRefundError(_).map(_.code).list.mkString(","))
-      newBS <- EitherT(tpBackend.commonPaymentService.billingSchedule(sub.id, numberOfBills = 12).map(_ \/> "Error getting billing schedule"))
+      oldBS <- EitherT(tpBackend.commonPaymentService.billingSchedule(sub.id, account, numberOfBills = 14).map(_ \/> "Error getting billing schedule"))
+      result <- EitherT(tpBackend.suspensionService.addHoliday(newHoliday, oldBS, account.billCycleDay, sub.termEndDate)).leftMap(getAndLogRefundError(_).map(_.code).list.mkString(","))
+      newBS <- EitherT(tpBackend.commonPaymentService.billingSchedule(sub.id, account, numberOfBills = 12).map(_ \/> "Error getting billing schedule"))
       newHolidays <- EitherT(tpBackend.suspensionService.getHolidays(sub.name)).leftMap(_ => "Error getting holidays")
       pendingHolidays = pendingHolidayRefunds(newHolidays)
       suspendableDays = Config.suspendableWeeks * sub.plan.charges.chargedDays.size
@@ -129,13 +129,13 @@ object ManageDelivery extends ContextLogging {
   }
 
   /**
-    * Takes an Int and returns a ScalaZ Right of it, with String labelled as the left. This is just to save some ugly
+    * Takes a value returns a ScalaZ Right of it, with String labelled as the left. This is just to save some ugly
     * ScalaZ syntax being in the middle of the for comprehension above
     *
     * @param i an Int
     * @return \/[String, Int]
     */
-  private def intToEither(i: Int): \/[String, Int] = \/-(i)
+  private def toScalaZRight[A](i: A): \/[String, A] = \/-(i)
 }
 
 object ManageWeekly extends ContextLogging {
@@ -276,7 +276,7 @@ object AccountManagement extends Controller with ContextLogging with CatalogProv
     val futureMaybeFutureManagePage = for {
       subscription <- OptionT(eventualMaybeSubscription)
       allHolidays <- OptionT(tpBackend.suspensionService.getHolidays(subscription.name).map(_.toOption))
-      billingSchedule <- OptionT(tpBackend.commonPaymentService.billingSchedule(subscription.id, numberOfBills = 13))
+      billingSchedule <- OptionT(tpBackend.commonPaymentService.billingSchedule(subscription.id, subscription.accountId, numberOfBills = 13))
     } yield {
       val maybeFutureManagePage = subscription.planToManage.product match {
         case Product.Delivery => subscription.asDelivery.map { deliverySubscription =>
@@ -370,10 +370,10 @@ object AccountManagement extends Controller with ContextLogging with CatalogProv
     import model.SubscriptionOps._
 
     val res = for {
-    subscription <- OptionT( SessionSubscription.subscriptionFromRequest)
-    billingSchedule <- OptionT(tpBackend.commonPaymentService.billingSchedule(subscription.id, numberOfBills = 13))
-    }yield {
-      Ok(thankYouRenew(subscription.nextPlan,billingSchedule, resolution))
+      subscription <- OptionT(SessionSubscription.subscriptionFromRequest)
+      billingSchedule <- OptionT(tpBackend.commonPaymentService.billingSchedule(subscription.id, subscription.accountId, 13))
+    } yield {
+      Ok(thankYouRenew(subscription.nextPlan, billingSchedule, resolution))
     }
     res.run.map(_.getOrElse(Redirect(routes.Homepage.index()).withNewSession))
   }
