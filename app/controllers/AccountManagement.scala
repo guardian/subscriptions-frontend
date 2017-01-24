@@ -82,7 +82,7 @@ object ManageDelivery extends ContextLogging {
       newHoliday = PaymentHoliday(sub.name, form.startDate, form.endDate)
       // 14 because + 2 extra months needed in calculation to cover setting a 6-week suspension on the day before your 12th billing day!
       oldBS <- EitherT(tpBackend.commonPaymentService.billingSchedule(sub.id, numberOfBills = 14).map(_ \/> "Error getting billing schedule"))
-      result <- EitherT(tpBackend.suspensionService.addHoliday(newHoliday, oldBS, billCycleDay)).leftMap(getAndLogRefundError(_).map(_.code).list.mkString(","))
+      result <- EitherT(tpBackend.suspensionService.addHoliday(newHoliday, oldBS, billCycleDay, sub.termEndDate)).leftMap(getAndLogRefundError(_).map(_.code).list.mkString(","))
       newBS <- EitherT(tpBackend.commonPaymentService.billingSchedule(sub.id, numberOfBills = 12).map(_ \/> "Error getting billing schedule"))
       newHolidays <- EitherT(tpBackend.suspensionService.getHolidays(sub.name)).leftMap(_ => "Error getting holidays")
       pendingHolidays = pendingHolidayRefunds(newHolidays)
