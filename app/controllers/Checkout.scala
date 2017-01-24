@@ -7,8 +7,8 @@ import com.gu.identity.play.ProxiedIP
 import com.gu.memsub.Subscription.ProductRatePlanId
 import com.gu.memsub.promo.Promotion._
 import com.gu.memsub.promo.{NewUsers, NormalisedPromoCode, PromoCode}
-import com.gu.memsub.subsv2.CatalogPlan
-import com.gu.memsub.{Product, SupplierCode}
+import com.gu.memsub.subsv2.{CatalogPlan, PaidCharge}
+import com.gu.memsub.{BillingPeriod, OneOffPeriod, Product, SupplierCode}
 import com.gu.zuora.soap.models.errors._
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config.Identity.webAppProfileUrl
@@ -56,12 +56,14 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
 
     val matchingPlanList: Option[PlanList[CatalogPlan.ContentSubscription]] = {
 
-      val testOnlyPlans = if (tpBackend == TouchpointBackend.Test) List(catalog.weeklyZoneB.toList) else List.empty
+      def oneOffPlan(plan: CatalogPlan[_, PaidCharge[_, BillingPeriod], _]) = plan.charges.billingPeriod.isInstanceOf[OneOffPeriod]
+
+      val testOnlyPlans = if (tpBackend == TouchpointBackend.Test) List(catalog.weeklyZoneB.toList.filterNot(oneOffPlan)) else List.empty
 
       val contentSubscriptionPlans = List(
         catalog.delivery.list,
         catalog.voucher.list,
-        catalog.weeklyZoneA.toList,
+        catalog.weeklyZoneA.toList.filterNot(oneOffPlan),
         catalog.weeklyZoneC.toList,
         catalog.digipack.toList) ++ testOnlyPlans
 
