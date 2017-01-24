@@ -3,7 +3,7 @@
 @import views.support.Pricing._
 @import views.support.Dates._
 @import org.joda.time.LocalDate.now
-
+@import com.gu.memsub.OneOffPeriod
 @(plan: SubscriptionPlan.PaperPlan,
   billingSchedule: BillingSchedule,
   touchpointBackendResolution: services.TouchpointBackend.Resolution
@@ -13,7 +13,10 @@
     <main class="page-container gs-container gs-container--slim">
         @fragments.page.header("Thank you", None, List("l-padded"))
         <section class="section-slice section-slice--bleed section-slice--limited">
-            <p>Your Guardian Weekly subscription has been renewed. We will take @plan.charges.prettyPricing(plan.charges.currencies.head) from your account, starting @if(plan.start.isAfter(now)) { @prettyDate(plan.start). } else { today. }</p>
+            <p>Your Guardian Weekly subscription has been renewed. @plan.charges.billingPeriod match {
+                    case _: OneOffPeriod => { We will take a @plan.charges.prettyPricing(plan.charges.currencies.head) from your account. }
+                    case _ => { We will take @plan.charges.prettyPricing(plan.charges.currencies.head) from your account, starting @if(plan.start.isAfter(now)) { @prettyDate(plan.start). } else { today. } }
+            } </p>
         </section>
         <section class="section-slice--bleed section-slice--limited">
             <h3 class="mma-section__header">
