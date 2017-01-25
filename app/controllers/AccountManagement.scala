@@ -78,7 +78,7 @@ object ManageDelivery extends ContextLogging {
       form <- EitherT(Future.successful(SuspendForm.mappings.bindFromRequest().value \/> "Please check your selections and try again"))
       maybeDeliverySub <- EitherT(SessionSubscription.subscriptionFromRequest.map(_ \/> "Could not find an active subscription"))
       sub <- EitherT(Future.successful(maybeDeliverySub.asDelivery \/> "Is not a Home Delivery subscription"))
-      account <- EitherT(tpBackend.zuoraService.getAccount(sub.accountId).map(toScalaZRight))
+      account <- EitherT(recoverToDisjunction(tpBackend.zuoraService.getAccount(sub.accountId), "Unable to retrieve account details"))
       newHoliday = PaymentHoliday(sub.name, form.startDate, form.endDate)
       // 14 because + 2 extra months needed in calculation to cover setting a 6-week suspension on the day before your 12th billing day!
       oldBS <- EitherT(tpBackend.commonPaymentService.billingSchedule(sub.id, account, numberOfBills = 14).map(_ \/> "Error getting billing schedule"))
@@ -128,14 +128,14 @@ object ManageDelivery extends ContextLogging {
     r
   }
 
-  /**
-    * Takes a value returns a ScalaZ Right of it, with String labelled as the left. This is just to save some ugly
-    * ScalaZ syntax being in the middle of the for comprehension above
-    *
-    * @param i an Int
-    * @return \/[String, Int]
-    */
-  private def toScalaZRight[A](i: A): \/[String, A] = \/-(i)
+  private def recoverToDisjunction[A](eventualA: Future[A], replacementErrorMessage: String): Future[\/[String, A]] = {
+    eventualA.map(\/-.apply).recover {
+      case t: Throwable =>
+        logger.error(t.toString)
+        \/.left(replacementErrorMessage)
+    }
+  }
+
 }
 
 object ManageWeekly extends ContextLogging {
