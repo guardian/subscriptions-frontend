@@ -6,12 +6,14 @@
     "autoprefixer-core": "^5.2.1",
     "babel-core": "^6.10.4",
     "babel-loader": "^6.2.4",
+    "babel-plugin-transform-flow-strip-types": "^6.22.0",
     "babel-preset-es2015": "^6.9.0",
     "babel-preset-react": "^6.11.1",
     "bean": "^1.0.15",
     "bonzo": "^2.0.0",
     "bower": "^1.3.11",
     "css-loader": "^0.23.1",
+    "flow-bin": "^0.38.0",
     "grunt": "^0.4.5",
     "grunt-asset-hash": "0.1.6",
     "grunt-contrib-clean": "^0.6.0",
@@ -56,5 +58,9 @@
     "webpack": "^1.13.1",
     "webpack-dev-server": "^1.14.1",
     "zxcvbn": "^4.3.0"
+  },
+  "scripts": {
+    "flow": "flow; test $? -eq 0 -o $? -eq 2",
+    "compile": "echo 'compiling assets' && grunt compile"
   }
 }
