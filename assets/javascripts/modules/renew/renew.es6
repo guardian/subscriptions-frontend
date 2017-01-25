@@ -1,3 +1,4 @@
+// @flow
 import ajax from 'ajax';
 import {check} from '../promoCode';
 
