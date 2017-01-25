@@ -1,12 +1,10 @@
 package forms
 
 import com.gu.i18n._
-import com.gu.memsub.Address
+import com.gu.memsub._
 import com.gu.memsub.Subscription.ProductRatePlanId
 import com.gu.memsub.promo.PromoCode
-import com.gu.memsub.subsv2.CatalogPlan
-import com.gu.memsub.subsv2.Catalog
-import com.gu.memsub.BillingPeriod
+import com.gu.memsub.subsv2.{Catalog, CatalogPlan, PaidCharge}
 import forms.SubscriptionsForm._
 import model.{SubscribeRequest, _}
 import play.api.data.Forms._
@@ -28,7 +26,10 @@ class SubscriptionsForm(catalog: Catalog) {
   }
 
   implicit val pf2 = new Formatter[CatalogPlan.Paper] {
-    val validPlans = catalog.delivery.list ++ catalog.voucher.list ++ catalog.weeklyZoneA.toList ++ catalog.weeklyZoneB.toList ++ catalog.weeklyZoneC.toList
+
+    def oneOffPlan(plan: CatalogPlan[_, PaidCharge[_, BillingPeriod], _]) = plan.charges.billingPeriod.isInstanceOf[OneOffPeriod]
+
+    val validPlans = catalog.delivery.list ++ catalog.voucher.list ++ catalog.weeklyZoneA.toList.filterNot(oneOffPlan) ++ catalog.weeklyZoneB.toList.filterNot(oneOffPlan) ++ catalog.weeklyZoneC.toList
     override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], CatalogPlan.Paper] =
       data.get(key).map(ProductRatePlanId).flatMap(prpId => validPlans.find(_.id == prpId)).toRight(Seq(FormError(key, "Bad plan")))
     override def unbind(key: String, value: CatalogPlan.Paper): Map[String, String] =
