@@ -14,7 +14,7 @@
                 <span class="mma-section__calendar--main">@bill.date.getDayOfMonth</span>
                 <span class="mma-section__calendar--sub">@bill.date.shortMonth</span>
             </div>
-            <p class="mma-section__calendar--amount @bill.isDiscounted("mma-section__calendar--amount--discounted")">
+            <p class="mma-section__calendar--amount @bill.whenDiscounted("mma-section__calendar--amount--discounted")">
               @currency.glyph@bill.amount.currency
             </p>
         </div>
