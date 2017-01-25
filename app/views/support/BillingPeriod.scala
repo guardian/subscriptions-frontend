@@ -7,7 +7,7 @@ object BillingPeriod {
       case Month() => "every month"
       case Quarter() => "every 3 months"
       case Year() => "every 12 months"
-      case OneYear() => "One off Payment"
+      case OneYear() => "one off payment"
     }
   }
 }
