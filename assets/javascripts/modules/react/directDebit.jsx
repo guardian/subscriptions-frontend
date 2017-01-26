@@ -29,7 +29,7 @@ export function DirectDebit(props: {
         <AccountHolder onChange={props.handleAccountHolder} value={props.accountHolder}
                        valid={props.validAccountHolder}/>
         <Confirmation checked={props.directDebitConfirmed} onChange={props.handleDirectDebitConfirmation}
-                      valid={this.props.validDirectDebitConfirmed}/>
+                      valid={props.validDirectDebitConfirmed}/>
         <dt className="mma-section__list--title">
             Advance Notice
         </dt>
