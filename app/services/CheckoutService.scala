@@ -285,7 +285,11 @@ class CheckoutService(identityService: IdentityService,
         contractEffectiveDate = contractEffective,
         customerAcceptanceDate = customerAcceptance,
         promoCode = None,
-        autoRenew = renewal.plan.charges.billingPeriod.isInstanceOf[RecurringPeriod])
+        autoRenew = renewal.plan.charges.billingPeriod match {
+          case _: RecurringPeriod => true
+          case _ => false
+        }
+      )
 
       val validPromotion = for {
         code <- renewal.promoCode.withLogging("promo code from client")
