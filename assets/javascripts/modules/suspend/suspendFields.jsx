@@ -9,7 +9,7 @@ import moment from 'moment'
 require('react-datepicker/dist/react-datepicker.css');
 
 const DATE_PATTERN = 'D MMMM YYYY';
-const LEAD_TIME = moment().add(2, 'days');
+const LEAD_TIME = moment().add(3, 'days');
 const LAST_START_DATE = moment().add(1, 'year');
 const MAX_WEEKS = 6;
 
@@ -45,7 +45,7 @@ export default {
         const container = document.getElementById(formElements.SUSPEND_DATE_PICKER_ID);
         if (!container) { return; }
 
-        var firstSelectableDate = getFirstSelectableDate(container.getAttribute('firstPaymentDate')),
+        const firstSelectableDate = getFirstSelectableDate(container.getAttribute('firstPaymentDate')),
             remainingDays = parseInt(container.getAttribute('remainingDays'), 10),
             filterDateFn = filterDate(container.getAttribute('ratePlanName'), container.getAttribute('excludeExistingDays'));
 
