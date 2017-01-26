@@ -1,21 +1,27 @@
 # Subscriptions frontend
 
-### NGinx
+## NGinx
 
-   To run standalone you can use the default nginx installation as follows:
+#### Setup Nginx for `Identity-Platform`
 
-   Install nginx:
-
-   Mac OSX: `brew install nginx`
-
-   Make sure you have a sites-enabled folder under your nginx home. This should be
-
-   Mac OSX: `~/Developers/etc/nginx/sites-enabled` or `/usr/local/etc/nginx/`
-   Make sure your nginx.conf (found in your nginx home) contains the following line in the `http{...}` block: `include sites-enabled/*`;
-
-	Get Janus credentials for subscription so you can download the nginx keys.
+Subscriptions depends on Nginx config and SSL certs from Identity, so you'll need to perform the
+[Nginx setup for identity-platform](https://github.com/guardian/identity-platform/blob/master/README.md#setup-nginx-for-local-development)
+first, before you do anything else.
 
    Run: `./nginx/setup.sh` and enter your password where prompted.
+
+#### Run Subscription's Nginx setup script
+
+Run the Subscription-specific [setup.sh](nginx/setup.sh) script from the root
+of the `subscriptions-frontend` project:
+
+```
+./nginx/setup.sh
+```
+
+The script doesn't start Nginx. To manually start it run `sudo nginx` or `sudo systemctl start nginx`
+depending on your system.
+
 
 ## General Setup
 
