@@ -49,7 +49,7 @@ object ContentSubscriptionPlanOps {
       }
     }
 
-    def isRecurring =  in.charges.billingPeriod.isRecurring
+    def isRecurring: Boolean = in.charges.billingPeriod.isRecurring
 
   }
 

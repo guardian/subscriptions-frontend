@@ -42,7 +42,7 @@ object SubscriptionOps extends LazyLogging {
     val renewable = {
       val wontAutoRenew = !subscription.autoRenew
       val startedAlready = !subscription.termStartDate.isAfter(now)
-      val isOneOffPlan = subscription.planToManage.charges.billingPeriod.isRecurring
+      val isOneOffPlan = !subscription.planToManage.charges.billingPeriod.isRecurring
       info(s"testing if renewable - wontAutoRenew: $wontAutoRenew, startedAlready: $startedAlready, isOneOffPlan: $isOneOffPlan")
       wontAutoRenew && startedAlready && isOneOffPlan
     }
