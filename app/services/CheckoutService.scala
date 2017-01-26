@@ -275,8 +275,6 @@ class CheckoutService(identityService: IdentityService,
     val customerAcceptance = contractEffective
 
     def addPlan(contact: Contact) = {
-
-
       val newRatePlan = RatePlan(renewal.plan.id.get, None)
 
       val renewCommand = Renew(
