@@ -32,7 +32,7 @@ import scalaz.std.option._
 import scalaz.std.scalaFuture._
 import scalaz.syntax.monad._
 import scalaz.{EitherT, Monad, NonEmptyList, OptionT, \/}
-
+import views.support.BillingPeriod._
 
 object CheckoutService {
   def paymentDelay(in: Either[PaperData, DigipackData], zuora: ZuoraProperties)(implicit now: LocalDate): Days = in.fold(
@@ -285,10 +285,7 @@ class CheckoutService(identityService: IdentityService,
         contractEffectiveDate = contractEffective,
         customerAcceptanceDate = customerAcceptance,
         promoCode = None,
-        autoRenew = renewal.plan.charges.billingPeriod match {
-          case _: RecurringPeriod => true
-          case _ => false
-        }
+        autoRenew = renewal.plan.charges.billingPeriod.isRecurring
       )
 
       val validPromotion = for {
