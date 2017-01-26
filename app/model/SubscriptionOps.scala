@@ -7,7 +7,7 @@ import com.github.nscala_time.time.OrderingImplicits._
 import com.typesafe.scalalogging.LazyLogging
 import controllers.ContextLogging
 import org.joda.time.LocalDate.now
-
+import model.BillingPeriodOps._
 object SubscriptionOps extends LazyLogging {
 
   type WeeklyPlanOneOff = PaidSubscriptionPlan[Product.Weekly, PaidCharge[Weekly.type, OneOffPeriod]]
@@ -42,7 +42,7 @@ object SubscriptionOps extends LazyLogging {
     val renewable = {
       val wontAutoRenew = !subscription.autoRenew
       val startedAlready = !subscription.termStartDate.isAfter(now)
-      val isOneOffPlan = subscription.planToManage.charges.billingPeriod.isInstanceOf[OneOffPeriod]
+      val isOneOffPlan = subscription.planToManage.charges.billingPeriod.isRecurring
       info(s"testing if renewable - wontAutoRenew: $wontAutoRenew, startedAlready: $startedAlready, isOneOffPlan: $isOneOffPlan")
       wontAutoRenew && startedAlready && isOneOffPlan
     }

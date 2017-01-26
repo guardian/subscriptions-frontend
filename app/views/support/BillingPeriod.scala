@@ -9,14 +9,5 @@ object BillingPeriod {
       case Year() => "every 12 months"
       case OneYear() => "one off payment"
     }
-
-    def isRecurring = billingPeriod match {
-      case _: RecurringPeriod => true
-      case _ => false
-    }
-
   }
-
-
-
 }

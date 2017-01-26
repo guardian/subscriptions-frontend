@@ -32,7 +32,7 @@ import scalaz.std.option._
 import scalaz.std.scalaFuture._
 import scalaz.syntax.monad._
 import scalaz.{EitherT, Monad, NonEmptyList, OptionT, \/}
-import views.support.BillingPeriod._
+import model.BillingPeriodOps._
 
 object CheckoutService {
   def paymentDelay(in: Either[PaperData, DigipackData], zuora: ZuoraProperties)(implicit now: LocalDate): Days = in.fold(
