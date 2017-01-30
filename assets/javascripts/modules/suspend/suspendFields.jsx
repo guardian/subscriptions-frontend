@@ -9,14 +9,14 @@ import moment from 'moment'
 require('react-datepicker/dist/react-datepicker.css');
 
 const DATE_PATTERN = 'D MMMM YYYY';
-const LEAD_TIME = moment().add(3, 'days');
+const LEAD_TIME = moment().add(3, 'days').startOf('day'); // might be as short as 2 days and 1 second in the future!
 const LAST_START_DATE = moment().add(1, 'year');
 const MAX_WEEKS = 6;
 
 function getFirstSelectableDate(firstPaymentDate) {
     if (firstPaymentDate) {
         const firstPaymentMoment = moment(firstPaymentDate, DATE_PATTERN);
-        if (firstPaymentMoment.isAfter(LEAD_TIME)) {
+        if (firstPaymentMoment.isSameOrAfter(LEAD_TIME)) {
             return firstPaymentMoment;
         }
     }
