@@ -10,7 +10,7 @@ import reviewDetails from './reviewDetails'
 
 require('react-datepicker/dist/react-datepicker.css');
 
-const NUMBER_OF_DAYS_IN_ADVANCE = 5;
+const NUMBER_OF_DAYS_IN_ADVANCE = 3;
 const MAX_WEEKS_AVAILABLE = 4;
 
 function getFirstSelectableDate(filterFn) {
