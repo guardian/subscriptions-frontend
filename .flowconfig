@@ -1,0 +1,9 @@
+[include]
+.*/node_modules.*/
+.*/assets/javascripts.*/
+
+[ignore]
+.*/reqwest/tests/.*
+.*/node_modules/fbjs/.*
+.*/node_modules/config-chain/test/broken.json
+.*/node_modules/npmconf/test/.*
