@@ -27,9 +27,7 @@ class SubscriptionsForm(catalog: Catalog) {
 
   implicit val pf2 = new Formatter[CatalogPlan.Paper] {
 
-    def oneOffPlan(plan: CatalogPlan[_, PaidCharge[_, BillingPeriod], _]) = plan.charges.billingPeriod.isInstanceOf[OneOffPeriod]
-
-    val validPlans = catalog.delivery.list ++ catalog.voucher.list ++ catalog.weeklyZoneA.toList.filterNot(oneOffPlan) ++ catalog.weeklyZoneB.toList.filterNot(oneOffPlan) ++ catalog.weeklyZoneC.toList
+    val validPlans = catalog.delivery.list ++ catalog.voucher.list ++ catalog.weeklyZoneA.toList.filter(_.isRecurring) ++ catalog.weeklyZoneB.toList.filter(_.isRecurring) ++ catalog.weeklyZoneC.toList
     override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], CatalogPlan.Paper] =
       data.get(key).map(ProductRatePlanId).flatMap(prpId => validPlans.find(_.id == prpId)).toRight(Seq(FormError(key, "Bad plan")))
     override def unbind(key: String, value: CatalogPlan.Paper): Map[String, String] =

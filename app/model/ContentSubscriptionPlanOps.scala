@@ -5,7 +5,7 @@ import Currency._
 import com.gu.memsub.Product
 import com.gu.memsub.subsv2.CatalogPlan
 import views.support.CountryWithCurrency
-
+import model.BillingPeriodOps._
 
 object ContentSubscriptionPlanOps {
   val weeklyUkCountries = CountryGroup.UK.copy(
@@ -48,6 +48,9 @@ object ContentSubscriptionPlanOps {
         case Product.WeeklyZoneC => LocalizationSettings(Some(CountryWithCurrency.whitelisted(supportedCurrencies, USD, weeklyZoneCGroups)), allCountriesWithCurrencyOrGBP)
       }
     }
+
+    def isRecurring: Boolean = in.charges.billingPeriod.isRecurring
+
   }
 
 }

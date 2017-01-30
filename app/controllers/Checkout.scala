@@ -36,7 +36,7 @@ import scalaz.std.option._
 import scalaz.std.scalaFuture._
 import scalaz.syntax.applicative._
 import scalaz.{NonEmptyList, OptionT}
-
+import model.ContentSubscriptionPlanOps._
 object Checkout extends Controller with LazyLogging with CatalogProvider {
 
   import SessionKeys.{Currency => _, UserId => _, _}
@@ -56,14 +56,12 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
 
     val matchingPlanList: Option[PlanList[CatalogPlan.ContentSubscription]] = {
 
-      def oneOffPlan(plan: CatalogPlan[_, PaidCharge[_, BillingPeriod], _]) = plan.charges.billingPeriod.isInstanceOf[OneOffPeriod]
-
-      val testOnlyPlans = if (tpBackend == TouchpointBackend.Test) List(catalog.weeklyZoneB.toList.filterNot(oneOffPlan)) else List.empty
+      val testOnlyPlans = if (tpBackend == TouchpointBackend.Test) List(catalog.weeklyZoneB.toList.filter(_.isRecurring)) else List.empty
 
       val contentSubscriptionPlans = List(
         catalog.delivery.list,
         catalog.voucher.list,
-        catalog.weeklyZoneA.toList.filterNot(oneOffPlan),
+        catalog.weeklyZoneA.toList.filter(_.isRecurring),
         catalog.weeklyZoneC.toList,
         catalog.digipack.toList) ++ testOnlyPlans
 

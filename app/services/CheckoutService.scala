@@ -8,7 +8,7 @@ import com.gu.identity.play.{AuthenticatedIdUser, IdMinimalUser}
 import com.gu.memsub.promo._
 import com.gu.memsub.services.{GetSalesforceContactForSub, PromoService, PaymentService => CommonPaymentService}
 import com.gu.memsub.subsv2.{Catalog, Subscription, SubscriptionPlan}
-import com.gu.memsub.{Address, Product}
+import com.gu.memsub.{Address, Product, RecurringPeriod}
 import com.gu.salesforce.{Contact, ContactId}
 import com.gu.stripe.Stripe
 import com.gu.zuora.api.ZuoraService
@@ -32,7 +32,7 @@ import scalaz.std.option._
 import scalaz.std.scalaFuture._
 import scalaz.syntax.monad._
 import scalaz.{EitherT, Monad, NonEmptyList, OptionT, \/}
-
+import model.BillingPeriodOps._
 
 object CheckoutService {
   def paymentDelay(in: Either[PaperData, DigipackData], zuora: ZuoraProperties)(implicit now: LocalDate): Days = in.fold(
@@ -276,7 +276,18 @@ class CheckoutService(identityService: IdentityService,
 
     def addPlan(contact: Contact) = {
       val newRatePlan = RatePlan(renewal.plan.id.get, None)
-      val renewCommand = Renew(subscription.id.get, subscription.termStartDate, subscription.termEndDate, NonEmptyList(newRatePlan), contractEffective, customerAcceptance)
+
+      val renewCommand = Renew(
+        subscriptionId = subscription.id.get,
+        currentTermStartDate = subscription.termStartDate,
+        currentTermEndDate = subscription.termEndDate,
+        newRatePlans = NonEmptyList(newRatePlan),
+        contractEffectiveDate = contractEffective,
+        customerAcceptanceDate = customerAcceptance,
+        promoCode = None,
+        autoRenew = renewal.plan.charges.billingPeriod.isRecurring
+      )
+
       val validPromotion = for {
         code <- renewal.promoCode.withLogging("promo code from client")
         deliveryCountryString <- contact.mailingCountry.withLogging("salesforce mailing country")
