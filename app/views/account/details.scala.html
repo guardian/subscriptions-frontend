@@ -89,7 +89,7 @@
                                     @fragments.forms.errorMessage("This field is required")
                                 </div>
                                 @promoCode.map{promo=>
-                                    <input type="hidden" value="@promo" name="promoCode"/>
+                                    <input type="hidden" value="@promo.get" name="promoCode"/>
                                 }
                                 @if(flash.get("error").isDefined) {
                                     <div class="form-field__error-message-visible">@flash.get("error")</div>

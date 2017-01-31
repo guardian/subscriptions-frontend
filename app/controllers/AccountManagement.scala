@@ -309,8 +309,8 @@ object AccountManagement extends Controller with ContextLogging with CatalogProv
     val loginRequest = AccountManagementLoginForm.mappings.bindFromRequest().value
     val promoCode = loginRequest.flatMap(_.promoCode).map(NormalisedPromoCode.safeFromString)
     subscriptionFromUserDetails(loginRequest).map {
-        case Some(sub) => SessionSubscription.set(Redirect(routes.AccountManagement.manage(None,None,promoCode)), sub)
-        case _ => Redirect(routes.AccountManagement.manage(None, None,None)).flashing(
+        case Some(sub) => SessionSubscription.set(Redirect(routes.AccountManagement.manage(None, None, promoCode)), sub)
+        case _ => Redirect(routes.AccountManagement.manage(None, None, promoCode)).flashing(
           "error" -> "Unable to verify your details."
         )
     }
