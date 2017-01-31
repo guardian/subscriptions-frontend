@@ -45,6 +45,7 @@ libraryDependencies ++= Seq(
     PlayImport.specs2,
     "com.gu" %% "membership-common" % "0.353",
     "com.gu" %% "memsub-common-play-auth" % "0.8",
+    "com.gu" %% "identity-test-users" % "0.6",
     "com.gu" %% "content-authorisation-common" % "0.1",
     "com.github.nscala-time" %% "nscala-time" % "2.8.0",
     "net.kencochrane.raven" % "raven-logback" % "6.0.0",
