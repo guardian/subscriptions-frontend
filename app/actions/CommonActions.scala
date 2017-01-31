@@ -24,6 +24,7 @@ object CommonActions {
   val AuthorisedTester = GoogleAuthenticatedStaffAction andThen requireGroup[GoogleAuthRequest](Set(
     "directteam@guardian.co.uk",
     "subscriptions.dev@guardian.co.uk",
+    "membership.dev@guardian.co.uk",
     "membership.wildebeest@guardian.co.uk",
     "memsubs.dev@guardian.co.uk",
     "identitydev@guardian.co.uk",
