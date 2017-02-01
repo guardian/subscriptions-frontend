@@ -9,7 +9,9 @@
 .roundel--raised {
     top: -40px;
 }
-
+.roundel--right {
+    right: -40px;
+}
 .roundel__container {
     @include circular();
     align-content: center;

@@ -8,6 +8,9 @@ import com.gu.memsub.{BillingPeriod => BP, _}
 import com.gu.memsub.subsv2._
 import views.support.BillingPeriod._
 import views.support.PlanOps._
+import scalaz.Id
+
+import scala.language.higherKinds
 
 object Pricing {
 
@@ -21,10 +24,9 @@ object Pricing {
     def prettyPricing(currency: Currency) =
       s"${unsafePrice(currency).pretty} ${plan.billingPeriod.frequencyInMonths}"
 
-    def amount(currency: Currency) =
-      unsafePrice(currency).amount
+    def amount(currency: Currency) = unsafePrice(currency).amount
 
-    def prettyPricingForDiscountedPeriod(discountPromo: Promotion[PercentDiscount, Option, LandingPage], currency: Currency) = {
+    def prettyPricingForDiscountedPeriod[M[+A], A <: LandingPage](discountPromo: Promotion[PercentDiscount,M, A], currency: Currency) = {
       val originalAmount = unsafePrice(currency)
       val discountAmount = discountPromo.promotionType.applyDiscount(originalAmount, plan.billingPeriod)
 
@@ -58,6 +60,7 @@ object Pricing {
         }
       }
     }
+
   }
   implicit class PrettyProductPlan(in: CatalogPlan.Paid) {
     implicit val planWithPricing = new PlanWithPricing(in.charges)
