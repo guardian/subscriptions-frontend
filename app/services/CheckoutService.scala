@@ -166,9 +166,13 @@ class CheckoutService(identityService: IdentityService,
     } yield {
       \/.right(memberId)
     }).recover {
-      case e => \/.left(NonEmptyList(CheckoutSalesforceFailure(
-        userData,
-        s"${userData} could not subscribe during checkout because his details could not be updated in Salesforce")))
+      case e => {
+        val message = s"${userData} could not subscribe during checkout because his details could not be updated in Salesforce"
+        logger.error(s"$message: ${e.toString}")
+        \/.left(NonEmptyList(CheckoutSalesforceFailure(
+          userData,
+          message)))
+      }
     }
   }
 
