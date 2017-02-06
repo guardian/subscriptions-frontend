@@ -18,7 +18,7 @@ import views.support.PegdownMarkdownRenderer
 object PromoLandingPage extends Controller {
 
   val tpBackend = TouchpointBackend.Normal
-  val catalog = tpBackend.catalogService.unsafeCatalog
+  lazy val catalog = tpBackend.catalogService.unsafeCatalog
   val edition = DigitalEdition.UK
 
   private def isActive(promotion: AnyPromotion): Boolean = {
@@ -38,11 +38,17 @@ object PromoLandingPage extends Controller {
     }
   }
 
+  private def getWeeklyLandingPage(promotion: AnyPromotion)(implicit promoCode: PromoCode): Option[Html] = {
+    promotion.asWeekly.filter(p => isActive(asAnyPromotion(p))).map { promotionWithLandingPage =>
+      views.html.promotion.weeklyLandingPage(catalog, promoCode, promotionWithLandingPage, PegdownMarkdownRenderer)
+    }
+  }
+
   def render(promoCodeStr: String) = CachedAction { _ =>
     implicit val promoCode = PromoCode(promoCodeStr)
     (for {
       promotion <- tpBackend.promoService.findPromotion(promoCode)
-      html <- getNewspaperLandingPage(promotion) orElse getDigitalPackLandingPage(promotion)
+      html <- getNewspaperLandingPage(promotion) orElse getDigitalPackLandingPage(promotion) orElse getWeeklyLandingPage(promotion)
     } yield Ok(html)).getOrElse(Redirect("/" ? (internalCampaignCode -> s"FROM_P_${promoCode.get}")))
   }
 
