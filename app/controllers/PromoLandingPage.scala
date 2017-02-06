@@ -18,7 +18,7 @@ import views.support.PegdownMarkdownRenderer
 object PromoLandingPage extends Controller {
 
   val tpBackend = TouchpointBackend.Normal
-  val catalog = tpBackend.catalogService.unsafeCatalog
+  lazy val catalog = tpBackend.catalogService.unsafeCatalog
   val edition = DigitalEdition.UK
 
   private def isActive(promotion: AnyPromotion): Boolean = {

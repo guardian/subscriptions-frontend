@@ -50,7 +50,7 @@ object DiscountWeeklyRegion {
     }
   }
 
-  private val currencyFor = CountryGroup.availableCurrency(Currency.all.toSet)
+  private val currencyFor = CountryGroup.availableCurrency(Currency.all.toSet) _
 
   case class discountedPlan(pretty: String, period: String, url: Uri)
 
