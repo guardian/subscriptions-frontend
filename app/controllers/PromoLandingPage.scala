@@ -57,13 +57,14 @@ object PromoLandingPage extends Controller {
   }
 
   def preview() = GoogleAuthenticatedStaffAction { implicit request =>
-    val previewReturnHeaders = HandleXFrameOptionsOverrideHeader.HEADER_KEY -> s"ALLOW-FROM ${Config.previewXFrameOptionsOverride}"
-    Form(Forms.single("promoJson" -> Forms.text)).bindFromRequest().fold(_ => NotFound, { jsString =>
-      Json.fromJson[AnyPromotion](Json.parse(jsString)).asOpt.flatMap { promotion =>
-        implicit val promoCode: PromoCode = promotion.codes.headOption.getOrElse(PromoCode(""))
-        getLandingPage(promotion)
-      }.fold[Result](NotFound)(Ok(_).withHeaders(previewReturnHeaders))
-    })
+    def OkWithPreviewHeaders(html:Html) = Ok(html).withHeaders(HandleXFrameOptionsOverrideHeader.HEADER_KEY -> s"ALLOW-FROM ${Config.previewXFrameOptionsOverride}")
+
+    val promotion = Form(Forms.single("promoJson" -> Forms.text)).bindFromRequest().fold(_ => None, {jsString =>
+      Json.fromJson[AnyPromotion](Json.parse(jsString)).asOpt})
+    implicit val promoCode: PromoCode = promotion.flatMap(_.codes.headOption).getOrElse(PromoCode("NOTSET"))
+    val landingPage = promotion.flatMap(getLandingPage)
+
+    landingPage.map(OkWithPreviewHeaders).getOrElse(NotFound)
   }
 
   def terms(promoCodeStr: String) = CachedAction { _ =>
