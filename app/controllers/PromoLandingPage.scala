@@ -57,14 +57,22 @@ object PromoLandingPage extends Controller {
   }
 
   def preview() = GoogleAuthenticatedStaffAction { implicit request =>
-    def OkWithPreviewHeaders(html:Html) = Ok(html).withHeaders(HandleXFrameOptionsOverrideHeader.HEADER_KEY -> s"ALLOW-FROM ${Config.previewXFrameOptionsOverride}")
+    //User can preview a promotion before assigning it a code.
+    val undefinedPromoCode = PromoCode("PromoCode")
+    //This appears in a frame in the promoTool.
+    def OkWithPreviewHeaders(html: Html) = Ok(html).withHeaders(HandleXFrameOptionsOverrideHeader.HEADER_KEY -> s"ALLOW-FROM ${Config.previewXFrameOptionsOverride}")
 
-    val promotion = Form(Forms.single("promoJson" -> Forms.text)).bindFromRequest().fold(_ => None, {jsString =>
-      Json.fromJson[AnyPromotion](Json.parse(jsString)).asOpt})
-    implicit val promoCode: PromoCode = promotion.flatMap(_.codes.headOption).getOrElse(PromoCode("NOTSET"))
-    val landingPage = promotion.flatMap(getLandingPage)
+    val formSerializedPromotion = Form(Forms.single("promoJson" -> Forms.text)).bindFromRequest()
+    val maybePromotion = formSerializedPromotion.fold(_ => None, { jsString =>
+      Json.fromJson[AnyPromotion](Json.parse(jsString)).asOpt
+    })
 
-    landingPage.map(OkWithPreviewHeaders).getOrElse(NotFound)
+    val maybeLandingPage = maybePromotion.flatMap { promotion =>
+      val promoCode: PromoCode = promotion.codes.headOption.getOrElse(undefinedPromoCode)
+      getLandingPage(promotion)(promoCode)
+    }
+
+    maybeLandingPage.map(OkWithPreviewHeaders).getOrElse(NotFound)
   }
 
   def terms(promoCodeStr: String) = CachedAction { _ =>
