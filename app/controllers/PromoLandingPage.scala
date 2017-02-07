@@ -27,6 +27,7 @@ object PromoLandingPage extends Controller {
   }
 
   private def getDigitalPackLandingPage(promotion: AnyPromotion)(implicit promoCode: PromoCode): Option[Html] = {
+
     promotion.asDigitalPack.filter(p => isActive(asAnyPromotion(p))).map { promotionWithLandingPage =>
       views.html.promotion.digitalpackLandingPage(edition, catalog, promoCode, promotionWithLandingPage, PegdownMarkdownRenderer)
     }
@@ -48,15 +49,20 @@ object PromoLandingPage extends Controller {
     implicit val promoCode = PromoCode(promoCodeStr)
     (for {
       promotion <- tpBackend.promoService.findPromotion(promoCode)
-      html <- getNewspaperLandingPage(promotion) orElse getDigitalPackLandingPage(promotion) orElse getWeeklyLandingPage(promotion)
+      html <- getLandingPage(promotion)
     } yield Ok(html)).getOrElse(Redirect("/" ? (internalCampaignCode -> s"FROM_P_${promoCode.get}")))
+  }
+  def getLandingPage(promotion: AnyPromotion)(implicit promoCode: PromoCode): Option[Html] = {
+    getNewspaperLandingPage(promotion) orElse getDigitalPackLandingPage(promotion) orElse getWeeklyLandingPage(promotion)
   }
 
   def preview() = GoogleAuthenticatedStaffAction { implicit request =>
+    val previewReturnHeaders = HandleXFrameOptionsOverrideHeader.HEADER_KEY -> s"ALLOW-FROM ${Config.previewXFrameOptionsOverride}"
     Form(Forms.single("promoJson" -> Forms.text)).bindFromRequest().fold(_ => NotFound, { jsString =>
-      Json.fromJson[AnyPromotion](Json.parse(jsString)).asOpt.flatMap(_.asDigitalPack)
-        .map(p => views.html.promotion.digitalpackLandingPage(edition, catalog, p.codes.headOption.getOrElse(PromoCode("")), p, PegdownMarkdownRenderer))
-        .fold[Result](NotFound)(p => Ok(p).withHeaders(HandleXFrameOptionsOverrideHeader.HEADER_KEY -> s"ALLOW-FROM ${Config.previewXFrameOptionsOverride}"))
+      Json.fromJson[AnyPromotion](Json.parse(jsString)).asOpt.flatMap { promotion =>
+        implicit val promoCode: PromoCode = promotion.codes.headOption.getOrElse(PromoCode(""))
+        getLandingPage(promotion)
+      }.fold[Result](NotFound)(Ok(_).withHeaders(previewReturnHeaders))
     })
   }
 
