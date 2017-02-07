@@ -27,6 +27,7 @@ object PromoLandingPage extends Controller {
   }
 
   private def getDigitalPackLandingPage(promotion: AnyPromotion)(implicit promoCode: PromoCode): Option[Html] = {
+
     promotion.asDigitalPack.filter(p => isActive(asAnyPromotion(p))).map { promotionWithLandingPage =>
       views.html.promotion.digitalpackLandingPage(edition, catalog, promoCode, promotionWithLandingPage, PegdownMarkdownRenderer)
     }
@@ -48,16 +49,30 @@ object PromoLandingPage extends Controller {
     implicit val promoCode = PromoCode(promoCodeStr)
     (for {
       promotion <- tpBackend.promoService.findPromotion(promoCode)
-      html <- getNewspaperLandingPage(promotion) orElse getDigitalPackLandingPage(promotion) orElse getWeeklyLandingPage(promotion)
+      html <- getLandingPage(promotion)
     } yield Ok(html)).getOrElse(Redirect("/" ? (internalCampaignCode -> s"FROM_P_${promoCode.get}")))
+  }
+  def getLandingPage(promotion: AnyPromotion)(implicit promoCode: PromoCode): Option[Html] = {
+    getNewspaperLandingPage(promotion) orElse getDigitalPackLandingPage(promotion) orElse getWeeklyLandingPage(promotion)
   }
 
   def preview() = GoogleAuthenticatedStaffAction { implicit request =>
-    Form(Forms.single("promoJson" -> Forms.text)).bindFromRequest().fold(_ => NotFound, { jsString =>
-      Json.fromJson[AnyPromotion](Json.parse(jsString)).asOpt.flatMap(_.asDigitalPack)
-        .map(p => views.html.promotion.digitalpackLandingPage(edition, catalog, p.codes.headOption.getOrElse(PromoCode("")), p, PegdownMarkdownRenderer))
-        .fold[Result](NotFound)(p => Ok(p).withHeaders(HandleXFrameOptionsOverrideHeader.HEADER_KEY -> s"ALLOW-FROM ${Config.previewXFrameOptionsOverride}"))
+    //User can preview a promotion before assigning it a code.
+    val undefinedPromoCode = PromoCode("PromoCode")
+    //This appears in a frame in the promoTool.
+    def OkWithPreviewHeaders(html: Html) = Ok(html).withHeaders(HandleXFrameOptionsOverrideHeader.HEADER_KEY -> s"ALLOW-FROM ${Config.previewXFrameOptionsOverride}")
+
+    val formSerializedPromotion = Form(Forms.single("promoJson" -> Forms.text)).bindFromRequest()
+    val maybePromotion = formSerializedPromotion.fold(_ => None, { jsString =>
+      Json.fromJson[AnyPromotion](Json.parse(jsString)).asOpt
     })
+
+    val maybeLandingPage = maybePromotion.flatMap { promotion =>
+      val promoCode: PromoCode = promotion.codes.headOption.getOrElse(undefinedPromoCode)
+      getLandingPage(promotion)(promoCode)
+    }
+
+    maybeLandingPage.map(OkWithPreviewHeaders).getOrElse(NotFound)
   }
 
   def terms(promoCodeStr: String) = CachedAction { _ =>
