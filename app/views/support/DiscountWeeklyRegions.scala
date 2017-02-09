@@ -11,7 +11,7 @@ import views.support.Pricing._
 
 object DiscountWeeklyRegions {
   case class discountedPlan(pretty: String, period: String, url: Uri)
-  case class DiscountWeeklyRegion(title: String, description: String, url: Uri, ratePlans: Set[Subscription.ProductRatePlanId], countries: Set[Country]) {
+  case class DiscountWeeklyRegion(title: String, description: String, ratePlans: Set[Subscription.ProductRatePlanId], countries: Set[Country]) {
     def promotionalRatePlans(implicit promotion: PromoWithWeeklyLandingPage) = {
       ratePlans intersect promotion.appliesTo.productRatePlanIds
     }
@@ -26,7 +26,6 @@ object DiscountWeeklyRegions {
       Some(DiscountWeeklyRegion(
         title = country.name,
         description = "Posted to you by air mail",
-        url = "http://na/",
         ratePlans = catalog.weeklyZoneC.toList.map(_.id).toSet,
         countries = Set(country)
       ))
@@ -39,7 +38,6 @@ object DiscountWeeklyRegions {
     DiscountWeeklyRegion(
       title = "Rest of the world",
       description = "Posted to you by air mail",
-      url = "http://na/",
       ratePlans = catalog.weeklyZoneC.toList.map(_.id).toSet,
       countries = ZONEC - country
     )
@@ -49,13 +47,11 @@ object DiscountWeeklyRegions {
     val UKandUS = Seq(DiscountWeeklyRegion(
       title = "United Kingdom",
       description = "Includes Isle of Man and Channel Islands",
-      url = Uri.parse(s"checkout/${catalog.weeklyZoneA.quarter.slug}").addParam("countryGroup", "uk"),
       ratePlans = catalog.weeklyZoneA.toList.map(_.id).toSet,
       countries = UK
     ), DiscountWeeklyRegion(
       title = "United States",
       description = "Includes Alaska and Hawaii",
-      url = Uri.parse(s"checkout/${catalog.weeklyZoneA.quarter.slug}").addParam("countryGroup", "us"),
       ratePlans = catalog.weeklyZoneA.toList.map(_.id).toSet,
       countries = US
     ))
