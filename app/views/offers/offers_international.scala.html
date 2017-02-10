@@ -1,0 +1,44 @@
+@import model.DigitalEdition
+@import views.support.DigitalEdition._
+
+@(edition: DigitalEdition)
+
+@main(s"${edition.name} | Subscriptions and Membership | The Guardian",
+    Some("Subscribe to The Guardian. Support our independent, award-winning journalism."),
+    edition = edition) {
+
+    <main class="page-container gs-container">
+        @fragments.page.header("Subscriptions and Membership", Some("Select your preferred package"))
+        <div class="row row--items-2">
+            <div class="row__item block block--primary block--digital">
+                <h2 class="block__title">Subscribe to the Guardian <span class="break-tablet">digital pack</span></h2>
+                <div class="block__info">
+                    <ul class="block__list">
+                        <li class="block__list-item">Access to the Daily Edition, the digital version of the UK Guardian newspaper</li>
+                        <li class="block__list-item">Access to the Guardian App Premium Tier, an advert-free experience</li>
+                        <li class="block__list-item">Available on Apple, Android and Kindle Fire</li>
+                        @edition.digitalPackSaving.map {saving => <li class="block__list-item"><strong>Save up to @saving%</strong></li>}
+                        <li class="block__list-item">14-day free trial</li>
+                    </ul>
+                </div>
+                <div class="block__footer">
+                    <a class="button button--large button--primary button--arrow" href="/@edition.id/digital">Subscribe now</a>
+                </div>
+            </div>
+            <div class="row__item block block--primary block--weekly">
+                <h2 class="block__title">Subscribe to the Guardian Weekly</h2>
+                <div class="block__info">
+                    <ul class="block__list">
+                        <li class="block__list-item">A selection of international editorial from the Guardian, Observer and Washington Post</li>
+                        <li class="block__list-item">A unique blend of international news, politics, culture and comment</li>
+                        <li class="block__list-item">Save on the retail price</li>
+                        <li class="block__list-item">Free delivery to your door, wherever you are in the world</li>
+                    </ul>
+                </div>
+                <div class="block__footer">
+                    <a class="button button--large button--primary" href="https://www.myguardianweekly.co.uk/subscribe/?prom=AAA14&amp;CMP=FAB_2500">Subscribe now</a>
+                </div>
+            </div>
+        </div>
+    </main>
+}
