@@ -15,7 +15,7 @@
 
 @main(s"Confirmation | Subscribe to the ${plan.title} | The Guardian", bodyClasses=List("is-wide"), touchpointBackendResolutionOpt = Some(touchpointBackendResolution), plan = Some(plan)) {
 
-    @fragments.analytics.tagmanager()
+    @fragments.analytics.conversion(true)
 
 <script type="text/javascript">
     guardian.pageInfo.slug="GuardianDigiPack:Order Complete";
