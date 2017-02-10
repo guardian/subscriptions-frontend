@@ -15,7 +15,7 @@ require([
     'modules/patterns',
     'modules/cas/form',
     'modules/renew/loader',
-    'modules/dropdown',
+    'modules/animatedDropdown',
     // Add new dependencies ABOVE this
     'promise-polyfill'
 ], function (
@@ -56,6 +56,7 @@ require([
     suspend.init();
     confirmation.init();
     cas.init();
+    console.log(dropdown);
     dropdown.init();
 
     patterns.init();
