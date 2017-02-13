@@ -48,7 +48,7 @@ object PromoLandingPage extends Controller {
     }
   }
 
-  def render(promoCodeStr: String) = CachedAction { request =>
+  def render(promoCodeStr: String) = NoCacheAction { request =>
     implicit val promoCode = PromoCode(promoCodeStr)
     val country = request.getFastlyCountry
     val promotion = tpBackend.promoService.findPromotionFuture(promoCode)
