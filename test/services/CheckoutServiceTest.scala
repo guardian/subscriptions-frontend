@@ -28,7 +28,7 @@ class CheckoutServiceTest extends Specification {
     id = ProductRatePlanId("p"),
     name = "name",
     description = "desc",
-    charges = PaidCharge(Digipack, BillingPeriod.month, PricingSummary(Map.empty)),
+    charges = PaidCharge(Digipack, BillingPeriod.Month, PricingSummary(Map.empty)),
     product = Product.Digipack,
     saving = None,
     s = Status.current

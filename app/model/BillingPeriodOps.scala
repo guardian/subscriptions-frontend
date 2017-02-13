@@ -1,6 +1,7 @@
 package model
 
-import com.gu.memsub.{BillingPeriod, RecurringPeriod}
+import com.gu.memsub.BillingPeriod
+import com.gu.memsub.BillingPeriod.RecurringPeriod
 
 object BillingPeriodOps {
 

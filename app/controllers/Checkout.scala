@@ -7,8 +7,8 @@ import com.gu.identity.play.ProxiedIP
 import com.gu.memsub.Subscription.ProductRatePlanId
 import com.gu.memsub.promo.Promotion._
 import com.gu.memsub.promo.{NewUsers, NormalisedPromoCode, PromoCode}
-import com.gu.memsub.subsv2.{CatalogPlan, PaidCharge}
-import com.gu.memsub.{BillingPeriod, OneOffPeriod, Product, SupplierCode}
+import com.gu.memsub.subsv2.CatalogPlan
+import com.gu.memsub.{Product, SupplierCode}
 import com.gu.zuora.soap.models.errors._
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config.Identity.webAppProfileUrl
@@ -36,7 +36,6 @@ import scalaz.std.option._
 import scalaz.std.scalaFuture._
 import scalaz.syntax.applicative._
 import scalaz.{NonEmptyList, OptionT}
-import model.ContentSubscriptionPlanOps._
 object Checkout extends Controller with LazyLogging with CatalogProvider {
 
   import SessionKeys.{Currency => _, UserId => _, _}

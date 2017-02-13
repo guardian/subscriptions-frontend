@@ -2,13 +2,13 @@ package services
 
 import com.github.nscala_time.time.OrderingImplicits._
 import com.gu.config.DiscountRatePlanIds
-import com.gu.i18n.{Country, CountryGroup}
 import com.gu.i18n.Currency.GBP
+import com.gu.i18n.{Country, CountryGroup}
 import com.gu.identity.play.{AuthenticatedIdUser, IdMinimalUser}
 import com.gu.memsub.promo._
 import com.gu.memsub.services.{GetSalesforceContactForSub, PromoService, PaymentService => CommonPaymentService}
-import com.gu.memsub.subsv2.{Catalog, Subscription, SubscriptionPlan}
-import com.gu.memsub.{Address, Product, RecurringPeriod}
+import com.gu.memsub.subsv2.{Catalog, Subscription}
+import com.gu.memsub.{Address, Product}
 import com.gu.salesforce.{Contact, ContactId}
 import com.gu.stripe.Stripe
 import com.gu.zuora.api.ZuoraService
@@ -17,13 +17,14 @@ import com.gu.zuora.soap.models.Queries
 import com.gu.zuora.soap.models.Results.SubscribeResult
 import com.gu.zuora.soap.models.errors._
 import com.typesafe.scalalogging.LazyLogging
+import model.BillingPeriodOps._
 import model.SubscriptionOps._
-import model.{Renewal, _}
 import model.error.CheckoutService._
 import model.error.IdentityService._
 import model.error.SubsError
+import model.{Renewal, _}
 import org.joda.time.LocalDate.now
-import org.joda.time.{DateTimeConstants, Days, LocalDate}
+import org.joda.time.{Days, LocalDate}
 import touchpoint.ZuoraProperties
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -31,8 +32,7 @@ import scala.concurrent.Future
 import scalaz.std.option._
 import scalaz.std.scalaFuture._
 import scalaz.syntax.monad._
-import scalaz.{EitherT, Monad, NonEmptyList, OptionT, \/}
-import model.BillingPeriodOps._
+import scalaz.{EitherT, Monad, NonEmptyList, \/}
 
 object CheckoutService {
   def paymentDelay(in: Either[PaperData, DigipackData], zuora: ZuoraProperties)(implicit now: LocalDate): Days = in.fold(

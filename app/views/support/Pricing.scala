@@ -5,6 +5,7 @@ import com.gu.i18n.Currency.GBP
 import com.gu.memsub.promo.PercentDiscount.getDiscountScaledToPeriod
 import com.gu.memsub.promo.{LandingPage, PercentDiscount, Promotion}
 import com.gu.memsub.{BillingPeriod => BP, _}
+import BP._
 import com.gu.memsub.subsv2._
 import views.support.BillingPeriod._
 import views.support.PlanOps._
@@ -34,28 +35,28 @@ object Pricing {
         s"${discountAmount.pretty} ${plan.billingPeriod.frequencyInMonths}"
       } { durationMonths =>
         plan.billingPeriod match {
-          case m: Month =>
+          case Month =>
             val span = durationMonths
             if (span > 1) {
               s"${discountAmount.pretty} for $span months, then ${originalAmount.pretty} every month thereafter"
             } else {
               s"${discountAmount.pretty} for 1 month, then ${originalAmount.pretty} every month thereafter"
             }
-          case q: Quarter =>
-            val span = getDiscountScaledToPeriod(discountPromo.promotionType, q)._2
+          case Quarter =>
+            val span = getDiscountScaledToPeriod(discountPromo.promotionType, Quarter)._2
             if (span > 1) {
               s"${discountAmount.pretty} for ${span.toInt} quarters, then ${originalAmount.pretty} every quarter thereafter"
             } else {
               s"${discountAmount.pretty} for 1 quarter, then ${originalAmount.pretty} every quarter thereafter"
             }
-          case y: Year =>
-            val span = getDiscountScaledToPeriod(discountPromo.promotionType, y)._2
+          case Year =>
+            val span = getDiscountScaledToPeriod(discountPromo.promotionType, Year)._2
             if (span > 1) {
               s"${discountAmount.pretty} for ${span.toInt} years, then ${originalAmount.pretty} every year thereafter"
             } else {
               s"${discountAmount.pretty} for 1 year, then ${originalAmount.pretty} every year thereafter"
             }
-          case oneYear: OneYear => s"${discountAmount.pretty} for 1 year"
+          case OneYear => s"${discountAmount.pretty} for 1 year"
 
         }
       }
