@@ -1,61 +1,43 @@
+@mixin showing {
+    opacity: 1;
+    max-height: 2000px;
+}
+
+@mixin hidden {
+    opacity: 0;
+    max-height: 0;
+}
+
 @keyframes show {
     0% {
-        opacity: 0;
-        max-height: 0;
-
-        margin: 0;
-        padding: 0;
+        @include hidden;
     }
     10% {
-        opacity: 0;
-        max-height: 0;
-
-        margin: 0;
-        padding: 0;
+        @include hidden;
     }
     90% {
-        opacity: 0;
-        max-height: 200px;
-        margin: auto;
-        padding: auto;
+        @include showing;
     }
-
     100% {
-        opacity: 1;
-        max-height: 200px;
-        margin: auto;
-        padding: auto;
+        @include showing;
     }
-
 }
+
 @keyframes hide {
     0% {
-        opacity: 1;
-        max-height: 200px;
-        margin: auto;
-        padding: auto;
+        @include showing;
     }
     10% {
-        opacity: 0;
-        max-height: 200px;
-        margin: auto;
-        padding: auto;
+        @include showing;
     }
     90% {
-        opacity: 0;
-        max-height: 0;
-
-        margin: 0;
-        padding: 0;
+        @include hidden;
     }
     100% {
-        opacity: 0;
-        max-height: 0;
-
-        margin: 0;
-        padding: 0;
+        @include hidden;
     }
 }
+
 .animate-hide {
     animation-name: hide;
     animation-duration: 1s;
@@ -63,8 +45,11 @@
     animation-delay: 0s;
     animation-iteration-count: 1;
     animation-fill-mode: forwards;
+    overflow: hidden;
+
     animation-play-state: running;
 }
+
 .animate-show {
     animation-name: show;
     animation-duration: 1s;
@@ -74,9 +59,8 @@
     animation-fill-mode: forwards;
     animation-play-state: running;
 }
-.animate-hide-hidden {
-    opacity: 0;
-    max-height: 0;
 
-    margin: 0;
-    padding: 0;}
+.animate-hide-hidden {
+    @include hidden;
+}
+

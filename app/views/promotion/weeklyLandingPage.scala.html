@@ -48,26 +48,30 @@
             <h2 class="page-heading">Where should we send your Guardian Weekly?</h2>
 
             @for(option <- options) {
-                <span class="package js-dropdown js-hide" data-dropdown-menu="@option.title.replaceAll(" ","")">
+                <div class="package js-dropdown js-hide" data-dropdown-menu="@option.title.replaceAll(" ","")">
                     <div class="package__info">
                         <span class="package__title" >@option.title</span>
                         <span class="package__description">@option.description</span>
                         </div>
-                </span>
+                </div>
+
+
+
+            }
+            @for(option <- options) {
                 <div class="js-dropdown-@option.title.replaceAll(" ","") js-dropdown-menu animate-hide-hidden">
 
                     <h3>How would you like to pay?</h3>
                     <div>
                 @for(plan <- DiscountWeeklyRegions.plans(promotion,option,catalog,promoCode)){
                     <a href="@plan.url.toString" class="package">
-                    <div class="package__info">
-                        <span class="package__title">Every @plan.period</span>
-                        <span class="package__description">For @plan.pretty</span>
-                    </div>
+                        <div class="package__info">
+                            <span class="package__title">Every @plan.period</span>
+                            <span class="package__description">For @plan.pretty</span>
+                        </div>
                     </a>
                 }
-                </div>
-                </div>
+                    </div></div>
             }
         </section>
         <section class="section-slice promotion-terms">
