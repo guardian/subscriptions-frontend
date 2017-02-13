@@ -1,9 +1,10 @@
 package model
 
-import com.gu.memsub.{OneOffPeriod, Product, Weekly}
+import com.gu.memsub.{Product, Weekly}
 import com.gu.memsub.subsv2.{PaidCharge, PaidSubscriptionPlan, Subscription}
 import com.gu.memsub.subsv2.SubscriptionPlan.{Paid, PaperPlan, WeeklyPlan}
 import com.github.nscala_time.time.OrderingImplicits._
+import com.gu.memsub.BillingPeriod.OneOffPeriod
 import com.typesafe.scalalogging.LazyLogging
 import controllers.ContextLogging
 import org.joda.time.LocalDate.now

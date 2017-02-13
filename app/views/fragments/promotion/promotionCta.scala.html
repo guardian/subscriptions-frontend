@@ -1,10 +1,10 @@
 @import com.gu.memsub.promo.PromoCode
 @import com.gu.memsub.promo.Promotion.AnyPromotion
 @import com.gu.memsub.subsv2.CatalogPlan
-@import com.gu.memsub.Month
+@import com.gu.memsub.BillingPeriod.Month
 @import model.DigitalEdition
 @import org.joda.time.Days
-@(edition: DigitalEdition, plan: CatalogPlan.Digipack[Month], promoCode: PromoCode, promotion: AnyPromotion)
+@(edition: DigitalEdition, plan: CatalogPlan.Digipack[Month.type], promoCode: PromoCode, promotion: AnyPromotion)
 <div class="promotion-cta">
     <div class="grid grid--3up-step-phablet grid--flex">
         <div class="grid__item grid__item--flex-2-columns">
