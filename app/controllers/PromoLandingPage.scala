@@ -71,13 +71,13 @@ object PromoLandingPage extends Controller {
 
   private def getBrochureRouteForPromotion(promotion: AnyPromotion): Option[Call] = {
     val applicableRatePlanIds = promotion.appliesTo.productRatePlanIds
-    if (applicableRatePlanIds intersect digitalPackRatePlanIds nonEmpty) {
+    if ((applicableRatePlanIds intersect digitalPackRatePlanIds).nonEmpty) {
       Some(routes.DigitalPack.redirect())
-    } else if (applicableRatePlanIds intersect paperPlusPackageRatePlanIds nonEmpty) {
+    } else if ((applicableRatePlanIds intersect paperPlusPackageRatePlanIds).nonEmpty) {
       Some(routes.Shipping.viewCollectionPaperDigital())
-    } else if (applicableRatePlanIds intersect paperOnlyPackageRatePlanIds nonEmpty) {
+    } else if ((applicableRatePlanIds intersect paperOnlyPackageRatePlanIds).nonEmpty) {
       Some(routes.Shipping.viewCollectionPaper())
-    } else if (applicableRatePlanIds intersect guardianWeeklyRatePlanIds nonEmpty) {
+    } else if ((applicableRatePlanIds intersect guardianWeeklyRatePlanIds).nonEmpty) {
       Some(routes.WeeklyLandingPage.index())
     } else {
       None
