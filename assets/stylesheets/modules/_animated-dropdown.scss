@@ -1,0 +1,66 @@
+@mixin showing {
+    opacity: 1;
+    max-height: 2000px;
+}
+
+@mixin hidden {
+    opacity: 0;
+    max-height: 0;
+}
+
+@keyframes show {
+    0% {
+        @include hidden;
+    }
+    10% {
+        @include hidden;
+    }
+    90% {
+        @include showing;
+    }
+    100% {
+        @include showing;
+    }
+}
+
+@keyframes hide {
+    0% {
+        @include showing;
+    }
+    10% {
+        @include showing;
+    }
+    90% {
+        @include hidden;
+    }
+    100% {
+        @include hidden;
+    }
+}
+
+.animate-hide {
+    animation-name: hide;
+    animation-duration: 1s;
+    animation-timing-function: ease-out;
+    animation-delay: 0s;
+    animation-iteration-count: 1;
+    animation-fill-mode: forwards;
+    overflow: hidden;
+
+    animation-play-state: running;
+}
+
+.animate-show {
+    animation-name: show;
+    animation-duration: 1s;
+    animation-timing-function: ease-out;
+    animation-delay: 0s;
+    animation-iteration-count: 1;
+    animation-fill-mode: forwards;
+    animation-play-state: running;
+}
+
+.animate-hide-hidden {
+    @include hidden;
+}
+

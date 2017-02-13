@@ -2,15 +2,17 @@
 @import com.gu.memsub.promo.Promotion.PromoWithWeeklyLandingPage
 @import com.gu.memsub.promo.Promotion.asAnyPromotion
 @import views.support.LandingPageOps._
-@import views.support.{MarkdownRenderer, DiscountWeeklyRegion}
+@import views.support.{MarkdownRenderer}
 @import com.gu.memsub.subsv2.Catalog
 @import model.Subscriptions._
-@(catalog: Catalog, promoCode: PromoCode, promotion: PromoWithWeeklyLandingPage, md: MarkdownRenderer)
+@import views.support.DiscountWeeklyRegions
+@import com.gu.i18n.Country
+@(country: Country ,catalog: Catalog, promoCode: PromoCode, promotion: PromoWithWeeklyLandingPage, md: MarkdownRenderer)
 @voucherPlans = @{catalog.voucher.list.filter(p => promotion.appliesTo.productRatePlanIds.contains(p.id))}
 @deliveryPlans = @{catalog.delivery.list.filter(p => promotion.appliesTo.productRatePlanIds.contains(p.id))}
 @anyPromotion = @{asAnyPromotion(promotion)}
 @title = @{"Subscribe to the Guardian Weekly"}
-@options = @{DiscountWeeklyRegion.forPromotion(promotion,catalog)}
+@options = @{DiscountWeeklyRegions.forPromotion(promotion,country)(catalog)}
 @main(
     title = s"$title | The Guardian"
 ) {
@@ -46,25 +48,30 @@
             <h2 class="page-heading">Where should we send your Guardian Weekly?</h2>
 
             @for(option <- options) {
-                <span class="package">
-                    <div class="package__info js-dropdown"  data-dropdown-menu="js-@option.title.replaceAll(" ","")">
+                <div class="package js-dropdown js-hide" data-dropdown-menu="@option.title.replaceAll(" ","")">
+                    <div class="package__info">
                         <span class="package__title" >@option.title</span>
                         <span class="package__description">@option.description</span>
                         </div>
-                </span>
-                <div id="js-@option.title.replaceAll(" ","")" class="js-dropdown-menu is-hidden">
+                </div>
+
+
+
+            }
+            @for(option <- options) {
+                <div class="js-dropdown-@option.title.replaceAll(" ","") js-dropdown-menu animate-hide-hidden">
+
                     <h3>How would you like to pay?</h3>
                     <div>
-                @for(plan <- DiscountWeeklyRegion.plans(promotion,option,catalog,promoCode)){
+                @for(plan <- DiscountWeeklyRegions.plans(promotion,option,catalog,promoCode)){
                     <a href="@plan.url.toString" class="package">
-                    <div class="package__info">
-                        <span class="package__title">Every @plan.period</span>
-                        <span class="package__description">For @plan.pretty</span>
-                    </div>
+                        <div class="package__info">
+                            <span class="package__title">Every @plan.period</span>
+                            <span class="package__description">For @plan.pretty</span>
+                        </div>
                     </a>
                 }
-                </div>
-                </div>
+                    </div></div>
             }
         </section>
         <section class="section-slice promotion-terms">

@@ -1,5 +1,6 @@
 package controllers
 import actions.CommonActions._
+import com.gu.i18n.{Country, CountryGroup}
 import com.gu.memsub.promo.Formatters.PromotionFormatters._
 import com.gu.memsub.promo.Promotion._
 import com.gu.memsub.promo._
@@ -12,6 +13,7 @@ import play.api.libs.json.Json
 import play.api.mvc._
 import play.twirl.api.Html
 import services.TouchpointBackend
+import utils.RequestCountry.RequestWithFastlyCountry
 import utils.Tracking.internalCampaignCode
 import views.support.PegdownMarkdownRenderer
 
@@ -39,21 +41,24 @@ object PromoLandingPage extends Controller {
     }
   }
 
-  private def getWeeklyLandingPage(promotion: AnyPromotion)(implicit promoCode: PromoCode): Option[Html] = {
+  private def getWeeklyLandingPage(promotion: AnyPromotion, maybeCountry: Option[Country] = None)(implicit promoCode: PromoCode): Option[Html] = {
+    val country = maybeCountry.getOrElse(Country.UK)
     promotion.asWeekly.filter(p => isActive(asAnyPromotion(p))).map { promotionWithLandingPage =>
-      views.html.promotion.weeklyLandingPage(catalog, promoCode, promotionWithLandingPage, PegdownMarkdownRenderer)
+      views.html.promotion.weeklyLandingPage(country,catalog, promoCode, promotionWithLandingPage, PegdownMarkdownRenderer)
     }
   }
 
-  def render(promoCodeStr: String) = CachedAction { _ =>
+  def render(promoCodeStr: String) = NoCacheAction { request =>
     implicit val promoCode = PromoCode(promoCodeStr)
+    val country = request.getFastlyCountry
+    val promotion = tpBackend.promoService.findPromotionFuture(promoCode)
     (for {
       promotion <- tpBackend.promoService.findPromotion(promoCode)
-      html <- getLandingPage(promotion)
+      html <- getLandingPage(promotion,country)
     } yield Ok(html)).getOrElse(Redirect("/" ? (internalCampaignCode -> s"FROM_P_${promoCode.get}")))
   }
-  def getLandingPage(promotion: AnyPromotion)(implicit promoCode: PromoCode): Option[Html] = {
-    getNewspaperLandingPage(promotion) orElse getDigitalPackLandingPage(promotion) orElse getWeeklyLandingPage(promotion)
+  def getLandingPage(promotion: AnyPromotion, maybeCountry: Option[Country]= None)(implicit promoCode: PromoCode): Option[Html] = {
+    getNewspaperLandingPage(promotion) orElse getDigitalPackLandingPage(promotion) orElse getWeeklyLandingPage(promotion, maybeCountry)
   }
 
   def preview() = GoogleAuthenticatedStaffAction { implicit request =>
