@@ -15,9 +15,7 @@ require([
     'modules/patterns',
     'modules/cas/form',
     'modules/renew/loader',
-    'modules/animatedDropdown',
-    // Add new dependencies ABOVE this
-    'promise-polyfill'
+    'modules/animatedDropdown'
 ], function (
     ajax,
     raven,
@@ -35,11 +33,9 @@ require([
     patterns,
     cas,
     renew,
-    dropdown,
-    promise
+    dropdown
 ) {
     'use strict';
-    window.Promise = window.Promise || promise;
 
     ajax.init({page: {ajaxUrl: ''}});
     raven.init('https://6dd79da86ec54339b403277d8baac7c8@app.getsentry.com/47380');
@@ -56,7 +52,6 @@ require([
     suspend.init();
     confirmation.init();
     cas.init();
-    console.log(dropdown);
     dropdown.init();
 
     patterns.init();
