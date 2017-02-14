@@ -89,7 +89,7 @@
         };
 
         if (location.hash === '' || location.hash === '#') {
-            location.hash = '@hash';
+            location.replace('#@hash');
         }
 
         window.onhashchange();
