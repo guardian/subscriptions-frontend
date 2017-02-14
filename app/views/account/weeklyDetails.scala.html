@@ -29,7 +29,7 @@
                     plan = subscription.planToManage,
                     maybeStartDate = Some(subscription.planToManage.start),
                     maybeContact = Some(contact),
-                    maybeFuturePlan = Some(subscription.nextPlan).filter(_.start.isAfter(now))
+                    maybeFuturePlan = Some(subscription.nextPlan).filter { plan => plan.start.isAfter(now) && plan != subscription.planToManage }
                 )()
             </section>
 
