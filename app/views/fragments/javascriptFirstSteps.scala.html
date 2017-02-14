@@ -4,12 +4,9 @@
 @import configuration.Config
 @(jsVars: JsVars, touchpointBackendResolutionOpt: Option[services.TouchpointBackend.Resolution])
 
-<!--[if lte IE 9]>
-<script src="@hashedPathFor("javascripts/vendor/polyfills.js")"></script>
-<![endif]-->
-<!--[if lt IE 9]>
-<script src="@hashedPathFor("javascripts/vendor/html5shiv.js")"></script>
-<![endif]-->
+
+<script src="https://polyfill.guim.co.uk/v2/polyfill.min.js?features=default-3.6,Element.prototype.dataset,Array.prototype.includes"></script>
+
 
 <script id="gu">
     var guardian = JSON.parse('@Html(Json.stringify(Json.toJson(jsVars)))');

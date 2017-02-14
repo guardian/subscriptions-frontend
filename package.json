@@ -43,7 +43,6 @@
     "moment": "^2.13.0",
     "moment-business-days": "0.0.10",
     "phantomjs": "~1.9.15",
-    "promise-polyfill": "^5.2.1",
     "qwery": "^4.0.0",
     "raven-js": "^3.0.5",
     "react": "^15.1.0",
