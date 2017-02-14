@@ -15,8 +15,6 @@
 
 @main(s"Confirmation | Subscribe to the ${plan.title} | The Guardian", bodyClasses=List("is-wide"), touchpointBackendResolutionOpt = Some(touchpointBackendResolution), plan = Some(plan)) {
 
-    @fragments.analytics.conversion(true)
-
 <script type="text/javascript">
     guardian.pageInfo.slug="GuardianDigiPack:Order Complete";
     guardian.pageInfo.productData = {
@@ -26,7 +24,7 @@
         type: 'GUARDIAN_DIGIPACK',
         eventName: 'purchase',
         amount: @{plan.charges.gbpPrice.amount},
-        // Google Analtics
+        // Google Analytics
         zuoraId: '@subscriptionName',
         productType: '@plan.productType',
         productPurchased: '@plan.name'
