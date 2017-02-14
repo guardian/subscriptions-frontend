@@ -78,7 +78,7 @@ GET         /s/:supplierCodeStr              controllers.Homepage.supplierRedire
 # Paths from legacy redirects
 GET         /Voucher                         controllers.Homepage.index
 
-# Offers page or 404
+# Offers page
 GET         /offers                          controllers.Offers.offers
 GET         /:edition/offers                 controllers.Offers.offersPage(edition: String)
 
