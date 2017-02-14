@@ -130,7 +130,7 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
           supplierCode = resolvedSupplierCode,
           edition = digitalEdition,
           countryAndCurrencySettings = countryAndCurrencySettings
-        )).withSession(trackingCodeSessionData ++ supplierCodeSessionData: _*)
+        )).withSession(request.session.data.toSeq ++ trackingCodeSessionData ++ supplierCodeSessionData: _*)
       }
 
       matchingPlanList match {
