@@ -27,7 +27,7 @@ object Pricing {
 
     def amount(currency: Currency) = unsafePrice(currency).amount
 
-    def prettyPricingForDiscountedPeriod[M[+A], A <: LandingPage](discountPromo: Promotion[PercentDiscount,M, A], currency: Currency) = {
+    def prettyPricingForDiscountedPeriod[M[+A], A <: LandingPage](discountPromo: Promotion[PercentDiscount, M, A], currency: Currency) = {
       val originalAmount = unsafePrice(currency)
       val discountAmount = discountPromo.promotionType.applyDiscount(originalAmount, plan.billingPeriod)
 
@@ -62,7 +62,17 @@ object Pricing {
       }
     }
 
+    def headlinePricingForDiscountedPeriod[M[+A], A <: LandingPage](discountPromo: Promotion[PercentDiscount, M, A], currency: Currency) = {
+      val originalAmount = unsafePrice(currency)
+      val discountAmount = discountPromo.promotionType.applyDiscount(originalAmount, plan.billingPeriod)
+      discountPromo.promotionType.durationMonths.fold {
+        s"${discountAmount.pretty} per ${plan.billingPeriod.noun}"
+      } { _ =>
+        s"From ${discountAmount.pretty} per ${plan.billingPeriod.noun}"
+      }
+    }
   }
+
   implicit class PrettyProductPlan(in: CatalogPlan.Paid) {
     implicit val planWithPricing = new PlanWithPricing(in.charges)
 
@@ -76,4 +86,5 @@ object Pricing {
       case _ => s"$prefix${planWithPricing.prettyPricing(currency)}"
     }
   }
+
 }

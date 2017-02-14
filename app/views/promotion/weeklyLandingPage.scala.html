@@ -51,6 +51,11 @@
                 <div class="package js-dropdown js-hide" data-dropdown-menu="@option.title.replaceAll(" ","")">
                     <div class="package__info">
                         <span class="package__title" >@option.title</span>
+                        @DiscountWeeklyRegions.plans(promotion,option,catalog,promoCode).headOption.map{plan=>
+                        <strong class="package__price">
+                             @plan.headline
+                        </strong>
+                        }
                         <span class="package__description">@option.description</span>
                         </div>
                 </div>
@@ -66,8 +71,11 @@
                 @for(plan <- DiscountWeeklyRegions.plans(promotion,option,catalog,promoCode)){
                     <a href="@plan.url.toString" class="package">
                         <div class="package__info">
-                            <span class="package__title">Every @plan.period</span>
-                            <span class="package__description">For @plan.pretty</span>
+                            <span class="package__title">@plan.period</span>
+                            <strong class="package__price">
+                               @plan.headline
+                            </strong>
+                            <span class="package__description"> For @plan.pretty</span>
                         </div>
                     </a>
                 }
