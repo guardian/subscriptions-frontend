@@ -7,7 +7,6 @@ import model.DigitalEdition._
 import play.api.mvc._
 import services.TouchpointBackend
 import utils.RequestCountry._
-import views.support.Pricing._
 
 object DigitalPack extends Controller {
 
@@ -20,12 +19,11 @@ object DigitalPack extends Controller {
     redirectResult(digitalEdition)
   }
 
-  def landingPage(code: String) = CachedAction { implicit request =>
-    getById(code).fold(redirectResult(INT)) { digitalEdition =>
-      val plan = TouchpointBackend.Normal.catalogService.unsafeCatalog.digipack.month
-      val price = plan.charges.price.getPrice(digitalEdition.countryGroup.currency).getOrElse(plan.charges.gbpPrice)
-      Ok(views.html.digitalpack.info(digitalEdition, price))
-    }
+  def landingPage(code: String) = CachedAction { _ =>
+    val digitalEdition = getById(code).getOrElse(INT)
+    val plan = TouchpointBackend.Normal.catalogService.unsafeCatalog.digipack.month
+    val price = plan.charges.price.getPrice(digitalEdition.countryGroup.currency).getOrElse(plan.charges.gbpPrice)
+    Ok(views.html.digitalpack.info(digitalEdition, price))
   }
 
 }
