@@ -11,7 +11,7 @@
 @deliveryPlans = @{catalog.delivery.list.filter(p => promotion.appliesTo.productRatePlanIds.contains(p.id))}
 @anyPromotion = @{asAnyPromotion(promotion)}
 @title = @{"Subscribe to the Guardian and Observer"}
-@hash = @{s"#${promotion.landingPage.defaultProduct}"}
+@hash = @{s"${promotion.landingPage.defaultProduct}"}
 @products = @{
     val adapter = planToOptions(promoCode, anyPromotion) _
     val voucherProduct = CollectionSubscriptionProduct(
