@@ -70,8 +70,8 @@ class CheckoutService(identityService: IdentityService,
 
     val updatedCommand = additionalRateplan.map { ratePlantoAdd =>
       val updatedRatePlans = ratePlantoAdd <:: originalCommand.ratePlans
-      val contractEffective = DateTime.now.toLocalDate.plusDays(defaultPaymentDelayt.getDays)
-      originalCommand.copy(ratePlans = updatedRatePlans, contractEffective = contractEffective, contractAcceptance = contractEffective.plusDays(42))
+      val updatedContractEffective = DateTime.now.toLocalDate.plusDays(defaultPaymentDelayt.getDays)
+      originalCommand.copy(ratePlans = updatedRatePlans, contractEffective = updatedContractEffective, contractAcceptance = updatedContractEffective.plusDays(42))
     }
 
     updatedCommand.getOrElse(originalCommand)
@@ -227,9 +227,9 @@ class CheckoutService(identityService: IdentityService,
       address = personalData.address,
       email = personalData.email,
       soldToContact = soldToContact.map(address => SoldToContact(
-        name = personalData, // TODO once we have gifting change this to the Giftee's name
+        name = personalData,        // TODO once we have gifting change this to the Giftee's name
         address = address,
-        email = personalData.email // TODO once we have gifting change this to the Giftee's email address
+        email = personalData.email  // TODO once we have gifting change this to the Giftee's email address
       )),
       contractEffective = now,
       contractAcceptance = paymentDelay.map(delay => now.plusDays(delay.getDays)).getOrElse(now),
