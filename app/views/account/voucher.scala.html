@@ -1,10 +1,10 @@
 @import com.gu.memsub.BillingSchedule
-@import com.gu.memsub.subsv2.SubscriptionPlan
 @import com.gu.memsub.subsv2.Subscription
 @import model.DigitalEdition.UK
 @import model.SubscriptionOps._
+@import com.gu.memsub.subsv2.SubscriptionPlan.Voucher
 @(
-    subscription: Subscription[SubscriptionPlan.DailyPaper], billingSchedule: BillingSchedule
+    subscription: Subscription[Voucher], billingSchedule: BillingSchedule
 )(implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackend.Resolution)
 
 @main("Your Guardian subscription | The Guardian", bodyClasses = List("is-wide"), edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
