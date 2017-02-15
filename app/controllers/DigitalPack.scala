@@ -10,13 +10,20 @@ import utils.RequestCountry._
 
 object DigitalPack extends Controller {
 
-  private def redirectResult(digitalEdition: DigitalEdition)(implicit request: Request[AnyContent]) =
-    Redirect(routes.DigitalPack.landingPage(digitalEdition.id).url, request.queryString, SEE_OTHER)
+  private val queryParamHint = "edition"
+
+  private def redirectResult(digitalEdition: DigitalEdition)(implicit request: Request[AnyContent]) = {
+    val queryString = request.queryString.-(queryParamHint)
+    Redirect(routes.DigitalPack.landingPage(digitalEdition.id).url, queryString, SEE_OTHER)
+  }
 
   def redirect = NoCacheAction { implicit request =>
-    val countryGroup = request.getFastlyCountryGroup.getOrElse(UK)     // UK fallback for when no GEO-IP country (test env)
-    val digitalEdition = getForCountryGroup(countryGroup)
-    redirectResult(digitalEdition)
+    // Use hint from 'edition' query parameter if present, else use GEO-IP
+    request.getQueryString(queryParamHint).flatMap(getById).map(redirectResult) getOrElse {
+      val countryGroup = request.getFastlyCountryGroup.getOrElse(UK) // UK fallback for when no GEO-IP (e.g test env)
+      val digitalEdition = getForCountryGroup(countryGroup)
+      redirectResult(digitalEdition)
+    }
   }
 
   def landingPage(code: String) = CachedAction { _ =>
