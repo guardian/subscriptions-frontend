@@ -13,7 +13,7 @@ object DigitalPack extends Controller {
   private val queryParamHint = "edition"
 
   private def redirectResult(digitalEdition: DigitalEdition)(implicit request: Request[AnyContent]) = {
-    val queryString = request.queryString.-(queryParamHint)
+    val queryString = request.queryString - queryParamHint
     Redirect(routes.DigitalPack.landingPage(digitalEdition.id).url, queryString, SEE_OTHER)
   }
 
