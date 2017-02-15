@@ -1,11 +1,13 @@
 @mixin showing {
     opacity: 1;
     max-height: 2000px;
+    overflow:hidden;
 }
 
 @mixin hidden {
     opacity: 0;
     max-height: 0;
+    overflow:hidden;
 }
 
 @keyframes show {
@@ -28,13 +30,12 @@
 
 .animate-hide {
     animation-name: hide;
-    animation-duration: 3s;
+    animation-duration: 1s;
     animation-timing-function: ease-in-out;
     animation-delay: 0s;
     animation-iteration-count: 1;
     animation-fill-mode: forwards;
     overflow: hidden;
-
     animation-play-state: running;
 }
 
@@ -52,3 +53,7 @@
     @include hidden;
 }
 
+.animate-show-shown .package__price{
+    opacity: 0;
+    transition: 1s ease-in-out;
+}

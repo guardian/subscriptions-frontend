@@ -1,4 +1,4 @@
-const SHOW_CLASS = 'js-show';
+    const SHOW_CLASS = 'animate-show-shown';
 
 
 function animationFinishHandler(element) {
