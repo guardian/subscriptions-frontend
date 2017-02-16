@@ -10,10 +10,11 @@ import reviewDetails from './reviewDetails'
 
 require('react-datepicker/dist/react-datepicker.css');
 
-const NUMBER_OF_DAYS_IN_ADVANCE = 3;
 const MAX_WEEKS_AVAILABLE = 4;
 
 function getFirstSelectableDate(filterFn) {
+    let weekly = formElements.$DELIVERED_PRODUCT_TYPE.val() === 'weekly';
+    let NUMBER_OF_DAYS_IN_ADVANCE = weekly?7:3;
     var firstSelectableDate = moment().add(NUMBER_OF_DAYS_IN_ADVANCE, 'days');
     while (filterFn && !filterFn(firstSelectableDate)) {
         firstSelectableDate.add(1, 'day');
@@ -27,9 +28,9 @@ function getLastSelectableDate(firstSelectableDate) {
 }
 
 function getDefaultProps() {
-    const filterDateFn = planDateFilter(),
-        firstSelectableDate = getFirstSelectableDate(filterDateFn),
-        lastSelectableDate = getLastSelectableDate(firstSelectableDate);
+    const filterDateFn = planDateFilter();
+    const firstSelectableDate = getFirstSelectableDate(filterDateFn);
+    const lastSelectableDate = getLastSelectableDate(firstSelectableDate);
 
     return {
         filterDate: filterDateFn,
