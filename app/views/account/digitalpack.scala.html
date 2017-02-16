@@ -1,0 +1,62 @@
+@import com.gu.memsub.BillingSchedule
+@import com.gu.memsub.subsv2.SubscriptionPlan.Digipack
+@import com.gu.memsub.subsv2.Subscription
+@import model.DigitalEdition.UK
+@import model.SubscriptionOps._
+@import org.joda.time.LocalDate.now
+@import org.joda.time.Days.daysBetween
+@import views.support.Dates._
+@import views.support.Pricing._
+
+@(
+    subscription: Subscription[Digipack], billingSchedule: BillingSchedule
+)(implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackend.Resolution)
+
+@main("Your Guardian Digital Pack subscription | The Guardian", bodyClasses = List("is-wide"), edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
+
+    <main class="page-container gs-container">
+        <section class="suspend-container">
+
+            <div class="suspend-header">
+                <h1 class="suspend-header__title">Your Guardian Digital Pack subscription</h1>
+            </div>
+
+            <section class="mma-section">
+                <h3 class="mma-section__header">
+                    Your details
+                </h3>
+                <dl class="mma-section__list">
+                    <dt class="mma-section__list--title">Subscriber ID</dt>
+                    <dd class="mma-section__list--content">@subscription.name.get</dd>
+                    @if(subscription.firstPaymentDate.isAfter(now)) {
+                        <dt class="mma-section__list--title">Free trial</dt>
+                        <dd class="mma-section__list--content">You have @{daysBetween(now, subscription.firstPaymentDate).getDays} days left of your free trial.</dd>
+                        <dt class="mma-section__list--title">Paid plan</dt>
+                        <dd class="mma-section__list--content">
+                            <div>@subscription.plan.name</div>
+                            <div>@subscription.plan.charges.prettyPricing(subscription.plan.charges.price.currencies.head)</div>
+                            <div>Starts: @prettyDate(subscription.firstPaymentDate)</div>
+                        </dd>
+                    } else {
+                        <dt class="mma-section__list--title">Current plan</dt>
+                        <dd class="mma-section__list--content">
+                            <div>@subscription.plan.name</div>
+                            <div>@subscription.plan.charges.prettyPricing(subscription.plan.charges.price.currencies.head)</div>
+                            <div>Started: @prettyDate(subscription.firstPaymentDate)</div>
+                        </dd>
+                    }
+                </dl>
+            </section>
+
+            <section class="mma-section">
+                <h3 class="mma-section__header">
+                    Your billing schedule
+                </h3>
+                @views.html.account.fragments.billingSchedule(billingSchedule, subscription.currency)
+            </section>
+            <section class="mma-section">
+                <a class="button button--primary button--large" href="@routes.AccountManagement.logout">Sign Out</a>
+            </section>
+        </section>
+    </main>
+}
