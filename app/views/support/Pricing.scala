@@ -65,7 +65,7 @@ object Pricing {
     def headlinePricingForDiscountedPeriod[M[+A], A <: LandingPage](discountPromo: Promotion[PercentDiscount, M, A], currency: Currency) = {
       val originalAmount = unsafePrice(currency)
       val discountAmount = discountPromo.promotionType.applyDiscount(originalAmount, plan.billingPeriod)
-      val from = discountPromo.promotionType.durationMonths.map("From")
+      val from = discountPromo.promotionType.durationMonths.map(_ => "From")
       s"${from.mkString} ${discountAmount.pretty} per ${plan.billingPeriod.noun}"
     }
   }
