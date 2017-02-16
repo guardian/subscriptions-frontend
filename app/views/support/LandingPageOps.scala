@@ -1,6 +1,7 @@
 package views.support
 
 import com.gu.i18n.CountryGroup.UK
+import com.gu.i18n.Currency.GBP
 import com.gu.memsub.promo.Promotion._
 import com.gu.memsub.promo._
 import com.gu.memsub.subsv2.CatalogPlan
@@ -45,9 +46,9 @@ object LandingPageOps {
   }
 
   def planToOptions(promoCode: PromoCode, promotion: AnyPromotion)(in: CatalogPlan.Paid): SubscriptionOption = {
-    val planPrice = promotion.asDiscount.map(adjustPrice(in, _)).getOrElse(in.charges.gbpPrice)
+    val planPrice = promotion.asDiscount.map(adjustPrice(in, GBP, _)).getOrElse(in.charges.gbpPrice)
     val saving = if (promotion.asDiscount.isDefined) None else in.saving
-    val paymentDetails = promotion.asDiscount.map(views.html.fragments.promotion.paymentDetails(in, _))
+    val paymentDetails = promotion.asDiscount.map(views.html.fragments.promotion.paymentDetails(in, GBP, _))
 
     SubscriptionOption(in.id.get,
       in.name,

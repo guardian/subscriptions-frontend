@@ -1,9 +1,9 @@
+@import com.gu.i18n.Country
 @import com.gu.memsub.subsv2.CatalogPlan
 @import com.gu.memsub.BillingPeriod.Month
 @import com.gu.memsub.promo.PromoCode
-@import model.DigitalEdition
 
-@(edition: DigitalEdition, plan: CatalogPlan.Digipack[Month.type], promoCode: PromoCode, roundelHtml: Option[String])
+@(country: Country, plan: CatalogPlan.Digipack[Month.type], promoCode: PromoCode, roundelHtml: Option[String])
 <div class="digipack">
     <div class="grid grid--3up-step-phablet grid--flex grid--no-clearfix-before">
         <div class="grid__item grid__item--flex-2-columns grid__item--flex-wrapped">
@@ -15,7 +15,7 @@
         <div class="grid__item u-vertically-center-flexbox">
             <p class="digipack__benefit">Experience your newspaper in full, on your tablet with the Guardian & Observer daily edition</p>
             <p class="digipack__benefit">Enjoy an advert-free experience on The Guardian's app with access to our daily crosswords and exclusive content</p>
-            @fragments.promotion.subscribeNow(edition, promoCode)
+            @fragments.promotion.subscribeNow(country, promoCode)
         </div>
     </div>
 </div>

@@ -66,11 +66,11 @@ GET         /assets/*file                    controllers.CachedAssets.at(path="/
 GET         /test-users                      controllers.Testing.testUser
 
 # Promotions
-GET         /p/:promoCodeStr                 controllers.PromoLandingPage.render(promoCodeStr: String)
+GET         /p/:promoCodeStr                 controllers.PromoLandingPage.render(promoCodeStr: String, country: Option[Country])
 GET         /p/:promoCodeStr/terms           controllers.PromoLandingPage.terms(promoCodeStr: String)
 
 # NOCSRF
-POST        /q                               controllers.PromoLandingPage.preview
+POST        /q                               controllers.PromoLandingPage.preview(country: Option[Country])
 
 # Promotions
 GET         /s/:supplierCodeStr              controllers.Homepage.supplierRedirect(supplierCodeStr: String)

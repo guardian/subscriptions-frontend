@@ -1,10 +1,11 @@
+@import com.gu.i18n.Country
+@import com.gu.i18n.Currency
 @import com.gu.memsub.promo.PromoCode
 @import com.gu.memsub.promo.Promotion.AnyPromotion
 @import com.gu.memsub.subsv2.CatalogPlan
 @import com.gu.memsub.BillingPeriod.Month
-@import model.DigitalEdition
 
-@(edition: DigitalEdition, plan: CatalogPlan.Digipack[Month.type], promoCode: PromoCode, promotion: AnyPromotion)
+@(currency: Currency, country: Country, plan: CatalogPlan.Digipack[Month.type], promoCode: PromoCode, promotion: AnyPromotion)
 <div>
     <div class="digital-tablet-previews hide-above-phablet">
         <img src="@controllers.CachedAssets.hashedPathFor("images/backgrounds/bg-digital-tablet-previews.jpg")"/>
@@ -44,8 +45,8 @@
                     <h3>Every day; every section; every supplement</h3>
                     <div class="feature__text">The Guide; Cook; and food Monthly plus our daily crossword tailored for your tablet.</div>
                     <div class="feature__cta">
-                        @fragments.promotion.pricingCta(edition, plan, promoCode, promotion)
-                        @fragments.promotion.subscribeNow(edition, promoCode)
+                        @fragments.promotion.pricingCta(currency, plan, promoCode, promotion)
+                        @fragments.promotion.subscribeNow(country, promoCode)
                     </div>
                 </div>
             </div>
