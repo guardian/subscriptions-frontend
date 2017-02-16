@@ -1,24 +1,26 @@
-    const SHOW_CLASS = 'animate-show-shown';
-
+const SHOW_CLASS = 'animate-show-shown';
+const HIDE_CLASS = 'animate-hide-hidden';
+const ANIMATE_SHOW_CLASS = 'animate-show';
+const ANIMATE_HIDE_CLASS = 'animate-hide';
 
 function animationFinishHandler(element) {
     element.addEventListener('animationend', (event) => {
         event.preventDefault();
-        element.classList.remove('animate-hide');
-        element.classList.remove('animate-show');
+        element.classList.remove(ANIMATE_HIDE_CLASS);
+        element.classList.remove(ANIMATE_SHOW_CLASS);
         if (event.animationName === 'hide') {
-            element.classList.add('animate-hide-hidden')
+            element.classList.add(HIDE_CLASS)
         } else if (event.animationName === 'show') {
-            element.classList.remove('animate-hide-hidden')
+            element.classList.remove(HIDE_CLASS)
         }
     })
 }
 
 
 function show(element) {
-    element.classList.remove('animate-hide');
-    element.classList.add('animate-show');
-    element.classList.remove('animate-hide-hidden')
+    element.classList.remove(ANIMATE_HIDE_CLASS);
+    element.classList.add(ANIMATE_SHOW_CLASS);
+    element.classList.remove(HIDE_CLASS)
 }
 
 export function init() {
@@ -33,13 +35,13 @@ export function init() {
                 element.classList.remove(SHOW_CLASS);
                 otherElements.map(show);
                 children.map((e) => {
-                    e.classList.add('animate-hide');
+                    e.classList.add(ANIMATE_HIDE_CLASS);
                 });
             } else {
                 children.map(show);
                 element.classList.add(SHOW_CLASS);
                 otherElements.map((e) => {
-                    e.classList.add('animate-hide');
+                    e.classList.add(ANIMATE_HIDE_CLASS);
                 })
             }
         });
