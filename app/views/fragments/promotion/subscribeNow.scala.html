@@ -1,12 +1,10 @@
 @import com.gu.memsub.promo.PromoCode
-@import model.DigitalEdition
-@import views.support.DigitalEdition._
-@(edition: DigitalEdition, promoCode: PromoCode)
+@import com.gu.i18n.Country
+@(country: Country, promoCode: PromoCode)
 <div class="pricing-cta">
     <div class="pricing-cta__action">
         <a class="button button--large button--primary"
-        href="@edition.redirect&promoCode=@promoCode.get"
-        data-test-id="digital-pack-@edition.id-trial-header"
+        href="/checkout?countryGroup=@country.alpha2&promoCode=@promoCode.get"
         >Subscribe now</a>
     </div>
 </div>

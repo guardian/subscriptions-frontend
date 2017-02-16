@@ -1,7 +1,7 @@
 package controllers
 import actions.CommonActions._
+import com.gu.i18n.CountryGroup.byCountryCode
 import com.gu.i18n.{Country, CountryGroup}
-import com.gu.i18n.Country
 import com.gu.memsub.Digipack
 import com.gu.memsub.promo.Formatters.PromotionFormatters._
 import com.gu.memsub.promo.Promotion._
@@ -10,15 +10,13 @@ import com.netaporter.uri.dsl._
 import configuration.Config
 import controllers.SessionKeys.PromotionTrackingCode
 import filters.HandleXFrameOptionsOverrideHeader
-import model.DigitalEdition.UK
 import play.api.data.{Form, Forms}
 import play.api.libs.json.Json
 import play.api.mvc._
 import play.twirl.api.Html
 import services.TouchpointBackend
-import utils.RequestCountry.RequestWithFastlyCountry
+import utils.RequestCountry._
 import utils.Tracking.internalCampaignCode
-import utils.Tracking._
 import views.html.promotion._
 import views.support.PegdownMarkdownRenderer
 
@@ -45,10 +43,11 @@ object PromoLandingPage extends Controller {
     )
   }
 
-  private def getDigitalPackLandingPage(promotion: AnyPromotion)(implicit promoCode: PromoCode): Option[Html] = {
-    // The Digital Pack landing page currently only supports GBP, so only render it for UK-applicative promotions
-    promotion.asDigitalPack.filter(p => isActive(asAnyPromotion(p))).filter(_.appliesTo.countries.contains(Country.UK)).map { promotionWithLandingPage =>
-      digitalpackLandingPage(UK, catalog, promoCode, promotionWithLandingPage, PegdownMarkdownRenderer)
+  private def getDigitalPackLandingPage(promotion: AnyPromotion, maybeCountry: Option[Country])(implicit promoCode: PromoCode): Option[Html] = {
+    promotion.asDigitalPack.filter(p => isActive(asAnyPromotion(p))).map { promotionWithLandingPage =>
+      val currency = maybeCountry.flatMap(c => byCountryCode(c.alpha2)).getOrElse(CountryGroup.UK).currency
+      val country = maybeCountry.getOrElse(Country.UK)
+      digitalpackLandingPage(currency, country, catalog, promoCode, promotionWithLandingPage, PegdownMarkdownRenderer)
     }
   }
 
@@ -58,15 +57,15 @@ object PromoLandingPage extends Controller {
     }
   }
 
-  private def getWeeklyLandingPage(promotion: AnyPromotion, maybeCountry: Option[Country] = None)(implicit promoCode: PromoCode): Option[Html] = {
+  private def getWeeklyLandingPage(promotion: AnyPromotion, maybeCountry: Option[Country])(implicit promoCode: PromoCode): Option[Html] = {
     val country = maybeCountry.getOrElse(Country.UK)
     promotion.asWeekly.filter(p => isActive(asAnyPromotion(p))).map { promotionWithLandingPage =>
       weeklyLandingPage(country, catalog, promoCode, promotionWithLandingPage, PegdownMarkdownRenderer)
     }
   }
 
-  private def getLandingPage(promotion: AnyPromotion, maybeCountry: Option[Country]= None)(implicit promoCode: PromoCode): Option[Html] = {
-    getNewspaperLandingPage(promotion) orElse getDigitalPackLandingPage(promotion) orElse getWeeklyLandingPage(promotion, maybeCountry)
+  private def getLandingPage(promotion: AnyPromotion, maybeCountry: Option[Country])(implicit promoCode: PromoCode): Option[Html] = {
+    getNewspaperLandingPage(promotion) orElse getDigitalPackLandingPage(promotion, maybeCountry) orElse getWeeklyLandingPage(promotion, maybeCountry)
   }
 
   private def getBrochureRouteForPromotion(promotion: AnyPromotion): Option[Call] = {
@@ -86,7 +85,7 @@ object PromoLandingPage extends Controller {
 
   private def redirectToBrochurePage(promotion: AnyPromotion)(implicit promoCode: PromoCode, request: Request[AnyContent]): Option[Result] = {
     getBrochureRouteForPromotion(promotion) map { route =>
-      val result = Redirect(route.url ? (internalCampaignCode -> s"FROM_P_${promoCode.get}"), request.queryString)
+      val result = Redirect(route.url, request.queryString)
       if (promotion.promotionType == Tracking) {
         result.withSession(PromotionTrackingCode -> promoCode.get)
       } else {
@@ -95,19 +94,20 @@ object PromoLandingPage extends Controller {
     }
   }
 
-  def render(promoCodeStr: String): Action[AnyContent] = NoCacheAction.async { implicit request =>
+  def render(promoCodeStr: String, country: Option[Country]): Action[AnyContent] = NoCacheAction.async { implicit request =>
     implicit val promoCode = PromoCode(promoCodeStr)
 
     tpBackend.promoService.findPromotionFuture(promoCode) map { maybePromotion =>
       maybePromotion flatMap { promotion =>
-        getLandingPage(promotion).map(Ok(_)) orElse redirectToBrochurePage(promotion)
+        val maybeCountry = country orElse request.getFastlyCountry
+        getLandingPage(promotion, maybeCountry).map(Ok(_)) orElse redirectToBrochurePage(promotion)
       } getOrElse {
         Redirect(routes.Homepage.index().url ? (internalCampaignCode -> s"FROM_P_${promoCode.get}"), request.queryString)
       }
     }
   }
 
-  def preview() = GoogleAuthenticatedStaffAction { implicit request =>
+  def preview(country: Option[Country]) = GoogleAuthenticatedStaffAction { implicit request =>
     //User can preview a promotion before assigning it a code.
     val undefinedPromoCode = PromoCode("PromoCode")
     //This appears in a frame in the promoTool.
@@ -120,7 +120,8 @@ object PromoLandingPage extends Controller {
 
     val maybeLandingPage = maybePromotion.flatMap { promotion =>
       val promoCode: PromoCode = promotion.codes.headOption.getOrElse(undefinedPromoCode)
-      getLandingPage(promotion)(promoCode)
+      val maybeCountry = country orElse request.getFastlyCountry
+      getLandingPage(promotion, maybeCountry)(promoCode)
     }
 
     maybeLandingPage.map(OkWithPreviewHeaders).getOrElse(NotFound)

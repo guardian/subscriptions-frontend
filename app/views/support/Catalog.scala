@@ -1,5 +1,6 @@
 package views.support
 
+import com.gu.i18n.Currency
 import com.gu.memsub.Subscription.ProductRatePlanId
 import com.gu.memsub.promo.PercentDiscount._
 import com.gu.memsub.promo.Promotion.AnyPromotion
@@ -68,14 +69,16 @@ object Catalog {
         ).some, _ => None)
   }
 
-  def adjustPrice(plan: CatalogPlan.Paid, promotion: AnyPromotion): Price =
-    promotion.asDiscount.fold(plan.charges.gbpPrice)(_.promotionType.applyDiscount(plan.charges.gbpPrice, plan.charges.billingPeriod))
-  
-  def formatPrice(plan: CatalogPlan.Paid, promotion: AnyPromotion): String = {
-    adjustPrice(plan, promotion).pretty
+  def adjustPrice(plan: CatalogPlan.Paid, currency: Currency, promotion: AnyPromotion): Price = {
+    val price = plan.charges.price.getPrice(currency).getOrElse(plan.charges.gbpPrice)
+    promotion.asDiscount.map(_.promotionType.applyDiscount(price, plan.charges.billingPeriod)).getOrElse(price)
   }
 
-  def formatPrice(plan: CatalogPlan.Paid): String = {
-    plan.charges.gbpPrice.pretty
+  def formatPrice(plan: CatalogPlan.Paid, currency: Currency, promotion: AnyPromotion): String = {
+    adjustPrice(plan, currency, promotion).pretty
+  }
+
+  def formatPrice(plan: CatalogPlan.Paid, currency: Currency): String = {
+    plan.charges.price.getPrice(currency).getOrElse(plan.charges.gbpPrice).pretty
   }
 }
