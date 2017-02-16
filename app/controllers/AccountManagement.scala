@@ -37,7 +37,7 @@ object SessionSubscription {
 
   val SUBSCRIPTION_SESSION_KEY = "subscriptionId"
 
-  def set(result: Result, sub: Subscription[Paid]): Result =
+  def set(result: Result, sub: Subscription[ContentSubscription]): Result =
     result.withSession(
       SUBSCRIPTION_SESSION_KEY -> sub.name.get
     )
@@ -45,17 +45,17 @@ object SessionSubscription {
   def clear(result: Result)(implicit request: Request[AnyContent]): Result =
     result.withSession(request.session - SUBSCRIPTION_SESSION_KEY)
 
-  def subscriptionFromRequest(implicit request: Request[_]): Future[Option[Subscription[Paid]]] = {
+  def subscriptionFromRequest(implicit request: Request[_]): Future[Option[Subscription[ContentSubscription]]] = {
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
 
     (for {
       subscriptionId <- OptionT(Future.successful(request.session.data.get(SUBSCRIPTION_SESSION_KEY)))
-      zuoraSubscription <- OptionT(tpBackend.subscriptionService.get[Paid](Name(subscriptionId)))
+      zuoraSubscription <- OptionT(tpBackend.subscriptionService.get[ContentSubscription](Name(subscriptionId)))
     } yield zuoraSubscription).orElse(for {
       identityUser <- OptionT(Future.successful(authenticatedUserFor(request)))
       salesForceUser <- OptionT(tpBackend.salesforceService.repo.get(identityUser.user.id))
-      zuoraSubscription <- OptionT(tpBackend.subscriptionService.current[Paid](salesForceUser).map(_.headOption/*FIXME if they have more than one they can only manage the first*/))
+      zuoraSubscription <- OptionT(tpBackend.subscriptionService.current[ContentSubscription](salesForceUser).map(_.headOption/*FIXME if they have more than one they can only manage the first*/))
     } yield zuoraSubscription).run
   }
 
@@ -292,7 +292,7 @@ object AccountManagement extends Controller with ContextLogging with CatalogProv
 
   val accountManagementAction = NoCacheAction
 
-  def subscriptionFromUserDetails(loginRequestOpt: Option[AccountManagementLoginRequest])(implicit request: Request[AnyContent]): Future[Option[Subscription[Paid]]] = {
+  def subscriptionFromUserDetails(loginRequestOpt: Option[AccountManagementLoginRequest])(implicit request: Request[AnyContent]): Future[Option[Subscription[ContentSubscription]]] = {
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
 
@@ -301,7 +301,7 @@ object AccountManagement extends Controller with ContextLogging with CatalogProv
       format(zuoraContact.lastName) == format(loginRequest.lastname)
     }
 
-    def subscriptionDetailsMatch(loginRequest: AccountManagementLoginRequest, zuoraSubscription: Subscription[Paid]): Future[Boolean] = {
+    def subscriptionDetailsMatch(loginRequest: AccountManagementLoginRequest, zuoraSubscription: Subscription[ContentSubscription]): Future[Boolean] = {
       for {
         zuoraAccount <- tpBackend.zuoraService.getAccount(zuoraSubscription.accountId)
         zuoraContact <- tpBackend.zuoraService.getContact(zuoraAccount.billToId)
@@ -310,7 +310,7 @@ object AccountManagement extends Controller with ContextLogging with CatalogProv
 
     loginRequestOpt.map { loginRequest =>
       (for {
-        zuoraSubscription <- OptionT(tpBackend.subscriptionService.get[Paid](Name(loginRequest.subscriptionId)))
+        zuoraSubscription <- OptionT(tpBackend.subscriptionService.get[ContentSubscription](Name(loginRequest.subscriptionId)))
         result <- OptionT(subscriptionDetailsMatch(loginRequest, zuoraSubscription).map(matches => if (matches) Some(zuoraSubscription) else None))
       } yield result).run
     }.getOrElse(Future.successful(None))
@@ -338,7 +338,7 @@ object AccountManagement extends Controller with ContextLogging with CatalogProv
         case _: Product.Weekly => subscription.asWeekly.map { weeklySubscription =>
           ManageWeekly(billingSchedule, weeklySubscription, promoCode)
         }
-        case Product.Digipack => subscription.as[Product.ZDigipack, PaidChargeList, Digipack].map { digipackSubscription =>
+        case Product.Digipack => subscription.asDigipack.map { digipackSubscription =>
           Future.successful(Ok(views.html.account.digitalpack(digipackSubscription, billingSchedule)))
         }
       }
