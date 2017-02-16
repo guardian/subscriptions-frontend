@@ -10,7 +10,7 @@ import com.netaporter.uri.dsl._
 import views.support.Pricing._
 
 object DiscountWeeklyRegions {
-  case class discountedPlan(pretty: String, period: String, url: Uri)
+  case class discountedPlan(pretty: String, headline: String, period: String, url: Uri)
   case class DiscountWeeklyRegion(title: String, description: String, ratePlans: Set[Subscription.ProductRatePlanId], countries: Set[Country]) {
     def promotionalRatePlans(implicit promotion: PromoWithWeeklyLandingPage) = {
       ratePlans intersect promotion.appliesTo.productRatePlanIds
@@ -78,13 +78,17 @@ object DiscountWeeklyRegions {
 
     for {
       plan <- plans
-      discountPromo <- promotion.asDiscount.toList
       currency <- plan.charges.currencies.toList
       if (cs.contains(currency))
     } yield {
       discountedPlan(
-        pretty = plan.charges.prettyPricingForDiscountedPeriod[scalaz.Id.Id, WeeklyLandingPage](discountPromo, currency),
-        period = plan.charges.billingPeriod.noun,
+        pretty = promotion.asDiscount
+          .map{discountPromo => plan.charges.prettyPricingForDiscountedPeriod[scalaz.Id.Id, WeeklyLandingPage](discountPromo, currency)}
+          .getOrElse(plan.charges.prettyPricing(currency)),
+        headline = promotion.asDiscount
+          .map{discountPromo => plan.charges.headlinePricingForDiscountedPeriod[scalaz.Id.Id, WeeklyLandingPage](discountPromo, currency)}
+          .getOrElse(plan.charges.prettyPricing(currency)),
+        period = plan.charges.billingPeriod.adjective,
         url = s"checkout/${plan.slug}" ? ("promoCode" -> promoCode.get) & ("countryGroup" -> CountryGroup.allGroups.find(_.currency == currency).getOrElse(CountryGroup.UK).id))
     }
   }

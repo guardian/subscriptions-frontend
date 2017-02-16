@@ -12,6 +12,8 @@
     position: relative;
     border: none;
     color: $c-brand;
+    transition: 0.1s ease-in 0.15s;
+
 }
 .package:hover,
 .package:active {

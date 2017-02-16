@@ -1,22 +1,18 @@
 @mixin showing {
     opacity: 1;
     max-height: 2000px;
+    overflow:hidden;
 }
 
 @mixin hidden {
     opacity: 0;
     max-height: 0;
+    overflow:hidden;
 }
 
 @keyframes show {
     0% {
         @include hidden;
-    }
-    10% {
-        @include hidden;
-    }
-    90% {
-        @include showing;
     }
     100% {
         @include showing;
@@ -27,12 +23,6 @@
     0% {
         @include showing;
     }
-    10% {
-        @include showing;
-    }
-    90% {
-        @include hidden;
-    }
     100% {
         @include hidden;
     }
@@ -41,19 +31,18 @@
 .animate-hide {
     animation-name: hide;
     animation-duration: 1s;
-    animation-timing-function: ease-out;
+    animation-timing-function: ease-in-out;
     animation-delay: 0s;
     animation-iteration-count: 1;
     animation-fill-mode: forwards;
     overflow: hidden;
-
     animation-play-state: running;
 }
 
 .animate-show {
     animation-name: show;
-    animation-duration: 1s;
-    animation-timing-function: ease-out;
+    animation-duration: 1.5s;
+    animation-timing-function: ease-in-out;
     animation-delay: 0s;
     animation-iteration-count: 1;
     animation-fill-mode: forwards;
@@ -64,3 +53,7 @@
     @include hidden;
 }
 
+.animate-show-shown .package__price{
+    opacity: 0;
+    transition: 1s ease-in-out;
+}
