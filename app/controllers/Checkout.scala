@@ -4,6 +4,7 @@ import actions.CommonActions._
 import com.gu.i18n.Currency._
 import com.gu.i18n._
 import com.gu.identity.play.ProxiedIP
+import com.gu.memsub.BillingPeriod.SixWeeks
 import com.gu.memsub.Subscription.ProductRatePlanId
 import com.gu.memsub.promo.Promotion._
 import com.gu.memsub.promo.{NewUsers, NormalisedPromoCode, PromoCode}
@@ -55,12 +56,12 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
 
     val matchingPlanList: Option[PlanList[CatalogPlan.ContentSubscription]] = {
 
-      val testOnlyPlans = if (tpBackend == TouchpointBackend.Test) List(catalog.weeklyZoneB.toList.filter(_.isRecurring)) else List.empty
+      val testOnlyPlans = if (tpBackend == TouchpointBackend.Test) List(catalog.weeklyZoneB.toList.filter(_.availableForCheckout)) else List.empty
 
       val contentSubscriptionPlans = List(
         catalog.delivery.list,
         catalog.voucher.list,
-        catalog.weeklyZoneA.toList.filter(_.isRecurring),
+        catalog.weeklyZoneA.toList.filter(_.availableForCheckout),
         catalog.weeklyZoneC.toList,
         catalog.digipack.toList) ++ testOnlyPlans
 

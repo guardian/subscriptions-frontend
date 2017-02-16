@@ -24,7 +24,7 @@ import model.error.IdentityService._
 import model.error.SubsError
 import model.{Renewal, _}
 import org.joda.time.LocalDate.now
-import org.joda.time.{Days, LocalDate}
+import org.joda.time.{DateTime, Days, LocalDate}
 import touchpoint.ZuoraProperties
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -61,6 +61,22 @@ class CheckoutService(identityService: IdentityService,
     case _ => false
   }
 
+  def processIntroductoryPeriod(defaultPaymentDelayt: Days, originalCommand: Subscribe): Subscribe = {
+    val additionalRateplan = (originalCommand.ratePlans.head.productRatePlanId match {
+      case catalog.weeklyZoneA.sixWeeks.id.get => Some(catalog.weeklyZoneA.quarter)
+      case catalog.weeklyZoneC.sixWeeks.id.get => Some(catalog.weeklyZoneC.quarter)
+      case _ => None
+    }).map(plan => RatePlan(plan.id.get, None))
+
+    val updatedCommand = additionalRateplan.map { ratePlantoAdd =>
+      val updatedRatePlans = ratePlantoAdd <:: originalCommand.ratePlans
+      val updatedContractEffective = DateTime.now.toLocalDate.plusDays(defaultPaymentDelayt.getDays)
+      originalCommand.copy(ratePlans = updatedRatePlans, contractEffective = updatedContractEffective, contractAcceptance = updatedContractEffective.plusDays(42))
+    }
+
+    updatedCommand.getOrElse(originalCommand)
+  }
+
   def processSubscription(subscriptionData: SubscribeRequest,
                           authenticatedUserOpt: Option[AuthenticatedIdUser],
                           requestData: SubscriptionRequestData
@@ -82,7 +98,8 @@ class CheckoutService(identityService: IdentityService,
       payment <- EitherT(createPaymentType(purchaserIds, subscriptionData))
       defaultPaymentDelay = CheckoutService.paymentDelay(subscriptionData.productData, zuoraProperties)
       paymentMethod <- EitherT(attachPaymentMethodToStripeCustomer(payment, purchaserIds))
-      subscribe = createSubscribeRequest(personalData, soldToContact, requestData, plan, purchaserIds, paymentMethod, payment.makeAccount, Some(defaultPaymentDelay))
+      initialCommand = createSubscribeRequest(personalData, soldToContact, requestData, plan, purchaserIds, paymentMethod, payment.makeAccount, Some(defaultPaymentDelay))
+      subscribe = processIntroductoryPeriod(defaultPaymentDelay, initialCommand)
       validPromotion = promoCode.flatMap(promoService.validate[NewUsers](_, personalData.address.country.getOrElse(Country.UK), subscriptionData.productRatePlanId).toOption)
       withPromo = validPromotion.map(v => p.apply(v, prpId => catalog.paid.find(_.id == prpId).map(_.charges.billingPeriod).get, promoPlans)(subscribe)).getOrElse(subscribe)
       result <- EitherT(createSubscription(withPromo, purchaserIds))
@@ -198,7 +215,9 @@ class CheckoutService(identityService: IdentityService,
       purchaserIds: PurchaserIdentifiers,
       paymentMethod: PaymentMethod,
       acc: Account,
-      paymentDelay: Option[Days]): Subscribe =
+      paymentDelay: Option[Days]): Subscribe = {
+
+    val now = DateTime.now.toLocalDate
 
     Subscribe(
       account = acc,
@@ -212,11 +231,13 @@ class CheckoutService(identityService: IdentityService,
         address = address,
         email = personalData.email  // TODO once we have gifting change this to the Giftee's email address
       )),
-      paymentDelay = paymentDelay,
+      contractEffective = now,
+      contractAcceptance = paymentDelay.map(delay => now.plusDays(delay.getDays)).getOrElse(now),
       ipAddress = requestData.ipAddress.map(_.getHostAddress),
       supplierCode = requestData.supplierCode,
       ipCountry = requestData.ipCountry
     )
+  }
 
   private def createSubscription(
       subscribe: Subscribe,
