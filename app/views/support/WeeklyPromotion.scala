@@ -18,7 +18,7 @@ object WeeklyPromotion {
 
   case class DiscountedRegion(title: String, description: String, countries: Set[Country], discountedPlans: List[DiscountedPlan])
 
-  def forPromotion(promotion: PromoWithWeeklyLandingPage, promoCode: PromoCode, requestCountry: Country)(implicit catalog: Catalog): Seq[DiscountedRegion] = {
+  def validRegionsForPromotion(promotion: PromoWithWeeklyLandingPage, promoCode: PromoCode, requestCountry: Country)(implicit catalog: Catalog): Seq[DiscountedRegion] = {
     val promotionProductRatePlanIds = promotion.appliesTo.productRatePlanIds
     val promotionCountries = promotion.appliesTo.countries
     val regionForZoneCCountry: Seq[DiscountedRegion] = {

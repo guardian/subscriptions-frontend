@@ -13,7 +13,7 @@
     @anyPromotion = @{asAnyPromotion(promotion)}
     @title = @{"Subscribe to the Guardian Weekly"}
 
-    @discountedRegions = @{WeeklyPromotion.forPromotion(promotion, promoCode, country)(catalog)}
+    @discountedRegions = @{WeeklyPromotion.validRegionsForPromotion(promotion, promoCode, country)(catalog)}
 
     @main(title = s"$title | The Guardian") {
         <main class="page-container gs-container">
