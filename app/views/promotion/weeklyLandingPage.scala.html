@@ -5,89 +5,91 @@
 @import views.support.{MarkdownRenderer}
 @import com.gu.memsub.subsv2.Catalog
 @import model.Subscriptions._
-@import views.support.DiscountWeeklyRegions
 @import com.gu.i18n.Country
-@(country: Country ,catalog: Catalog, promoCode: PromoCode, promotion: PromoWithWeeklyLandingPage, md: MarkdownRenderer)
-@voucherPlans = @{catalog.voucher.list.filter(p => promotion.appliesTo.productRatePlanIds.contains(p.id))}
-@deliveryPlans = @{catalog.delivery.list.filter(p => promotion.appliesTo.productRatePlanIds.contains(p.id))}
-@anyPromotion = @{asAnyPromotion(promotion)}
-@title = @{"Subscribe to the Guardian Weekly"}
-@options = @{DiscountWeeklyRegions.forPromotion(promotion,country)(catalog)}
-@main(
-    title = s"$title | The Guardian"
-) {
-    <main class="page-container gs-container">
-        @fragments.page.header(title,promotion.landingPage.title)
-        @promotion.landingPage.roundelHtml.map { h => <div class="digipack__roundel">@fragments.common.roundel(h, Seq("roundel--raised","roundel--right"))</div> }
-        @promotion.landingPage.image.map{img =>
+@import views.support.WeeklyPromotion
+@(country: Country, catalog: Catalog, promoCode: PromoCode, promotion: PromoWithWeeklyLandingPage, md: MarkdownRenderer)
+    @voucherPlans = @{catalog.voucher.list.filter(p => promotion.appliesTo.productRatePlanIds.contains(p.id))}
+    @deliveryPlans = @{catalog.delivery.list.filter(p => promotion.appliesTo.productRatePlanIds.contains(p.id))}
+    @anyPromotion = @{asAnyPromotion(promotion)}
+    @title = @{"Subscribe to the Guardian Weekly"}
 
+    @discountedRegions = @{WeeklyPromotion.validRegionsForPromotion(promotion, promoCode, country)(catalog)}
 
-                        <img src="@img.defaultImage" srcset="@img.srcset" sizes="100vw" class="promotion-image__image"/>
-
-
-        }
-
-        <section class="promotion-description">
-            @promotion.landingPage.description.fold {
-                <p>@promotion.description</p>
-            } { d =>
-                <div>@Html(md.render(d))</div>
-                <br/>
+    @main(title = s"$title | The Guardian") {
+        <main class="page-container gs-container">
+            @fragments.page.header(title, promotion.landingPage.title)
+            @promotion.landingPage.roundelHtml.map { h =>
+                <div class="digipack__roundel">@fragments.common.roundel(h, Seq("roundel--raised", "roundel--right"))</div>
             }
-
-            @promotion.asIncentive.map { p =>
-                <h4>Redemption instructions</h4>
-                <p>@p.promotionType.redemptionInstructions</p>
+            @promotion.landingPage.image.map { img =>
+                <img src="@img.defaultImage" srcset="@img.srcset" sizes="100vw" class="promotion-image__image"/>
             }
-        </section>
-
-
-
-        <section class="section-slice">
-
-            <h2 class="page-heading">Where should we send your Guardian Weekly?</h2>
-
-            @for(option <- options) {
-                <div class="package js-dropdown js-hide" data-dropdown-menu="@option.title.replaceAll(" ","")">
-                    <div class="package__info">
-                        <span class="package__title" >@option.title</span>
-                        @DiscountWeeklyRegions.plans(promotion,option,catalog,promoCode).headOption.map{plan=>
-                        <strong class="package__price">
-                             @plan.headline
-                        </strong>
-                        }
-                        <span class="package__description">@option.description</span>
-                        </div>
-                </div>
-
-
-
-            }
-            @for(option <- options) {
-                <div class="js-dropdown-@option.title.replaceAll(" ","") js-dropdown-menu animate-hide-hidden">
-
-                    <h3>How would you like to pay?</h3>
-                    <div>
-                @for(plan <- DiscountWeeklyRegions.plans(promotion,option,catalog,promoCode)){
-                    <a href="@plan.url.toString" class="package">
-                        <div class="package__info">
-                            <span class="package__title">@plan.period</span>
-                            <strong class="package__price">
-                               @plan.headline
-                            </strong>
-                            <span class="package__description"> For @plan.pretty</span>
-                        </div>
-                    </a>
+            <section class="promotion-description">
+                @promotion.landingPage.description.fold {
+                    <p>@promotion.description</p>
+                } { d =>
+                    <div>@Html(md.render(d))</div>
+                    <br/>
                 }
-                    </div></div>
-            }
-        </section>
-        <section class="section-slice promotion-terms">
-            @fragments.promotion.promotionTermsAndConditions(anyPromotion, md)
-            <p>For full promotion terms and conditions visit <a class="u-link" href="/p/@promoCode.get/terms">subscribe.theguardian.com/p/@promoCode.get/terms</a></p>
-            @fragments.promotion.subscriptionTermsAndConditions(catalog, anyPromotion)
-            @fragments.promotion.copyrightNotice()
-        </section>
-    </main>
-
-}
+                @promotion.asIncentive.map { p =>
+                    <h4>Redemption instructions</h4>
+                    <p>@p.promotionType.redemptionInstructions</p>
+                }
+            </section>
+            <section class="section-slice">
+                <h2 class="page-heading">Where should we send your Guardian Weekly?</h2>
+                @for(region <- discountedRegions) {
+                    @if(region.discountedPlans.length > 1) {
+                        <div class="package js-dropdown js-hide" data-dropdown-menu="@region.title.replaceAll(" ", "")">
+                            <div class="package__info">
+                                <span class="package__title" >@region.title</span>
+                                @region.discountedPlans.headOption.map { plan =>
+                                    <strong class="package__price">
+                                        @plan.headline
+                                    </strong>
+                                }
+                                <span class="package__description">@region.description</span>
+                            </div>
+                        </div>
+                    } else {
+                        @region.discountedPlans.headOption.map { plan =>
+                            <a href="@plan.url.toString" class="package">
+                                <div class="package__info">
+                                    <span class="package__title" >@region.title</span>
+                                    <strong class="package__price">
+                                    @plan.headline
+                                    </strong>
+                                    <span class="package__description">@region.description</span>
+                                </div>
+                            </a>
+                        }
+                    }
+                }
+                @for(region <- discountedRegions) {
+                    <div class="js-dropdown-@region.title.replaceAll(" ", "") js-dropdown-menu animate-hide-hidden">
+                        <h3>How would you like to pay?</h3>
+                        <div>
+                        @for(plan <- region.discountedPlans) {
+                            <a href="@plan.url.toString" class="package">
+                                <div class="package__info">
+                                    <span class="package__title">@plan.period</span>
+                                    <strong class="package__price">
+                                    @plan.headline
+                                    </strong>
+                                    <span class="package__description"> For @plan.pretty</span>
+                                </div>
+                            </a>
+                        }
+                        </div>
+                    </div>
+                }
+            </section>
+            <section class="section-slice promotion-terms">
+                @fragments.promotion.promotionTermsAndConditions(anyPromotion, md)
+                <p>For full promotion terms and conditions visit <a class="u-link" href="/p/@promoCode.get/terms">
+                    subscribe.theguardian.com/p/@promoCode.get/terms</a></p>
+                @fragments.promotion.subscriptionTermsAndConditions(catalog, anyPromotion)
+                @fragments.promotion.copyrightNotice()
+            </section>
+        </main>
+    }
