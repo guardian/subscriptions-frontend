@@ -87,7 +87,7 @@ object PromoLandingPage extends Controller {
     getBrochureRouteForPromotion(promotion) map { route =>
       val result = Redirect(route.url, request.queryString)
       if (promotion.promotionType == Tracking) {
-        result.withSession(PromotionTrackingCode -> promoCode.get)
+        result.withSession(request.session.data.toSeq ++ Seq(PromotionTrackingCode -> promoCode.get) :_*)
       } else {
         result
       }
