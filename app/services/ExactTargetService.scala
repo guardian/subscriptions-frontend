@@ -23,7 +23,7 @@ import model.exactTarget.HolidaySuspensionBillingScheduleDataExtensionRow.constr
 import model.exactTarget._
 import model.{PaperData, PurchaserIdentifiers, Renewal, SubscribeRequest, SubscriptionOps}
 import model.SubscriptionOps._
-import org.joda.time.{Days, LocalDate}
+import org.joda.time.{DateTime, Days, LocalDate}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json._
 import views.support.PlanOps._
@@ -46,14 +46,6 @@ class ExactTargetService(
   zuoraService: ZuoraService,
   salesforceService: SalesforceService
 ) extends LazyLogging {
-  private def getPlanDescription(validPromotion: Option[ValidPromotion[NewUsers]], currency: Currency, plan: Plan.Paid): String = {
-    (for {
-      vp <- validPromotion
-      discountPromotion <- vp.promotion.asDiscount
-    } yield {
-      plan.charges.prettyPricingForDiscountedPeriod(discountPromotion, currency)
-    }).getOrElse(plan.charges.prettyPricing(currency))
-  }
 
   private def buildWelcomeEmailDataExtensionRow(
       subscribeResult: SubscribeResult,
@@ -76,10 +68,19 @@ class ExactTargetService(
     def buildRow(sub: Subscription[Plan.Paid], pm: PaymentMethod) = {
       val personalData = subscriptionData.genericData.personalData
       val promotionDescription = validPromotion.filterNot(_.promotion.promotionType == Tracking).map(_.promotion.description)
-      val subscriptionDetails = getPlanDescription(validPromotion, subscriptionData.genericData.currency, sub.plan)
 
+      //todo just for test see how to fix this
+      val now = DateTime.now.toLocalDate
+
+      val nonExpiredPlans = sub.plans.list.filter(_.end.isAfter(now))
+      val plan = nonExpiredPlans.head //todo this should probably continue using the whole plan instead of passing just one
+
+      //val subscriptionDetails = getPlanDescription(validPromotion, subscriptionData.genericData.currency, plan)
+      val subscriptionDetails = sub.newSubPaymentDescripttion(validPromotion, subscriptionData.genericData.currency)
       subscriptionData.productData.fold(
-        paperData => if (paperData.plan.isHomeDelivery) {
+        paperData =>{
+          println(s"paper date is $paperData")
+          if (paperData.plan.isHomeDelivery) {
           PaperHomeDeliveryWelcome1DataExtensionRow(
             paperData = paperData,
             personalData = personalData,
@@ -89,6 +90,7 @@ class ExactTargetService(
             promotionDescription = promotionDescription
           )
         } else if (paperData.plan.isGuardianWeekly) {
+
           GuardianWeeklyWelcome1DataExtensionRow(
             paperData = paperData,
             personalData = personalData,
@@ -107,7 +109,9 @@ class ExactTargetService(
             subscriptionDetails = subscriptionDetails,
             promotionDescription = promotionDescription
           )
-        },
+        }
+    }
+        ,
         _ => DigipackWelcome1DataExtensionRow(
           personalData = personalData,
           subscription = sub,
