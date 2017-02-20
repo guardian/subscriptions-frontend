@@ -22,15 +22,11 @@ case class Checkout(testUser: TestUser, endpoint: String = "checkout") extends P
 
   def fillInBillingAddress(): Unit = BillingAddress.fillIn()
 
-  def fillInDirectDebitPaymentDetails(): Unit = DebitCardPaymentDetails.fillIn()
+  def fillInDirectDebitPaymentDetails(): Unit = DirectDebitPaymentDetails.fillIn()
 
-  def selectConfirmAccountHolder(): Unit = DebitCardPaymentDetails.confirm.select()
+  def selectConfirmAccountHolder(): Unit = DirectDebitPaymentDetails.confirm.select()
 
-  def clickDebitPaymentContinueButton(): Unit = DebitCardPaymentDetails.continue()
-
-  def fillInCreditCardPaymentDetailsStripe(): Unit = StripeCheckout.fillIn()
-
-  def clickCredictCardPaymentContinueButton() = CreditCardPaymentDetails.continue()
+  def clickDebitPaymentContinueButton(): Unit = DirectDebitPaymentDetails.continue()
 
   def selectCreditCardPaymentOption() = setRadioButtonValue(CreditCardPaymentDetails.paymentType, "card")
 
@@ -40,23 +36,9 @@ case class Checkout(testUser: TestUser, endpoint: String = "checkout") extends P
 
   def yourDetailsSectionHasLoaded(): Boolean = pageHasElement(PersonalDetails.continueButton)
 
-  def directDebitSectionHasLoaded(): Boolean = pageHasElement(DebitCardPaymentDetails.continueButton)
+  def directDebitSectionHasLoaded(): Boolean = pageHasElement(DirectDebitPaymentDetails.continueButton)
 
   def billingAddressSectionHasLoaded(): Boolean = pageHasElement(BillingAddress.continueButton)
-
-  def cardSectionHasLoaded(): Boolean = pageHasElement(CreditCardPaymentDetails.continueButton)
-
-  def switchToStripe() = driver.switchTo().frame(driver.findElement(StripeCheckout.container.by))
-
-  def stripeCheckoutHasLoaded(): Boolean = pageHasElement(StripeCheckout.container)
-
-  def stripeCheckoutHasCC(): Boolean = pageHasElement(StripeCheckout.cardNumber)
-
-  def stripeCheckoutHasCVC(): Boolean = pageHasElement(StripeCheckout.cardCvc)
-
-  def stripeCheckoutHasExph(): Boolean = pageHasElement(StripeCheckout.cardExp)
-
-  def stripeCheckoutHasSubmit(): Boolean = pageHasElement(StripeCheckout.submitButton)
 
   def reviewSectionHasLoaded(): Boolean = pageHasElement(ReviewSection.submitPaymentButton)
 
@@ -123,7 +105,7 @@ case class Checkout(testUser: TestUser, endpoint: String = "checkout") extends P
     def continue(): Unit = clickOn(continueButton)
   }
 
-  private object DebitCardPaymentDetails {
+  private object DirectDebitPaymentDetails {
     val account = id("payment-account")
     val sortcode = id("payment-sortcode")
     val payment = id("payment-holder")
@@ -148,57 +130,5 @@ case class Checkout(testUser: TestUser, endpoint: String = "checkout") extends P
 
   private object ReviewSection {
     val submitPaymentButton = cssSelector(".js-checkout-submit")
-  }
-
-  // Temporary hack to identify elements on Stripe Checkout form using xpath, since the ids are no longer consistently set.
-  private object StripeCheckout {
-    val container = name("stripe_checkout_app")
-    val cardNumber = xpath("//div[label/text() = \"Card number\"]/input")
-    val cardExp = xpath("//div[label/text() = \"Expiry\"]/input")
-    val cardCvc = xpath("//div[label/text() = \"CVC\"]/input")
-    val submitButton = xpath("//div[button]")
-
-    private def fillInHelper(cardNum: String) = {
-
-      setValueSlowly(cardNumber, cardNum)
-      setValueSlowly(cardExp, "1019")
-      setValueSlowly(cardCvc, "111")
-      continue()
-      Thread.sleep(5000)
-    }
-
-    /*
-    * Stripe wants you to pause between month and year and between each quartet in the cc
-    * This causes pain when you use Selenium. There are a few stack overflow posts- but nothing really useful.
-    * */
-    private def setValueSlowly(q: Query, value: String): Unit = {
-      for {
-        c <- value
-      } yield {
-        setValue(q, c.toString)
-        Thread.sleep(100)
-      }
-    }
-
-    def fillIn(): Unit = fillInHelper("4242 4242 4242 4242")
-
-    /* https://stripe.com/docs/testing */
-
-    // Charge will be declined with a card_declined code.
-    def fillInCardDeclined(): Unit = fillInHelper("4000000000000002")
-
-    // Charge will be declined with a card_declined code and a fraudulent reason.
-    def fillInCardDeclinedFraud(): Unit = fillInHelper("4100000000000019")
-
-    // Charge will be declined with an incorrect_cvc code.
-    def fillInCardDeclinedCvc(): Unit = fillInHelper("4000000000000127")
-
-    // Charge will be declined with an expired_card code.
-    def fillInCardDeclinedExpired(): Unit = fillInHelper("4000000000000069")
-
-    // Charge will be declined with a processing_error code.
-    def fillInCardDeclinedProcessError(): Unit = fillInHelper("4000000000000119")
-
-    def continue(): Unit = clickOn(submitButton)
   }
 }
