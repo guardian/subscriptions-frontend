@@ -233,7 +233,6 @@ class CheckoutService(identityService: IdentityService,
       )),
       contractEffective = now,
       contractAcceptance = paymentDelay.map(delay => now.plusDays(delay.getDays)).getOrElse(now),
-      ipAddress = requestData.ipAddress.map(_.getHostAddress),
       supplierCode = requestData.supplierCode,
       ipCountry = requestData.ipCountry
     )
