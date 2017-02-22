@@ -11,53 +11,46 @@
 
 @import org.joda.time.LocalDate.now
 
-@*TODO JUST FOR TESTING FIX PARAMETER LIST*@
-@(subscriptionName: String, plan: SubscriptionPlan.PaperPlan, maybeStartDate: Option[LocalDate], chosenPaperDays: List[PaperDay] = empty, maybeContact: Option[Contact] = None, maybeFuturePlan: Option[SubscriptionPlan.PaperPlan] = None, subscription: Subscription[SubscriptionPlan.PaperPlan])(extra: Html = Html(""))
+@*TODO not sure what this chosenPaperDays param is*@
+@(chosenPaperDays: List[PaperDay] = empty, maybeContact: Option[Contact] = None, subscription: Subscription[SubscriptionPlan.PaperPlan])(extra: Html = Html(""))
 <dl class="mma-section__list">
     <dt class="mma-section__list--title">Subscriber ID</dt>
-    <dd class="mma-section__list--content">@subscriptionName</dd>
+    <dd class="mma-section__list--content">@{subscription.name.get}</dd>
 
-    @label(singular: String, size: Int) = {
-    @if(size > 1) {
-        <dt class="mma-section__list--title">@{singular+"s"}</dt>
+    @planListLabel(singular: String, amount: Int) = {
+    @if(amount > 1) {
+        <dt class="mma-section__list--title">@{
+            singular + "s"
+        }</dt>
     }
-    @if(size == 1) {
+    @if(amount == 1) {
         <dt class="mma-section__list--title">@singular</dt>
     }
     }
 
-    @defining(subscription.currentPlans) { currentPlans =>
-        @label("Current plan", currentPlans.length)
-    <dd class="mma-section__list--content">
-    @for(plan <- currentPlans) {
+    @renderPlans(plans: List[SubscriptionPlan.PaperPlan], singularLabel: String) = {
+     @planListLabel(singularLabel, plans.length)
+        <dd class="mma-section__list--content">
+        @for(plan <- plans) {
+            <div>
+            @if(plan.name == "Echo-Legacy") {
+                Multi-day (@{
+                chosenPaperDays.map(_.id.replace("Print ", "")).mkString(", ")
+            })
+            } else {
+                @plan.name
+            }
+            </div>
+            <div>@plan.charges.prettyPricing(plan.charges.price.currencies.head)</div>
 
-        <div>
-        @if(plan.name == "Echo-Legacy") {
-            Multi-day (@{
-            chosenPaperDays.map(_.id.replace("Print ", "")).mkString(", ")
-        })
-        } else {
-            @plan.name
+            <div>@if(plan.start.isAfter(now)) { Starts: } else { Started: } @prettyDate(plan.start)</div>
         }
-        </div>
-        <div>@plan.charges.prettyPricing(plan.charges.price.currencies.head)</div>
-        @maybeStartDate.map { startDate =>
-            <div>@if(startDate.isAfter(now)) { Starts: } else { Started: } @prettyDate(startDate)</div>
-        }
-    }
-    </dd>
+        </dd>
+
     }
 
-    @defining(subscription.futurePlans) { futurePlans =>
-        @label("Future plan", futurePlans.length)
-    <dd class="mma-section__list--content">
-    @for(plan <- futurePlans) {
-        <div>@plan.name</div>
-        <div>@plan.charges.prettyPricing(plan.charges.price.currencies.head)</div>
-        <div>Starts: @prettyDate(plan.start)</div>
-    }
-    </dd>
-    }
+    @renderPlans(subscription.currentPlans, "Current Plan")
+    @renderPlans(subscription.futurePlans, "Future Plan")
 
     @maybeContact.map { contact =>
         <dt class="mma-section__list--title">Delivery details</dt>

@@ -50,9 +50,6 @@
                     Your details
                 </h3>
                 @views.html.account.fragments.yourDetails(
-                    subscriptionName = subscription.name.get,
-                    plan = subscription.plan,
-                    maybeStartDate = Some(if(subscription.plan.name == "Echo-Legacy") subscription.startDate else subscription.firstPaymentDate),
                     chosenPaperDays= chosenPaperDays,
                     subscription = subscription
                 ) {
