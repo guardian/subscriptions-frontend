@@ -53,7 +53,8 @@
                     subscriptionName = subscription.name.get,
                     plan = subscription.plan,
                     maybeStartDate = Some(if(subscription.plan.name == "Echo-Legacy") subscription.startDate else subscription.firstPaymentDate),
-                    chosenPaperDays= chosenPaperDays
+                    chosenPaperDays= chosenPaperDays,
+                    subscription = subscription
                 ) {
                     <dt class="mma-section__list--title">Available holiday</dt>
                     <dd class="mma-section__list--content">

@@ -1,19 +1,36 @@
 @import com.gu.memsub.subsv2.SubscriptionPlan
+@import com.gu.memsub.subsv2.Subscription
 @import views.support.Dates._
 @import views.support.Pricing._
 @import com.gu.memsub.PaperDay
 @import scala.collection.immutable.List.empty
 @import com.gu.salesforce.Contact
 @import org.joda.time.LocalDate
+@import model.SubscriptionOps._
+
 
 @import org.joda.time.LocalDate.now
-@(subscriptionName: String, plan: SubscriptionPlan.PaperPlan, maybeStartDate: Option[LocalDate], chosenPaperDays: List[PaperDay] = empty, maybeContact: Option[Contact] = None, maybeFuturePlan: Option[SubscriptionPlan.PaperPlan] = None)(extra: Html = Html(""))
+
+@*TODO JUST FOR TESTING FIX PARAMETER LIST*@
+@(subscriptionName: String, plan: SubscriptionPlan.PaperPlan, maybeStartDate: Option[LocalDate], chosenPaperDays: List[PaperDay] = empty, maybeContact: Option[Contact] = None, maybeFuturePlan: Option[SubscriptionPlan.PaperPlan] = None, subscription: Subscription[SubscriptionPlan.PaperPlan])(extra: Html = Html(""))
 <dl class="mma-section__list">
     <dt class="mma-section__list--title">Subscriber ID</dt>
     <dd class="mma-section__list--content">@subscriptionName</dd>
 
-    <dt class="mma-section__list--title">Current plan</dt>
+    @label(singular: String, size: Int) = {
+    @if(size > 1) {
+        <dt class="mma-section__list--title">@{singular+"s"}</dt>
+    }
+    @if(size == 1) {
+        <dt class="mma-section__list--title">@singular</dt>
+    }
+    }
+
+    @defining(subscription.currentPlans) { currentPlans =>
+        @label("Current plan", currentPlans.length)
     <dd class="mma-section__list--content">
+    @for(plan <- currentPlans) {
+
         <div>
         @if(plan.name == "Echo-Legacy") {
             Multi-day (@{
@@ -27,15 +44,19 @@
         @maybeStartDate.map { startDate =>
             <div>@if(startDate.isAfter(now)) { Starts: } else { Started: } @prettyDate(startDate)</div>
         }
+    }
     </dd>
+    }
 
-    @maybeFuturePlan.map { futurePlan =>
-        <dt class="mma-section__list--title">Renewal plan</dt>
-        <dd class="mma-section__list--content">
-            <div>@futurePlan.name</div>
-            <div>@futurePlan.charges.prettyPricing(futurePlan.charges.price.currencies.head)</div>
-            <div>Starts: @prettyDate(futurePlan.start)</div>
-        </dd>
+    @defining(subscription.futurePlans) { futurePlans =>
+        @label("Future plan", futurePlans.length)
+    <dd class="mma-section__list--content">
+    @for(plan <- futurePlans) {
+        <div>@plan.name</div>
+        <div>@plan.charges.prettyPricing(plan.charges.price.currencies.head)</div>
+        <div>Starts: @prettyDate(plan.start)</div>
+    }
+    </dd>
     }
 
     @maybeContact.map { contact =>

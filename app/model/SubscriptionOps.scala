@@ -22,25 +22,6 @@ object SubscriptionOps extends LazyLogging {
   implicit class EnrichedPaidSubscription[P <: Paid](subscription: Subscription[P]) {
 
     private def containsPlanFor(p:Product):Boolean = subscription.plans.list.exists(_.product == p)
-//TODO IT'S NOT TRIVIAL TO GET A SUBSCRIPTION TO THE THANK YUOU PAGE SO THIS WILL PROBABLY NOT BE USED
-//    def isHomeDelivery: Boolean = containsPlanFor(Delivery)
-//
-//    def isVoucher: Boolean = containsPlanFor(Voucher)
-//
-//    def isDigitalPack: Boolean = containsPlanFor(com.gu.memsub.Product.Digipack)
-//
-//    def isGuardianWeekly: Boolean = subscription.plans.list.exists(_ match {
-//      case _:Product.Weekly => true
-//      case _ => false
-//    })
-//
-//    def email: String = (
-//      subscription.isHomeDelivery.option("homedelivery@theguardian.com") orElse
-//        subscription.isVoucher.option("vouchersubs@theguardian.com") orElse
-//        subscription.isDigitalPack.option("digitalpack@theguardian.com") orElse
-//        subscription.isGuardianWeekly.option("gwsubs@theguardian.com")
-//      ).getOrElse("subscriptions@theguardian.com")
-
 
     val currency = subscription.plans.head.charges.currencies.head
     val nextPlan = subscription.plans.list.maxBy(_.end)
@@ -61,23 +42,27 @@ object SubscriptionOps extends LazyLogging {
         if (subscription.plans.size > 1) {
           logger.warn("User has multiple future plans, we are showing them their last ending plan")
         }
-        subscription.plans.list.minBy(_.start)
+        nextPlan
       }
     }
 
+    //TODO CHECK IF THIS IS CORRECT OR IF WE NEED SPECIAL CASES FOR FREE PERIODS OR THINGS LIKE THAT
+    def currentPlans = subscription.plans.list.filter(p => (p.start == now || p.start.isBefore(now)) && p.end.isAfter(now))
+
+    def futurePlans = subscription.plans.list.filter(_.start.isAfter(now) ).sortBy(_.start)
     //todo ask if we need this
-    val nonExpiredSubscriptions = subscription.plans.list.filter(_.end.isAfter(now))
+    def nonExpiredSubscriptions = subscription.plans.list.filter(_.end.isAfter(now))
 
 
-    val recurringPlans = nonExpiredSubscriptions.filter(_.charges.billingPeriod.isRecurring)
-    val oneOffPlans = nonExpiredSubscriptions.filterNot(_.charges.billingPeriod.isRecurring)
-    val introductoryPeriodPlan = oneOffPlans.find(_.charges.billingPeriod == SixWeeks)
-    val hasIntroductoryPeriod = introductoryPeriodPlan.isDefined
+    def recurringPlans = nonExpiredSubscriptions.filter(_.charges.billingPeriod.isRecurring)
+    def oneOffPlans = nonExpiredSubscriptions.filterNot(_.charges.billingPeriod.isRecurring)
+    def introductoryPeriodPlan = oneOffPlans.find(_.charges.billingPeriod == SixWeeks)
+    def hasIntroductoryPeriod = introductoryPeriodPlan.isDefined
 
 
     //TODO MAYBE THIS ONLY MAKES SENSE FOR NEW SUBS SO IT SHOULD BE MOVED TO EXACTTARGET SERVICE?
     //TODO ALSO THIS STILL USES SUBSCRIPTION.PLAN
-    def newSubPaymentDescripttion(validPromotion: Option[ValidPromotion[NewUsers]], currency: Currency): String = {
+    def newSubPaymentDescription(validPromotion: Option[ValidPromotion[NewUsers]], currency: Currency): String = {
 
       val discountedPlanDescription = (for {
         vp <- validPromotion
@@ -86,7 +71,7 @@ object SubscriptionOps extends LazyLogging {
         subscription.plan.charges.prettyPricingForDiscountedPeriod(discountPromotion, currency)
       })
 
-      val introductoryPeriodSubDescription = subscription.introductoryPeriodPlan.map{introductoryPlan =>
+      def introductoryPeriodSubDescription = subscription.introductoryPeriodPlan.map{introductoryPlan =>
 
         val nextRecurrringPeriod = subscription.recurringPlans.minBy(_.start)
 

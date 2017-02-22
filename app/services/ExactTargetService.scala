@@ -76,7 +76,7 @@ class ExactTargetService(
       val plan = nonExpiredPlans.head //todo this should probably continue using the whole plan instead of passing just one
 
       //val subscriptionDetails = getPlanDescription(validPromotion, subscriptionData.genericData.currency, plan)
-      val subscriptionDetails = sub.newSubPaymentDescripttion(validPromotion, subscriptionData.genericData.currency)
+      val subscriptionDetails = sub.newSubPaymentDescription(validPromotion, subscriptionData.genericData.currency)
       subscriptionData.productData.fold(
         paperData =>{
           println(s"paper date is $paperData")
