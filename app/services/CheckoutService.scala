@@ -61,7 +61,7 @@ class CheckoutService(identityService: IdentityService,
     case _ => false
   }
 
-  def processIntroductoryPeriod(defaultPaymentDelayt: Days, originalCommand: Subscribe): Subscribe = {
+  def processIntroductoryPeriod(defaultPaymentDelay: Days, originalCommand: Subscribe): Subscribe = {
     val additionalRateplan = (originalCommand.ratePlans.head.productRatePlanId match {
       case catalog.weeklyZoneA.sixWeeks.id.get => Some(catalog.weeklyZoneA.quarter)
       case catalog.weeklyZoneC.sixWeeks.id.get => Some(catalog.weeklyZoneC.quarter)
@@ -70,8 +70,12 @@ class CheckoutService(identityService: IdentityService,
 
     val updatedCommand = additionalRateplan.map { ratePlantoAdd =>
       val updatedRatePlans = ratePlantoAdd <:: originalCommand.ratePlans
-      val updatedContractEffective = DateTime.now.toLocalDate.plusDays(defaultPaymentDelayt.getDays)
-      originalCommand.copy(ratePlans = updatedRatePlans, contractEffective = updatedContractEffective, contractAcceptance = updatedContractEffective.plusDays(42))
+
+      val defaultDelayDays = defaultPaymentDelay.getDays
+      val introductoryPeriodDelayDays = if (defaultDelayDays > 0) defaultDelayDays -1  else defaultDelayDays
+
+      val updatedContractEffective = DateTime.now.toLocalDate.plusDays(introductoryPeriodDelayDays)
+      originalCommand.copy(ratePlans = updatedRatePlans, contractEffective = updatedContractEffective, contractAcceptance = updatedContractEffective.plusDays(43))
     }
 
     updatedCommand.getOrElse(originalCommand)
