@@ -54,8 +54,8 @@ object SubscriptionOps extends LazyLogging {
     def nonExpiredSubscriptions = subscription.plans.list.filter(_.end.isAfter(now))
 
 
-    def recurringPlans = nonExpiredSubscriptions.filter(_.charges.billingPeriod.isRecurring)
-    def oneOffPlans = nonExpiredSubscriptions.filterNot(_.charges.billingPeriod.isRecurring)
+    def recurringPlans = subscription.plans.list.filter(p => p.end.isAfter(now) && p.charges.billingPeriod.isRecurring)
+    def oneOffPlans = subscription.plans.list.filterNot(p => p.end.isBefore(now) || p.charges.billingPeriod.isRecurring)
     def introductoryPeriodPlan = oneOffPlans.find(_.charges.billingPeriod == SixWeeks)
     def hasIntroductoryPeriod = introductoryPeriodPlan.isDefined
 

@@ -5,6 +5,7 @@ import _root_.services.TouchpointBackend
 import _root_.services.TouchpointBackend.Resolution
 import actions.CommonActions._
 import com.github.nscala_time.time.OrderingImplicits.LocalDateOrdering
+import com.gu.memsub.BillingPeriod.SixWeeks
 import com.gu.memsub.Subscription.{Name, ProductRatePlanId}
 import com.gu.memsub.promo.{NormalisedPromoCode, PromoCode}
 import com.gu.memsub.services.GetSalesforceContactForSub
@@ -31,7 +32,7 @@ import scala.concurrent.Future
 import scalaz.std.scalaFuture._
 import scalaz.syntax.std.option._
 import scalaz.{-\/, EitherT, OptionT, \/, \/-}
-
+import model.ContentSubscriptionPlanOps._
 // this handles putting subscriptions in and out of the session
 object SessionSubscription {
 
@@ -183,14 +184,18 @@ object ManageWeekly extends ContextLogging {
           futureZuoraBillToContact.map { zuoraContact =>
             zuoraContact.country.map { billToCountry =>
               val catalog = tpBackend.catalogService.unsafeCatalog
+
               val weeklyPlans = weeklySubscription.planToManage.product match {
                 case Product.WeeklyZoneA => catalog.weeklyZoneA.toList
                 case Product.WeeklyZoneB => catalog.weeklyZoneB.toList
                 case Product.WeeklyZoneC => catalog.weeklyZoneC.toList
               }
+
+              val renewalPlans = weeklyPlans.filter(_.availableForRenewal)
+
               val currency = account.currency.toRight(s"could not deserialise currency for account ${account.id}")
               val weeklyPlanInfo = currency.right.flatMap { existingCurrency =>
-                sequence(weeklyPlans.map { plan =>
+                sequence(renewalPlans.map { plan =>
                   val price = plan.charges.price.getPrice(existingCurrency).toRight(s"could not find price in $existingCurrency for plan ${plan.id} ${plan.name}").right
                   price.map(price => WeeklyPlanInfo(plan.id, plan.charges.prettyPricing(price.currency)))
                 }).right.map(r => (existingCurrency, r))
