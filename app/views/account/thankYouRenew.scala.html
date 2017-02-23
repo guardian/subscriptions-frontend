@@ -4,7 +4,7 @@
 @import views.support.Dates._
 @import org.joda.time.LocalDate.now
 @import com.gu.memsub.BillingPeriod.OneOffPeriod
-@(plan: SubscriptionPlan.PaperPlan,
+@(plan: SubscriptionPlan.ContentSubscription,
   billingSchedule: BillingSchedule,
   touchpointBackendResolution: services.TouchpointBackend.Resolution
 )(implicit request: RequestHeader)

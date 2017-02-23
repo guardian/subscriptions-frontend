@@ -54,7 +54,7 @@ class CheckoutSpec extends FeatureSpec with Browser
 
   feature("Subscription checkout") {
 
-    scenario("Guest users subscribe with direct debit", Acceptance) {
+    scenario("Guest user subscribes for the Digital Pack with direct debit", Acceptance) {
       checkDependenciesAreAvailable
       val testUser = new TestUser
 
@@ -114,25 +114,34 @@ class CheckoutSpec extends FeatureSpec with Browser
         assert(Driver.cookiesSet.map(_.getName).contains(idCookie)) }
     }
 
-    scenario("Guest users subscribe to Voucher Everyday package", Acceptance) {
-      checkDependenciesAreAvailable
-      val testUser = new TestUser
+    scenario("Identity user subscribes to the Voucher Everyday package with direct debit", Acceptance) {
+      withRegisteredIdentityUserFixture { testUser =>
 
+      Given("a registered and signed in Identity user selects the Everyday package")
+
+      Then("they should land on the 'Voucher Everyday Checkout' page,")
       val checkout = Checkout(testUser, "checkout/voucher-everyday")
-      When("users visit the 'Voucher Everyday Checkout' page,")
       go.to(checkout)
       assert(checkout.pageHasLoaded())
 
-      Then("section 'Your details' should load.")
+      And("they should be signed in with their Identity account,")
+      assert(checkout.userIsSignedIn)
+
+      And("they should have Identity cookies,")
+      Seq("GU_U", "SC_GU_U", "SC_GU_LA").foreach { idCookie =>
+        assert(Driver.cookiesSet.map(_.getName).contains(idCookie))
+      }
+
+      And("the section 'Your details' should load.")
       assert(checkout.yourDetailsSectionHasLoaded())
 
-      When("they fill in personal details,")
-      checkout.fillInPersonalDetails()
+      And("first name, last name, and email address should be pre-filled,")
+      assert(checkout.userDetailsArePrefilled)
 
-      And("click on 'Continue' button,")
+      When("they click the continue button")
       checkout.clickPersonalDetailsContinueButton()
 
-      Then("section 'Delivery Address' should load.")
+      Then("the section 'Delivery Address' should load.")
       assert(checkout.deliveryAddressSectionHasLoaded())
 
       When("they fill in delivery address details,")
@@ -171,96 +180,9 @@ class CheckoutSpec extends FeatureSpec with Browser
       val thankYou = ThankYou(testUser)
       assert(thankYou.pageHasLoaded())
 
-      When("they set password for their Identity account,")
-      thankYou.setPassword("supers4af3passw0rd")
-
-      Then("they should be logged into Identity account,")
-      assert(thankYou.hasMyProfileButton)
-
-      And("should have Identity cookies.")
-      Seq("GU_U", "SC_GU_U", "SC_GU_LA").foreach { idCookie =>
-        assert(Driver.cookiesSet.map(_.getName).contains(idCookie)) }
-    }
-
-    scenario("Identity user subscribes with credit card through Stripe Checkout", Acceptance) {
-      withRegisteredIdentityUserFixture { testUser =>
-
-        Given("registered and signed in Identity users want to subscribe by clicking on " +
-          "'Start your free trial'")
-
-        Then("they should land on 'Checkout' page,")
-        val checkout = pages.Checkout(testUser)
-
-        go.to(checkout)
-        assert(checkout.pageHasLoaded())
-
-        And("should be signed in with their Identity account,")
-        assert(checkout.userIsSignedIn)
-
-        And("first name, last name, and email address should be pre-filled,")
-        assert(checkout.userDetailsArePrefilled)
-
-        And("they should have Identity cookies,")
-        Seq("GU_U", "SC_GU_U", "SC_GU_LA").foreach { idCookie =>
-          assert(Driver.cookiesSet.map(_.getName).contains(idCookie))
-        }
-
-        And("the section 'Your details' should load.")
-        assert(checkout.yourDetailsSectionHasLoaded())
-
-        Then("Go along to the address details")
-        checkout.clickPersonalDetailsContinueButton()
-
-        When("they fill in the address,")
-        checkout.fillInBillingAddress()
-
-        And("click on 'Continue' button,")
-        checkout.clickBillingDetailsContinueButton()
-
-        Then("the section 'Payment Details' should load.")
-        assert(checkout.directDebitSectionHasLoaded())
-
-        When("Users select credit card payment option,")
-        checkout.selectCreditCardPaymentOption()
-
-        And("click on 'Continue' button,")
-        checkout.clickCredictCardPaymentContinueButton()
-
-        Then("the section 'Confirm and Review' should load.")
-        assert(checkout.reviewSectionHasLoaded())
-
-        When("they submit the form,")
-        checkout.submitPayment()
-
-        Then("the Stripe Checkout iframe should display")
-        assert(checkout.stripeCheckoutHasLoaded())
-
-        When("the checkout iframe is present")
-        checkout.switchToStripe()
-
-        Then("credit card field is present")
-        assert(checkout.stripeCheckoutHasCC())
-
-        Then("expiry date field is present")
-        assert(checkout.stripeCheckoutHasExph())
-
-        Then("CVC field is present")
-        assert(checkout.stripeCheckoutHasCVC())
-
-        Then("submit button is present")
-        assert(checkout.stripeCheckoutHasSubmit())
-
-        And("they fill in credit card payment details,")
-        checkout.fillInCreditCardPaymentDetailsStripe()
-
-        Then("they should land on 'Thank You' page,")
-        val thankYou = ThankYou(testUser)
-        assert(thankYou.pageHasLoaded())
-
-        And("they should still be signed in.")
-        assert(thankYou.userIsSignedIn)
+      And("they should still be signed in.")
+      assert(thankYou.userIsSignedIn)
       }
     }
-
   }
 }

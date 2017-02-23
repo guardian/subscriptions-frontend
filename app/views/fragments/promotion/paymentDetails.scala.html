@@ -1,17 +1,17 @@
+@import com.gu.i18n.Currency
 @import com.gu.memsub.subsv2.CatalogPlan
-@import com.gu.memsub.promo.Promotion._
+@import com.gu.memsub.promo.Promotion.AnyPromotion
 @import views.support.Catalog._
 
-@(plan: CatalogPlan.Paid, promotion: AnyPromotion)
-
+@(plan: CatalogPlan.Paid, currency: Currency, promotion: AnyPromotion)
 @promotion.asDiscount.find(_.promotionType.durationMonths.isDefined).fold {
-    Monthly price <strong>@formatPrice(plan, promotion)</strong>
+    Monthly price <strong>@formatPrice(plan, currency, promotion)</strong>
 } { p =>
     @if(p.promotionType.durationMonths.get > 1) {
-        <strong>@formatPrice(plan, promotion)</strong> per month for @p.promotionType.durationMonths.get months
+        <strong>@formatPrice(plan, currency, promotion)</strong> per month for @p.promotionType.durationMonths.get months
     } else {
-        <strong>@formatPrice(plan, promotion)</strong> for 1 month
+        <strong>@formatPrice(plan, currency, promotion)</strong> for 1 month
     }
     <br/>
-    Then <strong>@formatPrice(plan)</strong> every month thereafter
+    Then <strong>@formatPrice(plan, currency)</strong> every month thereafter
 }

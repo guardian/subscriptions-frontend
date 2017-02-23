@@ -30,7 +30,8 @@ define(['lodash/object/pick', 'utils/user', 'raven-js'], function (pick, userUti
                         console.warn('Raven captured error: ', data);
                     }
                     return !window.guardian.isDev;
-                }
+                },
+                release: guardian.buildNumber
             }).install();
         }
     }
