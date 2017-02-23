@@ -43,7 +43,7 @@ libraryDependencies ++= Seq(
     ws,
     filters,
     PlayImport.specs2,
-    "com.gu" %% "membership-common" % "0.366",
+    "com.gu" %% "membership-common" % "0.367",
     "com.gu" %% "memsub-common-play-auth" % "0.8",
     "com.gu" %% "identity-test-users" % "0.6",
     "com.gu" %% "content-authorisation-common" % "0.1",
@@ -59,7 +59,7 @@ libraryDependencies ++= Seq(
     "com.squareup.okhttp3" % "okhttp" % "3.4.1" % "test",
     "org.scalaz" %% "scalaz-core" % "7.1.3",
     "org.pegdown" % "pegdown" % "1.6.0",
-    "com.amazonaws" % "aws-java-sdk-sqs" % "1.10.50",
+    "com.amazonaws" % "aws-java-sdk-sqs" % "1.11.95",
     "net.databinder.dispatch" %% "dispatch-core" % "0.11.3"
 )
 
