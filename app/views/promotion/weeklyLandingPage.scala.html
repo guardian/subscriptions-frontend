@@ -5,6 +5,7 @@
 @import views.support.{MarkdownRenderer}
 @import com.gu.memsub.subsv2.Catalog
 @import model.Subscriptions._
+@import controllers.CachedAssets.hashedPathFor
 @import com.gu.i18n.Country
 @import views.support.WeeklyPromotion
 @import com.gu.memsub.promo.Grey
@@ -15,7 +16,7 @@
     @deliveryPlans = @{catalog.delivery.list.filter(p => promotion.appliesTo.productRatePlanIds.contains(p.id))}
     @anyPromotion = @{asAnyPromotion(promotion)}
     @nonTrackingPromotion = @{anyPromotion.asDiscount orElse anyPromotion.asFreeTrial orElse anyPromotion.asIncentive}
-    @title = @{"Subscribe to the Guardian Weekly"}
+    @title = @{"The Guardian Weekly"}
     @titleColour = @{promotion.landingPage.sectionColour match {
         case Some(Blue) => "hero--title__blue"
         case Some(Grey) => "hero--title__grey"
@@ -25,8 +26,31 @@
     @discountedRegions = @{WeeklyPromotion.validRegionsForPromotion(promotion, promoCode, country)(catalog)}
 
     @main(title = s"$title | The Guardian", bodyClasses = List("is-wide")) {
+    @promotion.landingPage.image.fold{
+        @*
+        don't ship this, use a grid image
+        *@
+        <div class="hero-banner @titleColour">
+            <div class="hero-banner__underlay gs-container"></div>
+            <picture class="hero-banner__image">
+                <img src="@hashedPathFor("images/backgrounds/weeklydontuse.jpg")" sizes="100vw"/>
+            </picture>
 
-    @promotion.landingPage.image.map { img =>
+            <div class="hero-banner__inner idk-flexwrap ">
+
+                <div class="hero-banner__content section-left">
+                    <h1 class="hero-banner__title">@title</h1>
+                    <h2 class="hero-banner__description">@promotion.landingPage.title.getOrElse("")</h2>
+
+                </div>
+                <div class="section-right"></div>
+
+            </div>
+        </div>
+
+
+
+    } { img =>
         @fragments.heroBanner(img, modifierClass = titleColour){
             @title
         }{
@@ -34,12 +58,11 @@
         }
     }
         <main class="page-container gs-container">
-          @promotion.landingPage.roundelHtml.map { h =>
-                <div class="digipack__roundel">@fragments.common.roundel(h, Seq("roundel--raised", "roundel--right"))</div>
+            @promotion.landingPage.roundelHtml.map { h =>
+                <div class="digipack__roundel">@fragments.common.roundel(h, Seq("roundel--high", "roundel--right"))</div>
             }
-
             <div class="idk-flexwrap">
-            <section class="promotion-description section-left">
+            <section class="section-left">
                 @promotion.landingPage.description.fold {
                     <p>@promotion.description</p>
                 } { d =>
@@ -51,7 +74,7 @@
                     <p>@p.promotionType.redemptionInstructions</p>
                 }
             </section>
-            <section class="section-slice section-right">
+            <section class="section-slice--bleed section-right">
                 <h2 class="page-heading">Where should we send your Guardian Weekly?</h2>
                 @for(region <- discountedRegions) {
                     @if(region.discountedPlans.length > 1) {
@@ -100,7 +123,7 @@
                 }
             </section>
             </div>
-            <section class="section-slice promotion-terms">
+            <section class="section-slice--bleed promotion-terms">
             <div class="idk-flexwrap">
                 <div class="idk-flexwrap__inner">
             @nonTrackingPromotion.map{promo =>

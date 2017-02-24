@@ -2,25 +2,27 @@
    Hero Banner
    ========================================================================== */
 .hero-banner {
-    height: 50vh;
+    background: black;
+    height:  300px;
     position: relative;
     overflow: hidden;
-    @include mq(mobileLandscape) {
-        background-position: center center;
-        height: 74vh;
-    }
+}
+.hero-banner__underlay {
+    height: 100%;
+    background: guss-colour(neutral-1);
 
-    @include mq(tablet) {
-        height: 460px;
-    }
 }
 
 .hero-banner__image {
-
+    position: absolute;
+    top: 0;
+    height: 100%;
     width: 100%;
 
     > img {
         width: 100%;
+        filter: opacity(50%);
+
     }
 
     @include mq(mobileLandscape) {
@@ -34,9 +36,14 @@
 .hero-banner__inner {
     width: 100%;
     position: absolute;
-    top: 0;
+    bottom: 0;
     display: flex;
     justify-content: center;
+}
+
+.hero-banner__content {
+    background: white;
+
 }
 
 .hero-banner__title{
@@ -50,6 +57,3 @@
     color: guss-colour(features-main-1);
 }
 
-.hero--title__white{
-    color: white;
-}

@@ -54,21 +54,21 @@
 
 .section-left {
     width: 100%;
-    margin-left: $gs-gutter;
-
+    padding-left: $gs-gutter;
+    padding-top: $gs-baseline;
+    padding-bottom: $gs-baseline;
     @include mq(desktop) {
-
-        width: gs-span(5);
+        width: gs-span(6);
     }
 }
 
 .section-right {
     width: 100%;
-    margin-left: $gs-gutter;
-
+    padding-left: $gs-gutter + gs-span(1);
+    padding-top: $gs-baseline;
+    padding-bottom: $gs-baseline;
     @include mq(desktop) {
-
-        width: gs-span(7);
+        width: gs-span(6);
     }
 }
 
@@ -86,7 +86,7 @@
 
 .idk-flexwrap__inner {
     width: 100%;
-    margin-left:  $gs-gutter;
+    padding-left:  $gs-gutter;
     @include mq(desktop) {
         width: gs-span(12);
 
