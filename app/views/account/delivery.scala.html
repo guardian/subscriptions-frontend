@@ -14,7 +14,7 @@
 @(
     subscription: Subscription[DailyPaper],
     holidayRefunds: Seq[HolidayRefund] = Seq.empty,
-    billingSchedule: BillingSchedule,
+    billingSchedule: Option[BillingSchedule],
     chosenPaperDays: List[PaperDay],
     suspendableDays: Int,
     suspendedDays: Int,
@@ -103,11 +103,13 @@
                 <h3 class="mma-section__header">Upcoming delivery holidays</h3>
                 @account.fragments.suspensions(holidayRefunds, suspendableDays, suspendedDays)
             </section>
+            @billingSchedule.map { bs =>
+                <section class="mma-section">
+                    <h3 class="mma-section__header">Your billing schedule</h3>
+                    @account.fragments.billingSchedule(bs, subscription.currency)
+                </section>
+            }
 
-            <section class="mma-section">
-                <h3 class="mma-section__header">Your billing schedule</h3>
-                @account.fragments.billingSchedule(billingSchedule, subscription.currency)
-            </section>
 
             <section class="mma-section">
                 <a class="button button--primary button--large" href="@routes.AccountManagement.logout">Sign Out</a>

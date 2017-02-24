@@ -9,7 +9,7 @@
 @import views.support.Pricing._
 
 @(
-    subscription: Subscription[Digipack], billingSchedule: BillingSchedule
+    subscription: Subscription[Digipack], billingSchedule: Option[BillingSchedule]
 )(implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackend.Resolution)
 
 @main("Your Guardian Digital Pack subscription | The Guardian", bodyClasses = List("is-wide"), edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
@@ -48,12 +48,14 @@
                 </dl>
             </section>
 
-            <section class="mma-section">
-                <h3 class="mma-section__header">
-                    Your billing schedule
-                </h3>
-                @views.html.account.fragments.billingSchedule(billingSchedule, subscription.currency)
-            </section>
+            @billingSchedule.map { bs =>
+                <section class="mma-section">
+                    <h3 class="mma-section__header">
+                        Your billing schedule
+                    </h3>
+                    @views.html.account.fragments.billingSchedule(bs, subscription.currency)
+                </section>
+            }
             <section class="mma-section">
                 <a class="button button--primary button--large" href="@routes.AccountManagement.logout">Sign Out</a>
             </section>
