@@ -1,0 +1,55 @@
+/* ==========================================================================
+   Hero Banner
+   ========================================================================== */
+.hero-banner {
+    height: 50vh;
+    position: relative;
+    overflow: hidden;
+    @include mq(mobileLandscape) {
+        background-position: center center;
+        height: 74vh;
+    }
+
+    @include mq(tablet) {
+        height: 460px;
+    }
+}
+
+.hero-banner__image {
+
+    width: 100%;
+
+    > img {
+        width: 100%;
+    }
+
+    @include mq(mobileLandscape) {
+    }
+
+    // tablet & above
+    @include mq(tablet) {
+    }
+}
+
+.hero-banner__inner {
+    width: 100%;
+    position: absolute;
+    top: 0;
+    display: flex;
+    justify-content: center;
+}
+
+.hero-banner__title{
+    font-weight:900;
+}
+.hero--title__blue {
+    color: guss-colour(news-main-1);
+}
+
+.hero--title__grey {
+    color: guss-colour(features-main-1);
+}
+
+.hero--title__white{
+    color: white;
+}

@@ -12,6 +12,8 @@ import com.gu.memsub.promo.{PromoCode, Promotion, WeeklyLandingPage}
 
 object WeeklyPromotion {
   private val UK = CountryGroup.UK.countries.toSet
+  private val UKdomestic = Set(CountryGroup.C.UK)
+  private val UKoverseas = UK diff UKdomestic
   private val US = CountryGroup.US.countries.toSet
   private val ZONEC = CountryGroup.allGroups.flatMap(_.countries).toSet.diff(UK union US)
   case class DiscountedPlan(pretty: String, headline: String, period: String, url: Uri)
@@ -41,18 +43,45 @@ object WeeklyPromotion {
         discountedPlans = plansForPromotion(promotion, promoCode, ZONEC - requestCountry, catalog.weeklyZoneC.toList)
       )
     }
-    val UKandUS = Seq(DiscountedRegion(
-      title = "United Kingdom",
-      description = "Includes Isle of Man and Channel Islands",
-      countries = UK,
-      discountedPlans = plansForPromotion(promotion, promoCode, UK, catalog.weeklyZoneA.toList)
-    ), DiscountedRegion(
+    val UKregion: Set[DiscountedRegion] = {
+      val all = DiscountedRegion(
+        title = "United Kingdom",
+        description = "Includes Isle of Man and Channel Islands",
+        countries = UK,
+        discountedPlans = plansForPromotion(promotion, promoCode, UK, catalog.weeklyZoneA.toList)
+      )
+      val domestic = DiscountedRegion(
+        title = "United Kingdom",
+        description = "Includes mainland UK only.",
+        countries = UKdomestic,
+        discountedPlans = plansForPromotion(promotion, promoCode, UK, catalog.weeklyZoneA.toList)
+      )
+      val overseas = DiscountedRegion(
+        title = "Isle of Man and Channel Islands",
+        description = "",
+        countries = UKoverseas,
+        discountedPlans = plansForPromotion(promotion, promoCode, UK, catalog.weeklyZoneA.toList)
+      )
+      val countries = promotionCountries intersect UK
+      val isDomestic = !(countries intersect UKdomestic).isEmpty
+      val isOverseas = !(countries intersect UKoverseas).isEmpty
+      if(isDomestic && isOverseas){
+        Set(all)
+      } else if (isDomestic) {
+        Set(domestic)
+      } else if (isOverseas) {
+        Set(overseas)
+      } else {
+        Set()
+      }
+    }
+    val USregion = DiscountedRegion(
       title = "United States",
       description = "Includes Alaska and Hawaii",
       countries = US,
       discountedPlans = plansForPromotion(promotion, promoCode, UK, catalog.weeklyZoneA.toList)
-    ))
-    val regions = regionForZoneCCountry ++ UKandUS ++ Seq(rowWithoutCountry)
+    )
+    val regions = regionForZoneCCountry ++ UKregion ++ Seq(USregion) ++ Seq(rowWithoutCountry)
     regions.filter(_.discountedPlans.length > 0)
   }
 
