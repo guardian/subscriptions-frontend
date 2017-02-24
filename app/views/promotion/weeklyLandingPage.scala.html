@@ -23,7 +23,7 @@
         case Some(White) => "hero--title__white"
         case _ => ""
     }}
-    @discountedRegions = @{WeeklyPromotion.validRegionsForPromotion(promotion, promoCode, country)(catalog)}
+    @discountedRegions = @{WeeklyPromotion.validRegionsForPromotion(Some(promotion), promoCode, country)(catalog)}
 
     @main(title = s"$title | The Guardian", bodyClasses = List("is-wide")) {
     @promotion.landingPage.image.fold{
