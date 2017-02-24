@@ -284,8 +284,8 @@ class CheckoutService(identityService: IdentityService,
     import LogImplicit._
 
     def getPayment(contact: Contact, billto: Queries.Contact): PaymentService#Payment = {
-      val idMinimalUser = IdMinimalUser(contact.identityId, None)
-      val pid = PurchaserIdentifiers(contact, Some(idMinimalUser))
+      val idMinimalUser = contact.identityId.map(IdMinimalUser(_, None))
+      val pid = PurchaserIdentifiers(contact, idMinimalUser)
       renewal.paymentData match {
         case cd: CreditCardData => paymentService.makeCreditCardPayment(cd, subscription.currency, pid)
         case dd: DirectDebitData => paymentService.makeDirectDebitPayment(dd, billto.firstName, billto.lastName, contact)
