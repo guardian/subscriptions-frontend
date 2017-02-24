@@ -91,7 +91,8 @@ define([
         var promoCode = $inputBox.val().trim(),
             ratePlanId = ratePlanChoice.getSelectedRatePlanId(),
             country = formElements.DELIVERY.$COUNTRY_SELECT.val().trim() || formElements.BILLING.$COUNTRY_SELECT.val().trim(),
-            currency = document.querySelector('.js-rate-plans input:checked').dataset.currency;
+            selectedPlan = document.querySelector('.js-rate-plans input:checked'),
+            currency = selectedPlan === null ? null : selectedPlan.dataset.currency;
 
         if (promoCode === '') {
             clearDown();
