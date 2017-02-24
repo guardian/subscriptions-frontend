@@ -65,7 +65,7 @@ object ManageDelivery extends ContextLogging {
 
   import play.api.mvc.Results._
 
-  def apply(errorCodes: Set[String], allHolidays: Seq[HolidayRefund], billingSchedule: BillingSchedule, deliverySubscription: Subscription[Delivery])(implicit request: Request[AnyContent], touchpoint: TouchpointBackend.Resolution): Result = {
+  def apply(errorCodes: Set[String], allHolidays: Seq[HolidayRefund], billingSchedule: Option[BillingSchedule], deliverySubscription: Subscription[Delivery])(implicit request: Request[AnyContent], touchpoint: TouchpointBackend.Resolution): Result = {
     val pendingHolidays = pendingHolidayRefunds(allHolidays)
     val suspendedDays = SuspensionService.holidayToSuspendedDays(pendingHolidays, deliverySubscription.plan.charges.chargedDays.toList)
     val chosenPaperDays = deliverySubscription.plan.charges.chargedDays.toList.sortBy(_.dayOfTheWeekIndex)
@@ -172,7 +172,7 @@ object ManageWeekly extends ContextLogging {
 
   }
 
-  def apply(billingSchedule: BillingSchedule, weeklySubscription: Subscription[WeeklyPlan], promoCode: Option[PromoCode])(implicit request: Request[AnyContent], resolution: TouchpointBackend.Resolution): Future[Result] = {
+  def apply(billingSchedule: Option[BillingSchedule], weeklySubscription: Subscription[WeeklyPlan], promoCode: Option[PromoCode])(implicit request: Request[AnyContent], resolution: TouchpointBackend.Resolution): Future[Result] = {
     implicit val tpBackend = resolution.backend
     implicit val flash = request.flash
     implicit val subContext = weeklySubscription
@@ -204,7 +204,7 @@ object ManageWeekly extends ContextLogging {
                 case Right((existingCurrency, weeklyPlanInfoList)) =>
                   Ok(weeklySubscription.asRenewable.map { renewableSub =>
                     info(s"sub is renewable - showing weeklyRenew page")
-                    views.html.account.weeklyRenew(renewableSub, billingSchedule, contact, billToCountry, weeklyPlanInfoList, existingCurrency, promoCode)
+                    views.html.account.weeklyRenew(renewableSub, contact, billToCountry, weeklyPlanInfoList, existingCurrency, promoCode)
                   } getOrElse {
                     info(s"sub is not renewable - showing weeklyDetails page")
                     views.html.account.weeklyDetails(weeklySubscription, billingSchedule, contact)
@@ -326,7 +326,7 @@ object AccountManagement extends Controller with ContextLogging with CatalogProv
     val futureMaybeFutureManagePage = for {
       subscription <- OptionT(eventualMaybeSubscription)
       allHolidays <- OptionT(tpBackend.suspensionService.getHolidays(subscription.name).map(_.toOption))
-      billingSchedule <- OptionT(tpBackend.commonPaymentService.billingSchedule(subscription.id, subscription.accountId, numberOfBills = 13))
+      billingSchedule <- OptionT(tpBackend.commonPaymentService.billingSchedule(subscription.id, subscription.accountId, numberOfBills = 13).map(Some(_):Option[Option[BillingSchedule]]))
     } yield {
       val maybeFutureManagePage = subscription.planToManage.product match {
         case Product.Delivery => subscription.asDelivery.map { deliverySubscription =>

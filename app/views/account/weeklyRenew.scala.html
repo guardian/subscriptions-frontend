@@ -13,7 +13,7 @@
 @import com.gu.memsub.promo.PromoCode
 @import org.joda.time.LocalDate.now
 @(
-    subscription: Subscription[WeeklyPlanOneOff], billingSchedule: BillingSchedule, contact: Contact, billToCountry: Country, plans: List[WeeklyPlanInfo], currency: Currency, promoCode: Option[PromoCode]
+    subscription: Subscription[WeeklyPlanOneOff], contact: Contact, billToCountry: Country, plans: List[WeeklyPlanInfo], currency: Currency, promoCode: Option[PromoCode]
 )(implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackend.Resolution)
 
 @main("Your Guardian Weekly subscription | The Guardian", bodyClasses = List("is-wide"), edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
