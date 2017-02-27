@@ -72,7 +72,7 @@ class CheckoutService(identityService: IdentityService,
       val updatedRatePlans = ratePlantoAdd <:: originalCommand.ratePlans
 
       val defaultDelayDays = defaultPaymentDelay.getDays
-      val introductoryPeriodDelayDays = if (defaultDelayDays > 0) defaultDelayDays -1  else defaultDelayDays
+      val introductoryPeriodDelayDays = if (defaultDelayDays > 0) defaultDelayDays - 1  else defaultDelayDays
 
       val updatedContractEffective = DateTime.now.toLocalDate.plusDays(introductoryPeriodDelayDays)
       originalCommand.copy(ratePlans = updatedRatePlans, contractEffective = updatedContractEffective, contractAcceptance = updatedContractEffective.plusDays(43))
