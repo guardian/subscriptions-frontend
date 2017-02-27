@@ -46,11 +46,8 @@ object SubscriptionOps extends LazyLogging {
       }
     }
 
-    //TODO CHECK IF THIS IS CORRECT OR IF WE NEED SPECIAL CASES FOR FREE PERIODS OR THINGS LIKE THAT
     def currentPlans = subscription.plans.list.filter(p => (p.start == now || p.start.isBefore(now)) && p.end.isAfter(now))
-
     def futurePlans = subscription.plans.list.filter(_.start.isAfter(now) ).sortBy(_.start)
-    //todo ask if we need this
     def nonExpiredSubscriptions = subscription.plans.list.filter(_.end.isAfter(now))
 
 
