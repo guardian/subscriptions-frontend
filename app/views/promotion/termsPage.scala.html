@@ -28,8 +28,8 @@
 
             <h4>Applies to products</h4>
             <ul class="promotion-applies-to">
-                @catalog.allSubs.flatten.filter(plan => promotion.appliesTo.productRatePlanIds.contains(plan.id)).map { plan =>
-                    <li>@{plan.product.toString.replace("Digipack", "")} @plan.name</li>
+                @catalog.allSubs.flatten.filter(plan => promotion.appliesTo.productRatePlanIds.contains(plan.id)).map(_.name).distinct.sorted.map { name =>
+                    <li>@name</li>
                 }
             </ul>
 
