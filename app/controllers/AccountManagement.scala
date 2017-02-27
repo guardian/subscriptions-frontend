@@ -186,7 +186,6 @@ object ManageWeekly extends ContextLogging {
           futureZuoraBillToContact.map { zuoraContact =>
             zuoraContact.country.map { billToCountry =>
               val catalog = tpBackend.catalogService.unsafeCatalog
-
               val weeklyPlans = weeklySubscription.planToManage.product match {
                 case Product.WeeklyZoneA => catalog.weeklyZoneA.toList
                 case Product.WeeklyZoneB => catalog.weeklyZoneB.toList

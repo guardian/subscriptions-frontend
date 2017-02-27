@@ -74,12 +74,6 @@ class ExactTargetService(
       val personalData = subscriptionData.genericData.personalData
       val promotionDescription = validPromotion.filterNot(_.promotion.promotionType == Tracking).map(_.promotion.description)
 
-      //todo just for test see how to fix this
-      val now = DateTime.now.toLocalDate
-
-      val nonExpiredPlans = sub.plans.list.filter(_.end.isAfter(now))
-      val plan = nonExpiredPlans.head //todo this should probably continue using the whole plan instead of passing just one
-
       val subscriptionDetails = {
         val currency = subscriptionData.genericData.currency
 
@@ -102,9 +96,7 @@ class ExactTargetService(
 
 
       subscriptionData.productData.fold(
-        paperData =>{
-          println(s"paper date is $paperData")
-          if (paperData.plan.isHomeDelivery) {
+        paperData => if (paperData.plan.isHomeDelivery) {
           PaperHomeDeliveryWelcome1DataExtensionRow(
             paperData = paperData,
             personalData = personalData,
@@ -114,7 +106,6 @@ class ExactTargetService(
             promotionDescription = promotionDescription
           )
         } else if (paperData.plan.isGuardianWeekly) {
-
           GuardianWeeklyWelcome1DataExtensionRow(
             paperData = paperData,
             personalData = personalData,
@@ -133,9 +124,7 @@ class ExactTargetService(
             subscriptionDetails = subscriptionDetails,
             promotionDescription = promotionDescription
           )
-        }
-    }
-        ,
+        },
         _ => DigipackWelcome1DataExtensionRow(
           personalData = personalData,
           subscription = sub,

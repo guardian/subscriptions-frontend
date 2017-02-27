@@ -237,6 +237,7 @@ object PaperVoucherWelcome1DataExtensionRow {
 }
 
 object GuardianWeeklyWelcome1DataExtensionRow {
+
   import model.SubscriptionOps._
 
   def apply(
@@ -254,9 +255,7 @@ object GuardianWeeklyWelcome1DataExtensionRow {
       Seq("date_of_second_payment" -> formatDate(weeklySub.secondPaymentDate))
     } getOrElse Nil
 
-    val a = GuardianWeeklyWelcome1DataExtensionRow(personalData.email, commonFields ++ additionalFields)
-    println(s"extension row is $a")
-    a
+    GuardianWeeklyWelcome1DataExtensionRow(personalData.email, commonFields ++ additionalFields)
   }
 }
 
