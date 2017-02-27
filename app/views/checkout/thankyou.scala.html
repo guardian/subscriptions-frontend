@@ -3,6 +3,7 @@
 @import views.support.BillingPeriod._
 @import views.support.PlanOps._
 @import com.gu.memsub.subsv2.CatalogPlan
+@import com.gu.memsub.Product
 
 @(subscriptionName: String,
     guestAccountForm: Option[Form[model.GuestAccountData]] = None,
@@ -76,5 +77,10 @@
         </div>
     </section>
 </main>
-    @fragments.analytics.jellyfish.conversion()
+    @{
+        plan.product match {
+            case _: Product.Weekly => fragments.analytics.jellyfish.weeklyConversion()
+            case _ => fragments.analytics.jellyfish.conversion()
+        }
+    }
 }

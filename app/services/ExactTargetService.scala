@@ -1,6 +1,8 @@
 package services
 import com.github.nscala_time.time.Imports._
 import com.amazonaws.regions.{Region, Regions}
+
+import com.amazonaws.regions.Regions.EU_WEST_1
 import com.amazonaws.services.sqs.AmazonSQSClient
 import com.amazonaws.services.sqs.model._
 import com.gu.aws.CredentialsProvider
@@ -19,11 +21,14 @@ import com.gu.zuora.api.ZuoraService
 import com.gu.zuora.soap.models.Results.SubscribeResult
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
+import model.SubscriptionOps._
 import model.exactTarget.HolidaySuspensionBillingScheduleDataExtensionRow.constructSalutation
 import model.exactTarget._
 import model.{PaperData, PurchaserIdentifiers, Renewal, SubscribeRequest, SubscriptionOps}
 import model.SubscriptionOps._
 import org.joda.time.{DateTime, Days, LocalDate}
+import model.{PurchaserIdentifiers, Renewal, SubscribeRequest}
+import org.joda.time.{Days, LocalDate}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json._
 import views.support.PlanOps._
@@ -31,8 +36,8 @@ import views.support.Pricing._
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
-import scalaz.{-\/, EitherT, \/, \/-}
 import scalaz.Scalaz._
+import scalaz.{-\/, EitherT, \/, \/-}
 
 /**
   * Sends welcome email message to Amazon SQS queue which is consumed by membership-workflow.
@@ -249,8 +254,10 @@ class ExactTargetService(
 }
 
 object SqsClient extends LazyLogging {
-  private val sqsClient = new AmazonSQSClient(CredentialsProvider)
-  sqsClient.setRegion(Region.getRegion(Regions.EU_WEST_1))
+  private val sqsClient = AmazonSQSClient.builder
+    .withCredentials(CredentialsProvider)
+    .withRegion(EU_WEST_1)
+    .build()
 
   def sendDataExtensionToQueue(queueName: String, row: DataExtensionRow): Future[Try[SendMessageResult]] = {
     Future {

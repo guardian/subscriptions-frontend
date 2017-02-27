@@ -6,7 +6,7 @@
 @import model.SubscriptionOps._
 @import org.joda.time.LocalDate.now
 @(
-    subscription: Subscription[SubscriptionPlan.WeeklyPlan], billingSchedule: BillingSchedule, contact: Contact
+    subscription: Subscription[SubscriptionPlan.WeeklyPlan], billingSchedule: Option[BillingSchedule], contact: Contact
 )(implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackend.Resolution)
 
 @main("Your Guardian Weekly subscription | The Guardian", bodyClasses = List("is-wide"), edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
@@ -29,13 +29,14 @@
                     subscription = subscription
                 )()
             </section>
-
-            <section class="mma-section">
-                <h3 class="mma-section__header">
-                    Your billing schedule
-                </h3>
-                @views.html.account.fragments.billingSchedule(billingSchedule, subscription.currency)
-            </section>
+            @billingSchedule.map { bs =>
+                <section class="mma-section">
+                    <h3 class="mma-section__header">
+                        Your billing schedule
+                    </h3>
+                    @views.html.account.fragments.billingSchedule(bs, subscription.currency)
+                </section>
+            }
             <section class="mma-section">
                 <a class="button button--primary button--large" href="@routes.AccountManagement.logout">Sign Out</a>
             </section>

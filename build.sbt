@@ -59,7 +59,7 @@ libraryDependencies ++= Seq(
     "com.squareup.okhttp3" % "okhttp" % "3.4.1" % "test",
     "org.scalaz" %% "scalaz-core" % "7.1.3",
     "org.pegdown" % "pegdown" % "1.6.0",
-    "com.amazonaws" % "aws-java-sdk-sqs" % "1.10.50",
+    "com.amazonaws" % "aws-java-sdk-sqs" % "1.11.95",
     "net.databinder.dispatch" %% "dispatch-core" % "0.11.3"
 )
 
@@ -79,6 +79,7 @@ resolvers ++= Seq(
     Resolver.sonatypeRepo("releases"))
 
 addCommandAlias("devrun", "run -Dconfig.resource=DEV.conf 9200")
+addCommandAlias("prodrun", "run -Dconfig.resource=PROD.conf 9200")
 addCommandAlias("fast-test", "testOnly -- -l Acceptance")
 addCommandAlias("acceptance-test", "testOnly acceptance.CheckoutSpec")
 
