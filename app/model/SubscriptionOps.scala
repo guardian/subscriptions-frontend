@@ -58,28 +58,6 @@ object SubscriptionOps extends LazyLogging {
     def oneOffPlans = subscription.plans.list.filterNot(p => p.end.isBefore(now) || p.charges.billingPeriod.isRecurring)
     def introductoryPeriodPlan = oneOffPlans.find(_.charges.billingPeriod == SixWeeks)
     def hasIntroductoryPeriod = introductoryPeriodPlan.isDefined
-
-
-    //TODO MAYBE THIS ONLY MAKES SENSE FOR NEW SUBS SO IT SHOULD BE MOVED TO EXACTTARGET SERVICE?
-    //TODO ALSO THIS STILL USES SUBSCRIPTION.PLAN
-    def newSubPaymentDescription(validPromotion: Option[ValidPromotion[NewUsers]], currency: Currency): String = {
-
-      val discountedPlanDescription = (for {
-        vp <- validPromotion
-        discountPromotion <- vp.promotion.asDiscount
-      } yield {
-        subscription.plan.charges.prettyPricingForDiscountedPeriod(discountPromotion, currency)
-      })
-
-      def introductoryPeriodSubDescription = subscription.introductoryPeriodPlan.map{introductoryPlan =>
-
-        val nextRecurrringPeriod = subscription.recurringPlans.minBy(_.start)
-
-        introductoryPlan.charges.prettyPricing(currency) + " then " + nextRecurrringPeriod.charges.prettyPricing(currency)
-      }
-
-      discountedPlanDescription orElse introductoryPeriodSubDescription getOrElse subscription.plan.charges.prettyPricing(currency)
-    }
   }
 
   implicit class EnrichedPaperSubscription[P <: PaperPlan](subscription: Subscription[P]) extends ContextLogging {

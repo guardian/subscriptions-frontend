@@ -1,5 +1,5 @@
 package services
-
+import com.github.nscala_time.time.Imports._
 import com.amazonaws.regions.{Region, Regions}
 import com.amazonaws.services.sqs.AmazonSQSClient
 import com.amazonaws.services.sqs.model._
@@ -75,8 +75,27 @@ class ExactTargetService(
       val nonExpiredPlans = sub.plans.list.filter(_.end.isAfter(now))
       val plan = nonExpiredPlans.head //todo this should probably continue using the whole plan instead of passing just one
 
-      //val subscriptionDetails = getPlanDescription(validPromotion, subscriptionData.genericData.currency, plan)
-      val subscriptionDetails = sub.newSubPaymentDescription(validPromotion, subscriptionData.genericData.currency)
+      val subscriptionDetails = {
+        val currency = subscriptionData.genericData.currency
+
+        val discountedPlanDescription = (for {
+          vp <- validPromotion
+          discountPromotion <- vp.promotion.asDiscount
+        } yield {
+          sub.plan.charges.prettyPricingForDiscountedPeriod(discountPromotion, currency)
+        })
+
+        def introductoryPeriodSubDescription = sub.introductoryPeriodPlan.map { introductoryPlan =>
+
+          val nextRecurrringPeriod = sub.recurringPlans.minBy(_.start)
+
+          introductoryPlan.charges.prettyPricing(currency) + " then " + nextRecurrringPeriod.charges.prettyPricing(currency)
+        }
+
+        discountedPlanDescription orElse introductoryPeriodSubDescription getOrElse sub.plan.charges.prettyPricing(currency)
+      }
+
+
       subscriptionData.productData.fold(
         paperData =>{
           println(s"paper date is $paperData")
