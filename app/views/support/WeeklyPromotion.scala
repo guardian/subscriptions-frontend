@@ -1,6 +1,7 @@
 package views.support
 
 import com.gu.i18n.{Country, CountryGroup, Currency}
+import com.gu.memsub.BillingPeriod._
 import com.gu.memsub.Subscription
 import com.gu.memsub.Subscription.ProductRatePlanId
 import com.gu.memsub.promo.PromoCode
@@ -16,9 +17,13 @@ object WeeklyPromotion {
   private val UKdomestic = Set(CountryGroup.C.UK)
   private val UKoverseas = UK diff UKdomestic
   private val US = CountryGroup.US.countries.toSet
+  private val AU = CountryGroup.Australia.countries.toSet
+  private val NZ = CountryGroup.NewZealand.countries.toSet
+  private val EU = CountryGroup.Europe.countries.toSet
+  private val CA = CountryGroup.Canada.countries.toSet
   private val allCountries = CountryGroup.allGroups.flatMap(_.countries).toSet
   private val ZONEC = allCountries.toSet.diff(UK union US)
-  case class DiscountedPlan(pretty: String, headline: String, period: String, url: Uri)
+  case class DiscountedPlan(currency: Currency, pretty: String, headline: String, period: String, url: Uri, discounted: Boolean)
 
   case class DiscountedRegion(title: String, description: String, countries: Set[Country], discountedPlans: List[DiscountedPlan])
 
@@ -66,13 +71,13 @@ object WeeklyPromotion {
         discountedPlans = plansForPromotion(promotion, promoCode, UK, catalog.weeklyZoneA.toList)
       )
       val countries = promotionCountries intersect UK
-      val isDomestic = !(countries intersect UKdomestic).isEmpty
-      val isOverseas = !(countries intersect UKoverseas).isEmpty
-      if(isDomestic && isOverseas){
+      val includesUKDomestic = !(countries intersect UKdomestic).isEmpty
+      val includesUKOverseas = !(countries intersect UKoverseas).isEmpty
+      if(includesUKDomestic && includesUKOverseas){
         Set(all)
-      } else if (isDomestic) {
+      } else if (includesUKDomestic) {
         Set(domestic)
-      } else if (isOverseas) {
+      } else if (includesUKOverseas) {
         Set(overseas)
       } else {
         Set()
@@ -82,9 +87,33 @@ object WeeklyPromotion {
       title = "United States",
       description = "Includes Alaska and Hawaii",
       countries = US,
-      discountedPlans = plansForPromotion(promotion, promoCode, UK, catalog.weeklyZoneA.toList)
+      discountedPlans = plansForPromotion(promotion, promoCode, US, catalog.weeklyZoneA.toList)
     )
-    val regions = regionForZoneCCountry ++ UKregion ++ Seq(USregion) ++ Seq(rowWithoutCountry)
+    val AUSregion = DiscountedRegion(
+      title = "Australia",
+      description = "Posted to you by air mail",
+      countries = AU,
+      discountedPlans = plansForPromotion(promotion, promoCode, AU, catalog.weeklyZoneC.toList)
+    )
+    val NZregion = DiscountedRegion(
+      title = "New Zealand",
+      description = "Posted to you by air mail",
+      countries = NZ,
+      discountedPlans = plansForPromotion(promotion, promoCode, NZ, catalog.weeklyZoneC.toList)
+    )
+    val CAregion = DiscountedRegion(
+      title = "Canada",
+      description = "Posted to you by air mail",
+      countries = CA,
+      discountedPlans = plansForPromotion(promotion, promoCode, CA, catalog.weeklyZoneC.toList)
+    )
+    val EUregion = DiscountedRegion(
+      title = "Europe",
+      description = "Posted to you by air mail",
+      countries = EU,
+      discountedPlans = plansForPromotion(promotion, promoCode, EU, catalog.weeklyZoneC.toList)
+    )
+    val regions = regionForZoneCCountry ++ UKregion ++ Seq(USregion, AUSregion, NZregion, CAregion, EUregion, rowWithoutCountry)
     regions.filter(_.discountedPlans.length > 0)
   }
 
@@ -92,27 +121,46 @@ object WeeklyPromotion {
 
   def plansForPromotion(promotion: Option[PromoWithWeeklyLandingPage], promoCode: PromoCode, countries: Set[Country], catalogPlans: Seq[CatalogPlan.Paid])(implicit catalog: Catalog): List[DiscountedPlan] = {
     def currencies = promotion.map(countries intersect _.appliesTo.countries).getOrElse(countries).flatMap { country => currencyFor(country) }
-    val productRatePlanIds =(productRatePlanId: ProductRatePlanId) => promotion.map(_.appliesTo.productRatePlanIds.contains(productRatePlanId)).getOrElse(true)
 
-    def plans: List[CatalogPlan.Paid] =
-      catalogPlans.filter(catalogPlan => productRatePlanIds(catalogPlan.id)).toList.sortBy(_.charges.gbpPrice.amount)
+    def isSixWeek(catalogPlan: CatalogPlan.Paid):Boolean = catalogPlan.charges.billingPeriod match{
+      case SixWeeks => true
+      case _ => false
+    }
+    val displaySixForSix: Boolean = promotion.map(promo =>
+      catalogPlans.filter(plan => promo.appliesTo.productRatePlanIds.contains(plan.id)).exists(isSixWeek)).getOrElse(false)
 
-    for {
+
+    val plans: List[CatalogPlan.Paid] = {if(displaySixForSix)catalogPlans else catalogPlans.filterNot(isSixWeek)}.filter(_.charges.billingPeriod match {case OneYear => false
+    case _ => true}).toList.sortBy(_.charges.gbpPrice.amount)
+
+    val discountedPlans = for {
       plan <- plans
       currency <- plan.charges.currencies.toList
       if (currencies.contains(currency))
     } yield {
-      val pretty = promotion.flatMap(_.asDiscount)
+      val sixOrDiscount = isSixWeek(plan) || promotion.map(_.appliesTo.productRatePlanIds.contains(plan.id)).getOrElse(false)
+      val pretty = promotion.filter(_.appliesTo.productRatePlanIds.contains(plan.id)).flatMap(_.asDiscount)
         .map { discountPromo => plan.charges.prettyPricingForDiscountedPeriod[scalaz.Id.Id, WeeklyLandingPage](discountPromo, currency) }
-        .getOrElse(plan.charges.prettyPricing(currency))
+        .getOrElse(plan.charges.billingPeriod match {
+          case SixWeeks => s"${currency.identifier}6 for six issues"
+          case _ => plan.charges.prettyPricing(currency)
+        })
       val headline = promotion.flatMap(_.asDiscount)
-        .map { discountPromo => plan.charges.headlinePricingForDiscountedPeriod[scalaz.Id.Id, WeeklyLandingPage](discountPromo, currency) }.getOrElse(plan.charges.prettyPricing(currency))
+        .map { discountPromo => plan.charges.headlinePricingForDiscountedPeriod[scalaz.Id.Id, WeeklyLandingPage](discountPromo, currency) }.getOrElse(plan.charges.billingPeriod match {
+        case SixWeeks => s"${currency.identifier}6 for six issues"
+        case _ => plan.charges.prettyPricing(currency)
+      })
+      val url = s"checkout/${plan.slug}" ? ("promoCode" -> promoCode.get) & ("countryGroup" -> CountryGroup.allGroups.find(_.currency == currency).getOrElse(CountryGroup.UK).id)
       DiscountedPlan(
+        currency = currency,
         pretty = pretty,
         headline = headline,
-        period = plan.charges.billingPeriod.adjective,
-        url = s"checkout/${plan.slug}" ? ("promoCode" -> promoCode.get) & ("countryGroup" -> CountryGroup.allGroups.find(_.currency == currency).getOrElse(CountryGroup.UK).id))
+        period = plan.charges.billingPeriod.adjective.capitalize,
+        url = url,
+        discounted = sixOrDiscount)
     }
+    val p = discountedPlans.partition(_.currency==Currency.USD)
+    p._1 ++ p._2
   }
 
 }

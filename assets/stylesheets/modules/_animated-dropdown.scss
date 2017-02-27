@@ -2,17 +2,22 @@
     opacity: 1;
     max-height: 2000px;
     overflow:hidden;
+    margin-bottom: 12px;
 }
 
 @mixin hidden {
     opacity: 0;
     max-height: 0;
     overflow:hidden;
+    margin-bottom: 0;
 }
 
 @keyframes show {
     0% {
         @include hidden;
+    }
+    20% {
+        margin-bottom: 12px;
     }
     100% {
         @include showing;
@@ -22,6 +27,9 @@
 @keyframes hide {
     0% {
         @include showing;
+    }
+    80% {
+        margin-bottom: 12px;
     }
     100% {
         @include hidden;

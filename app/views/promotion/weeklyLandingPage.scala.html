@@ -2,6 +2,7 @@
 @import com.gu.memsub.promo.Promotion.PromoWithWeeklyLandingPage
 @import com.gu.memsub.promo.Promotion.asAnyPromotion
 @import views.support.LandingPageOps._
+@import views.support.CommaSplit
 @import views.support.{MarkdownRenderer}
 @import com.gu.memsub.subsv2.Catalog
 @import model.Subscriptions._
@@ -40,10 +41,10 @@
 
                 <div class="hero-banner__content section-left">
                     <h1 class="hero-banner__title">@title</h1>
-                    <h2 class="hero-banner__description">@promotion.landingPage.title.getOrElse("")</h2>
+                    <h1 class="hero-banner__description">@CommaSplit.split(promotion.landingPage.title.getOrElse(""))</h1>
 
                 </div>
-                <div class="section-right"></div>
+                <div class="section-right u-hide-until-desktop"></div>
 
             </div>
         </div>
@@ -54,13 +55,16 @@
         @fragments.heroBanner(img, modifierClass = titleColour){
             @title
         }{
-            @promotion.landingPage.title.getOrElse("")
+            @CommaSplit.split(promotion.landingPage.title.getOrElse(""))
         }
     }
-        <main class="page-container gs-container">
-            @promotion.landingPage.roundelHtml.map { h =>
+        <main class="page-container">
+            @** promotion.landingPage.roundelHtml.map { h =>
                 <div class="digipack__roundel">@fragments.common.roundel(h, Seq("roundel--high", "roundel--right"))</div>
             }
+            roundel's cause some layout issues in chrom due to overflow
+
+            **@
             <div class="idk-flexwrap">
             <section class="section-left">
                 @promotion.landingPage.description.fold {
@@ -76,33 +80,32 @@
             </section>
             <section class="section-slice--bleed section-right">
                 <h2 class="page-heading">Where should we send your Guardian Weekly?</h2>
+                <div>
                 @for(region <- discountedRegions) {
                     @if(region.discountedPlans.length > 1) {
                         <div class="package js-dropdown js-hide" data-dropdown-menu="@region.title.replaceAll(" ", "")">
-                            <div class="package__info">
-                                <span class="package__title" >@region.title</span>
+                            <div class="package__info" title="@region.description">
+                                <span class="package__title">@region.title</span>
                                 @region.discountedPlans.headOption.map { plan =>
-                                    <strong class="package__price">
+                                    <span class="package__price">
                                         @plan.headline
-                                    </strong>
+                                    </span>
                                 }
-                                <span class="package__description">@region.description</span>
                             </div>
                         </div>
                     } else {
                         @region.discountedPlans.headOption.map { plan =>
-                            <a href="@plan.url.toString" class="package">
+                            <a href="@plan.url.toString" class="package" title="@region.description">
                                 <div class="package__info">
                                     <span class="package__title" >@region.title</span>
-                                    <strong class="package__price">
+                                    <span class="package__price">
                                     @plan.headline
-                                    </strong>
-                                    <span class="package__description">@region.description</span>
+                                    </span>
                                 </div>
                             </a>
                         }
                     }
-                }
+                } </div>
                 @for(region <- discountedRegions) {
                     <div class="js-dropdown-@region.title.replaceAll(" ", "") js-dropdown-menu animate-hide-hidden">
                         <h3>What type of subscription is right for you?</h3>
@@ -110,10 +113,7 @@
                         @for(plan <- region.discountedPlans) {
                             <a href="@plan.url.toString" class="package">
                                 <div class="package__info">
-                                    <span class="package__title">@plan.period</span>
-                                    <strong class="package__price">
-                                    @plan.headline
-                                    </strong>
+                                    <span class="package__title">@if(plan.discounted){🐙}  @plan.period</span>
                                     <span class="package__description"> For @plan.pretty</span>
                                 </div>
                             </a>
@@ -123,8 +123,7 @@
                 }
             </section>
             </div>
-            <section class="section-slice--bleed promotion-terms">
-            <div class="idk-flexwrap">
+            <section class="idk-flexwrap promotion-terms">
                 <div class="idk-flexwrap__inner">
             @nonTrackingPromotion.map{promo =>
 
@@ -134,7 +133,6 @@
             }
                     @fragments.promotion.subscriptionTermsAndConditions(catalog, anyPromotion)
                     @fragments.promotion.copyrightNotice()
-                </div>
             </div>
             </section>
         </main>

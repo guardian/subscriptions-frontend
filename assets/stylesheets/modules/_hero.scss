@@ -2,21 +2,30 @@
    Hero Banner
    ========================================================================== */
 .hero-banner {
-    background: black;
-    height:  300px;
-    position: relative;
-    overflow: hidden;
-}
-.hero-banner__underlay {
-    height: 100%;
     background: guss-colour(neutral-1);
+    @include mq(desktop) {
+        background: black;
+        height: 300px;
+        position: relative;
+        overflow: hidden;
+    }
+}
 
+.hero-banner__underlay {
+    @include mq(mobileLandscape) {
+        height: 100%;
+        background: guss-colour(neutral-1);
+    }
 }
 
 .hero-banner__image {
-    position: absolute;
-    top: 0;
-    height: 100%;
+
+    @include mq(desktop) {
+        position: absolute;
+
+        top: 0;
+        height: 100%;
+    }
     width: 100%;
 
     > img {
@@ -24,30 +33,39 @@
         filter: opacity(50%);
 
     }
-
-    @include mq(mobileLandscape) {
-    }
-
-    // tablet & above
-    @include mq(tablet) {
-    }
 }
 
 .hero-banner__inner {
     width: 100%;
-    position: absolute;
-    bottom: 0;
-    display: flex;
-    justify-content: center;
+    @include mq(desktop) {
+        position: absolute;
+        bottom: 0;
+        display: flex;
+        justify-content: center;
+    }
 }
 
 .hero-banner__content {
     background: white;
+    padding-top: 18px;
+    padding-bottom: 24px;
+    h1{
+        @include mq(tablet) {
+            font-size: 30px;
+            line-height: 30px;
+            letter-spacing: -0.1px;
+        }
+        font-size: 22px;
+        line-height: 22px;
+    }
 
 }
-
+.hero-banner__description{
+    color: guss-colour(news-support-2);
+    font-weight: 500;
+}
 .hero-banner__title{
-    font-weight:900;
+    font-weight: 900;;
 }
 .hero--title__blue {
     color: guss-colour(news-main-1);

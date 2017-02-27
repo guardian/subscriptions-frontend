@@ -54,21 +54,23 @@
 
 .section-left {
     width: 100%;
-    padding-left: $gs-gutter;
-    padding-top: $gs-baseline;
-    padding-bottom: $gs-baseline;
+    padding: 24px 20px 36px 20px;
     @include mq(desktop) {
-        width: gs-span(6);
+        width: 420px;
     }
 }
 
 .section-right {
     width: 100%;
-    padding-left: $gs-gutter + gs-span(1);
-    padding-top: $gs-baseline;
-    padding-bottom: $gs-baseline;
+    padding: 24px 20px 36px 20px;
+
     @include mq(desktop) {
-        width: gs-span(6);
+        padding-left:  80px;
+        width: 400px;
+    }
+    @include mq(wide) {
+        padding-left: 140px;
+        width: 460px;
     }
 }
 
@@ -88,7 +90,9 @@
     width: 100%;
     padding-left:  $gs-gutter;
     @include mq(desktop) {
-        width: gs-span(12);
-
+        width: 820px;
+    }
+    @include mq(wide){
+        width: 880px;
     }
 }

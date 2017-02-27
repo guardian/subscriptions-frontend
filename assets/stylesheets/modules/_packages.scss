@@ -13,7 +13,7 @@
     border: none;
     color: black;
     transition: 0.1s ease-in 0.15s;
-    border-radius: $gs-baseline;
+    border-radius: 10px;
 }
 .package:hover,
 .package:active {
@@ -28,7 +28,8 @@
     }
 }
 .package__title {
-    @include fs-headline(3);
+    font-size: 16px;
+    line-height: 18px;
     font-weight:900;
 }
 .package__info {
@@ -38,10 +39,10 @@
 }
 .package__price {
     display: block;
-
+    text-align: right;
     @include mq(tablet) {
-        float: right;
-        @include font-size(20px, 24px);
+        font-size: 16px;
+        line-height: 18px;
     }
 }
 .package__description,
@@ -193,13 +194,13 @@ $step-size-tablet: 60px;
         position: absolute;
         top: 0;
         left: 0;
-        @include border-radius($step-size);
+        border-radius: $step-size;
         height: $step-size;
         width: $step-size;
 
         @include mq(tablet) {
             @include font-size(32px, $step-size-tablet);
-            @include border-radius($step-size-tablet);
+            border-radius:$step-size-tablet;
             height: $step-size-tablet;
             width: $step-size-tablet;
         }

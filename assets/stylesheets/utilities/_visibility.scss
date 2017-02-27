@@ -30,6 +30,11 @@
         display: none !important;
     }
 }
+.u-hide-until-desktop {
+    @include mq($until: desktop) {
+        display: none !important;
+    }
+}
 
 .u-display-until-tablet {
     display: block !important;
