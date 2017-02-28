@@ -25,11 +25,8 @@
                     Your details
                 </h3>
                 @views.html.account.fragments.yourDetails(
-                    subscriptionName = subscription.name.get,
-                    plan = subscription.planToManage,
-                    maybeStartDate = Some(subscription.planToManage.start),
                     maybeContact = Some(contact),
-                    maybeFuturePlan = Some(subscription.nextPlan).filter { plan => plan.start.isAfter(now) && plan != subscription.planToManage }
+                    subscription = subscription
                 )()
             </section>
             @billingSchedule.map { bs =>

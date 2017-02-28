@@ -38,10 +38,9 @@
                 </h3>
                 @helper.CSRF.formField
                 @views.html.account.fragments.yourDetails(
-                    subscriptionName = subscription.name.get,
-                    plan = subscription.nextPlan,
-                    maybeStartDate = Some(subscription.nextPlan.start),
-                    maybeContact = Some(contact))()
+                    maybeContact = Some(contact),
+                    subscription = subscription
+                )()
             </section>
 
             <section class="mma-section">
