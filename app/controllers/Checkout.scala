@@ -3,12 +3,11 @@ package controllers
 import actions.CommonActions._
 import com.gu.i18n.Currency._
 import com.gu.i18n._
-import com.gu.identity.play.ProxiedIP
-import com.gu.memsub.BillingPeriod.SixWeeks
 import com.gu.memsub.Subscription.ProductRatePlanId
 import com.gu.memsub.promo.Promotion._
 import com.gu.memsub.promo.{NewUsers, NormalisedPromoCode, PromoCode}
-import com.gu.memsub.subsv2.CatalogPlan
+import com.gu.memsub.subsv2.CatalogPlan.ContentSubscription
+import com.gu.memsub.subsv2.{CatalogPlan, PlansWithIntroductory}
 import com.gu.memsub.{Product, SupplierCode}
 import com.gu.zuora.soap.models.errors._
 import com.typesafe.scalalogging.LazyLogging
@@ -54,20 +53,34 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
     // countryGroup String above basically means now 'countryOrCountryGroup' so we'll use the fromHint API on DetermineCountryGroup
     val determinedCountryGroup = DetermineCountryGroup.fromHint(countryGroup) getOrElse CountryGroup.UK
 
-    val matchingPlanList: Option[PlanList[CatalogPlan.ContentSubscription]] = {
+    val matchingPlanList: Option[PlanList[ContentSubscription]] = {
 
-      val testOnlyPlans = if (tpBackend == TouchpointBackend.Test) List(catalog.weeklyZoneB.toList.filter(_.availableForCheckout)) else List.empty
+      val testOnlyPlans = if (tpBackend == TouchpointBackend.Test) List(catalog.weeklyZoneB.plansWithAssociations) else List.empty
 
       val contentSubscriptionPlans = List(
         catalog.delivery.list,
         catalog.voucher.list,
-        catalog.weeklyZoneA.toList.filter(_.availableForCheckout),
-        catalog.weeklyZoneC.toList,
-        catalog.digipack.toList) ++ testOnlyPlans
+        catalog.digipack.plans
+      )
 
-      def matchPlan(planCandidates: List[CatalogPlan.ContentSubscription]) = planCandidates.find(_.slug == forThisPlan).map(p => PlanList(p, getBetterPlans(p, planCandidates): _*))
+      val productsWithIntroductoryPlans = List(
+        catalog.weeklyZoneA.plansWithAssociations,
+        catalog.weeklyZoneC.plansWithAssociations
+      ) ++ testOnlyPlans
 
-      contentSubscriptionPlans.toIterator.map(matchPlan).find(_.isDefined).flatten
+      def matchPlan(planCandidates: List[ContentSubscription], associations: List[(ContentSubscription, ContentSubscription)]): Option[PlanList[ContentSubscription]] =
+        planCandidates.find{ plan =>
+          plan.slug == forThisPlan && plan.availableForCheckout // this will now check all, even digipack
+        }.map { planFromSlug =>
+          val otherPlansInProduct = getBetterPlans(planFromSlug, planCandidates)
+          PlanList(associations, planFromSlug, otherPlansInProduct: _*)
+        }
+
+      contentSubscriptionPlans.map(plan => matchPlan(plan, List.empty)).find(_.isDefined).flatten orElse
+      productsWithIntroductoryPlans.map {
+        case PlansWithIntroductory(plans, associations) =>
+          matchPlan(plans, associations)
+      }.find(_.isDefined).flatten
     }
 
     val idUser = (for {

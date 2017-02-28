@@ -20,14 +20,14 @@ class SubscriptionsForm(catalog: Catalog) {
 
   implicit val pf1 = new Formatter[CatalogPlan.Digipack[BillingPeriod]] {
     override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], CatalogPlan.Digipack[BillingPeriod]] =
-      data.get(key).map(ProductRatePlanId).flatMap(prpId => catalog.digipack.toList.find(_.id == prpId)).toRight(Seq(FormError(key, "Bad plan")))
+      data.get(key).map(ProductRatePlanId).flatMap(prpId => catalog.digipack.plans.find(_.id == prpId)).toRight(Seq(FormError(key, "Bad plan")))
     override def unbind(key: String, value: CatalogPlan.Digipack[BillingPeriod]): Map[String, String] =
       Map(key -> value.id.get)
   }
 
   implicit val pf2 = new Formatter[CatalogPlan.Paper] {
 
-    val validPlans = catalog.delivery.list ++ catalog.voucher.list ++ catalog.weeklyZoneA.toList.filter(_.availableForCheckout) ++ catalog.weeklyZoneB.toList.filter(_.availableForCheckout) ++ catalog.weeklyZoneC.toList
+    val validPlans = catalog.delivery.list ++ catalog.voucher.list ++ catalog.weeklyZoneA.plans.filter(_.availableForCheckout) ++ catalog.weeklyZoneB.plans.filter(_.availableForCheckout) ++ catalog.weeklyZoneC.plans
     override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], CatalogPlan.Paper] =
       data.get(key).map(ProductRatePlanId).flatMap(prpId => validPlans.find(_.id == prpId)).toRight(Seq(FormError(key, "Bad plan")))
     override def unbind(key: String, value: CatalogPlan.Paper): Map[String, String] =

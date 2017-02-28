@@ -24,27 +24,22 @@
     countryAndCurrencySettings: CountryAndCurrencySettings
 )(implicit request: RequestHeader)
 
-@priceOption(plan: CatalogPlan.Paid, currency: Currency) = {
+@priceOption(plan: CatalogPlan.Paid, currency: Currency, associatedPlan: Option[CatalogPlan.Paid]) = {
     <label class="option" data-currency="@currency">
         <span class="option__input">
             <input
             type="radio" name="ratePlanId"
-            data-option-label-prefix="@plan.prefix"
-            data-option-mirror-payment-default="@plan.charges.prettyPricing(currency)"
-            data-option-mirror-payment="@plan.charges.prettyPricing(currency)"
-            data-option-mirror-description="@for(s <- plan.subtitle) {(@s)}"
+            data-option-mirror-payment="@plan.charges.prettyPricing(currency) @for(ap <- associatedPlan.map(_.charges.prettyPricing(currency))) { and then @ap}"
+            data-option-mirror-description="@for(s <- plan.subtitle) {(@s@for(ap <- associatedPlan.flatMap(_.subtitle)) { and then @ap})}"
             data-option-mirror-package="@plan.packageName"
-            data-amount="@plan.charges.unsafePrice(currency).prettyAmount"
-            data-name="@plan.name"
-            data-number-of-months="@plan.charges.billingPeriod.monthsInPeriod"
+            data-name="@plan.name @for(ap <- associatedPlan.map(_.name)) { and then @ap}"
 
             data-currency="@currency"
-            data-frequency="@plan.charges.billingPeriod.frequencyInMonths"
             value="@plan.id.get"
             @if(plan == productData.plans.default && currency == countryAndCurrencySettings.defaultCurrency){ checked="checked" }
             >
         </span>
-        <span class="option__label" id="label-for-@plan.id.get-@currency">@plan.prettyName(currency)</span>
+        <span class="option__label" id="label-for-@plan.id.get-@currency">@plan.prettyName(currency) @for(ap <- associatedPlan.map(_.charges.prettyPricing(currency))) { and then @ap}</span>
     </label>
 }
 
@@ -106,7 +101,7 @@
                 <fieldset class="basket-billing-options is-hidden js-rate-plans js-option-mirror-group" id="change-payment-frequency">
                     @productData.plans.list.map { p =>
                         @p.charges.price.currencies.map { c =>
-                            @priceOption(p, c)
+                            @priceOption(p, c, productData.plans.associationFor(p))
                         }
                     }
                 </fieldset>
