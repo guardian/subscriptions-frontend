@@ -60,7 +60,10 @@ object PromoLandingPage extends Controller {
   private def getWeeklyLandingPage(promotion: AnyPromotion, maybeCountry: Option[Country])(implicit promoCode: PromoCode): Option[Html] = {
     val country = maybeCountry.getOrElse(Country.UK)
     promotion.asWeekly.filter(p => isActive(asAnyPromotion(p))).map { promotionWithLandingPage =>
-      weeklyLandingPage(country, catalog, promoCode, promotionWithLandingPage, PegdownMarkdownRenderer)
+      val description = Html(PegdownMarkdownRenderer.render(
+        promotionWithLandingPage.landingPage.description.getOrElse(promotionWithLandingPage.description)
+      ))
+      weeklyLandingPage(country, catalog, Some(promoCode), Some(promotionWithLandingPage), description, PegdownMarkdownRenderer)
     }
   }
 
@@ -68,7 +71,7 @@ object PromoLandingPage extends Controller {
     getNewspaperLandingPage(promotion) orElse getDigitalPackLandingPage(promotion, maybeCountry) orElse getWeeklyLandingPage(promotion, maybeCountry)
   }
 
-  private def getBrochureRouteForPromotion(promotion: AnyPromotion): Option[Call] = {
+  private def getBrochureRouteForPromotion(promotion: AnyPromotion, maybeCountry: Option[Country]): Option[Call] = {
     val applicableRatePlanIds = promotion.appliesTo.productRatePlanIds
     if ((applicableRatePlanIds intersect digitalPackRatePlanIds).nonEmpty) {
       Some(routes.DigitalPack.redirect())
@@ -77,14 +80,14 @@ object PromoLandingPage extends Controller {
     } else if ((applicableRatePlanIds intersect paperOnlyPackageRatePlanIds).nonEmpty) {
       Some(routes.Shipping.viewCollectionPaper())
     } else if ((applicableRatePlanIds intersect guardianWeeklyRatePlanIds).nonEmpty) {
-      Some(routes.WeeklyLandingPage.index())
+      Some(routes.WeeklyLandingPage.index(maybeCountry))
     } else {
       None
     }
   }
 
-  private def redirectToBrochurePage(promotion: AnyPromotion)(implicit promoCode: PromoCode, request: Request[AnyContent]): Option[Result] = {
-    getBrochureRouteForPromotion(promotion) map { route =>
+  private def redirectToBrochurePage(promotion: AnyPromotion, maybeCountry: Option[Country])(implicit promoCode: PromoCode, request: Request[AnyContent]): Option[Result] = {
+    getBrochureRouteForPromotion(promotion, maybeCountry) map { route =>
       val result = Redirect(route.url, request.queryString)
       if (promotion.promotionType == Tracking) {
         result.withSession(request.session.data.toSeq ++ Seq(PromotionTrackingCode -> promoCode.get) :_*)
@@ -100,7 +103,7 @@ object PromoLandingPage extends Controller {
     tpBackend.promoService.findPromotionFuture(promoCode) map { maybePromotion =>
       maybePromotion flatMap { promotion =>
         val maybeCountry = country orElse request.getFastlyCountry
-        getLandingPage(promotion, maybeCountry).map(Ok(_)) orElse redirectToBrochurePage(promotion)
+        getLandingPage(promotion, maybeCountry).map(Ok(_)) orElse redirectToBrochurePage(promotion, maybeCountry)
       } getOrElse {
         Redirect(routes.Homepage.index().url ? (internalCampaignCode -> s"FROM_P_${promoCode.get}"), request.queryString)
       }

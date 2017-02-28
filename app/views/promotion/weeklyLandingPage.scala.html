@@ -2,6 +2,7 @@
 @import com.gu.memsub.promo.Promotion.PromoWithWeeklyLandingPage
 @import com.gu.memsub.promo.Promotion.asAnyPromotion
 @import views.support.LandingPageOps._
+@import configuration.Links
 @import views.support.CommaSplit
 @import views.support.{MarkdownRenderer}
 @import com.gu.memsub.subsv2.Catalog
@@ -12,26 +13,17 @@
 @import com.gu.memsub.promo.Grey
 @import com.gu.memsub.promo.Blue
 @import com.gu.memsub.promo.White
-@(country: Country, catalog: Catalog, promoCode: PromoCode, promotion: PromoWithWeeklyLandingPage, md: MarkdownRenderer)
-    @voucherPlans = @{catalog.voucher.list.filter(p => promotion.appliesTo.productRatePlanIds.contains(p.id))}
-    @deliveryPlans = @{catalog.delivery.list.filter(p => promotion.appliesTo.productRatePlanIds.contains(p.id))}
-    @anyPromotion = @{asAnyPromotion(promotion)}
-    @nonTrackingPromotion = @{anyPromotion.asDiscount orElse anyPromotion.asFreeTrial orElse anyPromotion.asIncentive}
+@(country: Country, catalog: Catalog, promoCode: Option[PromoCode], promotion: Option[PromoWithWeeklyLandingPage],description:Html, md: MarkdownRenderer)
+    @anyPromotion = @{promotion.map(asAnyPromotion)}
+    @nonTrackingPromotion = @{anyPromotion.flatMap(p => p.asDiscount orElse p.asFreeTrial orElse p.asIncentive)}
     @title = @{"The Guardian Weekly"}
-    @titleColour = @{promotion.landingPage.sectionColour match {
-        case Some(Blue) => "hero--title__blue"
-        case Some(Grey) => "hero--title__grey"
-        case Some(White) => "hero--title__white"
-        case _ => ""
-    }}
-    @discountedRegions = @{WeeklyPromotion.validRegionsForPromotion(Some(promotion), promoCode, country)(catalog)}
-
+    @discountedRegions = @{WeeklyPromotion.validRegionsForPromotion(promotion, promoCode, country)(catalog)}
     @main(title = s"$title | The Guardian", bodyClasses = List("is-wide")) {
-    @promotion.landingPage.image.fold{
+    @promotion.flatMap(_.landingPage.image).fold{
         @*
         don't ship this, use a grid image
         *@
-        <div class="hero-banner @titleColour">
+        <div class="hero-banner">
             <div class="hero-banner__underlay gs-container"></div>
             <picture class="hero-banner__image">
                 <img src="@hashedPathFor("images/backgrounds/weeklydontuse.jpg")" sizes="100vw"/>
@@ -41,7 +33,7 @@
 
                 <div class="hero-banner__content section-left">
                     <h1 class="hero-banner__title">@title</h1>
-                    <h1 class="hero-banner__description">@CommaSplit.split(promotion.landingPage.title.getOrElse(""))</h1>
+                    <h1 class="hero-banner__description">@CommaSplit.split(promotion.flatMap(_.landingPage.title).getOrElse("Get the world in perspective,\nevery single week"))</h1>
 
                 </div>
                 <div class="section-right u-hide-until-desktop"></div>
@@ -52,33 +44,29 @@
 
 
     } { img =>
-        @fragments.heroBanner(img, modifierClass = titleColour){
+        @fragments.heroBanner(img){
             @title
         }{
-            @CommaSplit.split(promotion.landingPage.title.getOrElse(""))
+            @CommaSplit.split(promotion.flatMap(_.landingPage.title).getOrElse(""))
         }
     }
         <main class="page-container">
             @** promotion.landingPage.roundelHtml.map { h =>
                 <div class="digipack__roundel">@fragments.common.roundel(h, Seq("roundel--high", "roundel--right"))</div>
             }
-            roundel's cause some layout issues in chrom due to overflow
+            roundel's cause some layout issues in chrome due to overflow
 
             **@
             <div class="idk-flexwrap">
-            <section class="section-left">
-                @promotion.landingPage.description.fold {
-                    <p>@promotion.description</p>
-                } { d =>
-                    <div>@Html(md.render(d))</div>
+                <section class="section-left">
+                    <div>@description</div>
                     <br/>
-                }
-                @promotion.asIncentive.map { p =>
-                    <h4>Redemption instructions</h4>
-                    <p>@p.promotionType.redemptionInstructions</p>
-                }
-            </section>
-            <section class="section-slice--bleed section-right">
+                    @promotion.flatMap(_.asIncentive).map { p =>
+                        <h4>Redemption instructions</h4>
+                        <p>@p.promotionType.redemptionInstructions</p>
+                    }
+                </section>
+                <section class="section-slice--bleed section-right">
                 <h2 class="page-heading">Where should we send your Guardian Weekly?</h2>
                 <div>
                 @for(region <- discountedRegions) {
@@ -87,7 +75,7 @@
                             <div class="package__info" title="@region.description">
                                 <span class="package__title">@region.title</span>
                                 @region.discountedPlans.headOption.map { plan =>
-                                    <span class="package__price">
+                                    <span class="package__description package__supl">
                                         @plan.headline
                                     </span>
                                 }
@@ -98,7 +86,7 @@
                             <a href="@plan.url.toString" class="package" title="@region.description">
                                 <div class="package__info">
                                     <span class="package__title" >@region.title</span>
-                                    <span class="package__price">
+                                    <span class="package__description package__supl">
                                     @plan.headline
                                     </span>
                                 </div>
@@ -114,7 +102,7 @@
                             <a href="@plan.url.toString" class="package">
                                 <div class="package__info">
                                     <span class="package__title">@if(plan.discounted){🐙}  @plan.period</span>
-                                    <span class="package__description"> For @plan.pretty</span>
+                                    <span class="package__description">@plan.pretty</span>
                                 </div>
                             </a>
                         }
@@ -125,15 +113,16 @@
             </div>
             <section class="idk-flexwrap promotion-terms">
                 <div class="idk-flexwrap__inner">
-            @nonTrackingPromotion.map{promo =>
+                    @nonTrackingPromotion.map { promo =>
 
-                    @fragments.promotion.promotionTermsAndConditions(anyPromotion, md)
-                    <p>For full promotion terms and conditions visit <a class="u-link" href="/p/@promoCode.get/terms">
-                        subscribe.theguardian.com/p/@promoCode.get/terms</a></p>
-            }
-                    @fragments.promotion.subscriptionTermsAndConditions(catalog, anyPromotion)
+                        @fragments.promotion.promotionTermsAndConditions(promo, md)
+                    <p>For full promotion terms and conditions visit <a class="u-link" href="/p/@promoCode.map(_.get)/terms">
+                        subscribe.theguardian.com/p/@promoCode.map(_.get)/terms</a></p>
+
+                        @fragments.promotion.subscriptionTermsAndConditions(catalog, promo)
+                    }
                     @fragments.promotion.copyrightNotice()
-            </div>
+                </div>
             </section>
         </main>
     }
