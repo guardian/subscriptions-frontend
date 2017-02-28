@@ -2,17 +2,23 @@
     opacity: 1;
     max-height: 2000px;
     overflow:hidden;
+    margin-bottom: 12px;
 }
 
 @mixin hidden {
     opacity: 0;
     max-height: 0;
     overflow:hidden;
+    margin-bottom: 0;
 }
 
 @keyframes show {
     0% {
         @include hidden;
+    }
+    20% {
+        margin-bottom: 12px;
+        opacity: 0;
     }
     100% {
         @include showing;
@@ -23,6 +29,10 @@
     0% {
         @include showing;
     }
+    80% {
+        margin-bottom: 12px;
+        opacity: 1;
+    }
     100% {
         @include hidden;
     }
@@ -30,7 +40,7 @@
 
 .animate-hide {
     animation-name: hide;
-    animation-duration: 1s;
+    animation-duration: 2s;
     animation-timing-function: ease-in-out;
     animation-delay: 0s;
     animation-iteration-count: 1;
@@ -41,7 +51,7 @@
 
 .animate-show {
     animation-name: show;
-    animation-duration: 1.5s;
+    animation-duration: 2.5s;
     animation-timing-function: ease-in-out;
     animation-delay: 0s;
     animation-iteration-count: 1;
@@ -53,7 +63,7 @@
     @include hidden;
 }
 
-.animate-show-shown .package__price{
+.animate-show-shown .package__supl{
     opacity: 0;
     transition: 1s ease-in-out;
 }

@@ -10,9 +10,11 @@
     padding-bottom: $gs-baseline * 2;
     border-top: 1px solid $c-border;
 }
+
 .section-slice--bleed {
     @include container-padding();
 }
+
 .section-slice--limited {
     .section-slice__content {
         @include mq(desktop) {
@@ -35,7 +37,6 @@
     margin-bottom: $gs-baseline * 2;
 }
 
-
 /* Section Divider
  *
  * Seperate to break-up sub-section
@@ -49,4 +50,49 @@
     padding-top: $gs-baseline / 2;
     padding-bottom: $gs-baseline;
     margin-bottom: $gs-baseline;
+}
+
+.section-left {
+    width: 100%;
+    padding: 24px 20px 36px 20px;
+    @include mq(desktop) {
+        width: 420px;
+    }
+}
+
+.section-right {
+    width: 100%;
+    padding: 24px 20px 36px 20px;
+
+    @include mq(desktop) {
+        padding-left:  80px;
+        width: 400px;
+    }
+    @include mq(wide) {
+        padding-left: 140px;
+        width: 460px;
+    }
+}
+
+.idk-flexwrap {
+    display: flex;
+    justify-content: center;
+    flex-flow: column;
+    flex-wrap: wrap;
+    @include mq(desktop) {
+        flex-wrap: nowrap;
+
+        flex-flow: row;
+    }
+}
+
+.idk-flexwrap__inner {
+    width: 100%;
+    padding-left:  $gs-gutter;
+    @include mq(desktop) {
+        width: 820px;
+    }
+    @include mq(wide){
+        width: 880px;
+    }
 }

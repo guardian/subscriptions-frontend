@@ -1,0 +1,20 @@
+@(image: com.gu.memsub.images.ResponsiveImageGroup, imageModifierClass: String = "", modifierClass: String = "")(title: Html)(description: Html)
+
+<div class="hero-banner @modifierClass">
+    <picture class="hero-banner__image @imageModifierClass">
+        <img srcset="@image.srcset" sizes="100vw"/>
+    </picture>
+
+    <div class="hero-banner__inner idk-flexwrap ">
+
+        <div class="hero-banner__content section-left">
+
+                <h1 class="hero-banner__title">@title</h1>
+                <h1 class="hero-banner__description">@description</h1>
+
+        </div>
+        <div class="section-right u-hide-until-desktop"></div>
+
+    </div>
+</div>
+
