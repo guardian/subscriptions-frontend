@@ -15,6 +15,10 @@ object Links {
     "https://www.theguardian.com/subscriber-direct/subscription-terms-and-conditions",
     "Terms and Conditions"
   )
+  val weeklyTerms = Links(
+    "https://www.theguardian.com/info/2014/jul/10/guardian-weekly-print-subscription-services-terms-conditions",
+    "Terms and Conditions"
+  )
   val privacyPolicy = Links(
     "https://www.theguardian.com/help/privacy-policy",
     "Privacy Policy"
