@@ -300,7 +300,7 @@ class CheckoutService(identityService: IdentityService,
 
     def addPlan(contact: Contact) = {
       val newRatePlan = RatePlan(renewal.plan.id.get, None)
-
+      val currentVersionExpired = subscription.termEndDate.isBefore(now)
       val renewCommand = Renew(
         subscriptionId = subscription.id.get,
         currentTermStartDate = subscription.termStartDate,
@@ -309,7 +309,8 @@ class CheckoutService(identityService: IdentityService,
         contractEffectiveDate = contractEffective,
         customerAcceptanceDate = customerAcceptance,
         promoCode = None,
-        autoRenew = renewal.plan.charges.billingPeriod.isRecurring
+        autoRenew = renewal.plan.charges.billingPeriod.isRecurring,
+        currentVersionExpired = currentVersionExpired
       )
 
       val validPromotion = for {

@@ -237,7 +237,7 @@ object ManageWeekly extends ContextLogging {
         renewableSub <- weeklySub.asRenewable.toRightDisjunction("subscription is not renewable")
         renew <- parseRenewalRequest(request, tpBackend.catalogService.unsafeCatalog)
       } yield {
-        info(s"renewing ${renew.plan.name} for ${renewableSub.id} with promo code: ${renew.promoCode}")(sub)
+        info(s"Attempting to renew ${renew.plan.name} for ${renewableSub.id} with promo code: ${renew.promoCode}")(sub)
         tpBackend.checkoutService.renewSubscription(renewableSub, renew, description(renewableSub, renew)).map(_ => Ok(Json.obj("redirect" -> routes.AccountManagement.renewThankYou().url)))
           .recover{
             case e: Throwable =>
