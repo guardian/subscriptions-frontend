@@ -122,6 +122,9 @@
         display: table;
     }
 }
+.package__special {
+    color: guss-colour(success);
+}
 .pricing-cta__pricing,
 .pricing-cta__action {
     @include mq(tablet) {

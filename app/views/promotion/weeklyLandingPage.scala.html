@@ -101,7 +101,13 @@
                         @for(plan <- region.discountedPlans) {
                             <a href="@plan.url.toString" class="package">
                                 <div class="package__info">
-                                    <span class="package__title">@if(plan.discounted){🐙}  @plan.period</span>
+                                    <span class="package__title">@if(plan.discounted) {
+                                        @promotion.flatMap(_.landingPage.roundelHtml).map { text =>
+                                            <span class="package__special">
+                                                @text
+                                            </span>
+                                        }
+                                    } @plan.period</span>
                                     <span class="package__description">@plan.pretty</span>
                                 </div>
                             </a>
