@@ -21,19 +21,19 @@
     @main(title = s"$title | The Guardian", bodyClasses = List("is-wide")) {
     @promotion.flatMap(_.landingPage.image).fold{
         @*
-        don't ship this, use a grid image
+        TODO:replace with a grid image
         *@
         <div class="hero-banner">
             <div class="hero-banner__underlay gs-container"></div>
             <picture class="hero-banner__image">
-                <img src="@hashedPathFor("images/backgrounds/weeklydontuse.jpg")" sizes="100vw"/>
+                <img src="@hashedPathFor("images/backgrounds/weeklydefault.jpg")" sizes="100vw"/>
             </picture>
 
             <div class="hero-banner__inner idk-flexwrap ">
 
                 <div class="hero-banner__content section-left">
                     <h1 class="hero-banner__title">@title</h1>
-                    <h1 class="hero-banner__description">@CommaSplit.split(promotion.flatMap(_.landingPage.title).getOrElse("Get the world in perspective,\nevery single week"))</h1>
+                    <h1 class="hero-banner__description">@CommaSplit.split(promotion.flatMap(_.landingPage.title).getOrElse("Get the world in perspective,every single week"))</h1>
 
                 </div>
                 <div class="section-right u-hide-until-desktop"></div>
