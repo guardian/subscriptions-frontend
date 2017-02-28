@@ -129,11 +129,9 @@ object WeeklyPromotion {
 
     val plans: List[CatalogPlan.Paid] = {if(displaySixForSix)catalogPlans else catalogPlans.filterNot(isSixWeek)}.filter(_.charges.billingPeriod match {case OneYear => false
     case _ => true}).toList.sortBy(_.charges.gbpPrice.amount)
-
+    val currency = if (currencies.size > 1 && currencies.contains(Currency.USD)) Currency.USD else currencies.head
     val discountedPlans = for {
       plan <- plans
-      currency <- plan.charges.currencies.toList
-      if (currencies.contains(currency))
     } yield {
       val sixOrDiscount = isSixWeek(plan) || promotion.map(_.appliesTo.productRatePlanIds.contains(plan.id)).getOrElse(false)
       val pretty = promotion.filter(_.appliesTo.productRatePlanIds.contains(plan.id)).flatMap(_.asDiscount)
