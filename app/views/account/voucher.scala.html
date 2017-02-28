@@ -21,9 +21,7 @@
                     Your details
                 </h3>
                 @views.html.account.fragments.yourDetails(
-                    subscriptionName = subscription.name.get,
-                    plan = subscription.plan,
-                    maybeStartDate = Some(subscription.firstPaymentDate)
+                    subscription = subscription
                 )()
             </section>
             @billingSchedule.map { bs =>

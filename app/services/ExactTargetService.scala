@@ -1,4 +1,6 @@
 package services
+import com.github.nscala_time.time.Imports._
+import com.amazonaws.regions.{Region, Regions}
 
 import com.amazonaws.regions.Regions.EU_WEST_1
 import com.amazonaws.services.sqs.AmazonSQSClient
@@ -22,6 +24,9 @@ import configuration.Config
 import model.SubscriptionOps._
 import model.exactTarget.HolidaySuspensionBillingScheduleDataExtensionRow.constructSalutation
 import model.exactTarget._
+import model.{PaperData, PurchaserIdentifiers, Renewal, SubscribeRequest, SubscriptionOps}
+import model.SubscriptionOps._
+import org.joda.time.{DateTime, Days, LocalDate}
 import model.{PurchaserIdentifiers, Renewal, SubscribeRequest}
 import org.joda.time.{Days, LocalDate}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
@@ -46,14 +51,6 @@ class ExactTargetService(
   zuoraService: ZuoraService,
   salesforceService: SalesforceService
 ) extends LazyLogging {
-  private def getPlanDescription(validPromotion: Option[ValidPromotion[NewUsers]], currency: Currency, plan: Plan.Paid): String = {
-    (for {
-      vp <- validPromotion
-      discountPromotion <- vp.promotion.asDiscount
-    } yield {
-      plan.charges.prettyPricingForDiscountedPeriod(discountPromotion, currency)
-    }).getOrElse(plan.charges.prettyPricing(currency))
-  }
 
   private def buildWelcomeEmailDataExtensionRow(
       subscribeResult: SubscribeResult,
@@ -76,7 +73,27 @@ class ExactTargetService(
     def buildRow(sub: Subscription[Plan.Paid], pm: PaymentMethod) = {
       val personalData = subscriptionData.genericData.personalData
       val promotionDescription = validPromotion.filterNot(_.promotion.promotionType == Tracking).map(_.promotion.description)
-      val subscriptionDetails = getPlanDescription(validPromotion, subscriptionData.genericData.currency, sub.plan)
+
+      val subscriptionDetails = {
+        val currency = subscriptionData.genericData.currency
+
+        val discountedPlanDescription = (for {
+          vp <- validPromotion
+          discountPromotion <- vp.promotion.asDiscount
+        } yield {
+          sub.plan.charges.prettyPricingForDiscountedPeriod(discountPromotion, currency)
+        })
+
+        def introductoryPeriodSubDescription = sub.introductoryPeriodPlan.map { introductoryPlan =>
+
+          val nextRecurrringPeriod = sub.recurringPlans.minBy(_.start)
+
+          introductoryPlan.charges.prettyPricing(currency) + " then " + nextRecurrringPeriod.charges.prettyPricing(currency)
+        }
+
+        discountedPlanDescription orElse introductoryPeriodSubDescription getOrElse sub.plan.charges.prettyPricing(currency)
+      }
+
 
       subscriptionData.productData.fold(
         paperData => if (paperData.plan.isHomeDelivery) {

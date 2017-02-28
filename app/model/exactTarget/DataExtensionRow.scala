@@ -6,7 +6,6 @@ import java.util.UUID
 import com.gu.exacttarget._
 import com.gu.i18n.{Currency, Title}
 import com.gu.memsub
-import com.gu.memsub.subsv2.SubscriptionPlan.{Digipack => _, _}
 import com.gu.memsub.subsv2.{Subscription, SubscriptionPlan => Plan}
 import com.gu.memsub.{Subscription => _, _}
 import com.gu.salesforce.Contact
@@ -238,6 +237,9 @@ object PaperVoucherWelcome1DataExtensionRow {
 }
 
 object GuardianWeeklyWelcome1DataExtensionRow {
+
+  import model.SubscriptionOps._
+
   def apply(
              paperData: PaperData,
              personalData: PersonalData,
@@ -248,8 +250,11 @@ object GuardianWeeklyWelcome1DataExtensionRow {
            ): GuardianWeeklyWelcome1DataExtensionRow = {
 
     val commonFields = PaperFieldsGenerator.fieldsFor(paperData, personalData, subscription, paymentMethod, subscriptionDetails, promotionDescription)
-    val secondPaymentDate = subscription.firstPaymentDate plusMonths subscription.plan.charges.billingPeriod.monthsInPeriod
-    val additionalFields = Seq("date_of_second_payment" -> formatDate(secondPaymentDate))
+
+    val additionalFields = subscription.asWeekly.map { weeklySub =>
+      Seq("date_of_second_payment" -> formatDate(weeklySub.secondPaymentDate))
+    } getOrElse Nil
+
     GuardianWeeklyWelcome1DataExtensionRow(personalData.email, commonFields ++ additionalFields)
   }
 }
