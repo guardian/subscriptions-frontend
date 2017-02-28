@@ -292,15 +292,12 @@ class CheckoutService(identityService: IdentityService,
       }
     }
 
-    val ratePlan = RatePlan(renewal.plan.id.get, None, Nil)
-    val amend =   Amend(subscriptionId = subscription.id.get, plansToRemove = Nil, newRatePlans = NonEmptyList(ratePlan))
-
     val contractEffective = Seq(subscription.termEndDate, now).max // The sub may have 'expired' before the customer gets round to renewing it.
     val customerAcceptance = contractEffective
 
     def addPlan(contact: Contact) = {
       val newRatePlan = RatePlan(renewal.plan.id.get, None)
-
+      val currentVersionExpired = subscription.termEndDate.isBefore(now)
       val renewCommand = Renew(
         subscriptionId = subscription.id.get,
         currentTermStartDate = subscription.termStartDate,
@@ -309,7 +306,8 @@ class CheckoutService(identityService: IdentityService,
         contractEffectiveDate = contractEffective,
         customerAcceptanceDate = customerAcceptance,
         promoCode = None,
-        autoRenew = renewal.plan.charges.billingPeriod.isRecurring
+        autoRenew = renewal.plan.charges.billingPeriod.isRecurring,
+        startRenewedTermToday = currentVersionExpired // If the sub has expired, we want to shift the term dates forward
       )
 
       val validPromotion = for {
