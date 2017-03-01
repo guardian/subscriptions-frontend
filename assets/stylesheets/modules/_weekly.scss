@@ -125,32 +125,3 @@
 .weekly__package__special {
     color: guss-colour(success);
 }
-.pricing-cta__pricing,
-.pricing-cta__action {
-    @include mq(tablet) {
-        display: table-cell;
-        vertical-align: center;
-        padding-right: $gs-gutter;
-    }
-}
-.pricing-cta__pricing {
-    margin-bottom: $gs-baseline;
-
-    @include mq(tablet) {
-        margin-bottom: 0;
-    }
-}
-.pricing-cta__pricing__title {
-    @include fs-header(2);
-    color: $c-neutral1;
-
-    @include mq(tablet) {
-        @include fs-header(4);
-    }
-}
-.pricing-cta__pricing__value {
-    @include fs-textSans(2);
-    color: $c-neutral2;
-    margin-bottom: 0;
-}
-
