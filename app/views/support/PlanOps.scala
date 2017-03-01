@@ -37,7 +37,7 @@ object PlanOps {
         )
       case Weekly :: Nil =>
         ResponsiveImageGroup(
-          availableImages = ResponsiveImageGenerator("1961260fc68598c31c0b882d8f4da8e8ec34e7d0/0_0_1000_1333", Seq(375, 750, 1000), "png"),
+          availableImages = ResponsiveImageGenerator("f3f9792bbb2c2f04ef01d0c1022e04eb87a2619a/0_0_4350_3416", Seq(500, 1000)),
           altText = Some("Stack of The Guardian Weekly editions")
         )
       case _ =>

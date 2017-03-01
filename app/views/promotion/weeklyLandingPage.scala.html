@@ -13,43 +13,22 @@
 @import com.gu.memsub.promo.Grey
 @import com.gu.memsub.promo.Blue
 @import com.gu.memsub.promo.White
+@import com.gu.memsub.images.ResponsiveImageGroup
+@import com.gu.memsub.images.ResponsiveImageGenerator
 @(country: Country, catalog: Catalog, promoCode: Option[PromoCode], promotion: Option[PromoWithWeeklyLandingPage],description:Html, md: MarkdownRenderer)
     @anyPromotion = @{promotion.map(asAnyPromotion)}
     @nonTrackingPromotion = @{anyPromotion.flatMap(p => p.asDiscount orElse p.asFreeTrial orElse p.asIncentive)}
     @title = @{"The Guardian Weekly"}
+    @defaultImage = @{ResponsiveImageGroup(None,None,None,ResponsiveImageGenerator("021b11f82c8fb43da5ef308dc6d6c5bf2fecb9c8/0_0_2560_300",Seq(2560)))}
     @discountedRegions = @{WeeklyPromotion.validRegionsForPromotion(promotion, promoCode, country)(catalog)}
     @main(title = s"$title | The Guardian", bodyClasses = List("is-wide")) {
-    @promotion.flatMap(_.landingPage.image).fold{
-        @*
-        TODO:replace with a grid image
-        *@
-        <div class="hero-banner">
-            <div class="hero-banner__underlay gs-container"></div>
-            <picture class="hero-banner__image">
-                <img src="@hashedPathFor("images/backgrounds/weeklydefault.jpg")" sizes="100vw"/>
-            </picture>
 
-            <div class="hero-banner__inner idk-flexwrap ">
-
-                <div class="hero-banner__content section-left">
-                    <h1 class="hero-banner__title">@title</h1>
-                    <h1 class="hero-banner__description">@CommaSplit.split(promotion.flatMap(_.landingPage.title).getOrElse("Get the world in perspective,every single week"))</h1>
-
-                </div>
-                <div class="section-right u-hide-until-desktop"></div>
-
-            </div>
-        </div>
-
-
-
-    } { img =>
-        @fragments.heroBanner(img){
+        @fragments.heroBanner(promotion.flatMap(_.landingPage.image).getOrElse(defaultImage)){
             @title
-        }{
+        } {
             @CommaSplit.split(promotion.flatMap(_.landingPage.title).getOrElse(""))
         }
-    }
+
         <main class="page-container">
             @** promotion.landingPage.roundelHtml.map { h =>
                 <div class="digipack__roundel">@fragments.common.roundel(h, Seq("roundel--high", "roundel--right"))</div>

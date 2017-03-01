@@ -131,7 +131,8 @@ module.exports = function(grunt) {
             options: {
                 map: isDev ? true : false,
                 processors: [
-                    require('autoprefixer-core')({browsers: ['> 5%', 'last 2 versions', 'IE 8', 'IE 9', 'Safari 6']})
+                    require('autoprefixer-core')({browsers: ['> 5%', 'last 2 versions', 'IE 8', 'IE 9', 'Safari 6']}),
+                    require('postcss-object-fit-images')
                 ]
             },
             dist: { src: '<%= dirs.public.stylesheets %>/*.css' }

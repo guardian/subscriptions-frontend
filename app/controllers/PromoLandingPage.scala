@@ -18,6 +18,7 @@ import services.TouchpointBackend
 import utils.RequestCountry._
 import utils.Tracking.internalCampaignCode
 import views.html.promotion._
+import views.html.weekly.landing_description
 import views.support.PegdownMarkdownRenderer
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -60,9 +61,9 @@ object PromoLandingPage extends Controller {
   private def getWeeklyLandingPage(promotion: AnyPromotion, maybeCountry: Option[Country])(implicit promoCode: PromoCode): Option[Html] = {
     val country = maybeCountry.getOrElse(Country.UK)
     promotion.asWeekly.filter(p => isActive(asAnyPromotion(p))).map { promotionWithLandingPage =>
-      val description = Html(PegdownMarkdownRenderer.render(
-        promotionWithLandingPage.landingPage.description.getOrElse(promotionWithLandingPage.description)
-      ))
+      val description = promotionWithLandingPage.landingPage.description.map{desc =>
+        Html(PegdownMarkdownRenderer.render(desc)
+      )}.getOrElse(landing_description())
       weeklyLandingPage(country, catalog, Some(promoCode), Some(promotionWithLandingPage), description, PegdownMarkdownRenderer)
     }
   }
