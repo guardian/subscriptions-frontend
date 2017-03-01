@@ -15,7 +15,8 @@ require([
     'modules/patterns',
     'modules/cas/form',
     'modules/renew/loader',
-    'modules/animatedDropdown'
+    'modules/animatedDropdown',
+    'object-fit-images'
 ], function (
     ajax,
     raven,
@@ -33,7 +34,8 @@ require([
     patterns,
     cas,
     renew,
-    dropdown
+    dropdown,
+    objectFitImages
 ) {
     'use strict';
 
@@ -53,6 +55,7 @@ require([
     confirmation.init();
     cas.init();
     dropdown.init();
+    objectFitImages();
 
     patterns.init();
     renew.init();
