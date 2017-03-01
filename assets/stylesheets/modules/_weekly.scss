@@ -1,57 +1,62 @@
 /* ==========================================================================
-   Packages
+   weekly__packages
    ========================================================================== */
 
-/* Package Options
+/* weekly__package Options
    ========================================================================== */
 
-.package {
+.weekly__package {
     display: block;
-    background-color: $c-neutral7;
+    background-color: guss-colour(comment-support-2);
     margin-bottom: $gs-baseline;
     position: relative;
     border: none;
-    color: $c-brand;
+    color: black;
+    transition: 0.1s ease-in 0.15s;
+    border-radius: 10px;
 }
-.package:hover,
-.package:active {
-    color: $c-white;
-    background-color: #84be43;
+.weekly__package:hover,
+.weekly__package:active {
+    background-color: guss-colour(news-support-1);
+    color: black;
 }
-.package__list {
+.weekly__package__list {
     margin-bottom: $gs-baseline*2;
 
     @include mq(tablet) {
         margin-top: $gs-baseline*3;
     }
 }
-.package__title {
-    @include font-size(24px, 28px);
-    font-weight: 900;
-    text-transform: uppercase;
+.weekly__package__title {
+    font-size: 16px;
+    line-height: 18px;
+    font-weight:900;
 }
-.package__info {
+.weekly__package__info {
     cursor: pointer;
     display: block;
     padding: $gs-baseline;
 }
-.package__price {
+.weekly__package__price {
     display: block;
-
+    text-align: right;
     @include mq(tablet) {
-        float: right;
-        @include font-size(20px, 24px);
+        font-size: 16px;
+        line-height: 18px;
     }
 }
-.package__description,
-.package__monthly {
+.weekly__package__description,
+.weekly__package__monthly {
     display: block;
 }
+.weekly__package__description{
+    @include fs-textSans(3);
+}
 
-/* Package Preview
+/* weekly__package Preview
    ========================================================================== */
 
-.package-preview {
+.weekly__package-preview {
     background: $c-neutral7;
     padding: $gs-baseline $gs-gutter/2;
 
@@ -63,31 +68,30 @@
         width: 100%;
     }
 }
-.package-preview__header,
-.package-preview__content {
+.weekly__package-preview__header,
+.weekly__package-preview__content {
     @include mq(tablet) {
         display: table-cell;
         vertical-align: top;
     }
 }
-.package-preview__header {
+.weekly__package-preview__header {
     @include mq(tablet) {
         width: gs-span(4);
         padding-right: $gs-gutter;
     }
 }
-.package-preview__content {
+.weekly__package-preview__content {
     @include mq(tablet) {
         padding-right: $gs-gutter;
     }
 }
-.package-preview__image {
+.weekly__package-preview__image {
     margin: 0 auto $gs-baseline;
     max-height: 256px;
 }
-.package-preview__title {
+.weekly__package-preview__title {
     @include fs-headline(3);
-    font-weight: guss-font-weight(medium);
     margin-bottom: $gs-baseline * 2;
 }
 
@@ -118,6 +122,9 @@
         display: table;
     }
 }
+.weekly__package__special {
+    color: guss-colour(success);
+}
 .pricing-cta__pricing,
 .pricing-cta__action {
     @include mq(tablet) {
@@ -147,58 +154,3 @@
     margin-bottom: 0;
 }
 
-/* Steps
-   ========================================================================== */
-
-/* Steps */
-$step-size: 40px;
-$step-size-tablet: 60px;
-
-.steps {
-    @extend .o-inline-list;
-    @include mq(tablet) {
-        margin-bottom: $gs-baseline;
-    }
-}
-
-.steps__item {
-    @extend .o-inline-list__item;
-    margin-bottom: $gs-baseline/2;
-    min-height: $step-size + $gs-baseline/2;
-    padding-left: $step-size + $gs-gutter/2;
-    padding-right: $gs-gutter/2;
-    position: relative;
-    margin-left: 0;
-
-    @include mq(tablet) {
-        width: 33%;
-        vertical-align: top;
-        min-height: $step-size-tablet + $gs-baseline/2;
-        padding-left: $step-size-tablet + $gs-gutter/2;
-    }
-
-    &:before {
-        background-color: $c-brand;
-        color: $c-white;
-        content: counter(steps);
-        counter-increment: steps;
-        display: block;
-        float: left;
-        font-weight: 500;
-        line-height: $step-size;
-        text-align: center;
-        position: absolute;
-        top: 0;
-        left: 0;
-        @include border-radius($step-size);
-        height: $step-size;
-        width: $step-size;
-
-        @include mq(tablet) {
-            @include font-size(32px, $step-size-tablet);
-            @include border-radius($step-size-tablet);
-            height: $step-size-tablet;
-            width: $step-size-tablet;
-        }
-    }
-}
