@@ -69,9 +69,7 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
       ) ++ testOnlyPlans
 
       def matchPlan(planCandidates: List[ContentSubscription], associations: List[(ContentSubscription, ContentSubscription)]): Option[PlanList[ContentSubscription]] =
-        planCandidates.find{ plan =>
-          plan.slug == forThisPlan && plan.availableForCheckout // this will now check all, even digipack
-        }.map { planFromSlug =>
+        planCandidates.filter(_.availableForCheckout).find(_.slug == forThisPlan).map { planFromSlug =>
           val otherPlansInProduct = getBetterPlans(planFromSlug, planCandidates)
           PlanList(associations, planFromSlug, otherPlansInProduct: _*)
         }
