@@ -57,32 +57,32 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
 
       val testOnlyPlans = if (tpBackend == TouchpointBackend.Test) List(catalog.weeklyZoneB.plansWithAssociations) else List.empty
 
-      val contentSubscriptionPlans = List(
+      val paperSubscriptionPlans = List(
         catalog.delivery.list,
         catalog.voucher.list,
         catalog.digipack.plans
-      )
+      ).map(plans => PlansWithIntroductory(plans, List.empty))
 
       val productsWithIntroductoryPlans = List(
         catalog.weeklyZoneA.plansWithAssociations,
         catalog.weeklyZoneC.plansWithAssociations
       ) ++ testOnlyPlans
 
-      def matchPlan(planCandidates: List[ContentSubscription], associations: List[(ContentSubscription, ContentSubscription)]): Option[PlanList[ContentSubscription]] = {
-        val buyablePlans = planCandidates.filter(_.availableForCheckout)
-        buyablePlans.partition(_.slug == forThisPlan) match {
-          case (planFromSlug :: Nil, otherPlans)  =>
-            val betterPlansInProduct = getBetterPlans(planFromSlug, otherPlans)
-            Some(PlanList(associations, planFromSlug, betterPlansInProduct: _*))
-          case _ => None
-        }
-      }
+      val contentSubscriptionPlans = paperSubscriptionPlans ++ productsWithIntroductoryPlans
 
-      contentSubscriptionPlans.map(plan => matchPlan(plan, List.empty)).find(_.isDefined).flatten orElse
-      productsWithIntroductoryPlans.map {
+      contentSubscriptionPlans.map {
         case PlansWithIntroductory(plans, associations) =>
-          matchPlan(plans, associations)
+          val buyablePlans = plans.filter(_.availableForCheckout)
+          val plansInPriceOrder = buyablePlans.sortBy(_.charges.gbpPrice.amount)
+          val slugPlanAndBetter = plansInPriceOrder.dropWhile(_.slug != forThisPlan)
+          slugPlanAndBetter match {
+            case planFromSlug :: otherPlans =>
+              val betterPlansInProduct = getBetterPlans(planFromSlug, otherPlans)
+              Some(PlanList(associations, planFromSlug, betterPlansInProduct: _*))
+            case Nil => None // didn't find slug
+          }
       }.find(_.isDefined).flatten
+
     }
 
     val idUser = (for {
