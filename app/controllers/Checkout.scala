@@ -43,8 +43,8 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
   def checkoutService(implicit res: TouchpointBackend.Resolution): CheckoutService =
     res.backend.checkoutService
 
-  def getBetterPlans[A <: CatalogPlan.Paid](plan: A, others: List[A]) =
-    others.sortBy(_.charges.gbpPrice.amount).dropWhile(_.charges.gbpPrice.amount <= plan.charges.gbpPrice.amount)
+  def getBetterPlans[A <: CatalogPlan.Paid](plan: A, allPlans: List[A]) =
+    allPlans.sortBy(_.charges.gbpPrice.amount).dropWhile(_.charges.gbpPrice.amount <= plan.charges.gbpPrice.amount)
 
   def renderCheckout(countryGroup: String, promoCode: Option[PromoCode], supplierCode: Option[SupplierCode], forThisPlan: String) = NoCacheAction.async { implicit request =>
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
@@ -57,30 +57,32 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
 
       val testOnlyPlans = if (tpBackend == TouchpointBackend.Test) List(catalog.weeklyZoneB.plansWithAssociations) else List.empty
 
-      val contentSubscriptionPlans = List(
+      val paperSubscriptionPlans = List(
         catalog.delivery.list,
         catalog.voucher.list,
         catalog.digipack.plans
-      )
+      ).map(plans => PlansWithIntroductory(plans, List.empty))
 
       val productsWithIntroductoryPlans = List(
         catalog.weeklyZoneA.plansWithAssociations,
         catalog.weeklyZoneC.plansWithAssociations
       ) ++ testOnlyPlans
 
-      def matchPlan(planCandidates: List[ContentSubscription], associations: List[(ContentSubscription, ContentSubscription)]): Option[PlanList[ContentSubscription]] =
-        planCandidates.find{ plan =>
-          plan.slug == forThisPlan && plan.availableForCheckout // this will now check all, even digipack
-        }.map { planFromSlug =>
-          val otherPlansInProduct = getBetterPlans(planFromSlug, planCandidates)
-          PlanList(associations, planFromSlug, otherPlansInProduct: _*)
-        }
+      val contentSubscriptionPlans = paperSubscriptionPlans ++ productsWithIntroductoryPlans
 
-      contentSubscriptionPlans.map(plan => matchPlan(plan, List.empty)).find(_.isDefined).flatten orElse
-      productsWithIntroductoryPlans.map {
+      contentSubscriptionPlans.map {
         case PlansWithIntroductory(plans, associations) =>
-          matchPlan(plans, associations)
+          val buyablePlans = plans.filter(_.availableForCheckout)
+          val plansInPriceOrder = buyablePlans.sortBy(_.charges.gbpPrice.amount)
+          val slugPlanAndBetter = plansInPriceOrder.dropWhile(_.slug != forThisPlan)
+          slugPlanAndBetter match {
+            case planFromSlug :: otherPlans =>
+              val betterPlansInProduct = getBetterPlans(planFromSlug, otherPlans)
+              Some(PlanList(associations, planFromSlug, betterPlansInProduct: _*))
+            case Nil => None // didn't find slug
+          }
       }.find(_.isDefined).flatten
+
     }
 
     val idUser = (for {
