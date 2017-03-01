@@ -68,11 +68,13 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
         catalog.weeklyZoneC.plansWithAssociations
       ) ++ testOnlyPlans
 
-      def matchPlan(planCandidates: List[ContentSubscription], associations: List[(ContentSubscription, ContentSubscription)]): Option[PlanList[ContentSubscription]] =
-        planCandidates.filter(_.availableForCheckout).find(_.slug == forThisPlan).map { planFromSlug =>
-          val otherPlansInProduct = getBetterPlans(planFromSlug, planCandidates)
+      def matchPlan(planCandidates: List[ContentSubscription], associations: List[(ContentSubscription, ContentSubscription)]): Option[PlanList[ContentSubscription]] = {
+        val buyablePlans = planCandidates.filter(_.availableForCheckout)
+        buyablePlans.find(_.slug == forThisPlan).map { planFromSlug =>
+          val otherPlansInProduct = getBetterPlans(planFromSlug, buyablePlans)
           PlanList(associations, planFromSlug, otherPlansInProduct: _*)
         }
+      }
 
       contentSubscriptionPlans.map(plan => matchPlan(plan, List.empty)).find(_.isDefined).flatten orElse
       productsWithIntroductoryPlans.map {
