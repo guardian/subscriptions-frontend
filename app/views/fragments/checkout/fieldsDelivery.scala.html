@@ -1,9 +1,10 @@
+@import com.gu.i18n.Currency
 @import views.support.CountryWithCurrency
 @import views.html.fragments.checkout.address
 @import views.support.PlanOps._
 @import views.support.ProductPopulationData
 
-@(data: ProductPopulationData, countriesWithCurrency: List[CountryWithCurrency])
+@(data: ProductPopulationData, countriesWithCurrency: List[CountryWithCurrency], currency: Currency)
 
 @renderFields(usePostcodeLookup: Boolean, showDeliveryInstructions: Boolean, productName: String, firstPaperLabel: String) = {
 @address(
@@ -12,7 +13,8 @@
     countriesWithCurrency = countriesWithCurrency,
     plan = data.plans.default,
     usePostcodeLookup = usePostcodeLookup,
-    determinesPriceBanding = true)
+    determinesPriceBanding = true,
+    defaultCurrency = currency)
 
     <div class="js-checkout-delivery-data" id="deliveryFields">
         @if(showDeliveryInstructions) {

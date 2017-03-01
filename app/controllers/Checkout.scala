@@ -1,6 +1,7 @@
 package controllers
 
 import actions.CommonActions._
+import com.gu.i18n.CountryGroup.{UK, US}
 import com.gu.i18n.Currency._
 import com.gu.i18n._
 import com.gu.memsub.Subscription.ProductRatePlanId
@@ -51,7 +52,7 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
     implicit val tpBackend = resolution.backend
 
     // countryGroup String above basically means now 'countryOrCountryGroup' so we'll use the fromHint API on DetermineCountryGroup
-    val determinedCountryGroup = DetermineCountryGroup.fromHint(countryGroup) getOrElse CountryGroup.UK
+    val determinedCountryGroup = DetermineCountryGroup.fromHint(countryGroup) getOrElse UK
 
     val matchingPlanList: Option[PlanList[ContentSubscription]] = {
 
@@ -114,12 +115,23 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
         }
 
         val countryAndCurrencySettings = planList.default.product match {
-          case Product.Digipack => getSettings(determinedCountryGroup.defaultCountry, GBP)
-          case Product.Delivery => getSettings(Some(Country.UK), GBP)
-          case Product.Voucher => getSettings(Some(Country.UK), GBP)
-          case Product.WeeklyZoneA => getSettings(determinedCountryGroup.defaultCountry, GBP)
-          case Product.WeeklyZoneB => getSettings(None, USD)
-          case Product.WeeklyZoneC => getSettings(determinedCountryGroup.defaultCountry, USD)
+          case Product.Digipack => getSettings(determinedCountryGroup.defaultCountry, determinedCountryGroup.currency)
+          case Product.Delivery => getSettings(UK.defaultCountry, UK.currency)
+          case Product.Voucher => getSettings(UK.defaultCountry, UK.currency)
+          case Product.WeeklyZoneA => {
+            if (Set(UK, US).contains(determinedCountryGroup)) {
+              getSettings(determinedCountryGroup.defaultCountry, determinedCountryGroup.currency)
+            } else {
+              getSettings(UK.defaultCountry, UK.currency)
+            }
+          }
+          case Product.WeeklyZoneB | Product.WeeklyZoneC => {
+            if (Set(UK, US).contains(determinedCountryGroup)) {
+              getSettings(None, USD)
+            } else {
+              getSettings(determinedCountryGroup.defaultCountry, determinedCountryGroup.currency)
+            }
+          }
         }
 
         val digitalEdition = model.DigitalEdition.getForCountry(countryAndCurrencySettings.defaultCountry)
