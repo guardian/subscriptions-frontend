@@ -44,7 +44,7 @@ object Promotion extends Controller with LazyLogging with CatalogProvider {
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
     tpBackend.promoService.findPromotionFuture(promoCode).map { promotion =>
-      promotion.fold {
+      promotion.filterNot(_.isTracking).fold {
         NotFound(Json.obj("errorMessage" -> s"Sorry, we can't find that code."))
       } {
         promo =>
@@ -66,7 +66,7 @@ object Promotion extends Controller with LazyLogging with CatalogProvider {
     implicit val tpBackend = resolution.backend
 
     tpBackend.promoService.findPromotionFuture(promoCode).map { promotion =>
-      promotion.fold {
+      promotion.filterNot(_.isTracking).fold {
         NotFound(Json.obj("errorMessage" -> s"Sorry, we can't find that code."))
       } { promo =>
         val result = promo.validate(country)
