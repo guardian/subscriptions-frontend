@@ -1,0 +1,43 @@
+@import com.gu.memsub.BillingPeriod.SixWeeks
+@import com.gu.memsub.promo.PromoCode
+@import com.gu.memsub.promo.Promotion.AnyPromotion
+@import com.gu.memsub.subsv2.Catalog
+@import views.support.MarkdownRenderer
+
+@(promoCode: PromoCode, catalog: Catalog, promotion: AnyPromotion, md: MarkdownRenderer)
+@isSixForSix = @{(catalog.weekly.flatten.filter(_.charges.billingPeriod == SixWeeks).map(_.id).toSet intersect promotion.appliesTo.productRatePlanIds).nonEmpty}
+@Html(md.render(
+    if (isSixForSix) {
+s"""
+Offer not available to current subscribers of Guardian Weekly. You must be 18+ to be eligible for this offer. Guardian Weekly reserve the right to end this offer at any time.
+
+**United Kingdom:** Offer is £6 for the first 6 issues followed by quarterly (13 weeks) subscription payments of £30 thereafter, saving 20% off the cover price.
+
+**USA and Canada:** Offer is $$6 for the first 6 issues, followed by quarterly (13 weeks) subscription payments of $$60, saving 30% off the cover price ($$US) and 20% ($$CAN).
+
+**Australia and New Zealand:** Offer is $$6 for the first 6 issues, followed by quarterly (13 weeks) subscription payments of $$78AUD (Australia) or $$98NZD (New Zealand) thereafter, saving 18% off the cover price.
+
+**Europe:**  Offer is €6 for the first 6 issues followed by quarterly (13 weeks) subscription payments of €49, saving 30% off the cover price. Excluding Cyprus, Malta and Republic of Ireland.
+
+**Rest of World:** Offer is £6 the first 6 issues, followed by quarterly (13 weeks) subscription payments of £48.
+"""
+    } else {
+s"""
+You must be 18+ to be eligible for a Guardian Weekly subscription.
+
+**United Kingdom:** Quarterly (13 weeks) subscription rate £30 and annual rate £120, saving 20% off the cover price.
+
+**USA and Canada:** Quarterly (13 weeks) subscription rate $$60 and annual rate $$240, saving 30% off the cover price ($$US) and 20% ($$CAN).
+
+**Australia:** Quarterly (13 weeks) subscription payments of $$78 and annual rate $$312, saving 18% off the cover price.
+
+**New Zealand:** Quarterly (13 weeks) subscription rate of $$98 and annual rate $$392, saving 18% off the cover price.
+
+**Europe:** Quarterly (13 weeks) subscription rate of €49 and annual rate €196, saving 30% off the cover price. Excluding Cyprus, Malta and Republic of Ireland.
+
+**Rest of World:** Quarterly (13 weeks) subscription payments of £48 or US$$65 and annual rates £192 or US $$260.
+"""
+    }
++ "For full subscription terms and conditions visit [https://www.theguardian.com/guardian-weekly-subscription-terms-conditions](theguardian.com/guardian-weekly-subscription-terms-conditions)"
+
+))

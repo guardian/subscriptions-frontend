@@ -5,13 +5,18 @@
 @import com.gu.memsub.promo.PromoCode
 
 @(promoCode: PromoCode, catalog: Catalog, promotion: AnyPromotion, md: MarkdownRenderer)
-@isDigipack = @{catalog.digipack.plans.exists(plan => promotion.appliesTo.productRatePlanIds.contains(plan.id))}
+@isDigipack = @{(catalog.digipack.plans.map(_.id).toSet intersect promotion.appliesTo.productRatePlanIds).nonEmpty}
+@isGuardianWeekly = @{(catalog.weekly.flatten.map(_.id).toSet intersect promotion.appliesTo.productRatePlanIds).nonEmpty}
 @if(promotion.asIncentive.isDefined) {
     <p>@Html(md.render(promotion.getIncentiveLegalTerms))</p>
 } else {
     @if(isDigipack) {
         <p>@fragments.promotion.digitalpackLegalTerms(promoCode, promotion, md)</p>
     } else {
-        <p>@fragments.promotion.newspaperLegalTerms(promoCode, promotion, md)</p>
+        @if(isGuardianWeekly) {
+            <p>@fragments.promotion.guardianWeeklyLegalTerms(promoCode, catalog, promotion, md)</p>
+        } else {
+            <p>@fragments.promotion.newspaperLegalTerms(promoCode, promotion, md)</p>
+        }
     }
 }
