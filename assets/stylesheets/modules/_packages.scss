@@ -8,7 +8,7 @@
 .package {
     display: block;
     background-color: guss-colour(comment-support-2);
-    margin-bottom: $gs-baseline;
+    margin-bottom: $gs-baseline/2;
     position: relative;
     border: none;
     color: black;
@@ -123,7 +123,13 @@
     }
 }
 .package__special {
-    color: guss-colour(success);
+    color: guss-colour(news-support-2);
+    transition: 0.1s ease-in 0.15s;
+}
+a:hover {
+    .package__special{
+        color: guss-colour(neutral-1);
+    }
 }
 .pricing-cta__pricing,
 .pricing-cta__action {
@@ -208,4 +214,8 @@ $step-size-tablet: 60px;
             width: $step-size-tablet;
         }
     }
+}
+
+.package--increased-padding{
+    padding-top: 36px;
 }

@@ -26,7 +26,7 @@
         @fragments.heroBanner(promotion.flatMap(_.landingPage.image).getOrElse(defaultImage)){
             @title
         } {
-            @CommaSplit.split(promotion.flatMap(_.landingPage.title).getOrElse(""))
+            @CommaSplit.split(promotion.flatMap(_.landingPage.title).getOrElse("Get the world in perspective, every single week"))
         }
 
         <main class="page-container">
@@ -36,9 +36,9 @@
             roundel's cause some layout issues in chrome due to overflow
 
             **@
-            <div class="idk-flexwrap">
+            <div class="flexwrap">
                 <section class="section-left">
-                    <div>@description</div>
+                    <div class="weekly-list">@description</div>
                     <br/>
                     @promotion.flatMap(_.asIncentive).map { p =>
                         <h4>Redemption instructions</h4>
@@ -46,7 +46,7 @@
                     }
                 </section>
                 <section class="section-slice--bleed section-right">
-                <h2 class="page-heading">Where should we send your Guardian Weekly?</h2>
+                <h2 class="section-right--header">Where should we send your Guardian Weekly?</h2>
                 <div>
                 @for(region <- discountedRegions) {
                     @if(region.discountedPlans.length > 1) {
@@ -75,7 +75,7 @@
                 } </div>
                 @for(region <- discountedRegions) {
                     <div class="js-dropdown-@region.title.replaceAll(" ", "") js-dropdown-menu animate-hide-hidden">
-                        <h3>What type of subscription is right for you?</h3>
+                        <h3 class="section-right--header package--increased-padding">What type of subscription is right for you?</h3>
                         <div>
                         @for(plan <- region.discountedPlans) {
                             <a href="@plan.url.toString" class="package">
@@ -96,8 +96,8 @@
                 }
             </section>
             </div>
-            <section class="idk-flexwrap promotion-terms">
-                <div class="idk-flexwrap__inner">
+            <section class="flexwrap promotion-terms">
+                <div class="flexwrap__inner">
                     @nonTrackingPromotion.map { promo =>
 
                         @fragments.promotion.promotionTermsAndConditions(promo, md)
