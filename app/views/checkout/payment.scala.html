@@ -29,6 +29,8 @@
         <span class="option__input">
             <input
             type="radio" name="ratePlanId"
+            data-option-label-prefix="@plan.prefix"
+            data-option-mirror-payment-default="@plan.charges.prettyPricing(currency) @for(ap <- associatedPlan.map(_.charges.prettyPricing(currency))) { and then @ap}"
             data-option-mirror-payment="@plan.charges.prettyPricing(currency) @for(ap <- associatedPlan.map(_.charges.prettyPricing(currency))) { and then @ap}"
             data-option-mirror-description="@for(s <- plan.subtitle) {(@s@for(ap <- associatedPlan.flatMap(_.subtitle)) { and then @ap})}"
             data-option-mirror-package="@plan.packageName"
