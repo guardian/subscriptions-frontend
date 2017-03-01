@@ -43,8 +43,8 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
   def checkoutService(implicit res: TouchpointBackend.Resolution): CheckoutService =
     res.backend.checkoutService
 
-  def getBetterPlans[A <: CatalogPlan.Paid](plan: A, others: List[A]) =
-    others.sortBy(_.charges.gbpPrice.amount).dropWhile(_.charges.gbpPrice.amount <= plan.charges.gbpPrice.amount)
+  def getBetterPlans[A <: CatalogPlan.Paid](plan: A, allPlans: List[A]) =
+    allPlans.sortBy(_.charges.gbpPrice.amount).dropWhile(_.charges.gbpPrice.amount <= plan.charges.gbpPrice.amount)
 
   def renderCheckout(countryGroup: String, promoCode: Option[PromoCode], supplierCode: Option[SupplierCode], forThisPlan: String) = NoCacheAction.async { implicit request =>
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
@@ -70,9 +70,11 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
 
       def matchPlan(planCandidates: List[ContentSubscription], associations: List[(ContentSubscription, ContentSubscription)]): Option[PlanList[ContentSubscription]] = {
         val buyablePlans = planCandidates.filter(_.availableForCheckout)
-        buyablePlans.find(_.slug == forThisPlan).map { planFromSlug =>
-          val otherPlansInProduct = getBetterPlans(planFromSlug, buyablePlans)
-          PlanList(associations, planFromSlug, otherPlansInProduct: _*)
+        buyablePlans.partition(_.slug == forThisPlan) match {
+          case (planFromSlug :: Nil, otherPlans)  =>
+            val betterPlansInProduct = getBetterPlans(planFromSlug, otherPlans)
+            Some(PlanList(associations, planFromSlug, betterPlansInProduct: _*))
+          case _ => None
         }
       }
 
