@@ -1,0 +1,100 @@
+/* ==========================================================================
+   weekly__packages
+   ========================================================================== */
+
+/* weekly__package Options
+   ========================================================================== */
+
+.weekly__package {
+    display: block;
+    background-color: guss-colour(comment-support-2);
+    margin-bottom: $gs-baseline;
+    position: relative;
+    border: none;
+    color: black;
+    transition: 0.1s ease-in 0.15s;
+    border-radius: 10px;
+}
+.weekly__package:hover,
+.weekly__package:active {
+    background-color: guss-colour(news-support-1);
+    color: black;
+}
+.weekly__package__list {
+    margin-bottom: $gs-baseline*2;
+
+    @include mq(tablet) {
+        margin-top: $gs-baseline*3;
+    }
+}
+.weekly__package__title {
+    font-size: 16px;
+    line-height: 18px;
+    font-weight:900;
+}
+.weekly__package__info {
+    cursor: pointer;
+    display: block;
+    padding: $gs-baseline;
+}
+.weekly__package__price {
+    display: block;
+    text-align: right;
+    @include mq(tablet) {
+        font-size: 16px;
+        line-height: 18px;
+    }
+}
+.weekly__package__description,
+.weekly__package__monthly {
+    display: block;
+}
+.weekly__package__description{
+    @include fs-textSans(3);
+}
+
+/* weekly__package Preview
+   ========================================================================== */
+
+.weekly__package-preview {
+    background: $c-neutral7;
+    padding: $gs-baseline $gs-gutter/2;
+
+    @include mq($until: tablet) {
+        margin-bottom: $gs-baseline;
+    }
+    @include mq(tablet) {
+        display: table;
+        width: 100%;
+    }
+}
+.weekly__package-preview__header,
+.weekly__package-preview__content {
+    @include mq(tablet) {
+        display: table-cell;
+        vertical-align: top;
+    }
+}
+.weekly__package-preview__header {
+    @include mq(tablet) {
+        width: gs-span(4);
+        padding-right: $gs-gutter;
+    }
+}
+.weekly__package-preview__content {
+    @include mq(tablet) {
+        padding-right: $gs-gutter;
+    }
+}
+.weekly__package-preview__image {
+    margin: 0 auto $gs-baseline;
+    max-height: 256px;
+}
+.weekly__package-preview__title {
+    @include fs-headline(3);
+    margin-bottom: $gs-baseline * 2;
+}
+
+.weekly__package__special {
+    color: guss-colour(success);
+}
