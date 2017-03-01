@@ -95,33 +95,6 @@
     margin-bottom: $gs-baseline * 2;
 }
 
-/* Benefits
-   ========================================================================== */
-
-.benefit-item {
-    border-top: 1px solid $c-neutral4;
-    padding-top: $gs-baseline / 2;
-}
-.benefit-item__title {
-    @include fs-header(1);
-    margin-bottom: $gs-baseline / 2;
-}
-.benefit-item__description {
-    @include fs-headline(2);
-    margin-bottom: 0;
-}
-
-/* Pricing CTA
-   ========================================================================== */
-
-.pricing-cta {
-    margin: ($gs-baseline / 4) 0;
-
-    @include mq(tablet) {
-        margin: $gs-gutter 0;
-        display: table;
-    }
-}
 .weekly__package__special {
     color: guss-colour(success);
 }
