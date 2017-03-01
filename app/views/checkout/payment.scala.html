@@ -179,7 +179,7 @@
                                     @if(productData.isVoucher) {
                                         @fragments.checkout.fieldsVoucher(productData, deliveryCountries)
                                     }else{
-                                        @fragments.checkout.fieldsDelivery(productData, deliveryCountries)
+                                        @fragments.checkout.fieldsDelivery(productData, deliveryCountries, countryAndCurrencySettings.defaultCurrency)
                                     }
                                     @continueButton("#paymentDetails", "js-checkout-delivery-details-submit")
                                 </div>
@@ -202,7 +202,7 @@
                             <a href="#yourDetails" class="text-button u-button-reset js-edit-billing-address" title="Edit your personal details">Edit</a>
                         </div>
                         <div class="field-panel__fields">
-                            @fragments.checkout.fieldsBilling(personalData.map(_.address), canBeHidden = !productData.isDigitalPack, countryAndCurrencySettings.availableBillingCountries, productData.plans.default, !productData.isPhysical)
+                            @fragments.checkout.fieldsBilling(personalData.map(_.address), canBeHidden = !productData.isDigitalPack, countryAndCurrencySettings.availableBillingCountries, productData.plans.default, !productData.isPhysical, countryAndCurrencySettings.defaultCurrency)
                             @continueButton("#paymentDetails", "js-checkout-billing-address-submit")
                         </div>
                     </fieldset>

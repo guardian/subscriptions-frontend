@@ -1,3 +1,4 @@
+@import com.gu.i18n.Currency
 @import com.gu.memsub.Address
 @import views.support.AddressOps._
 @import views.support.CountryWithCurrency
@@ -5,7 +6,7 @@
 @import com.gu.memsub.subsv2.CatalogPlan
 @import views.html.fragments.checkout.address
 
-@(billingAddress: Option[Address], canBeHidden: Boolean, countriesWithCurrency: List[CountryWithCurrency], plan: CatalogPlan.Paid, determinesPriceBanding : Boolean)
+@(billingAddress: Option[Address], canBeHidden: Boolean, countriesWithCurrency: List[CountryWithCurrency], plan: CatalogPlan.Paid, determinesPriceBanding: Boolean, currency: Currency)
 
 @if(canBeHidden) {
   <div class="js-checkout-use-delivery">
@@ -27,5 +28,7 @@
         countriesWithCurrency = countriesWithCurrency,
         plan = plan,
         usePostcodeLookup = false,
-        determinesPriceBanding = determinesPriceBanding)
+        determinesPriceBanding = determinesPriceBanding,
+        defaultCurrency = currency
+    )
 </div>
