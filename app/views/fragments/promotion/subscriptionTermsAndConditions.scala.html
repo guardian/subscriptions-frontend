@@ -22,9 +22,19 @@
         <a class="u-link" href="@Links.digipackTerms.href" target="_blank">theguardian.com/digital-subscriptions-terms-conditions</a>.
     </p>
 } else {
-    <h4>Subscription terms and conditions</h4>
-    <p>Subscriptions available to people aged 18 and over with a valid email address.</p>
-    <p>
-        For full subscription terms and conditions visit <a class="u-link" href="@Links.paperTerms.href" target="_blank">theguardian.com/subscriber-direct/subscription-terms-and-conditions</a>
-    </p>
+    @if(promotion.asWeekly) {
+        <h4>Guardian Weekly subscription terms and conditions</h4>
+        <p>Subscriptions available to people aged 18 and over with a valid email address.</p>
+        <p>
+            For full details of Guardian Weekly print subscription services and their terms and conditions - see
+            <a class="u-link" href="@Links.weeklyTerms.href" target="_blank">theguardian.com/guardian-weekly-subscription-terms-conditions</a>
+        </p>
+    } else {
+        <h4>Newspaper subscription terms and conditions</h4>
+        <p>Subscriptions available to people aged 18 and over with a valid email address.</p>
+        <p>
+            For full details of Guardian and Observer voucher and home delivery subscription services and their terms and conditions - see
+            <a class="u-link" href="@Links.paperTerms.href" target="_blank">theguardian.com/subscriber-direct/subscription-terms-and-conditions</a>
+        </p>
+    }
 }
