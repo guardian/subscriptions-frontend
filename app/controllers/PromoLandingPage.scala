@@ -28,11 +28,11 @@ object PromoLandingPage extends Controller {
   private val tpBackend = TouchpointBackend.Normal
   private val catalog = tpBackend.catalogService.unsafeCatalog
 
-  private val digitalPackRatePlanIds = catalog.digipack.toList.map(_.id).toSet
+  private val digitalPackRatePlanIds = catalog.digipack.plans.map(_.id).toSet
   private val allPaperPackages = catalog.delivery.list ++ catalog.voucher.list
   private val paperPlusPackageRatePlanIds = allPaperPackages.filter(_.charges.benefits.list.contains(Digipack)).map(_.id).toSet
   private val paperOnlyPackageRatePlanIds = allPaperPackages.filterNot(_.charges.benefits.list.contains(Digipack)).map(_.id).toSet
-  private val guardianWeeklyRatePlanIds = catalog.weeklyZoneA.toList.map(_.id).toSet ++ catalog.weeklyZoneC.toList.map(_.id).toSet
+  private val guardianWeeklyRatePlanIds = catalog.weeklyZoneA.plans.map(_.id).toSet ++ catalog.weeklyZoneC.plans.map(_.id).toSet
 
   private def isActive(promotion: AnyPromotion): Boolean = {
     val isTest = tpBackend.environmentName != "PROD"

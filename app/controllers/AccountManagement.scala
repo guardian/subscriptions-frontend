@@ -187,9 +187,9 @@ object ManageWeekly extends ContextLogging {
             zuoraContact.country.map { billToCountry =>
               val catalog = tpBackend.catalogService.unsafeCatalog
               val weeklyPlans = weeklySubscription.planToManage.product match {
-                case Product.WeeklyZoneA => catalog.weeklyZoneA.toList
-                case Product.WeeklyZoneB => catalog.weeklyZoneB.toList
-                case Product.WeeklyZoneC => catalog.weeklyZoneC.toList
+                case Product.WeeklyZoneA => catalog.weeklyZoneA.plans
+                case Product.WeeklyZoneB => catalog.weeklyZoneB.plans
+                case Product.WeeklyZoneC => catalog.weeklyZoneC.plans
               }
 
               val renewalPlans = weeklyPlans.filter(_.availableForRenewal)

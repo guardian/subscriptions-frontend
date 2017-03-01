@@ -5,7 +5,7 @@
 @import com.gu.memsub.promo.PromoCode
 
 @(promoCode: PromoCode, catalog: Catalog, promotion: AnyPromotion, md: MarkdownRenderer)
-@isDigipack = @{catalog.digipack.toList.exists(plan => promotion.appliesTo.productRatePlanIds.contains(plan.id))}
+@isDigipack = @{catalog.digipack.plans.exists(plan => promotion.appliesTo.productRatePlanIds.contains(plan.id))}
 @if(promotion.asIncentive.isDefined) {
     <p>@Html(md.render(promotion.getIncentiveLegalTerms))</p>
 } else {

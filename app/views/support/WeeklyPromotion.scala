@@ -35,7 +35,7 @@ object WeeklyPromotion {
           title = requestCountry.name,
           description = "Posted to you by air mail",
           countries = Set(requestCountry),
-          discountedPlans = plansForPromotion(promotion, promoCode, Set(requestCountry), catalog.weeklyZoneC.toList)
+          discountedPlans = plansForPromotion(promotion, promoCode, Set(requestCountry), catalog.weeklyZoneC.plans)
         ))
       } else {
         Seq()
@@ -45,7 +45,7 @@ object WeeklyPromotion {
         title = "Rest of the world",
         description = "Posted to you by air mail",
         countries = ZONEC - requestCountry,
-        discountedPlans = plansForPromotion(promotion, promoCode, ZONEC - requestCountry, catalog.weeklyZoneC.toList)
+        discountedPlans = plansForPromotion(promotion, promoCode, ZONEC - requestCountry, catalog.weeklyZoneC.plans)
       ))
 
     val UKregion: Set[DiscountedRegion] = {
@@ -53,19 +53,19 @@ object WeeklyPromotion {
         title = "United Kingdom",
         description = "Includes Isle of Man and Channel Islands",
         countries = UK,
-        discountedPlans = plansForPromotion(promotion, promoCode, UK, catalog.weeklyZoneA.toList)
+        discountedPlans = plansForPromotion(promotion, promoCode, UK, catalog.weeklyZoneA.plans)
       )
       val domestic = DiscountedRegion(
         title = "United Kingdom",
         description = "Includes mainland UK only.",
         countries = UKdomestic,
-        discountedPlans = plansForPromotion(promotion, promoCode, UK, catalog.weeklyZoneA.toList)
+        discountedPlans = plansForPromotion(promotion, promoCode, UK, catalog.weeklyZoneA.plans)
       )
       val overseas = DiscountedRegion(
         title = "Isle of Man and Channel Islands",
         description = "",
         countries = UKoverseas,
-        discountedPlans = plansForPromotion(promotion, promoCode, UK, catalog.weeklyZoneA.toList)
+        discountedPlans = plansForPromotion(promotion, promoCode, UK, catalog.weeklyZoneA.plans)
       )
       val countries = promotionCountries intersect UK
       val includesUKDomestic = !(countries intersect UKdomestic).isEmpty
@@ -84,31 +84,31 @@ object WeeklyPromotion {
       title = "United States",
       description = "Includes Alaska and Hawaii",
       countries = US,
-      discountedPlans = plansForPromotion(promotion, promoCode, US, catalog.weeklyZoneA.toList)
+      discountedPlans = plansForPromotion(promotion, promoCode, US, catalog.weeklyZoneA.plans)
     ))
     val AUSregion =  if (AU contains requestCountry) Seq() else Seq(DiscountedRegion(
       title = "Australia",
       description = "Posted to you by air mail",
       countries = AU,
-      discountedPlans = plansForPromotion(promotion, promoCode, AU, catalog.weeklyZoneC.toList)
+      discountedPlans = plansForPromotion(promotion, promoCode, AU, catalog.weeklyZoneC.plans)
     ))
     val NZregion =  if (NZ contains requestCountry) Seq() else Seq(DiscountedRegion(
       title = "New Zealand",
       description = "Posted to you by air mail",
       countries = NZ,
-      discountedPlans = plansForPromotion(promotion, promoCode, NZ, catalog.weeklyZoneC.toList)
+      discountedPlans = plansForPromotion(promotion, promoCode, NZ, catalog.weeklyZoneC.plans)
     ))
     val CAregion =  if (CA contains requestCountry) Seq() else Seq(DiscountedRegion(
       title = "Canada",
       description = "Posted to you by air mail",
       countries = CA,
-      discountedPlans = plansForPromotion(promotion, promoCode, CA, catalog.weeklyZoneC.toList)
+      discountedPlans = plansForPromotion(promotion, promoCode, CA, catalog.weeklyZoneC.plans)
     ))
     val EUregion = Seq(DiscountedRegion(
       title = "Europe",
       description = "Posted to you by air mail",
       countries = EU,
-      discountedPlans = plansForPromotion(promotion, promoCode, EU, catalog.weeklyZoneC.toList)
+      discountedPlans = plansForPromotion(promotion, promoCode, EU, catalog.weeklyZoneC.plans)
     ))
     val regions = regionForZoneCCountry ++ UKregion ++ USregion ++ EUregion ++ AUSregion ++  NZregion ++ CAregion  ++ rowWithoutCountry
     regions.filter(_.discountedPlans.length > 0)
