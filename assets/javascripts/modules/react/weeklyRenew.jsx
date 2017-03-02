@@ -322,8 +322,8 @@ class Plan extends React.Component {
     price() {
         if (this.props.promotionalPrice) {
             return <span>
-                <s>{this.props.price} </s>
-                <strong>{this.props.promotionalPrice}</strong>
+                <s>{this.props.price}</s>
+                <strong>&nbsp;{this.props.promotionalPrice}</strong>
             </span>
         }
         return this.props.price
