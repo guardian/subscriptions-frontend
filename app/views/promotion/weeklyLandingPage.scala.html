@@ -53,11 +53,11 @@
                 <div>
                 @for(region <- discountedRegions) {
                     @if(region.discountedPlans.length > 1) {
-                        <div class="package js-dropdown js-hide" data-dropdown-menu="@region.title.replaceAll(" ", "")">
-                            <div class="package__info" title="@region.description">
-                                <span class="package__title">@region.title</span>
+                        <div class="weekly__package js-dropdown js-hide" data-dropdown-menu="@region.title.replaceAll(" ", "")">
+                            <div class="weekly__package__info" title="@region.description">
+                                <span class="weekly__package__title">@region.title</span>
                                 @region.discountedPlans.headOption.map { plan =>
-                                    <span class="package__description package__supl">
+                                    <span class="weekly__package__description weekly__package__supl">
                                         @plan.headline
                                     </span>
                                 }
@@ -65,10 +65,10 @@
                         </div>
                     } else {
                         @region.discountedPlans.headOption.map { plan =>
-                            <a href="@plan.url.toString" class="package" title="@region.description">
-                                <div class="package__info">
-                                    <span class="package__title" >@region.title</span>
-                                    <span class="package__description package__supl">
+                            <a href="@plan.url.toString" class="weekly__package" title="@region.description">
+                                <div class="weekly__package__info">
+                                    <span class="weekly__package__title" >@region.title</span>
+                                    <span class="weekly__package__description weekly__package__supl">
                                     @plan.headline
                                     </span>
                                 </div>
@@ -81,16 +81,16 @@
                         <h3 class="section-right--header package--increased-padding">What type of subscription is right for you?</h3>
                         <div>
                         @for(plan <- region.discountedPlans) {
-                            <a href="@plan.url.toString" class="package">
-                                <div class="package__info">
-                                    <span class="package__title">@if(plan.discounted) {
+                            <a href="@plan.url.toString" class="weekly__package">
+                                <div class="weekly__package__info">
+                                    <span class="weekly__package__title">@if(plan.discounted) {
                                         @promotion.flatMap(_.landingPage.roundelHtml).map { text =>
-                                            <span class="package__special">
+                                            <span class="weekly__package__special">
                                                 @text
                                             </span>
                                         }
                                     } @plan.period</span>
-                                    <span class="package__description">@plan.pretty</span>
+                                    <span class="weekly__package__description">@plan.pretty</span>
                                 </div>
                             </a>
                         }

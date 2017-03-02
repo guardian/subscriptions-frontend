@@ -7,18 +7,16 @@
 
 .package {
     display: block;
-    background-color: guss-colour(comment-support-2);
-    margin-bottom: $gs-baseline/2;
+    background-color: $c-neutral7;
+    margin-bottom: $gs-baseline;
     position: relative;
     border: none;
-    color: black;
-    transition: 0.1s ease-in 0.15s;
-    border-radius: 10px;
+    color: $c-brand;
 }
 .package:hover,
 .package:active {
-    background-color: guss-colour(news-support-1);
-    color: black;
+    color: $c-white;
+    background-color: #84be43;
 }
 .package__list {
     margin-bottom: $gs-baseline*2;
@@ -28,9 +26,9 @@
     }
 }
 .package__title {
-    font-size: 16px;
-    line-height: 18px;
-    font-weight:900;
+    @include font-size(24px, 28px);
+    font-weight: 900;
+    text-transform: uppercase;
 }
 .package__info {
     cursor: pointer;
@@ -39,18 +37,15 @@
 }
 .package__price {
     display: block;
-    text-align: right;
+
     @include mq(tablet) {
-        font-size: 16px;
-        line-height: 18px;
+        float: right;
+        @include font-size(20px, 24px);
     }
 }
 .package__description,
 .package__monthly {
     display: block;
-}
-.package__description{
-    @include fs-textSans(3);
 }
 
 /* Package Preview
@@ -92,6 +87,7 @@
 }
 .package-preview__title {
     @include fs-headline(3);
+    font-weight: guss-font-weight(medium);
     margin-bottom: $gs-baseline * 2;
 }
 
@@ -120,15 +116,6 @@
     @include mq(tablet) {
         margin: $gs-gutter 0;
         display: table;
-    }
-}
-.package__special {
-    color: guss-colour(news-support-2);
-    transition: 0.1s ease-in 0.15s;
-}
-a:hover {
-    .package__special{
-        color: guss-colour(neutral-1);
     }
 }
 .pricing-cta__pricing,
@@ -203,19 +190,15 @@ $step-size-tablet: 60px;
         position: absolute;
         top: 0;
         left: 0;
-        border-radius: $step-size;
+        @include border-radius($step-size);
         height: $step-size;
         width: $step-size;
 
         @include mq(tablet) {
             @include font-size(32px, $step-size-tablet);
-            border-radius:$step-size-tablet;
+            @include border-radius($step-size-tablet);
             height: $step-size-tablet;
             width: $step-size-tablet;
         }
     }
-}
-
-.package--increased-padding{
-    padding-top: 36px;
 }

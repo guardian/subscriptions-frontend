@@ -1,6 +1,7 @@
 package controllers
 
 import actions.CommonActions._
+import com.gu.i18n.CountryGroup.{UK, US}
 import com.gu.i18n.Currency._
 import com.gu.i18n._
 import com.gu.memsub.Subscription.{Name, ProductRatePlanId}
@@ -51,7 +52,7 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
     implicit val tpBackend = resolution.backend
 
     // countryGroup String above basically means now 'countryOrCountryGroup' so we'll use the fromHint API on DetermineCountryGroup
-    val determinedCountryGroup = DetermineCountryGroup.fromHint(countryGroup) getOrElse CountryGroup.UK
+    val determinedCountryGroup = DetermineCountryGroup.fromHint(countryGroup) getOrElse UK
 
     val matchingPlanList: Option[PlanList[ContentSubscription]] = {
 
@@ -114,35 +115,45 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
         }
 
         val countryAndCurrencySettings = planList.default.product match {
-          case Product.Digipack => getSettings(determinedCountryGroup.defaultCountry, GBP)
-          case Product.Delivery => getSettings(Some(Country.UK), GBP)
-          case Product.Voucher => getSettings(Some(Country.UK), GBP)
-          case Product.WeeklyZoneA => getSettings(determinedCountryGroup.defaultCountry, GBP)
-          case Product.WeeklyZoneB => getSettings(None, USD)
-          case Product.WeeklyZoneC => getSettings(determinedCountryGroup.defaultCountry, USD)
+          case Product.Digipack => getSettings(determinedCountryGroup.defaultCountry, determinedCountryGroup.currency)
+          case Product.Delivery => getSettings(UK.defaultCountry, UK.currency)
+          case Product.Voucher => getSettings(UK.defaultCountry, UK.currency)
+          case Product.WeeklyZoneA => {
+            if (Set(UK, US).contains(determinedCountryGroup)) {
+              getSettings(determinedCountryGroup.defaultCountry, determinedCountryGroup.currency)
+            } else {
+              getSettings(UK.defaultCountry, UK.currency)
+            }
+          }
+          case Product.WeeklyZoneB | Product.WeeklyZoneC => {
+            if (Set(UK, US).contains(determinedCountryGroup)) {
+              getSettings(None, USD)
+            } else {
+              getSettings(determinedCountryGroup.defaultCountry, determinedCountryGroup.currency)
+            }
+          }
         }
 
         val digitalEdition = model.DigitalEdition.getForCountry(countryAndCurrencySettings.defaultCountry)
 
         // either a code to send to the form (left) or a tracking code for the session (right)
         val countryToValidatePromotionAgainst = countryAndCurrencySettings.defaultCountry orElse determinedCountryGroup.defaultCountry
-        val validatedPromoCode: Either[PromoCode, Seq[(String, String)]] = (promoCode |@| countryToValidatePromotionAgainst) (
-          tpBackend.promoService.validate[NewUsers](_: PromoCode, _: Country, planList.default.id)
-        ).flatMap(_.toOption).map(vp => vp.promotion.asTracking.map(_ => Seq(PromotionTrackingCode -> vp.code.get)).toRight(vp.code))
-          .getOrElse(Right(Seq.empty))
+
+        val promotion = promoCode.flatMap(tpBackend.promoService.findPromotion)
+
+        val trackingPromotion = promotion.flatMap(_.asTracking)
+        val displayPromoCode = if(promotion.isDefined && trackingPromotion.isEmpty) promoCode else None
+        val trackingCodeSessionData: Seq[(String, String)] = trackingPromotion.flatMap(_ => promoCode.map(p => (PromotionTrackingCode -> p.get))).toSeq
 
         val resolvedSupplierCode = supplierCode orElse request.session.get(SupplierTrackingCode).map(SupplierCode) // query param wins
-        val trackingCodeSessionData = validatedPromoCode.right.toSeq.flatten
         val supplierCodeSessionData = resolvedSupplierCode.map(code => Seq(SupplierTrackingCode -> code.get)).getOrElse(Seq.empty)
         val productData = ProductPopulationData(user.map(_.address), planList)
-        val promoCodeExists = promoCode.filter(tpBackend.promoService.findPromotion(_).isDefined)
-
         Ok(views.html.checkout.payment(
           personalData = personalData,
           productData = productData,
           countryGroup = determinedCountryGroup,
           touchpointBackendResolution = resolution,
-          promoCode = validatedPromoCode.left.toOption orElse promoCodeExists,
+          promoCode = displayPromoCode,
           supplierCode = resolvedSupplierCode,
           edition = digitalEdition,
           countryAndCurrencySettings = countryAndCurrencySettings

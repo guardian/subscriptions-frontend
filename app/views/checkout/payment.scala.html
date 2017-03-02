@@ -24,24 +24,28 @@
     countryAndCurrencySettings: CountryAndCurrencySettings
 )(implicit request: RequestHeader)
 
+@andThenPricing(currency: Currency, associatedPlan: Option[CatalogPlan.Paid]) = {
+    @for(ap <- associatedPlan.map(_.charges.prettyPricing(currency))) {
+        and then @ap
+    }
+}
 @priceOption(plan: CatalogPlan.Paid, currency: Currency, associatedPlan: Option[CatalogPlan.Paid]) = {
     <label class="option" data-currency="@currency">
         <span class="option__input">
             <input
             type="radio" name="ratePlanId"
             data-option-label-prefix="@plan.prefix"
-            data-option-mirror-payment-default="@plan.charges.prettyPricing(currency) @for(ap <- associatedPlan.map(_.charges.prettyPricing(currency))) { and then @ap}"
-            data-option-mirror-payment="@plan.charges.prettyPricing(currency) @for(ap <- associatedPlan.map(_.charges.prettyPricing(currency))) { and then @ap}"
-            data-option-mirror-description="@for(s <- plan.subtitle) {(@s@for(ap <- associatedPlan.flatMap(_.subtitle)) { and then @ap})}"
+            data-option-mirror-payment-default="@plan.charges.prettyPricing(currency) @andThenPricing(currency, associatedPlan)"
+            data-option-mirror-payment="@plan.charges.prettyPricing(currency) @andThenPricing(currency, associatedPlan)"
+            data-option-mirror-description="@for(s <- plan.subtitle) { (@s) }"
             data-option-mirror-package="@plan.packageName"
-            data-name="@plan.name @for(ap <- associatedPlan.map(_.name)) { and then @ap}"
-
+            data-name="@plan.name"
             data-currency="@currency"
             value="@plan.id.get"
             @if(plan == productData.plans.default && currency == countryAndCurrencySettings.defaultCurrency){ checked="checked" }
             >
         </span>
-        <span class="option__label" id="label-for-@plan.id.get-@currency">@plan.prettyName(currency) @for(ap <- associatedPlan.map(_.charges.prettyPricing(currency))) { and then @ap}</span>
+        <span class="option__label" id="label-for-@plan.id.get-@currency">@plan.prettyName(currency) @andThenPricing(currency, associatedPlan)</span>
     </label>
 }
 
@@ -179,7 +183,7 @@
                                     @if(productData.isVoucher) {
                                         @fragments.checkout.fieldsVoucher(productData, deliveryCountries)
                                     }else{
-                                        @fragments.checkout.fieldsDelivery(productData, deliveryCountries)
+                                        @fragments.checkout.fieldsDelivery(productData, deliveryCountries, countryAndCurrencySettings.defaultCurrency)
                                     }
                                     @continueButton("#paymentDetails", "js-checkout-delivery-details-submit")
                                 </div>
@@ -202,7 +206,7 @@
                             <a href="#yourDetails" class="text-button u-button-reset js-edit-billing-address" title="Edit your personal details">Edit</a>
                         </div>
                         <div class="field-panel__fields">
-                            @fragments.checkout.fieldsBilling(personalData.map(_.address), canBeHidden = !productData.isDigitalPack, countryAndCurrencySettings.availableBillingCountries, productData.plans.default, !productData.isPhysical)
+                            @fragments.checkout.fieldsBilling(personalData.map(_.address), canBeHidden = !productData.isDigitalPack, countryAndCurrencySettings.availableBillingCountries, productData.plans.default, !productData.isPhysical, countryAndCurrencySettings.defaultCurrency)
                             @continueButton("#paymentDetails", "js-checkout-billing-address-submit")
                         </div>
                     </fieldset>
