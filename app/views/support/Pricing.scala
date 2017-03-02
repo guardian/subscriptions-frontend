@@ -2,9 +2,8 @@ package views.support
 
 import com.gu.i18n.Currency
 import com.gu.i18n.Currency.GBP
+import com.gu.memsub.Benefit.{Digipack, Weekly}
 import com.gu.memsub.BillingPeriod._
-import com.gu.memsub.Digipack
-import com.gu.memsub.Weekly
 import com.gu.memsub.promo.PercentDiscount.getDiscountScaledToPeriod
 import com.gu.memsub.promo.{LandingPage, PercentDiscount, Promotion}
 import com.gu.memsub.subsv2._

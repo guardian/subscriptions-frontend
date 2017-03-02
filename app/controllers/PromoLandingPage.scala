@@ -2,7 +2,7 @@ package controllers
 import actions.CommonActions._
 import com.gu.i18n.CountryGroup.byCountryCode
 import com.gu.i18n.{Country, CountryGroup}
-import com.gu.memsub.Digipack
+import com.gu.memsub.Benefit.Digipack
 import com.gu.memsub.promo.Formatters.PromotionFormatters._
 import com.gu.memsub.promo.Promotion._
 import com.gu.memsub.promo._
@@ -32,7 +32,7 @@ object PromoLandingPage extends Controller {
   private val allPaperPackages = catalog.delivery.list ++ catalog.voucher.list
   private val paperPlusPackageRatePlanIds = allPaperPackages.filter(_.charges.benefits.list.contains(Digipack)).map(_.id).toSet
   private val paperOnlyPackageRatePlanIds = allPaperPackages.filterNot(_.charges.benefits.list.contains(Digipack)).map(_.id).toSet
-  private val guardianWeeklyRatePlanIds = catalog.weeklyZoneA.plans.map(_.id).toSet ++ catalog.weeklyZoneC.plans.map(_.id).toSet
+  private val guardianWeeklyRatePlanIds = catalog.weekly.zoneA.plans.map(_.id).toSet ++ catalog.weekly.zoneC.plans.map(_.id).toSet
 
   private def isActive(promotion: AnyPromotion): Boolean = {
     val isTest = tpBackend.environmentName != "PROD"

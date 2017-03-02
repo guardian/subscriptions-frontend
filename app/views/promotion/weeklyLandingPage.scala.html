@@ -19,7 +19,7 @@
 
 @(country: Country, catalog: Catalog, promoCode: Option[PromoCode], promotion: Option[PromoWithWeeklyLandingPage],description:Html, md: MarkdownRenderer)
     @anyPromotion = @{promotion.map(asAnyPromotion)}
-    @isSixForSix = @{anyPromotion.filter(p => (catalog.weekly.flatten.filter(_.charges.billingPeriod == SixWeeks).map(_.id).toSet intersect p.appliesTo.productRatePlanIds).nonEmpty)}
+    @isSixForSix = @{anyPromotion.filter(p => (catalog.weekly.plans.flatten.filter(_.charges.billingPeriod == SixWeeks).map(_.id).toSet intersect p.appliesTo.productRatePlanIds).nonEmpty)}
     @nonTrackingPromotion = @{anyPromotion.flatMap(p => p.asDiscount orElse p.asFreeTrial orElse p.asIncentive) orElse isSixForSix}
     @title = @{"The Guardian Weekly Subscriptions"}
     @defaultImage = @{ResponsiveImageGroup(None,None,None,ResponsiveImageGenerator("021b11f82c8fb43da5ef308dc6d6c5bf2fecb9c8/0_0_2560_300",Seq(2560)))}

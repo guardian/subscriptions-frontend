@@ -6,7 +6,7 @@
 
 @(promoCode: PromoCode, catalog: Catalog, promotion: AnyPromotion, md: MarkdownRenderer)
 @isDigipack = @{(catalog.digipack.plans.map(_.id).toSet intersect promotion.appliesTo.productRatePlanIds).nonEmpty}
-@isGuardianWeekly = @{(catalog.weekly.flatten.map(_.id).toSet intersect promotion.appliesTo.productRatePlanIds).nonEmpty}
+@isGuardianWeekly = @{(catalog.weekly.plans.flatten.map(_.id).toSet intersect promotion.appliesTo.productRatePlanIds).nonEmpty}
 @if(promotion.asIncentive.isDefined) {
     <p>@Html(md.render(promotion.getIncentiveLegalTerms))</p>
 } else {
