@@ -1,0 +1,34 @@
+@import com.gu.memsub.subsv2.SubscriptionPlan
+@import views.support.Dates._
+@import views.support.Pricing._
+@import com.gu.memsub.PaperDay
+@import org.joda.time.LocalDate.now
+
+@(plans: List[SubscriptionPlan.ContentSubscription], singularLabel: String, chosenPaperDays: List[PaperDay] = List.empty)
+
+@if(plans.length > 1) {
+    <dt class="mma-section__list--title">@{
+        singularLabel + "s"
+    }</dt>
+}
+@if(plans.length == 1) {
+    <dt class="mma-section__list--title">@singularLabel</dt>
+}
+
+<dd class="mma-section__list--content">
+@for(plan <- plans) {
+    <div>
+    @if(plan.name == "Echo-Legacy") {
+        Multi-day (@{
+        chosenPaperDays.map(_.id.replace("Print ", "")).mkString(", ")
+    })
+    } else {
+        @plan.name
+    }
+    </div>
+    <div>@plan.charges.prettyPricing(plan.charges.price.currencies.head)</div>
+
+    <div>@if(plan.start.isAfter(now)) { Starts: } else { Started: } @prettyDate(plan.start)</div>
+}
+</dd>
+
