@@ -48,7 +48,7 @@
     }
 }
 .basket-preview__product__caption {
-    display: inline-block;
+    display: inline;
     font-weight: normal;
 
     @include mq($until: desktop) {
