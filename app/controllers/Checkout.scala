@@ -138,23 +138,22 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
 
         // either a code to send to the form (left) or a tracking code for the session (right)
         val countryToValidatePromotionAgainst = countryAndCurrencySettings.defaultCountry orElse determinedCountryGroup.defaultCountry
-        val validatedPromoCode: Either[PromoCode, Seq[(String, String)]] = (promoCode |@| countryToValidatePromotionAgainst) (
-          tpBackend.promoService.validate[NewUsers](_: PromoCode, _: Country, planList.default.id)
-        ).flatMap(_.toOption).map(vp => vp.promotion.asTracking.map(_ => Seq(PromotionTrackingCode -> vp.code.get)).toRight(vp.code))
-          .getOrElse(Right(Seq.empty))
+
+        val promotion = promoCode.flatMap(tpBackend.promoService.findPromotion)
+
+        val trackingPromotion = promotion.flatMap(_.asTracking)
+        val displayPromoCode = if(promotion.isDefined && trackingPromotion.isEmpty) promoCode else None
+        val trackingCodeSessionData: Seq[(String, String)] = trackingPromotion.flatMap(_ => promoCode.map(p => (PromotionTrackingCode -> p.get))).toSeq
 
         val resolvedSupplierCode = supplierCode orElse request.session.get(SupplierTrackingCode).map(SupplierCode) // query param wins
-        val trackingCodeSessionData = validatedPromoCode.right.toSeq.flatten
         val supplierCodeSessionData = resolvedSupplierCode.map(code => Seq(SupplierTrackingCode -> code.get)).getOrElse(Seq.empty)
         val productData = ProductPopulationData(user.map(_.address), planList)
-        val promoCodeExists = promoCode.filter(tpBackend.promoService.findPromotion(_).isDefined)
-
         Ok(views.html.checkout.payment(
           personalData = personalData,
           productData = productData,
           countryGroup = determinedCountryGroup,
           touchpointBackendResolution = resolution,
-          promoCode = validatedPromoCode.left.toOption orElse promoCodeExists,
+          promoCode = displayPromoCode,
           supplierCode = resolvedSupplierCode,
           edition = digitalEdition,
           countryAndCurrencySettings = countryAndCurrencySettings
