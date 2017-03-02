@@ -2,14 +2,14 @@ package views.support
 
 import com.gu.i18n.Currency
 import com.gu.i18n.Currency.GBP
+import com.gu.memsub.BillingPeriod._
+import com.gu.memsub.Digipack
+import com.gu.memsub.Weekly
 import com.gu.memsub.promo.PercentDiscount.getDiscountScaledToPeriod
 import com.gu.memsub.promo.{LandingPage, PercentDiscount, Promotion}
-import com.gu.memsub.{BillingPeriod => BP, _}
-import BP._
 import com.gu.memsub.subsv2._
 import views.support.BillingPeriod._
 import views.support.PlanOps._
-import scalaz.Id
 
 import scala.language.higherKinds
 
@@ -57,7 +57,7 @@ object Pricing {
               s"${discountAmount.pretty} for 1 year, then ${originalAmount.pretty} every year thereafter"
             }
           case OneYear => s"${discountAmount.pretty} for 1 year"
-
+          case _ => ""
         }
       }
     }
@@ -80,6 +80,7 @@ object Pricing {
 
     def prettyName(currency: Currency): String = in.charges.benefits.list match {
       case Digipack :: Nil => planWithPricing.prettyPricing(currency)
+      case Weekly :: Nil => planWithPricing.prettyPricing(currency)
       case _ => s"$prefix${planWithPricing.prettyPricing(currency)}"
     }
   }
