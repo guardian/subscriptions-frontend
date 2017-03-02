@@ -10,6 +10,7 @@
 .global-nav__inner {
     background-color: $c-brand-dark;
 }
+
 // [1] Reset default link border
 // [2] Semi-magic numbers, optical rather than uniform alignment
 .global-nav__link {
@@ -23,5 +24,11 @@
     &:focus,
     &:active {
         text-decoration: underline;
+    }
+}
+
+.global-nav__link--right {
+    @include mq(mobileLandscape) {
+        float: right;
     }
 }
