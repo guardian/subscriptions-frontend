@@ -11,7 +11,7 @@
 
 @import org.joda.time.LocalDate.now
 
-@(chosenPaperDays: List[PaperDay] = empty, maybeContact: Option[Contact] = None, subscription: Subscription[SubscriptionPlan.PaperPlan])(extra: Html = Html(""))
+@(chosenPaperDays: List[PaperDay] = empty, maybeContact: Option[Contact] = None, subscription: Subscription[SubscriptionPlan.ContentSubscription])(extra: Html = Html(""))
 <dl class="mma-section__list">
     <dt class="mma-section__list--title">Subscriber ID</dt>
     <dd class="mma-section__list--content">@{subscription.name.get}</dd>
@@ -27,7 +27,7 @@
     }
     }
 
-    @renderPlans(plans: List[SubscriptionPlan.PaperPlan], singularLabel: String) = {
+    @renderPlans(plans: List[SubscriptionPlan.ContentSubscription], singularLabel: String) = {
      @planListLabel(singularLabel, plans.length)
         <dd class="mma-section__list--content">
         @for(plan <- plans) {

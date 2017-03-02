@@ -1,11 +1,13 @@
 @import com.gu.i18n.Currency
-@import com.gu.memsub.promo.Promotion._
+@import com.gu.memsub.promo.Promotion.AnyPromotion
 @import com.gu.memsub.subsv2.CatalogPlan
 @import views.support.BillingPeriod._
 @import views.support.PlanOps._
 @import views.support.Pricing._
+@import com.gu.memsub.subsv2.Subscription
+@import com.gu.memsub.subsv2.SubscriptionPlan.ContentSubscription
 
-@(subscriptionId: String, plan: CatalogPlan.Paid, promotion: Option[AnyPromotion] = None, currency: Currency)
+@(subscription: Subscription[ContentSubscription], subscriptionId: String, plan: CatalogPlan.Paid, promotion: Option[AnyPromotion] = None, currency: Currency)
 <div class="review-panel">
     <input type="hidden" name="subscriptionDetails"
            data-amount="@plan.charges.gbpPrice.amount"
@@ -23,6 +25,8 @@
             }
         </div>
     </div>
+
+    @views.html.account.fragments.yourDetails(subscription = subscription)()
     <div class="review-panel__item">
         <h4 class="review-panel__label">Payment frequency:</h4>
         <div class="review-panel__details">

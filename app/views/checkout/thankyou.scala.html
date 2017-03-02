@@ -4,8 +4,11 @@
 @import views.support.PlanOps._
 @import com.gu.memsub.subsv2.CatalogPlan
 @import com.gu.memsub.Product
-
-@(subscriptionName: String,
+@import com.gu.memsub.subsv2.Subscription
+@import com.gu.memsub.subsv2.SubscriptionPlan.ContentSubscription
+@(
+    subscription: Subscription[ContentSubscription],
+    subscriptionName: String,
     guestAccountForm: Option[Form[model.GuestAccountData]] = None,
     touchpointBackendResolution: services.TouchpointBackend.Resolution,
     plan: CatalogPlan.Paid, // we should take a subscription here
@@ -46,7 +49,7 @@
                     <a href="mailto:@plan.email">@plan.email</a> or on <strong>@plan.phone</strong>.
                     Lines open weekdays 8am-8pm, weekend 8pm-6pm.</p>
             </div>
-            @fragments.checkout.reviewPanel(subscriptionName, plan, promotion, currency)
+            @fragments.checkout.reviewPanel(subscription, subscriptionName, plan, promotion, currency)
         </div>
     </section>
 
