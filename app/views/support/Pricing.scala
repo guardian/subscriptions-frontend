@@ -57,7 +57,6 @@ object Pricing {
               s"${discountAmount.pretty} for 1 year, then ${originalAmount.pretty} every year thereafter"
             }
           case OneYear => s"${discountAmount.pretty} for 1 year"
-          case _ => ""
         }
       }
     }
@@ -79,8 +78,7 @@ object Pricing {
     }
 
     def prettyName(currency: Currency): String = in.charges.benefits.list match {
-      case Digipack :: Nil => planWithPricing.prettyPricing(currency)
-      case Weekly :: Nil => planWithPricing.prettyPricing(currency)
+      case Digipack :: Nil | Weekly :: Nil => planWithPricing.prettyPricing(currency)
       case _ => s"$prefix${planWithPricing.prettyPricing(currency)}"
     }
   }
