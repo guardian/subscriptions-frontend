@@ -20,7 +20,7 @@ object PlanOps {
 
     def packageName: String = in.charges.benefits.list match {
       case Digipack :: Nil => "Guardian Digital Pack"
-      case Weekly :: Nil => "Guardian Weekly"
+      case Weekly :: Nil => "The Guardian Weekly"
       case _ => s"${in.name} package"
     }
 

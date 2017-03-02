@@ -1,8 +1,5 @@
-@import com.gu.memsub.Current
-@import com.gu.memsub.BillingPeriod
-@import com.gu.memsub.ProductFamily
-@import views.support.PlanOps._
 @import com.gu.memsub.subsv2.CatalogPlan
+@import views.support.PlanOps._
 
 @(plan: CatalogPlan.Paid)
 
@@ -20,7 +17,7 @@
             @plan.packageName
         </span>
         <span class="basket-preview__product__caption js-option-mirror-description-display">
-            (@plan.subtitle)
+            @for(s <- plan.subtitle) { (@s) }
         </span>
         <span class="basket-preview__product__payment js-option-mirror-payment-display"></span>
     </div>
