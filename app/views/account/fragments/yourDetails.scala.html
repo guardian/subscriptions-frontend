@@ -1,55 +1,22 @@
 @import com.gu.memsub.subsv2.SubscriptionPlan
 @import com.gu.memsub.subsv2.Subscription
-@import views.support.Dates._
-@import views.support.Pricing._
 @import com.gu.memsub.PaperDay
 @import scala.collection.immutable.List.empty
 @import com.gu.salesforce.Contact
-@import org.joda.time.LocalDate
 @import model.SubscriptionOps._
 
-
-@import org.joda.time.LocalDate.now
-
-@(chosenPaperDays: List[PaperDay] = empty, maybeContact: Option[Contact] = None, subscription: Subscription[SubscriptionPlan.PaperPlan])(extra: Html = Html(""))
+@(chosenPaperDays: List[PaperDay] = empty, maybeContact: Option[Contact] = None, subscription: Subscription[SubscriptionPlan.ContentSubscription])(extra: Html = Html(""))
 <dl class="mma-section__list">
     <dt class="mma-section__list--title">Subscriber ID</dt>
     <dd class="mma-section__list--content">@{subscription.name.get}</dd>
-
-    @planListLabel(singular: String, amount: Int) = {
-    @if(amount > 1) {
-        <dt class="mma-section__list--title">@{
-            singular + "s"
-        }</dt>
-    }
-    @if(amount == 1) {
-        <dt class="mma-section__list--title">@singular</dt>
-    }
-    }
-
-    @renderPlans(plans: List[SubscriptionPlan.PaperPlan], singularLabel: String) = {
-     @planListLabel(singularLabel, plans.length)
-        <dd class="mma-section__list--content">
-        @for(plan <- plans) {
-            <div>
-            @if(plan.name == "Echo-Legacy") {
-                Multi-day (@{
-                chosenPaperDays.map(_.id.replace("Print ", "")).mkString(", ")
-            })
-            } else {
-                @plan.name
-            }
-            </div>
-            <div>@plan.charges.prettyPricing(plan.charges.price.currencies.head)</div>
-
-            <div>@if(plan.start.isAfter(now)) { Starts: } else { Started: } @prettyDate(plan.start)</div>
-        }
-        </dd>
-
-    }
-
-    @renderPlans(subscription.currentPlans, "Current Plan")
-    @renderPlans(subscription.futurePlans, "Upcoming Plan")
+    @account.fragments.planList(
+        plans = subscription.currentPlans,
+        singularLabel = "Current Plan",
+        chosenPaperDays = chosenPaperDays)
+    @account.fragments.planList(
+        plans = subscription.futurePlans,
+        singularLabel = "Upcoming Plan",
+        chosenPaperDays = chosenPaperDays)
 
     @maybeContact.map { contact =>
         <dt class="mma-section__list--title">Delivery details</dt>

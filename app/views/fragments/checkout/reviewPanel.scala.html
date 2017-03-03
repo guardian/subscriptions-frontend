@@ -1,38 +1,46 @@
 @import com.gu.i18n.Currency
-@import com.gu.memsub.promo.Promotion._
+@import com.gu.memsub.promo.Promotion.AnyPromotion
 @import com.gu.memsub.subsv2.CatalogPlan
-@import views.support.BillingPeriod._
 @import views.support.PlanOps._
 @import views.support.Pricing._
+@import views.support.Dates._
 
-@(subscriptionId: String, plan: CatalogPlan.Paid, promotion: Option[AnyPromotion] = None, currency: Currency)
+@import com.gu.memsub.subsv2.Subscription
+@import com.gu.memsub.subsv2.SubscriptionPlan.ContentSubscription
+@import model.SubscriptionOps._
+@import org.joda.time.LocalDate.now
+
+@(subscription: Subscription[ContentSubscription], subscriptionId: String, plan: CatalogPlan.Paid, promotion: Option[AnyPromotion] = None)
 <div class="review-panel">
+
     <input type="hidden" name="subscriptionDetails"
            data-amount="@plan.charges.gbpPrice.amount"
            data-number-of-months="@plan.charges.billingPeriod.monthsInPeriod">
+
     <div class="review-panel__item">
         <h4 class="review-panel__label">Subscriber ID:</h4>
         <div class="review-panel__details">@subscriptionId</div>
     </div>
+
     <div class="review-panel__item">
         <h4 class="review-panel__label">Your subscription:</h4>
         <div class="review-panel__details">
-            <div>@plan.packageName</div>
-            @for(subtitle <- plan.subtitle) {
-                <em>(@subtitle)</em>
+            @for(plan <-subscription.sortedPlans) {
+                <div>@plan.name</div>
+                <em>
+                    @promotion.flatMap(_.asDiscount).fold {
+                        @plan.charges.prettyPricing(subscription.currency)
+                    } { discountPromo =>
+                        @Html(plan.charges.prettyPricingForDiscountedPeriod(discountPromo, subscription.currency))
+                    }
+                <div>@if(plan.start.isAfter(now)) { Starts: } else { Started: } @prettyDate(plan.start)</div>
+        </em>
+
+
             }
         </div>
     </div>
-    <div class="review-panel__item">
-        <h4 class="review-panel__label">Payment frequency:</h4>
-        <div class="review-panel__details">
-            @promotion.flatMap(_.asDiscount).fold {
-                @plan.charges.prettyPricing(currency)
-            } { discountPromo =>
-                @Html(plan.charges.prettyPricingForDiscountedPeriod(discountPromo, currency))
-            }
-        </div>
-    </div>
+
     @promotion.map { promo =>
         <div class="review-panel__promotion">
             <h4 class="review-panel__label">✓ Promotion applied:</h4>

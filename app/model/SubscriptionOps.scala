@@ -49,8 +49,7 @@ object SubscriptionOps extends LazyLogging {
     def currentPlans = subscription.plans.list.filter(p => (p.start == now || p.start.isBefore(now)) && p.end.isAfter(now))
     def futurePlans = subscription.plans.list.filter(_.start.isAfter(now) ).sortBy(_.start)
     def nonExpiredSubscriptions = subscription.plans.list.filter(_.end.isAfter(now))
-
-
+    def sortedPlans = subscription.plans.list.sortBy(_.start)
     def recurringPlans = subscription.plans.list.filter(p => p.end.isAfter(now) && p.charges.billingPeriod.isRecurring)
     def oneOffPlans = subscription.plans.list.filterNot(p => p.end.isBefore(now) || p.charges.billingPeriod.isRecurring)
     def introductoryPeriodPlan = oneOffPlans.find(_.charges.billingPeriod == SixWeeks)
