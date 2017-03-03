@@ -98,9 +98,10 @@ class WeeklyRenew extends React.Component {
             promosStatus: status.LOADING
         });
 
-        validatePromoCode(this.state.promoCode, this.props.country, this.props.currency).then((a) => {
-            let newPlans = validatePromotionForPlans(a, this.state.plans);
-            let update = newPlans.map((plan) => {
+        validatePromoCode(this.state.promoCode, this.props.country, this.props.currency).then((response) => {
+            let newPlans = validatePromotionForPlans(response, this.state.plans);
+            let tracking = response.promotion.promotionType === 'tracking';
+            let update = tracking || newPlans.map((plan) => {
                 return 'promotionalPrice' in plan
             }).reduce((a, b) => {
                 return !!(a || b)
@@ -110,7 +111,7 @@ class WeeklyRenew extends React.Component {
                 this.setState({
                     promoStatus: status.VALID,
                     plans: newPlans,
-                    promotionDescription: a.promotion.description
+                    promotionDescription: response.promotion.description
                 })
             } else {
                 //It's a good promotion, but it's not a weekly one
