@@ -124,7 +124,7 @@ object WeeklyPromotion {
       currency <- currencyFor(promoCountry)
     } yield currency
     val currency = currencies match {
-      case _ if (currencies.size == 1) => currencies.head
+      case currency :: Nil => currency
       case _ => Currency.USD
     }
 
