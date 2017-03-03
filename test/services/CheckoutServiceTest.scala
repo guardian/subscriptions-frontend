@@ -49,4 +49,21 @@ class CheckoutServiceTest extends Specification {
       CheckoutService.paymentDelay(paperData, zuora) mustEqual Days.days(8)
     }
   }
+
+  "determineNextAvailablePaperDate" should {
+
+    "Calculate the next available Friday correctly (if today is a Monday)" in {
+       CheckoutService.determineFirstAvailablePaperDate(new LocalDate("2017-03-06")) mustEqual(new LocalDate("2017-03-17"))
+    }
+
+    "Calculate the next available Friday correctly (if today is a Friday)" in {
+      CheckoutService.determineFirstAvailablePaperDate(new LocalDate("2017-03-10")) mustEqual(new LocalDate("2017-03-17"))
+    }
+
+    "Calculate the next available Friday correctly (if today is a Sunday)" in {
+      CheckoutService.determineFirstAvailablePaperDate(new LocalDate("2017-03-12")) mustEqual(new LocalDate("2017-03-24"))
+    }
+
+  }
+
 }
