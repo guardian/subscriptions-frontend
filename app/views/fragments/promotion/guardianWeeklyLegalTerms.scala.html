@@ -5,7 +5,7 @@
 @import views.support.MarkdownRenderer
 
 @(promoCode: PromoCode, catalog: Catalog, promotion: AnyPromotion, md: MarkdownRenderer)
-@isSixForSix = @{(catalog.weekly.flatten.filter(_.charges.billingPeriod == SixWeeks).map(_.id).toSet intersect promotion.appliesTo.productRatePlanIds).nonEmpty}
+@isSixForSix = @{(catalog.weekly.plans.flatten.filter(_.charges.billingPeriod == SixWeeks).map(_.id).toSet intersect promotion.appliesTo.productRatePlanIds).nonEmpty}
 @Html(md.render(
     (if (isSixForSix) {
 s"""
