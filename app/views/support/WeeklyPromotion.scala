@@ -116,36 +116,55 @@ object WeeklyPromotion {
 
   private val currencyFor = CountryGroup.availableCurrency(Currency.all.toSet) _
 
-  def plansForPromotion(promotion: Option[PromoWithWeeklyLandingPage], promoCode: Option[PromoCode], countries: Set[Country], catalogPlans: Seq[CatalogPlan.Paid])(implicit catalog: Catalog): List[DiscountedPlan] = {
-    def currencies = promotion.map(countries intersect _.appliesTo.countries).getOrElse(countries).flatMap { country => currencyFor(country) }
-
-    def isSixWeek(catalogPlan: CatalogPlan.Paid):Boolean = catalogPlan.charges.billingPeriod match{
-      case SixWeeks => true
-      case _ => false
+  def plansForPromotion(maybePromotion: Option[PromoWithWeeklyLandingPage], promoCode: Option[PromoCode], countries: Set[Country], catalogPlans: Seq[CatalogPlan.Paid])(implicit catalog: Catalog): List[DiscountedPlan] = {
+    val currencies = for {
+      promotion <- maybePromotion.toList
+      promoCountry <- promotion.appliesTo.countries
+      if (countries contains promoCountry)
+      currency <- currencyFor(promoCountry)
+    } yield currency
+    val currency = currencies match {
+      case _ if (currencies.size == 1) => currencies.head
+      case _ => Currency.USD
     }
-    val displaySixForSix: Boolean = promotion.map(promo =>
-      catalogPlans.filter(plan => promo.appliesTo.productRatePlanIds.contains(plan.id)).exists(isSixWeek)).getOrElse(false)
 
-    val plans: List[CatalogPlan.Paid] = {if(displaySixForSix)catalogPlans else catalogPlans.filterNot(isSixWeek)}.filter(_.charges.billingPeriod match {case OneYear => false
-    case _ => true}).toList.sortBy(_.charges.gbpPrice.amount)
-    val discountedPlans = for {
-      currency <- currencies.headOption.toList
+    def isSixWeek(catalogPlan: CatalogPlan.Paid): Boolean =
+      catalogPlan.charges.billingPeriod match {
+        case SixWeeks => true
+        case _ => false
+      }
+
+    val displaySixForSix: Boolean = maybePromotion.map(promo =>
+      catalogPlans.filter{plan =>
+        promo.appliesTo.productRatePlanIds.contains(plan.id)
+      }.exists(isSixWeek))
+      .getOrElse(false)
+
+    val plans: List[CatalogPlan.Paid] = {
+      if (displaySixForSix) catalogPlans
+      else catalogPlans.filterNot(isSixWeek)
+    }.filter(_.charges.billingPeriod match {
+      case OneYear => false
+      case _ => true
+    }).toList.sortBy(_.charges.gbpPrice.amount)
+
+    for {
       plan <- plans
-    } yield {
-      val sixOrDiscount = isSixWeek(plan) || promotion.map(_.appliesTo.productRatePlanIds.contains(plan.id)).getOrElse(false)
-      val pretty = promotion.filter(_.appliesTo.productRatePlanIds.contains(plan.id)).flatMap(_.asDiscount)
+      sixOrDiscount = isSixWeek(plan) || maybePromotion.map(_.appliesTo.productRatePlanIds.contains(plan.id)).getOrElse(false)
+      pretty = maybePromotion.filter(_.appliesTo.productRatePlanIds.contains(plan.id)).flatMap(_.asDiscount)
         .map { discountPromo => plan.charges.prettyPricingForDiscountedPeriod[scalaz.Id.Id, WeeklyLandingPage](discountPromo, currency) }
         .getOrElse(plan.charges.billingPeriod match {
           case SixWeeks => s"${currency.identifier}6 for six issues"
           case _ => plan.charges.prettyPricing(currency)
         })
-      val headline = promotion.flatMap(_.asDiscount)
+      headline = maybePromotion.flatMap(_.asDiscount)
         .map { discountPromo => plan.charges.headlinePricingForDiscountedPeriod[scalaz.Id.Id, WeeklyLandingPage](discountPromo, currency) }.getOrElse(plan.charges.billingPeriod match {
         case SixWeeks => s"${currency.identifier}6 for six issues"
         case _ => plan.charges.prettyPricing(currency)
       })
-      val checkout = s"checkout/${plan.slug}" ? ("countryGroup" -> CountryGroup.allGroups.find(_.currency == currency).getOrElse(CountryGroup.UK).id)
-      val url = promoCode.map(p => checkout & ("promoCode" -> p.get)).getOrElse(checkout)
+      checkout = s"checkout/${plan.slug}" ? ("countryGroup" -> CountryGroup.allGroups.find(_.currency == currency).getOrElse(CountryGroup.UK).id)
+      url = promoCode.map(p => checkout & ("promoCode" -> p.get)).getOrElse(checkout)
+    } yield {
       DiscountedPlan(
         currency = currency,
         pretty = pretty,
@@ -154,8 +173,6 @@ object WeeklyPromotion {
         url = url,
         discounted = sixOrDiscount)
     }
-    val p = discountedPlans.partition(_.currency==Currency.USD)
-    p._1 ++ p._2
   }
 
 }
