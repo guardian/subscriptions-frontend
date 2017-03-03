@@ -31,11 +31,12 @@ object WeeklyPromotion {
     val promotionCountries = promotion.map(_.appliesTo.countries).getOrElse(allCountries)
     val regionForZoneCCountry: Seq[DiscountedRegion] = {
       if (ZONEC.contains(requestCountry)) {
+        val currency = CountryGroup.byCountryCode(requestCountry.alpha2).map(_.currency).getOrElse(Currency.USD)
         Seq(DiscountedRegion(
           title = requestCountry.name,
           description = "Posted to you by air mail",
           countries = Set(requestCountry),
-          discountedPlans = plansForPromotion(promotion, promoCode, Set(requestCountry), catalog.weekly.zoneC.plans)
+          discountedPlans = plansForPromotion(promotion, promoCode, Set(requestCountry), catalog.weekly.zoneC.plans,currency)
         ))
       } else {
         Seq()
@@ -45,7 +46,7 @@ object WeeklyPromotion {
         title = "Rest of the world",
         description = "Posted to you by air mail",
         countries = ZONEC - requestCountry,
-        discountedPlans = plansForPromotion(promotion, promoCode, ZONEC - requestCountry, catalog.weekly.zoneC.plans)
+        discountedPlans = plansForPromotion(promotion, promoCode, ZONEC - requestCountry, catalog.weekly.zoneC.plans,Currency.USD)
       ))
 
     val UKregion: Set[DiscountedRegion] = {
@@ -53,19 +54,19 @@ object WeeklyPromotion {
         title = "United Kingdom",
         description = "Includes Isle of Man and Channel Islands",
         countries = UK,
-        discountedPlans = plansForPromotion(promotion, promoCode, UK, catalog.weekly.zoneA.plans)
+        discountedPlans = plansForPromotion(promotion, promoCode, UK, catalog.weekly.zoneA.plans,Currency.GBP)
       )
       val domestic = DiscountedRegion(
         title = "United Kingdom",
         description = "Includes mainland UK only.",
         countries = UKdomestic,
-        discountedPlans = plansForPromotion(promotion, promoCode, UK, catalog.weekly.zoneA.plans)
+        discountedPlans = plansForPromotion(promotion, promoCode, UK, catalog.weekly.zoneA.plans,Currency.GBP)
       )
       val overseas = DiscountedRegion(
         title = "Isle of Man and Channel Islands",
         description = "",
         countries = UKoverseas,
-        discountedPlans = plansForPromotion(promotion, promoCode, UK, catalog.weekly.zoneA.plans)
+        discountedPlans = plansForPromotion(promotion, promoCode, UK, catalog.weekly.zoneA.plans,Currency.GBP)
       )
       val countries = promotionCountries intersect UK
       val includesUKDomestic = !(countries intersect UKdomestic).isEmpty
@@ -84,31 +85,32 @@ object WeeklyPromotion {
       title = "United States",
       description = "Includes Alaska and Hawaii",
       countries = US,
-      discountedPlans = plansForPromotion(promotion, promoCode, US, catalog.weekly.zoneA.plans)
+      discountedPlans = plansForPromotion(promotion, promoCode, US, catalog.weekly.zoneA.plans,Currency.USD)
     ))
     val AUSregion =  if (AU contains requestCountry) Seq() else Seq(DiscountedRegion(
       title = "Australia",
       description = "Posted to you by air mail",
       countries = AU,
-      discountedPlans = plansForPromotion(promotion, promoCode, AU, catalog.weekly.zoneC.plans)
+      discountedPlans = plansForPromotion(promotion, promoCode, AU, catalog.weekly.zoneC.plans,Currency.AUD)
     ))
     val NZregion =  if (NZ contains requestCountry) Seq() else Seq(DiscountedRegion(
       title = "New Zealand",
       description = "Posted to you by air mail",
       countries = NZ,
-      discountedPlans = plansForPromotion(promotion, promoCode, NZ, catalog.weekly.zoneC.plans)
+      discountedPlans = plansForPromotion(promotion, promoCode, NZ, catalog.weekly.zoneC.plans,Currency.NZD)
     ))
     val CAregion =  if (CA contains requestCountry) Seq() else Seq(DiscountedRegion(
       title = "Canada",
       description = "Posted to you by air mail",
       countries = CA,
-      discountedPlans = plansForPromotion(promotion, promoCode, CA, catalog.weekly.zoneC.plans)
+      discountedPlans = plansForPromotion(promotion, promoCode, CA, catalog.weekly.zoneC.plans,Currency.CAD)
     ))
     val EUregion = Seq(DiscountedRegion(
       title = "Europe",
       description = "Posted to you by air mail",
       countries = EU,
-      discountedPlans = plansForPromotion(promotion, promoCode, EU, catalog.weekly.zoneC.plans)
+      discountedPlans = plansForPromotion(promotion, promoCode, EU, catalog.weekly.zoneC.plans,Currency.EUR)
+
     ))
     val regions = regionForZoneCCountry ++ UKregion ++ USregion ++ EUregion ++ AUSregion ++  NZregion ++ CAregion  ++ rowWithoutCountry
     regions.filter(_.discountedPlans.nonEmpty)
@@ -116,36 +118,44 @@ object WeeklyPromotion {
 
   private val currencyFor = CountryGroup.availableCurrency(Currency.all.toSet) _
 
-  def plansForPromotion(promotion: Option[PromoWithWeeklyLandingPage], promoCode: Option[PromoCode], countries: Set[Country], catalogPlans: Seq[CatalogPlan.Paid])(implicit catalog: Catalog): List[DiscountedPlan] = {
-    def currencies = promotion.map(countries intersect _.appliesTo.countries).getOrElse(countries).flatMap { country => currencyFor(country) }
+  def plansForPromotion(maybePromotion: Option[PromoWithWeeklyLandingPage], promoCode: Option[PromoCode], countries: Set[Country], catalogPlans: Seq[CatalogPlan.Paid], currency: Currency)(implicit catalog: Catalog): List[DiscountedPlan] = {
 
-    def isSixWeek(catalogPlan: CatalogPlan.Paid):Boolean = catalogPlan.charges.billingPeriod match{
-      case SixWeeks => true
-      case _ => false
-    }
-    val displaySixForSix: Boolean = promotion.map(promo =>
-      catalogPlans.filter(plan => promo.appliesTo.productRatePlanIds.contains(plan.id)).exists(isSixWeek)).getOrElse(false)
+    def isSixWeek(catalogPlan: CatalogPlan.Paid): Boolean =
+      catalogPlan.charges.billingPeriod match {
+        case SixWeeks => true
+        case _ => false
+      }
+    val displaySixForSix: Boolean = maybePromotion.map(promo =>
+      catalogPlans.filter{plan =>
+        promo.appliesTo.productRatePlanIds.contains(plan.id)
+      }.exists(isSixWeek))
+      .getOrElse(false)
 
-    val plans: List[CatalogPlan.Paid] = {if(displaySixForSix)catalogPlans else catalogPlans.filterNot(isSixWeek)}.filter(_.charges.billingPeriod match {case OneYear => false
-    case _ => true}).toList.sortBy(_.charges.gbpPrice.amount)
-    val discountedPlans = for {
-      currency <- currencies.headOption.toList
+    val plans: List[CatalogPlan.Paid] = {
+      if (displaySixForSix) catalogPlans
+      else catalogPlans.filterNot(isSixWeek)
+    }.filter(_.charges.billingPeriod match {
+      case OneYear => false
+      case _ => true
+    }).toList.sortBy(_.charges.gbpPrice.amount)
+
+    for {
       plan <- plans
-    } yield {
-      val sixOrDiscount = isSixWeek(plan) || promotion.map(_.appliesTo.productRatePlanIds.contains(plan.id)).getOrElse(false)
-      val pretty = promotion.filter(_.appliesTo.productRatePlanIds.contains(plan.id)).flatMap(_.asDiscount)
+      sixOrDiscount = isSixWeek(plan) || maybePromotion.map(_.appliesTo.productRatePlanIds.contains(plan.id)).getOrElse(false)
+      pretty = maybePromotion.filter(_.appliesTo.productRatePlanIds.contains(plan.id)).flatMap(_.asDiscount)
         .map { discountPromo => plan.charges.prettyPricingForDiscountedPeriod[scalaz.Id.Id, WeeklyLandingPage](discountPromo, currency) }
         .getOrElse(plan.charges.billingPeriod match {
           case SixWeeks => s"${currency.identifier}6 for six issues"
           case _ => plan.charges.prettyPricing(currency)
         })
-      val headline = promotion.flatMap(_.asDiscount)
+      headline = maybePromotion.flatMap(_.asDiscount)
         .map { discountPromo => plan.charges.headlinePricingForDiscountedPeriod[scalaz.Id.Id, WeeklyLandingPage](discountPromo, currency) }.getOrElse(plan.charges.billingPeriod match {
         case SixWeeks => s"${currency.identifier}6 for six issues"
         case _ => plan.charges.prettyPricing(currency)
       })
-      val checkout = s"checkout/${plan.slug}" ? ("countryGroup" -> CountryGroup.allGroups.find(_.currency == currency).getOrElse(CountryGroup.UK).id)
-      val url = promoCode.map(p => checkout & ("promoCode" -> p.get)).getOrElse(checkout)
+      checkout = s"checkout/${plan.slug}" ? ("countryGroup" -> CountryGroup.allGroups.find(_.currency == currency).getOrElse(CountryGroup.UK).id)
+      url = promoCode.map(p => checkout & ("promoCode" -> p.get)).getOrElse(checkout)
+    } yield {
       DiscountedPlan(
         currency = currency,
         pretty = pretty,
@@ -154,8 +164,6 @@ object WeeklyPromotion {
         url = url,
         discounted = sixOrDiscount)
     }
-    val p = discountedPlans.partition(_.currency==Currency.USD)
-    p._1 ++ p._2
   }
 
 }
