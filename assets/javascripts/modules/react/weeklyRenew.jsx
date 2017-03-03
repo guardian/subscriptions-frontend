@@ -98,9 +98,10 @@ class WeeklyRenew extends React.Component {
             promosStatus: status.LOADING
         });
 
-        validatePromoCode(this.state.promoCode, this.props.country, this.props.currency).then((a) => {
-            let newPlans = validatePromotionForPlans(a, this.state.plans);
-            let update = newPlans.map((plan) => {
+        validatePromoCode(this.state.promoCode, this.props.country, this.props.currency).then((response) => {
+            let newPlans = validatePromotionForPlans(response, this.state.plans);
+            let tracking = response.promotion.promotionType.name === 'tracking';
+            let update = tracking || newPlans.map((plan) => {
                 return 'promotionalPrice' in plan
             }).reduce((a, b) => {
                 return !!(a || b)
@@ -110,7 +111,7 @@ class WeeklyRenew extends React.Component {
                 this.setState({
                     promoStatus: status.VALID,
                     plans: newPlans,
-                    promotionDescription: a.promotion.description
+                    promotionDescription: response.promotion.description
                 })
             } else {
                 //It's a good promotion, but it's not a weekly one
@@ -307,7 +308,7 @@ class PlanChooser extends React.Component {
     render() {
         let plans = this.props.plans.map((plan) => {
             let checked = plan == this.props.selected;
-            return <Plan id={plan.id} price={plan.price} promotionalPrice={plan.promotionalPrice} checked={checked}
+            return <Plan key={plan.id} id={plan.id} price={plan.price} promotionalPrice={plan.promotionalPrice} checked={checked}
                          handleChange={this.props.handleChange(plan)}/>
         });
         return <div>
@@ -322,16 +323,17 @@ class Plan extends React.Component {
     price() {
         if (this.props.promotionalPrice) {
             return <span>
-                <s>{this.props.price} </s>
-                <strong>{this.props.promotionalPrice}</strong>
+                <s>{this.props.price}</s>
+                <strong>&nbsp;{this.props.promotionalPrice}</strong>
             </span>
         }
         return this.props.price
     }
 
     render() {
-        return <label className="option"><input type="radio" name="planchooser" value={this.props.id}
-                                                checked={this.props.checked}
+        return <label className="option">
+            <input type="radio" name="planchooser" value={this.props.id}
+                                                 checked={this.props.checked}
                                                 onChange={this.props.handleChange}/>
             {this.price()}
         </label>
