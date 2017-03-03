@@ -21,7 +21,7 @@ class SalesforceServiceTest extends Specification {
       id = ProductRatePlanId("p"),
       name = "name",
       description = "desc",
-      charges = PaperCharges(Map(MondayPaper -> PricingSummary(Map.empty)), None),
+      charges = PaperCharges(Map(Benefit.MondayPaper -> PricingSummary(Map.empty)), None),
       product = Delivery,
       saving = None,
       s = Status.current
