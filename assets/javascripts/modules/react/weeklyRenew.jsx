@@ -100,7 +100,7 @@ class WeeklyRenew extends React.Component {
 
         validatePromoCode(this.state.promoCode, this.props.country, this.props.currency).then((response) => {
             let newPlans = validatePromotionForPlans(response, this.state.plans);
-            let tracking = response.promotion.promotionType === 'tracking';
+            let tracking = response.promotion.promotionType.name === 'tracking';
             let update = tracking || newPlans.map((plan) => {
                 return 'promotionalPrice' in plan
             }).reduce((a, b) => {
@@ -308,7 +308,7 @@ class PlanChooser extends React.Component {
     render() {
         let plans = this.props.plans.map((plan) => {
             let checked = plan == this.props.selected;
-            return <Plan id={plan.id} price={plan.price} promotionalPrice={plan.promotionalPrice} checked={checked}
+            return <Plan key={plan.id} id={plan.id} price={plan.price} promotionalPrice={plan.promotionalPrice} checked={checked}
                          handleChange={this.props.handleChange(plan)}/>
         });
         return <div>
@@ -331,8 +331,9 @@ class Plan extends React.Component {
     }
 
     render() {
-        return <label className="option"><input type="radio" name="planchooser" value={this.props.id}
-                                                checked={this.props.checked}
+        return <label className="option">
+            <input type="radio" name="planchooser" value={this.props.id}
+                                                 checked={this.props.checked}
                                                 onChange={this.props.handleChange}/>
             {this.price()}
         </label>

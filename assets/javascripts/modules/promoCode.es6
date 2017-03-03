@@ -20,6 +20,9 @@ export function validatePromoCode(promoCode, country, currency){
 
 export function validatePromotionForPlans(promotion, plans) {
     let newPlans = promotion.adjustedRatePlans;
+    if (newPlans == null){
+        return plans;
+    }
     return plans.map((plan) => {
         if (plan.id in newPlans) {
             return Object.assign({},plan, {promotionalPrice: newPlans[plan.id]})
