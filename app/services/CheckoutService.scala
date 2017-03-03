@@ -63,8 +63,8 @@ class CheckoutService(identityService: IdentityService,
 
   def processIntroductoryPeriod(defaultPaymentDelay: Days, originalCommand: Subscribe): Subscribe = {
     val additionalRateplan = (originalCommand.ratePlans.head.productRatePlanId match {
-      case catalog.weeklyZoneA.sixWeeks.id.get => Some(catalog.weeklyZoneA.quarter)
-      case catalog.weeklyZoneC.sixWeeks.id.get => Some(catalog.weeklyZoneC.quarter)
+      case catalog.weekly.zoneA.sixWeeks.id.get => Some(catalog.weekly.zoneA.quarter)
+      case catalog.weekly.zoneC.sixWeeks.id.get => Some(catalog.weekly.zoneC.quarter)
       case _ => None
     }).map(plan => RatePlan(plan.id.get, None))
 

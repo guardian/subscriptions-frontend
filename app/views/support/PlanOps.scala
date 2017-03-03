@@ -1,5 +1,6 @@
 package views.support
 
+import com.gu.memsub.Benefit._
 import com.gu.memsub.Product.{Delivery, Voucher}
 import com.gu.memsub._
 import com.gu.memsub.images.{ResponsiveImage, ResponsiveImageGenerator, ResponsiveImageGroup}

@@ -1,19 +1,15 @@
 package model
 
-import com.gu.memsub.{Product, Weekly}
-import com.gu.memsub.subsv2.{PaidCharge, PaidSubscriptionPlan, Subscription, SubscriptionPlan}
-import com.gu.memsub.subsv2.SubscriptionPlan.{Paid, PaperPlan, WeeklyPlan}
 import com.github.nscala_time.time.OrderingImplicits._
-import com.gu.i18n.Currency
+import com.gu.memsub.Benefit._
 import com.gu.memsub.BillingPeriod.{OneOffPeriod, SixWeeks}
-import com.gu.memsub.Product.{Delivery, Voucher}
-import com.gu.memsub.promo.{NewUsers, ValidPromotion}
+import com.gu.memsub._
+import com.gu.memsub.subsv2.SubscriptionPlan.{Paid, PaperPlan, WeeklyPlan}
+import com.gu.memsub.subsv2.{PaidCharge, PaidSubscriptionPlan, Subscription}
 import com.typesafe.scalalogging.LazyLogging
 import controllers.ContextLogging
-import org.joda.time.LocalDate.now
 import model.BillingPeriodOps._
-import views.support.Pricing._
-import scalaz.syntax.std.boolean._
+import org.joda.time.LocalDate.now
 
 object SubscriptionOps extends LazyLogging {
 
