@@ -9,7 +9,7 @@
     subscription: Subscription[SubscriptionPlan.WeeklyPlan], billingSchedule: Option[BillingSchedule], contact: Contact
 )(implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackend.Resolution)
 
-@main("Your Guardian Weekly subscription | The Guardian", bodyClasses = List("is-wide"), edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
+@main("Your Guardian Weekly subscription | The Guardian", bodyClasses = List("is-wide"), edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution), managementPage = true) {
     @helper.javascriptRouter("jsRoutes")(
         routes.javascript.Promotion.validate
     )
@@ -37,9 +37,6 @@
                     @views.html.account.fragments.billingSchedule(bs, subscription.currency)
                 </section>
             }
-            <section class="mma-section">
-                <a class="button button--primary button--large" href="@routes.AccountManagement.logout">Sign Out</a>
-            </section>
         </section>
     </main>
 }

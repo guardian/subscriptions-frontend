@@ -13,7 +13,8 @@
     bodyClasses: Seq[String] = Nil,
     touchpointBackendResolutionOpt: Option[services.TouchpointBackend.Resolution] = None,
     plan: Option[CatalogPlan.Paid] = None,
-    edition: DigitalEdition = DigitalEdition.INT
+    edition: DigitalEdition = DigitalEdition.INT,
+    managementPage: Boolean = false
 )(content: Html)
 
 <!DOCTYPE html>
@@ -38,7 +39,7 @@
         }
         @fragments.global.warnings()
         @fragments.global.header()
-        @fragments.global.navigation(edition)
+        @fragments.global.navigation(edition, managementPage)
 
         <div class="global-container">
             @content
