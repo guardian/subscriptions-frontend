@@ -57,7 +57,7 @@
 }
 
 @main(
-    title = s"Details - name and address | Subscribe to the ${productData.plans.default.title} | The Guardian",
+    title = s"Details - name and address | Subscribe to the ${productData.plans.default.product.title} | The Guardian",
     jsVars = JsVars(userIsSignedIn = personalData.isDefined, ignorePageLoadTracking = true, currency = countryAndCurrencySettings.defaultCurrency, country = countryAndCurrencySettings.defaultCountry),
     bodyClasses = List("is-wide"),
     touchpointBackendResolutionOpt = Some(touchpointBackendResolution),
@@ -74,7 +74,7 @@
 <main class="page-container gs-container">
 
     <section class="checkout-container">
-        @fragments.checkout.checkoutHeader(productData.plans.default.title)
+        @fragments.checkout.checkoutHeader(productData.plans.default.product.title)
 
         <form class="form js-checkout-form" action="" method="POST" novalidate>
             @helper.CSRF.formField

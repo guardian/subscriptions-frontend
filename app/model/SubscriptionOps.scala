@@ -45,35 +45,7 @@ object SubscriptionOps extends LazyLogging {
       }
     }
 
-
-    def packageName: String = firstPlan.charges.benefits.list match {
-      case Digipack :: Nil => "Guardian Digital Pack"
-      case Weekly :: Nil => "The Guardian Weekly"
-      case _ => s"${firstPlan.name} package"
-    }
-
-    def subtitle: Option[String] = firstPlan.charges.benefits.list match {
-      case Digipack :: Nil => Some("Daily Edition + Guardian App Premium Tier")
-      case _ => StringOps.oempty(firstPlan.description).headOption
-    }
-
-    def title: String = firstPlan.charges.benefits.list match {
-      case Digipack :: Nil => "Guardian Digital Pack"
-      case Weekly :: Nil => "Guardian Weekly"
-      case x => "Guardian/Observer Newspapers"
-    }
-
     def hasDigitalPack: Boolean = subscription.plans.list.exists(_.charges.benefits.list.contains(Digipack))
-
-    def phone: String = "+44 (0) 330 333 6767"
-
-    def email: String = (
-      subscription.isHomeDelivery.option("homedelivery@theguardian.com") orElse
-        subscription.isVoucher.option("vouchersubs@theguardian.com") orElse
-        subscription.hasDigitalPack.option("digitalpack@theguardian.com") orElse
-        subscription.isGuardianWeekly.option("gwsubs@theguardian.com")
-      ).getOrElse("subscriptions@theguardian.com")
-
 
     val currency = subscription.plans.head.charges.currencies.head
     val nextPlan = subscription.plans.list.maxBy(_.end)
@@ -99,6 +71,7 @@ object SubscriptionOps extends LazyLogging {
     }
 
     def firstPlan = sortedPlans.head
+    def firstProduct = firstPlan.product
     def currentPlans = subscription.plans.list.filter(p => (p.start == now || p.start.isBefore(now)) && p.end.isAfter(now))
     def futurePlans = subscription.plans.list.filter(_.start.isAfter(now) ).sortBy(_.start)
     def nonExpiredSubscriptions = subscription.plans.list.filter(_.end.isAfter(now))

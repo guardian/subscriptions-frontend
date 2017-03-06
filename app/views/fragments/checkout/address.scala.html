@@ -21,7 +21,7 @@
     <div class="form-field js-checkout-postcode"
         @if(plan.isHomeDelivery) {
             data-validate-for="@namePrefix"
-            data-error-message="Sorry, we cannot deliver a paper to an address with this postcode. Please call Customer Services on: @plan.phone or press Back to purchase a voucher subscription."
+            data-error-message="Sorry, we cannot deliver a paper to an address with this postcode. Please call Customer Services on: +44 (0) 330 333 6767 or press Back to purchase a voucher subscription."
         }>
         <label class="label" @labelFor("postcode")>Postcode</label>
         @if(usePostcodeLookup) {
