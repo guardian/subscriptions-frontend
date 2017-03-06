@@ -35,9 +35,22 @@ import scalaz.syntax.monad._
 import scalaz.{EitherT, Monad, NonEmptyList, \/}
 
 object CheckoutService {
+
   def paymentDelay(in: Either[PaperData, DigipackData], zuora: ZuoraProperties)(implicit now: LocalDate): Days = in.fold(
     p => Days.daysBetween(now, p.startDate), d => zuora.gracePeriodInDays.plus(zuora.paymentDelayInDays)
   )
+
+  def determineFirstAvailablePaperDate(now: LocalDate): LocalDate = {
+    val dayOfWeek = now.getDayOfWeek
+    val daysToFastForward = if (dayOfWeek <= 5) {
+      (5 - dayOfWeek) + 7 // Skips to a week on Friday
+    } else {
+      (5 - dayOfWeek) + 14 // We've just missed Saturday's fulfillment file creation, so we have to skip another Friday
+    }
+    val nextAvailableDate = now.plusDays(daysToFastForward)
+    nextAvailableDate
+  }
+
 }
 
 class CheckoutService(identityService: IdentityService,
@@ -296,12 +309,14 @@ class CheckoutService(identityService: IdentityService,
       }
     }
 
-    val contractEffective = Seq(subscription.termEndDate, now).max // The sub may have 'expired' before the customer gets round to renewing it.
-    val customerAcceptance = contractEffective
+    val currentVersionExpired = subscription.termEndDate.isBefore(now)
+    // For a renewal, all dates should be identical. If the sub has expired, this date should be fast-forwarded to the next available paper date
+    val startDateForRenewal = if (currentVersionExpired) CheckoutService.determineFirstAvailablePaperDate(now) else subscription.termEndDate
+    val contractEffective = startDateForRenewal
+    val customerAcceptance = startDateForRenewal
 
     def addPlan(contact: Contact) = {
       val newRatePlan = RatePlan(renewal.plan.id.get, None)
-      val currentVersionExpired = subscription.termEndDate.isBefore(now)
       val renewCommand = Renew(
         subscriptionId = subscription.id.get,
         currentTermStartDate = subscription.termStartDate,
@@ -311,7 +326,7 @@ class CheckoutService(identityService: IdentityService,
         customerAcceptanceDate = customerAcceptance,
         promoCode = None,
         autoRenew = renewal.plan.charges.billingPeriod.isRecurring,
-        startRenewedTermToday = currentVersionExpired // If the sub has expired, we want to shift the term dates forward
+        fastForwardTermStartDate = currentVersionExpired // If the sub has expired, we need to shift the term dates forward
       )
 
       val validPromotion = for {
