@@ -12,7 +12,7 @@
     subscription: Subscription[Digipack], billingSchedule: Option[BillingSchedule]
 )(implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackend.Resolution)
 
-@main("Your Guardian Digital Pack subscription | The Guardian", bodyClasses = List("is-wide"), edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution), managementPage = false) {
+@main("Your Guardian Digital Pack subscription | The Guardian", bodyClasses = List("is-wide"), edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution), managementPage = true) {
 
     <main class="page-container gs-container">
         <section class="suspend-container">
