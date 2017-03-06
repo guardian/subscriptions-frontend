@@ -32,7 +32,7 @@ object Promotion extends Controller with LazyLogging with CatalogProvider {
     case class RatePlanPrice(ratePlanId: ProductRatePlanId, chargeList: PaidChargeList)
     promo.asDiscount.map { discountPromo =>
     catalog.allSubs.flatten
-        .filter(plan => promo.appliesTo.productRatePlanIds.contains(plan.id))
+        .filter(plan => promo.appliesTo.productRatePlanIds contains plan.id)
         .filter(plan => plan.charges.currencies contains currency)
         .map(plan => RatePlanPrice(plan.id, plan.charges)).map { ratePlanPrice =>
           ratePlanPrice.ratePlanId.get -> ratePlanPrice.chargeList.prettyPricingForDiscountedPeriod(discountPromo, currency)
