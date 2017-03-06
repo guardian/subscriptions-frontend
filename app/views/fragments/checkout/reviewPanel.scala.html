@@ -1,7 +1,7 @@
 @import com.gu.i18n.Currency
 @import com.gu.memsub.promo.Promotion.AnyPromotion
 @import com.gu.memsub.subsv2.CatalogPlan
-@import views.support.PlanOps._
+@import model.SubPlanOps._
 @import views.support.Pricing._
 @import views.support.Dates._
 
@@ -25,18 +25,28 @@
     <div class="review-panel__item">
         <h4 class="review-panel__label">Your subscription:</h4>
         <div class="review-panel__details">
-            @for(plan <-subscription.sortedPlans) {
-                <div>@plan.name</div>
-                <em>
-                    @promotion.flatMap(_.asDiscount).fold {
-                        @plan.charges.prettyPricing(subscription.currency)
-                    } { discountPromo =>
-                        @Html(plan.charges.prettyPricingForDiscountedPeriod(discountPromo, subscription.currency))
-                    }
-                <div>@if(plan.start.isAfter(now)) { Starts: } else { Started: } @prettyDate(plan.start)</div>
-        </em>
-
-
+            @defining(subscription.plans.head) { plan =>
+                <div>@plan.packageName</div>
+                @for(subtitle <- plan.subtitle) {
+                    <em>(@subtitle)</em>
+                }
+            }
+        </div>
+    </div>
+    <div>
+        <h4 class="review-panel__label">Payment Plan:</h4>
+        <div class="review-panel__details">
+        @for(plan <-subscription.sortedPlans) {
+                <div class="review-panel__item">
+                    <div>
+                        @promotion.flatMap(_.asDiscount).fold {
+                            @plan.charges.prettyPricing(subscription.currency)
+                        } { discountPromo =>
+                            @Html(plan.charges.prettyPricingForDiscountedPeriod(discountPromo, subscription.currency))
+                        }
+                    </div>
+                    <div>@if(plan.start.isAfter(now)) { Starts: } else { Started: } @prettyDate(plan.start)</div>
+                </div>
             }
         </div>
     </div>
