@@ -31,10 +31,11 @@ object Promotion extends Controller with LazyLogging with CatalogProvider {
 
     case class RatePlanPrice(ratePlanId: ProductRatePlanId, chargeList: PaidChargeList)
     promo.asDiscount.map { discountPromo =>
-      catalog.allSubs.flatten
-        .filter(plan => promo.appliesTo.productRatePlanIds.contains(plan.id))
+    catalog.allSubs.flatten
+        .filter(plan => promo.appliesTo.productRatePlanIds contains plan.id)
+        .filter(plan => plan.charges.currencies contains currency)
         .map(plan => RatePlanPrice(plan.id, plan.charges)).map { ratePlanPrice =>
-        ratePlanPrice.ratePlanId.get -> ratePlanPrice.chargeList.prettyPricingForDiscountedPeriod(discountPromo, currency)
+          ratePlanPrice.ratePlanId.get -> ratePlanPrice.chargeList.prettyPricingForDiscountedPeriod(discountPromo, currency)
       }.toMap
     }
   }
@@ -50,7 +51,7 @@ object Promotion extends Controller with LazyLogging with CatalogProvider {
       } {
         promo =>
           val result = promo.validateFor(prpId, country)
-          val body = Json.obj(
+          def body = Json.obj(
             "promotion" -> Json.toJson(promo),
             "adjustedRatePlans" -> Json.toJson(getAdjustedRatePlans(promo, country, currency)),
             "isValid" -> result.isRight,
@@ -71,7 +72,7 @@ object Promotion extends Controller with LazyLogging with CatalogProvider {
         NotFound(Json.obj("errorMessage" -> s"Sorry, we can't find that code."))
       } { promo =>
         val result = promo.validate(country)
-        val body = Json.obj(
+        def body = Json.obj(
           "promotion" -> Json.toJson(promo),
           "adjustedRatePlans" -> Json.toJson(getAdjustedRatePlans(promo, country, currency)),
           "isValid" -> result.isRight,

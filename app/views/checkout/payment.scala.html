@@ -61,7 +61,7 @@
     jsVars = JsVars(userIsSignedIn = personalData.isDefined, ignorePageLoadTracking = true, currency = countryAndCurrencySettings.defaultCurrency, country = countryAndCurrencySettings.defaultCountry),
     bodyClasses = List("is-wide"),
     touchpointBackendResolutionOpt = Some(touchpointBackendResolution),
-    plan = Some(productData.plans.default),
+    product = Some(productData.plans.default.product),
     edition = edition
 ) {
 <script>

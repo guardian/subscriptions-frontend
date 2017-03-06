@@ -3,7 +3,7 @@
 @import utils.TestUsers.{PreSigninTestCookie, NameEnteredInForm, SignedInUsername}
 @import com.gu.memsub.subsv2.CatalogPlan
 @import com.gu.memsub.BillingPeriod
-@import com.gu.memsub.Current
+@import com.gu.memsub.Product
 @import model.DigitalEdition
 
 @(
@@ -12,9 +12,9 @@
     jsVars: model.JsVars = model.JsVars(),
     bodyClasses: Seq[String] = Nil,
     touchpointBackendResolutionOpt: Option[services.TouchpointBackend.Resolution] = None,
-    customerServiceEmail : Option[String],
-    customerServicePhone : Option[String],
-    edition: DigitalEdition = DigitalEdition.INT
+    product: Option[Product] = None,
+    edition: DigitalEdition = DigitalEdition.INT,
+    managementPage: Boolean = false
 )(content: Html)
 
 <!DOCTYPE html>
@@ -39,13 +39,13 @@
         }
         @fragments.global.warnings()
         @fragments.global.header()
-        @fragments.global.navigation(edition)
+        @fragments.global.navigation(edition, managementPage)
 
         <div class="global-container">
             @content
         </div>
 
-        @fragments.global.footer(plan, edition)
+        @fragments.global.footer(product, edition)
         @fragments.footerJavaScript()
     </body>
 </html>

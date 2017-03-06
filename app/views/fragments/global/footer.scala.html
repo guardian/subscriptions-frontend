@@ -5,26 +5,26 @@
 @import com.gu.memsub.subsv2.CatalogPlan
 @import com.gu.memsub.Current
 @import model.DigitalEdition
-@import model.DigitalEdition
+@import com.gu.memsub.Product
 
-@(plan: Option[CatalogPlan.Paid], edition: DigitalEdition)
+@(product: Option[Product], edition: DigitalEdition)
 
 <footer class="global-footer">
 
     @fragments.global.brandbar()
-    @fragments.global.navigation(edition)
+    @fragments.global.navigation(edition, false)
 
     <div class="global-footer__info">
         <div class="gs-container">
             <p>
               For help with Guardian and Observer subscription services please email
-                  <a href="mailto:@plan.fold("subscriptions@theguardian.com")(_.email)">@plan.fold("subscriptions@theguardian.com")(_.email)</a> or call @plan.fold("+44 (0) 330 333 6767")(_.phone). Open BST 8am to 8pm, Monday to Sunday.
+                  <a href="mailto:@product.fold("subscriptions@theguardian.com")(_.email)">@product.fold("subscriptions@theguardian.com")(_.email)</a> or call +44 (0) 330 333 6767. Open BST 8am to 8pm, Monday to Sunday.
             </p>
             <p>
                 You may also find help in our
-                <a href="@Links.guardianSubscriptionFaqs.href"
-                   title="@Links.guardianSubscriptionFaqs.title">
-                   @Links.guardianSubscriptionFaqs.title.
+                <a href="@product.map(_.faqHref).getOrElse("https://www.theguardian.com/subscriber-direct/subscription-frequently-asked-questions")"
+                   title="Frequently Asked Questions">
+                   Frequently Asked Questions.
                 </a>
             </p>
             <small class="global-footer__copyright">

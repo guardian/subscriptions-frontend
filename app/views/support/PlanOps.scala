@@ -6,6 +6,7 @@ import com.gu.memsub._
 import com.gu.memsub.images.{ResponsiveImage, ResponsiveImageGenerator, ResponsiveImageGroup}
 import com.gu.memsub.subsv2.CatalogPlan
 import com.netaporter.uri.dsl._
+import configuration.Links
 
 import scala.reflect.internal.util.StringOps
 import scalaz.syntax.std.boolean._
@@ -53,13 +54,6 @@ object PlanOps {
       case _ => "Add more"
     }
 
-    def email: String = (
-      in.isHomeDelivery.option("homedelivery@theguardian.com") orElse
-      in.isVoucher.option("vouchersubs@theguardian.com") orElse
-      in.hasDigitalPack.option("digitalpack@theguardian.com") orElse
-      in.isGuardianWeekly.option("gwsubs@theguardian.com")
-    ).getOrElse("subscriptions@theguardian.com")
-
     def isHomeDelivery: Boolean = in.product == Delivery
 
     def isVoucher: Boolean = in.product == Voucher
@@ -90,6 +84,25 @@ object PlanOps {
         "Unknown"
       }
     }
+  }
+
+  implicit class ProductOps(product: Product) {
+
+    def email: String =
+      product match {
+        case Delivery => "homedelivery@theguardian.com"
+        case Voucher => "vouchersubs@theguardian.com"
+        case Product.Digipack => "digitalpack@theguardian.com"
+        case _:Product.Weekly => "gwsubs@theguardian.com"
+        case _ => "subscriptions@theguardian.com"
+      }
+
+    def faqHref: String =
+      product match {
+        case _:Product.Weekly => "https://www.theguardian.com/help/2012/jan/19/guardian-weekly-faqs"
+        case _ => "https://www.theguardian.com/subscriber-direct/subscription-frequently-asked-questions"
+      }
+
   }
 
   implicit class ProductPopulationDataOps(in: ProductPopulationData) {
