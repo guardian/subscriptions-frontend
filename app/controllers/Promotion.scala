@@ -16,6 +16,7 @@ import utils.TestUsers.PreSigninTestCookie
 import views.html.{checkout => view}
 import views.support.Pricing._
 import views.support.{BillingPeriod => _}
+
 import scala.concurrent.ExecutionContext.Implicits.global
 
 object Promotion extends Controller with LazyLogging with CatalogProvider {
@@ -66,7 +67,7 @@ object Promotion extends Controller with LazyLogging with CatalogProvider {
     implicit val tpBackend = resolution.backend
 
     tpBackend.promoService.findPromotionFuture(promoCode).map { promotion =>
-      promotion.filterNot(_.isTracking).fold {
+      promotion.fold {
         NotFound(Json.obj("errorMessage" -> s"Sorry, we can't find that code."))
       } { promo =>
         val result = promo.validate(country)
