@@ -12,7 +12,7 @@
     subscription: Subscription[Digipack], billingSchedule: Option[BillingSchedule]
 )(implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackend.Resolution)
 
-@main("Your Guardian Digital Pack subscription | The Guardian", bodyClasses = List("is-wide"), edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
+@main("Your Guardian Digital Pack subscription | The Guardian", bodyClasses = List("is-wide"), edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution), managementPage = false) {
 
     <main class="page-container gs-container">
         <section class="suspend-container">
@@ -56,9 +56,7 @@
                     @views.html.account.fragments.billingSchedule(bs, subscription.currency)
                 </section>
             }
-            <section class="mma-section">
-                <a class="button button--primary button--large" href="@routes.AccountManagement.logout">Sign Out</a>
-            </section>
+
         </section>
     </main>
 }
