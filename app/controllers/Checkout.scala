@@ -56,20 +56,20 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
 
     val matchingPlanList: Option[PlanList[ContentSubscription]] = {
 
-      val testOnlyPlans = if (tpBackend == TouchpointBackend.Test) List(catalog.weeklyZoneB.plansWithAssociations) else List.empty
+      val testOnlyPlans = if (tpBackend == TouchpointBackend.Test) List(catalog.weekly.zoneB.plansWithAssociations) else List.empty
 
-      val paperSubscriptionPlans = List(
+      val productsWithoutIntroductoryPlans = List(
         catalog.delivery.list,
         catalog.voucher.list,
         catalog.digipack.plans
       ).map(plans => PlansWithIntroductory(plans, List.empty))
 
       val productsWithIntroductoryPlans = List(
-        catalog.weeklyZoneA.plansWithAssociations,
-        catalog.weeklyZoneC.plansWithAssociations
+        catalog.weekly.zoneA.plansWithAssociations,
+        catalog.weekly.zoneC.plansWithAssociations
       ) ++ testOnlyPlans
 
-      val contentSubscriptionPlans = paperSubscriptionPlans ++ productsWithIntroductoryPlans
+      val contentSubscriptionPlans = productsWithoutIntroductoryPlans ++ productsWithIntroductoryPlans
 
       contentSubscriptionPlans.map {
         case PlansWithIntroductory(plans, associations) =>

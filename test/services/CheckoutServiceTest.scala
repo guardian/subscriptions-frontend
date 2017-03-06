@@ -1,7 +1,8 @@
 package services
+import com.gu.memsub.Benefit._
 import com.gu.memsub.Product.{Delivery, ZDigipack}
-import com.gu.memsub._
 import com.gu.memsub.Subscription.ProductRatePlanId
+import com.gu.memsub._
 import com.gu.memsub.subsv2._
 import model.{DigipackData, PaperData}
 import org.joda.time.{Days, LocalDate}

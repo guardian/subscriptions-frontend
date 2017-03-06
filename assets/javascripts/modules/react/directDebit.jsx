@@ -79,8 +79,8 @@ function AccountNumber(props: {valid: boolean, onChange: Function, value: string
                    onChange={props.onChange}
                    id="payment-account"
                    name="payment.account"
-                   pattern="[0-9]*" minlength="6"
-                   maxlength="10"
+                   pattern="[0-9]*" minLength="6"
+                   maxLength="10"
                    className="input-text"
             />
             {invalid && <p className="mma-error">

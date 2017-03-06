@@ -6,6 +6,7 @@ import java.util.UUID
 import com.gu.exacttarget._
 import com.gu.i18n.{Currency, Title}
 import com.gu.memsub
+import com.gu.memsub.Benefit.Digipack
 import com.gu.memsub.subsv2.{Subscription, SubscriptionPlan => Plan}
 import com.gu.memsub.{Subscription => _, _}
 import com.gu.salesforce.Contact
