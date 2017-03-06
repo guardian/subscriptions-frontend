@@ -4,6 +4,7 @@
 @import com.gu.memsub.subsv2.SubscriptionPlan.ContentSubscription
 @import model.SubscriptionOps._
 @import views.support.PlanOps._
+
 @(  subscription: Subscription[ContentSubscription],
     guestAccountForm: Option[Form[model.GuestAccountData]] = None,
     touchpointBackendResolution: services.TouchpointBackend.Resolution,
@@ -25,7 +26,7 @@
         amount: @{subscription.firstPlan.charges.gbpPrice.amount},
         // Google Analytics
         zuoraId: '@subscription.name.get',
-        productType: '@subscription.productType',
+        productType: '@subscription.firstProduct.productType',
         productPurchased: '@{subscription.firstPlan.name}'
     };
 </script>

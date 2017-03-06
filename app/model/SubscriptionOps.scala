@@ -31,20 +31,6 @@ object SubscriptionOps extends LazyLogging {
 
     private def containsPlanFor(p:Product):Boolean = subscription.plans.list.exists(_.product == p)
 
-    def productType: String = {
-      if (isHomeDelivery) {
-        "Home Delivery"
-      } else if (isVoucher) {
-        "Voucher Book"
-      } else if (isDigitalPack) {
-        "Digital Pack"
-      } else if (isGuardianWeekly) {
-        "Guardian Weekly"
-      } else {
-        "Unknown"
-      }
-    }
-
     def hasDigitalPack: Boolean = subscription.plans.list.exists(_.charges.benefits.list.contains(Digipack))
 
     val currency = subscription.plans.head.charges.currencies.head

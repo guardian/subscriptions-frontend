@@ -56,19 +56,7 @@ object PlanOps {
 
     def hasDigitalPack: Boolean = in.charges.benefits.list.contains(Digipack)
 
-    def productType: String = {
-      if (isHomeDelivery) {
-        "Home Delivery"
-      } else if (isVoucher) {
-        "Voucher Book"
-      } else if (isDigitalPack) {
-        "Digital Pack"
-      } else if (isGuardianWeekly) {
-        "Guardian Weekly"
-      } else {
-        "Unknown"
-      }
-    }
+
   }
 
   implicit class ProductOps(product: Product) {
@@ -103,6 +91,14 @@ object PlanOps {
     def subtitle: Option[String] = product match {
       case Product.Digipack => Some("Daily Edition + Guardian App Premium Tier")
       case _ => None
+    }
+
+    def productType: String = product match {
+      case Delivery => "Home Delivery"
+      case Voucher => "Voucher Book"
+      case Product.Digipack => "Digital Pack"
+      case _: Product.Weekly => "Guardian Weekly"
+      case _ => "Unknown"
     }
   }
 

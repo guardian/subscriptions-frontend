@@ -1,6 +1,5 @@
 @import model.JsVars
 @import configuration.Config.Identity._
-@import views.support.BillingPeriod._
 @import views.support.Pricing._
 @import com.gu.memsub.promo.PromoCode
 @import com.gu.memsub.SupplierCode
@@ -13,6 +12,7 @@
 @import model.DigitalEdition
 @import views.support.CountryAndCurrencySettings
 @import com.gu.memsub.Product.WeeklyZoneC
+
 @(
     personalData: Option[PersonalData],
     productData: ProductPopulationData,
@@ -68,7 +68,7 @@
     guardian.supplierCode = '@{supplierCode.mkString}';
     guardian.pageInfo.productData.initialProduct = '@{productData.plans.default.name}';
     guardian.pageInfo.productData.productPurchasing = '@{productData.plans.default.name}';
-    guardian.pageInfo.productData.productType = '@{productData.plans.default.productType}';
+    guardian.pageInfo.productData.productType = '@{productData.plans.default.product.productType}';
 </script>
 
 <main class="page-container gs-container">

@@ -290,7 +290,6 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
 
     val sessionInfo = for {
       subsName <- session.get(SubsName)
-      currencyStr <- session.get(SessionKeys.Currency)
       startDate <- session.get(StartDate)
     } yield (subsName, startDate)
     sessionInfo.fold {
