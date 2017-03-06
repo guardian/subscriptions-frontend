@@ -9,7 +9,7 @@
   touchpointBackendResolution: services.TouchpointBackend.Resolution
 )(implicit request: RequestHeader)
 
-@main(s"Confirmation | The Guardian", bodyClasses=List("is-wide"), touchpointBackendResolutionOpt = Some(touchpointBackendResolution), plan = None) {
+@main(s"Confirmation | The Guardian", bodyClasses=List("is-wide"), touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
     <main class="page-container gs-container gs-container--slim">
         @fragments.page.header("Thank you", None, List("l-padded"))
         <section class="section-slice section-slice--bleed section-slice--limited">

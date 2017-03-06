@@ -10,16 +10,16 @@
 @import model.SubscriptionOps._
 @import org.joda.time.LocalDate.now
 
-@(subscription: Subscription[ContentSubscription], subscriptionId: String, plan: CatalogPlan.Paid, promotion: Option[AnyPromotion] = None)
+@(subscription: Subscription[ContentSubscription], promotion: Option[AnyPromotion] = None)
 <div class="review-panel">
 
     <input type="hidden" name="subscriptionDetails"
-           data-amount="@plan.charges.gbpPrice.amount"
-           data-number-of-months="@plan.charges.billingPeriod.monthsInPeriod">
+           data-amount="@subscription.firstPlan.charges.gbpPrice.amount"
+           data-number-of-months="@subscription.firstPlan.charges.billingPeriod.monthsInPeriod">
 
     <div class="review-panel__item">
         <h4 class="review-panel__label">Subscriber ID:</h4>
-        <div class="review-panel__details">@subscriptionId</div>
+        <div class="review-panel__details">@subscription.name.get</div>
     </div>
 
     <div class="review-panel__item">

@@ -288,18 +288,14 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
     implicit val tpBackend = resolution.backend
     val session = request.session
 
-
     val sessionInfo = for {
       subsName <- session.get(SubsName)
-      plan <- session.get(RatePlanId).map(ProductRatePlanId).flatMap(p => catalog.allSubs.flatten.find(_.id == p))
-      ratePlanId <- session.get(RatePlanId)
       currencyStr <- session.get(SessionKeys.Currency)
-      currency <- Currency.fromString(currencyStr)
       startDate <- session.get(StartDate)
-    } yield (subsName, plan, currency, startDate)
+    } yield (subsName, startDate)
     sessionInfo.fold {
       Future.successful(Redirect(routes.Homepage.index()).withNewSession)
-    } { case (subsName, plan, currency, startDate) =>
+    } { case (subsName, startDate) =>
 
       val passwordForm = authenticatedUserFor(request).fold {
         for {
@@ -316,7 +312,7 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
       val eventualMaybeSubscription = tpBackend.subscriptionService.get[com.gu.memsub.subsv2.SubscriptionPlan.ContentSubscription](Name(subsName))
       eventualMaybeSubscription.map { maybeSub =>
         maybeSub.map { sub =>
-          Ok(view.thankyou(sub, subsName, passwordForm, resolution, plan, promotion, currency, startDate))
+          Ok(view.thankyou(sub, passwordForm, resolution, promotion, startDate))
         }.getOrElse {
           Redirect(routes.Homepage.index()).withNewSession
         }

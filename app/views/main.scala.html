@@ -12,7 +12,8 @@
     jsVars: model.JsVars = model.JsVars(),
     bodyClasses: Seq[String] = Nil,
     touchpointBackendResolutionOpt: Option[services.TouchpointBackend.Resolution] = None,
-    plan: Option[CatalogPlan.Paid] = None,
+    customerServiceEmail : Option[String],
+    customerServicePhone : Option[String],
     edition: DigitalEdition = DigitalEdition.INT
 )(content: Html)
 
