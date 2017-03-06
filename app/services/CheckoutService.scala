@@ -34,7 +34,7 @@ import scalaz.std.scalaFuture._
 import scalaz.syntax.monad._
 import scalaz.{EitherT, Monad, NonEmptyList, \/}
 
-object CheckoutService extends LazyLogging {
+object CheckoutService {
 
   def paymentDelay(in: Either[PaperData, DigipackData], zuora: ZuoraProperties)(implicit now: LocalDate): Days = in.fold(
     p => Days.daysBetween(now, p.startDate), d => zuora.gracePeriodInDays.plus(zuora.paymentDelayInDays)
@@ -42,7 +42,6 @@ object CheckoutService extends LazyLogging {
 
   def determineFirstAvailablePaperDate(now: LocalDate): LocalDate = {
     val dayOfWeek = now.getDayOfWeek
-    logger.info(s"Today is day number: $dayOfWeek")
     val daysToFastForward = if (dayOfWeek <= 5) {
       (5 - dayOfWeek) + 7 // Skips to a week on Friday
     } else {
