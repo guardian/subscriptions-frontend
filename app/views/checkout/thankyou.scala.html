@@ -14,7 +14,7 @@
     startDate: String
 )(implicit request: RequestHeader)
 
-@main(s"Confirmation | Subscribe to the ${plan.title} | The Guardian", bodyClasses=List("is-wide"), touchpointBackendResolutionOpt = Some(touchpointBackendResolution), plan = Some(plan)) {
+@main(s"Confirmation | Subscribe to the ${plan.title} | The Guardian", bodyClasses=List("is-wide"), touchpointBackendResolutionOpt = Some(touchpointBackendResolution), product = Some(plan.product)) {
 
 <script type="text/javascript">
     guardian.pageInfo.slug="GuardianDigiPack:Order Complete";
@@ -43,7 +43,7 @@
                     you'll receive email confirmation of this shortly.
                 </p>
                 <p>Here are the details of your subscription, if any of these are incorrect please get in touch with us straight away via email at
-                    <a href="mailto:@plan.email">@plan.email</a> or on <strong>@plan.phone</strong>.
+                    <a href="mailto:@plan.product.email">@plan.product.email</a> or on <strong>@plan.phone</strong>.
                     Lines open weekdays 8am-8pm, weekend 8pm-6pm.</p>
             </div>
             @fragments.checkout.reviewPanel(subscriptionName, plan, promotion, currency)
