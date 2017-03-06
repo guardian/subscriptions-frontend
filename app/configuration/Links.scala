@@ -29,10 +29,6 @@ object Links {
     "Why your data matter to us"
   )
 
-  val guardianSubscriptionFaqs = Links(
-    "https://www.theguardian.com/subscriber-direct/subscription-frequently-asked-questions",
-    "Frequently Asked Questions"
-  )
 }
 
 object ProfileLinks {
