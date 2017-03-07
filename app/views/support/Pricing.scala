@@ -36,14 +36,18 @@ object Pricing {
         plan.billingPeriod match {
           case Month =>
             val span = durationMonths
-            if (span > 1) {
+            if (span == 12) {
+              s"${discountAmount.pretty} per month for 1 year, then ${originalAmount.pretty} every month thereafter"
+            } else if (span > 1) {
               s"${discountAmount.pretty} for $span months, then ${originalAmount.pretty} every month thereafter"
             } else {
               s"${discountAmount.pretty} for 1 month, then ${originalAmount.pretty} every month thereafter"
             }
           case Quarter =>
             val span = getDiscountScaledToPeriod(discountPromo.promotionType, Quarter)._2
-            if (span > 1) {
+            if (span == 4) {
+              s"${discountAmount.pretty} per quarter for 1 year, then ${originalAmount.pretty} every quarter thereafter"
+            } else if (span > 1) {
               s"${discountAmount.pretty} for ${span.toInt} quarters, then ${originalAmount.pretty} every quarter thereafter"
             } else {
               s"${discountAmount.pretty} for 1 quarter, then ${originalAmount.pretty} every quarter thereafter"
@@ -55,7 +59,7 @@ object Pricing {
             } else {
               s"${discountAmount.pretty} for 1 year, then ${originalAmount.pretty} every year thereafter"
             }
-          case OneYear => s"${discountAmount.pretty} for 1 year"
+          case OneYear => s"${discountAmount.pretty} for 1 year only"
         }
       }
     }
