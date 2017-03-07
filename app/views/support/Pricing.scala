@@ -37,27 +37,27 @@ object Pricing {
           case Month =>
             val span = durationMonths
             if (span == 12) {
-              s"${discountAmount.pretty} per month for 1 year, then ${originalAmount.pretty} every month thereafter"
+              s"${discountAmount.pretty} per month for 1 year, then standard rate (currently ${originalAmount.pretty} per month)"
             } else if (span > 1) {
-              s"${discountAmount.pretty} for $span months, then ${originalAmount.pretty} every month thereafter"
+              s"${discountAmount.pretty} for $span months, then standard rate (currently ${originalAmount.pretty} per month)"
             } else {
-              s"${discountAmount.pretty} for 1 month, then ${originalAmount.pretty} every month thereafter"
+              s"${discountAmount.pretty} for 1 month, then standard rate (currently ${originalAmount.pretty} per month)"
             }
           case Quarter =>
             val span = getDiscountScaledToPeriod(discountPromo.promotionType, Quarter)._2
             if (span == 4) {
-              s"${discountAmount.pretty} per quarter for 1 year, then ${originalAmount.pretty} every quarter thereafter"
+              s"${discountAmount.pretty} per quarter for 1 year, then standard rate (currently ${originalAmount.pretty} per quarter)"
             } else if (span > 1) {
-              s"${discountAmount.pretty} for ${span.toInt} quarters, then ${originalAmount.pretty} every quarter thereafter"
+              s"${discountAmount.pretty} for ${span.toInt} quarters, then standard rate (currently ${originalAmount.pretty} per quarter)"
             } else {
-              s"${discountAmount.pretty} for 1 quarter, then ${originalAmount.pretty} every quarter thereafter"
+              s"${discountAmount.pretty} for 1 quarter, then standard rate (currently ${originalAmount.pretty} per quarter)"
             }
           case Year =>
             val span = getDiscountScaledToPeriod(discountPromo.promotionType, Year)._2
             if (span > 1) {
-              s"${discountAmount.pretty} for ${span.toInt} years, then ${originalAmount.pretty} every year thereafter"
+              s"${discountAmount.pretty} for ${span.toInt} years, then standard rate (currently ${originalAmount.pretty} per year)"
             } else {
-              s"${discountAmount.pretty} for 1 year, then ${originalAmount.pretty} every year thereafter"
+              s"${discountAmount.pretty} for 1 year, then standard rate (currently ${originalAmount.pretty} per year)"
             }
           case OneYear => s"${discountAmount.pretty} for 1 year only"
         }
