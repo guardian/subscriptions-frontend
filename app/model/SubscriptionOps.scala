@@ -25,13 +25,13 @@ object SubscriptionOps extends LazyLogging {
 
     def isVoucher: Boolean = containsPlanFor(Voucher)
 
-    def isDigitalPack: Boolean = containsPlanFor(com.gu.memsub.Product.Digipack)
+    def isDigitalPack: Boolean = containsPlanFor(Product.Digipack)
 
-    def isGuardianWeekly = subscription.plans.list.exists(plan => cond(plan.product) { case _: Product.Weekly => true })
+    def isGuardianWeekly = nonExpiredPlans.exists(plan => cond(plan.product) { case _: Product.Weekly => true })
 
-    private def containsPlanFor(p:Product):Boolean = subscription.plans.list.exists(_.product == p)
+    private def containsPlanFor(p:Product):Boolean = nonExpiredPlans.exists(_.product == p)
 
-    def hasDigitalPack: Boolean = subscription.plans.list.exists(_.charges.benefits.list.contains(Digipack))
+    def hasDigitalPack: Boolean = nonExpiredPlans.exists(_.charges.benefits.list.contains(Digipack))
 
     val currency = subscription.plans.head.charges.currencies.head
     val nextPlan = subscription.plans.list.maxBy(_.end)
@@ -60,7 +60,7 @@ object SubscriptionOps extends LazyLogging {
     def firstProduct = firstPlan.product
     def currentPlans = subscription.plans.list.filter(p => (p.start == now || p.start.isBefore(now)) && p.end.isAfter(now))
     def futurePlans = subscription.plans.list.filter(_.start.isAfter(now) ).sortBy(_.start)
-    def nonExpiredSubscriptions = subscription.plans.list.filter(_.end.isAfter(now))
+    def nonExpiredPlans = subscription.plans.list.filter(_.end.isAfter(now))
     def sortedPlans = subscription.plans.list.sortBy(_.start)
     def recurringPlans = subscription.plans.list.filter(p => p.end.isAfter(now) && p.charges.billingPeriod.isRecurring)
     def oneOffPlans = subscription.plans.list.filterNot(p => p.end.isBefore(now) || p.charges.billingPeriod.isRecurring)
