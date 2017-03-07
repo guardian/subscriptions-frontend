@@ -223,14 +223,14 @@ class ExactTargetService(
 
     val sentMessage = (for {
       paymentMethod <- EitherT(getPaymentMethod(oldSub.accountId))
-      row = GuardianWeeklyRenewalDataExtensionRow(oldSub.name,
-        renewal.plan.name,
-        subscriptionDetails,
-        contact,
-        paymentMethod,
-        email,
-        customerAcceptance,
-        contractEffective)
+      row = GuardianWeeklyRenewalDataExtensionRow(subscriptionName = oldSub.name,
+        subscriptionDetails = subscriptionDetails,
+        planName = renewal.plan.name,
+        contact = contact,
+        paymentMethod = paymentMethod,
+        email = email,
+        customerAcceptance = customerAcceptance,
+        contractEffective = contractEffective)
       sendMessage <- EitherT(sendToQueue(row))
     } yield (sendMessage)).run
 
