@@ -4,12 +4,12 @@
 @import com.gu.memsub.subsv2.CatalogPlan
 @import com.gu.memsub.BillingPeriod.Month
 @import views.support.Catalog._
-@import configuration.Config.Zuora.paymentDelay
+@import configuration.Config.Zuora.defaultDigitalPackFreeTrialPeriod
 
 @(currency: Currency, plan: CatalogPlan.Digipack[Month.type], promoCode: PromoCode, promotion: AnyPromotion)
 <div class="pricing-cta">
     <div class="pricing-cta__pricing">
-        <h4 class="pricing-cta__pricing__title">Free for @promotion.asFreeTrial.fold(paymentDelay.getDays)(_.promotionType.duration.getDays) days</h4>
+        <h4 class="pricing-cta__pricing__title">Free for @promotion.asFreeTrial.fold(defaultDigitalPackFreeTrialPeriod.getDays)(_.promotionType.duration.getDays) days</h4>
         <p class="pricing-cta__pricing__value">
             @promotion.asDiscount.find(_.promotionType.durationMonths.isDefined).fold {
                 Then @formatPrice(plan, currency, promotion)/month

@@ -1,6 +1,5 @@
 package services
 
-import com.github.nscala_time.time.OrderingImplicits._
 import com.gu.config.DiscountRatePlanIds
 import com.gu.i18n.Currency.GBP
 import com.gu.i18n.{Country, CountryGroup}
@@ -27,7 +26,7 @@ import model.error.IdentityService._
 import model.error.SubsError
 import model.{Renewal, _}
 import org.joda.time.LocalDate.now
-import org.joda.time.{DateTime, Days, LocalDate}
+import org.joda.time.{Days, LocalDate}
 import touchpoint.ZuoraProperties
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -38,9 +37,11 @@ import scalaz.{EitherT, Monad, NonEmptyList, \/}
 import views.support.Pricing._
 
 object CheckoutService {
-
+  def fulfilmentDelay(in: Either[PaperData, DigipackData])(implicit now: LocalDate): Days = in.fold(
+    p => Days.daysBetween(now, p.startDate), d => Days.ZERO
+  )
   def paymentDelay(in: Either[PaperData, DigipackData], zuora: ZuoraProperties)(implicit now: LocalDate): Days = in.fold(
-    p => Days.daysBetween(now, p.startDate), d => zuora.gracePeriodInDays.plus(zuora.paymentDelayInDays)
+    p => Days.daysBetween(now, p.startDate), d => zuora.gracePeriodInDays.plus(zuora.defaultDigitalPackFreeTrialPeriod)
   )
 
   def determineFirstAvailablePaperDate(now: LocalDate): LocalDate = {
@@ -71,21 +72,20 @@ class CheckoutService(identityService: IdentityService,
     case _ => false
   }
 
-  def processIntroductoryPeriod(defaultPaymentDelay: Days, originalCommand: Subscribe): Subscribe = {
+  def processIntroductoryPeriod(fulfilmentDelay: Days, originalCommand: Subscribe): Subscribe = {
+    val introductoryPeriodDelayDays = Math.max(fulfilmentDelay.getDays, 0)
+    val sixWeeksPlanStartDate = originalCommand.contractEffective.plusDays(introductoryPeriodDelayDays)
+
     val additionalRateplan = (originalCommand.ratePlans.head.productRatePlanId match {
       case catalog.weekly.zoneA.sixWeeks.id.get => Some(catalog.weekly.zoneA.quarter)
       case catalog.weekly.zoneC.sixWeeks.id.get => Some(catalog.weekly.zoneC.quarter)
       case _ => None
-    }).map(plan => RatePlan(plan.id.get, None))
+    }).map(plan => RatePlan(plan.id.get, Some(ChargeOverride(plan.charges.chargeId.get, triggerDate = Some(sixWeeksPlanStartDate)))))
 
-    val updatedCommand = additionalRateplan.map { ratePlantoAdd =>
-      val updatedRatePlans = ratePlantoAdd <:: originalCommand.ratePlans
-
-      val defaultDelayDays = defaultPaymentDelay.getDays
-      val introductoryPeriodDelayDays = defaultDelayDays - 1
-
-      val updatedContractEffective = DateTime.now.toLocalDate.plusDays(introductoryPeriodDelayDays)
-      originalCommand.copy(ratePlans = updatedRatePlans, contractEffective = updatedContractEffective, contractAcceptance = updatedContractEffective.plusDays(43))
+    val updatedCommand = additionalRateplan.map { sixWeeksRatePlan =>
+      val updatedRatePlans = sixWeeksRatePlan <:: originalCommand.ratePlans
+      val updatedContractAcceptance = sixWeeksPlanStartDate.plusWeeks(6)
+      originalCommand.copy(ratePlans = updatedRatePlans, contractAcceptance = updatedContractAcceptance)
     }
 
     updatedCommand.getOrElse(originalCommand)
@@ -110,10 +110,11 @@ class CheckoutService(identityService: IdentityService,
       memberId <- EitherT(createOrUpdateUserInSalesforce(subscriptionData, idMinimalUser))
       purchaserIds = PurchaserIdentifiers(memberId, idMinimalUser)
       payment <- EitherT(createPaymentType(purchaserIds, subscriptionData))
-      defaultPaymentDelay = CheckoutService.paymentDelay(subscriptionData.productData, zuoraProperties)
+      fulfilmentDelay = CheckoutService.fulfilmentDelay(subscriptionData.productData)
+      paymentDelay = CheckoutService.paymentDelay(subscriptionData.productData, zuoraProperties)
       paymentMethod <- EitherT(attachPaymentMethodToStripeCustomer(payment, purchaserIds))
-      initialCommand = createSubscribeRequest(personalData, soldToContact, requestData, plan, purchaserIds, paymentMethod, payment.makeAccount, Some(defaultPaymentDelay))
-      subscribe = processIntroductoryPeriod(defaultPaymentDelay, initialCommand)
+      initialCommand = createSubscribeRequest(personalData, soldToContact, requestData, plan, purchaserIds, paymentMethod, payment.makeAccount, Some(fulfilmentDelay), Some(paymentDelay))
+      subscribe = processIntroductoryPeriod(fulfilmentDelay, initialCommand)
       validPromotion = promoCode.flatMap(promoService.validate[NewUsers](_, personalData.address.country.getOrElse(Country.UK), subscriptionData.productRatePlanId).toOption)
       withPromo = validPromotion.map(v => p.apply(v, prpId => catalog.paid.find(_.id == prpId).map(_.charges.billingPeriod).get, promoPlans)(subscribe)).getOrElse(subscribe)
       result <- EitherT(createSubscription(withPromo, purchaserIds))
@@ -229,9 +230,12 @@ class CheckoutService(identityService: IdentityService,
       purchaserIds: PurchaserIdentifiers,
       paymentMethod: PaymentMethod,
       acc: Account,
+      fufilmentDelay: Option[Days],
       paymentDelay: Option[Days]): Subscribe = {
 
-    val now = DateTime.now.toLocalDate
+    val acquisitionDate = now
+    val fulfilmentDate = fufilmentDelay.map(delay => now.plusDays(delay.getDays)).getOrElse(acquisitionDate)
+    val firstPaymentDate = paymentDelay.map(delay => now.plusDays(delay.getDays)).getOrElse(fulfilmentDate)
 
     Subscribe(
       account = acc,
@@ -245,8 +249,8 @@ class CheckoutService(identityService: IdentityService,
         address = address,
         email = personalData.email  // TODO once we have gifting change this to the Giftee's email address
       )),
-      contractEffective = now,
-      contractAcceptance = paymentDelay.map(delay => now.plusDays(delay.getDays)).getOrElse(now),
+      contractEffective = acquisitionDate,
+      contractAcceptance = firstPaymentDate,
       supplierCode = requestData.supplierCode,
       ipCountry = requestData.ipCountry
     )
@@ -306,6 +310,7 @@ class CheckoutService(identityService: IdentityService,
       }
     }
 
+<<<<<<< HEAD
     val currentVersionExpired = subscription.termEndDate.isBefore(now).withContextLogging("currentVersionExpired")
     // For a renewal, all dates should be identical. If the sub has expired, this date should be fast-forwarded to the next available paper date
     val startDateForRenewal = {
@@ -313,6 +318,12 @@ class CheckoutService(identityService: IdentityService,
     }.withContextLogging("startDateForRenewal")
     val contractEffective = startDateForRenewal
     val customerAcceptance = startDateForRenewal
+=======
+    val currentVersionExpired = subscription.termEndDate.isBefore(now)
+
+    // For a renewal, all dates should be identical. If the sub has expired, this date should be fast-forwarded to the next available paper date
+    val newTermStartDate = if (currentVersionExpired) CheckoutService.determineFirstAvailablePaperDate(now) else subscription.termEndDate
+>>>>>>> 69bfd1f... Committing for backup
 
     def constructRenewCommand(contact: Contact): Future[Renew] = Future {
       val newRatePlan = RatePlan(renewal.plan.id.get, None)
@@ -321,8 +332,7 @@ class CheckoutService(identityService: IdentityService,
         currentTermStartDate = subscription.termStartDate,
         currentTermEndDate = subscription.termEndDate,
         newRatePlans = NonEmptyList(newRatePlan),
-        contractEffectiveDate = contractEffective,
-        customerAcceptanceDate = customerAcceptance,
+        newTermStartDate = newTermStartDate,
         promoCode = None,
         autoRenew = renewal.plan.charges.billingPeriod.isRecurring,
         fastForwardTermStartDate = currentVersionExpired // If the sub has expired, we need to shift the term dates forward
@@ -388,7 +398,7 @@ class CheckoutService(identityService: IdentityService,
       renewCommand <- constructRenewCommand(contact)
       amendResult <- zuoraService.renewSubscription(renewCommand)
       _ <- ensureEmail(contact, subscription)
-      _ <- exactTargetService.enqueueRenewalEmail(subscription, renewal, getSubscriptionDetailsForEmail(getValidPromotion(contact)), contact, renewal.email, customerAcceptance, contractEffective)
+      _ <- exactTargetService.enqueueRenewalEmail(subscription, renewal, getSubscriptionDetailsForEmail(getValidPromotion(contact)), contact, renewal.email, newTermStartDate)
     }
       yield {
         updateResult

@@ -1,11 +1,10 @@
 package services
-import com.github.nscala_time.time.Imports._
-import com.amazonaws.regions.{Region, Regions}
+
 import com.amazonaws.regions.Regions.EU_WEST_1
 import com.amazonaws.services.sqs.AmazonSQSClient
 import com.amazonaws.services.sqs.model._
+import com.github.nscala_time.time.Imports._
 import com.gu.aws.CredentialsProvider
-import com.gu.i18n.Currency
 import com.gu.lib.Retry
 import com.gu.memsub.Subscription._
 import com.gu.memsub.promo.Promotion._
@@ -24,9 +23,6 @@ import logging.ContextLogging
 import model.SubscriptionOps._
 import model.exactTarget.HolidaySuspensionBillingScheduleDataExtensionRow.constructSalutation
 import model.exactTarget._
-import model.{PaperData, PurchaserIdentifiers, Renewal, SubscribeRequest, SubscriptionOps}
-import model.SubscriptionOps._
-import org.joda.time.{DateTime, Days, LocalDate}
 import model.{PurchaserIdentifiers, Renewal, SubscribeRequest}
 import org.joda.time.{Days, LocalDate}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
@@ -199,8 +195,7 @@ class ExactTargetService(
     subscriptionDetails: String,
     contact: Contact,
     email: String,
-    customerAcceptance: LocalDate,
-    contractEffective: LocalDate): Future[Unit] = {
+    newTermStartDate: LocalDate): Future[Unit] = {
 
     implicit val context = oldSub
 
@@ -235,8 +230,7 @@ class ExactTargetService(
         contact = contact,
         paymentMethod = paymentMethod,
         email = email,
-        customerAcceptance = customerAcceptance,
-        contractEffective = contractEffective)
+        newTermStartDate = newTermStartDate)
       sendMessage <- EitherT(sendToQueue(row))
     } yield sendMessage).run
 
