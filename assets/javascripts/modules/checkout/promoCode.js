@@ -9,12 +9,16 @@ define([
 ], function ($, bean, toggleError, ajax, formElements, ratePlanChoice) {
     'use strict';
 
-    var $inputBox           = formElements.$PROMO_CODE,
-        $ratePlanFields     = $('input[name="ratePlanId"]'),
-        $promoCodeSnippet   = $('.js-promo-code-snippet'),
-        $promoCodeTsAndCs   = $('.js-promo-code-tsandcs'),
-        $promoCodeError     = $('.js-promo-code .js-error-message'),
-        $promoCodeApplied   = $('.js-promo-code-applied');
+    var $inputBox         = formElements.$PROMO_CODE;
+    var $ratePlanFields   = $('input[name="ratePlanId"]');
+    var $promoCodeSnippet = $('.js-promo-code-snippet');
+    var $promoCodeTsAndCs = $('.js-promo-code-tsandcs');
+    var $promoCodeError   = $('.js-promo-code .js-error-message');
+    var $promoCodeApplied = $('.js-promo-code-applied');
+    var $promoRenew       = $('.js-promo-renew');
+
+    $promoRenew.hide();
+    $promoRenew.removeAttr('hidden');
 
     function bindExtraKeyListener() {
         if (bindExtraKeyListener.alreadyBound) {
@@ -67,6 +71,7 @@ define([
         $promoCodeSnippet.html('');
         $promoCodeTsAndCs.attr('href', '#');
         $promoCodeApplied.hide();
+        $promoRenew.hide();
         toggleError($promoCodeError.parent(), false);
         removePromotionFromRatePlans();
     }
@@ -76,6 +81,11 @@ define([
         message = message || 'Invalid promo code, please try again.';
         $promoCodeError.text(message);
         toggleError($promoCodeError.parent(), true);
+
+    }
+    function displayRenew() {
+        clearDown();
+        $promoRenew.show();
 
     }
 
@@ -105,8 +115,15 @@ define([
             type: 'json',
             method: 'GET',
             url: jsRoutes.controllers.Promotion.validateForProductRatePlan(promoCode, ratePlanId, country, currency).url
-        }).then(function (a) {
-            if (a.isValid) {
+        }).then(function (a)
+        {
+            var retention = 'promotion' in a &&
+                        'promotionType' in a.promotion &&
+              a.promotion.promotionType.name === 'retention';
+
+            if (retention) {
+                displayRenew();
+            } else if (a.isValid) {
                 displayPromotion(a, promoCode);
                 bindExtraKeyListener();
             } else {
