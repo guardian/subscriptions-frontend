@@ -4,32 +4,34 @@ import com.gu.memsub.Benefit._
 import com.gu.memsub.Product.{Delivery, Voucher}
 import com.gu.memsub._
 import com.gu.memsub.images.{ResponsiveImage, ResponsiveImageGenerator, ResponsiveImageGroup}
-import com.gu.memsub.subsv2.CatalogPlan
+import com.gu.memsub.subsv2.{CatalogPlan, Plan, SubscriptionPlan}
 import com.netaporter.uri.dsl._
 import configuration.Links
 
 import scala.reflect.internal.util.StringOps
 import scalaz.syntax.std.boolean._
 object PlanOps {
+  implicit class CommonPlanOps[+A <: Plan[_,_]](in: A) {
 
-  implicit class PrettyPlan[+A <: CatalogPlan.AnyPlan](in: A) {
-
-    def title: String = in.charges.benefits.list match {
-      case Digipack :: Nil => "Guardian Digital Pack"
-      case Weekly :: Nil => "Guardian Weekly"
+    def title: String = in.product match {
+      case Product.Digipack => "Guardian Digital Pack"
+      case _: Product.Weekly  => "Guardian Weekly"
       case x => "Guardian/Observer Newspapers"
     }
 
-    def packageName: String = in.charges.benefits.list match {
-      case Digipack :: Nil => "Guardian Digital Pack"
-      case Weekly :: Nil => "The Guardian Weekly"
+    def packageName: String = in.product match {
+      case Product.Digipack => "Guardian Digital Pack"
+      case _: Product.Weekly=> "The Guardian Weekly"
       case _ => s"${in.name} package"
     }
 
-    def subtitle: Option[String] = in.charges.benefits.list match {
-      case Digipack :: Nil => Some("Daily Edition + Guardian App Premium Tier")
+    def subtitle: Option[String] = in.product match {
+      case Product.Digipack => Some("Daily Edition + Guardian App Premium Tier")
       case _ => StringOps.oempty(in.description).headOption
     }
+  }
+
+  implicit class PrettyPlan[+A <: CatalogPlan.AnyPlan](in: A) {
 
     def packImage: ResponsiveImageGroup = in.charges.benefits.list match {
       case Digipack :: Nil =>
@@ -69,21 +71,7 @@ object PlanOps {
 
     def hasDigitalPack: Boolean = in.charges.benefits.list.contains(Digipack)
 
-    def phone: String = "+44 (0) 330 333 6767"
 
-    def productType: String = {
-      if (isHomeDelivery) {
-        "Home Delivery"
-      } else if (isVoucher) {
-        "Voucher Book"
-      } else if (isDigitalPack) {
-        "Digital Pack"
-      } else if (isGuardianWeekly) {
-        "Guardian Weekly"
-      } else {
-        "Unknown"
-      }
-    }
   }
 
   implicit class ProductOps(product: Product) {
@@ -93,15 +81,23 @@ object PlanOps {
         case Delivery => "homedelivery@theguardian.com"
         case Voucher => "vouchersubs@theguardian.com"
         case Product.Digipack => "digitalpack@theguardian.com"
-        case _:Product.Weekly => "gwsubs@theguardian.com"
+        case _: Product.Weekly => "gwsubs@theguardian.com"
         case _ => "subscriptions@theguardian.com"
       }
 
     def faqHref: String =
       product match {
-        case _:Product.Weekly => "https://www.theguardian.com/help/2012/jan/19/guardian-weekly-faqs"
+        case _: Product.Weekly => "https://www.theguardian.com/help/2012/jan/19/guardian-weekly-faqs"
         case _ => "https://www.theguardian.com/subscriber-direct/subscription-frequently-asked-questions"
       }
+
+    def productType: String = product match {
+      case Delivery => "Home Delivery"
+      case Voucher => "Voucher Book"
+      case Product.Digipack => "Digital Pack"
+      case _: Product.Weekly => "Guardian Weekly"
+      case _ => "Unknown"
+    }
 
   }
 

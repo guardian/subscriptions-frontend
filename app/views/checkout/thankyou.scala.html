@@ -1,34 +1,32 @@
 @import com.gu.i18n.Currency
 @import com.gu.memsub.promo.Promotion.AnyPromotion
-@import views.support.BillingPeriod._
+@import com.gu.memsub.subsv2.Subscription
+@import com.gu.memsub.subsv2.SubscriptionPlan.ContentSubscription
+@import model.SubscriptionOps._
 @import views.support.PlanOps._
-@import com.gu.memsub.subsv2.CatalogPlan
-@import com.gu.memsub.Product
 
-@(subscriptionName: String,
+@(  subscription: Subscription[ContentSubscription],
     guestAccountForm: Option[Form[model.GuestAccountData]] = None,
     touchpointBackendResolution: services.TouchpointBackend.Resolution,
-    plan: CatalogPlan.Paid, // we should take a subscription here
     promotion: Option[AnyPromotion] = None,
-    currency: Currency,
     startDate: String
 )(implicit request: RequestHeader)
 
-@main(s"Confirmation | Subscribe to the ${plan.title} | The Guardian", bodyClasses=List("is-wide"), touchpointBackendResolutionOpt = Some(touchpointBackendResolution), product = Some(plan.product)) {
+
+@main(s"Confirmation | Subscribe to the ${subscription.firstPlan.title} | The Guardian", bodyClasses=List("is-wide"), touchpointBackendResolutionOpt = Some(touchpointBackendResolution), product = Some(subscription.firstProduct)) {
 
 <script type="text/javascript">
     guardian.pageInfo.slug="GuardianDigiPack:Order Complete";
     guardian.pageInfo.productData = {
-        numberOfMonths: @{plan.charges.billingPeriod.monthsInPeriod},
         // Omniture
         source: 'Subscriptions and Membership',
         type: 'GUARDIAN_DIGIPACK',
         eventName: 'purchase',
-        amount: @{plan.charges.gbpPrice.amount},
+        amount: @{subscription.firstPlan.charges.gbpPrice.amount},
         // Google Analytics
-        zuoraId: '@subscriptionName',
-        productType: '@plan.productType',
-        productPurchased: '@plan.name'
+        zuoraId: '@subscription.name.get',
+        productType: '@subscription.firstProduct.productType',
+        productPurchased: '@{subscription.firstPlan.name}'
     };
 </script>
 
@@ -43,10 +41,10 @@
                     you'll receive email confirmation of this shortly.
                 </p>
                 <p>Here are the details of your subscription, if any of these are incorrect please get in touch with us straight away via email at
-                    <a href="mailto:@plan.product.email">@plan.product.email</a> or on <strong>@plan.phone</strong>.
+                    <a href="mailto:@subscription.firstProduct.email">@subscription.firstProduct.email</a> or on <strong>+44 (0) 330 333 6767</strong>.
                     Lines open weekdays 8am-8pm, weekend 8pm-6pm.</p>
             </div>
-            @fragments.checkout.reviewPanel(subscriptionName, plan, promotion, currency)
+            @fragments.checkout.reviewPanel(subscription, promotion)
         </div>
     </section>
 
@@ -57,7 +55,7 @@
 
             <div class="steps">
                 <h4 class="steps__title">We’ll send you an email confirming your subscription and payment information.</h4>
-                @if(plan.isVoucher) {
+                @if(subscription.isVoucher) {
                     <h4 class="steps__title">You will then receive your personalised book of vouchers.</h4>
                     <h4 class="steps__title">Take your vouchers to your newsagent or where you buy your paper.</h4>
                 }
@@ -65,11 +63,11 @@
                     <h4 class="steps__title">You can enter a password to manage your subscription online:</h4>
                     @fragments.confirmation.registerGuestAccount(guestAccountForm)
                 }
-                @if(plan.isHomeDelivery || plan.isGuardianWeekly) {
+                @if(subscription.isHomeDelivery || subscription.isGuardianWeekly) {
                     <h4 class="steps__title">Your first paper will be delivered on @startDate. </h4>
                     <h4 class="steps__title">You can set up any delivery holidays in our <a class="u-link" href="/manage">Subscription Management</a> area.</h4>
                 }
-                @if(plan.hasDigitalPack) { @fragments.confirmation.appSteps() }
+                @if(subscription.hasDigitalPack) { @fragments.confirmation.appSteps() }
             </div>
 
             <br/>
@@ -78,9 +76,10 @@
     </section>
 </main>
     @{
-        plan.product match {
-            case _: Product.Weekly => fragments.analytics.jellyfish.weeklyConversion()
-            case _ => fragments.analytics.jellyfish.conversion()
+        if(subscription.isGuardianWeekly) {
+            fragments.analytics.jellyfish.weeklyConversion()
+        } else {
+            fragments.analytics.jellyfish.conversion()
         }
     }
 }

@@ -19,7 +19,6 @@ define(['modules/analytics/ga', 'modules/checkout/ratePlanChoice'], function (ga
         if (selectedRatePlanData) {
             guardian.pageInfo.productData.amount = selectedRatePlanData.amount;
             guardian.pageInfo.productData.productPurchasing = selectedRatePlanData.name;
-            guardian.pageInfo.productData.numberOfMonths = selectedRatePlanData.numberOfMonths;
         }
         trackEvent('Rate Plan Change')();
     }

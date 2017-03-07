@@ -3,6 +3,7 @@ package model
 import com.github.nscala_time.time.OrderingImplicits._
 import com.gu.memsub.Benefit._
 import com.gu.memsub.BillingPeriod.{OneOffPeriod, SixWeeks}
+import com.gu.memsub.Product.{Delivery, Voucher}
 import com.gu.memsub._
 import com.gu.memsub.subsv2.SubscriptionPlan.{Paid, PaperPlan, WeeklyPlan}
 import com.gu.memsub.subsv2.{PaidCharge, PaidSubscriptionPlan, Subscription}
@@ -10,6 +11,9 @@ import com.typesafe.scalalogging.LazyLogging
 import controllers.ContextLogging
 import model.BillingPeriodOps._
 import org.joda.time.LocalDate.now
+import PartialFunction.cond
+import scala.reflect.internal.util.StringOps
+import scalaz.syntax.std.boolean._
 
 object SubscriptionOps extends LazyLogging {
 
@@ -17,7 +21,17 @@ object SubscriptionOps extends LazyLogging {
 
   implicit class EnrichedPaidSubscription[P <: Paid](subscription: Subscription[P]) {
 
-    private def containsPlanFor(p:Product):Boolean = subscription.plans.list.exists(_.product == p)
+    def isHomeDelivery: Boolean = containsPlanFor(Delivery)
+
+    def isVoucher: Boolean = containsPlanFor(Voucher)
+
+    def isDigitalPack: Boolean = containsPlanFor(Product.Digipack)
+
+    def isGuardianWeekly = nonExpiredPlans.exists(plan => cond(plan.product) { case _: Product.Weekly => true })
+
+    private def containsPlanFor(p:Product):Boolean = nonExpiredPlans.exists(_.product == p)
+
+    def hasDigitalPack: Boolean = nonExpiredPlans.exists(_.charges.benefits.list.contains(Digipack))
 
     val currency = subscription.plans.head.charges.currencies.head
     val nextPlan = subscription.plans.list.maxBy(_.end)
@@ -42,11 +56,12 @@ object SubscriptionOps extends LazyLogging {
       }
     }
 
+    def firstPlan = sortedPlans.head
+    def firstProduct = firstPlan.product
     def currentPlans = subscription.plans.list.filter(p => (p.start == now || p.start.isBefore(now)) && p.end.isAfter(now))
     def futurePlans = subscription.plans.list.filter(_.start.isAfter(now) ).sortBy(_.start)
-    def nonExpiredSubscriptions = subscription.plans.list.filter(_.end.isAfter(now))
-
-
+    def nonExpiredPlans = subscription.plans.list.filter(_.end.isAfter(now))
+    def sortedPlans = subscription.plans.list.sortBy(_.start)
     def recurringPlans = subscription.plans.list.filter(p => p.end.isAfter(now) && p.charges.billingPeriod.isRecurring)
     def oneOffPlans = subscription.plans.list.filterNot(p => p.end.isBefore(now) || p.charges.billingPeriod.isRecurring)
     def introductoryPeriodPlan = oneOffPlans.find(_.charges.billingPeriod == SixWeeks)

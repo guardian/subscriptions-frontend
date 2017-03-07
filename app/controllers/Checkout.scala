@@ -4,7 +4,7 @@ import actions.CommonActions._
 import com.gu.i18n.CountryGroup.{UK, US}
 import com.gu.i18n.Currency._
 import com.gu.i18n._
-import com.gu.memsub.Subscription.ProductRatePlanId
+import com.gu.memsub.Subscription.{Name, ProductRatePlanId}
 import com.gu.memsub.promo.Promotion._
 import com.gu.memsub.promo.{NewUsers, NormalisedPromoCode, PromoCode}
 import com.gu.memsub.subsv2.CatalogPlan.ContentSubscription
@@ -283,22 +283,18 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
       }
   }
 
-  def thankYou() = NoCacheAction { implicit request =>
+  def thankYou() = NoCacheAction.async { implicit request =>
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
     val session = request.session
 
     val sessionInfo = for {
       subsName <- session.get(SubsName)
-      plan <- session.get(RatePlanId).map(ProductRatePlanId).flatMap(p => catalog.allSubs.flatten.find(_.id == p))
-      ratePlanId <- session.get(RatePlanId)
-      currencyStr <- session.get(SessionKeys.Currency)
-      currency <- Currency.fromString(currencyStr)
       startDate <- session.get(StartDate)
-    } yield (subsName, plan, currency, startDate)
+    } yield (subsName, startDate)
     sessionInfo.fold {
-      Redirect(routes.Homepage.index()).withNewSession
-    } { case (subsName, plan, currency, startDate) =>
+      Future.successful(Redirect(routes.Homepage.index()).withNewSession)
+    } { case (subsName, startDate) =>
 
       val passwordForm = authenticatedUserFor(request).fold {
         for {
@@ -311,7 +307,15 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
       } // Don't display the user registration form if the user is logged in
 
       val promotion = session.get(AppliedPromoCode).flatMap(code => resolution.backend.promoService.findPromotion(NormalisedPromoCode.safeFromString(code)))
-      Ok(view.thankyou(subsName, passwordForm, resolution, plan, promotion, currency, startDate))
+
+      val eventualMaybeSubscription = tpBackend.subscriptionService.get[com.gu.memsub.subsv2.SubscriptionPlan.ContentSubscription](Name(subsName))
+      eventualMaybeSubscription.map { maybeSub =>
+        maybeSub.map { sub =>
+          Ok(view.thankyou(sub, passwordForm, resolution, promotion, startDate))
+        }.getOrElse {
+          Redirect(routes.Homepage.index()).withNewSession
+        }
+      }
     }
 
   }
