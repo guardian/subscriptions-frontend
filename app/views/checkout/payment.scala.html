@@ -74,7 +74,7 @@
 <main class="page-container gs-container">
 
     <section class="checkout-container">
-        @fragments.checkout.checkoutHeader(productData.plans.default.product.title)
+        @fragments.checkout.checkoutHeader(productData.plans.default.title)
 
         <form class="form js-checkout-form" action="" method="POST" novalidate>
             @helper.CSRF.formField

@@ -13,7 +13,7 @@
 )(implicit request: RequestHeader)
 
 
-@main(s"Confirmation | Subscribe to the ${subscription.firstProduct.title} | The Guardian", bodyClasses=List("is-wide"), touchpointBackendResolutionOpt = Some(touchpointBackendResolution), product = Some(subscription.firstProduct)) {
+@main(s"Confirmation | Subscribe to the ${subscription.firstPlan.title} | The Guardian", bodyClasses=List("is-wide"), touchpointBackendResolutionOpt = Some(touchpointBackendResolution), product = Some(subscription.firstProduct)) {
 
 <script type="text/javascript">
     guardian.pageInfo.slug="GuardianDigiPack:Order Complete";

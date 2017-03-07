@@ -4,19 +4,34 @@ import com.gu.memsub.Benefit._
 import com.gu.memsub.Product.{Delivery, Voucher}
 import com.gu.memsub._
 import com.gu.memsub.images.{ResponsiveImage, ResponsiveImageGenerator, ResponsiveImageGroup}
-import com.gu.memsub.subsv2.CatalogPlan
+import com.gu.memsub.subsv2.{CatalogPlan, Plan, SubscriptionPlan}
 import com.netaporter.uri.dsl._
 import configuration.Links
 
 import scala.reflect.internal.util.StringOps
 import scalaz.syntax.std.boolean._
 object PlanOps {
+  implicit class CommonPlanOps[+A <: Plan[_,_]](in: A) {
+
+    def title: String = in.product match {
+      case Product.Digipack => "Guardian Digital Pack"
+      case _: Product.Weekly  => "Guardian Weekly"
+      case x => "Guardian/Observer Newspapers"
+    }
+
+    def packageName: String = in.product match {
+      case Product.Digipack => "Guardian Digital Pack"
+      case _: Product.Weekly=> "The Guardian Weekly"
+      case _ => s"${in.name} package"
+    }
+
+    def subtitle: Option[String] = in.product match {
+      case Product.Digipack => Some("Daily Edition + Guardian App Premium Tier")
+      case _ => StringOps.oempty(in.description).headOption
+    }
+  }
 
   implicit class PrettyPlan[+A <: CatalogPlan.AnyPlan](in: A) {
-
-    def title: String = in.product.title
-    def packageName: String =  in.product.packageName
-    def subtitle: Option[String] = in.product.subtitle orElse StringOps.oempty(in.description).headOption
 
     def packImage: ResponsiveImageGroup = in.charges.benefits.list match {
       case Digipack :: Nil =>
@@ -76,23 +91,6 @@ object PlanOps {
         case _ => "https://www.theguardian.com/subscriber-direct/subscription-frequently-asked-questions"
       }
 
-    def title: String = product match {
-      case Product.Digipack => "Guardian Digital Pack"
-      case _: Product.Weekly => "Guardian Weekly"
-      case x => "Guardian/Observer Newspapers"
-    }
-
-    def packageName: String = product match {
-      case Product.Digipack => "Guardian Digital Pack"
-      case _: Product.Weekly => "The Guardian Weekly"
-      case _ => s"${product.name} package"
-    }
-
-    def subtitle: Option[String] = product match {
-      case Product.Digipack => Some("Daily Edition + Guardian App Premium Tier")
-      case _ => None
-    }
-
     def productType: String = product match {
       case Delivery => "Home Delivery"
       case Voucher => "Voucher Book"
@@ -100,6 +98,7 @@ object PlanOps {
       case _: Product.Weekly => "Guardian Weekly"
       case _ => "Unknown"
     }
+
   }
 
   implicit class ProductPopulationDataOps(in: ProductPopulationData) {

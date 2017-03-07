@@ -8,7 +8,8 @@
 @import com.gu.memsub.subsv2.SubscriptionPlan.ContentSubscription
 @import model.SubscriptionOps._
 @import org.joda.time.LocalDate.now
-@import views.support.PlanOps.ProductOps
+@import views.support.PlanOps._
+
 
 @(subscription: Subscription[ContentSubscription], promotion: Option[AnyPromotion] = None)
 <div class="review-panel">
@@ -25,8 +26,8 @@
     <div class="review-panel__item">
         <h4 class="review-panel__label">Your subscription:</h4>
         <div class="review-panel__details">
-            <div>@subscription.firstPlan.product.packageName</div>
-            @for(subtitle <- subscription.firstPlan.product.subtitle) {
+            <div>@subscription.firstPlan.packageName</div>
+            @for(subtitle <- subscription.firstPlan.subtitle) {
                 <em>(@subtitle)</em>
             }
         </div>
