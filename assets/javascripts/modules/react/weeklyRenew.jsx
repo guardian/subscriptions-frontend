@@ -32,6 +32,11 @@ export function init(container) {
         plans={plans}
         promoCode={container.dataset.promoCode}
         directDebitLogo={container.dataset.directDebitLogo}
+        weeklyTermsConditionsHref={container.dataset.weeklyTermsConditionsHref}
+        weeklyTermsConditionsTitle={container.dataset.weeklyTermsConditionsTitle}
+        privacyPolicyHref={container.dataset.privacyPolicyHref}
+        privacyPolicyTitle={container.dataset.privacyPolicyTitle}
+        whyYourDataMattersToUsHref={container.dataset.whyYourDataMattersToUsHref}
         />,
         container);
 }
@@ -222,11 +227,20 @@ class WeeklyRenew extends React.Component {
                         directDebitLogo={this.props.directDebitLogo}
                     />
                 </dl>
-                <button
-                    className="button button--primary"
-                    onClick={this.click}>
-                    {this.buttonText()}
-                </button>
+                <dl className="mma-section__list">
+                    <dt className="mma-section__list--title">Review and confirm</dt>
+                    <dd className="mma-section__list--content">
+                        <div className="u-note prose">
+                            <p>
+                                Our <a href={this.props.privacyPolicyHref} target="_blank">{this.props.privacyPolicyTitle}</a> explains in further detail how we use your information and you can find out why your data matters to us <a href={this.props.whyYourDataMattersToUsHref} target="_blank">here</a>.
+                            </p>
+                            <p>
+                                By proceeding you agree to the <a href={this.props.weeklyTermsConditionsHref} target="_blank">{this.props.weeklyTermsConditionsTitle}</a> for the Guardian Weekly print subscription services.
+                            </p>
+                        </div>
+                        <button className="button button--primary" onClick={this.click}>{this.buttonText()}</button>
+                    </dd>
+                </dl>
             </div>
             }
 
@@ -293,7 +307,7 @@ class PaymentType extends React.Component {
     render() {
         return <div>
             <dt className="mma-section__list--title">Payment method</dt>
-            <dd className="mma-section__list--content">
+            <dd className="mma-section__list--content option__label">
                 <SwitchButton labelRight="Direct Debit" label="Credit Card"
                               onChange={this.props.handlePaymentType}
                               checked={this.props.paymentType === DIRECT_DEBIT}
@@ -322,12 +336,12 @@ class PlanChooser extends React.Component {
 class Plan extends React.Component {
     price() {
         if (this.props.promotionalPrice) {
-            return <span>
+            return <span className="option__label">
                 <s>{this.props.price}</s>
                 <strong>&nbsp;{this.props.promotionalPrice}</strong>
             </span>
         }
-        return this.props.price
+        return <span className="option__label">{this.props.price}</span>
     }
 
     render() {
