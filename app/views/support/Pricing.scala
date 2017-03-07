@@ -33,34 +33,36 @@ object Pricing {
       discountPromo.promotionType.durationMonths.fold {
         s"${discountAmount.pretty} ${plan.billingPeriod.frequencyInMonths}"
       } { durationMonths =>
-        plan.billingPeriod match {
+
+        val forDuration = plan.billingPeriod match {
           case Month =>
             val span = durationMonths
             if (span == 12) {
-              s"${discountAmount.pretty} per month for 1 year, then standard rate (currently ${originalAmount.pretty} per month)"
+              "every month for 1 year"
             } else if (span > 1) {
-              s"${discountAmount.pretty} for $span months, then standard rate (currently ${originalAmount.pretty} per month)"
+              s"every month for $span months"
             } else {
-              s"${discountAmount.pretty} for 1 month, then standard rate (currently ${originalAmount.pretty} per month)"
+              "for 1 month"
             }
           case Quarter =>
             val span = getDiscountScaledToPeriod(discountPromo.promotionType, Quarter)._2
             if (span == 4) {
-              s"${discountAmount.pretty} per quarter for 1 year, then standard rate (currently ${originalAmount.pretty} per quarter)"
+              "every quarter for 1 year"
             } else if (span > 1) {
-              s"${discountAmount.pretty} for ${span.toInt} quarters, then standard rate (currently ${originalAmount.pretty} per quarter)"
+              s"every quarter for ${span.toInt} quarters"
             } else {
-              s"${discountAmount.pretty} for 1 quarter, then standard rate (currently ${originalAmount.pretty} per quarter)"
+              "for 1 quarter"
             }
           case Year =>
             val span = getDiscountScaledToPeriod(discountPromo.promotionType, Year)._2
             if (span > 1) {
-              s"${discountAmount.pretty} for ${span.toInt} years, then standard rate (currently ${originalAmount.pretty} per year)"
+              s"every year for ${span.toInt} years"
             } else {
-              s"${discountAmount.pretty} for 1 year, then standard rate (currently ${originalAmount.pretty} per year)"
+              "for 1 year"
             }
           case OneYear => s"${discountAmount.pretty} for 1 year only"
         }
+        s"${discountAmount.pretty} $forDuration, then standard rate (${originalAmount.pretty} every ${plan.billingPeriod.noun})"
       }
     }
 
