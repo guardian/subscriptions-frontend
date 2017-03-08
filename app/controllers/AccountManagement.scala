@@ -232,8 +232,6 @@ object ManageWeekly extends ContextLogging {
 
     def jsonError(message: String) = Json.toJson(Json.obj("errorMessage" -> message))
 
-    def description(sub: Subscription[WeeklyPlan], renewal: Renewal) = renewal.plan.charges.prettyPricing(sub.currency)
-
     SessionSubscription.subscriptionFromRequest flatMap { maybeSub =>
       val response = for {
         sub <- maybeSub.toRightDisjunction("no subscription in request")
@@ -242,7 +240,7 @@ object ManageWeekly extends ContextLogging {
         renew <- parseRenewalRequest(request, tpBackend.catalogService.unsafeCatalog)
       } yield {
         info(s"Attempting to renew ${renew.plan.name} for ${renewableSub.id} with promo code: ${renew.promoCode}")(sub)
-        tpBackend.checkoutService.renewSubscription(renewableSub, renew, description(renewableSub, renew)).map(_ => Ok(Json.obj("redirect" -> routes.AccountManagement.renewThankYou().url)))
+        tpBackend.checkoutService.renewSubscription(renewableSub, renew).map(_ => Ok(Json.obj("redirect" -> routes.AccountManagement.renewThankYou().url)))
           .recover{
             case e: Throwable =>
               val errorMessage = "Unexpected error while renewing subscription"

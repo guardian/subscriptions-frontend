@@ -60,9 +60,11 @@ object Pricing {
             } else {
               "for 1 year"
             }
-          case OneYear => s"${discountAmount.pretty} for 1 year only"
+          case OneYear => s"for 1 year only"
         }
-        s"${discountAmount.pretty} $forDuration, then standard rate (${originalAmount.pretty} every ${plan.billingPeriod.noun})"
+        if (plan.billingPeriod == OneYear) { s"${discountAmount.pretty} $forDuration" } else {
+          s"${discountAmount.pretty} $forDuration, then standard rate (${originalAmount.pretty} every ${plan.billingPeriod.noun})"
+        }
       }
     }
 
