@@ -260,7 +260,7 @@ object ManageWeekly extends ContextLogging {
 
     val res = for {
       subscription <- OptionT(SessionSubscription.subscriptionFromRequest)
-      billingSchedule <- OptionT(tpBackend.commonPaymentService.billingSchedule(subscription.id, subscription.accountId, 13))
+      billingSchedule <- OptionT(tpBackend.commonPaymentService.billingSchedule(subscription.id, subscription.accountId, numberOfBills = 13).map(Some(_):Option[Option[BillingSchedule]]))
     } yield {
       Ok(thankYouRenew(subscription.nextPlan, billingSchedule, touchpoint))
     }

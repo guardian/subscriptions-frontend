@@ -5,7 +5,7 @@
 @import org.joda.time.LocalDate.now
 @import com.gu.memsub.BillingPeriod.OneOffPeriod
 @(plan: SubscriptionPlan.ContentSubscription,
-  billingSchedule: BillingSchedule,
+  maybeBillingSchedule: Option[BillingSchedule],
   touchpointBackendResolution: services.TouchpointBackend.Resolution
 )(implicit request: RequestHeader)
 
@@ -15,13 +15,17 @@
         <section class="section-slice section-slice--bleed section-slice--limited">
             <p>Your Guardian Weekly subscription has been renewed.</p>
         </section>
-        <section class="section-slice--bleed section-slice--limited">
-            <h3 class="mma-section__header">
-                Your billing schedule
-            </h3>
-            @views.html.account.fragments.billingSchedule(billingSchedule, plan.charges.price.currencies.head)
 
-        </section>
+            @for(billingSchedule <- maybeBillingSchedule) {
+                <section class="section-slice--bleed section-slice--limited">
+                    <h3 class="mma-section__header">
+                Your billing schedule
+                    </h3>
+                    @views.html.account.fragments.billingSchedule(billingSchedule, plan.charges.price.currencies.head)
+                </section>
+            }
+
+
         <section class="section-slice--bleed mma-section">
             <a class="button button--primary button--large" href="@routes.AccountManagement.processLogin">
                 Back to subscription details</a>
