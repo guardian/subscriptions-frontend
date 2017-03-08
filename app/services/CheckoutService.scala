@@ -333,8 +333,7 @@ class CheckoutService(identityService: IdentityService,
         fastForwardTermStartDate = currentVersionExpired // If the sub has expired, we need to shift the term dates forward
       )
       val finalRenewCommand = applyPromoIfNecessary(contact, basicRenewCommand)
-      logger.info(s"Final renew command will be: ${finalRenewCommand}")
-      finalRenewCommand
+      finalRenewCommand.withContextLogging("final renew command")
     }
 
     def getValidPromotion(contact: Contact) = for {
@@ -347,11 +346,11 @@ class CheckoutService(identityService: IdentityService,
     def applyPromoIfNecessary(contact: Contact, basicRenewCommand: Renew): Renew = {
       getValidPromotion(contact) match {
         case Some(validPromotion) => {
-          logger.info(s"Attempting to apply the promotion: ${validPromotion.code} to subscription: ${subscription.name}")
+          info(s"Attempting to apply the promotion ${validPromotion.code}")
           p.apply(validPromotion, prpId => catalog.paid.find(_.id == prpId).map(_.charges.billingPeriod).get, promoPlans)(basicRenewCommand)
         }
         case None => {
-          logger.info(s"No promotion to apply, keeping basicRenewCommand")
+          info(s"No promotion to apply, keeping basicRenewCommand")
           basicRenewCommand
         }
       }
@@ -375,8 +374,7 @@ class CheckoutService(identityService: IdentityService,
         introductoryPlan.charges.prettyPricing(currency) + " then " + nextRecurrringPeriod.charges.prettyPricing(currency)
       }
       val subscriptionDetails = discountedPlanDescription orElse introductoryPeriodSubDescription getOrElse renewal.plan.charges.prettyPricing(currency)
-      logger.info(s"Subscription details (for renewal email) will be: $subscriptionDetails")
-      subscriptionDetails
+      subscriptionDetails.withContextLogging(s"Subscription details (for renewal email):")
     }
 
     for {
