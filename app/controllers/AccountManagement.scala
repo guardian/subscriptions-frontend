@@ -178,7 +178,7 @@ object ManageWeekly extends ContextLogging {
     implicit val tpBackend = resolution.backend
     implicit val flash = request.flash
     implicit val subContext = weeklySubscription
-    if (weeklySubscription.readerType == ReaderType.Direct) {
+    if (weeklySubscription.readerType != ReaderType.Agent) {
       // go to SF to get the contact mailing information etc
       GetSalesforceContactForSub.zuoraAccountFromSub(weeklySubscription)(tpBackend.zuoraService, tpBackend.salesforceService.repo, global).flatMap { account =>
         val futureSfContact = GetSalesforceContactForSub.sfContactForZuoraAccount(account)(tpBackend.zuoraService, tpBackend.salesforceService.repo, global)
@@ -223,7 +223,7 @@ object ManageWeekly extends ContextLogging {
         }
       }
     } else {
-      info(s"don't support gifts, can't manage sub")
+      info(s"don't support agents, can't manage sub")
       Future.successful(Ok(views.html.account.details(None, promoCode))) // don't support gifts (yet) as they have related contacts in salesforce of unknown structure
     }
   }

@@ -13,6 +13,7 @@
 @import com.gu.i18n.Currency
 @import com.gu.memsub.promo.PromoCode
 @import org.joda.time.LocalDate.now
+@import com.gu.memsub.subsv2.ReaderType
 @(
     subscription: Subscription[WeeklyPlanOneOff], contact: Contact, billToCountry: Country, plans: List[WeeklyPlanInfo], currency: Currency, promoCode: Option[PromoCode]
 )(implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackend.Resolution)
@@ -57,7 +58,7 @@
                 </p>
 
                 <div class="js-weekly-renew"
-                data-email="@contact.email"
+                data-email="@if(subscription.readerType == ReaderType.Direct) {@contact.email} else {}"
                 data-billing-country="@billToCountry.alpha2"
                 data-promo-code="@promoCode.map(_.get)"
                 data-currency="@currency.iso"
