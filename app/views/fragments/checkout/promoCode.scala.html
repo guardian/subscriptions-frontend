@@ -11,6 +11,9 @@
             <a class="button button--primary button--large button--arrow-right js-promo-code-validate">Apply</a>
         </div>
         @fragments.forms.errorMessage("Please enter a valid promo code.")
+        <div class="js-promo-renew" hidden>
+           <span class="form-field__error-message-visible">This promotion is for renewing customers only.</span> <a class="button button--primary button--large button--arrow-right" href="@routes.AccountManagement.processLogin()">Renew my subscription</a>
+        </div>
     </div>
     <div class="js-promo-code-applied promo-code-applied" style="display: none">
         <div><strong>✓&nbsp;&nbsp;Promotion applied</strong></div>

@@ -105,7 +105,7 @@ class WeeklyRenew extends React.Component {
 
         validatePromoCode(this.state.promoCode, this.props.country, this.props.currency).then((response) => {
             let newPlans = validatePromotionForPlans(response, this.state.plans);
-            let tracking = response.promotion.promotionType.name === 'tracking';
+            let tracking = response.promotion.promotionType.name === 'tracking' || response.promotion.promotionType.name === 'retention';
             let update = tracking || newPlans.map((plan) => {
                 return 'promotionalPrice' in plan
             }).reduce((a, b) => {
