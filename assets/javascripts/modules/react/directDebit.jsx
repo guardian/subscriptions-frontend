@@ -31,17 +31,21 @@ export function DirectDebit(props: {
         <Confirmation checked={props.directDebitConfirmed} onChange={props.handleDirectDebitConfirmation}
                       valid={props.validDirectDebitConfirmed}/>
         <dt className="mma-section__list--title">
-            Advance Notice
+            Advance notice
         </dt>
         <dd className="mma-section__list--content">
-            <div className="mma-section__list--restricted prose">
+            <div className="mma-section__list--restricted u-note prose">
                 <p>The details of your Direct Debit instruction including payment schedule, due date, frequency and
                         amount will be sent to you within three working days. All the normal Direct Debit safeguards and
                         guarantees apply.</p>
-                <p>The Guardian, Unit 16, Coalfield Way, Ashby Park, Ashby-De-La-Zouch, LE65 1JT United Kingdom
+                <p>
+                    Your payments are protected by the <a target="_blank" href="https://www.directdebit.co.uk/DirectDebitExplained/pages/directdebitguarantee.aspx">Direct Debit guarantee</a>.
                 </p>
-                <p>Tel: +44 (0) 330 333 6767</p>
-                <p><a href="mailto:gwsubs@theguardian.com">gwsubs@theguardian.com</a></p>
+                <div>
+                    <div>The Guardian, Unit 16, Coalfield Way, Ashby Park, Ashby-De-La-Zouch, LE65 1JT United Kingdom</div>
+                    <div>Tel: +44 (0) 330 333 6767</div>
+                    <div><a href="mailto:gwsubs@theguardian.com">gwsubs@theguardian.com</a></div>
+                </div>
             </div>
         </dd>
     </div>

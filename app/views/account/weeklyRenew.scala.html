@@ -1,3 +1,4 @@
+@import configuration.Links
 @import com.gu.memsub.BillingSchedule
 @import com.gu.memsub.subsv2.Subscription
 @import model.DigitalEdition.UK
@@ -62,9 +63,14 @@
                 data-currency="@currency.iso"
                 data-delivery-country="@contact.mailingCountryParsed.map(_.alpha2).getOrElse(billToCountry.alpha2)"
                 data-direct-debit-logo="@hashedPathFor("images/direct-debit-black.png")"
+                data-weekly-terms-conditions-href="@Links.weeklyTerms.href"
+                data-weekly-terms-conditions-title="@Links.weeklyTerms.title"
+                data-privacy-policy-href="@Links.privacyPolicy.href"
+                data-privacy-policy-title="@Links.privacyPolicy.title"
+                data-why-your-data-matters-to-us-href="@Links.whyYourDataMattersToUs.href"
                 />
 
             </section>
-            </section>
-        </main>
-    }
+        </section>
+    </main>
+}
