@@ -9,7 +9,8 @@ import com.gu.memsub.promo._
 import com.gu.memsub.promo.ValidPromotion
 import com.gu.memsub.promo.Promotion._
 import com.gu.memsub.services.{GetSalesforceContactForSub, PromoService, PaymentService => CommonPaymentService}
-import com.gu.memsub.subsv2.{Catalog, Subscription}
+import com.gu.memsub.subsv2.SubscriptionPlan.WeeklyPlan
+import com.gu.memsub.subsv2.{Catalog, ReaderType, Subscription}
 import com.gu.memsub.{Address, Product}
 import com.gu.salesforce.{Contact, ContactId}
 import com.gu.stripe.Stripe
@@ -356,9 +357,14 @@ class CheckoutService(identityService: IdentityService,
       }
     }
 
-    def ensureEmail(contact: Contact) = if (contact.email.isDefined) Future.successful(\/.right(()))
-      else salesforceService.repo.addEmail(contact, renewal.email).map { either =>
-        either.fold[Unit]({ err => error(s"couldn't update email for sub: ${subscription.id}: $err") }, u => u)
+    def ensureEmail(contact: Contact, subscription: Subscription[WeeklyPlan]) =
+      if (subscription.readerType != ReaderType.Direct || contact.email.isDefined) {
+        info(s"email submitted on backend but not updated: ${subscription.readerType}, ${contact.email}")
+        Future.successful(\/.right(()))
+      } else {
+        salesforceService.repo.addEmail(contact, renewal.email).map { either =>
+          either.fold[Unit]({ err => error(s"couldn't update email for sub: ${subscription.id}: $err") }, u => u)
+        }
       }
 
     def getSubscriptionDetailsForEmail(maybeValidPromotion: Option[ValidPromotion[PromoContext]]): String = {
@@ -387,7 +393,7 @@ class CheckoutService(identityService: IdentityService,
       updateResult <- zuoraService.createPaymentMethod(createPaymentMethod).withContextLogging("createPaymentMethod", _.id)
       renewCommand <- constructRenewCommand(contact)
       amendResult <- zuoraService.renewSubscription(renewCommand)
-      _ <- ensureEmail(contact)
+      _ <- ensureEmail(contact, subscription)
       _ <- exactTargetService.enqueueRenewalEmail(subscription, renewal, getSubscriptionDetailsForEmail(getValidPromotion(contact)), contact, renewal.email, customerAcceptance, contractEffective)
     }
       yield {
