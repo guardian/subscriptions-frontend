@@ -8,12 +8,10 @@ import com.gu.memsub._
 import com.gu.memsub.subsv2.SubscriptionPlan.{Paid, PaperPlan, WeeklyPlan}
 import com.gu.memsub.subsv2.{PaidCharge, PaidSubscriptionPlan, Subscription}
 import com.typesafe.scalalogging.LazyLogging
-import controllers.ContextLogging
+import logging.ContextLogging
 import model.BillingPeriodOps._
 import org.joda.time.LocalDate.now
 import PartialFunction.cond
-import scala.reflect.internal.util.StringOps
-import scalaz.syntax.std.boolean._
 
 object SubscriptionOps extends LazyLogging {
 
