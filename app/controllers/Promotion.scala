@@ -78,7 +78,7 @@ object Promotion extends Controller with LazyLogging with CatalogProvider {
           "isValid" -> result.isRight,
           "errorMessage" -> result.swap.toOption.map(_.msg)
         )
-        result.fold(_ => NotAcceptable(body), _ => Ok(body))
+        result.fold(_ => NotAcceptable/*!?! fix this*/(body), _ => Ok(body))
       }
 
     }

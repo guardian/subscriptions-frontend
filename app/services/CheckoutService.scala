@@ -16,7 +16,7 @@ import com.gu.zuora.soap.models.Commands.{Account, PaymentMethod, RatePlan, Subs
 import com.gu.zuora.soap.models.Queries
 import com.gu.zuora.soap.models.Results.SubscribeResult
 import com.gu.zuora.soap.models.errors._
-import com.typesafe.scalalogging.LazyLogging
+import logging.ContextLogging
 import model.BillingPeriodOps._
 import model.SubscriptionOps._
 import model.error.CheckoutService._
@@ -62,7 +62,7 @@ class CheckoutService(identityService: IdentityService,
                       zuoraProperties: ZuoraProperties,
                       promoService: PromoService,
                       promoPlans: DiscountRatePlanIds,
-                      commonPaymentService: CommonPaymentService) extends LazyLogging {
+                      commonPaymentService: CommonPaymentService) extends ContextLogging {
 
   type NonFatalErrors = Seq[SubsError]
   type PostSubscribeResult = (Option[UserIdData], NonFatalErrors)
@@ -298,7 +298,7 @@ class CheckoutService(identityService: IdentityService,
   def renewSubscription(subscription: Subscription[WeeklyPlanOneOff], renewal: Renewal, subscriptionDetails: String )
     (implicit p: PromotionApplicator[com.gu.memsub.promo.Renewal, Renew]) = {
 
-    import LogImplicit._
+    implicit val context = subscription
 
     def getPayment(contact: Contact, billto: Queries.Contact): PaymentService#Payment = {
       val idMinimalUser = IdMinimalUser(contact.identityId, None)
@@ -309,9 +309,11 @@ class CheckoutService(identityService: IdentityService,
       }
     }
 
-    val currentVersionExpired = subscription.termEndDate.isBefore(now)
+    val currentVersionExpired = subscription.termEndDate.isBefore(now).withContextLogging("currentVersionExpired")
     // For a renewal, all dates should be identical. If the sub has expired, this date should be fast-forwarded to the next available paper date
-    val startDateForRenewal = if (currentVersionExpired) CheckoutService.determineFirstAvailablePaperDate(now) else subscription.termEndDate
+    val startDateForRenewal = {
+      if (currentVersionExpired) CheckoutService.determineFirstAvailablePaperDate(now) else subscription.termEndDate
+    }.withContextLogging("startDateForRenewal")
     val contractEffective = startDateForRenewal
     val customerAcceptance = startDateForRenewal
 
@@ -330,10 +332,10 @@ class CheckoutService(identityService: IdentityService,
       )
 
       val validPromotion = for {
-        code <- renewal.promoCode.withLogging("promo code from client")
-        deliveryCountryString <- contact.mailingCountry.withLogging("salesforce mailing country")
-        deliveryCountry <- CountryGroup.countryByName(deliveryCountryString).withLogging("delivery country object")
-        validPromotion <- promoService.validate[com.gu.memsub.promo.Renewal](code, deliveryCountry, renewal.plan.id).withLogging("validated promotion").toOption
+        code <- renewal.promoCode.withContextLogging("promo code from client")
+        deliveryCountryString <- contact.mailingCountry.withContextLogging("salesforce mailing country")
+        deliveryCountry <- CountryGroup.countryByName(deliveryCountryString).withContextLogging("delivery country object")
+        validPromotion <- promoService.validate[com.gu.memsub.promo.Renewal](code, deliveryCountry, renewal.plan.id).withContextLogging("validated promotion").toOption
       } yield validPromotion
       val withPromo = validPromotion.map(v => p.apply(v, prpId => catalog.paid.find(_.id == prpId).map(_.charges.billingPeriod).get, promoPlans)(renewCommand)).getOrElse(renewCommand)
       zuoraService.renewSubscription(withPromo)
@@ -341,18 +343,18 @@ class CheckoutService(identityService: IdentityService,
 
     def ensureEmail(contact: Contact) = if (contact.email.isDefined) Future.successful(\/.right(()))
       else salesforceService.repo.addEmail(contact, renewal.email).map { either =>
-        either.fold[Unit]({ err => logger.error(s"couldn't update email for sub: ${subscription.id}: $err") }, u => u)
+        either.fold[Unit]({ err => error(s"couldn't update email for sub: ${subscription.id}: $err") }, u => u)
       }
 
     for {
-      account <- zuoraService.getAccount(subscription.accountId)
-      billto <- zuoraService.getContact(account.billToId)
-      contact <- GetSalesforceContactForSub.sfContactForZuoraAccount(account)(zuoraService, salesforceService.repo, global)
+      account <- zuoraService.getAccount(subscription.accountId).withContextLogging("zuoraAccount", _.id)
+      billto <- zuoraService.getContact(account.billToId).withContextLogging("zuora bill to", _.id)
+      contact <- GetSalesforceContactForSub.sfContactForZuoraAccount(account)(zuoraService, salesforceService.repo, global).withContextLogging("sfContact", _.salesforceContactId)
       payment = getPayment(contact, billto)
       paymentMethod <- payment.makePaymentMethod
       createPaymentMethod = CreatePaymentMethod(subscription.accountId, paymentMethod, payment.makeAccount.paymentGateway, billto)
-      updateResult <- zuoraService.createPaymentMethod(createPaymentMethod)
-      amendResult <- addPlan(contact)
+      updateResult <- zuoraService.createPaymentMethod(createPaymentMethod).withContextLogging("createPaymentMethod", _.id)
+      amendResult <- addPlan(contact).withContextLogging("addPlan", _.ids)
       _ <- ensureEmail(contact)
       _ <- exactTargetService.enqueueRenewalEmail(subscription, renewal, subscriptionDetails, contact, renewal.email, customerAcceptance, contractEffective)
     }
