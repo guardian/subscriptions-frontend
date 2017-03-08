@@ -9,17 +9,14 @@ export const status = {
 
 export class PromoCode extends React.Component {
 render(){
-    let href = '/p/'+this.props.value+'/terms';
     return <div>
         <dt className="mma-section__list--title">
             <label className="label" for="promoCode">Promo code</label>
         </dt>
         <dd className="mma-section__list--content">
-        <PromoField value={this.props.value} handler={this.props.handler} />
-        <PromoButton status={this.props.status} onClick={this.props.send} />
-            {this.props.status == status.VALID && <div className="u-note">
-            {this.props.copy}<br />
-                <a className="u-link" href={href} target="_blank">See full terms and conditions</a></div>}
+            <PromoField value={this.props.value} handler={this.props.handler} />
+            <PromoButton status={this.props.status} onClick={this.props.send} />
+            {this.props.status == status.VALID && <div className="u-note">{this.props.copy}</div>}
         </dd>
     </div>
 }

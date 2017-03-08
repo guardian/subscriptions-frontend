@@ -18,6 +18,7 @@ import com.gu.zuora.soap.models.Queries.Contact
 import com.typesafe.scalalogging.LazyLogging
 import configuration.{Config, ProfileLinks}
 import forms._
+import logging.ContextLogging
 import model.SubscriptionOps._
 import model.{Renewal, RenewalReads}
 import org.joda.time.LocalDate.now
@@ -275,20 +276,7 @@ object ManageWeekly extends ContextLogging {
     }
   }
 }
-trait ContextLogging extends LazyLogging {
 
-  // as long as there's an implicit subscription context available, log will output the subscription name automatically
-  def info[P <: AnyPlan : Subscription](message: String): Unit = {
-    val context = implicitly[Subscription[P]]
-    logger.info(s"{sub: ${context.name.get}} $message")
-  }
-
-  def error[P <: AnyPlan : Subscription](message: String): Unit = {
-    val context = implicitly[Subscription[P]]
-    logger.info(s"{sub: ${context.name.get}} $message")
-  }
-
-}
 
 object AccountManagement extends Controller with ContextLogging with CatalogProvider {
 

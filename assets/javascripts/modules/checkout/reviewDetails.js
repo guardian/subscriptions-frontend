@@ -71,7 +71,17 @@ define([
         formEls.$REVIEW_ACCOUNT.text(formEls.$ACCOUNT.val());
         formEls.$REVIEW_SORTCODE.text(formEls.$SORTCODE.val());
         formEls.$REVIEW_HOLDER.text(formEls.$HOLDER.val());
-        formEls.$REVIEW_DELIVERY_INSTRUCTIONS.text(formEls.getDeliveryInstructions().val());
+
+        var DELIVERY_INSTRUCTIONS = formEls.getDeliveryInstructions().val();
+
+        if (!DELIVERY_INSTRUCTIONS) {
+            formEls.$REVIEW_DELIVERY_INSTRUCTIONS_FIELD.hide();
+        }
+        else {
+            formEls.$REVIEW_DELIVERY_INSTRUCTIONS_FIELD.show();
+        }
+
+        formEls.$REVIEW_DELIVERY_INSTRUCTIONS.text(DELIVERY_INSTRUCTIONS);
         formEls.$REVIEW_DELIVERY_START_DATE.text(formEls.getPaperCheckoutField().val());
     }
 

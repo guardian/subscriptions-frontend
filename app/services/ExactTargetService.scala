@@ -1,7 +1,6 @@
 package services
 import com.github.nscala_time.time.Imports._
 import com.amazonaws.regions.{Region, Regions}
-
 import com.amazonaws.regions.Regions.EU_WEST_1
 import com.amazonaws.services.sqs.AmazonSQSClient
 import com.amazonaws.services.sqs.model._
@@ -21,6 +20,7 @@ import com.gu.zuora.api.ZuoraService
 import com.gu.zuora.soap.models.Results.SubscribeResult
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
+import logging.ContextLogging
 import model.SubscriptionOps._
 import model.exactTarget.HolidaySuspensionBillingScheduleDataExtensionRow.constructSalutation
 import model.exactTarget._
@@ -50,7 +50,7 @@ class ExactTargetService(
   paymentService: CommonPaymentService,
   zuoraService: ZuoraService,
   salesforceService: SalesforceService
-) extends LazyLogging {
+) extends ContextLogging {
 
   private def buildWelcomeEmailDataExtensionRow(
       subscribeResult: SubscribeResult,
@@ -202,6 +202,8 @@ class ExactTargetService(
     customerAcceptance: LocalDate,
     contractEffective: LocalDate): Future[Unit] = {
 
+    implicit val context = oldSub
+
     sealed trait Error {
       def msg: String
       def code: String
@@ -214,12 +216,16 @@ class ExactTargetService(
       val code = "ET002"
     }
 
-    def getPaymentMethod(accountId: AccountId): Future[\/[Error, PaymentMethod]] = paymentService.getPaymentMethod(oldSub.accountId).map(_.toRightDisjunction(SimpleError(s"Failed to enqueue ${oldSub.name.get}'s guardian weekly renewal email. No payment method found in account")))
+    def getPaymentMethod(accountId: AccountId): Future[\/[Error, PaymentMethod]] =
+      paymentService.getPaymentMethod(oldSub.accountId).map { maybePaymentMethod =>
+        maybePaymentMethod.toRightDisjunction(SimpleError(s"Failed to enqueue guardian weekly renewal email. No payment method found in account"))
+      }
 
-    def sendToQueue(row: GuardianWeeklyRenewalDataExtensionRow): Future[\/[Error, SendMessageResult]] = SqsClient.sendDataExtensionToQueue(Config.holidaySuspensionEmailQueue, row).map {
-      case Success(sendMsgResult) => \/-(sendMsgResult)
-      case Failure(e) => -\/(ExceptionThrown(s"Failed to enqueue ${oldSub.name.get}'s guardian weekly renewal email. Details were: " + row.toString, e))
-    }
+    def sendToQueue(row: GuardianWeeklyRenewalDataExtensionRow): Future[\/[Error, SendMessageResult]] =
+      SqsClient.sendDataExtensionToQueue(Config.holidaySuspensionEmailQueue, row).map {
+        case Success(sendMsgResult) => \/-(sendMsgResult)
+        case Failure(e) => -\/(ExceptionThrown(s"Failed to enqueue ${oldSub.name.get}'s guardian weekly renewal email. Details were: " + row.toString, e))
+      }
 
     val sentMessage = (for {
       paymentMethod <- EitherT(getPaymentMethod(oldSub.accountId))
@@ -232,11 +238,11 @@ class ExactTargetService(
         customerAcceptance = customerAcceptance,
         contractEffective = contractEffective)
       sendMessage <- EitherT(sendToQueue(row))
-    } yield (sendMessage)).run
+    } yield sendMessage).run
 
     sentMessage.map {
-      case \/-(sendMsgResult) => logger.info(s"Successfully enqueued ${oldSub.name.get}'s guardian weekly renewal email.")
-      case -\/(se@SimpleError(_)) => logger.error(se.fullDescription)
+      case \/-(sendMsgResult) => info(s"Successfully enqueued guardian weekly renewal email.")
+      case -\/(se@SimpleError(_)) => error(se.fullDescription)
       case -\/(et@ExceptionThrown(_,exception)) => logger.error(et.fullDescription, exception)
     }
   }
