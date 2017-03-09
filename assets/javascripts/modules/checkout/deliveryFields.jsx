@@ -15,7 +15,7 @@ const MAX_WEEKS_AVAILABLE = 4;
 function getFirstSelectableDate(filterFn) {
     let weekly = formElements.$DELIVERED_PRODUCT_TYPE.val() === 'weekly';
     if (weekly){
-        return moment('20170317','YYYYMMDD');
+        return moment('20170324','YYYYMMDD');
     }
     let NUMBER_OF_DAYS_IN_ADVANCE = weekly?7:3;
     var firstSelectableDate = moment().add(NUMBER_OF_DAYS_IN_ADVANCE, 'days');
