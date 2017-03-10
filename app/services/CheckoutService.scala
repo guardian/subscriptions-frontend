@@ -75,25 +75,20 @@ class CheckoutService(identityService: IdentityService,
   private val allSixWeekAssociations = List(catalog.weekly.zoneA.associations, catalog.weekly.zoneC.associations).flatten
 
   // This method is not genericised because the '6' is not stored in the association.
-  def processSixWeekIntroductoryPeriod(fulfilmentDelay: Days, originalCommand: Subscribe): Subscribe = {
-    val introductoryPeriodDelayDays = fulfilmentDelay.getDays
-    val sixWeeksPlanStartDate = originalCommand.contractEffective.plusDays(introductoryPeriodDelayDays)
+  def processSixWeekIntroductoryPeriod(daysUntilFirstIssue: Days, originalCommand: Subscribe): Subscribe = {
+    val sixWeeksPlanStartDate = originalCommand.contractEffective.plusDays(daysUntilFirstIssue.getDays)
     val maybeSixWeekAssociation = allSixWeekAssociations.find(_._1.id == originalCommand.ratePlans.head.productRatePlanId)
-    val replacementPlans = maybeSixWeekAssociation.map { case (sixWeekPlan, recurringPlan) =>
-      NonEmptyList(
+    val updatedCommand = maybeSixWeekAssociation.map { case (sixWeekPlan, recurringPlan) =>
+      val replacementPlans = NonEmptyList(
         RatePlan(
           sixWeekPlan.id.get,
           Some(ChargeOverride(sixWeekPlan.charges.chargeId.get, triggerDate = Some(sixWeeksPlanStartDate)))
         ),
         RatePlan(recurringPlan.id.get, None)
       )
-    }
-
-    val updatedCommand = replacementPlans.map { replacementPlans =>
       val updatedContractAcceptance = sixWeeksPlanStartDate.plusWeeks(6)
       originalCommand.copy(ratePlans = replacementPlans, contractAcceptance = updatedContractAcceptance)
     }
-
     updatedCommand.getOrElse(originalCommand)
   }
 
