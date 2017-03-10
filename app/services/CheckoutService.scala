@@ -76,7 +76,7 @@ class CheckoutService(identityService: IdentityService,
 
   // This method is not genericised because the '6' is not stored in the association.
   def processSixWeekIntroductoryPeriod(fulfilmentDelay: Days, originalCommand: Subscribe): Subscribe = {
-    val introductoryPeriodDelayDays = Math.max(fulfilmentDelay.getDays, 0)
+    val introductoryPeriodDelayDays = fulfilmentDelay.getDays
     val sixWeeksPlanStartDate = originalCommand.contractEffective.plusDays(introductoryPeriodDelayDays)
     val maybeSixWeekAssociation = allSixWeekAssociations.find(_._1.id == originalCommand.ratePlans.head.productRatePlanId)
     val replacementPlans = maybeSixWeekAssociation.map { case (sixWeekPlan, recurringPlan) =>
