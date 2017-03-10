@@ -4,9 +4,8 @@ import com.gu.config.DiscountRatePlanIds
 import com.gu.i18n.Currency.GBP
 import com.gu.i18n.{Country, CountryGroup}
 import com.gu.identity.play.{AuthenticatedIdUser, IdMinimalUser}
-import com.gu.memsub.promo._
-import com.gu.memsub.promo.ValidPromotion
 import com.gu.memsub.promo.Promotion._
+import com.gu.memsub.promo.{ValidPromotion, _}
 import com.gu.memsub.services.{GetSalesforceContactForSub, PromoService, PaymentService => CommonPaymentService}
 import com.gu.memsub.subsv2.SubscriptionPlan.WeeklyPlan
 import com.gu.memsub.subsv2.{Catalog, ReaderType, Subscription}
@@ -28,13 +27,14 @@ import model.{Renewal, _}
 import org.joda.time.LocalDate.now
 import org.joda.time.{Days, LocalDate}
 import touchpoint.ZuoraProperties
+import views.support.Pricing._
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scalaz.std.option._
 import scalaz.std.scalaFuture._
 import scalaz.syntax.monad._
 import scalaz.{EitherT, Monad, NonEmptyList, \/}
-import views.support.Pricing._
 
 object CheckoutService {
   def fulfilmentDelay(in: Either[PaperData, DigipackData])(implicit now: LocalDate): Days = in.fold(
@@ -72,20 +72,26 @@ class CheckoutService(identityService: IdentityService,
     case _ => false
   }
 
-  def processIntroductoryPeriod(fulfilmentDelay: Days, originalCommand: Subscribe): Subscribe = {
+  private val allSixWeekAssociations = List(catalog.weekly.zoneA.associations, catalog.weekly.zoneC.associations).flatten
+
+  // This method is not genericised because the '6' is not stored in the association.
+  def processSixWeekIntroductoryPeriod(fulfilmentDelay: Days, originalCommand: Subscribe): Subscribe = {
     val introductoryPeriodDelayDays = Math.max(fulfilmentDelay.getDays, 0)
     val sixWeeksPlanStartDate = originalCommand.contractEffective.plusDays(introductoryPeriodDelayDays)
+    val maybeSixWeekAssociation = allSixWeekAssociations.find(_._1.id == originalCommand.ratePlans.head.productRatePlanId)
+    val replacementPlans = maybeSixWeekAssociation.map { case (sixWeekPlan, recurringPlan) =>
+      NonEmptyList(
+        RatePlan(
+          sixWeekPlan.id.get,
+          Some(ChargeOverride(sixWeekPlan.charges.chargeId.get, triggerDate = Some(sixWeeksPlanStartDate)))
+        ),
+        RatePlan(recurringPlan.id.get, None)
+      )
+    }
 
-    val additionalRateplan = (originalCommand.ratePlans.head.productRatePlanId match {
-      case catalog.weekly.zoneA.sixWeeks.id.get => Some(catalog.weekly.zoneA.quarter)
-      case catalog.weekly.zoneC.sixWeeks.id.get => Some(catalog.weekly.zoneC.quarter)
-      case _ => None
-    }).map(plan => RatePlan(plan.id.get, Some(ChargeOverride(plan.charges.chargeId.get, triggerDate = Some(sixWeeksPlanStartDate)))))
-
-    val updatedCommand = additionalRateplan.map { sixWeeksRatePlan =>
-      val updatedRatePlans = sixWeeksRatePlan <:: originalCommand.ratePlans
+    val updatedCommand = replacementPlans.map { replacementPlans =>
       val updatedContractAcceptance = sixWeeksPlanStartDate.plusWeeks(6)
-      originalCommand.copy(ratePlans = updatedRatePlans, contractAcceptance = updatedContractAcceptance)
+      originalCommand.copy(ratePlans = replacementPlans, contractAcceptance = updatedContractAcceptance)
     }
 
     updatedCommand.getOrElse(originalCommand)
@@ -114,7 +120,7 @@ class CheckoutService(identityService: IdentityService,
       paymentDelay = CheckoutService.paymentDelay(subscriptionData.productData, zuoraProperties)
       paymentMethod <- EitherT(attachPaymentMethodToStripeCustomer(payment, purchaserIds))
       initialCommand = createSubscribeRequest(personalData, soldToContact, requestData, plan, purchaserIds, paymentMethod, payment.makeAccount, Some(fulfilmentDelay), Some(paymentDelay))
-      subscribe = processIntroductoryPeriod(fulfilmentDelay, initialCommand)
+      subscribe = processSixWeekIntroductoryPeriod(fulfilmentDelay, initialCommand)
       validPromotion = promoCode.flatMap(promoService.validate[NewUsers](_, personalData.address.country.getOrElse(Country.UK), subscriptionData.productRatePlanId).toOption)
       withPromo = validPromotion.map(v => p.apply(v, prpId => catalog.paid.find(_.id == prpId).map(_.charges.billingPeriod).get, promoPlans)(subscribe)).getOrElse(subscribe)
       result <- EitherT(createSubscription(withPromo, purchaserIds))
