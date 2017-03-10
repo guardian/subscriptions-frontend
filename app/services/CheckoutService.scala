@@ -310,20 +310,12 @@ class CheckoutService(identityService: IdentityService,
       }
     }
 
-<<<<<<< HEAD
     val currentVersionExpired = subscription.termEndDate.isBefore(now).withContextLogging("currentVersionExpired")
-    // For a renewal, all dates should be identical. If the sub has expired, this date should be fast-forwarded to the next available paper date
-    val startDateForRenewal = {
-      if (currentVersionExpired) CheckoutService.determineFirstAvailablePaperDate(now) else subscription.termEndDate
-    }.withContextLogging("startDateForRenewal")
-    val contractEffective = startDateForRenewal
-    val customerAcceptance = startDateForRenewal
-=======
-    val currentVersionExpired = subscription.termEndDate.isBefore(now)
 
     // For a renewal, all dates should be identical. If the sub has expired, this date should be fast-forwarded to the next available paper date
-    val newTermStartDate = if (currentVersionExpired) CheckoutService.determineFirstAvailablePaperDate(now) else subscription.termEndDate
->>>>>>> 69bfd1f... Committing for backup
+    val newTermStartDate = {
+      if (currentVersionExpired) CheckoutService.determineFirstAvailablePaperDate(now) else subscription.termEndDate
+    }.withContextLogging("startDateForRenewal")
 
     def constructRenewCommand(contact: Contact): Future[Renew] = Future {
       val newRatePlan = RatePlan(renewal.plan.id.get, None)
