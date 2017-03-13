@@ -13,9 +13,9 @@ object BillingScheduleOps {
 
   implicit class BillingScheduleOps(billingSchedule: BillingSchedule) {
     def billsToDisplay = {
-      val amountOfBillsInNext12Months = billingSchedule.invoices.list.count(_.date.isBefore(now.plusYears(1)))
-      val maxBills = Math.min(amountOfBillsInNext12Months + 1, 13)
-      billingSchedule.invoices.list.take(maxBills)
+      val bills = billingSchedule.invoices.list
+      val amountOfBillsInNext12Months = bills.count(_.date.isBefore(now.plusYears(1)))
+      bills.take(amountOfBillsInNext12Months + 1)
     }
   }
 }
