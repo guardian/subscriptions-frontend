@@ -152,3 +152,9 @@
         border-color: $c-neutral2;
     }
 }
+
+.button:focus, .button:active, .button.active, .button:focus:active {
+    background-image: none;
+    outline: none;
+    box-shadow: none;
+}
