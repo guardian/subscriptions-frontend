@@ -44,7 +44,13 @@ object CheckoutService {
   )
 
   def determineFirstAvailablePaperDate(now: LocalDate): LocalDate = {
-    val nextAvailableDate = new LocalDate("2017-03-24")
+    val dayOfWeek = now.getDayOfWeek
+    val daysToFastForward = if (dayOfWeek <= 5) {
+      (5 - dayOfWeek) + 7 // Skips to a week on Friday
+    } else {
+      (5 - dayOfWeek) + 14 // We've just missed Saturday's fulfillment file creation, so we have to skip another Friday
+    }
+    val nextAvailableDate = now.plusDays(daysToFastForward)
     nextAvailableDate
   }
 
