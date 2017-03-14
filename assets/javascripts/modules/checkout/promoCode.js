@@ -97,6 +97,7 @@ define([
         applyPromotionToRatePlans(response.adjustedRatePlans);
     }
 
+
     function isRetention(r) {
         return ('promotion' in r) &&
             ('promotionType' in r.promotion) &&
@@ -106,6 +107,7 @@ define([
                     (r.promotion.promotionType.a.name === 'retention') || (r.promotion.promotionType.b.name === 'retention')
                 )
             );
+
     }
 
     function validate() {

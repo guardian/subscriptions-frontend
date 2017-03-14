@@ -1,7 +1,7 @@
 package services
 import com.gu.memsub.Benefit._
 import com.gu.memsub.Product.{Delivery, ZDigipack}
-import com.gu.memsub.Subscription.ProductRatePlanId
+import com.gu.memsub.Subscription.{ProductRatePlanChargeId, ProductRatePlanId}
 import com.gu.memsub._
 import com.gu.memsub.subsv2._
 import model.{DigipackData, PaperData}
@@ -29,13 +29,13 @@ class CheckoutServiceTest extends Specification {
     id = ProductRatePlanId("p"),
     name = "name",
     description = "desc",
-    charges = PaidCharge(Digipack, BillingPeriod.Month, PricingSummary(Map.empty)),
+    charges = PaidCharge(Digipack, BillingPeriod.Month, PricingSummary(Map.empty), ProductRatePlanChargeId("foo")),
     product = Product.Digipack,
     saving = None,
     s = Status.current
   )
 
-  val zuora = ZuoraProperties(paymentDelayInDays = Days.days(14), gracePeriodInDays = Days.days(2))
+  val zuora = ZuoraProperties(defaultDigitalPackFreeTrialPeriod = Days.days(14), gracePeriodInDays = Days.days(2))
   val paperData = Left(PaperData(new LocalDate("2016-07-30"), address, None, paperPlan))
   val digipackData = Right(DigipackData(digiPlan))
 

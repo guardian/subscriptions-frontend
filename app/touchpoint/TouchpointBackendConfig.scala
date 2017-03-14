@@ -62,6 +62,6 @@ object ZuoraProperties {
   }
 }
 case class ZuoraProperties(
-  paymentDelayInDays: Days,
+  defaultDigitalPackFreeTrialPeriod: Days,
   gracePeriodInDays: Days
 )

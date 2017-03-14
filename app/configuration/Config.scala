@@ -68,7 +68,7 @@ object Config {
   object Zuora {
     private val stageConfig = config.getConfig("touchpoint.backend.environments").getConfig(stage)
 
-    val paymentDelay = Days.days(stageConfig.getInt("zuora.paymentDelayInDays"))
+    val defaultDigitalPackFreeTrialPeriod = Days.days(stageConfig.getInt("zuora.paymentDelayInDays"))
   }
 
   val subscriptionsUrl = config.getString("subscriptions.url")

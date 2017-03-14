@@ -1,13 +1,12 @@
 package services
 
-import com.github.nscala_time.time.OrderingImplicits._
+import com.github.nscala_time.time.OrderingImplicits.LocalDateOrdering
 import com.gu.config.DiscountRatePlanIds
 import com.gu.i18n.Currency.GBP
 import com.gu.i18n.{Country, CountryGroup}
 import com.gu.identity.play.{AuthenticatedIdUser, IdMinimalUser}
-import com.gu.memsub.promo._
-import com.gu.memsub.promo.ValidPromotion
 import com.gu.memsub.promo.Promotion._
+import com.gu.memsub.promo.{ValidPromotion, _}
 import com.gu.memsub.services.{GetSalesforceContactForSub, PromoService, PaymentService => CommonPaymentService}
 import com.gu.memsub.subsv2.SubscriptionPlan.WeeklyPlan
 import com.gu.memsub.subsv2.{Catalog, ReaderType, Subscription}
@@ -27,20 +26,23 @@ import model.error.IdentityService._
 import model.error.SubsError
 import model.{Renewal, _}
 import org.joda.time.LocalDate.now
-import org.joda.time.{DateTime, Days, LocalDate}
+import org.joda.time.{Days, LocalDate}
 import touchpoint.ZuoraProperties
+import views.support.Pricing._
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scalaz.std.option._
 import scalaz.std.scalaFuture._
 import scalaz.syntax.monad._
 import scalaz.{EitherT, Monad, NonEmptyList, \/}
-import views.support.Pricing._
 
 object CheckoutService {
-
+  def fulfilmentDelay(in: Either[PaperData, DigipackData])(implicit now: LocalDate): Days = in.fold(
+    p => Days.daysBetween(now, p.startDate), d => Days.ZERO
+  )
   def paymentDelay(in: Either[PaperData, DigipackData], zuora: ZuoraProperties)(implicit now: LocalDate): Days = in.fold(
-    p => Days.daysBetween(now, p.startDate), d => zuora.gracePeriodInDays.plus(zuora.paymentDelayInDays)
+    p => Days.daysBetween(now, p.startDate), d => zuora.gracePeriodInDays.plus(zuora.defaultDigitalPackFreeTrialPeriod)
   )
 
   def determineFirstAvailablePaperDate(now: LocalDate): LocalDate = {
@@ -77,23 +79,23 @@ class CheckoutService(identityService: IdentityService,
     case _ => false
   }
 
-  def processIntroductoryPeriod(defaultPaymentDelay: Days, originalCommand: Subscribe): Subscribe = {
-    val additionalRateplan = (originalCommand.ratePlans.head.productRatePlanId match {
-      case catalog.weekly.zoneA.sixWeeks.id.get => Some(catalog.weekly.zoneA.quarter)
-      case catalog.weekly.zoneC.sixWeeks.id.get => Some(catalog.weekly.zoneC.quarter)
-      case _ => None
-    }).map(plan => RatePlan(plan.id.get, None))
+  private val allSixWeekAssociations = List(catalog.weekly.zoneA.associations, catalog.weekly.zoneC.associations).flatten
 
-    val updatedCommand = additionalRateplan.map { ratePlantoAdd =>
-      val updatedRatePlans = ratePlantoAdd <:: originalCommand.ratePlans
-
-      val defaultDelayDays = defaultPaymentDelay.getDays
-      val introductoryPeriodDelayDays = defaultDelayDays - 1
-
-      val updatedContractEffective = DateTime.now.toLocalDate.plusDays(introductoryPeriodDelayDays)
-      originalCommand.copy(ratePlans = updatedRatePlans, contractEffective = updatedContractEffective, contractAcceptance = updatedContractEffective.plusDays(43))
+  // This method is not genericised because the '6' is not stored in the association.
+  def processSixWeekIntroductoryPeriod(daysUntilFirstIssue: Days, originalCommand: Subscribe): Subscribe = {
+    val maybeSixWeekAssociation = allSixWeekAssociations.find(_._1.id.get == originalCommand.ratePlans.head.productRatePlanId)
+    val updatedCommand = maybeSixWeekAssociation.map { case (sixWeekPlan, recurringPlan) =>
+      val sixWeeksPlanStartDate = originalCommand.contractEffective.plusDays(daysUntilFirstIssue.getDays)
+      val replacementPlans = NonEmptyList(
+        RatePlan(
+          sixWeekPlan.id.get,
+          Some(ChargeOverride(sixWeekPlan.charges.chargeId.get, triggerDate = Some(sixWeeksPlanStartDate)))
+        ),
+        RatePlan(recurringPlan.id.get, None)
+      )
+      val updatedContractAcceptance = sixWeeksPlanStartDate.plusWeeks(6)
+      originalCommand.copy(ratePlans = replacementPlans, contractAcceptance = updatedContractAcceptance)
     }
-
     updatedCommand.getOrElse(originalCommand)
   }
 
@@ -116,10 +118,11 @@ class CheckoutService(identityService: IdentityService,
       memberId <- EitherT(createOrUpdateUserInSalesforce(subscriptionData, idMinimalUser))
       purchaserIds = PurchaserIdentifiers(memberId, idMinimalUser)
       payment <- EitherT(createPaymentType(purchaserIds, subscriptionData))
-      defaultPaymentDelay = CheckoutService.paymentDelay(subscriptionData.productData, zuoraProperties)
+      fulfilmentDelay = CheckoutService.fulfilmentDelay(subscriptionData.productData)
+      paymentDelay = CheckoutService.paymentDelay(subscriptionData.productData, zuoraProperties)
       paymentMethod <- EitherT(attachPaymentMethodToStripeCustomer(payment, purchaserIds))
-      initialCommand = createSubscribeRequest(personalData, soldToContact, requestData, plan, purchaserIds, paymentMethod, payment.makeAccount, Some(defaultPaymentDelay))
-      subscribe = processIntroductoryPeriod(defaultPaymentDelay, initialCommand)
+      initialCommand = createSubscribeRequest(personalData, soldToContact, requestData, plan, purchaserIds, paymentMethod, payment.makeAccount, Some(fulfilmentDelay), Some(paymentDelay))
+      subscribe = processSixWeekIntroductoryPeriod(fulfilmentDelay, initialCommand)
       validPromotion = promoCode.flatMap(promoService.validate[NewUsers](_, personalData.address.country.getOrElse(Country.UK), subscriptionData.productRatePlanId).toOption)
       withPromo = validPromotion.map(v => p.apply(v, prpId => catalog.paid.find(_.id == prpId).map(_.charges.billingPeriod).get, promoPlans)(subscribe)).getOrElse(subscribe)
       result <- EitherT(createSubscription(withPromo, purchaserIds))
@@ -235,9 +238,12 @@ class CheckoutService(identityService: IdentityService,
       purchaserIds: PurchaserIdentifiers,
       paymentMethod: PaymentMethod,
       acc: Account,
+      fufilmentDelay: Option[Days],
       paymentDelay: Option[Days]): Subscribe = {
 
-    val now = DateTime.now.toLocalDate
+    val acquisitionDate = now
+    val fulfilmentDate = fufilmentDelay.map(delay => now.plusDays(delay.getDays)).getOrElse(acquisitionDate)
+    val firstPaymentDate = paymentDelay.map(delay => now.plusDays(delay.getDays)).getOrElse(fulfilmentDate)
 
     Subscribe(
       account = acc,
@@ -251,8 +257,8 @@ class CheckoutService(identityService: IdentityService,
         address = address,
         email = personalData.email  // TODO once we have gifting change this to the Giftee's email address
       )),
-      contractEffective = now,
-      contractAcceptance = paymentDelay.map(delay => now.plusDays(delay.getDays)).getOrElse(now),
+      contractEffective = acquisitionDate,
+      contractAcceptance = firstPaymentDate,
       supplierCode = requestData.supplierCode,
       ipCountry = requestData.ipCountry
     )
@@ -313,12 +319,11 @@ class CheckoutService(identityService: IdentityService,
     }
 
     val currentVersionExpired = subscription.termEndDate.isBefore(now).withContextLogging("currentVersionExpired")
+
     // For a renewal, all dates should be identical. If the sub has expired, this date should be fast-forwarded to the next available paper date
-    val startDateForRenewal = {
+    val newTermStartDate = {
       if (currentVersionExpired) CheckoutService.determineFirstAvailablePaperDate(now) else subscription.termEndDate
     }.withContextLogging("startDateForRenewal")
-    val contractEffective = startDateForRenewal
-    val customerAcceptance = startDateForRenewal
 
     def constructRenewCommand(contact: Contact): Future[Renew] = Future {
       val newRatePlan = RatePlan(renewal.plan.id.get, None)
@@ -327,8 +332,7 @@ class CheckoutService(identityService: IdentityService,
         currentTermStartDate = subscription.termStartDate,
         currentTermEndDate = subscription.termEndDate,
         newRatePlans = NonEmptyList(newRatePlan),
-        contractEffectiveDate = contractEffective,
-        customerAcceptanceDate = customerAcceptance,
+        newTermStartDate = newTermStartDate,
         promoCode = None,
         autoRenew = renewal.plan.charges.billingPeriod.isRecurring,
         fastForwardTermStartDate = currentVersionExpired // If the sub has expired, we need to shift the term dates forward
@@ -394,7 +398,7 @@ class CheckoutService(identityService: IdentityService,
       renewCommand <- constructRenewCommand(contact)
       amendResult <- zuoraService.renewSubscription(renewCommand)
       _ <- ensureEmail(contact, subscription)
-      _ <- exactTargetService.enqueueRenewalEmail(subscription, renewal, getSubscriptionDetailsForEmail(getValidPromotion(contact)), contact, renewal.email, customerAcceptance, contractEffective)
+      _ <- exactTargetService.enqueueRenewalEmail(subscription, renewal, getSubscriptionDetailsForEmail(getValidPromotion(contact)), contact, renewal.email, newTermStartDate)
     }
       yield {
         updateResult
