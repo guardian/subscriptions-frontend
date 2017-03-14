@@ -99,15 +99,13 @@ define([
 
 
     function isRetention(r) {
-        return ('promotion' in r) &&
-            ('promotionType' in r.promotion) &&
-            (
-                (r.promotion.promotionType.name === 'retention')
-                || ('a' in r.promotion.promotionType &&
-                    (r.promotion.promotionType.a.name === 'retention') || (r.promotion.promotionType.b.name === 'retention')
-                )
-            );
-
+        if(r.promotion == null || r.promotion.promotionType == null){
+            return false;
+        }
+        if('a' in r.promotion.promotionType){
+            return (r.promotion.promotionType.a.name === 'retention') || (r.promotion.promotionType.b.name === 'retention');
+        }
+        return (r.promotion.promotionType.name === 'retention');
     }
 
     function validate() {
