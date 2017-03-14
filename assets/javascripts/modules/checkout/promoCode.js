@@ -97,6 +97,12 @@ define([
         applyPromotionToRatePlans(response.adjustedRatePlans);
     }
 
+    function isRetention(r){
+        return ('promotion' in r) &&
+        ('promotionType' in r.promotion) &&
+        ((r.promotion.promotionType.name === 'retention') || (r.promotion.promotionType.a.name === 'retention') || (r.promotion.promotionType.b.name === 'retention'));
+    }
+
     function validate() {
         var promoCode = $inputBox.val().trim(),
             ratePlanId = ratePlanChoice.getSelectedRatePlanId(),
@@ -115,28 +121,30 @@ define([
             type: 'json',
             method: 'GET',
             url: jsRoutes.controllers.Promotion.validateForProductRatePlan(promoCode, ratePlanId, country, currency).url
-        }).then(function (a)
+        }).then(function (r)
         {
-            var retention = 'promotion' in a &&
-                        'promotionType' in a.promotion &&
-              a.promotion.promotionType.name === 'retention';
-
-            if (retention) {
+            if (isRetention(r)) {
                 displayRenew();
-            } else if (a.isValid) {
-                displayPromotion(a, promoCode);
+            } else if (r.isValid) {
+                displayPromotion(r, promoCode);
                 bindExtraKeyListener();
             } else {
-                displayError(a.errorMessage);
+                displayError(r.errorMessage);
             }
-        }).catch(function (a) {
+        }).catch(function (r) {
             // Content of error codes are not parsed by ajax/reqwest.
-            if (a && a.response) {
-                var b = JSON.parse(a.response);
-                if (b && b.errorMessage) {
-                    displayError(b.errorMessage);
-                    return;
+            if (r && r.response) {
+                var j = JSON.parse(r.response);
+                if (j){
+                    if(isRetention(j)){
+                        displayRenew();
+                        return;
+                    } else if (j.errorMessage) {
+                        displayError(j.errorMessage);
+                        return;
+                    }
                 }
+
             }
             displayError();
         });
