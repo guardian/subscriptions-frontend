@@ -33,7 +33,7 @@ object WeeklyLandingPage extends Controller {
       val hreflangs = CountryGroup.countries.map { country =>
         Hreflang(Config.subscriptionsUrl + routes.WeeklyLandingPage.withCountry(country.alpha2).url, s"en-${country.alpha2}")
       }
-      val hreflang = Hreflangs(Config.subscriptionsUrl + routes.WeeklyLandingPage.withCountry("int").url, hreflangs)
+      val hreflang = Hreflangs(Config.subscriptionsUrl + routes.WeeklyLandingPage.withCountry(country.alpha2).url, hreflangs)
       Ok(weeklyLandingPage(country, catalog, None, None,description, PegdownMarkdownRenderer, hreflangs = hreflang))
     }
   }
