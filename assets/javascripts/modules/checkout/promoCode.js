@@ -97,10 +97,17 @@ define([
         applyPromotionToRatePlans(response.adjustedRatePlans);
     }
 
-    function isRetention(r){
+
+    function isRetention(r) {
         return ('promotion' in r) &&
-        ('promotionType' in r.promotion) &&
-        ((r.promotion.promotionType.name === 'retention') || (r.promotion.promotionType.a.name === 'retention') || (r.promotion.promotionType.b.name === 'retention'));
+            ('promotionType' in r.promotion) &&
+            (
+                (r.promotion.promotionType.name === 'retention')
+                || ('a' in r.promotion.promotionType &&
+                    (r.promotion.promotionType.a.name === 'retention') || (r.promotion.promotionType.b.name === 'retention')
+                )
+            );
+
     }
 
     function validate() {
