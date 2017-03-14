@@ -6,12 +6,22 @@
 @import views.support.LandingPageOps._
 @import views.support.MarkdownRenderer
 
-@(currency: Currency, country: Country, catalog: Catalog, promoCode: PromoCode, promotion: PromoWithDigitalPackLandingPage, md: MarkdownRenderer)
+@import controllers.WeeklyLandingPage.Hreflangs
+@(
+    currency: Currency,
+    country: Country,
+    catalog: Catalog,
+    promoCode: PromoCode,
+    promotion: PromoWithDigitalPackLandingPage,
+    md: MarkdownRenderer,
+    hreflangs: Hreflangs
+)
 @plan = @{catalog.digipack.month}
 @anyPromotion = @{asAnyPromotion(promotion)}
 @main(
     title = "Subscribe to the Guardian Digital Pack offer | The Guardian",
-    bodyClasses = Seq("is-wide")
+    bodyClasses = Seq("is-wide"),
+    hreflangs = Some(hreflangs)
 ) {
 
     <main class="page-container promo-landing-page">
