@@ -1,7 +1,15 @@
-@(title: String, description: Option[String], jsVars: model.JsVars, touchpointBackendResolutionOpt: Option[services.TouchpointBackend.Resolution])
+@import controllers.WeeklyLandingPage.Hreflangs
+@(
+    title: String,
+    description: Option[String],
+    jsVars: model.JsVars,
+    touchpointBackendResolutionOpt: Option[services.TouchpointBackend.Resolution],
+    hreflang: Option[Hreflangs]
+)
 
 @import play.api.Play
 @import controllers.CachedAssets.hashedPathFor
+@import controllers.WeeklyLandingPage.Hreflang
 
 <meta charset="utf-8">
 
@@ -16,6 +24,12 @@
 <meta property="og:title" content="@title"/>
 @description.map { d => <meta name="og:description" content="@d" /> }
 <meta property="og:type" content="website"/>
+    @hreflang.map { case Hreflangs(href, langMap) =>
+    <link rel="canonical" href="@href">
+        @langMap.map { case Hreflang(href, lang) =>
+        <link rel="alternate" href="@href" hreflang="@lang">
+        }
+    }
 
 @fragments.javascriptFirstSteps(jsVars, touchpointBackendResolutionOpt)
 

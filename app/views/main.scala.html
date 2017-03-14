@@ -6,6 +6,7 @@
 @import com.gu.memsub.Product
 @import model.DigitalEdition
 
+@import controllers.WeeklyLandingPage.Hreflangs
 @(
     title: String,
     description: Option[String] = None,
@@ -14,13 +15,14 @@
     touchpointBackendResolutionOpt: Option[services.TouchpointBackend.Resolution] = None,
     product: Option[Product] = None,
     edition: DigitalEdition = DigitalEdition.INT,
-    managementPage: Boolean = false
+    managementPage: Boolean = false,
+    hreflangs: Option[Hreflangs] = None
 )(content: Html)
 
 <!DOCTYPE html>
 <html lang="en-GB">
 <head>
-    @fragments.head(title, description, jsVars, touchpointBackendResolutionOpt)
+    @fragments.head(title, description, jsVars, touchpointBackendResolutionOpt, hreflangs)
 </head>
     <body class="js-off @bodyClasses.mkString(" ")">
         @for(
