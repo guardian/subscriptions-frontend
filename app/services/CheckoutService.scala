@@ -26,7 +26,7 @@ import model.error.IdentityService._
 import model.error.SubsError
 import model.{Renewal, _}
 import org.joda.time.LocalDate.now
-import org.joda.time.{Days, LocalDate}
+import org.joda.time.{DateTimeConstants, Days, LocalDate}
 import touchpoint.ZuoraProperties
 import views.support.Pricing._
 
@@ -44,16 +44,14 @@ object CheckoutService {
   def paymentDelay(in: Either[PaperData, DigipackData], zuora: ZuoraProperties)(implicit now: LocalDate): Days = in.fold(
     p => Days.daysBetween(now, p.startDate), d => zuora.gracePeriodInDays.plus(zuora.defaultDigitalPackFreeTrialPeriod)
   )
+  def nextFriday(d: LocalDate):LocalDate = d match {
+    case weekday if d.getDayOfWeek < DateTimeConstants.SATURDAY => d.withDayOfWeek(DateTimeConstants.FRIDAY)
+    case weekend => d.plusWeeks(1).withDayOfWeek(DateTimeConstants.FRIDAY)
+  }
 
   def determineFirstAvailableWeeklyDate(now: LocalDate): LocalDate = {
     val initialFulfilment = new LocalDate("2017-03-24")
-    val dayOfWeek = now.getDayOfWeek
-    val daysToFastForward = if (dayOfWeek <= 5) {
-      (5 - dayOfWeek) + 7 // Skips to a week on Friday
-    } else {
-      (5 - dayOfWeek) + 14 // We've just missed Saturday's fulfillment file creation, so we have to skip another Friday
-    }
-    val nextAvailableDate = now.plusDays(daysToFastForward)
+    val nextAvailableDate = nextFriday(now plusWeeks 1)
     if(nextAvailableDate isAfter initialFulfilment) nextAvailableDate else initialFulfilment
   }
 
