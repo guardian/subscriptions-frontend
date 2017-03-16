@@ -50,7 +50,7 @@ object CheckoutService {
   }
 
   def determineFirstAvailableWeeklyDate(now: LocalDate): LocalDate = {
-    val initialFulfilment = new LocalDate("2017-03-24")
+    val initialFulfilment = new LocalDate("2017-03-31")
     val nextAvailableDate = nextFriday(now plusWeeks 1)
     if(nextAvailableDate isAfter initialFulfilment) nextAvailableDate else initialFulfilment
   }
