@@ -3,8 +3,8 @@ package monitoring
 import ch.qos.logback.classic.filter.ThresholdFilter
 import ch.qos.logback.classic.{Logger, LoggerContext}
 import configuration.Config
-import net.kencochrane.raven.RavenFactory
-import net.kencochrane.raven.logback.SentryAppender
+import com.getsentry.raven.RavenFactory
+import com.getsentry.raven.logback.SentryAppender
 import org.slf4j.Logger.ROOT_LOGGER_NAME
 import org.slf4j.LoggerFactory
 
@@ -26,6 +26,7 @@ object SentryLogging {
         filter.start() // OMG WHY IS THIS NECESSARY LOGBACK?
 
         val sentryAppender = new SentryAppender(RavenFactory.ravenInstance(dsn)) {
+          setRelease(app.BuildInfo.buildNumber)
           addFilter(filter)
           setTags(tagsString)
           setContext(LoggerFactory.getILoggerFactory.asInstanceOf[LoggerContext])
