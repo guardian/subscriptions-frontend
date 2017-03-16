@@ -45,7 +45,8 @@ object CheckoutService {
     p => Days.daysBetween(now, p.startDate), d => zuora.gracePeriodInDays.plus(zuora.defaultDigitalPackFreeTrialPeriod)
   )
 
-  def determineFirstAvailablePaperDate(now: LocalDate): LocalDate = {
+  def determineFirstAvailableWeeklyDate(now: LocalDate): LocalDate = {
+    val initialFulfilment = new LocalDate("2017-03-24")
     val dayOfWeek = now.getDayOfWeek
     val daysToFastForward = if (dayOfWeek <= 5) {
       (5 - dayOfWeek) + 7 // Skips to a week on Friday
@@ -53,7 +54,7 @@ object CheckoutService {
       (5 - dayOfWeek) + 14 // We've just missed Saturday's fulfillment file creation, so we have to skip another Friday
     }
     val nextAvailableDate = now.plusDays(daysToFastForward)
-    nextAvailableDate
+    if(nextAvailableDate isAfter initialFulfilment) nextAvailableDate else initialFulfilment
   }
 
 }
@@ -322,7 +323,7 @@ class CheckoutService(identityService: IdentityService,
 
     // For a renewal, all dates should be identical. If the sub has expired, this date should be fast-forwarded to the next available paper date
     val newTermStartDate = {
-      if (currentVersionExpired) CheckoutService.determineFirstAvailablePaperDate(now) else subscription.termEndDate
+      if (currentVersionExpired) CheckoutService.determineFirstAvailableWeeklyDate(now) else subscription.termEndDate
     }.withContextLogging("startDateForRenewal")
 
     def constructRenewCommand(contact: Contact): Future[Renew] = Future {

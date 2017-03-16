@@ -53,15 +53,15 @@ class CheckoutServiceTest extends Specification {
   "determineFirstAvailablePaperDate" should {
 
     "Calculate the next available Friday correctly (if today is a Monday)" in {
-       CheckoutService.determineFirstAvailablePaperDate(new LocalDate("2017-03-06")) mustEqual(new LocalDate("2017-03-17"))
+       CheckoutService.determineFirstAvailableWeeklyDate(new LocalDate("2018-03-06")) mustEqual(new LocalDate("2018-03-17"))
     }
 
     "Calculate the next available Friday correctly (if today is a Friday)" in {
-      CheckoutService.determineFirstAvailablePaperDate(new LocalDate("2017-03-10")) mustEqual(new LocalDate("2017-03-17"))
+      CheckoutService.determineFirstAvailableWeeklyDate(new LocalDate("2018-03-10")) mustEqual(new LocalDate("2018-03-17"))
     }
 
     "Calculate the next available Friday correctly (if today is a Sunday)" in {
-      CheckoutService.determineFirstAvailablePaperDate(new LocalDate("2017-03-12")) mustEqual(new LocalDate("2017-03-24"))
+      CheckoutService.determineFirstAvailableWeeklyDate(new LocalDate("2018-03-12")) mustEqual(new LocalDate("2018-03-24"))
     }
 
   }
