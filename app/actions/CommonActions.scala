@@ -39,7 +39,8 @@ object CommonActions {
     "userhelp@guardian.co.uk",
     "dig.qa@guardian.co.uk",
     "subscriptions.dev@guardian.co.uk",
-    "subscriptions.cas@guardian.co.uk"
+    "subscriptions.cas@guardian.co.uk",
+    "ios@guardian.co.uk"
   ))
 
   val CachedAction = resultModifier(Cached(_))
