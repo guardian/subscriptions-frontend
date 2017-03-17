@@ -13,6 +13,7 @@ import com.gu.memsub.subsv2.{Catalog, ReaderType, Subscription}
 import com.gu.memsub.{Address, Product}
 import com.gu.salesforce.{Contact, ContactId}
 import com.gu.stripe.Stripe
+import com.gu.zuora.ZuoraRestService
 import com.gu.zuora.api.ZuoraService
 import com.gu.zuora.soap.models.Commands.{Account, PaymentMethod, RatePlan, Subscribe, _}
 import com.gu.zuora.soap.models.Queries
@@ -57,16 +58,18 @@ object CheckoutService {
 
 }
 
-class CheckoutService(identityService: IdentityService,
-                      salesforceService: SalesforceService,
-                      paymentService: PaymentService,
-                      catalog: Catalog,
-                      zuoraService: ZuoraService,
-                      exactTargetService: ExactTargetService,
-                      zuoraProperties: ZuoraProperties,
-                      promoService: PromoService,
-                      promoPlans: DiscountRatePlanIds,
-                      commonPaymentService: CommonPaymentService) extends ContextLogging {
+class CheckoutService(
+  identityService: IdentityService,
+  salesforceService: SalesforceService,
+  paymentService: PaymentService,
+  catalog: Catalog,
+  zuoraService: ZuoraService,
+  exactTargetService: ExactTargetService,
+  zuoraProperties: ZuoraProperties,
+  promoService: PromoService,
+  promoPlans: DiscountRatePlanIds,
+  commonPaymentService: CommonPaymentService
+) extends ContextLogging {
 
   type NonFatalErrors = Seq[SubsError]
   type PostSubscribeResult = (Option[UserIdData], NonFatalErrors)
@@ -304,7 +307,7 @@ class CheckoutService(identityService: IdentityService,
   }
 
   def renewSubscription(subscription: Subscription[WeeklyPlanOneOff], renewal: Renewal)
-    (implicit p: PromotionApplicator[com.gu.memsub.promo.Renewal, Renew]) = {
+    (implicit p: PromotionApplicator[com.gu.memsub.promo.Renewal, Renew], zuoraRestService: ZuoraRestService[Future]) = {
 
     implicit val context = subscription
 
@@ -361,15 +364,16 @@ class CheckoutService(identityService: IdentityService,
       }
     }
 
-    def ensureEmail(contact: Contact, subscription: Subscription[WeeklyPlan]) =
-      if (subscription.readerType != ReaderType.Direct || contact.email.isDefined) {
+    def ensureEmail(contact: Queries.Contact, subscription: Subscription[WeeklyPlan]) = {
+      if (contact.email.isDefined) {
         info(s"email submitted on backend but not updated: ${subscription.readerType}, ${contact.email}")
         Future.successful(\/.right(()))
       } else {
-        salesforceService.repo.addEmail(contact, renewal.email).map { either =>
+        zuoraRestService.addEmail(subscription.accountName, renewal.email).map { either =>
           either.fold[Unit]({ err => error(s"couldn't update email for sub: ${subscription.id}: $err") }, u => u)
         }
       }
+    }
 
     def getSubscriptionDetailsForEmail(maybeValidPromotion: Option[ValidPromotion[PromoContext]]): String = {
       val currency = subscription.currency
@@ -397,7 +401,7 @@ class CheckoutService(identityService: IdentityService,
       updateResult <- zuoraService.createPaymentMethod(createPaymentMethod).withContextLogging("createPaymentMethod", _.id)
       renewCommand <- constructRenewCommand(contact)
       amendResult <- zuoraService.renewSubscription(renewCommand)
-      _ <- ensureEmail(contact, subscription)
+      _ <- ensureEmail(billto, subscription)
       _ <- exactTargetService.enqueueRenewalEmail(subscription, renewal, getSubscriptionDetailsForEmail(getValidPromotion(contact)), contact, renewal.email, newTermStartDate)
     }
       yield {

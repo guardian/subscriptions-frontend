@@ -15,7 +15,7 @@
 @import org.joda.time.LocalDate.now
 @import com.gu.memsub.subsv2.ReaderType
 @(
-    subscription: Subscription[WeeklyPlanOneOff], contact: Contact, billToCountry: Country, plans: List[WeeklyPlanInfo], currency: Currency, promoCode: Option[PromoCode]
+    subscription: Subscription[WeeklyPlanOneOff], contact: Contact, email: Option[String], billToCountry: Country, plans: List[WeeklyPlanInfo], currency: Currency, promoCode: Option[PromoCode]
 )(implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackend.Resolution)
 
 @main("Your Guardian Weekly subscription | The Guardian", bodyClasses = List("is-wide"), edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution), managementPage = true) {
@@ -58,7 +58,7 @@
                 </p>
 
                 <div class="js-weekly-renew"
-                data-email="@if(subscription.readerType == ReaderType.Direct) {@contact.email} else {}"
+                data-email="@email"
                 data-billing-country="@billToCountry.alpha2"
                 data-promo-code="@promoCode.map(_.get)"
                 data-currency="@currency.iso"

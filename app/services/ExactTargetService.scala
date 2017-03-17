@@ -15,6 +15,7 @@ import com.gu.memsub.subsv2.reads.SubPlanReads._
 import com.gu.memsub.subsv2.{Subscription, SubscriptionPlan => Plan}
 import com.gu.memsub.{Subscription => _, _}
 import com.gu.salesforce.Contact
+import com.gu.zuora.ZuoraRestService
 import com.gu.zuora.api.ZuoraService
 import com.gu.zuora.soap.models.Results.SubscribeResult
 import com.typesafe.scalalogging.LazyLogging
@@ -164,28 +165,34 @@ class ExactTargetService(
       billingSchedule: BillingSchedule,
       numberOfSuspensionsLinedUp: Int,
       daysUsed: Int,
-      daysAllowed: Int): Future[Unit] = {
+      daysAllowed: Int
+  )(implicit zuoraRestService: ZuoraRestService[Future]): Future[Unit] = {
 
     val buildDataExtensionRow =
-      GetSalesforceContactForSub(subscription)(zuoraService, salesforceService.repo, defaultContext).map { salesforceContact =>
-        HolidaySuspensionBillingScheduleDataExtensionRow(
-          email = salesforceContact.email,
-          saluation = constructSalutation(salesforceContact.title, salesforceContact.firstName, Some(salesforceContact.lastName)),
-          subscriptionName = subscription.name.get,
-          subscriptionCurrency = subscription.currency,
-          packageName = packageName,
-          billingSchedule = billingSchedule,
-          numberOfSuspensionsLinedUp = numberOfSuspensionsLinedUp,
-          daysUsed = daysUsed,
-          daysAllowed = daysAllowed
-        )
-      }
+      EitherT(GetSalesforceContactForSub(subscription)(zuoraService, salesforceService.repo, defaultContext).flatMap { salesforceContact =>
+        EitherT(zuoraRestService.getAccount(subscription.accountName)).map { account =>
+          HolidaySuspensionBillingScheduleDataExtensionRow(
+            email = account.billToContact.email,
+            saluation = constructSalutation(salesforceContact.title, salesforceContact.firstName, Some(salesforceContact.lastName)),
+            subscriptionName = subscription.name.get,
+            subscriptionCurrency = subscription.currency,
+            packageName = packageName,
+            billingSchedule = billingSchedule,
+            numberOfSuspensionsLinedUp = numberOfSuspensionsLinedUp,
+            daysUsed = daysUsed,
+            daysAllowed = daysAllowed
+          )
+        }.run
+      })
 
     buildDataExtensionRow.flatMap { row =>
-      SqsClient.sendDataExtensionToQueue(Config.holidaySuspensionEmailQueue, row).map {
-        case Success(sendMsgResult) => logger.info(s"Successfully enqueued ${subscription.name.get}'s updated billing schedule email.")
-        case Failure(e) => logger.error(s"Failed to enqueue ${subscription.name.get}'s updated billing schedule email. Details were: " + row.toString, e)
-      }
+      EitherT(SqsClient.sendDataExtensionToQueue(Config.holidaySuspensionEmailQueue, row).map {
+        case Success(sendMsgResult) => \/.right(())
+        case Failure(e) => \/.left(s"Details were: ${row.toString}, ${e.toString}")
+      })
+    }.run.map {
+      case \/-(()) => logger.info(s"Successfully enqueued ${subscription.name.get}'s updated billing schedule email.")
+      case -\/(e) => logger.error(s"Failed to enqueue ${subscription.name.get}'s updated billing schedule email. $e")
     }
   }
 

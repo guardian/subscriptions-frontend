@@ -13,7 +13,8 @@ import com.gu.stripe.StripeService
 import com.gu.subscriptions.Discounter
 import com.gu.subscriptions.suspendresume.SuspensionService
 import com.gu.zuora
-import com.gu.zuora.{rest, soap}
+import com.gu.zuora.rest.SimpleClient
+import com.gu.zuora.{ZuoraRestService, rest, soap}
 import configuration.Config
 import forms.SubscriptionsForm
 import monitoring.TouchpointBackendMetrics
@@ -49,6 +50,7 @@ trait TouchpointBackend {
   def subsForm: SubscriptionsForm
   def exactTargetService: ExactTargetService
   def checkoutService: CheckoutService
+  implicit def simpleRestClient: SimpleClient[Future]
 }
 
 object TouchpointBackend {
@@ -65,12 +67,12 @@ object TouchpointBackend {
       val backendEnv = config.stripe.envName
     }
     val soapClient = new soap.ClientWithFeatureSupplier(Set.empty, config.zuoraSoap, loggingRunner(soapServiceMetrics), configurableLoggingRunner(20.seconds, soapServiceMetrics))
-    val simpleRestClient = new rest.SimpleClient[Future](config.zuoraRest, futureRunner)
     val newProductIds = Config.productIds(config.environmentName)
     val _stripeService = new StripeService(config.stripe, loggingRunner(touchpointBackendMetrics))
     val sfSimpleContactRepo = new SimpleContactRepository(config.salesforce, system.scheduler, Config.appName)
 
     new TouchpointBackend {
+      implicit val simpleRestClient: SimpleClient[Future] = new rest.SimpleClient[Future](config.zuoraRest, futureRunner)
       lazy val environmentName = config.environmentName
       lazy val salesforceService = new SalesforceServiceImp(sfSimpleContactRepo)
       lazy val catalogService = new subsv2.services.CatalogService[Future](newProductIds, simpleRestClient, Await.result(_, 10.seconds), backendType.name)
