@@ -345,7 +345,7 @@ class CheckoutService(identityService: IdentityService,
         code <- renewal.promoCode.withContextLogging("promo code from client")
         deliveryCountryString <- contact.mailingCountry.withContextLogging("salesforce mailing country")
         deliveryCountry <- Some(Country.UK).withContextLogging("delivery country object")
-        validPromotion <- None
+        validPromotion <- promoService.validate[com.gu.memsub.promo.Renewal](code, deliveryCountry, renewal.plan.id).withContextLogging("validated promotion").toOption
     } yield validPromotion
 
     def applyPromoIfNecessary(maybeValidPromo: Option[ValidPromotion[com.gu.memsub.promo.Renewal]], basicRenewCommand: Renew): Renew = {

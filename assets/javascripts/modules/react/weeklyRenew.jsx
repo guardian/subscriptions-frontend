@@ -73,6 +73,7 @@ class WeeklyRenew extends React.Component {
         this.click = this.click.bind(this);
         this.buttonText = this.buttonText.bind(this);
         this.validatePromo = this.validatePromo.bind(this);
+        this.getPrice = this.getPrice.bind(this);
         this.handlePlan = this.handlePlan.bind(this);
         this.getPlan = this.getPlan.bind(this);
 
@@ -112,30 +113,35 @@ class WeeklyRenew extends React.Component {
             }).reduce((a, b) => {
                 return !!(a || b)
             }, false);
-            console.log('shit');
             if (update) {
+                let price = this.getPrice(this.getPlan(newPlans));
                 //This is a weekly promotion
                 this.setState({
                     promoStatus: status.VALID,
                     plans: newPlans,
-                    promotionDescription: response.promotion.description
+                    promotionDescription: response.promotion.description,
+                    displayedPrice: price
                 });
-                this.handlePlan(this.getPlan(newPlans))
             } else {
+                let price = this.getPrice(this.getPlan(this.props.plans));
                 //It's a good promotion, but it's not a weekly one
                 this.setState({
                     promotionDescription: 'The promotion you have entered is not currently valid for any of the available billing periods.',
                     promoStatus: status.INVALID,
-                    plans: this.props.plans
+                    plans: this.props.plans,
+                    displayedPrice: price
                 });
-                this.handlePlan(this.getPlan(this.props.plans))
             }
         }).catch((payload) => {
+            console.log(payload);
+            let price = this.getPrice(this.getPlan(this.props.plans));
+
             let response = JSON.parse(payload.response);
             this.setState({
                 promotionDescription: response.errorMessage,
                 promoStatus: status.INVALID,
-                plans: this.props.plans
+                plans: this.props.plans,
+                displayedPrice: price
             })
         });
     }
@@ -170,9 +176,12 @@ class WeeklyRenew extends React.Component {
 
     handlePlan(plan) {
         return () => {
-            let price = plan.promotionalPrice || plan.price; //TODO: refactor into function
-            this.setState({plan: plan.id, displayedPrice: price});
+            this.setState({plan: plan.id, displayedPrice: this.getPrice(plan)});
         }
+    }
+
+    getPrice(plan) {
+        return plan.promotionalPrice || plan.price;
     }
 
     getPlan(plans) {
