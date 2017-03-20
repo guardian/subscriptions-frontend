@@ -1,20 +1,18 @@
 @import model.DigitalEdition
-@import views.support.DigitalEdition._
-
 @import model.DigitalEdition.UK
 @(edition: DigitalEdition, managementPage: Boolean)
 <nav class="global-nav">
     <div class="global-nav__inner gs-container">
-        <a href="/?INTCMP=GU_SUBSCRIPTIONS_NAV" class="global-nav__link">home</a>
-        <a href="/@edition.id/digital" class="global-nav__link">digital</a>
+        <a href="/" class="global-nav__link">home</a>
+        <a href="@routes.PromoLandingPage.render(s"DNAV${edition.id.toUpperCase}1", None).url?edition=@edition.id" class="global-nav__link">digital</a>
         @if(edition == UK) {
-            <a href="/collection/paper" class="global-nav__link">paper</a>
+            <a href="@routes.PromoLandingPage.render(s"NNAV${edition.id.toUpperCase}P", None).url" class="global-nav__link">paper</a>
         }
-        <a href="/weekly?INTCMP=GU_SUBSCRIPTIONS_NAV" class="global-nav__link">weekly</a>
+        <a href="@routes.PromoLandingPage.render(s"WNAV${edition.id.toUpperCase}", edition.countryGroup.defaultCountry).url" class="global-nav__link">weekly</a>
         @if(managementPage) {
             <a href="@routes.AccountManagement.logout" class="global-nav__link global-nav__link--right">sign out</a>
         } else {
-            <a href="/manage?INTCMP=GU_SUBSCRIPTIONS_NAV" class="global-nav__link global-nav__link--right">manage</a>
+            <a href="/manage" class="global-nav__link global-nav__link--right">manage</a>
         }
     </div>
 </nav>
