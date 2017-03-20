@@ -6,7 +6,7 @@ import com.gu.i18n.Currency.GBP
 import com.gu.i18n.{Country, CountryGroup}
 import com.gu.identity.play.{AuthenticatedIdUser, IdMinimalUser}
 import com.gu.memsub.promo.Promotion._
-import com.gu.memsub.promo.{ValidPromotion, _}
+import com.gu.memsub.promo.{Renewal, ValidPromotion, _}
 import com.gu.memsub.services.{GetSalesforceContactForSub, PromoService, PaymentService => CommonPaymentService}
 import com.gu.memsub.subsv2.SubscriptionPlan.WeeklyPlan
 import com.gu.memsub.subsv2.{Catalog, ReaderType, Subscription}
@@ -303,7 +303,7 @@ class CheckoutService(identityService: IdentityService,
     }
   }
 
-  def renewSubscription(subscription: Subscription[WeeklyPlanOneOff], renewal: Renewal)
+  def renewSubscription(subscription: Subscription[WeeklyPlanOneOff], renewal: model.Renewal)
     (implicit p: PromotionApplicator[com.gu.memsub.promo.Renewal, Renew]) = {
 
     implicit val context = subscription
@@ -324,7 +324,7 @@ class CheckoutService(identityService: IdentityService,
       if (currentVersionExpired) CheckoutService.determineFirstAvailableWeeklyDate(now) else subscription.termEndDate
     }.withContextLogging("startDateForRenewal")
 
-    def constructRenewCommand(contact: Contact): Future[Renew] = Future {
+    def constructRenewCommand(maybeValidPromo: Option[ValidPromotion[com.gu.memsub.promo.Renewal]]): Future[Renew] = Future {
       val newRatePlan = RatePlan(renewal.plan.id.get, None)
       val basicRenewCommand = Renew(
         subscriptionId = subscription.id.get,
@@ -337,19 +337,19 @@ class CheckoutService(identityService: IdentityService,
         autoRenew = renewal.plan.charges.billingPeriod.isRecurring,
         fastForwardTermStartDate = currentVersionExpired // If the sub has expired, we need to shift the term dates forward
       )
-      val finalRenewCommand = applyPromoIfNecessary(contact, basicRenewCommand)
+      val finalRenewCommand = applyPromoIfNecessary(maybeValidPromo, basicRenewCommand)
       finalRenewCommand.withContextLogging("final renew command")
     }
 
-    def getValidPromotion(contact: Contact) = for {
+    def getValidPromotion(contact: Contact): Option[ValidPromotion[com.gu.memsub.promo.Renewal]] = for {
         code <- renewal.promoCode.withContextLogging("promo code from client")
         deliveryCountryString <- contact.mailingCountry.withContextLogging("salesforce mailing country")
         deliveryCountry <- Some(Country.UK).withContextLogging("delivery country object")
-        validPromotion <- promoService.validate[com.gu.memsub.promo.Renewal](code, deliveryCountry, renewal.plan.id).withContextLogging("validated promotion").toOption
+        validPromotion <- None
     } yield validPromotion
 
-    def applyPromoIfNecessary(contact: Contact, basicRenewCommand: Renew): Renew = {
-      getValidPromotion(contact) match {
+    def applyPromoIfNecessary(maybeValidPromo: Option[ValidPromotion[com.gu.memsub.promo.Renewal]], basicRenewCommand: Renew): Renew = {
+      maybeValidPromo match {
         case Some(validPromotion) => {
           info(s"Attempting to apply the promotion ${validPromotion.code}")
           p.apply(validPromotion, prpId => catalog.paid.find(_.id == prpId).map(_.charges.billingPeriod).get, promoPlans)(basicRenewCommand)
@@ -371,7 +371,7 @@ class CheckoutService(identityService: IdentityService,
         }
       }
 
-    def getSubscriptionDetailsForEmail(maybeValidPromotion: Option[ValidPromotion[PromoContext]]): String = {
+    def getSubscriptionPrice(maybeValidPromotion: Option[ValidPromotion[PromoContext]]): String = {
       val currency = subscription.currency
       val discountedPlanDescription = for {
         validPromo <- maybeValidPromotion
@@ -379,26 +379,28 @@ class CheckoutService(identityService: IdentityService,
       } yield {
         renewal.plan.charges.prettyPricingForDiscountedPeriod(discountPromotion, currency)
       }
-      def introductoryPeriodSubDescription = subscription.introductoryPeriodPlan.map { introductoryPlan =>
-        val nextRecurrringPeriod = subscription.recurringPlans.minBy(_.start)
-        introductoryPlan.charges.prettyPricing(currency) + " then " + nextRecurrringPeriod.charges.prettyPricing(currency)
-      }
-      val subscriptionDetails = discountedPlanDescription orElse introductoryPeriodSubDescription getOrElse renewal.plan.charges.prettyPricing(currency)
-      subscriptionDetails.withContextLogging(s"Subscription details (for renewal email):")
+      val subscriptionDetails = discountedPlanDescription getOrElse renewal.plan.charges.prettyPricing(currency)
+      subscriptionDetails.withContextLogging(s"Subscription price:")
     }
+
+    val displayedPrice = renewal.displayedPrice
+    logger.info(s"Displayed price from client is: $displayedPrice")
 
     for {
       account <- zuoraService.getAccount(subscription.accountId).withContextLogging("zuoraAccount", _.id)
       billto <- zuoraService.getContact(account.billToId).withContextLogging("zuora bill to", _.id)
       contact <- GetSalesforceContactForSub.sfContactForZuoraAccount(account)(zuoraService, salesforceService.repo, global).withContextLogging("sfContact", _.salesforceContactId)
+      validPromotion = getValidPromotion(contact)
+      subscriptionPrice = getSubscriptionPrice(validPromotion)
+      if (subscriptionPrice == displayedPrice)
       payment = getPayment(contact, billto)
       paymentMethod <- payment.makePaymentMethod
       createPaymentMethod = CreatePaymentMethod(subscription.accountId, paymentMethod, payment.makeAccount.paymentGateway, billto)
       updateResult <- zuoraService.createPaymentMethod(createPaymentMethod).withContextLogging("createPaymentMethod", _.id)
-      renewCommand <- constructRenewCommand(contact)
+      renewCommand <- constructRenewCommand(validPromotion)
       amendResult <- zuoraService.renewSubscription(renewCommand)
       _ <- ensureEmail(contact, subscription)
-      _ <- exactTargetService.enqueueRenewalEmail(subscription, renewal, getSubscriptionDetailsForEmail(getValidPromotion(contact)), contact, renewal.email, newTermStartDate)
+      _ <- exactTargetService.enqueueRenewalEmail(subscription, renewal, subscriptionPrice, contact, renewal.email, newTermStartDate)
     }
       yield {
         updateResult

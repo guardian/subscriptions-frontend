@@ -56,6 +56,7 @@ class WeeklyRenew extends React.Component {
             showValidity: false,
             plan: this.props.plans[0].id,
             plans: this.props.plans,
+            displayedPrice: this.props.plans[0].price,
             promoCode: this.props.promoCode,
             promoStatus: status.NOTCHECKED,
             promotionDescription: null
@@ -111,20 +112,23 @@ class WeeklyRenew extends React.Component {
             }).reduce((a, b) => {
                 return !!(a || b)
             }, false);
+            console.log('shit');
             if (update) {
                 //This is a weekly promotion
                 this.setState({
                     promoStatus: status.VALID,
                     plans: newPlans,
                     promotionDescription: response.promotion.description
-                })
+                });
+                this.handlePlan(this.getPlan(newPlans))
             } else {
                 //It's a good promotion, but it's not a weekly one
                 this.setState({
                     promotionDescription: 'The promotion you have entered is not currently valid for any of the available billing periods.',
                     promoStatus: status.INVALID,
                     plans: this.props.plans
-                })
+                });
+                this.handlePlan(this.getPlan(this.props.plans))
             }
         }).catch((payload) => {
             let response = JSON.parse(payload.response);
@@ -166,12 +170,16 @@ class WeeklyRenew extends React.Component {
 
     handlePlan(plan) {
         return () => {
-            this.setState({plan: plan.id});
+            let price = plan.promotionalPrice || plan.price; //TODO: refactor into function
+            this.setState({plan: plan.id, displayedPrice: price});
         }
     }
 
-    getPlan() {
-        return this.state.plans.filter((plan) => {
+    getPlan(plans) {
+        if (plans == null) {
+            plans = this.state.plans;
+        }
+        return plans.filter((plan) => {
             return plan.id == this.state.plan
         })[0]
     }
@@ -181,10 +189,8 @@ class WeeklyRenew extends React.Component {
     }
 
     buttonText() {
-        let plan = this.getPlan();
-        let price = plan.promotionalPrice || plan.price;
         let method = this.state.paymentType === DIRECT_DEBIT ? 'by Direct Debit' : 'by Card';
-        return ['Pay', price, method].join(' ');
+        return ['Pay', this.state.displayedPrice, method].join(' ');
     }
 
     render() {
