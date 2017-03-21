@@ -383,8 +383,13 @@ class CheckoutService(identityService: IdentityService,
       subscriptionDetails.withContextLogging(s"Subscription price:")
     }
 
-    val displayedPrice = renewal.displayedPrice
-    logger.info(s"Displayed price from client is: $displayedPrice")
+    def pricesMatch(displayedPrice: String, subscriptionPrice: String) = {
+      if(displayedPrice != subscriptionPrice){
+        logger.error(s"Client and server side prices divergent, we showed $displayedPrice and wanted to charge $subscriptionPrice from ${subscription.name} (${renewal.promoCode})")
+        false
+      }
+      else true
+    }
 
     for {
       account <- zuoraService.getAccount(subscription.accountId).withContextLogging("zuoraAccount", _.id)
@@ -392,7 +397,7 @@ class CheckoutService(identityService: IdentityService,
       contact <- GetSalesforceContactForSub.sfContactForZuoraAccount(account)(zuoraService, salesforceService.repo, global).withContextLogging("sfContact", _.salesforceContactId)
       validPromotion = getValidPromotion(contact)
       subscriptionPrice = getSubscriptionPrice(validPromotion)
-      if (subscriptionPrice == displayedPrice)
+      if (pricesMatch(renewal.displayedPrice, subscriptionPrice))
       payment = getPayment(contact, billto)
       paymentMethod <- payment.makePaymentMethod
       createPaymentMethod = CreatePaymentMethod(subscription.accountId, paymentMethod, payment.makeAccount.paymentGateway, billto)

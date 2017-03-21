@@ -133,9 +133,7 @@ class WeeklyRenew extends React.Component {
                 });
             }
         }).catch((payload) => {
-            console.log(payload);
             let price = this.getPrice(this.getPlan(this.props.plans));
-
             let response = JSON.parse(payload.response);
             this.setState({
                 promotionDescription: response.errorMessage,
