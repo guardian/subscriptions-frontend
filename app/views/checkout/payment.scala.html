@@ -30,7 +30,9 @@
     }
 }
 @priceOption(plan: CatalogPlan.Paid, currency: Currency, associatedPlan: Option[CatalogPlan.Paid]) = {
-    <label class="option" data-currency="@currency">
+    <label class="option" data-currency="@currency"
+@if(plan.promotionalOnly && plan != productData.plans.default){hidden="true"}
+        >
         <span class="option__input">
             <input
             type="radio" name="ratePlanId"

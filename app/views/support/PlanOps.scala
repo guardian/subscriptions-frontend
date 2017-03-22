@@ -7,6 +7,9 @@ import com.gu.memsub.images.{ResponsiveImage, ResponsiveImageGenerator, Responsi
 import com.gu.memsub.subsv2.{CatalogPlan, Plan, SubscriptionPlan}
 import com.netaporter.uri.dsl._
 import configuration.Links
+import model.BillingPeriodOps._
+import com.gu.memsub.BillingPeriod.{OneYear, Quarter, SixWeeks}
+
 
 import scala.reflect.internal.util.StringOps
 import scalaz.syntax.std.boolean._
@@ -31,7 +34,7 @@ object PlanOps {
     }
   }
 
-  implicit class PrettyPlan[+A <: CatalogPlan.AnyPlan](in: A) {
+  implicit class PrettyPlan[+A <: CatalogPlan.Paid](in: A) {
 
     def packImage: ResponsiveImageGroup = in.charges.benefits.list match {
       case Digipack :: Nil =>
@@ -55,6 +58,8 @@ object PlanOps {
       case Digipack :: Nil | Weekly :: Nil=> "Change payment frequency"
       case _ => "Add more"
     }
+
+    def promotionalOnly: Boolean = in.charges.billingPeriod == SixWeeks
 
     def isHomeDelivery: Boolean = in.product == Delivery
 
