@@ -16,7 +16,7 @@ trait ContextLogging extends LazyLogging {
 
   def error[P <: AnyPlan : Subscription](message: String): Unit = {
     val context = implicitly[Subscription[P]]
-    logger.info(s"{sub: ${context.name.get}} $message")
+    logger.error(s"{sub: ${context.name.get}} $message")
   }
 
   implicit class FutureContextLoggable[T](future: Future[T]) {
