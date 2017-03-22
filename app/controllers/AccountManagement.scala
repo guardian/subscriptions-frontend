@@ -247,7 +247,7 @@ object ManageWeekly extends ContextLogging {
         }.recover{
             case e: Throwable =>
               val errorMessage = "Unexpected error while renewing subscription"
-              error(errorMessage)
+              error(s"${errorMessage}: $e")
               InternalServerError(jsonError(errorMessage))
         }
       }
