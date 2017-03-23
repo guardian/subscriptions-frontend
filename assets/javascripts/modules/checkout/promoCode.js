@@ -4,9 +4,8 @@ define([
     'bean',
     'modules/forms/toggleError',
     'utils/ajax',
-    'modules/checkout/formElements',
-    'modules/checkout/ratePlanChoice'
-], function ($, bean, toggleError, ajax, formElements, ratePlanChoice) {
+    'modules/checkout/formElements'
+], function ($, bean, toggleError, ajax, formElements) {
     'use strict';
 
     var $inputBox         = formElements.$PROMO_CODE;
@@ -16,9 +15,19 @@ define([
     var $promoCodeError   = $('.js-promo-code .js-error-message');
     var $promoCodeApplied = $('.js-promo-code-applied');
     var $promoRenew       = $('.js-promo-renew');
+    var $promotionalPlans = $('.js-promotional-plan');
 
     $promoRenew.hide();
     $promoRenew.removeAttr('hidden');
+
+    var ratePlans = {};
+    $ratePlanFields.each(function(el){
+       ratePlans[el.value] = true;
+    });
+    function containsRatePlans(r){
+        return r.promotion.appliesTo.productRatePlanIds.map(function(rp){return !!ratePlans[rp]})
+            .reduce(function(a,b){return a||b},false);
+    }
 
     function bindExtraKeyListener() {
         if (bindExtraKeyListener.alreadyBound) {
@@ -29,6 +38,8 @@ define([
     }
 
     function removePromotionFromRatePlans() {
+        console.log('removing')
+        $promotionalPlans.attr('hidden',true);
         $ratePlanFields.each(function(el) {
             var $el = $(el),
                 currency = $el.data('currency'),
@@ -45,7 +56,15 @@ define([
     }
 
     function applyPromotionToRatePlans(adjustedRatePlans) {
+        console.log('applyin', adjustedRatePlans);
         if (adjustedRatePlans) {
+            $promotionalPlans.each(function(el){
+                var ratePlanId = el.querySelector('input').value;
+                console.log(ratePlanId);
+                if (adjustedRatePlans[ratePlanId]) {
+                    $(el).removeAttr('hidden');
+                }
+                });
             $ratePlanFields.each(function(el) {
                 var $el = $(el),
                     ratePlanId = $el.val(),
@@ -62,6 +81,7 @@ define([
                 }
             });
         } else {
+            console.log('elsse');
             removePromotionFromRatePlans();
         }
     }
@@ -94,6 +114,7 @@ define([
         $promoCodeApplied.show();
         $promoCodeSnippet.html(response.promotion.description);
         $promoCodeTsAndCs.attr('href', '/p/' + promoCode + '/terms');
+        console.log(response,response.adjustedRatePlans);
         applyPromotionToRatePlans(response.adjustedRatePlans);
     }
 
@@ -110,7 +131,6 @@ define([
 
     function validate() {
         var promoCode = $inputBox.val().trim(),
-            ratePlanId = ratePlanChoice.getSelectedRatePlanId(),
             country = formElements.DELIVERY.$COUNTRY_SELECT.val().trim() || formElements.BILLING.$COUNTRY_SELECT.val().trim(),
             currency = document.querySelector('.js-rate-plans input:checked').dataset.currency;
 
@@ -125,17 +145,24 @@ define([
         ajax({
             type: 'json',
             method: 'GET',
-            url: jsRoutes.controllers.Promotion.validateForProductRatePlan(promoCode, ratePlanId, country, currency).url
+            url: jsRoutes.controllers.Promotion.validate(promoCode, country, currency).url
         }).then(function (r)
         {
             if (isRetention(r)) {
                 displayRenew();
-            } else if (r.isValid) {
-                displayPromotion(r, promoCode);
-                bindExtraKeyListener();
-            } else {
-                displayError(r.errorMessage);
+                return;
             }
+            if (r.isValid) {
+                if (containsRatePlans(r)) {
+                    displayPromotion(r, promoCode);
+                    bindExtraKeyListener();
+                    return;
+                }
+                else {
+                    displayError('The promo code you supplied is not applicable for this product');
+                }
+            }
+            displayError(r.errorMessage);
         }).catch(function (r) {
             // Content of error codes are not parsed by ajax/reqwest.
             if (r && r.response) {
@@ -157,6 +184,7 @@ define([
 
     return {
         init: function () {
+            console.log($promotionalPlans);
             var changeListeners = [
                     formElements.DELIVERY.$COUNTRY_SELECT,
                     formElements.BILLING.$COUNTRY_SELECT,

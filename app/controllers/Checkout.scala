@@ -76,7 +76,7 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
         val buyablePlans = plans.filter(_.availableForCheckout)
         val plansInPriceOrder = buyablePlans.sortBy(_.charges.gbpPrice.amount)
         val selectedPlan = plansInPriceOrder.find(_.slug == forThisPlan)
-        selectedPlan.map(PlanList(associations,_,plans))
+        selectedPlan.map(PlanList(associations,_,buyablePlans))
       }
         case _ => None
       }.headOption

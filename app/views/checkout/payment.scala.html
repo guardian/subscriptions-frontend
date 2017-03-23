@@ -30,7 +30,7 @@
     }
 }
 @priceOption(plan: CatalogPlan.Paid, currency: Currency, associatedPlan: Option[CatalogPlan.Paid]) = {
-    <label class="option" data-currency="@currency"
+    <label class="option @if(plan.promotionalOnly){js-promotional-plan}" data-currency="@currency"
 @if(plan.promotionalOnly && plan != productData.plans.default){hidden="true"}
         >
         <span class="option__input">
