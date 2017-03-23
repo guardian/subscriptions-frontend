@@ -3,6 +3,7 @@
 @import com.gu.memsub.promo.Promotion.asAnyPromotion
 @import views.support.LandingPageOps._
 @import configuration.Links
+@import model.DigitalEdition
 @import views.support.CommaSplit
 @import views.support.{MarkdownRenderer}
 @import com.gu.memsub.subsv2.Catalog
@@ -38,7 +39,8 @@
         title = s"$title | The Guardian",
         bodyClasses = List("is-wide"),
         product = Some(WeeklyZoneA),// don't specifically need zone a, any weekly is fine
-        hreflangs = Some(hreflangs)
+        hreflangs = Some(hreflangs),
+        edition = DigitalEdition.getForCountry(Some(country))
     ) {
 
         @fragments.heroBanner(promotion.flatMap(_.landingPage.image).getOrElse(defaultImage)){
