@@ -11,6 +11,7 @@ define([
 
     var $inputBox         = formElements.$PROMO_CODE;
     var $ratePlanFields   = $('input[name="ratePlanId"]');
+    //This doesn't include promotional rate plans as they're hidden
     var $promoCodeSnippet = $('.js-promo-code-snippet');
     var $promoCodeTsAndCs = $('.js-promo-code-tsandcs');
     var $promoCodeError   = $('.js-promo-code .js-error-message');
@@ -26,6 +27,39 @@ define([
     $ratePlanFields.each(function(el){
        ratePlans[el.value] = true;
     });
+
+    function showPromotionalPlans(productRatePlanIds){
+        var selected = ratePlanChoice.getSelectedRatePlanId();
+        var backupSelect = selected;
+        var select;
+        $ratePlanFields.each(function(plan){
+            console.log(plan);
+            var ratePlanId = plan.value;
+            var parent = plan.parentNode.parentNode;
+            if (productRatePlanIds.indexOf(ratePlanId)!==-1) {
+                parent.removeAttribute('hidden');
+                backupSelect = ratePlanId;
+                if(ratePlanId === selected){
+                    select = ratePlanId;
+                }
+            } else {
+                parent.hidden = true;
+            }
+        });
+
+        $promotionalPlans.each(function(el){
+            var ratePlanId = el.querySelector('input').value;
+            if (productRatePlanIds.indexOf(ratePlanId)!==-1) {
+                el.removeAttribute('hidden');
+                select = ratePlanId;
+            }
+        });
+
+        if(select == null){
+            select = backupSelect;
+        }
+        if (select) {selectRatePlan(select);}
+    }
 
     function selectRatePlan(ratePlanId){
         var currency = ratePlanChoice.getSelectedOptionData().currency;
@@ -91,14 +125,19 @@ define([
         $promoRenew.hide();
         toggleError($promoCodeError.parent(), false);
         var selected = ratePlanChoice.getSelectedRatePlanId()
-        $promotionalPlans.each(function(el){
+        $ratePlanFields.each(function (plan) {
+            var parent = plan.parentNode.parentNode;
+            parent.removeAttribute('hidden');
+        });
+        $promotionalPlans.each(function (el) {
             var $plan = $(el);
-            $plan.attr('hidden',true);
+            $plan.attr('hidden', true);
             var ratePlanId = el.querySelector('input').value;
-            if(ratePlanId===selected){
+            if (ratePlanId === selected) {
                 selectRatePlan(selectedPlan);
             }
         });
+
 
         $promotionalPlans.attr('hidden',true);
         removePromotionFromRatePlans();
@@ -122,13 +161,7 @@ define([
         $promoCodeApplied.show();
         $promoCodeSnippet.html(response.promotion.description);
         $promoCodeTsAndCs.attr('href', '/p/' + promoCode + '/terms');
-        $promotionalPlans.each(function(el){
-            var ratePlanId = el.querySelector('input').value;
-            if (response.promotion.appliesTo.productRatePlanIds.indexOf(ratePlanId)!==-1) {
-                el.removeAttribute('hidden');
-                selectRatePlan(ratePlanId);
-            }
-        });
+        showPromotionalPlans(response.promotion.appliesTo.productRatePlanIds);
         applyPromotionToRatePlans(response.adjustedRatePlans);
     }
 
