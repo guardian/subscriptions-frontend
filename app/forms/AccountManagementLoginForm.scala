@@ -8,7 +8,7 @@ case class AccountManagementLoginRequest(subscriptionId: String, lastname: Strin
 object AccountManagementLoginForm {
 
   val mappings = Form(mapping(
-    "subscriptionId" -> text(minLength = 5, maxLength = 50),
+    "subscriptionId" -> text(minLength = 1, maxLength = 50),
     "lastname" -> text(minLength = 1, maxLength = 50),
     "promoCode" -> optional(text(minLength = 1, maxLength = 50))
   )(AccountManagementLoginRequest.apply)(AccountManagementLoginRequest.unapply))
