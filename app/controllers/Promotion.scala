@@ -35,7 +35,7 @@ object Promotion extends Controller with LazyLogging with CatalogProvider {
         .filter(plan => promo.appliesTo.productRatePlanIds contains plan.id)
         .filter(plan => plan.charges.currencies contains currency)
         .map(plan => RatePlanPrice(plan.id, plan.charges)).map { ratePlanPrice =>
-          ratePlanPrice.ratePlanId.get -> ratePlanPrice.chargeList.prettyPricingForDiscountedPeriod(discountPromo, currency) //TODO: make this return adjusted rateplans if we're not changing them
+          ratePlanPrice.ratePlanId.get -> ratePlanPrice.chargeList.prettyPricingForDiscountedPeriod(discountPromo, currency)
       }.toMap
     }
   }
