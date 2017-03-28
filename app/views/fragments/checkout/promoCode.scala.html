@@ -1,7 +1,7 @@
 @import com.gu.memsub.promo.PromoCode
 @(promoCode: Option[PromoCode])(implicit r: RequestHeader)
 @helper.javascriptRouter("jsRoutes")(
-    routes.javascript.Promotion.validateForProductRatePlan
+    routes.javascript.Promotion.validate
 )
 <div class="checkout-promo-code js-promo-code">
     <label class="label" for="promo-code">Promo code</label>

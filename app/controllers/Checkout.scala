@@ -70,20 +70,16 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
       ) ++ testOnlyPlans
 
       val contentSubscriptionPlans = productsWithoutIntroductoryPlans ++ productsWithIntroductoryPlans
-
-      contentSubscriptionPlans.map {
-        case PlansWithIntroductory(plans, associations) =>
-          val buyablePlans = plans.filter(_.availableForCheckout)
-          val plansInPriceOrder = buyablePlans.sortBy(_.charges.gbpPrice.amount)
-          val slugPlanAndBetter = plansInPriceOrder.dropWhile(_.slug != forThisPlan)
-          slugPlanAndBetter match {
-            case planFromSlug :: otherPlans =>
-              val betterPlansInProduct = getBetterPlans(planFromSlug, otherPlans)
-              Some(PlanList(associations, planFromSlug, betterPlansInProduct: _*))
-            case Nil => None // didn't find slug
-          }
-      }.find(_.isDefined).flatten
-
+      contentSubscriptionPlans.flatMap {
+        case PlansWithIntroductory(plans, associations)
+          if (plans.exists(_.slug == forThisPlan)) => {
+        val buyablePlans = plans.filter(_.availableForCheckout)
+        val plansInPriceOrder = buyablePlans.sortBy(_.charges.gbpPrice.amount)
+        val selectedPlan = plansInPriceOrder.find(_.slug == forThisPlan)
+        selectedPlan.map(PlanList(associations,_,buyablePlans))
+      }
+        case _ => None
+      }.headOption
     }
 
     val idUser = (for {

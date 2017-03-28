@@ -52,7 +52,6 @@ object ContentSubscriptionPlanOps {
 
     def availableForCheckout: Boolean = in.charges.billingPeriod.isRecurring || in.charges.billingPeriod == SixWeeks
     def availableForRenewal: Boolean = in.charges.billingPeriod == Quarter || in.charges.billingPeriod == OneYear
-
   }
 
 }
