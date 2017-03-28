@@ -30,7 +30,7 @@
     }
 }
 @priceOption(plan: CatalogPlan.Paid, currency: Currency, associatedPlan: Option[CatalogPlan.Paid]) = {
-    <label class="option @if(plan.promotionalOnly){js-promotional-plan}" data-currency="@currency"
+    <label class="option" data-currency="@currency"
 @if(plan.promotionalOnly && plan != productData.plans.default){hidden="true"}
         >
         <span class="option__input">
@@ -45,7 +45,10 @@
             data-currency="@currency"
             data-promotional-plan="@plan.promotionalOnly"
             value="@plan.id.get"
-            @if(plan == productData.plans.default && currency == countryAndCurrencySettings.defaultCurrency){ checked="checked" }
+            @if(plan == productData.plans.default && currency == countryAndCurrencySettings.defaultCurrency) {
+                checked="checked"
+                data-is-default-plan="true"
+            }
             >
         </span>
         <span class="option__label" id="label-for-@plan.id.get-@currency">@plan.prettyName(currency) @andThenPricing(currency, associatedPlan)</span>

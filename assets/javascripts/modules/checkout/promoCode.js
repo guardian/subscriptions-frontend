@@ -17,7 +17,7 @@ define([
     var $promoCodeError   = $('.js-promo-code .js-error-message');
     var $promoCodeApplied = $('.js-promo-code-applied');
     var $promoRenew       = $('.js-promo-renew');
-    var $promotionalPlans = $('.js-promotional-plan');
+    var $promotionalPlans = $('input[data-promotional-plan="true"]');
     var selectedPlan      = ratePlanChoice.getSelectedRatePlanId();
 
     $promoRenew.hide();
@@ -33,11 +33,10 @@ define([
         var backupSelect = selected;
         var select;
         $ratePlanFields.each(function(plan){
-            console.log(plan);
             var ratePlanId = plan.value;
             var parent = plan.parentNode.parentNode;
             if (productRatePlanIds.indexOf(ratePlanId)!==-1) {
-                parent.removeAttribute('hidden');
+                parent.hidden = false;
                 backupSelect = ratePlanId;
                 if(ratePlanId === selected){
                     select = ratePlanId;
@@ -48,9 +47,9 @@ define([
         });
 
         $promotionalPlans.each(function(el){
-            var ratePlanId = el.querySelector('input').value;
+            var ratePlanId = el.value;
             if (productRatePlanIds.indexOf(ratePlanId)!==-1) {
-                el.removeAttribute('hidden');
+                el.hidden = false;
                 select = ratePlanId;
             }
         });
@@ -66,8 +65,12 @@ define([
         ratePlanChoice.selectRatePlanForIdAndCurrency(ratePlanId, currency);
     }
 
+    function ratePlanExists(prpId) {
+        return !!ratePlans[prpId];
+    }
+
     function containsRatePlans(r){
-        return r.promotion.appliesTo.productRatePlanIds.map(function(rp){return !!ratePlans[rp]})
+        return r.promotion.appliesTo.productRatePlanIds.map(ratePlanExists)
             .reduce(function(a,b){return a||b},false);
     }
 
@@ -124,22 +127,22 @@ define([
         $promoCodeApplied.hide();
         $promoRenew.hide();
         toggleError($promoCodeError.parent(), false);
-        var selected = ratePlanChoice.getSelectedRatePlanId()
+        var selected = ratePlanChoice.getSelectedRatePlanId();
         $ratePlanFields.each(function (plan) {
             var parent = plan.parentNode.parentNode;
-            parent.removeAttribute('hidden');
+            parent.hidden = false;
         });
+
         $promotionalPlans.each(function (el) {
             var $plan = $(el);
-            $plan.attr('hidden', true);
-            var ratePlanId = el.querySelector('input').value;
+            if (!$plan.data('is-default-plan')) {
+                el.parentNode.parentNode.hidden = true;
+            }
+            var ratePlanId = el.value;
             if (ratePlanId === selected) {
                 selectRatePlan(selectedPlan);
             }
         });
-
-
-        $promotionalPlans.attr('hidden',true);
         removePromotionFromRatePlans();
     }
 
@@ -203,13 +206,12 @@ define([
                 if (containsRatePlans(r)) {
                     displayPromotion(r, promoCode);
                     bindExtraKeyListener();
-                    return;
-                }
-                else {
+                } else {
                     displayError('The promo code you supplied is not applicable for this product');
                 }
+            } else {
+                displayError(r.errorMessage);
             }
-            displayError(r.errorMessage);
         }).catch(function (r) {
             // Content of error codes are not parsed by ajax/reqwest.
             if (r && r.response) {
