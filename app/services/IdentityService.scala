@@ -14,7 +14,7 @@ import play.api.libs.json._
 import play.api.libs.ws.{WS, WSRequest, WSResponse}
 import play.api.mvc.Cookie
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.language.implicitConversions
 import scala.concurrent.Future
 import scalaz.{NonEmptyList, \/}

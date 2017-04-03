@@ -17,7 +17,7 @@ import views.html.{checkout => view}
 import views.support.Pricing._
 import views.support.{BillingPeriod => _}
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 object Promotion extends Controller with LazyLogging with CatalogProvider {
 

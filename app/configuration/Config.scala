@@ -17,7 +17,7 @@ import com.typesafe.config.ConfigFactory
 import com.getsentry.raven.dsn.Dsn
 import org.joda.time.Days
 import play.api.mvc.{Call, RequestHeader}
-import scala.concurrent.ExecutionContext.Implicits.global
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.util.Try
 
 object Config {
