@@ -27,7 +27,7 @@ import play.api.mvc._
 import utils.TestUsers.PreSigninTestCookie
 import views.html.account.thankYouRenew
 import views.support.Pricing._
-
+import views.support.Dates._
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.concurrent.Future
 import scalaz.std.scalaFuture._
@@ -357,7 +357,7 @@ object AccountManagement extends Controller with ContextLogging with CatalogProv
       "error" -> errorMessage
     )
     subscriptionFromUserDetails(loginRequest).map {
-        case Some(sub) if (sub.isCancelled) =>  loginError(s"Your subscription is cancelled as of ${sub.termEndDate}, please contact customer services.")
+        case Some(sub) if (sub.isCancelled) =>  loginError(s"Your subscription is cancelled as of ${sub.termEndDate.pretty}, please contact customer services.")
         case Some(sub) => SessionSubscription.set(Redirect(routes.AccountManagement.manage(None, None, promoCode)), sub)
         case _ => loginError("Unable to verify your details.")
     }
