@@ -6,7 +6,7 @@ import com.gu.memsub.subsv2.CatalogPlan.Paper
 import play.api.libs.json._
 
 
-case class Renewal(email: String, plan: Paper, paymentData: PaymentData, promoCode: Option[PromoCode])
+case class Renewal(email: String, plan: Paper, paymentData: PaymentData, promoCode: Option[PromoCode], displayedPrice: String)
 
 class RenewalReads(catalog: Catalog) {
   val weeklyPlans = catalog.weekly.zoneA.plans ++ catalog.weekly.zoneB.plans ++ catalog.weekly.zoneC.plans

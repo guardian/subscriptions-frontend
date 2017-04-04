@@ -4,9 +4,7 @@ import com.gu.memsub.subsv2.CatalogPlan
 import com.gu.memsub.subsv2.CatalogPlan.{ContentSubscription, RecurringPlan}
 
 
-case class PlanList[+A](associations: List[(ContentSubscription, ContentSubscription)], default: A, others: A*) {
-  def map[B](f: A => B): PlanList[B] = PlanList(associations, f(default), others.map(f):_*)
-  def list = Seq(default) ++ others
+case class PlanList[+A](associations: List[(ContentSubscription, ContentSubscription)], default: A, list: List[A]) {
   def associationFor(p: ContentSubscription) =
     associations.toMap.get(p)
 }

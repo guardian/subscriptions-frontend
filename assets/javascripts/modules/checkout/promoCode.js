@@ -11,14 +11,68 @@ define([
 
     var $inputBox         = formElements.$PROMO_CODE;
     var $ratePlanFields   = $('input[name="ratePlanId"]');
+    //This doesn't include promotional rate plans as they're hidden
     var $promoCodeSnippet = $('.js-promo-code-snippet');
     var $promoCodeTsAndCs = $('.js-promo-code-tsandcs');
     var $promoCodeError   = $('.js-promo-code .js-error-message');
     var $promoCodeApplied = $('.js-promo-code-applied');
     var $promoRenew       = $('.js-promo-renew');
+    var $promotionalPlans = $('input[data-promotional-plan="true"]');
+    var selectedPlan      = ratePlanChoice.getSelectedRatePlanId();
 
     $promoRenew.hide();
     $promoRenew.removeAttr('hidden');
+
+    var ratePlans = {};
+    $ratePlanFields.each(function(el){
+       ratePlans[el.value] = true;
+    });
+
+    function showPromotionalPlans(productRatePlanIds){
+        var selected = ratePlanChoice.getSelectedRatePlanId();
+        var backupSelect = selected;
+        var select;
+        $ratePlanFields.each(function(plan){
+            var ratePlanId = plan.value;
+            var parent = plan.parentNode.parentNode;
+            if (productRatePlanIds.indexOf(ratePlanId)!==-1) {
+                parent.hidden = false;
+                backupSelect = ratePlanId;
+                if(ratePlanId === selected){
+                    select = ratePlanId;
+                }
+            } else {
+                parent.hidden = true;
+            }
+        });
+
+        $promotionalPlans.each(function(el){
+            var ratePlanId = el.value;
+            if (productRatePlanIds.indexOf(ratePlanId)!==-1) {
+                el.hidden = false;
+                select = ratePlanId;
+            }
+        });
+
+        if(select == null){
+            select = backupSelect;
+        }
+        if (select) {selectRatePlan(select);}
+    }
+
+    function selectRatePlan(ratePlanId){
+        var currency = ratePlanChoice.getSelectedOptionData().currency;
+        ratePlanChoice.selectRatePlanForIdAndCurrency(ratePlanId, currency);
+    }
+
+    function ratePlanExists(prpId) {
+        return !!ratePlans[prpId];
+    }
+
+    function containsRatePlans(r){
+        return r.promotion.appliesTo.productRatePlanIds.map(ratePlanExists)
+            .reduce(function(a,b){return a||b},false);
+    }
 
     function bindExtraKeyListener() {
         if (bindExtraKeyListener.alreadyBound) {
@@ -73,6 +127,22 @@ define([
         $promoCodeApplied.hide();
         $promoRenew.hide();
         toggleError($promoCodeError.parent(), false);
+        var selected = ratePlanChoice.getSelectedRatePlanId();
+        $ratePlanFields.each(function (plan) {
+            var parent = plan.parentNode.parentNode;
+            parent.hidden = false;
+        });
+
+        $promotionalPlans.each(function (el) {
+            var $plan = $(el);
+            if (!$plan.data('is-default-plan')) {
+                el.parentNode.parentNode.hidden = true;
+            }
+            var ratePlanId = el.value;
+            if (ratePlanId === selected) {
+                selectRatePlan(selectedPlan);
+            }
+        });
         removePromotionFromRatePlans();
     }
 
@@ -94,6 +164,7 @@ define([
         $promoCodeApplied.show();
         $promoCodeSnippet.html(response.promotion.description);
         $promoCodeTsAndCs.attr('href', '/p/' + promoCode + '/terms');
+        showPromotionalPlans(response.promotion.appliesTo.productRatePlanIds);
         applyPromotionToRatePlans(response.adjustedRatePlans);
     }
 
@@ -110,7 +181,6 @@ define([
 
     function validate() {
         var promoCode = $inputBox.val().trim(),
-            ratePlanId = ratePlanChoice.getSelectedRatePlanId(),
             country = formElements.DELIVERY.$COUNTRY_SELECT.val().trim() || formElements.BILLING.$COUNTRY_SELECT.val().trim(),
             currency = document.querySelector('.js-rate-plans input:checked').dataset.currency;
 
@@ -125,14 +195,20 @@ define([
         ajax({
             type: 'json',
             method: 'GET',
-            url: jsRoutes.controllers.Promotion.validateForProductRatePlan(promoCode, ratePlanId, country, currency).url
+            url: jsRoutes.controllers.Promotion.validate(promoCode, country, currency).url
         }).then(function (r)
         {
             if (isRetention(r)) {
                 displayRenew();
-            } else if (r.isValid) {
-                displayPromotion(r, promoCode);
-                bindExtraKeyListener();
+                return;
+            }
+            if (r.isValid) {
+                if (containsRatePlans(r)) {
+                    displayPromotion(r, promoCode);
+                    bindExtraKeyListener();
+                } else {
+                    displayError('The promo code you supplied is not applicable for this product');
+                }
             } else {
                 displayError(r.errorMessage);
             }

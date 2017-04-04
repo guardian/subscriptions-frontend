@@ -22,7 +22,7 @@ import views.html.promotion._
 import views.html.weekly.landing_description
 import views.support.PegdownMarkdownRenderer
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 object PromoLandingPage extends Controller {
 
@@ -88,7 +88,7 @@ object PromoLandingPage extends Controller {
 
   private def redirectToBrochurePage(promotion: AnyPromotion, country: Country)(implicit promoCode: PromoCode, request: Request[AnyContent]): Option[Result] = {
     getBrochureRouteForPromotion(promotion, country) map { route =>
-      val result = Redirect(route.url, request.queryString)
+      val result = Redirect(route.url, request.queryString - "country")
       if (promotion.promotionType == Tracking) {
         result.withSession(request.session.data.toSeq ++ Seq(PromotionTrackingCode -> promoCode.get) :_*)
       } else {

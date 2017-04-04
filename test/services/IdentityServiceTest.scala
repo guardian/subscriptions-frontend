@@ -10,7 +10,7 @@ import utils.TestIdUser._
 import utils.TestPersonalData.testPersonalData
 import utils.TestWSResponse
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.concurrent.Future
 
 class IdentityServiceTest extends FreeSpec {

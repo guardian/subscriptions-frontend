@@ -3,7 +3,7 @@ package logging
 import com.gu.memsub.subsv2.Subscription
 import com.gu.memsub.subsv2.SubscriptionPlan.AnyPlan
 import com.typesafe.scalalogging.LazyLogging
-import scala.concurrent.ExecutionContext.Implicits.global
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.concurrent.Future
 
 trait ContextLogging extends LazyLogging {
@@ -16,7 +16,7 @@ trait ContextLogging extends LazyLogging {
 
   def error[P <: AnyPlan : Subscription](message: String): Unit = {
     val context = implicitly[Subscription[P]]
-    logger.info(s"{sub: ${context.name.get}} $message")
+    logger.error(s"{sub: ${context.name.get}} $message")
   }
 
   implicit class FutureContextLoggable[T](future: Future[T]) {

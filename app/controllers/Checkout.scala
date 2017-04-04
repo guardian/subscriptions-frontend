@@ -10,6 +10,7 @@ import com.gu.memsub.promo.{NewUsers, NormalisedPromoCode, PromoCode}
 import com.gu.memsub.subsv2.CatalogPlan.ContentSubscription
 import com.gu.memsub.subsv2.{CatalogPlan, PlansWithIntroductory}
 import com.gu.memsub.{Product, SupplierCode}
+import com.gu.tip.Tip
 import com.gu.zuora.soap.models.errors._
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config.Identity.webAppProfileUrl
@@ -31,7 +32,7 @@ import views.html.{checkout => view}
 import views.support.{PlanList, BillingPeriod => _, _}
 
 import scala.Function.const
-import scala.concurrent.ExecutionContext.Implicits.global
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.concurrent.Future
 import scalaz.std.option._
 import scalaz.std.scalaFuture._
@@ -70,20 +71,16 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
       ) ++ testOnlyPlans
 
       val contentSubscriptionPlans = productsWithoutIntroductoryPlans ++ productsWithIntroductoryPlans
-
-      contentSubscriptionPlans.map {
-        case PlansWithIntroductory(plans, associations) =>
-          val buyablePlans = plans.filter(_.availableForCheckout)
-          val plansInPriceOrder = buyablePlans.sortBy(_.charges.gbpPrice.amount)
-          val slugPlanAndBetter = plansInPriceOrder.dropWhile(_.slug != forThisPlan)
-          slugPlanAndBetter match {
-            case planFromSlug :: otherPlans =>
-              val betterPlansInProduct = getBetterPlans(planFromSlug, otherPlans)
-              Some(PlanList(associations, planFromSlug, betterPlansInProduct: _*))
-            case Nil => None // didn't find slug
-          }
-      }.find(_.isDefined).flatten
-
+      contentSubscriptionPlans.flatMap {
+        case PlansWithIntroductory(plans, associations)
+          if (plans.exists(_.slug == forThisPlan)) => {
+        val buyablePlans = plans.filter(_.availableForCheckout)
+        val plansInPriceOrder = buyablePlans.sortBy(_.charges.gbpPrice.amount)
+        val selectedPlan = plansInPriceOrder.find(_.slug == forThisPlan)
+        selectedPlan.map(PlanList(associations,_,plansInPriceOrder))
+      }
+        case _ => None
+      }.headOption
     }
 
     val idUser = (for {
@@ -311,6 +308,7 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
       val eventualMaybeSubscription = tpBackend.subscriptionService.get[com.gu.memsub.subsv2.SubscriptionPlan.ContentSubscription](Name(subsName))
       eventualMaybeSubscription.map { maybeSub =>
         maybeSub.map { sub =>
+          if (tpBackend.environmentName == "PROD") Tip.verify()
           Ok(view.thankyou(sub, passwordForm, resolution, promotion, startDate))
         }.getOrElse {
           Redirect(routes.Homepage.index()).withNewSession

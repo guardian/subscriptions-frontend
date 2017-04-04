@@ -74,7 +74,8 @@ export function send(state, errorHandler) {
         let payload = {
             email: state.email.value,
             plan: state.plan,
-            paymentData: paymentData
+            paymentData: paymentData,
+            displayedPrice: state.displayedPrice
         };
         let promoCode = state.promoCode;
         if(promoCode){

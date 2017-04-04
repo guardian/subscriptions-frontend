@@ -29,7 +29,7 @@ import utils.TestUsers.PreSigninTestCookie
 import views.html.account.thankYouRenew
 import views.support.Pricing._
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.concurrent.Future
 import scalaz.std.scalaFuture._
 import scalaz.syntax.std.option._
@@ -185,8 +185,8 @@ object ManageWeekly extends ContextLogging {
     implicit val subContext = weeklySubscription
     if (weeklySubscription.readerType != ReaderType.Agent) {
       // go to SF to get the contact mailing information etc
-      GetSalesforceContactForSub.zuoraAccountFromSub(weeklySubscription)(tpBackend.zuoraService, tpBackend.salesforceService.repo, global).flatMap { account =>
-        val futureSfContact = GetSalesforceContactForSub.sfContactForZuoraAccount(account)(tpBackend.zuoraService, tpBackend.salesforceService.repo, global)
+      GetSalesforceContactForSub.zuoraAccountFromSub(weeklySubscription)(tpBackend.zuoraService, tpBackend.salesforceService.repo, defaultContext).flatMap { account =>
+        val futureSfContact = GetSalesforceContactForSub.sfContactForZuoraAccount(account)(tpBackend.zuoraService, tpBackend.salesforceService.repo, defaultContext)
         val futureZuoraBillToContact = tpBackend.zuoraService.getContact(account.billToId)
         futureSfContact.flatMap { contact =>
           futureZuoraBillToContact.map { zuoraContact =>
@@ -247,14 +247,16 @@ object ManageWeekly extends ContextLogging {
         renewableSub <- weeklySub.asRenewable.toRightDisjunction("subscription is not renewable")
         renew <- parseRenewalRequest(request, tpBackend.catalogService.unsafeCatalog)
       } yield {
-        info(s"Attempting to renew ${renew.plan.name} for ${renewableSub.id} with promo code: ${renew.promoCode}")(sub)
-        tpBackend.checkoutService.renewSubscription(renewableSub, renew).map(_ => Ok(Json.obj("redirect" -> routes.AccountManagement.renewThankYou().url)))
-          .recover{
+        info(s"Attempting to renew onto ${renew.plan.name} with promo code: ${renew.promoCode}")(sub)
+        tpBackend.checkoutService.renewSubscription(renewableSub, renew).map { _ =>
+          info(s"Successfully processed renewal onto ${renew.plan.name}")(sub)
+          Ok(Json.obj("redirect" -> routes.AccountManagement.renewThankYou().url))
+        }.recover{
             case e: Throwable =>
               val errorMessage = "Unexpected error while renewing subscription"
-              logger.error(errorMessage, e)
+              error(s"${errorMessage}: $e")(sub)
               InternalServerError(jsonError(errorMessage))
-          }
+        }
       }
       response.valueOr(error => Future(BadRequest(jsonError(error))))
     }
