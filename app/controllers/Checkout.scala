@@ -10,6 +10,7 @@ import com.gu.memsub.promo.{NewUsers, NormalisedPromoCode, PromoCode}
 import com.gu.memsub.subsv2.CatalogPlan.ContentSubscription
 import com.gu.memsub.subsv2.{CatalogPlan, PlansWithIntroductory}
 import com.gu.memsub.{Product, SupplierCode}
+import com.gu.tip.Tip
 import com.gu.zuora.soap.models.errors._
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config.Identity.webAppProfileUrl
@@ -307,6 +308,7 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
       val eventualMaybeSubscription = tpBackend.subscriptionService.get[com.gu.memsub.subsv2.SubscriptionPlan.ContentSubscription](Name(subsName))
       eventualMaybeSubscription.map { maybeSub =>
         maybeSub.map { sub =>
+          if (tpBackend.environmentName == "PROD") Tip.verify()
           Ok(view.thankyou(sub, passwordForm, resolution, promotion, startDate))
         }.getOrElse {
           Redirect(routes.Homepage.index()).withNewSession
