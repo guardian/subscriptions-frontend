@@ -5,7 +5,7 @@ import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
 import model.DirectDebitData
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.concurrent.Future
 
 trait GoCardlessService {

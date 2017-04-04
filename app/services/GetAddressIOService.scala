@@ -7,7 +7,7 @@ import com.typesafe.scalalogging.LazyLogging
 import monitoring.Metrics
 import services.GetAddressIOModel.{FindAddressResult, FindAddressResultError}
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.concurrent.Future
 
 object GetAddressIOModel {

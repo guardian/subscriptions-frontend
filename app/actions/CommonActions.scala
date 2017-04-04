@@ -8,8 +8,7 @@ import controllers.{Cached, NoCache}
 import play.api.mvc.Security.AuthenticatedRequest
 import play.api.mvc._
 import play.filters.csrf.{CSRFCheck, CSRFConfig}
-
-import scala.concurrent.ExecutionContext.Implicits.global
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.concurrent.Future
 object CommonActions {
 

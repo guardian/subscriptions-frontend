@@ -28,7 +28,7 @@ import utils.TestUsers.PreSigninTestCookie
 import views.html.account.thankYouRenew
 import views.support.Pricing._
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.concurrent.Future
 import scalaz.std.scalaFuture._
 import scalaz.syntax.std.option._
@@ -180,8 +180,8 @@ object ManageWeekly extends ContextLogging {
     implicit val subContext = weeklySubscription
     if (weeklySubscription.readerType != ReaderType.Agent) {
       // go to SF to get the contact mailing information etc
-      GetSalesforceContactForSub.zuoraAccountFromSub(weeklySubscription)(tpBackend.zuoraService, tpBackend.salesforceService.repo, global).flatMap { account =>
-        val futureSfContact = GetSalesforceContactForSub.sfContactForZuoraAccount(account)(tpBackend.zuoraService, tpBackend.salesforceService.repo, global)
+      GetSalesforceContactForSub.zuoraAccountFromSub(weeklySubscription)(tpBackend.zuoraService, tpBackend.salesforceService.repo, defaultContext).flatMap { account =>
+        val futureSfContact = GetSalesforceContactForSub.sfContactForZuoraAccount(account)(tpBackend.zuoraService, tpBackend.salesforceService.repo, defaultContext)
         val futureZuoraBillToContact = tpBackend.zuoraService.getContact(account.billToId)
         futureSfContact.flatMap { contact =>
           futureZuoraBillToContact.map { zuoraContact =>

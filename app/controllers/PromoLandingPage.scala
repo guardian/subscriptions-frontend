@@ -22,7 +22,7 @@ import views.html.promotion._
 import views.html.weekly.landing_description
 import views.support.PegdownMarkdownRenderer
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 object PromoLandingPage extends Controller {
 

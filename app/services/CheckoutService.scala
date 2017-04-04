@@ -30,7 +30,7 @@ import org.joda.time.{DateTimeConstants, Days, LocalDate}
 import touchpoint.ZuoraProperties
 import views.support.Pricing._
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.concurrent.Future
 import scalaz.std.option._
 import scalaz.std.scalaFuture._
@@ -394,7 +394,7 @@ class CheckoutService(identityService: IdentityService,
     for {
       account <- zuoraService.getAccount(subscription.accountId).withContextLogging("zuoraAccount", _.id)
       billto <- zuoraService.getContact(account.billToId).withContextLogging("zuora bill to", _.id)
-      contact <- GetSalesforceContactForSub.sfContactForZuoraAccount(account)(zuoraService, salesforceService.repo, global).withContextLogging("sfContact", _.salesforceContactId)
+      contact <- GetSalesforceContactForSub.sfContactForZuoraAccount(account)(zuoraService, salesforceService.repo, defaultContext).withContextLogging("sfContact", _.salesforceContactId)
       validPromotion = getValidPromotion(contact)
       subscriptionPrice = getSubscriptionPrice(validPromotion)
       if (pricesMatch(renewal.displayedPrice, subscriptionPrice))

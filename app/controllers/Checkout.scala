@@ -31,7 +31,7 @@ import views.html.{checkout => view}
 import views.support.{PlanList, BillingPeriod => _, _}
 
 import scala.Function.const
-import scala.concurrent.ExecutionContext.Implicits.global
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.concurrent.Future
 import scalaz.std.option._
 import scalaz.std.scalaFuture._
