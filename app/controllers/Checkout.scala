@@ -266,7 +266,6 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
       }
 
       logger.info(s"User successfully became subscriber:\n\tUser: SF=${r.salesforceMember.salesforceContactId}\n\tPlan: ${subscribeRequest.productData.fold(_.plan, _.plan).name}\n\tSubscription: ${r.subscribeResult.subscriptionName}")
-      if (tpBackend.environmentName == "PROD") Tip.verify()
       Ok(Json.obj("redirect" -> routes.Checkout.thankYou().url)).withSession(session)
     }
 
@@ -309,6 +308,7 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
       val eventualMaybeSubscription = tpBackend.subscriptionService.get[com.gu.memsub.subsv2.SubscriptionPlan.ContentSubscription](Name(subsName))
       eventualMaybeSubscription.map { maybeSub =>
         maybeSub.map { sub =>
+          if (tpBackend.environmentName == "PROD") Tip.verify()
           Ok(view.thankyou(sub, passwordForm, resolution, promotion, startDate))
         }.getOrElse {
           Redirect(routes.Homepage.index()).withNewSession
