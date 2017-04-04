@@ -302,8 +302,8 @@ object AccountManagement extends Controller with ContextLogging with CatalogProv
 
     loginRequestOpt.map { loginRequest =>
       (for {
-        zuoraSubscription <- OptionT(tpBackend.subscriptionService.get[ContentSubscription](Name(loginRequest.subscriptionId)))
-        result <- OptionT(subscriptionDetailsMatch(loginRequest, zuoraSubscription).map(matches => if (matches) Some(zuoraSubscription) else None))
+        zuoraSubscription <- OptionT(tpBackend.subscriptionService.get[ContentSubscription](Name(loginRequest.subscriptionId))).filter(sub => !sub.isCancelled)
+        result <- OptionT(subscriptionDetailsMatch(loginRequest, zuoraSubscription).map(matches => if (matches)  Some(zuoraSubscription) else None))
       } yield result).run
     }.getOrElse(Future.successful(None))
 
