@@ -302,7 +302,7 @@ object AccountManagement extends Controller with ContextLogging with CatalogProv
 
     loginRequestOpt.map { loginRequest =>
       (for {
-        zuoraSubscription <- OptionT(tpBackend.subscriptionService.get[ContentSubscription](Name(loginRequest.subscriptionId))).filter(sub => !sub.isCancelled)
+        zuoraSubscription <- OptionT(tpBackend.subscriptionService.get[ContentSubscription](Name(loginRequest.subscriptionId)))
         result <- OptionT(subscriptionDetailsMatch(loginRequest, zuoraSubscription).map(matches => if (matches) Some(zuoraSubscription) else None))
       } yield result).run
     }.getOrElse(Future.successful(None))
@@ -353,11 +353,13 @@ object AccountManagement extends Controller with ContextLogging with CatalogProv
   def processLogin: Action[AnyContent] = accountManagementAction.async { implicit request =>
     val loginRequest = AccountManagementLoginForm.mappings.bindFromRequest().value
     val promoCode = loginRequest.flatMap(_.promoCode).map(NormalisedPromoCode.safeFromString)
+    def loginError(errorMessage: String) = Redirect(routes.AccountManagement.manage(None, None, promoCode)).flashing(
+      "error" -> errorMessage
+    )
     subscriptionFromUserDetails(loginRequest).map {
+        case Some(sub) if (sub.isCancelled) =>  loginError(s"Your subscription is cancelled as of ${sub.termEndDate}, please contact customer services.")
         case Some(sub) => SessionSubscription.set(Redirect(routes.AccountManagement.manage(None, None, promoCode)), sub)
-        case _ => Redirect(routes.AccountManagement.manage(None, None, promoCode)).flashing(
-          "error" -> "Unable to verify your details."
-        )
+        case _ => loginError("Unable to verify your details.")
     }
   }
 
