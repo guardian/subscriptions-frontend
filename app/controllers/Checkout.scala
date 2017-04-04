@@ -10,6 +10,7 @@ import com.gu.memsub.promo.{NewUsers, NormalisedPromoCode, PromoCode}
 import com.gu.memsub.subsv2.CatalogPlan.ContentSubscription
 import com.gu.memsub.subsv2.{CatalogPlan, PlansWithIntroductory}
 import com.gu.memsub.{Product, SupplierCode}
+import com.gu.tip.Tip
 import com.gu.zuora.soap.models.errors._
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config.Identity.webAppProfileUrl
@@ -265,6 +266,7 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
       }
 
       logger.info(s"User successfully became subscriber:\n\tUser: SF=${r.salesforceMember.salesforceContactId}\n\tPlan: ${subscribeRequest.productData.fold(_.plan, _.plan).name}\n\tSubscription: ${r.subscribeResult.subscriptionName}")
+      if (tpBackend.environmentName == "PROD") Tip.verify()
       Ok(Json.obj("redirect" -> routes.Checkout.thankYou().url)).withSession(session)
     }
 
