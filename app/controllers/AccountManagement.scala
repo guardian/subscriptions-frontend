@@ -316,7 +316,7 @@ object AccountManagement extends Controller with ContextLogging with CatalogProv
     val errorCodes = errorCode.toSeq.flatMap(_.split(',').map(_.trim)).filterNot(_.isEmpty).toSet
 
     val futureMaybeFutureManagePage = for {
-      subscription <- OptionT(eventualMaybeSubscription)
+      subscription <- OptionT(eventualMaybeSubscription).filter(!_.isCancelled)
       allHolidays <- OptionT(tpBackend.suspensionService.getHolidays(subscription.name).map(_.toOption))
       billingSchedule <- OptionT(tpBackend.commonPaymentService.billingSchedule(subscription.id, subscription.accountId, numberOfBills = 13).map(Some(_):Option[Option[BillingSchedule]]))
     } yield {
