@@ -369,7 +369,7 @@ class CheckoutService(
         info(s"email submitted on backend but not updated: ${subscription.readerType}, ${contact.email}")
         Future.successful(\/.right(()))
       } else {
-        zuoraRestService.addEmail(subscription.accountName, renewal.email).map { either =>
+        zuoraRestService.addEmail(subscription.accountId, renewal.email).map { either =>
           either.fold[Unit]({ err => error(s"couldn't update email for sub: ${subscription.id}: $err") }, u => u)
         }
       }

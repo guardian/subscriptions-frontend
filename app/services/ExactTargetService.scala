@@ -170,7 +170,7 @@ class ExactTargetService(
 
     val buildDataExtensionRow =
       EitherT(GetSalesforceContactForSub(subscription)(zuoraService, salesforceService.repo, defaultContext).flatMap { salesforceContact =>
-        EitherT(zuoraRestService.getAccount(subscription.accountName)).map { account =>
+        EitherT(zuoraRestService.getAccount(subscription.accountId)).map { account =>
           HolidaySuspensionBillingScheduleDataExtensionRow(
             email = account.billToContact.email,
             saluation = constructSalutation(salesforceContact.title, salesforceContact.firstName, Some(salesforceContact.lastName)),
