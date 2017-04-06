@@ -286,6 +286,7 @@ object HolidaySuspensionBillingScheduleDataExtensionRow {
 
     HolidaySuspensionBillingScheduleDataExtensionRow(
       emailAddress,
+      subscriptionName,
       Seq(
         "ZuoraSubscriberId" -> subscriptionName,
         "SubscriberKey" -> emailAddress,
@@ -369,7 +370,7 @@ case class GuardianWeeklyWelcome1DataExtensionRow(email: String, fields: Seq[(St
   override def forExtension = GuardianWeeklyWelcome1DataExtension
 }
 
-case class HolidaySuspensionBillingScheduleDataExtensionRow(email: String, fields: Seq[(String, String)]) extends DataExtensionRow {
+case class HolidaySuspensionBillingScheduleDataExtensionRow(email: String, subscriptionName: String, fields: Seq[(String, String)]) extends DataExtensionRow {
   override def forExtension = HolidaySuspensionBillingScheduleExtension
 }
 case class GuardianWeeklyRenewalDataExtensionRow(email: String, fields: Seq[(String, String)]) extends DataExtensionRow {

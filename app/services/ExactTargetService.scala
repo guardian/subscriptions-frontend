@@ -188,7 +188,7 @@ class ExactTargetService(
     buildDataExtensionRow.flatMap { row =>
       EitherT(SqsClient.sendDataExtensionToQueue(Config.holidaySuspensionEmailQueue, row).map {
         case Success(sendMsgResult) => \/.right(())
-        case Failure(e) => \/.left(s"Details were: ${row.toString}, ${e.toString}")
+        case Failure(e) => \/.left(s"Details were: ${row.subscriptionName}, ${e.toString}")
       })
     }.run.map {
       case \/-(()) => logger.info(s"Successfully enqueued ${subscription.name.get}'s updated billing schedule email.")
