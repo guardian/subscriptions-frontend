@@ -14,6 +14,7 @@ import com.gu.memsub.subsv2._
 import com.gu.memsub.{BillingSchedule, Product}
 import com.gu.subscriptions.suspendresume.SuspensionService
 import com.gu.subscriptions.suspendresume.SuspensionService.{BadZuoraJson, ErrNel, HolidayRefund, PaymentHoliday}
+import com.gu.zuora.ZuoraRestService
 import com.gu.zuora.soap.models.Queries.Contact
 import com.typesafe.scalalogging.LazyLogging
 import configuration.{Config, ProfileLinks}
@@ -77,6 +78,8 @@ object ManageDelivery extends ContextLogging {
 
   def suspend(implicit request: Request[AnyContent], touchpoint: TouchpointBackend.Resolution): Future[Result] = {
     implicit val tpBackend = touchpoint.backend
+    implicit val rest = tpBackend.simpleRestClient
+    implicit val zuoraRestService = new ZuoraRestService[Future]
 
     (for {
       form <- EitherT(Future.successful(SuspendForm.mappings.bindFromRequest().value \/> "Please check your selections and try again"))
@@ -176,6 +179,8 @@ object ManageWeekly extends ContextLogging {
 
   def apply(billingSchedule: Option[BillingSchedule], weeklySubscription: Subscription[WeeklyPlan], promoCode: Option[PromoCode])(implicit request: Request[AnyContent], resolution: TouchpointBackend.Resolution): Future[Result] = {
     implicit val tpBackend = resolution.backend
+    implicit val rest = tpBackend.simpleRestClient
+    implicit val zuoraRestService = new ZuoraRestService[Future]
     implicit val flash = request.flash
     implicit val subContext = weeklySubscription
     if (weeklySubscription.readerType != ReaderType.Agent) {
@@ -209,7 +214,7 @@ object ManageWeekly extends ContextLogging {
                 case Right((existingCurrency, weeklyPlanInfoList)) =>
                   Ok(weeklySubscription.asRenewable.map { renewableSub =>
                     info(s"sub is renewable - showing weeklyRenew page")
-                    views.html.account.weeklyRenew(renewableSub, contact, billToCountry, weeklyPlanInfoList, existingCurrency, promoCode)
+                    views.html.account.weeklyRenew(renewableSub, contact, zuoraContact.email, billToCountry, weeklyPlanInfoList, existingCurrency, promoCode)
                   } getOrElse {
                     info(s"sub is not renewable - showing weeklyDetails page")
                     views.html.account.weeklyDetails(weeklySubscription, billingSchedule, contact)
@@ -230,6 +235,8 @@ object ManageWeekly extends ContextLogging {
 
   def renew(implicit request: Request[AnyContent], touchpoint: TouchpointBackend.Resolution): Future[Result] = {
     implicit val tpBackend = touchpoint.backend
+    implicit val rest = tpBackend.simpleRestClient
+    implicit val zuoraRestService = new ZuoraRestService[Future]
 
     def jsonError(message: String) = Json.toJson(Json.obj("errorMessage" -> message))
 
