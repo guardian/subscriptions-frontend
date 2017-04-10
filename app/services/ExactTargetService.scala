@@ -20,7 +20,7 @@ import com.gu.zuora.api.ZuoraService
 import com.gu.zuora.soap.models.Results.SubscribeResult
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
-import logging.ContextLogging
+import logging.{Context, ContextLogging}
 import model.SubscriptionOps._
 import model.exactTarget.HolidaySuspensionBillingScheduleDataExtensionRow.constructSalutation
 import model.exactTarget._
@@ -202,9 +202,7 @@ class ExactTargetService(
     subscriptionDetails: String,
     contact: Contact,
     email: String,
-    newTermStartDate: LocalDate): Future[Unit] = {
-
-    implicit val context = oldSub
+    newTermStartDate: LocalDate)(implicit context: Context): Future[Unit] = {
 
     sealed trait Error {
       def msg: String

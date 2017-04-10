@@ -8,7 +8,7 @@ import com.gu.memsub._
 import com.gu.memsub.subsv2.SubscriptionPlan.{Paid, PaperPlan, WeeklyPlan}
 import com.gu.memsub.subsv2.{PaidCharge, PaidSubscriptionPlan, Subscription}
 import com.typesafe.scalalogging.LazyLogging
-import logging.ContextLogging
+import logging.{Context, ContextLogging}
 import model.BillingPeriodOps._
 import org.joda.time.LocalDate.now
 import PartialFunction.cond
@@ -67,8 +67,7 @@ object SubscriptionOps extends LazyLogging {
   }
 
   implicit class EnrichedPaperSubscription[P <: PaperPlan](subscription: Subscription[P]) extends ContextLogging {
-    implicit val subContext = subscription
-    val renewable = {
+    def renewable(implicit context: Context) = {
       val wontAutoRenew = !subscription.autoRenew
       val startedAlready = !subscription.termStartDate.isAfter(now)
       info(s"testing if renewable - wontAutoRenew: $wontAutoRenew, startedAlready: $startedAlready")
@@ -77,7 +76,7 @@ object SubscriptionOps extends LazyLogging {
   }
 
   implicit class EnrichedWeeklySubscription[P <: WeeklyPlan](subscription: Subscription[P]) {
-    def asRenewable = if (subscription.renewable) Some(subscription.asInstanceOf[Subscription[WeeklyPlanOneOff]]) else None
+    def asRenewable(implicit context: Context) = if (subscription.renewable) Some(subscription.asInstanceOf[Subscription[WeeklyPlanOneOff]]) else None
     def secondPaymentDate = if (subscription.hasIntroductoryPeriod) subscription.acceptanceDate else subscription.acceptanceDate plusMonths subscription.plan.charges.billingPeriod.monthsInPeriod
 
   }
