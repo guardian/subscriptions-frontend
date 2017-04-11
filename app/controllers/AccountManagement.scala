@@ -68,12 +68,11 @@ object ManageDelivery extends ContextLogging {
 
   import play.api.mvc.Results._
 
-  def apply(errorCodes: Set[String], allHolidays: Seq[HolidayRefund], billingSchedule: Option[BillingSchedule], deliverySubscription: Subscription[Delivery])(implicit request: Request[AnyContent], touchpoint: TouchpointBackend.Resolution): Result = {
-    val pendingHolidays = pendingHolidayRefunds(allHolidays)
+  def apply(errorCodes: Set[String], pendingHolidays: Seq[HolidayRefund], billingSchedule: Option[BillingSchedule], deliverySubscription: Subscription[Delivery])(implicit request: Request[AnyContent], touchpoint: TouchpointBackend.Resolution): Result = {
     val suspendedDays = SuspensionService.holidayToSuspendedDays(pendingHolidays, deliverySubscription.plan.charges.chargedDays.toList)
     val chosenPaperDays = deliverySubscription.plan.charges.chargedDays.toList.sortBy(_.dayOfTheWeekIndex)
     val suspendableDays = Config.suspendableWeeks * chosenPaperDays.size
-    Ok(views.html.account.delivery(deliverySubscription, pendingHolidayRefunds(allHolidays), billingSchedule, chosenPaperDays, suspendableDays, suspendedDays, errorCodes))
+    Ok(views.html.account.delivery(deliverySubscription, pendingHolidays, billingSchedule, chosenPaperDays, suspendableDays, suspendedDays, errorCodes))
   }
 
   def suspend(implicit request: Request[AnyContent], touchpoint: TouchpointBackend.Resolution): Future[Result] = {
@@ -91,8 +90,7 @@ object ManageDelivery extends ContextLogging {
       oldBS <- EitherT(tpBackend.commonPaymentService.billingSchedule(sub.id, account, numberOfBills = 14).map(_ \/> "Error getting billing schedule"))
       result <- EitherT(tpBackend.suspensionService.addHoliday(newHoliday, oldBS, account.billCycleDay, sub.termEndDate)).leftMap(getAndLogRefundError(_).map(_.code).list.mkString(","))
       newBS <- EitherT(tpBackend.commonPaymentService.billingSchedule(sub.id, account, numberOfBills = 12).map(_ \/> "Error getting billing schedule"))
-      newHolidays <- EitherT(tpBackend.suspensionService.getHolidays(sub.name)).leftMap(_ => "Error getting holidays")
-      pendingHolidays = pendingHolidayRefunds(newHolidays)
+      pendingHolidays <- EitherT(tpBackend.suspensionService.getUnfinishedHolidays(sub.name, now)).leftMap(_ => "Error getting holidays")
       suspendableDays = Config.suspendableWeeks * sub.plan.charges.chargedDays.size
       suspendedDays = SuspensionService.holidayToSuspendedDays(pendingHolidays, sub.plan.charges.chargedDays.toList)
     } yield {
@@ -109,16 +107,6 @@ object ManageDelivery extends ContextLogging {
         currency = sub.currency
       ))
     }).valueOr(errorCode => Redirect(routes.AccountManagement.manage(None, Some(errorCode), None).url))
-  }
-
-  /**
-    * Takes a sequence of HolidayRefunds and filters out those that haven't finished yet. Sorting by their start date.
-    *
-    * @param allHolidays a sequence of HolidayRefunds
-    * @return a filtered and sorted sequence of HolidayRefunds
-    */
-  private def pendingHolidayRefunds(allHolidays: Seq[HolidayRefund]): Seq[HolidayRefund] = {
-    allHolidays.filterNot(_._2.finish.isBefore(now)).sortBy(_._2.start)
   }
 
   /**
@@ -324,12 +312,12 @@ object AccountManagement extends Controller with ContextLogging with CatalogProv
 
     val futureMaybeFutureManagePage = for {
       subscription <- OptionT(eventualMaybeSubscription).filter(!_.isCancelled)
-      allHolidays <- OptionT(tpBackend.suspensionService.getHolidays(subscription.name).map(_.toOption))
+      pendingHolidays <- OptionT(tpBackend.suspensionService.getUnfinishedHolidays(subscription.name, now).map(_.toOption))
       billingSchedule <- OptionT(tpBackend.commonPaymentService.billingSchedule(subscription.id, subscription.accountId, numberOfBills = 13).map(Some(_):Option[Option[BillingSchedule]]))
     } yield {
       val maybeFutureManagePage = subscription.planToManage.product match {
         case Product.Delivery => subscription.asDelivery.map { deliverySubscription =>
-          Future.successful(ManageDelivery(errorCodes, allHolidays, billingSchedule, deliverySubscription))
+          Future.successful(ManageDelivery(errorCodes, pendingHolidays, billingSchedule, deliverySubscription))
         }
         case Product.Voucher => subscription.asVoucher.map { voucherSubscription =>
           Future.successful(Ok(views.html.account.voucher(voucherSubscription, billingSchedule)))
