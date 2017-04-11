@@ -19,7 +19,7 @@ import com.gu.zuora.soap.models.Commands.{Account, PaymentMethod, RatePlan, Subs
 import com.gu.zuora.soap.models.Queries
 import com.gu.zuora.soap.models.Results.SubscribeResult
 import com.gu.zuora.soap.models.errors._
-import logging.ContextLogging
+import logging.{Context, ContextLogging}
 import model.BillingPeriodOps._
 import model.SubscriptionOps._
 import model.error.CheckoutService._
@@ -304,9 +304,11 @@ class CheckoutService(
   }
 
   def renewSubscription(subscription: Subscription[WeeklyPlanOneOff], renewal: model.Renewal)
-    (implicit p: PromotionApplicator[com.gu.memsub.promo.Renewal, Renew], zuoraRestService: ZuoraRestService[Future]) = {
-
-    implicit val context = subscription
+    (implicit
+      p: PromotionApplicator[com.gu.memsub.promo.Renewal, Renew],
+      zuoraRestService: ZuoraRestService[Future],
+      context: Context
+    ) = {
 
     def getPayment(contact: Contact, billto: Queries.Contact): PaymentService#Payment = {
       val idMinimalUser = IdMinimalUser(contact.identityId, None)

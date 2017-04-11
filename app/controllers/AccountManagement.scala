@@ -244,11 +244,11 @@ object ManageWeekly extends ContextLogging {
       val response = for {
         sub <- maybeSub.toRightDisjunction("no subscription in request")
         weeklySub <- sub.asWeekly.toRightDisjunction("subscription is not weekly")
-        renewableSub <- weeklySub.asRenewable.toRightDisjunction("subscription is not renewable")
+        renewableSub <- weeklySub.asRenewable(sub).toRightDisjunction("subscription is not renewable")
         renew <- parseRenewalRequest(request, tpBackend.catalogService.unsafeCatalog)
       } yield {
         info(s"Attempting to renew onto ${renew.plan.name} with promo code: ${renew.promoCode}")(sub)
-        tpBackend.checkoutService.renewSubscription(renewableSub, renew).map { _ =>
+        tpBackend.checkoutService.renewSubscription(renewableSub, renew)(implicitly, implicitly, sub).map { _ =>
           info(s"Successfully processed renewal onto ${renew.plan.name}")(sub)
           Ok(Json.obj("redirect" -> routes.AccountManagement.renewThankYou().url))
         }.recover{
