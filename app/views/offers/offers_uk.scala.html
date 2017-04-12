@@ -1,8 +1,8 @@
 @import model.DigitalEdition.UK
-@import org.joda.time.LocalDate
+@import org.joda.time.DateTime
 @import views.support.DigitalEdition._
 @()
-@isEasterWeekend = @{LocalDate.now.isAfter(LocalDate.parse("2017-04-13")) && LocalDate.now.isBefore(LocalDate.parse("2017-04-18"))}
+@isEasterWeekend = @{DateTime.now.isAfter(DateTime.parse("2017-04-13T13:00:00Z")) && DateTime.now.isBefore(DateTime.parse("2017-04-18T01:00:00Z"))}
 @main(
     "Subscriptions and Membership | The Guardian",
     Some("Subscribe to The Guardian & Observer. Support our independent, award-winning journalism."),
@@ -31,16 +31,14 @@
                 <div class="block__info">
                     <ul class="block__list">
                         <li class="block__list-item">
-                            <strong>
-                            @if(isEasterWeekend) {
-                                Subscribe this weekend to save an extra 50% on the first 3 months
-                            } else {
-                                Subscribe today to save an extra 50% for the first month
-                            }
-                            </strong>
+                        @if(isEasterWeekend) {
+                            <strong>Subscribe this weekend to save an extra 50% on the first 3 months</strong>
+                        } else {
+                            <strong>Subscribe today to save an extra 50% for the first month</strong>
+                        }
                         </li>
                         <li class="block__list-item">Year-round savings on the retail price</li>
-                        <li class="block__list-item">Pick the package you want: Everyday+, Sixday+ and Weekend+</li>
+                        <li class="block__list-item">Pick the package you want: Everyday+, Sixday+, Weekend+ and Sunday+</li>
                         <li class="block__list-item">All supplements Monday to Sunday</li>
                         <li class="block__list-item">All the <strong>Digital Pack</strong> benefits</li>
                     </ul>
@@ -54,16 +52,14 @@
                 <div class="block__info">
                     <ul class="block__list">
                         <li class="block__list-item">
-                            <strong>
-                            @if(isEasterWeekend) {
-                                Subscribe this weekend to save an extra 50% on the first 3 months
-                            } else {
-                                Subscribe today to save an extra 50% for the first month
-                            }
-                            </strong>
+                        @if(isEasterWeekend) {
+                            <strong>Subscribe this weekend to save an extra 50% on the first 3 months</strong>
+                        } else {
+                            <strong>Subscribe today to save an extra 50% for the first month</strong>
+                        }
                         </li>
                         <li class="block__list-item">Year-round savings on the retail price</li>
-                        <li class="block__list-item">Pick the package you want: Everyday, Sixday and Weekend</li>
+                        <li class="block__list-item">Pick the package you want: Everyday, Sixday, Weekend and Sunday</li>
                         <li class="block__list-item">All supplements Monday to Sunday</li>
                         <li class="block__list-item">Receive newspaper vouchers to use at over 1,000 retailers across the UK, or delivery within the M25</li>
                     </ul>
