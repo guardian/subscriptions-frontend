@@ -3,7 +3,7 @@ define([
 ], function (cookie) {
     'use strict';
 
-    var analyticsEnabled = (
+    var analyticsEnabled = true || (
         window.guardian.analyticsEnabled &&
         !cookie.getCookie('ANALYTICS_OFF_KEY') &&
         !window.guardian.isDev

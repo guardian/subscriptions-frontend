@@ -3,6 +3,7 @@ define(['modules/analytics/ga',
         'modules/analytics/remarketing',
         'modules/analytics/krux',
         'modules/analytics/facebook',
+        'modules/analytics/appnexus',
         'modules/analytics/affectv'
 ], function (ga,
              ophan,

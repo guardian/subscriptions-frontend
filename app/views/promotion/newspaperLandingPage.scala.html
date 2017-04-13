@@ -47,10 +47,10 @@
     <script>
         guardian.pageInfo.pageType = 'Landing';
     @if(products.exists(_.title.contains("+"))) {
-        guardian.pageInfo.productData.productSegment = 'Paper+Digital';
+        guardian.pageInfo.productData.productSegment = 'paper-digital';
     }
     @if(!products.exists(_.title.contains("+"))) {
-        guardian.pageInfo.productData.productSegment = 'Paper';
+        guardian.pageInfo.productData.productSegment = 'paper';
     }
     </script>
 

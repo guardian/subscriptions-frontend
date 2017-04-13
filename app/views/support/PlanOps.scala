@@ -28,6 +28,15 @@ object PlanOps {
       case Product.Digipack => Some("Daily Edition + Guardian App Premium Tier")
       case _ => StringOps.oempty(in.description).headOption
     }
+
+    def segment: String = {
+      in.product match {
+        case Product.Digipack => "digital"
+        case _: Product.Weekly=> "weekly"
+        case Product.Voucher | Product.Delivery => if (in.name.endsWith("+")) "paper-digital" else "paper"
+        case _ => ""
+      }
+    }
   }
 
   implicit class PrettyPlan[+A <: CatalogPlan.Paid](in: A) {
@@ -74,17 +83,17 @@ object PlanOps {
 
     def segment: String = {
       if (in.isDigitalPack) {
-        "Digital"
+        "digital"
       } else if (in.isHomeDelivery || in.isVoucher) {
         if (in.hasDigitalPack) {
-          "Paper+Digital"
+          "paper-digital"
         } else {
-          "Paper"
+          "paper"
         }
       } else if (in.isGuardianWeekly) {
-        "Weekly"
+        "weekly"
       } else {
-        "Subscription"
+        ""
       }
     }
   }

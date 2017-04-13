@@ -22,11 +22,18 @@ define([
         var productData = guardian.pageInfo ? guardian.pageInfo.productData : {};
 
         if (productData) {
+            var parameters = {
+                currency: 'GBP',
+                value: '0',
+                content_type: productData.productType
+            };
             if (productData.productPurchasing) {
-                fbq('track', 'InitiateCheckout');
+                parameters.content_name = productData.productPurchasing;
+                fbq('track', 'InitiateCheckout', parameters);
             }
             if (productData.productPurchased) {
-                fbq('track', 'Purchase');
+                parameters.content_name = productData.productPurchased;
+                fbq('track', 'Purchase', parameters);
             }
         }
     }
