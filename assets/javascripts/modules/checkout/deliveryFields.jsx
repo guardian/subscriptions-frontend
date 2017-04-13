@@ -13,10 +13,10 @@ require('react-datepicker/dist/react-datepicker.css');
 const MAX_WEEKS_AVAILABLE = 4;
 
 function getFirstSelectableDate(filterFn) {
-    let weekly = formElements.$DELIVERED_PRODUCT_TYPE.val() === 'weekly';
-    let firstWeekly = moment('20170414','YYYYMMDD');
-    let NUMBER_OF_DAYS_IN_ADVANCE = weekly?7:3;
-    var firstSelectableDate = moment().add(NUMBER_OF_DAYS_IN_ADVANCE, 'days');
+    const weekly = formElements.$DELIVERED_PRODUCT_TYPE.val() === 'weekly';
+    const firstWeekly = moment('20170428','YYYYMMDD');
+    const NUMBER_OF_DAYS_IN_ADVANCE = weekly ? 7 : 3;
+    const firstSelectableDate = moment().add(NUMBER_OF_DAYS_IN_ADVANCE, 'days');
     while (filterFn && !filterFn(firstSelectableDate)) {
         firstSelectableDate.add(1, 'day');
     }
@@ -27,7 +27,7 @@ function getFirstSelectableDate(filterFn) {
 }
 
 function getLastSelectableDate(firstSelectableDate) {
-    var startDate = firstSelectableDate || moment();
+    const startDate = firstSelectableDate || moment();
     return moment(startDate).add(MAX_WEEKS_AVAILABLE, 'weeks');
 }
 
