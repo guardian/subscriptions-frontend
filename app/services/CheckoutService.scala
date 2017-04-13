@@ -50,9 +50,12 @@ object CheckoutService {
     case weekend => d.plusWeeks(1).withDayOfWeek(DateTimeConstants.FRIDAY)
   }
 
-  def determineFirstAvailableWeeklyDate(now: LocalDate): LocalDate =
-    nextFriday(now plusWeeks 1)
+  val manualFulfilmentOverride = new LocalDate("2017-04-28")
 
+  def determineFirstAvailableWeeklyDate(now: LocalDate): LocalDate = {
+    val nextAvailableDate = nextFriday(now plusWeeks 1)
+    Seq(manualFulfilmentOverride, nextAvailableDate).max
+  }
 }
 
 class CheckoutService(
