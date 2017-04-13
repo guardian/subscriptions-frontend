@@ -3,12 +3,14 @@ define(['modules/analytics/ga',
         'modules/analytics/remarketing',
         'modules/analytics/krux',
         'modules/analytics/facebook',
+        'modules/analytics/appnexus',
         'modules/analytics/affectv'
 ], function (ga,
              ophan,
              remarketing,
              krux,
              facebook,
+             appnexus,
              affectv) {
     'use strict';
 
@@ -19,6 +21,7 @@ define(['modules/analytics/ga',
         remarketing.init();
         krux.init();
         facebook.init();
+        appnexus.init();
         affectv.init();
     }
 

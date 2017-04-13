@@ -1,9 +1,12 @@
 @import model.DigitalEdition.UK
-@(subscription: model.Subscriptions.SubscriptionProduct)
-
-@import utils.Prices._
+@(subscription: model.Subscriptions.SubscriptionProduct, productSegment: String)
 
 @main(s"${subscription.capitalizedTitle} | Choose a Package | Subscriptions | The Guardian", edition = UK) {
+
+    <script>
+        guardian.pageInfo.pageType = 'Landing';
+        guardian.pageInfo.productData.productSegment = '@productSegment';
+    </script>
 
     <main class="page-container gs-container">
 

@@ -43,6 +43,17 @@
 @main(
     title = s"$title | The Guardian"
 ) {
+
+    <script>
+        guardian.pageInfo.pageType = 'Landing';
+    @if(products.exists(_.title.contains("+"))) {
+        guardian.pageInfo.productData.productSegment = 'paper-digital';
+    }
+    @if(!products.exists(_.title.contains("+"))) {
+        guardian.pageInfo.productData.productSegment = 'paper';
+    }
+    </script>
+
     <main class="page-container gs-container">
 
         @fragments.page.header(title)

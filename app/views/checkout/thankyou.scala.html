@@ -2,8 +2,8 @@
 @import com.gu.memsub.promo.Promotion.AnyPromotion
 @import com.gu.memsub.subsv2.Subscription
 @import com.gu.memsub.subsv2.SubscriptionPlan.ContentSubscription
-@import model.SubscriptionOps._
 @import views.support.PlanOps._
+@import model.SubscriptionOps._
 
 @(  subscription: Subscription[ContentSubscription],
     guestAccountForm: Option[Form[model.GuestAccountData]] = None,
@@ -12,10 +12,10 @@
     startDate: String
 )(implicit request: RequestHeader)
 
-
 @main(s"Confirmation | Subscribe to the ${subscription.firstPlan.title} | The Guardian", bodyClasses=List("is-wide"), touchpointBackendResolutionOpt = Some(touchpointBackendResolution), product = Some(subscription.firstProduct)) {
 
 <script type="text/javascript">
+    guardian.pageInfo.pageType = 'Thankyou';
     guardian.pageInfo.slug="GuardianDigiPack:Order Complete";
     guardian.pageInfo.productData = {
         // Omniture
@@ -25,6 +25,7 @@
         amount: 0,
         // Google Analytics
         zuoraId: '@subscription.name.get',
+        productSegment: '@{subscription.firstPlan.segment}',
         productType: '@subscription.firstProduct.productType',
         productPurchased: '@{subscription.firstPlan.name}'
     };
