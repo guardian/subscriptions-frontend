@@ -9,6 +9,7 @@ define(['modules/analytics/ga',
              remarketing,
              krux,
              facebook,
+             appnexus,
              affectv) {
     'use strict';
 
@@ -19,6 +20,7 @@ define(['modules/analytics/ga',
         remarketing.init();
         krux.init();
         facebook.init();
+        appnexus.init();
         affectv.init();
     }
 

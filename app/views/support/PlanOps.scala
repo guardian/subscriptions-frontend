@@ -1,18 +1,14 @@
 package views.support
 
 import com.gu.memsub.Benefit._
+import com.gu.memsub.BillingPeriod.SixWeeks
 import com.gu.memsub.Product.{Delivery, Voucher}
 import com.gu.memsub._
 import com.gu.memsub.images.{ResponsiveImage, ResponsiveImageGenerator, ResponsiveImageGroup}
-import com.gu.memsub.subsv2.{CatalogPlan, Plan, SubscriptionPlan}
+import com.gu.memsub.subsv2.{CatalogPlan, Plan}
 import com.netaporter.uri.dsl._
-import configuration.Links
-import model.BillingPeriodOps._
-import com.gu.memsub.BillingPeriod.{OneYear, Quarter, SixWeeks}
-
 
 import scala.reflect.internal.util.StringOps
-import scalaz.syntax.std.boolean._
 object PlanOps {
   implicit class CommonPlanOps[+A <: Plan[_,_]](in: A) {
 
@@ -76,7 +72,21 @@ object PlanOps {
 
     def hasDigitalPack: Boolean = in.charges.benefits.list.contains(Digipack)
 
-
+    def segment: String = {
+      if (in.isDigitalPack) {
+        "Digital"
+      } else if (in.isHomeDelivery || in.isVoucher) {
+        if (in.hasDigitalPack) {
+          "Paper+Digital"
+        } else {
+          "Paper"
+        }
+      } else if (in.isGuardianWeekly) {
+        "Weekly"
+      } else {
+        "Subscription"
+      }
+    }
   }
 
   implicit class ProductOps(product: Product) {

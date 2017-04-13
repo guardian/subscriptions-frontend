@@ -72,6 +72,8 @@
 ) {
 <script>
     guardian.supplierCode = '@{supplierCode.mkString}';
+    guardian.pageInfo.pageType = 'Checkout';
+    guardian.pageInfo.productData.productSegment = '@{productData.plans.default.segment}';
     guardian.pageInfo.productData.initialProduct = '@{productData.plans.default.name}';
     guardian.pageInfo.productData.productPurchasing = '@{productData.plans.default.name}';
     guardian.pageInfo.productData.productType = '@{productData.plans.default.product.productType}';

@@ -11,7 +11,7 @@ object Shipping extends Controller {
   // no need to support test users here really as plans seldom change
   val catalog = TouchpointBackend.Normal.catalogService.unsafeCatalog
 
-  def index(subscriptionCollection: SubscriptionProduct) = {
+  private def index(subscriptionCollection: SubscriptionProduct, productSegment: String) = {
     Ok(views.html.shipping.shipping(subscriptionCollection))
   }
 
@@ -27,7 +27,7 @@ object Shipping extends Controller {
       description = "Save money on your newspapers and digital content. Plus start using the daily edition and premium live news app immediately.",
       altPackagePath = "/delivery/paper-digital",
       options = catalog.voucher.list.filter(_.charges.digipack.isDefined).map(planToOptions).sortBy(_.weeklyPrice).reverse
-    ))
+    ), "Paper+Digital")
   }
 
   def viewCollectionPaper() = CachedAction {
@@ -36,7 +36,7 @@ object Shipping extends Controller {
       description = "Save money on your newspapers.",
       altPackagePath = "/delivery/paper",
       options = catalog.voucher.list.filter(_.charges.digipack.isEmpty).map(planToOptions).sortBy(_.weeklyPrice).reverse
-    ))
+    ), "Paper")
   }
 
   def viewDeliveryPaperDigital() = CachedAction {
@@ -46,7 +46,7 @@ object Shipping extends Controller {
                       |Plus you can start using the daily edition and premium live news app immediately.""".stripMargin,
       altPackagePath = "/collection/paper-digital",
       options = catalog.delivery.list.filter(_.charges.digipack.isDefined).map(planToOptions).sortBy(_.weeklyPrice).reverse
-    ))
+    ), "Paper+Digital")
   }
 
   def viewDeliveryPaper() = CachedAction {
@@ -55,7 +55,7 @@ object Shipping extends Controller {
       description = "If you live within the M25 you can have your papers delivered by 7am Monday - Saturday and 8.30 on Sunday.",
       altPackagePath = "/collection/paper",
       options = catalog.delivery.list.filter(_.charges.digipack.isEmpty).map(planToOptions).sortBy(_.weeklyPrice).reverse
-    ))
+    ), "Paper")
   }
 
 }
