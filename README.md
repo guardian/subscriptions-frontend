@@ -49,7 +49,7 @@ depending on your system.
 1. Download our private keys from the `subscriptions-private` S3 bucket. If you have the AWS CLI set up you can run:
 
     ```
-    aws s3 cp s3://subscriptions-private/DEV/subscriptions-frontend.conf /etc/gu  --profile membership
+    aws s3 cp s3://subscriptions-private/DEV/subscriptions-frontend.private.conf /etc/gu  --profile membership
     ```
 
 1. Run ``` sbt devrun ``` and navigate to ```sub.thegulocal.com```
