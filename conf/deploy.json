@@ -13,7 +13,7 @@
       "actionsBeforeApp": ["frontend.uploadArtifacts", "frontend.deploy"]
     },
     "artifactUploadOnly": {
-      "actions": [ "frontend.uploadArtifacts" ]
+      "actions": [ "subscriptions-frontend.uploadArtifacts" ]
     }
   }
 }
