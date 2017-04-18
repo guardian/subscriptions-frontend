@@ -1,7 +1,6 @@
 package services
 
 import com.gu.identity.play.IdMinimalUser
-import com.gu.memsub.Address
 import com.gu.salesforce.ContactDeserializer.Keys
 import com.gu.salesforce._
 import com.typesafe.scalalogging.LazyLogging
@@ -31,7 +30,7 @@ object SalesforceService {
     Keys.BILLING_STREET -> personalData.address.line,
     Keys.BILLING_CITY -> personalData.address.town,
     Keys.BILLING_POSTCODE -> personalData.address.postCode,
-    Keys.BILLING_COUNTRY -> personalData.address.countryName,
+    Keys.BILLING_COUNTRY -> personalData.address.country.map(_.name).getOrElse(personalData.address.countryName),
     Keys.BILLING_STATE -> personalData.address.countyOrState,
     Keys.ALLOW_GU_RELATED_MAIL -> personalData.receiveGnmMarketing
   ) ++ personalData.title.fold(Json.obj())(title => Json.obj(
@@ -41,7 +40,7 @@ object SalesforceService {
     Keys.MAILING_CITY -> addr.town,
     Keys.MAILING_POSTCODE -> addr.postCode,
     Keys.MAILING_STATE -> addr.countyOrState,
-    Keys.MAILING_COUNTRY -> addr.countryName
+    Keys.MAILING_COUNTRY -> addr.country.map(_.name).getOrElse(addr.countryName)
   ) ++ paperData.flatMap(_.deliveryInstructions).fold(Json.obj())(instrs => Json.obj(
     Keys.DELIVERY_INSTRUCTIONS -> instrs
   )))
