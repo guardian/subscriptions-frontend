@@ -103,21 +103,24 @@ Resources:
       UserData:
         Fn::Base64: !Sub |
           #!/bin/bash -ev
-          CONF_DIR=/subscriptions/subscriptions-frontend-1.0-SNAPSHOT/conf
+          CONF_DIR=/etc/subscriptions-frontend
           /opt/features/ssh-keys/initialise-keys-and-cron-job.sh -l -b github-team-keys -t Membership-and-Subscriptions || true
-          adduser --system --home /subscriptions --disabled-password subscriptions
-          aws --region ${AWS::Region} s3 cp s3://subscriptions-dist/${Stack}/${Stage}/frontend/app.zip /tmp
-          unzip -d /subscriptions /tmp/app.zip
           mkdir /etc/gu
+
+          aws --region ${AWS::Region} s3 cp s3://subscriptions-dist/${Stack}/${Stage}/frontend/subscriptions-frontend_1.0-SNAPSHOT_all.deb /tmp
+
           aws --region ${AWS::Region} s3 cp s3://subscriptions-private/${Stage}/subscriptions-frontend.private.conf /etc/gu
-          chown subscriptions /etc/gu/subscriptions-frontend.private.conf
+
+          dpkg -i /tmp/subscriptions-frontend_1.0-SNAPSHOT_all.deb
+          chown subscriptions-frontend /etc/gu/subscriptions-frontend.private.conf
           chmod 0600 /etc/gu/subscriptions-frontend.private.conf
           wget https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py
           sed -i -e "s/__DATE/$(date +%F)/" -e 's/__STAGE/${Stage}/' $CONF_DIR/logger.conf
           python awslogs-agent-setup.py -nr ${AWS::Region} -c $CONF_DIR/logger.conf
-          sed 's/__STAGE/${Stage}/' $CONF_DIR/upstart.conf > /etc/init/subscriptions-app.conf
-          chown -R subscriptions /subscriptions/
-          start subscriptions-app
+
+          systemctl enable awslogs
+          systemctl start awslogs
+
   SubscriptionsAppRole:
     Type: AWS::IAM::Role
     Properties:

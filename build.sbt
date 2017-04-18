@@ -6,9 +6,10 @@ version := "1.0-SNAPSHOT"
 
 lazy val root = (project in file(".")).enablePlugins(
     PlayScala,
-    BuildInfoPlugin
+    BuildInfoPlugin,
+    RiffRaffArtifact,
+    JDebPackaging
 ).settings(
-    magentaPackageName := "frontend",
     buildInfoKeys := Seq[BuildInfoKey](
 	name,
 	BuildInfoKey.constant("gitCommitId", Option(System.getenv("BUILD_VCS_NUMBER")) getOrElse (try {
@@ -79,9 +80,29 @@ resolvers ++= Seq(
     "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases",
     Resolver.sonatypeRepo("releases"))
 
+import com.typesafe.sbt.packager.archetypes.ServerLoader.Systemd
+serverLoading in Debian := Systemd
+debianPackageDependencies := Seq("openjdk-8-jre-headless")
+maintainer := "Membership Dev <membership.dev@theguardian.com>"
+packageSummary := "Subscription Frontend"
+packageDescription := """Subscription Frontend"""
+
+riffRaffPackageType := (packageBin in Debian).value
+
+javaOptions in Universal ++= Seq(
+      "-Dpidfile.path=/dev/null",
+      "-J-XX:MaxRAMFraction=2",
+      "-J-XX:InitialRAMFraction=2",
+      "-J-XX:MaxMetaspaceSize=500m",
+      "-J-XX:+PrintGCDetails",
+      "-J-XX:+PrintGCDateStamps",
+      s"-J-Xloggc:/var/log/${packageName.value}/gc.log"
+    )
+
 addCommandAlias("devrun", "run  9200")
 addCommandAlias("prodrun", "run 9200")
 addCommandAlias("fast-test", "testOnly -- -l Acceptance")
 addCommandAlias("acceptance-test", "testOnly acceptance.CheckoutSpec")
+addCommandAlias("play-artifact", "riffRaffNotifyTeamcity")
 
-playArtifactDistSettings
+
