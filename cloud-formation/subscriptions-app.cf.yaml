@@ -1,0 +1,263 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: subscriptions-app
+Parameters:
+  VpcId:
+    Type: String
+    Description: VpcId of your existing Virtual Private Cloud (VPC)
+    Default: vpc-e905ae8c
+  Subnets:
+    Type: CommaDelimitedList
+    Description: The list of SubnetIds in your Virtual Private Cloud (VPC)
+    Default: subnet-b3931cc4, subnet-fee4839b, subnet-cde44494
+  Stack:
+    Type: String
+    Description: Applied directly as a tag
+    Default: subscriptions
+  KeyName:
+    Description: The EC2 Key Pair to allow SSH access to the instance
+    Type: String
+    Default: aws-subscriptions
+  Stage:
+    Type: String
+    Description: Applied directly as a tag
+    Default: PROD
+  AllowedIngressIps:
+    Description: IP address range (CIDR) that access the site (e.g. '77.91.248.0/21'-
+      Internal Guardian, or '0.0.0.0/0' - the whole internet!)
+    Type: String
+    Default: 0.0.0.0/0
+  StatusAppSecurityGroup:
+    Description: Security group to add instances to so StatusApp can access management
+      pages - search for 'StatusApp-InstanceSecurityGroup' to find the Security Group
+    Type: AWS::EC2::SecurityGroup::Id
+  InstanceType:
+    Type: String
+    Description: EC2 instance type
+    AllowedValues:
+    - t2.micro
+    - t2.medium
+    - m3.medium
+    ConstraintDescription: must be a valid EC2 instance type.
+  ImageId:
+    Description: AMI ID
+    Type: String
+  VulnerabilityScanningSecurityGroup:
+    Description: Security group that grants access to the account's Vulnerability
+      Scanner
+    Type: AWS::EC2::SecurityGroup::Id
+Mappings:
+  StageVariables:
+    PROD:
+      DynamoDBTables:
+      - arn:aws:dynamodb:*:*:table/MembershipSub-Promotions-PROD
+      - arn:aws:dynamodb:*:*:table/MembershipSub-Promotions-UAT
+      SiteDomain: 'subscribe.theguardian.com.origin.subscriptions.guardianapis.com.'
+      MinInstances: '3'
+      MaxInstances: '6'
+      DesiredInstances: '3'
+      SSLCertificateId: '89005cdb-ddf9-4893-89da-0e5facb13914'
+    CODE:
+      DynamoDBTables:
+      - arn:aws:dynamodb:*:*:table/MembershipSub-Promotions-DEV
+      - arn:aws:dynamodb:*:*:table/MembershipSub-Promotions-UAT
+      SiteDomain: 'subscribe.code.dev-theguardian.com.origin.subscriptions.guardianapis.com.'
+      MinInstances: '1'
+      MaxInstances: '2'
+      DesiredInstances: '1'
+      SSLCertificateId: '425252d2-fc17-4ad3-8a44-264cb557b2e5'
+Resources:
+  FrontendAutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      AvailabilityZones: !GetAZs ''
+      VPCZoneIdentifier: !Ref 'Subnets'
+      LaunchConfigurationName: !Ref 'FrontendLaunchConfig'
+      MinSize: !FindInMap [StageVariables, !Ref 'Stage', MinInstances]
+      MaxSize: !FindInMap [StageVariables, !Ref 'Stage', MaxInstances]
+      DesiredCapacity: !FindInMap [StageVariables, !Ref 'Stage', DesiredInstances]
+      LoadBalancerNames:
+      - !Ref 'FrontendElasticLoadBalancer'
+      HealthCheckType: ELB
+      HealthCheckGracePeriod: 300
+      Tags:
+      - Key: Stack
+        Value: !Ref 'Stack'
+        PropagateAtLaunch: 'true'
+      - Key: App
+        Value: frontend
+        PropagateAtLaunch: 'true'
+      - Key: Stage
+        Value: !Ref 'Stage'
+        PropagateAtLaunch: 'true'
+  FrontendLaunchConfig:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Properties:
+      ImageId: !Ref 'ImageId'
+      SecurityGroups:
+      - !Ref 'InstanceSecurityGroup'
+      - !Ref 'VulnerabilityScanningSecurityGroup'
+      InstanceType: !Ref 'InstanceType'
+      KeyName: !Ref 'KeyName'
+      IamInstanceProfile: !Ref 'SubscriptionsAppInstanceProfile'
+      AssociatePublicIpAddress: true
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash -ev
+          CONF_DIR=/subscriptions/subscriptions-frontend-1.0-SNAPSHOT/conf
+          /opt/features/ssh-keys/initialise-keys-and-cron-job.sh -l -b github-team-keys -t Membership-and-Subscriptions || true
+          adduser --system --home /subscriptions --disabled-password subscriptions
+          aws --region ${AWS::Region} s3 cp s3://subscriptions-dist/${Stack}/${Stage}/frontend/app.zip /tmp
+          unzip -d /subscriptions /tmp/app.zip
+          mkdir /etc/gu
+          aws --region ${AWS::Region} s3 cp s3://subscriptions-private/${Stage}/subscriptions-frontend.conf /etc/gu
+          chown subscriptions /etc/gu/subscriptions-frontend.conf
+          chmod 0600 /etc/gu/subscriptions-frontend.conf
+          wget https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py
+          sed -i -e "s/__DATE/$(date +%F)/" -e 's/__STAGE/${Stage}/' $CONF_DIR/logger.conf
+          python awslogs-agent-setup.py -nr ${AWS::Region} -c $CONF_DIR/logger.conf
+          sed 's/__STAGE/${Stage}/' $CONF_DIR/upstart.conf > /etc/init/subscriptions-app.conf
+          chown -R subscriptions /subscriptions/
+          start subscriptions-app
+  SubscriptionsAppRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Path: /
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - ec2.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Policies:
+      - PolicyName: PrivateBucket
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action: s3:GetObject
+            Resource: arn:aws:s3:::subscriptions-private/*
+          - Effect: Allow
+            Action: s3:GetObject
+            Resource: arn:aws:s3:::membership-private/membership_directory_cert.p12
+      - PolicyName: PushLogs
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - logs:*
+            Resource:
+            - arn:aws:logs:*:*:*
+      - PolicyName: PushMetrics
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - cloudwatch:PutMetricData
+            Resource: '*'
+      - PolicyName: DynamoPromotions
+        PolicyDocument:
+          Statement:
+          - Effect: Allow
+            Action:
+            - dynamodb:GetItem
+            - dynamodb:Scan
+            - dynamodb:Query
+            - dynamodb:DescribeTable
+            Resource: !FindInMap [StageVariables, !Ref 'Stage', DynamoDBTables]
+      - PolicyName: SQSWelcomeEmails
+        PolicyDocument:
+          Statement:
+          - Effect: Allow
+            Action: sqs:*
+            Resource: arn:aws:sqs:eu-west-1:865473395570:subs-welcome-email
+      - PolicyName: SQSHolidaySuspensionEmails
+        PolicyDocument:
+          Statement:
+          - Effect: Allow
+            Action: sqs:*
+            Resource: arn:aws:sqs:eu-west-1:865473395570:subs-holiday-suspension-email
+  SubscriptionsAppInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: /
+      Roles:
+      - !Ref 'SubscriptionsAppRole'
+  FrontendElasticLoadBalancer:
+    Type: AWS::ElasticLoadBalancing::LoadBalancer
+    Properties:
+      Listeners:
+      - LoadBalancerPort: '443'
+        InstancePort: 9000
+        Protocol: HTTPS
+        SSLCertificateId: !Sub
+            - arn:aws:acm:eu-west-1:${AWS::AccountId}:certificate/${CertificateId}
+            - { CertificateId : !FindInMap [StageVariables, !Ref 'Stage', SSLCertificateId] }
+      SecurityGroups:
+      - !Ref 'LoadBalancerSecurityGroup'
+      Subnets: !Ref 'Subnets'
+      HealthCheck:
+        Target: HTTP:9000/healthcheck
+        HealthyThreshold: '2'
+        UnhealthyThreshold: '10'
+        Interval: '10'
+        Timeout: '5'
+      ConnectionDrainingPolicy:
+        Enabled: 'true'
+        Timeout: '60'
+      CrossZone: 'true'
+  LoadBalancerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Permit incoming HTTPS access on port 443, egress to port 9000
+      VpcId: !Ref 'VpcId'
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: '443'
+        ToPort: '443'
+        CidrIp: !Ref 'AllowedIngressIps'
+      SecurityGroupEgress:
+      - IpProtocol: tcp
+        FromPort: '9000'
+        ToPort: '9000'
+        CidrIp: 0.0.0.0/0
+  InstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Open up SSH access and enable HTTP access on the configured
+        port
+      VpcId: !Ref 'VpcId'
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: '22'
+        ToPort: '22'
+        CidrIp: 77.91.248.0/21
+      - IpProtocol: tcp
+        FromPort: '9000'
+        ToPort: '9000'
+        CidrIp: 77.91.248.0/21
+      - IpProtocol: tcp
+        FromPort: '9000'
+        ToPort: '9000'
+        SourceSecurityGroupId: !Ref 'LoadBalancerSecurityGroup'
+      - IpProtocol: tcp
+        FromPort: '9000'
+        ToPort: '9000'
+        SourceSecurityGroupId: !Ref 'StatusAppSecurityGroup'
+  FrontendELBDNSrecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: /hostedzone/Z2LN31BPOUYL7D
+      Comment: CNAME for AWS ELB
+      Name: !FindInMap [StageVariables, !Ref 'Stage', SiteDomain]
+      Type: CNAME
+      TTL: '120'
+      ResourceRecords:
+      - !GetAtt 'FrontendElasticLoadBalancer.DNSName'
+Outputs:
+  URL:
+    Description: URL of the Frontend website
+    Value: !Sub 'http://${FrontendElasticLoadBalancer.DNSName}'
