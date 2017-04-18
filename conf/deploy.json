@@ -1,7 +1,7 @@
 {
   "defaultStacks": ["subscriptions"],
   "packages":{
-    "frontend":{
+    "subscriptions-frontend":{
       "type":"autoscaling",
       "data":{
         "bucket": "subscriptions-dist"
