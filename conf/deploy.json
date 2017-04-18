@@ -1,7 +1,7 @@
 {
   "defaultStacks": ["subscriptions"],
   "packages":{
-    "subscriptions-frontend":{
+    "frontend":{
       "type":"autoscaling",
       "data":{
         "bucket": "subscriptions-dist"
@@ -13,7 +13,7 @@
       "actionsBeforeApp": ["frontend.uploadArtifacts", "frontend.deploy"]
     },
     "artifactUploadOnly": {
-      "actions": [ "subscriptions-frontend.uploadArtifacts" ]
+      "actions": [ "frontend.uploadArtifacts" ]
     }
   }
 }
