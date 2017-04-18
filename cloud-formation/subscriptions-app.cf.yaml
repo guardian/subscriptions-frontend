@@ -107,11 +107,11 @@ Resources:
           /opt/features/ssh-keys/initialise-keys-and-cron-job.sh -l -b github-team-keys -t Membership-and-Subscriptions || true
           mkdir /etc/gu
 
-          aws --region ${AWS::Region} s3 cp s3://subscriptions-dist/${Stack}/${Stage}/frontend/subscriptions-frontend_1.0-SNAPSHOT_all.deb /tmp
+          aws --region ${AWS::Region} s3 cp s3://subscriptions-dist/${Stack}/${Stage}/frontend/frontend_1.0-SNAPSHOT_all.deb /tmp
 
           aws --region ${AWS::Region} s3 cp s3://subscriptions-private/${Stage}/subscriptions-frontend.private.conf /etc/gu
 
-          dpkg -i /tmp/subscriptions-frontend_1.0-SNAPSHOT_all.deb
+          dpkg -i /tmp/frontend_1.0-SNAPSHOT_all.deb
           chown subscriptions-frontend /etc/gu/subscriptions-frontend.private.conf
           chmod 0600 /etc/gu/subscriptions-frontend.private.conf
           wget https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py
