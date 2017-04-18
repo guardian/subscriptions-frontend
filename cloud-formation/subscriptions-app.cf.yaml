@@ -55,6 +55,7 @@ Mappings:
       MinInstances: '3'
       MaxInstances: '6'
       DesiredInstances: '3'
+      SSLCertificateId: '89005cdb-ddf9-4893-89da-0e5facb13914'
     CODE:
       DynamoDBTables:
       - arn:aws:dynamodb:*:*:table/MembershipSub-Promotions-DEV
@@ -63,6 +64,8 @@ Mappings:
       MinInstances: '1'
       MaxInstances: '2'
       DesiredInstances: '1'
+      SSLCertificateId: '425252d2-fc17-4ad3-8a44-264cb557b2e5'
+
 Resources:
   FrontendAutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
@@ -192,7 +195,10 @@ Resources:
       - LoadBalancerPort: '443'
         InstancePort: 9000
         Protocol: HTTPS
-        SSLCertificateId: !Sub 'arn:aws:acm:eu-west-1:${AWS::AccountId}:certificate/89005cdb-ddf9-4893-89da-0e5facb13914'
+        SSLCertificateId: !Sub
+            - arn:aws:acm:eu-west-1:${AWS::AccountId}:certificate/${CertificateId}
+            - { CertificateId : !FindInMap [StageVariables, !Ref 'Stage', SSLCertificateId] }
+
       SecurityGroups:
       - !Ref 'LoadBalancerSecurityGroup'
       Subnets: !Ref 'Subnets'
