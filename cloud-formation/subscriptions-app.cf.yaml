@@ -109,9 +109,9 @@ Resources:
           aws --region ${AWS::Region} s3 cp s3://subscriptions-dist/${Stack}/${Stage}/frontend/app.zip /tmp
           unzip -d /subscriptions /tmp/app.zip
           mkdir /etc/gu
-          aws --region ${AWS::Region} s3 cp s3://subscriptions-private/${Stage}/subscriptions-frontend.conf /etc/gu
-          chown subscriptions /etc/gu/subscriptions-frontend.conf
-          chmod 0600 /etc/gu/subscriptions-frontend.conf
+          aws --region ${AWS::Region} s3 cp s3://subscriptions-private/${Stage}/subscriptions-frontend.private.conf /etc/gu
+          chown subscriptions /etc/gu/subscriptions-frontend.private.conf
+          chmod 0600 /etc/gu/subscriptions-frontend.private.conf
           wget https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py
           sed -i -e "s/__DATE/$(date +%F)/" -e 's/__STAGE/${Stage}/' $CONF_DIR/logger.conf
           python awslogs-agent-setup.py -nr ${AWS::Region} -c $CONF_DIR/logger.conf
