@@ -119,7 +119,6 @@ Resources:
           sed 's/__STAGE/${Stage}/' $CONF_DIR/upstart.conf > /etc/init/subscriptions-app.conf
           chown -R subscriptions /subscriptions/
           start subscriptions-app
-
   SubscriptionsAppRole:
     Type: AWS::IAM::Role
     Properties:
@@ -198,7 +197,6 @@ Resources:
         SSLCertificateId: !Sub
             - arn:aws:acm:eu-west-1:${AWS::AccountId}:certificate/${CertificateId}
             - { CertificateId : !FindInMap [StageVariables, !Ref 'Stage', SSLCertificateId] }
-
       SecurityGroups:
       - !Ref 'LoadBalancerSecurityGroup'
       Subnets: !Ref 'Subnets'
