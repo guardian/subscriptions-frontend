@@ -30,7 +30,7 @@ object SalesforceService {
     Keys.BILLING_STREET -> personalData.address.line,
     Keys.BILLING_CITY -> personalData.address.town,
     Keys.BILLING_POSTCODE -> personalData.address.postCode,
-    Keys.BILLING_COUNTRY -> personalData.address.country.map(_.name).getOrElse(personalData.address.countryName),
+    Keys.BILLING_COUNTRY -> personalData.address.country.fold(personalData.address.countryName)(_.name),
     Keys.BILLING_STATE -> personalData.address.countyOrState,
     Keys.ALLOW_GU_RELATED_MAIL -> personalData.receiveGnmMarketing
   ) ++ personalData.title.fold(Json.obj())(title => Json.obj(
@@ -40,7 +40,7 @@ object SalesforceService {
     Keys.MAILING_CITY -> addr.town,
     Keys.MAILING_POSTCODE -> addr.postCode,
     Keys.MAILING_STATE -> addr.countyOrState,
-    Keys.MAILING_COUNTRY -> addr.country.map(_.name).getOrElse(addr.countryName)
+    Keys.MAILING_COUNTRY -> addr.country.fold(addr.countryName)(_.name)
   ) ++ paperData.flatMap(_.deliveryInstructions).fold(Json.obj())(instrs => Json.obj(
     Keys.DELIVERY_INSTRUCTIONS -> instrs
   )))
