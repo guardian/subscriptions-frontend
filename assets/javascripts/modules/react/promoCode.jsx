@@ -17,6 +17,7 @@ render(){
             <PromoField value={this.props.value} handler={this.props.handler} />
             <PromoButton status={this.props.status} onClick={this.props.send} />
             {this.props.status == status.VALID && <div className="u-note">{this.props.copy}</div>}
+            {this.props.status == status.INVALID && <div className="u-error">{this.props.copy}</div>}
         </dd>
     </div>
 }
