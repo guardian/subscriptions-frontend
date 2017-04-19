@@ -121,7 +121,7 @@ class WeeklyRenew extends React.Component {
                 let price = this.getPrice(this.getPlan(this.props.plans));
                 //It's a good promotion, but it's not a weekly one
                 this.setState({
-                    promotionDescription: 'The promotion you have entered is not currently valid for any of the available billing periods.',
+                    promotionDescription: 'The promotion you have entered is not currently valid to renew your subscription.',
                     promoStatus: status.INVALID,
                     plans: this.props.plans,
                     displayedPrice: price
