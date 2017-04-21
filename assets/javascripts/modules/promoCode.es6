@@ -9,7 +9,6 @@ export function validatePromoCode(promoCode, country, currency){
             method: route.method,
             url: route.url
         }).then((r)=>{
-            console.log('r',r);
             resolve(r);
         },(f,a)=>{
             console.log('f',f,a);
@@ -18,7 +17,7 @@ export function validatePromoCode(promoCode, country, currency){
     })
 }
 
-export function validatePromotionForPlans(promotion, plans) {
+export function combinePromotionAndPlans(promotion, plans) {
     let newPlans = promotion.adjustedRatePlans;
     if (newPlans == null){
         return plans;

@@ -2,7 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom';
 import {DirectDebit} from 'modules/react/directDebit'
 import {PromoCode, status} from 'modules/react/promoCode'
-import {validatePromoCode, validatePromotionForPlans} from '../promoCode';
+import {validatePromoCode, combinePromotionAndPlans} from '../promoCode';
 import {
     SortCode,
     validAccount,
@@ -106,14 +106,9 @@ class WeeklyRenew extends React.Component {
         });
 
         validatePromoCode(this.state.promoCode, this.props.country, this.props.currency).then((response) => {
-            let newPlans = validatePromotionForPlans(response, this.state.plans);
-            let tracking = response.promotion.promotionType.name === 'tracking' || response.promotion.promotionType.name === 'retention';
-            let update = tracking || newPlans.map((plan) => {
-                return 'promotionalPrice' in plan
-            }).reduce((a, b) => {
-                return !!(a || b)
-            }, false);
-            if (update) {
+            let newPlans = combinePromotionAndPlans(response, this.state.plans);
+            let valid = response.promotion.promotionType.name === 'retention' || (response.promotion.promotionType.name === 'double' && ( response.promotion.promotionType.a.name === 'retention' || response.promotion.promotionType.b.name === 'retention'));
+            if (valid) {
                 let price = this.getPrice(this.getPlan(newPlans));
                 //This is a weekly promotion
                 this.setState({
@@ -126,7 +121,7 @@ class WeeklyRenew extends React.Component {
                 let price = this.getPrice(this.getPlan(this.props.plans));
                 //It's a good promotion, but it's not a weekly one
                 this.setState({
-                    promotionDescription: 'The promotion you have entered is not currently valid for any of the available billing periods.',
+                    promotionDescription: 'The promotion you have entered is not currently valid to renew your subscription.',
                     promoStatus: status.INVALID,
                     plans: this.props.plans,
                     displayedPrice: price
@@ -134,9 +129,16 @@ class WeeklyRenew extends React.Component {
             }
         }).catch((payload) => {
             let price = this.getPrice(this.getPlan(this.props.plans));
-            let response = JSON.parse(payload.response);
+            let error = "Invalid Promotion";
+            if("response" in payload){
+              try{
+                  error = JSON.parse(payload.response).errorMessage;
+              } catch(e){
+                  console.error(e);
+              }
+            }
             this.setState({
-                promotionDescription: response.errorMessage,
+                promotionDescription: error,
                 promoStatus: status.INVALID,
                 plans: this.props.plans,
                 displayedPrice: price
