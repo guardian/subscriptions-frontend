@@ -133,13 +133,22 @@ object SubscriptionsForm {
       Map(key->value.fold("")(_.title))
   }
 
+  private val postcodeFormatter = new Formatter[String] {
+    override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], String] =
+      data.get(key).map(_.toUpperCase) match {
+        case Some(x) if x.length > addressMaxLength => Left(Seq(FormError("postcode","Postcode greater than maximum length.")))
+        case Some(x) => Right(x)
+        case None => Left(Seq(FormError("postcode","Postcode not supplied.")))
+      }
+    override def unbind(key: String, value: String): Map[String, String] = Map(key->value)
+  }
 
   val addressDataMapping = mapping(
     "address1" -> text(0, addressMaxLength),
     "address2" -> text(0, addressMaxLength),
     "town" -> text(0, addressMaxLength),
     "subdivision" -> text,
-    "postcode" -> text(0, addressMaxLength),
+    "postcode" -> of(postcodeFormatter),
     "country" -> countryName
   )(Address.apply)(Address.unapply)
     .verifying("address validation failed", AddressValidation.validateForCountry _)
