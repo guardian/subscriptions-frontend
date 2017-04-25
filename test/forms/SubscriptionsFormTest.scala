@@ -30,7 +30,7 @@ class SubscriptionsFormTest extends FreeSpec {
       "delivery.address1" -> "DELIVERY ADDR 1",
       "delivery.address2" -> "DELIVERY ADDR 2",
       "delivery.town" -> "DELIVERY TOWN",
-      "delivery.postcode" -> "DELIVERY OSTCODE",
+      "delivery.postcode" -> "delivery postcode",
       "delivery.subdivision" -> "DELIVERY SUBDIVISION",
       "delivery.country" -> Country.UK.alpha2
     ) ++ formData
@@ -41,7 +41,7 @@ class SubscriptionsFormTest extends FreeSpec {
         lineTwo = "DELIVERY ADDR 2",
         town = "DELIVERY TOWN",
         countyOrState = "DELIVERY SUBDIVISION",
-        postCode = "DELIVERY OSTCODE",
+        postCode = "DELIVERY POSTCODE",
         countryName = Country.UK.name
       )))(addressWithFallback(fallbackKey = "address").bind("delivery", withDelivery))
     }
@@ -52,7 +52,7 @@ class SubscriptionsFormTest extends FreeSpec {
         lineTwo = "address2",
         town = "town",
         countyOrState = "Middlesex",
-        postCode = "postcode",
+        postCode = "POSTCODE",
         countryName = Country.UK.name
       )))(addressWithFallback(fallbackKey = "address").bind("delivery", withDelivery.drop(1)))
     }
@@ -66,7 +66,7 @@ class SubscriptionsFormTest extends FreeSpec {
         last = "last",
         email = "a@example.com",
         receiveGnmMarketing = true,
-	address = Address("address1","address2","town", "Middlesex", "postcode", Country.UK.name),
+	address = Address("address1","address2","town", "Middlesex", "POSTCODE", Country.UK.name),
         telephoneNumber = None
       )))(personalDataMapping.bind(formData))
     }
