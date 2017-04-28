@@ -113,7 +113,7 @@ class CheckoutService(
     val soldToContact = subscriptionData.productData.left.toOption.filter(isGuardianWeekly).map(_.deliveryAddress)
 
     implicit val today = now()
-
+    import LogImplicit._
     (for {
       userExists <- EitherT(IdentityService.doesUserExist(personalData.email).map(\/.right[FatalErrors, Boolean]))
       _ <- Monad[SubNel].whenM(userExists && authenticatedUserOpt.isEmpty)(emailError)
@@ -125,7 +125,7 @@ class CheckoutService(
       paymentMethod <- EitherT(attachPaymentMethodToStripeCustomer(payment, purchaserIds))
       initialCommand = createSubscribeRequest(personalData, soldToContact, requestData, plan, purchaserIds, paymentMethod, payment.makeAccount, Some(fulfilmentDelay), Some(paymentDelay))
       subscribe = processSixWeekIntroductoryPeriod(fulfilmentDelay, initialCommand)
-      validPromotion = promoCode.flatMap(promoService.validate[NewUsers](_, personalData.address.country.getOrElse(Country.UK), subscriptionData.productRatePlanId).toOption)
+      validPromotion = promoCode.flatMap(promoService.validate[NewUsers](_, personalData.address.country.getOrElse(Country.UK), subscriptionData.productRatePlanId).toOption).withLogging("validating promotion")
       withPromo = validPromotion.map(v => p.apply(v, prpId => catalog.paid.find(_.id == prpId).map(_.charges.billingPeriod).get, promoPlans)(subscribe)).getOrElse(subscribe)
       result <- EitherT(createSubscription(withPromo, purchaserIds))
       out <- postSubscribeSteps(authenticatedUserOpt, memberId, result, subscriptionData, validPromotion)
