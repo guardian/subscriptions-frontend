@@ -51,22 +51,22 @@ class CheckoutServiceTest extends Specification {
   }
 
     "Calculate the next available Friday correctly (if overridden)" in {
-      CheckoutService.determineFirstAvailableWeeklyDate(new LocalDate("2017-04-13")) mustEqual new LocalDate("2017-04-28")
-      CheckoutService.determineFirstAvailableWeeklyDate(new LocalDate("2017-04-21")) mustEqual new LocalDate("2017-04-28")
-      CheckoutService.determineFirstAvailableWeeklyDate(new LocalDate("2017-04-22")) mustEqual new LocalDate("2017-05-05")
+      CheckoutService.determineFirstAvailableWeeklyDate(new LocalDate("2017-04-13")) mustEqual new LocalDate("2017-05-12")
+      CheckoutService.determineFirstAvailableWeeklyDate(new LocalDate("2017-04-21")) mustEqual new LocalDate("2017-05-12")
+      CheckoutService.determineFirstAvailableWeeklyDate(new LocalDate("2017-05-22")) mustEqual new LocalDate("2017-06-02")
     }
 
     // Uses default algorithm after override date that
     "Calculate the next available Friday correctly (if today is a Monday)" in {
-      CheckoutService.determineFirstAvailableWeeklyDate(new LocalDate("2017-04-24")) mustEqual new LocalDate("2017-05-05")
+      CheckoutService.determineFirstAvailableWeeklyDate(new LocalDate("2017-05-06")) mustEqual new LocalDate("2017-05-19")
     }
 
     "Calculate the next available Friday correctly (if today is a Friday)" in {
-      CheckoutService.determineFirstAvailableWeeklyDate(new LocalDate("2017-05-05")) mustEqual new LocalDate("2017-05-12")
+      CheckoutService.determineFirstAvailableWeeklyDate(new LocalDate("2017-06-09")) mustEqual new LocalDate("2017-06-16")
     }
 
     "Calculate the next available Friday correctly (if today is a Sunday)" in {
-      CheckoutService.determineFirstAvailableWeeklyDate(new LocalDate("2017-05-14")) mustEqual new LocalDate("2017-05-26")
+      CheckoutService.determineFirstAvailableWeeklyDate(new LocalDate("2017-06-11")) mustEqual new LocalDate("2017-06-23")
     }
 
 }
