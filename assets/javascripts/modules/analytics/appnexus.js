@@ -33,10 +33,14 @@ define([
         var pageType = guardian.pageInfo.pageType;
         if (!pageType) { return; }
 
-        var pixelType = (productSegment === 'Thankyou') ? 'px' : 'seg';
+        var parameterName = (productSegment === 'Thankyou') ? 'id' : 'add';
+
+        var parameterValue = pageCodes[pageType];
+
+        var pixelPath = (productSegment === 'Thankyou') ? 'px' : 'seg';
 
         var oImg = document.createElement('img');
-        oImg.setAttribute('src', 'https://secure.adnxs.com/' + pixelType + '?t=2&add=' + pageCodes[pageType]);
+        oImg.setAttribute('src', 'https://secure.adnxs.com/' + pixelPath + '?t=2&' + parameterName + '=' + parameterValue);
         oImg.setAttribute('alt', 'AppNexus pixel');
         oImg.setAttribute('height', '0');
         oImg.setAttribute('width', '0');
