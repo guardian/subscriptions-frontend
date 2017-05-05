@@ -25,14 +25,18 @@ define([
     function init() {
         if (!(guardian && guardian.pageInfo && guardian.pageInfo.productData && guardian.pageInfo.productData.productSegment)) { return; }
 
-        var pageCodes = segmentedPageCodes[guardian.pageInfo.productData.productSegment];
+        var productSegment = guardian.pageInfo.productData.productSegment;
+
+        var pageCodes = segmentedPageCodes[productSegment];
         if (!pageCodes) { return; }
 
         var pageType = guardian.pageInfo.pageType;
         if (!pageType) { return; }
 
+        var pixelType = (productSegment === 'Thankyou') ? 'px' : 'seg';
+
         var oImg = document.createElement('img');
-        oImg.setAttribute('src', 'https://secure.adnxs.com/seg?t=2&add=' + pageCodes[pageType]);
+        oImg.setAttribute('src', 'https://secure.adnxs.com/' + pixelType + '?t=2&add=' + pageCodes[pageType]);
         oImg.setAttribute('alt', 'AppNexus pixel');
         oImg.setAttribute('height', '0');
         oImg.setAttribute('width', '0');
