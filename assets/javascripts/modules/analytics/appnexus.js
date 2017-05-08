@@ -26,14 +26,15 @@ define([
         if (!(guardian && guardian.pageInfo && guardian.pageInfo.productData && guardian.pageInfo.productData.productSegment)) { return; }
 
         var productSegment = guardian.pageInfo.productData.productSegment;
-        var pixelPath = (productSegment === 'Thankyou') ? 'px' : 'seg';
-        var parameterName = (productSegment === 'Thankyou') ? 'id' : 'add';
 
         var pageCodes = segmentedPageCodes[productSegment];
         if (!pageCodes) { return; }
 
         var pageType = guardian.pageInfo.pageType;
         if (!pageType) { return; }
+
+        var pixelPath = (pageType === 'Thankyou') ? 'px' : 'seg';
+        var parameterName = (pageType === 'Thankyou') ? 'id' : 'add';
 
         var parameterValue = pageCodes[pageType];
 
