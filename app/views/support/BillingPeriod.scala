@@ -8,6 +8,7 @@ object BillingPeriod {
       case Month => "every month"
       case Quarter => "every 3 months"
       case Year => "every 12 months"
+      case SixMonthsRecurring => "every six months"
       case period: OneOffPeriod => s"for ${period.noun}"
     }
   }
