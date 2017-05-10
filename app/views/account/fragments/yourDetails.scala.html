@@ -5,7 +5,8 @@
 @import com.gu.salesforce.Contact
 @import model.SubscriptionOps._
 
-@(chosenPaperDays: List[PaperDay] = empty, maybeContact: Option[Contact] = None, subscription: Subscription[SubscriptionPlan.ContentSubscription])(extra: Html = Html(""))
+@import com.gu.zuora.ZuoraRestService.SoldToContact
+@(chosenPaperDays: List[PaperDay] = empty, maybeContact: Option[SoldToContact] = None, subscription: Subscription[SubscriptionPlan.ContentSubscription])(extra: Html = Html(""))
 <dl class="mma-section__list">
     <dt class="mma-section__list--title">Subscriber ID</dt>
     <dd class="mma-section__list--content">@{subscription.name.get}</dd>
@@ -23,12 +24,14 @@
         <dd class="mma-section__list--content">
             <div>@contact.firstName @contact.lastName</div>
             <div>@{
+                def opt(string: String) = Some(string).filter(_.trim.nonEmpty)
                 List(
-                    contact.mailingStreet,
-                    contact.mailingCity,
-                    contact.mailingState,
-                    contact.mailingPostcode,
-                    contact.mailingCountry
+                    opt(contact.address1),
+                    opt(contact.address2),
+                    opt(contact.city),
+                    opt(contact.state),
+                    opt(contact.postCode),
+                    contact.country.map(_.name)
                 ).flatten.mkString(", ")}</div>
         </dd>
     }

@@ -166,56 +166,59 @@ object ManageWeekly extends ContextLogging {
 
   }
 
-  def apply(billingSchedule: Option[BillingSchedule], weeklySubscription: Subscription[WeeklyPlan], promoCode: Option[PromoCode])(implicit request: Request[AnyContent], resolution: TouchpointBackend.Resolution): Future[Result] = {
+  def apply(
+    billingSchedule: Option[BillingSchedule],
+    weeklySubscription: Subscription[WeeklyPlan],
+    promoCode: Option[PromoCode]
+  )(implicit
+    request: Request[AnyContent],
+    resolution: TouchpointBackend.Resolution
+  ): Future[Result] = {
     implicit val tpBackend = resolution.backend
     implicit val rest = tpBackend.simpleRestClient
-    implicit val zuoraRestService = new ZuoraRestService[Future]
+    implicit val zuoraRest = new ZuoraRestService[Future]
     implicit val flash = request.flash
     implicit val subContext = weeklySubscription
     if (weeklySubscription.readerType != ReaderType.Agent) {
-      // go to SF to get the contact mailing information etc
-      GetSalesforceContactForSub.zuoraAccountFromSub(weeklySubscription)(tpBackend.zuoraService, tpBackend.salesforceService.repo, defaultContext).flatMap { account =>
-        val futureSfContact = GetSalesforceContactForSub.sfContactForZuoraAccount(account)(tpBackend.zuoraService, tpBackend.salesforceService.repo, defaultContext)
-        val futureZuoraBillToContact = tpBackend.zuoraService.getContact(account.billToId)
-        futureSfContact.flatMap { contact =>
-          futureZuoraBillToContact.map { zuoraContact =>
-            zuoraContact.country.map { billToCountry =>
-              val catalog = tpBackend.catalogService.unsafeCatalog
-              val weeklyPlans = weeklySubscription.planToManage.product match {
-                case Product.WeeklyZoneA => catalog.weekly.zoneA.plans
-                case Product.WeeklyZoneB => catalog.weekly.zoneB.plans
-                case Product.WeeklyZoneC => catalog.weekly.zoneC.plans
-              }
-
-              val renewalPlans = weeklyPlans.filter(_.availableForRenewal)
-
-              val currency = account.currency.toRight(s"could not deserialise currency for account ${account.id}")
-              val weeklyPlanInfo = currency.right.flatMap { existingCurrency =>
-                sequence(renewalPlans.map { plan =>
-                  val price = plan.charges.price.getPrice(existingCurrency).toRight(s"could not find price in $existingCurrency for plan ${plan.id} ${plan.name}").right
-                  price.map(price => WeeklyPlanInfo(plan.id, plan.charges.prettyPricing(price.currency)))
-                }).right.map(r => (existingCurrency, r))
-              }
-              weeklyPlanInfo match {
-                case Left(error) =>
-                  info(s"couldn't get new rate/currency for renewal: $error")
-                  Ok(views.html.account.details(None, promoCode))
-                case Right((existingCurrency, weeklyPlanInfoList)) =>
-                  Ok(weeklySubscription.asRenewable.map { renewableSub =>
-                    info(s"sub is renewable - showing weeklyRenew page")
-                    views.html.account.weeklyRenew(renewableSub, contact, zuoraContact.email, billToCountry, weeklyPlanInfoList, existingCurrency, promoCode)
-                  } getOrElse {
-                    info(s"sub is not renewable - showing weeklyDetails page")
-                    views.html.account.weeklyDetails(weeklySubscription, billingSchedule, contact)
-                  })
-              }
-            }.getOrElse {
-              info(s"no valid bill to country for account")
-              Ok(views.html.account.details(None, promoCode))
-            }
+      EitherT(zuoraRest.getAccount(weeklySubscription.accountId)).map { account =>
+        account.billToContact.country.map { billToCountry =>
+          val catalog = tpBackend.catalogService.unsafeCatalog
+          val weeklyPlans = weeklySubscription.planToManage.product match {
+            case Product.WeeklyZoneA => catalog.weekly.zoneA.plans
+            case Product.WeeklyZoneB => catalog.weekly.zoneB.plans
+            case Product.WeeklyZoneC => catalog.weekly.zoneC.plans
           }
+
+          val renewalPlans = weeklyPlans.filter(_.availableForRenewal)
+
+          val currency = account.currency.toRight(s"could not deserialise currency for account ${account.id}")
+          val weeklyPlanInfo = currency.right.flatMap { existingCurrency =>
+            sequence(renewalPlans.map { plan =>
+              val price = plan.charges.price.getPrice(existingCurrency).toRight(s"could not find price in $existingCurrency for plan ${plan.id} ${plan.name}").right
+              price.map(price => WeeklyPlanInfo(plan.id, plan.charges.prettyPricing(price.currency)))
+            }).right.map(r => (existingCurrency, r))
+          }
+          weeklyPlanInfo match {
+            case Left(error) =>
+              info(s"couldn't get new rate/currency for renewal: $error")
+              Ok(views.html.account.details(None, promoCode))
+            case Right((existingCurrency, weeklyPlanInfoList)) =>
+              Ok(weeklySubscription.asRenewable.map { renewableSub =>
+                info(s"sub is renewable - showing weeklyRenew page")
+                views.html.account.weeklyRenew(renewableSub, account.soldToContact, account.billToContact.email, billToCountry, weeklyPlanInfoList, existingCurrency, promoCode)
+              } getOrElse {
+                info(s"sub is not renewable - showing weeklyDetails page")
+                views.html.account.weeklyDetails(weeklySubscription, billingSchedule, account.soldToContact)
+              })
+          }
+        }.getOrElse {
+          info(s"no valid bill to country for account")
+          Ok(views.html.account.details(None, promoCode))
         }
-      }
+      }.run.map(_.fold({ error =>
+        info(s"problem getting account: $error")
+        Ok(views.html.account.details(None, promoCode))
+      }, identity))
     } else {
       info(s"don't support agents, can't manage sub")
       Future.successful(Ok(views.html.account.details(None, promoCode))) // don't support gifts (yet) as they have related contacts in salesforce of unknown structure
