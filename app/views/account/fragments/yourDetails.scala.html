@@ -24,7 +24,7 @@
         <dd class="mma-section__list--content">
             <div>@contact.firstName @contact.lastName</div>
             <div>@{
-                def opt(string: String) = Some(string).filter(_.trim.nonEmpty)
+                def opt(string: String) = Some(string.trim).filter(_.nonEmpty)
                 List(
                     opt(contact.address1),
                     opt(contact.address2),
