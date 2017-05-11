@@ -112,13 +112,12 @@ define([
 
     var redrawCurrencyOverride = function (selectedCurrency) {
         var currencySelector = $('.js-checkout-currency-override');
-
-        if (selectedCurrency == 'USD') {
-            formElements.$CURRENCY_OVERRIDE_CHECKBOX.removeClass('js-ignore');
-            currencySelector.show();
-        } else {
+        if (selectedCurrency === 'GBP') {
             formElements.$CURRENCY_OVERRIDE_CHECKBOX.addClass('js-ignore');
             currencySelector.hide();
+        } else {
+            formElements.$CURRENCY_OVERRIDE_CHECKBOX.removeClass('js-ignore');
+            currencySelector.show();
         }
     };
 
