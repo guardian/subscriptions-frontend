@@ -3,26 +3,28 @@
 
 @(edition: DigitalEdition)
 
-@main(s"${edition.name} | Subscriptions and Membership | The Guardian",
+@main(s"${edition.name} | Subscriptions | The Guardian",
     Some("Subscribe to The Guardian. Support our independent, award-winning journalism."),
     edition = edition) {
 
     <main class="page-container gs-container">
-        @fragments.page.header("Subscriptions and Membership", Some("Select your preferred package"))
+        @fragments.page.header("Subscription offers", Some("Select your preferred package"))
         <div class="row row--items-2">
             <div class="row__item block block--primary block--digital">
                 <h2 class="block__title">Subscribe to the Guardian <span class="break-tablet">digital pack</span></h2>
                 <div class="block__info">
                     <ul class="block__list">
                         <li class="block__list-item">14-day free trial</li>
-                        <li class="block__list-item"><strong>Save up to 75% on the app store price</strong></li>
+                        <li class="block__list-item"><strong>Plus, subscribe today and save an extra 50% on the first 3 months</strong></li>
+                        @edition.digitalPackSaving.map {saving => <li class="block__list-item">Save up to @{saving}% on the app store price</li>}
                         <li class="block__list-item">Access to the Daily Edition, the digital version of the UK Guardian newspaper</li>
-                        <li class="block__list-item">Access to the Guardian App Premium Tier, an advert-free experience</li>
+                        <li class="block__list-item">Access to the advert-free Guardian App Premium Tier</li>
                         <li class="block__list-item">Available on Apple, Android and Kindle Fire</li>
+                        <li class="block__list-item">Use on up to 10 devices</li>
                     </ul>
                 </div>
                 <div class="block__footer">
-                    <a class="button button--large button--primary button--arrow" href="@routes.PromoLandingPage.render("DOFFINT", edition.countryGroup.defaultCountry).url">Subscribe now</a>
+                    <a class="button button--large button--primary button--arrow" href="@routes.PromoLandingPage.render("DBH41F", edition.countryGroup.defaultCountry).url">Subscribe now</a>
                 </div>
             </div>
             <div class="row__item block block--primary block--weekly">
@@ -36,7 +38,7 @@
                     </ul>
                 </div>
                 <div class="block__footer">
-                    <a class="button button--large button--primary" href="@routes.PromoLandingPage.render("WAL41X", None).url">Subscribe now</a>
+                    <a class="button button--large button--primary" href="@routes.PromoLandingPage.render("WAL41X", edition.countryGroup.defaultCountry).url">Subscribe now</a>
                 </div>
             </div>
         </div>
