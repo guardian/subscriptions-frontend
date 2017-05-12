@@ -3,7 +3,8 @@
 @import com.gu.memsub.promo.PromoCode
 @(
     subscriberId: Option[String],
-    promoCode: Option[PromoCode]
+    promoCode: Option[PromoCode],
+    message: Option[String]= None
 )(implicit request: RequestHeader, flash: Flash, touchpointBackendResolution: services.TouchpointBackend.Resolution)
 
 @main("Manage your subscription | The Guardian", edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
@@ -79,6 +80,9 @@
                                 }
                                 @if(flash.get("error").isDefined) {
                                     <div class="form-field__error-message-visible">@flash.get("error")</div>
+                                }
+                                @message.map { message =>
+                                    <div class="form-field__error-message-visible">@message</div>
                                 }
                                 <button type="submit" class="js-suspend-submit button button--primary button--large u-margin-bottom">
                                     Continue

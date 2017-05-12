@@ -4,11 +4,8 @@ import _root_.services.AuthenticationService._
 import _root_.services.TouchpointBackend
 import _root_.services.TouchpointBackend.Resolution
 import actions.CommonActions._
-import com.github.nscala_time.time.OrderingImplicits.LocalDateOrdering
-import com.gu.memsub.BillingPeriod.SixWeeks
 import com.gu.memsub.Subscription.{Name, ProductRatePlanId}
 import com.gu.memsub.promo.{NormalisedPromoCode, PromoCode}
-import com.gu.memsub.services.GetSalesforceContactForSub
 import com.gu.memsub.subsv2.SubscriptionPlan._
 import com.gu.memsub.subsv2._
 import com.gu.memsub.{BillingSchedule, Product}
@@ -16,25 +13,25 @@ import com.gu.subscriptions.suspendresume.SuspensionService
 import com.gu.subscriptions.suspendresume.SuspensionService.{BadZuoraJson, ErrNel, HolidayRefund, PaymentHoliday}
 import com.gu.zuora.ZuoraRestService
 import com.gu.zuora.soap.models.Queries.Contact
-import com.typesafe.scalalogging.LazyLogging
 import configuration.{Config, ProfileLinks}
 import forms._
 import logging.ContextLogging
+import model.ContentSubscriptionPlanOps._
 import model.SubscriptionOps._
 import model.{Renewal, RenewalReads}
 import org.joda.time.LocalDate.now
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json._
 import play.api.mvc._
 import utils.TestUsers.PreSigninTestCookie
 import views.html.account.thankYouRenew
-import views.support.Pricing._
 import views.support.Dates._
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
+import views.support.Pricing._
+
 import scala.concurrent.Future
 import scalaz.std.scalaFuture._
 import scalaz.syntax.std.option._
 import scalaz.{-\/, EitherT, OptionT, \/, \/-}
-import model.ContentSubscriptionPlanOps._
 // this handles putting subscriptions in and out of the session
 object SessionSubscription {
 
@@ -155,8 +152,8 @@ object ManageWeekly extends ContextLogging {
 
   object WeeklyPlanInfo {
 
-    import play.api.libs.json._
     import play.api.libs.functional.syntax._
+    import play.api.libs.json._
 
     implicit def writer: Writes[WeeklyPlanInfo] =
       (
@@ -166,59 +163,62 @@ object ManageWeekly extends ContextLogging {
 
   }
 
-  def apply(billingSchedule: Option[BillingSchedule], weeklySubscription: Subscription[WeeklyPlan], promoCode: Option[PromoCode])(implicit request: Request[AnyContent], resolution: TouchpointBackend.Resolution): Future[Result] = {
+  def apply(
+    billingSchedule: Option[BillingSchedule],
+    weeklySubscription: Subscription[WeeklyPlan],
+    promoCode: Option[PromoCode]
+  )(implicit
+    request: Request[AnyContent],
+    resolution: TouchpointBackend.Resolution
+  ): Future[Result] = {
     implicit val tpBackend = resolution.backend
     implicit val rest = tpBackend.simpleRestClient
-    implicit val zuoraRestService = new ZuoraRestService[Future]
+    implicit val zuoraRest = new ZuoraRestService[Future]
     implicit val flash = request.flash
     implicit val subContext = weeklySubscription
     if (weeklySubscription.readerType != ReaderType.Agent) {
-      // go to SF to get the contact mailing information etc
-      GetSalesforceContactForSub.zuoraAccountFromSub(weeklySubscription)(tpBackend.zuoraService, tpBackend.salesforceService.repo, defaultContext).flatMap { account =>
-        val futureSfContact = GetSalesforceContactForSub.sfContactForZuoraAccount(account)(tpBackend.zuoraService, tpBackend.salesforceService.repo, defaultContext)
-        val futureZuoraBillToContact = tpBackend.zuoraService.getContact(account.billToId)
-        futureSfContact.flatMap { contact =>
-          futureZuoraBillToContact.map { zuoraContact =>
-            zuoraContact.country.map { billToCountry =>
-              val catalog = tpBackend.catalogService.unsafeCatalog
-              val weeklyPlans = weeklySubscription.planToManage.product match {
-                case Product.WeeklyZoneA => catalog.weekly.zoneA.plans
-                case Product.WeeklyZoneB => catalog.weekly.zoneB.plans
-                case Product.WeeklyZoneC => catalog.weekly.zoneC.plans
-              }
-
-              val renewalPlans = weeklyPlans.filter(_.availableForRenewal)
-
-              val currency = account.currency.toRight(s"could not deserialise currency for account ${account.id}")
-              val weeklyPlanInfo = currency.right.flatMap { existingCurrency =>
-                sequence(renewalPlans.map { plan =>
-                  val price = plan.charges.price.getPrice(existingCurrency).toRight(s"could not find price in $existingCurrency for plan ${plan.id} ${plan.name}").right
-                  price.map(price => WeeklyPlanInfo(plan.id, plan.charges.prettyPricing(price.currency)))
-                }).right.map(r => (existingCurrency, r))
-              }
-              weeklyPlanInfo match {
-                case Left(error) =>
-                  info(s"couldn't get new rate/currency for renewal: $error")
-                  Ok(views.html.account.details(None, promoCode))
-                case Right((existingCurrency, weeklyPlanInfoList)) =>
-                  Ok(weeklySubscription.asRenewable.map { renewableSub =>
-                    info(s"sub is renewable - showing weeklyRenew page")
-                    views.html.account.weeklyRenew(renewableSub, contact, zuoraContact.email, billToCountry, weeklyPlanInfoList, existingCurrency, promoCode)
-                  } getOrElse {
-                    info(s"sub is not renewable - showing weeklyDetails page")
-                    views.html.account.weeklyDetails(weeklySubscription, billingSchedule, contact)
-                  })
-              }
-            }.getOrElse {
-              info(s"no valid bill to country for account")
-              Ok(views.html.account.details(None, promoCode))
-            }
+      EitherT(zuoraRest.getAccount(weeklySubscription.accountId)).map { account =>
+        account.billToContact.country.map { billToCountry =>
+          val catalog = tpBackend.catalogService.unsafeCatalog
+          val weeklyPlans = weeklySubscription.planToManage.product match {
+            case Product.WeeklyZoneA => catalog.weekly.zoneA.plans
+            case Product.WeeklyZoneB => catalog.weekly.zoneB.plans
+            case Product.WeeklyZoneC => catalog.weekly.zoneC.plans
           }
+
+          val renewalPlans = weeklyPlans.filter(_.availableForRenewal)
+
+          val currency = account.currency.toRight(s"could not deserialise currency for account ${account.id}")
+          val weeklyPlanInfo = currency.right.flatMap { existingCurrency =>
+            sequence(renewalPlans.map { plan =>
+              val price = plan.charges.price.getPrice(existingCurrency).toRight(s"could not find price in $existingCurrency for plan ${plan.id} ${plan.name}").right
+              price.map(price => WeeklyPlanInfo(plan.id, plan.charges.prettyPricing(price.currency)))
+            }).right.map(r => (existingCurrency, r))
+          }
+          weeklyPlanInfo match {
+            case Left(errorMessage) =>
+              error(s"couldn't get new rate/currency for renewal: $errorMessage")
+              Ok(views.html.account.details(None, promoCode, Some("We found your subscription, but can't renew it via the web, please contact customer services for help.")))
+            case Right((existingCurrency, weeklyPlanInfoList)) =>
+              Ok(weeklySubscription.asRenewable.map { renewableSub =>
+                info(s"sub is renewable - showing weeklyRenew page")
+                views.html.account.weeklyRenew(renewableSub, account.soldToContact, account.billToContact.email, billToCountry, weeklyPlanInfoList, existingCurrency, promoCode)
+              } getOrElse {
+                info(s"sub is not renewable - showing weeklyDetails page")
+                views.html.account.weeklyDetails(weeklySubscription, billingSchedule, account.soldToContact)
+              })
+          }
+        }.getOrElse {
+          error(s"no valid bill to country for account")
+          Ok(views.html.account.details(None, promoCode, Some("We found your subscription, but can't manage it via the web, please contact customer services for help.")))
         }
-      }
+      }.run.map(_.fold({ errorMessage =>
+        error(s"problem getting account: $errorMessage")
+        Ok(views.html.account.details(None, promoCode, Some("We found your subscription, but can't manage it via the web, please contact customer services for help.")))
+      }, identity))
     } else {
       info(s"don't support agents, can't manage sub")
-      Future.successful(Ok(views.html.account.details(None, promoCode))) // don't support gifts (yet) as they have related contacts in salesforce of unknown structure
+      Future.successful(Ok(views.html.account.details(None, promoCode, Some("You subscribe via an agent, at present you can't manage it via the web, please contact customer services for help.")))) // don't support gifts (yet) as they have related contacts in salesforce of unknown structure
     }
   }
 
@@ -332,12 +332,12 @@ object AccountManagement extends Controller with ContextLogging with CatalogProv
       }
       maybeFutureManagePage.getOrElse {
         // the product type didn't have the right charges
-        Future.successful(Ok(views.html.account.details(None, promoCode)))
+        Future.successful(Ok(views.html.account.details(None, promoCode, Some("We found your subscription, but can't manage it via the web, please contact customer services for help."))))
       }
     }
 
     futureMaybeFutureManagePage.getOrElse {
-      // not a valid AS number or some unnamed problem getting the details
+      // not a valid AS number or some unnamed problem getting the details or no sub details in the session yet
       Future.successful(Ok(views.html.account.details(subscriberId, promoCode)))
     }.flatMap(identity)
   }
