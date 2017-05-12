@@ -14,8 +14,9 @@
 @import com.gu.memsub.promo.PromoCode
 @import org.joda.time.LocalDate.now
 @import com.gu.memsub.subsv2.ReaderType
+@import com.gu.zuora.ZuoraRestService.SoldToContact
 @(
-    subscription: Subscription[WeeklyPlanOneOff], contact: Contact, email: Option[String], billToCountry: Country, plans: List[WeeklyPlanInfo], currency: Currency, promoCode: Option[PromoCode]
+    subscription: Subscription[WeeklyPlanOneOff], contact: SoldToContact, email: Option[String], billToCountry: Country, plans: List[WeeklyPlanInfo], currency: Currency, promoCode: Option[PromoCode]
 )(implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackend.Resolution)
 
 @main("Your Guardian Weekly subscription | The Guardian", bodyClasses = List("is-wide"), edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution), managementPage = true) {
@@ -62,7 +63,7 @@
                 data-billing-country="@billToCountry.alpha2"
                 data-promo-code="@promoCode.map(_.get)"
                 data-currency="@currency.iso"
-                data-delivery-country="@contact.mailingCountryParsed.map(_.alpha2).getOrElse(billToCountry.alpha2)"
+                data-delivery-country="@contact.country.map(_.alpha2).getOrElse(billToCountry.alpha2)"
                 data-direct-debit-logo="@hashedPathFor("images/direct-debit-black.png")"
                 data-weekly-terms-conditions-href="@Links.weeklyTerms.href"
                 data-weekly-terms-conditions-title="@Links.weeklyTerms.title"
