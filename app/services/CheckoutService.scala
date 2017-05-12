@@ -257,7 +257,8 @@ class CheckoutService(
       soldToContact = soldToContact.map(address => SoldToContact(
         name = personalData,        // TODO once we have gifting change this to the Giftee's name
         address = address,
-        email = personalData.email  // TODO once we have gifting change this to the Giftee's email address
+        email = personalData.email,  // TODO once we have gifting change this to the Giftee's email address
+        phone = personalData.telephoneNumber
       )),
       contractEffective = acquisitionDate,
       contractAcceptance = firstPaymentDate,
@@ -269,7 +270,6 @@ class CheckoutService(
   private def createSubscription(
       subscribe: Subscribe,
       purchaserIds: PurchaserIdentifiers): Future[NonEmptyList[SubsError] \/ SubscribeResult] = {
-
     zuoraService.createSubscription(subscribe).map(\/.right).recover {
       case e: PaymentGatewayError => \/.left(NonEmptyList(CheckoutZuoraPaymentGatewayError(
         purchaserIds,
