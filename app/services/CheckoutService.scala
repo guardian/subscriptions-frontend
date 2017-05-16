@@ -263,7 +263,8 @@ class CheckoutService(
       contractEffective = acquisitionDate,
       contractAcceptance = firstPaymentDate,
       supplierCode = requestData.supplierCode,
-      ipCountry = requestData.ipCountry
+      ipCountry = requestData.ipCountry,
+      phone = personalData.telephoneNumber
     )
   }
 
