@@ -77,6 +77,7 @@
     guardian.pageInfo.productData.initialProduct = '@{productData.plans.default.name}';
     guardian.pageInfo.productData.productPurchasing = '@{productData.plans.default.name}';
     guardian.pageInfo.productData.productType = '@{productData.plans.default.product.productType}';
+    guardian.pageInfo.productData.promoCode = '@{promoCode.map(_.get)}';
 </script>
 
 <main class="page-container gs-container">

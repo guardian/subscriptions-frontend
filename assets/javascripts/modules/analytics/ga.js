@@ -27,7 +27,6 @@ define(['modules/analytics/analyticsEnabled',
         })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
         /*eslint-enable */
 
-        // Ours
         ga('create', {
             'trackingId': guardian.googleAnalytics.trackingId,
             'name': 'membershipPropertyTracker',
@@ -54,6 +53,9 @@ define(['modules/analytics/analyticsEnabled',
             if (productData.productPurchased) {
                 ga('membershipPropertyTracker.set', 'dimension11', productData.productType + ' - ' + productData.productPurchased);  // productPurchased
             }
+            if (productData.promoCode) {
+                ga('membershipPropertyTracker.set', 'dimension19', productData.promoCode);  // promoCode
+            }
         }
 
         if (intcmp && intcmp[1]) {
@@ -76,14 +78,6 @@ define(['modules/analytics/analyticsEnabled',
 
         ga('membershipPropertyTracker.send', 'pageview');
 
-        // JellyFish
-        ga('create', {
-            'trackingId': 'UA-44575989-1',
-            'name': 'jellyfishGA',
-            'cookieDomain': 'auto'
-        });
-        ga('jellyfishGA.send', 'pageview');
-
         flushEventQueue();
     }
 
@@ -104,6 +98,9 @@ define(['modules/analytics/analyticsEnabled',
                 metric2: obj.elapsedTime,
                 metric10: converted
             };
+            if (guardian.pageInfo.productData.promoCode) {
+                event.dimension19 = guardian.pageInfo.productData.promoCode;
+            }
             if (guardian.experience){
                 event.dimension16 = guardian.experience;
             }

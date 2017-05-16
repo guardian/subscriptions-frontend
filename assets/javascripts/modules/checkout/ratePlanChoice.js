@@ -44,8 +44,9 @@ define(['$', 'bean'], function ($, bean) {
 
     function selectRatePlanForIdAndCurrency(ratePlanId, currency) {
         forEveryPlanOption(function(option) {
-            if ($(option).val() === ratePlanId && $(option).attr('data-currency') === currency) {
-                $(option).attr('checked', 'checked');
+            var $option = $(option);
+            if ($option.val() === ratePlanId && $option.attr('data-currency') === currency && !$option.attr('checked')) {
+                $option.attr('checked', 'checked');
                 bean.fire(option, 'change');
             }
         });
