@@ -5,10 +5,12 @@ define([
     'modules/forms/toggleError',
     'utils/ajax',
     'modules/checkout/formElements',
-    'modules/checkout/ratePlanChoice'
-], function ($, bean, toggleError, ajax, formElements, ratePlanChoice) {
+    'modules/checkout/ratePlanChoice',
+    'modules/checkout/eventTracking'
+], function ($, bean, toggleError, ajax, formElements, ratePlanChoice, eventTracking) {
     'use strict';
 
+    var lastValidCode     = '';
     var $inputBox         = formElements.$PROMO_CODE;
     var $ratePlanFields   = $('input[name="ratePlanId"]');
     //This doesn't include promotional rate plans as they're hidden
@@ -88,12 +90,15 @@ define([
                 currency = $el.data('currency'),
                 $label = $('#label-for-' + $el.val() + '-' + currency),
                 labelPrefix = $el.data('option-label-prefix'),
-                newDisplayPrice = $el.data('option-mirror-payment-default');
+                newDisplayPrice = $el.data('option-mirror-payment-default'),
+                newLabel = labelPrefix + newDisplayPrice;
 
-            $label.html(labelPrefix + newDisplayPrice);
-            $el.attr('data-option-mirror-payment', newDisplayPrice);
-            if ($el.attr('checked')) {
-                bean.fire(el, 'change');
+            if ($label.html() !== newLabel) {
+                $label.html(newLabel);
+                $el.attr('data-option-mirror-payment', newDisplayPrice);
+                if ($el.attr('checked')) {
+                    bean.fire(el, 'change');
+                }
             }
         });
     }
@@ -117,6 +122,13 @@ define([
             });
         } else {
             removePromotionFromRatePlans();
+        }
+    }
+
+    function informAnalytics(promoCode) {
+        if (guardian && guardian.pageInfo && guardian.pageInfo.productData) {
+            guardian.pageInfo.productData.promoCode = promoCode;
+            eventTracking.enteredPromoCode();
         }
     }
 
@@ -164,6 +176,7 @@ define([
         $promoCodeApplied.show();
         $promoCodeSnippet.html(response.promotion.description);
         $promoCodeTsAndCs.attr('href', '/p/' + promoCode + '/terms');
+        informAnalytics(promoCode);
         showPromotionalPlans(response.promotion.appliesTo.productRatePlanIds);
         applyPromotionToRatePlans(response.adjustedRatePlans);
     }
@@ -185,12 +198,18 @@ define([
             currency = document.querySelector('.js-rate-plans input:checked').dataset.currency;
 
         if (promoCode === '') {
+            lastValidCode = '';
             clearDown();
             return;
         }
         if (country === '') {
             displayError('Please choose a billing or delivery country to validate this promo code');
         }
+        if (lastValidCode === promoCode) { // stop the keyup and blur causing double validation of the same code
+            return;
+        }
+
+        lastValidCode = '';
 
         ajax({
             type: 'json',
@@ -204,6 +223,7 @@ define([
             }
             if (r.isValid) {
                 if (containsRatePlans(r)) {
+                    lastValidCode = promoCode;
                     displayPromotion(r, promoCode);
                     bindExtraKeyListener();
                 } else {

@@ -29,6 +29,7 @@ define(['modules/analytics/ga', 'modules/checkout/ratePlanChoice'], function (ga
         completedPaymentDetails: trackEvent('Payment details'),
         completedReviewDetails: trackEvent('Review and confirm'),
         completedDeliveryDetails: trackEvent('Delivery address'),
+        enteredPromoCode: trackEvent('Promo code'),
         init: function () {
             ratePlanChoice.registerOnChangeAction(trackRatePlanChange);
 
