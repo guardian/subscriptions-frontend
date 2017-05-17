@@ -3,7 +3,9 @@ package forms
 import play.api.data.Form
 import play.api.data.Forms._
 
-case class AccountManagementLoginRequest(subscriptionId: String, lastname: String, promoCode: Option[String])
+case class AccountManagementLoginRequest(unsanitisedSubscriptionId: String, lastname: String, promoCode: Option[String]) {
+  val subscriptionId = unsanitisedSubscriptionId.replaceFirst("^0+", "");
+}
 
 object AccountManagementLoginForm {
 
