@@ -346,11 +346,10 @@ class CheckoutService(
       finalRenewCommand.withContextLogging("final renew command")
     }
 
-    def getValidPromotion(contact: Contact): Option[ValidPromotion[com.gu.memsub.promo.Renewal]] = for {
+    def getValidPromotion(addressCountry: Option[Country]): Option[ValidPromotion[com.gu.memsub.promo.Renewal]] = for {
         code <- renewal.promoCode.withContextLogging("promo code from client")
-        deliveryCountryString <- contact.mailingCountry.withContextLogging("salesforce mailing country")
-        deliveryCountry <- Some(Country.UK).withContextLogging("delivery country object")
-        validPromotion <- promoService.validate[com.gu.memsub.promo.Renewal](code, deliveryCountry, renewal.plan.id).withContextLogging("validated promotion").toOption
+        country <- addressCountry.withContextLogging("delivery country client")
+        validPromotion <- promoService.validate[com.gu.memsub.promo.Renewal](code, country, renewal.plan.id).withContextLogging("validated promotion").toOption
     } yield validPromotion
 
     def applyPromoIfNecessary(maybeValidPromo: Option[ValidPromotion[com.gu.memsub.promo.Renewal]], basicRenewCommand: Renew): Renew = {
@@ -400,8 +399,9 @@ class CheckoutService(
     for {
       account <- zuoraService.getAccount(subscription.accountId).withContextLogging("zuoraAccount", _.id)
       billto <- zuoraService.getContact(account.billToId).withContextLogging("zuora bill to", _.id)
+      soldto <- zuoraService.getContact(account.soldToId).withContextLogging("zuora sold to", _.id)
       contact <- GetSalesforceContactForSub.sfContactForZuoraAccount(account)(zuoraService, salesforceService.repo, defaultContext).withContextLogging("sfContact", _.salesforceContactId)
-      validPromotion = getValidPromotion(contact)
+      validPromotion = getValidPromotion(soldto.country.orElse(billto.country))
       subscriptionPrice = getSubscriptionPrice(validPromotion)
       if (pricesMatch(renewal.displayedPrice, subscriptionPrice))
       payment = getPayment(contact, billto)
