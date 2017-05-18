@@ -14,6 +14,7 @@ import com.gu.subscriptions.suspendresume.SuspensionService.{BadZuoraJson, ErrNe
 import com.gu.zuora.ZuoraRestService
 import com.gu.zuora.soap.models.Queries.Contact
 import configuration.{Config, ProfileLinks}
+import controllers.ManageWeekly.error
 import forms._
 import logging.ContextLogging
 import model.ContentSubscriptionPlanOps._
@@ -27,7 +28,7 @@ import utils.TestUsers.PreSigninTestCookie
 import views.html.account.thankYouRenew
 import views.support.Dates._
 import views.support.Pricing._
-
+import logging.Context
 import scala.concurrent.Future
 import scalaz.std.scalaFuture._
 import scalaz.syntax.std.option._
@@ -229,6 +230,12 @@ object ManageWeekly extends ContextLogging {
 
     def jsonError(message: String) = Json.toJson(Json.obj("errorMessage" -> message))
 
+    def returnError(errorMessage: String, context: Context) = {
+      val fullError = s"Unexpected error while renewing subscription : $errorMessage"
+      error(fullError)(context)
+      InternalServerError(jsonError(fullError))
+    }
+
     SessionSubscription.subscriptionFromRequest flatMap { maybeSub =>
       val response = for {
         sub <- maybeSub.toRightDisjunction("no subscription in request")
@@ -237,14 +244,14 @@ object ManageWeekly extends ContextLogging {
         renew <- parseRenewalRequest(request, tpBackend.catalogService.unsafeCatalog)
       } yield {
         info(s"Attempting to renew onto ${renew.plan.name} with promo code: ${renew.promoCode}")(sub)
-        tpBackend.checkoutService.renewSubscription(renewableSub, renew)(implicitly, implicitly, sub).map { _ =>
-          info(s"Successfully processed renewal onto ${renew.plan.name}")(sub)
-          Ok(Json.obj("redirect" -> routes.AccountManagement.renewThankYou().url))
-        }.recover{
-            case e: Throwable =>
-              val errorMessage = "Unexpected error while renewing subscription"
-              error(s"${errorMessage}: $e")(sub)
-              InternalServerError(jsonError(errorMessage))
+        tpBackend.checkoutService.renewSubscription(renewableSub, renew)(implicitly, implicitly, sub).map {
+          case \/-(_) =>
+            info(s"Successfully processed renewal onto ${renew.plan.name}")(sub)
+            Ok(Json.obj("redirect" -> routes.AccountManagement.renewThankYou().url))
+          case -\/(error) => returnError(error, sub)
+        }.recover {
+          case e: Throwable =>
+            returnError(e.getMessage, sub)
         }
       }
       response.valueOr(error => Future(BadRequest(jsonError(error))))

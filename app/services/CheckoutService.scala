@@ -36,7 +36,10 @@ import scala.concurrent.Future
 import scalaz.std.option._
 import scalaz.std.scalaFuture._
 import scalaz.syntax.monad._
-import scalaz.{EitherT, Monad, NonEmptyList, \/}
+import scalaz.{EitherT, Monad, NonEmptyList, \/, \/-, -\/}
+import scalaz.syntax.std.option._
+import com.gu.zuora.soap.models.Queries.{Contact => ZuoraContact}
+
 
 object CheckoutService {
   def fulfilmentDelay(in: Either[PaperData, DigipackData])(implicit now: LocalDate): Days = in.fold(
@@ -307,11 +310,11 @@ class CheckoutService(
   }
 
   def renewSubscription(subscription: Subscription[WeeklyPlanOneOff], renewal: model.Renewal)
-    (implicit
-      p: PromotionApplicator[com.gu.memsub.promo.Renewal, Renew],
-      zuoraRestService: ZuoraRestService[Future],
-      context: Context
-    ) = {
+                       (implicit
+                        p: PromotionApplicator[com.gu.memsub.promo.Renewal, Renew],
+                        zuoraRestService: ZuoraRestService[Future],
+                        context: Context
+                       ): Future[\/[String, Any]] = {
 
     def getPayment(contact: Contact, billto: Queries.Contact): PaymentService#Payment = {
       val idMinimalUser = IdMinimalUser(contact.identityId, None)
@@ -346,10 +349,10 @@ class CheckoutService(
       finalRenewCommand.withContextLogging("final renew command")
     }
 
-    def getValidPromotion(addressCountry: Option[Country]): Option[ValidPromotion[com.gu.memsub.promo.Renewal]] = for {
-        code <- renewal.promoCode.withContextLogging("promo code from client")
-        country <- addressCountry.withContextLogging("delivery country client")
-        validPromotion <- promoService.validate[com.gu.memsub.promo.Renewal](code, country, renewal.plan.id).withContextLogging("validated promotion").toOption
+
+    def getValidPromotion(code: PromoCode, addressCountry: Option[Country]): \/[String, ValidPromotion[com.gu.memsub.promo.Renewal]] = for {
+      country <- addressCountry.withContextLogging("country client").toRightDisjunction("No country in contact!")
+      validPromotion <- promoService.validate[com.gu.memsub.promo.Renewal](code, country, renewal.plan.id).leftMap(_.msg).withContextLogging("validated promotion")
     } yield validPromotion
 
     def applyPromoIfNecessary(maybeValidPromo: Option[ValidPromotion[com.gu.memsub.promo.Renewal]], basicRenewCommand: Renew): Renew = {
@@ -388,33 +391,48 @@ class CheckoutService(
       subscriptionDetails.withContextLogging(s"Subscription price:")
     }
 
-    def pricesMatch(displayedPrice: String, subscriptionPrice: String) = {
-      if(displayedPrice != subscriptionPrice){
-        logger.error(s"Client and server side prices divergent, we showed $displayedPrice and wanted to charge $subscriptionPrice from ${subscription.name} (${renewal.promoCode})")
-        false
+    case class ContactInfo(billto: ZuoraContact, soldto: ZuoraContact, salesforceContact: Contact)
+
+    def executeRenewal(contactInfo: ContactInfo, promotion: Option[ValidPromotion[com.gu.memsub.promo.Renewal]]): Future[\/[String, String]] = {
+      val subscriptionPrice = getSubscriptionPrice(promotion)
+      if (renewal.displayedPrice != subscriptionPrice) {
+        Future.successful(-\/(s"Client and server side prices divergent, we showed ${renewal.displayedPrice} and wanted to charge $subscriptionPrice from ${subscription.name} (${renewal.promoCode})"))
       }
-      else true
+      else {
+        val payment = getPayment(contactInfo.salesforceContact, contactInfo.billto)
+        for {
+          paymentMethod <- payment.makePaymentMethod
+          createPaymentMethod = CreatePaymentMethod(subscription.accountId, paymentMethod, payment.makeAccount.paymentGateway, contactInfo.billto)
+          updateResult <- zuoraService.createPaymentMethod(createPaymentMethod).withContextLogging("createPaymentMethod", _.id)
+          renewCommand <- constructRenewCommand(promotion)
+          amendResult <- zuoraService.renewSubscription(renewCommand)
+          _ <- ensureEmail(contactInfo.billto, subscription)
+          _ <- exactTargetService.enqueueRenewalEmail(subscription, renewal, subscriptionPrice, contactInfo.salesforceContact, renewal.email, newTermStartDate)
+        }
+          yield {
+            \/-(updateResult.id)
+          }
+      }
     }
 
-    for {
+    val contactInfo: Future[ContactInfo] = for {
       account <- zuoraService.getAccount(subscription.accountId).withContextLogging("zuoraAccount", _.id)
       billto <- zuoraService.getContact(account.billToId).withContextLogging("zuora bill to", _.id)
       soldto <- zuoraService.getContact(account.soldToId).withContextLogging("zuora sold to", _.id)
       contact <- GetSalesforceContactForSub.sfContactForZuoraAccount(account)(zuoraService, salesforceService.repo, defaultContext).withContextLogging("sfContact", _.salesforceContactId)
-      validPromotion = getValidPromotion(soldto.country.orElse(billto.country))
-      subscriptionPrice = getSubscriptionPrice(validPromotion)
-      if (pricesMatch(renewal.displayedPrice, subscriptionPrice))
-      payment = getPayment(contact, billto)
-      paymentMethod <- payment.makePaymentMethod
-      createPaymentMethod = CreatePaymentMethod(subscription.accountId, paymentMethod, payment.makeAccount.paymentGateway, billto)
-      updateResult <- zuoraService.createPaymentMethod(createPaymentMethod).withContextLogging("createPaymentMethod", _.id)
-      renewCommand <- constructRenewCommand(validPromotion)
-      amendResult <- zuoraService.renewSubscription(renewCommand)
-      _ <- ensureEmail(billto, subscription)
-      _ <- exactTargetService.enqueueRenewalEmail(subscription, renewal, subscriptionPrice, contact, renewal.email, newTermStartDate)
     }
-      yield {
-        updateResult
+      yield (ContactInfo(billto, soldto, contact))
+
+    contactInfo.flatMap { info =>
+      renewal.promoCode.withContextLogging("promo code from client") match {
+        case None => executeRenewal(info, None)
+        case Some(promoCode) => {
+          getValidPromotion(promoCode, info.soldto.country.orElse(info.billto.country)) match {
+            case \/-(promotion) => executeRenewal(info, Some(promotion))
+            case error => Future.successful(error)
+          }
+        }
       }
+    }
   }
 }
