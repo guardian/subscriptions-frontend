@@ -310,11 +310,11 @@ class CheckoutService(
   }
 
   def renewSubscription(subscription: Subscription[WeeklyPlanOneOff], renewal: model.Renewal)
-                       (implicit
-                        p: PromotionApplicator[com.gu.memsub.promo.Renewal, Renew],
-                        zuoraRestService: ZuoraRestService[Future],
-                        context: Context
-                       ): Future[\/[String, Any]] = {
+    (implicit
+      p: PromotionApplicator[com.gu.memsub.promo.Renewal, Renew],
+      zuoraRestService: ZuoraRestService[Future],
+      context: Context
+    ): Future[\/[String, Any]] = {
 
     def getPayment(contact: Contact, billto: Queries.Contact): PaymentService#Payment = {
       val idMinimalUser = IdMinimalUser(contact.identityId, None)
@@ -348,7 +348,6 @@ class CheckoutService(
       val finalRenewCommand = applyPromoIfNecessary(maybeValidPromo, basicRenewCommand)
       finalRenewCommand.withContextLogging("final renew command")
     }
-
 
     def getValidPromotion(code: PromoCode, addressCountry: Option[Country]): \/[String, ValidPromotion[com.gu.memsub.promo.Renewal]] = for {
       country <- addressCountry.withContextLogging("country client").toRightDisjunction("No country in contact!")
