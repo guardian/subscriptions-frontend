@@ -201,9 +201,7 @@ class ExactTargetService(
     renewal: Renewal,
     subscriptionDetails: String,
     contact: Contact,
-    email: String,
     newTermStartDate: LocalDate)(implicit context: Context): Future[Unit] = {
-
     sealed trait Error {
       def msg: String
       def code: String
@@ -234,7 +232,7 @@ class ExactTargetService(
         planName = renewal.plan.name,
         contact = contact,
         paymentMethod = paymentMethod,
-        email = email,
+        email = renewal.email,
         newTermStartDate = newTermStartDate)
       sendMessage <- EitherT(sendToQueue(row))
     } yield sendMessage).run

@@ -17,7 +17,7 @@ import com.gu.zuora.ZuoraRestService
 import com.gu.zuora.api.ZuoraService
 import com.gu.zuora.soap.models.Commands.{Account, PaymentMethod, RatePlan, Subscribe, _}
 import com.gu.zuora.soap.models.Queries
-import com.gu.zuora.soap.models.Results.SubscribeResult
+import com.gu.zuora.soap.models.Results.{AmendResult, SubscribeResult}
 import com.gu.zuora.soap.models.errors._
 import logging.{Context, ContextLogging}
 import model.BillingPeriodOps._
@@ -30,13 +30,13 @@ import org.joda.time.LocalDate.now
 import org.joda.time.{DateTimeConstants, Days, LocalDate}
 import touchpoint.ZuoraProperties
 import views.support.Pricing._
-
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
+
 import scala.concurrent.Future
 import scalaz.std.option._
 import scalaz.std.scalaFuture._
 import scalaz.syntax.monad._
-import scalaz.{EitherT, Monad, NonEmptyList, \/, \/-, -\/}
+import scalaz.{-\/, EitherT, Monad, NonEmptyList, \/, \/-}
 import scalaz.syntax.std.option._
 import com.gu.zuora.soap.models.Queries.{Contact => ZuoraContact}
 
@@ -392,7 +392,22 @@ class CheckoutService(
 
     case class ContactInfo(billto: ZuoraContact, soldto: ZuoraContact, salesforceContact: Contact)
 
-    def executeRenewal(contactInfo: ContactInfo, promotion: Option[ValidPromotion[com.gu.memsub.promo.Renewal]]): Future[\/[String, String]] = {
+    def postRenewalSteps(subscription: Subscription[WeeklyPlanOneOff], renewal: model.Renewal, subscriptionPrice: String, salesforceContact: Contact, newTermStartDate: LocalDate) = {
+      def logException(e: Exception): Unit = {
+        logger.error(s"unexpected error in post renewal steps", e)
+      }
+      try {
+        exactTargetService.enqueueRenewalEmail(subscription, renewal, subscriptionPrice, salesforceContact, newTermStartDate).recover {
+          case e: Exception => logException(e)
+        }
+      } catch {
+        case e: Exception => {
+          logException(e)
+          Future.successful()
+        }
+      }
+    }
+    def executeRenewal(contactInfo: ContactInfo, promotion: Option[ValidPromotion[com.gu.memsub.promo.Renewal]]): Future[\/[String, AmendResult]] = {
       val subscriptionPrice = getSubscriptionPrice(promotion)
       if (renewal.displayedPrice != subscriptionPrice) {
         Future.successful(-\/(s"Client and server side prices divergent, we showed ${renewal.displayedPrice} and wanted to charge $subscriptionPrice from ${subscription.name} (${renewal.promoCode})"))
@@ -404,12 +419,12 @@ class CheckoutService(
           createPaymentMethod = CreatePaymentMethod(subscription.accountId, paymentMethod, payment.makeAccount.paymentGateway, contactInfo.billto)
           updateResult <- zuoraService.createPaymentMethod(createPaymentMethod).withContextLogging("createPaymentMethod", _.id)
           renewCommand <- constructRenewCommand(promotion)
-          amendResult <- zuoraService.renewSubscription(renewCommand)
           _ <- ensureEmail(contactInfo.billto, subscription)
-          _ <- exactTargetService.enqueueRenewalEmail(subscription, renewal, subscriptionPrice, contactInfo.salesforceContact, renewal.email, newTermStartDate)
+          amendResult <- zuoraService.renewSubscription(renewCommand)
+          _ <- postRenewalSteps(subscription, renewal, subscriptionPrice, contactInfo.salesforceContact, newTermStartDate)
         }
           yield {
-            \/-(updateResult.id)
+            \/-(amendResult)
           }
       }
     }
