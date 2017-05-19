@@ -95,6 +95,9 @@ Resources:
       - Key: Stage
         Value: !Ref 'Stage'
         PropagateAtLaunch: 'true'
+      - Key: Name
+        Value: 'subscriptions-frontend'
+        PropagateAtLaunch: 'true'
   FrontendLaunchConfig:
     Type: AWS::AutoScaling::LaunchConfiguration
     Properties:
