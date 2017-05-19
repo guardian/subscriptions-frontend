@@ -24,6 +24,8 @@ trait ContextLogging extends StrictLogging {
 
   def error(message: String)(implicit context: Context) = log(logger.error(_), message, context)
 
+  def error(message: String, cause: Throwable)(implicit context: Context) = log(logger.error(_, cause), message, context)
+
   private def log(log: String => Unit, message: String, context: Context): Unit = {
     log(s"{${context.environmentName} sub: ${context.sub.name.get}} $message")
   }

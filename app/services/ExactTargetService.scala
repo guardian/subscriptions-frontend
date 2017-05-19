@@ -35,7 +35,6 @@ import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 import scalaz.Scalaz._
 import scalaz.{-\/, EitherT, \/, \/-}
-
 /**
   * Sends welcome email message to Amazon SQS queue which is consumed by membership-workflow.
   *
@@ -240,8 +239,8 @@ class ExactTargetService(
     sentMessage.map {
       case \/-(sendMsgResult) => info(s"Successfully enqueued guardian weekly renewal email.")
       case -\/(se@SimpleError(_)) => error(se.fullDescription)
-      case -\/(et@ExceptionThrown(_,exception)) => logger.error(et.fullDescription, exception)
-    }
+      case -\/(et@ExceptionThrown(_, exception)) => error(et.fullDescription, exception)
+    }.recover { case e: Exception => error(e.getMessage, e) }
   }
 }
 
@@ -253,6 +252,7 @@ object SqsClient extends LazyLogging {
 
   def sendDataExtensionToQueue(queueName: String, row: DataExtensionRow): Future[Try[SendMessageResult]] = {
     Future {
+      throw new Exception("exeception inside the thing!")
       val payload = Json.obj(
         "To" -> Json.obj(
           "Address" -> row.email,

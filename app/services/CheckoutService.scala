@@ -392,21 +392,6 @@ class CheckoutService(
 
     case class ContactInfo(billto: ZuoraContact, soldto: ZuoraContact, salesforceContact: Contact)
 
-    def postRenewalSteps(subscription: Subscription[WeeklyPlanOneOff], renewal: model.Renewal, subscriptionPrice: String, salesforceContact: Contact, newTermStartDate: LocalDate) = {
-      def logException(e: Exception): Unit = {
-        logger.error(s"unexpected error in post renewal steps", e)
-      }
-      try {
-        exactTargetService.enqueueRenewalEmail(subscription, renewal, subscriptionPrice, salesforceContact, newTermStartDate).recover {
-          case e: Exception => logException(e)
-        }
-      } catch {
-        case e: Exception => {
-          logException(e)
-          Future.successful()
-        }
-      }
-    }
     def executeRenewal(contactInfo: ContactInfo, promotion: Option[ValidPromotion[com.gu.memsub.promo.Renewal]]): Future[\/[String, AmendResult]] = {
       val subscriptionPrice = getSubscriptionPrice(promotion)
       if (renewal.displayedPrice != subscriptionPrice) {
@@ -421,7 +406,7 @@ class CheckoutService(
           renewCommand <- constructRenewCommand(promotion)
           _ <- ensureEmail(contactInfo.billto, subscription)
           amendResult <- zuoraService.renewSubscription(renewCommand)
-          _ <- postRenewalSteps(subscription, renewal, subscriptionPrice, contactInfo.salesforceContact, newTermStartDate)
+          _ <- exactTargetService.enqueueRenewalEmail(subscription, renewal, subscriptionPrice, contactInfo.salesforceContact, newTermStartDate)
         }
           yield {
             \/-(amendResult)
