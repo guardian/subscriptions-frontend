@@ -35,7 +35,6 @@ import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 import scalaz.Scalaz._
 import scalaz.{-\/, EitherT, \/, \/-}
-
 /**
   * Sends welcome email message to Amazon SQS queue which is consumed by membership-workflow.
   *
@@ -201,9 +200,7 @@ class ExactTargetService(
     renewal: Renewal,
     subscriptionDetails: String,
     contact: Contact,
-    email: String,
     newTermStartDate: LocalDate)(implicit context: Context): Future[Unit] = {
-
     sealed trait Error {
       def msg: String
       def code: String
@@ -234,7 +231,7 @@ class ExactTargetService(
         planName = renewal.plan.name,
         contact = contact,
         paymentMethod = paymentMethod,
-        email = email,
+        email = renewal.email,
         newTermStartDate = newTermStartDate)
       sendMessage <- EitherT(sendToQueue(row))
     } yield sendMessage).run
@@ -242,8 +239,8 @@ class ExactTargetService(
     sentMessage.map {
       case \/-(sendMsgResult) => info(s"Successfully enqueued guardian weekly renewal email.")
       case -\/(se@SimpleError(_)) => error(se.fullDescription)
-      case -\/(et@ExceptionThrown(_,exception)) => logger.error(et.fullDescription, exception)
-    }
+      case -\/(et@ExceptionThrown(_, exception)) => error(et.fullDescription, exception)
+    }.recover { case e: Exception => error(e.getMessage, e) }
   }
 }
 
