@@ -48,6 +48,9 @@ Parameters:
   LoggingKinesisStream:
     Description: Kinesis stream id to send logging to e.g. elk-stack-ElkKinesisStream-12345
     Type: String
+  LoggingPolicy:
+    Description: Policy needed to access the kinesis stream
+    Type: String
 Mappings:
   StageVariables:
     PROD:
@@ -193,6 +196,8 @@ Resources:
           - Effect: Allow
             Action: sqs:*
             Resource: arn:aws:sqs:eu-west-1:865473395570:subs-holiday-suspension-email
+      ManagedPolicyArns:
+      - !Ref 'LoggingPolicy'
   SubscriptionsAppInstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:
