@@ -252,7 +252,6 @@ object SqsClient extends LazyLogging {
 
   def sendDataExtensionToQueue(queueName: String, row: DataExtensionRow): Future[Try[SendMessageResult]] = {
     Future {
-      throw new Exception("exeception inside the thing!")
       val payload = Json.obj(
         "To" -> Json.obj(
           "Address" -> row.email,
