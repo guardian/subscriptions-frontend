@@ -21,11 +21,6 @@ object LogbackConfig {
     "{" + (for((k, v) <- customFields) yield s""""${k}":"${v}"""").mkString(",") + "}"
   }
 
-  def asLogBack(l: SLFLogger): Option[LogbackLogger] = l match {
-    case l: LogbackLogger => Some(l)
-    case _ => None
-  }
-
   def makeLayout(customFields: String) = {
     val l = new LogstashLayout()
     l.setCustomFields(customFields)
@@ -52,29 +47,32 @@ object LogbackConfig {
     if (config.enabled) {
       try {
         val rootLogger = LoggerFactory.getLogger(SLFLogger.ROOT_LOGGER_NAME)
-        asLogBack(rootLogger).map { lb =>
-          lb.info("Configuring Logback")
-          val context = lb.getLoggerContext
-          val layout = makeLayout(makeCustomFields(config.customFields))
-          val bufferSize = 1000
-          val appender = makeKinesisAppender(
-            layout,
-            context,
-            KinesisAppenderConfig(
-              config.stream,
-              config.region,
-              config.awsCredentialsProvider,
-              bufferSize
+        rootLogger match {
+          case lb: LogbackLogger =>
+            lb.info("Kinesis logging - Configuring Logback")
+            val context = lb.getLoggerContext
+            val layout = makeLayout(makeCustomFields(config.customFields))
+            val bufferSize = 1000
+            val appender = makeKinesisAppender(
+              layout,
+              context,
+              KinesisAppenderConfig(
+                config.stream,
+                config.region,
+                config.awsCredentialsProvider,
+                bufferSize
+              )
             )
-          )
-          lb.addAppender(appender)
-          lb.info("Configured Logback")
-        } getOrElse PlayLogger.info("not running using logback")
+            lb.addAppender(appender)
+            lb.info("Kinesis logging - Configured Logback")
+          case _ =>
+            PlayLogger.info("Kinesis logging failed - not running using logback")
+        }
       } catch {
-        case ex: Throwable => PlayLogger.info(s"Error while adding Logback Kinesis appender: $ex")
+        case ex: Throwable => PlayLogger.info(s"Kinesis logging failed with exception: $ex")
       }
     } else {
-      PlayLogger.info("Logging disabled")
+      PlayLogger.info("Kinesis logging not enabled by default (e.g. DEV mode)")
     }
   }
 
