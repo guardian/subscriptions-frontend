@@ -1,6 +1,7 @@
 package services
 
 import com.gu.identity.play.IdMinimalUser
+import com.gu.memsub.NormalisedTelephoneNumber
 import com.gu.salesforce.ContactDeserializer.Keys
 import com.gu.salesforce._
 import com.typesafe.scalalogging.LazyLogging
@@ -43,7 +44,7 @@ object SalesforceService {
     Keys.MAILING_COUNTRY -> addr.country.fold(addr.countryName)(_.name)
   ) ++ paperData.flatMap(_.deliveryInstructions).fold(Json.obj())(instrs => Json.obj(
     Keys.DELIVERY_INSTRUCTIONS -> instrs
-  )))
+  ))) ++ NormalisedTelephoneNumber.fromStringAndCountry(personalData.telephoneNumber, personalData.address.country).fold(Json.obj())(phone => Json.obj(Keys.TELEPHONE -> Seq(phone.countryCode, phone.localNumber).mkString("")))
 }
 
 case class SalesforceServiceError(s: String) extends Throwable {
