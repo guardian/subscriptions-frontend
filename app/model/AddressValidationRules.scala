@@ -20,6 +20,7 @@ object AddressValidationRules {
     case Some(UK) => AddressValidationRules(PostcodeRequired, SubdivisionOptional)
     case Some(US) => AddressValidationRules(PostcodeRequired, SubdivisionList(Country.US.states))
     case Some(Canada) => AddressValidationRules(PostcodeRequired, SubdivisionList(Country.Canada.states))
+    case Some(Australia) => AddressValidationRules(PostcodeRequired, SubdivisionList(Country.Australia.states))
     case _ => AddressValidationRules(PostcodeOptional, SubdivisionOptional)
   }
 }
