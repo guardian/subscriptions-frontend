@@ -2,7 +2,7 @@ package model
 
 import com.gu.i18n._
 import Currency._
-import com.gu.memsub.BillingPeriod.{OneYear, Quarter, SixWeeks}
+import com.gu.memsub.BillingPeriod.{OneYear, Quarter, SixWeeks, Year}
 import com.gu.memsub.Product
 import com.gu.memsub.subsv2.CatalogPlan
 import views.support.CountryWithCurrency
@@ -51,7 +51,7 @@ object ContentSubscriptionPlanOps {
     }
 
     def availableForCheckout: Boolean = in.charges.billingPeriod.isRecurring || in.charges.billingPeriod == SixWeeks
-    def availableForRenewal: Boolean = in.charges.billingPeriod == Quarter || in.charges.billingPeriod == OneYear
+    def availableForRenewal: Boolean = in.charges.billingPeriod == Quarter || in.charges.billingPeriod == OneYear || in.charges.billingPeriod == Year
   }
 
 }
