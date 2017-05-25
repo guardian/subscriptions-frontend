@@ -48,15 +48,15 @@ object CheckoutService {
   def paymentDelay(in: Either[PaperData, DigipackData], zuora: ZuoraProperties)(implicit now: LocalDate): Days = in.fold(
     p => Days.daysBetween(now, p.startDate), d => zuora.gracePeriodInDays.plus(zuora.defaultDigitalPackFreeTrialPeriod)
   )
-  def nextFriday(d: LocalDate):LocalDate = d match {
-    case weekday if d.getDayOfWeek < DateTimeConstants.SATURDAY => d.withDayOfWeek(DateTimeConstants.FRIDAY)
-    case weekend => d.plusWeeks(1).withDayOfWeek(DateTimeConstants.FRIDAY)
+  def nextFulfilment(d: LocalDate):LocalDate = d match {
+    case before if d.getDayOfWeek < DateTimeConstants.THURSDAY => d.withDayOfWeek(DateTimeConstants.FRIDAY)
+    case after => d.plusWeeks(1).withDayOfWeek(DateTimeConstants.FRIDAY)
   }
 
   val manualFulfilmentOverride = new LocalDate("2017-05-12")
 
   def determineFirstAvailableWeeklyDate(now: LocalDate): LocalDate = {
-    val nextAvailableDate = nextFriday(now plusWeeks 1)
+    val nextAvailableDate = nextFulfilment(now plusWeeks 1)
     Seq(manualFulfilmentOverride, nextAvailableDate).max
   }
 }
