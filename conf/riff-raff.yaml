@@ -1,0 +1,17 @@
+stacks: [subscriptions]
+regions: [eu-west-1]
+deployments:
+  ami:
+    type: ami-cloudformation-parameter
+    app: frontend
+    parameters:
+      amiTags:
+        Recipe: xenial-membership
+        AmigoStage: PROD
+      amiParameter: ImageId
+      cloudFormationStackByTags: true
+  frontend:
+    type: autoscaling
+    dependencies: [ami]
+    parameters:
+      bucket: subscriptions-dist
