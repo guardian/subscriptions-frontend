@@ -75,6 +75,13 @@ object Config {
 
   val sentryDsn = Try(new Dsn(config.getString("sentry.dsn")))
 
+  object Logstash {
+    private val param = Try{config.getConfig("param.logstash")}.toOption
+    val stream = Try{param.map(_.getString("stream"))}.toOption.flatten
+    val streamRegion = Try{param.map(_.getString("streamRegion"))}.toOption.flatten
+    val enabled = Try{config.getBoolean("logstash.enabled")}.toOption.contains(true)
+  }
+
   lazy val Salesforce =  SalesforceConfig.from(config.getConfig("touchpoint.backend.environments").getConfig(stage), stage)
 
   object GoCardless {

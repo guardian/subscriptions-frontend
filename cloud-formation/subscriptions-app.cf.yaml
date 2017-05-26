@@ -45,6 +45,12 @@ Parameters:
     Description: Security group that grants access to the account's Vulnerability
       Scanner
     Type: AWS::EC2::SecurityGroup::Id
+  LoggingKinesisStream:
+    Description: Kinesis stream id to send logging to e.g. elk-stack-ElkKinesisStream-12345
+    Type: String
+  LoggingPolicy:
+    Description: Policy needed to access the kinesis stream
+    Type: String
 Mappings:
   StageVariables:
     PROD:
@@ -89,6 +95,9 @@ Resources:
       - Key: Stage
         Value: !Ref 'Stage'
         PropagateAtLaunch: 'true'
+      - Key: Name
+        Value: 'subscriptions-frontend'
+        PropagateAtLaunch: 'true'
   FrontendLaunchConfig:
     Type: AWS::AutoScaling::LaunchConfiguration
     Properties:
@@ -110,6 +119,13 @@ Resources:
           aws --region ${AWS::Region} s3 cp s3://subscriptions-dist/${Stack}/${Stage}/frontend/frontend_1.0-SNAPSHOT_all.deb /tmp
 
           aws --region ${AWS::Region} s3 cp s3://subscriptions-private/${Stage}/subscriptions-frontend.private.conf /etc/gu
+
+          cat <<EOF >>/etc/gu/subscriptions-frontend.private.conf
+          param.logstash {
+            stream="${LoggingKinesisStream}"
+            streamRegion="${AWS::Region}"
+          }
+          EOF
 
           dpkg -i /tmp/frontend_1.0-SNAPSHOT_all.deb
           chown frontend /etc/gu/subscriptions-frontend.private.conf
@@ -183,6 +199,8 @@ Resources:
           - Effect: Allow
             Action: sqs:*
             Resource: arn:aws:sqs:eu-west-1:865473395570:subs-holiday-suspension-email
+      ManagedPolicyArns:
+      - !Ref 'LoggingPolicy'
   SubscriptionsAppInstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:

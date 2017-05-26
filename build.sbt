@@ -50,8 +50,8 @@ libraryDependencies ++= Seq(
     "com.gu" %% "content-authorisation-common" % "0.1",
     "com.gu" %% "tip" % "0.1.1",
     "com.github.nscala-time" %% "nscala-time" % "2.8.0",
-    "com.getsentry.raven" % "raven-logback" % "7.8.5",
-    "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0",
+    "com.getsentry.raven" % "raven-logback" % "8.0.3",
+    "com.typesafe.scala-logging" %% "scala-logging" % "3.5.0",
     "org.scalatest" %% "scalatest" % scalatestVersion % "test",
     "org.scalactic" %% "scalactic" % scalatestVersion % "test",
     "org.seleniumhq.selenium" % "selenium-java" % "3.0.1" % "test",
@@ -62,7 +62,10 @@ libraryDependencies ++= Seq(
     "org.scalaz" %% "scalaz-core" % "7.1.3",
     "org.pegdown" % "pegdown" % "1.6.0",
     "com.amazonaws" % "aws-java-sdk-sqs" % "1.11.95",
-    "net.databinder.dispatch" %% "dispatch-core" % "0.11.3"
+    "net.databinder.dispatch" %% "dispatch-core" % "0.11.3",
+    "com.gu" % "kinesis-logback-appender" % "1.4.0",
+    "net.logstash.logback" % "logstash-logback-encoder" % "4.9",
+    "com.fasterxml.jackson.dataformat" % "jackson-dataformat-cbor" % "2.8.7"
 )
 
 testOptions in Test ++= Seq(
