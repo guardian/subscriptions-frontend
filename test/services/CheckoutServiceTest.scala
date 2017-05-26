@@ -56,7 +56,7 @@ class CheckoutServiceTest extends Specification {
       CheckoutService.determineFirstAvailableWeeklyDate(new LocalDate("2017-05-22")) mustEqual new LocalDate("2017-06-02")
     }
 
-    // Uses default algorithm after override date that
+
     "Calculate the next available Friday correctly (if today is a Monday)" in {
       CheckoutService.determineFirstAvailableWeeklyDate(new LocalDate("2017-05-08")) mustEqual new LocalDate("2017-05-19")
     }
