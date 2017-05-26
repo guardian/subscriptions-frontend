@@ -49,17 +49,9 @@ class CheckoutServiceTest extends Specification {
       CheckoutService.paymentDelay(paperData, zuora) mustEqual Days.days(8)
     }
   }
-
-    "Calculate the next available Friday correctly (if overridden)" in {
-      CheckoutService.determineFirstAvailableWeeklyDate(new LocalDate("2017-04-13")) mustEqual new LocalDate("2017-05-12")
-      CheckoutService.determineFirstAvailableWeeklyDate(new LocalDate("2017-04-21")) mustEqual new LocalDate("2017-05-12")
-      CheckoutService.determineFirstAvailableWeeklyDate(new LocalDate("2017-05-22")) mustEqual new LocalDate("2017-06-02")
-    }
-
-
-    "Calculate the next available Friday correctly (if today is a Monday)" in {
-      CheckoutService.determineFirstAvailableWeeklyDate(new LocalDate("2017-05-08")) mustEqual new LocalDate("2017-05-19")
-    }
+  "Calculate the next available Friday correctly (if today is a Monday)" in {
+    CheckoutService.determineFirstAvailableWeeklyDate(new LocalDate("2017-05-08")) mustEqual new LocalDate("2017-05-19")
+  }
 
 
   "Calculate the next available Friday correctly (if today is a Wednesday)" in {

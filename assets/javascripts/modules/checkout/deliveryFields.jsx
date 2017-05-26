@@ -20,9 +20,6 @@ function getFirstSelectableDate(filterFn) {
     while (filterFn && !filterFn(firstSelectableDate)) {
         firstSelectableDate.add(1, 'day');
     }
-    if(weekly) {
-        return firstSelectableDate.isAfter(firstWeekly) ? firstSelectableDate : firstWeekly;
-    }
     return firstSelectableDate;
 }
 
