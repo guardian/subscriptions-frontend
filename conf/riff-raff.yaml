@@ -9,7 +9,6 @@ deployments:
         Recipe: xenial-membership
         AmigoStage: PROD
       amiParameter: ImageId
-      cloudFormationStackByTags: true
   frontend:
     type: autoscaling
     dependencies: [ami]
