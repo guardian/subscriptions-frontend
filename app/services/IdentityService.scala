@@ -26,7 +26,11 @@ class IdentityService(identityApiClient: => IdentityApiClient) extends LazyLoggi
 
   def doesUserExist(email: String): Future[Boolean] =
     identityApiClient.userLookupByEmail(email).map { response =>
-      (response.json \ "user" \ "id").asOpt[String].isDefined
+      response.status match {
+        case status if status == Status.OK =>  (response.json \ "user" \ "id").asOpt[String].isDefined
+        case _ => false
+      }
+
     }
 
   def userLookupByCredentials(accessCredentials: AccessCredentials): Future[Option[IdUser]] = accessCredentials match {
