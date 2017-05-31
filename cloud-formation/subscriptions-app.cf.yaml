@@ -144,6 +144,9 @@ Resources:
           - Effect: Allow
             Action: s3:GetObject
             Resource: arn:aws:s3:::membership-private/membership_directory_cert.p12
+          - Effect: Allow
+            Action: s3:GetObject
+            Resource: !Sub 'arn:aws:s3:::subscriptions-dist/subscriptions/${Stage}/frontend/*'
       - PolicyName: PushLogs
         PolicyDocument:
           Version: '2012-10-17'
