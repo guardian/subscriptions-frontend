@@ -28,7 +28,10 @@ class IdentityService(identityApiClient: => IdentityApiClient) extends LazyLoggi
     identityApiClient.userLookupByEmail(email).map { response =>
       response.status match {
         case status if status == Status.OK =>  (response.json \ "user" \ "id").asOpt[String].isDefined
-        case _ => false
+        case status => {
+          logger.error(s"ID API failed on email check with HTTP status $status")
+          false
+        }
       }
 
     }
