@@ -187,6 +187,8 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
       )
     )
 
+    val thankYouEdition = model.DigitalEdition.getForCountry(sr.genericData.personalData.address.country)
+
     val requestData = SubscriptionRequestData(
       ipCountry = request.getFastlyCountry,
       supplierCode = sessionSupplierCode.map(SupplierCode)
@@ -247,7 +249,8 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
       val productData = Seq(
         SubsName -> r.subscribeResult.subscriptionName,
         RatePlanId -> subscribeRequest.productRatePlanId.get,
-        SessionKeys.Currency -> subscribeRequest.genericData.currency.toString
+        SessionKeys.Currency -> subscribeRequest.genericData.currency.toString,
+        Edition -> thankYouEdition.id
       )
 
       val userSessionFields = r.userIdData match {
@@ -304,12 +307,12 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
       } // Don't display the user registration form if the user is logged in
 
       val promotion = session.get(AppliedPromoCode).flatMap(code => resolution.backend.promoService.findPromotion(NormalisedPromoCode.safeFromString(code)))
-
+      val edition: model.DigitalEdition = session.get(Edition).flatMap(model.DigitalEdition.getById).getOrElse(model.DigitalEdition.INT)
       val eventualMaybeSubscription = tpBackend.subscriptionService.get[com.gu.memsub.subsv2.SubscriptionPlan.ContentSubscription](Name(subsName))
       eventualMaybeSubscription.map { maybeSub =>
         maybeSub.map { sub =>
           if (tpBackend.environmentName == "PROD") Tip.verify()
-          Ok(view.thankyou(sub, passwordForm, resolution, promotion, startDate))
+          Ok(view.thankyou(sub, passwordForm, resolution, promotion, startDate, edition))
         }.getOrElse {
           Redirect(routes.Homepage.index()).withNewSession
         }
