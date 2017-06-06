@@ -27,8 +27,8 @@ class IdentityService(identityApiClient: => IdentityApiClient) extends LazyLoggi
   def doesUserExist(email: String): Future[Boolean] =
     identityApiClient.userLookupByEmail(email).map { response =>
       response.status match {
-        case status if status == Status.OK =>  true
-        case status if status == Status.NOT_FOUND => false
+        case Status.OK =>  true
+        case Status.NOT_FOUND => false
         case status => {
           logger.error(s"ID API failed on email check with HTTP status $status")
           false
