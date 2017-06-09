@@ -17,7 +17,7 @@ object Logstash extends StrictLogging {
 
   def customFields(playConfig: Config.type) = Map(
     "stack" -> "unknownStack",// all TODO
-    "app" -> "unknownApp",
+    "app" -> playConfig.appName,
     "stage" -> playConfig.stage,
     "build" -> "unknownBuild",
     "revision" -> "unknownRevision",
