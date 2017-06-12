@@ -15,8 +15,7 @@
             <div class="block__info">
                 <ul class="block__list">
                     <li class="block__list-item">14-day free trial</li>
-                    <li class="block__list-item"><strong>Plus, save 50% for the first 3 months</strong></li>
-                    @edition.digitalPackSaving.map {saving => <li class="block__list-item">Save up to @{saving}% on the app store price</li>}
+                    @edition.digitalPackSaving.map {saving => <li class="block__list-item"><strong>Save up to @{saving}% on the app store price</strong></li>}
                     <li class="block__list-item">Access to the Daily Edition, the digital version of the UK Guardian newspaper</li>
                     <li class="block__list-item">Access to the advert-free Guardian App Premium Tier</li>
                     <li class="block__list-item">Available on Apple, Android and Kindle Fire</li>
@@ -24,7 +23,7 @@
                 </ul>
             </div>
             <div class="block__footer">
-                <a class="button button--large button--primary button--arrow" href="@routes.PromoLandingPage.render(s"DBH80X", None).url?edition=@edition.id" data-test-id="subscriptions-@edition.id-digital">Subscribe now</a>
+                <a class="button button--large button--primary button--arrow" href="@routes.PromoLandingPage.render(s"DHOME${edition.id.toUpperCase}", None).url?edition=@edition.id" data-test-id="subscriptions-@edition.id-digital">Subscribe now</a>
             </div>
         </div>
         <div class="row__item block block--primary block--weekly">
