@@ -110,26 +110,41 @@ class CheckoutService(
     val plan = RatePlan(subscriptionData.productRatePlanId.get, None)
     def emailError: SubNel[Unit] = EitherT(Future.successful(\/.left(NonEmptyList(CheckoutIdentityFailure("Email in use")))))
     val idMinimalUser = authenticatedUserOpt.map(_.user)
-    val soldToContact = subscriptionData.productData.left.toOption.filter(isGuardianWeekly).map(_.deliveryAddress)
+    val soldToContact = subscriptionData.productData.left.toOption.map(_.deliveryAddress)
 
     implicit val today = now()
     import LogImplicit._
+    val di = subscriptionData.productData match {
+      case Left(pd) => pd.deliveryInstructions
+      case _ => None
+    }
+    println(subscriptionData)
+    println(subscriptionData.productData)
+    println(subscriptionData.productData.left)
+    println(di.getOrElse("NOPE"))
     (for {
+      //check user exists
       userExists <- EitherT(IdentityService.doesUserExist(personalData.email).map(\/.right[FatalErrors, Boolean]))
       _ <- Monad[SubNel].whenM(userExists && authenticatedUserOpt.isEmpty)(emailError)
-      memberId <- EitherT(createOrUpdateUserInSalesforce(subscriptionData, idMinimalUser))
-      purchaserIds = PurchaserIdentifiers(memberId, idMinimalUser)
-      payment <- EitherT(createPaymentType(purchaserIds, subscriptionData))
-      fulfilmentDelay = CheckoutService.fulfilmentDelay(subscriptionData.productData)
+      //update salesforce contact
+      contactId <- EitherT(createOrUpdateUserInSalesforce(subscriptionData, idMinimalUser))
+      //Combine ID + SF ids
+      combinedIds = PurchaserIdentifiers(contactId, idMinimalUser)
+    //Prepare payment
+      payment <- EitherT(createPaymentType(combinedIds, subscriptionData))
       paymentDelay = CheckoutService.paymentDelay(subscriptionData.productData, zuoraProperties)
-      paymentMethod <- EitherT(attachPaymentMethodToStripeCustomer(payment, purchaserIds))
-      initialCommand = createSubscribeRequest(personalData, soldToContact, requestData, plan, purchaserIds, paymentMethod, payment.makeAccount, Some(fulfilmentDelay), Some(paymentDelay))
-      subscribe = processSixWeekIntroductoryPeriod(fulfilmentDelay, initialCommand)
+      paymentMethod <- EitherT(attachPaymentMethodToStripeCustomer(payment, combinedIds))
+      //prepare a sub to send to zuora
+      fulfilmentDelay = CheckoutService.fulfilmentDelay(subscriptionData.productData)
+      initialSubscribe = createSubscribeRequest(personalData, soldToContact, requestData, plan, combinedIds, paymentMethod, payment.makeAccount, Some(fulfilmentDelay), Some(paymentDelay), di)
+      withTrial = processSixWeekIntroductoryPeriod(fulfilmentDelay, initialSubscribe)
+//handle promotion
       validPromotion = promoCode.flatMap(promoService.validate[NewUsers](_, personalData.address.country.getOrElse(Country.UK), subscriptionData.productRatePlanId).toOption).withLogging("validating promotion")
-      withPromo = validPromotion.map(v => p.apply(v, prpId => catalog.paid.find(_.id == prpId).map(_.charges.billingPeriod).get, promoPlans)(subscribe)).getOrElse(subscribe)
-      result <- EitherT(createSubscription(withPromo, purchaserIds))
-      out <- postSubscribeSteps(authenticatedUserOpt, memberId, result, subscriptionData, validPromotion)
-    } yield CheckoutSuccess(memberId, out._1, result, validPromotion, out._2)).run
+      withPromo = validPromotion.map(v => p.apply(v, prpId => catalog.paid.find(_.id == prpId).map(_.charges.billingPeriod).get, promoPlans)(withTrial)).getOrElse(withTrial)
+
+      result <- EitherT(createSubscription(withPromo, combinedIds))
+      out <- postSubscribeSteps(authenticatedUserOpt, contactId, result, subscriptionData, validPromotion)
+    } yield CheckoutSuccess(contactId, out._1, result, validPromotion, out._2)).run
   }
 
   def postSubscribeSteps(user: Option[AuthenticatedIdUser],
@@ -234,14 +249,16 @@ class CheckoutService(
 
   private def createSubscribeRequest(
       personalData: PersonalData,
-      soldToContact: Option[Address],
+      soldToAddress: Option[Address],
       requestData: SubscriptionRequestData,
       plan: RatePlan,
       purchaserIds: PurchaserIdentifiers,
       paymentMethod: PaymentMethod,
       acc: Account,
       fufilmentDelay: Option[Days],
-      paymentDelay: Option[Days]): Subscribe = {
+      paymentDelay: Option[Days],
+      deliveryInstructions: Option[String]
+                                    ): Subscribe = {
 
     val acquisitionDate = now
     val fulfilmentDate = fufilmentDelay.map(delay => now.plusDays(delay.getDays)).getOrElse(acquisitionDate)
@@ -254,11 +271,12 @@ class CheckoutService(
       name = personalData,
       address = personalData.address,
       email = personalData.email,
-      soldToContact = soldToContact.map(address => SoldToContact(
+      soldToContact = soldToAddress.map(address => SoldToContact(
         name = personalData,        // TODO once we have gifting change this to the Giftee's name
         address = address,
         email = personalData.email,  // TODO once we have gifting change this to the Giftee's email address
-        phone = personalData.telephoneNumber
+        phone = personalData.telephoneNumber,
+        deliveryInstructions = deliveryInstructions
       )),
       contractEffective = acquisitionDate,
       contractAcceptance = firstPaymentDate,
@@ -432,4 +450,4 @@ class CheckoutService(
       }
     }
   }
-}
+} //450 lines: THIS IS HOW WE GET ANTS DO YOU WANT ANTS???
