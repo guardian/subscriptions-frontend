@@ -5,12 +5,13 @@ import com.gu.config.DiscountRatePlanIds
 import com.gu.i18n.Currency.GBP
 import com.gu.i18n.{Country, CountryGroup}
 import com.gu.identity.play.{AuthenticatedIdUser, IdMinimalUser}
+import com.gu.memsub.Subscription.ProductRatePlanId
 import com.gu.memsub.promo.Promotion._
 import com.gu.memsub.promo.{Renewal, ValidPromotion, _}
 import com.gu.memsub.services.{GetSalesforceContactForSub, PromoService, PaymentService => CommonPaymentService}
 import com.gu.memsub.subsv2.SubscriptionPlan.WeeklyPlan
 import com.gu.memsub.subsv2.{Catalog, ReaderType, Subscription}
-import com.gu.memsub.{Address, Product}
+import com.gu.memsub.{Address, BillingPeriod, Product}
 import com.gu.salesforce.{Contact, ContactId}
 import com.gu.stripe.Stripe
 import com.gu.zuora.ZuoraRestService
@@ -104,24 +105,28 @@ class CheckoutService(
   def processSubscription(subscriptionData: SubscribeRequest,
                           authenticatedUserOpt: Option[AuthenticatedIdUser],
                           requestData: SubscriptionRequestData
-                         )(implicit p: PromotionApplicator[NewUsers, Subscribe]): Future[NonEmptyList[SubsError] \/ CheckoutSuccess] = {
+                         )(implicit promotionApplicator: PromotionApplicator[NewUsers, Subscribe]): Future[NonEmptyList[SubsError] \/ CheckoutSuccess] = {
 
     import subscriptionData.genericData._
     val plan = RatePlan(subscriptionData.productRatePlanId.get, None)
+
     def emailError: SubNel[Unit] = EitherT(Future.successful(\/.left(NonEmptyList(CheckoutIdentityFailure("Email in use")))))
+
     val idMinimalUser = authenticatedUserOpt.map(_.user)
-    val soldToContact = subscriptionData.productData.left.toOption.map(_.deliveryAddress)
+    val soldToContact = subscriptionData.productData match {
+      case Left(paperData) => Some(SoldToContact(
+        name = personalData, // TODO once we have gifting change this to the Giftee's name
+        address = paperData.deliveryAddress,
+        email = personalData.email, // TODO once we have gifting change this to the Giftee's email address
+        phone = personalData.telephoneNumber,
+        deliveryInstructions = paperData.deliveryInstructions
+      ))
+      case _ => None
+    }
 
     implicit val today = now()
     import LogImplicit._
-    val di = subscriptionData.productData match {
-      case Left(pd) => pd.deliveryInstructions
-      case _ => None
-    }
-    println(subscriptionData)
-    println(subscriptionData.productData)
-    println(subscriptionData.productData.left)
-    println(di.getOrElse("NOPE"))
+
     (for {
       //check user exists
       userExists <- EitherT(IdentityService.doesUserExist(personalData.email).map(\/.right[FatalErrors, Boolean]))
@@ -130,17 +135,23 @@ class CheckoutService(
       contactId <- EitherT(createOrUpdateUserInSalesforce(subscriptionData, idMinimalUser))
       //Combine ID + SF ids
       combinedIds = PurchaserIdentifiers(contactId, idMinimalUser)
-    //Prepare payment
+      //Prepare payment
       payment <- EitherT(createPaymentType(combinedIds, subscriptionData))
       paymentDelay = CheckoutService.paymentDelay(subscriptionData.productData, zuoraProperties)
       paymentMethod <- EitherT(attachPaymentMethodToStripeCustomer(payment, combinedIds))
       //prepare a sub to send to zuora
       fulfilmentDelay = CheckoutService.fulfilmentDelay(subscriptionData.productData)
-      initialSubscribe = createSubscribeRequest(personalData, soldToContact, requestData, plan, combinedIds, paymentMethod, payment.makeAccount, Some(fulfilmentDelay), Some(paymentDelay), di)
+      initialSubscribe = createSubscribeRequest(personalData, soldToContact, requestData, plan, combinedIds, paymentMethod, payment.makeAccount, Some(fulfilmentDelay), Some(paymentDelay))
       withTrial = processSixWeekIntroductoryPeriod(fulfilmentDelay, initialSubscribe)
-//handle promotion
-      validPromotion = promoCode.flatMap(promoService.validate[NewUsers](_, personalData.address.country.getOrElse(Country.UK), subscriptionData.productRatePlanId).toOption).withLogging("validating promotion")
-      withPromo = validPromotion.map(v => p.apply(v, prpId => catalog.paid.find(_.id == prpId).map(_.charges.billingPeriod).get, promoPlans)(withTrial)).getOrElse(withTrial)
+      //handle promotion
+      validPromotion = promoCode.flatMap {
+        promoService.validate[NewUsers](_, personalData.address.country.getOrElse(Country.UK), subscriptionData.productRatePlanId).toOption
+      }.withLogging("validating promotion")
+      withPromo = validPromotion.map{v =>
+        //TODO: This should just be type PlanFinder
+        val planFinder : ProductRatePlanId => BillingPeriod = prpId => catalog.paid.find(_.id == prpId).map(_.charges.billingPeriod).get
+        promotionApplicator.apply(v, planFinder, promoPlans)(withTrial)
+      }.getOrElse(withTrial)
 
       result <- EitherT(createSubscription(withPromo, combinedIds))
       out <- postSubscribeSteps(authenticatedUserOpt, contactId, result, subscriptionData, validPromotion)
@@ -249,15 +260,15 @@ class CheckoutService(
 
   private def createSubscribeRequest(
       personalData: PersonalData,
-      soldToAddress: Option[Address],
+      maybeSoldToContact
+      : Option[SoldToContact],
       requestData: SubscriptionRequestData,
       plan: RatePlan,
       purchaserIds: PurchaserIdentifiers,
       paymentMethod: PaymentMethod,
       acc: Account,
       fufilmentDelay: Option[Days],
-      paymentDelay: Option[Days],
-      deliveryInstructions: Option[String]
+      paymentDelay: Option[Days]
                                     ): Subscribe = {
 
     val acquisitionDate = now
@@ -271,13 +282,7 @@ class CheckoutService(
       name = personalData,
       address = personalData.address,
       email = personalData.email,
-      soldToContact = soldToAddress.map(address => SoldToContact(
-        name = personalData,        // TODO once we have gifting change this to the Giftee's name
-        address = address,
-        email = personalData.email,  // TODO once we have gifting change this to the Giftee's email address
-        phone = personalData.telephoneNumber,
-        deliveryInstructions = deliveryInstructions
-      )),
+      soldToContact = maybeSoldToContact,
       contractEffective = acquisitionDate,
       contractAcceptance = firstPaymentDate,
       supplierCode = requestData.supplierCode,
