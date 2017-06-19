@@ -260,8 +260,7 @@ class CheckoutService(
 
   private def createSubscribeRequest(
       personalData: PersonalData,
-      maybeSoldToContact
-      : Option[SoldToContact],
+      maybeSoldToContact: Option[SoldToContact],
       requestData: SubscriptionRequestData,
       plan: RatePlan,
       purchaserIds: PurchaserIdentifiers,
