@@ -28,8 +28,6 @@ define([
              formElements) {
     'use strict';
 
-    var FIELDSET_COLLAPSED = 'is-collapsed';
-
     function submitHandler() {
         if (formEls.$CHECKOUT_SUBMIT.length) {
             formEls.$CHECKOUT_SUBMIT[0].addEventListener('click', submit, false);
@@ -88,6 +86,10 @@ define([
         var form = formEls.$CHECKOUT_FORM[0];
         var data = serializer([].slice.call(form.elements));
         var submitEl = formEls.$CHECKOUT_SUBMIT[0];
+        var errorElement = $('.js-error');
+
+        errorElement.text('');
+
         ajax({
             url: '/checkout',
             method: 'post',
@@ -97,30 +99,27 @@ define([
                 window.location.assign(successData.redirect);
             },
             error: function (err) {
+
                 loader.stopLoader();
-                submitEl.removeAttribute('disabled');
-
-                formEls.$FIELDSET_PAYMENT_DETAILS
-                    .removeClass(FIELDSET_COLLAPSED);
-
-                formEls.$FIELDSET_REVIEW
-                    .addClass(FIELDSET_COLLAPSED);
-
-                formEls.$FIELDSET_YOUR_DETAILS[0]
-                    .scrollIntoView();
 
                 var paymentErr;
+                var errorMessage;
+                submitEl.removeAttribute('disabled');
 
-                try {
-                    paymentErr = JSON.parse(err.response);
-                } catch (e) {
-                    raven.Raven.captureException(e);
+                if(err.status === 403) {
+                    //Only look for error JSON if the Checkout gives us an error.
+                    try {
+                        paymentErr = JSON.parse(err.response);
+                        errorMessage = paymentErrorMessages.getMessage(paymentErr);
+                    } catch (e) {
+                        raven.Raven.captureException(e);
+                    }
                 }
 
-                var userMessage = paymentErrorMessages.getMessage(paymentErr);
-                var errorElement = paymentErrorMessages.getElement(paymentErr);
+                var userMessage = errorMessage || paymentErrorMessages.default
+
                 if (errorElement) {
-                    errorElement.textContent = userMessage;
+                    errorElement.text(userMessage);
                 }
             }
         });
