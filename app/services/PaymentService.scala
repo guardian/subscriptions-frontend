@@ -20,7 +20,7 @@ class PaymentService(val stripeService: StripeService) {
 
   case class DirectDebitPayment(paymentData: DirectDebitData, firstName: String, lastName: String, purchaserIds: PurchaserIdentifiers) extends Payment {
 
-    override def makeAccount = Account.goCardless(purchaserIds.memberId, identityIdForAccount(purchaserIds), GBP, autopay = true)
+    override def makeAccount = Account.goCardless(purchaserIds.contactId, identityIdForAccount(purchaserIds), GBP, autopay = true)
 
     override def makePaymentMethod =
       Future(BankTransfer(
@@ -34,7 +34,7 @@ class PaymentService(val stripeService: StripeService) {
   }
 
   class CreditCardPayment(val paymentData: CreditCardData, val currency: Currency, val purchaserIds: PurchaserIdentifiers) extends Payment {
-    override def makeAccount = Account.stripe(purchaserIds.memberId, identityIdForAccount(purchaserIds), currency, autopay = true)
+    override def makeAccount = Account.stripe(purchaserIds.contactId, identityIdForAccount(purchaserIds), currency, autopay = true)
     override def makePaymentMethod = {
       stripeService.Customer.create(description = purchaserIds.description, card = paymentData.stripeToken)
         .map(a => CreditCardReferenceTransaction(

@@ -43,7 +43,7 @@ define([
         'TW1', 'TW2', 'TW3', 'TW4', 'TW5', 'TW6', 'TW7', 'TW8', 'TW9',
         'UB10', 'UB3', 'UB4', 'UB5', 'UB6',
         'W1', 'W2', 'W3', 'W4', 'W5', 'W6', 'W7', 'W8', 'W9',
-        'WC1A', 'WC2',
+        'WC1A','WC1E', 'WC2',
         'WD1', 'WD2', 'WD3', 'WD4', 'WD5', 'WD6', 'WD7'
     ];
 
