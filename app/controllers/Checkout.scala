@@ -357,7 +357,7 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
       case InsufficientFunds => handleError("InsufficientFunds")
       case RevocationOfAuthorization => handleError("RevocationOfAuthorization")
       case GenericDecline => handleError("GenericDecline")
-      case _ => handleError("UknownPaymentError")
+      case _ => handleError("UnknownPaymentError")
     }
   }
 }
