@@ -7,8 +7,8 @@
 @import model.DigitalEdition
 @import com.gu.memsub.Product
 
-@(product: Option[Product], edition: DigitalEdition)
-
+@(maybeProduct: Option[Product], edition: DigitalEdition)
+@product = @{maybeProduct.getOrElse(Product.Digipack)}
 <footer class="global-footer">
 
     @fragments.global.brandbar()
@@ -17,13 +17,12 @@
     <div class="global-footer__info">
         <div class="gs-container">
             <p>
-                your edition is @{edition.countryGroup.name}
               For help with Guardian and Observer subscription services please email
-                  <a href="mailto:@product.fold("subscriptions@theguardian.com")(_.email)">@product.fold("subscriptions@theguardian.com")(_.email)</a> or call +44 (0) 330 333 6767. Open BST 8am to 8pm, Monday to Sunday.
+                  <a href="mailto:@maybeProduct.fold("subscriptions@theguardian.com")(_.email)">@maybeProduct.fold("subscriptions@theguardian.com")(_.email)</a> or call            @product.phone(edition)
             </p>
             <p>
                 You may also find help in our
-                <a href="@product.map(_.faqHref).getOrElse("https://www.theguardian.com/subscriber-direct/subscription-frequently-asked-questions")"
+                <a href="@product.faqHref"
                    title="Frequently Asked Questions">
                    Frequently Asked Questions.
                 </a>

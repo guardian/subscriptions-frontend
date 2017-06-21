@@ -7,6 +7,8 @@ import com.gu.memsub._
 import com.gu.memsub.images.{ResponsiveImage, ResponsiveImageGenerator, ResponsiveImageGroup}
 import com.gu.memsub.subsv2.{CatalogPlan, Plan}
 import com.netaporter.uri.dsl._
+import model.DigitalEdition
+import model.DigitalEdition.{AU, UK, US}
 
 import scala.reflect.internal.util.StringOps
 object PlanOps {
@@ -114,6 +116,12 @@ object PlanOps {
         case _: Product.Weekly => "https://www.theguardian.com/help/2012/jan/19/guardian-weekly-faqs"
         case _ => "https://www.theguardian.com/subscriber-direct/subscription-frequently-asked-questions"
       }
+
+    def phone(digitalEdition: DigitalEdition): String = product match {
+      case _: Product.Weekly if digitalEdition == US => {"1-844-632-2010 (toll free); 917-900-4663 (direct line)"}
+      case _: Product.Weekly if digitalEdition == AU => {"1800 773 766 (toll free within Australia)"}
+      case _ => {"+44 (0) 330 333 6767. Open BST 8am to 8pm, Monday to Sunday"}
+    }
 
     def productType: String = product match {
       case Delivery => "Home Delivery"
