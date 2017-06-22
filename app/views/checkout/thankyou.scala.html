@@ -5,14 +5,16 @@
 @import views.support.PlanOps._
 @import model.SubscriptionOps._
 
+@import model.DigitalEdition
 @(  subscription: Subscription[ContentSubscription],
     guestAccountForm: Option[Form[model.GuestAccountData]] = None,
     touchpointBackendResolution: services.TouchpointBackend.Resolution,
     promotion: Option[AnyPromotion] = None,
-    startDate: String
+    startDate: String,
+    edition: DigitalEdition
 )(implicit request: RequestHeader)
 
-@main(s"Confirmation | Subscribe to the ${subscription.firstPlan.title} | The Guardian", bodyClasses=List("is-wide"), touchpointBackendResolutionOpt = Some(touchpointBackendResolution), product = Some(subscription.firstProduct)) {
+@main(s"Confirmation | Subscribe to the ${subscription.firstPlan.title} | The Guardian", bodyClasses=List("is-wide"), touchpointBackendResolutionOpt = Some(touchpointBackendResolution), product = Some(subscription.firstProduct), edition = edition) {
 
 <script type="text/javascript">
     guardian.pageInfo.pageType = 'Thankyou';
