@@ -18,9 +18,10 @@ class PaymentService(val stripeService: StripeService) {
     def makePaymentMethod: Future[PaymentMethod]
   }
 
-  case class DirectDebitPayment(paymentData: DirectDebitData, firstName: String, lastName: String, purchaserIds: PurchaserIdentifiers) extends Payment {
+  case class DirectDebitPayment(paymentData: DirectDebitData, firstName: String, lastName: String, purchaserIds: PurchaserIdentifiers, deliveryInstructions: Option[String]) extends Payment {
 
-    override def makeAccount = Account.goCardless(purchaserIds.contactId, identityIdForAccount(purchaserIds), GBP, autopay = true)
+    override def makeAccount = Account.goCardless(purchaserIds.contactId, identityIdForAccount(purchaserIds), GBP, autopay = true, deliveryInstructions = deliveryInstructions
+    )
 
     override def makePaymentMethod =
       Future(BankTransfer(
@@ -33,8 +34,8 @@ class PaymentService(val stripeService: StripeService) {
       ))
   }
 
-  class CreditCardPayment(val paymentData: CreditCardData, val currency: Currency, val purchaserIds: PurchaserIdentifiers) extends Payment {
-    override def makeAccount = Account.stripe(purchaserIds.contactId, identityIdForAccount(purchaserIds), currency, autopay = true)
+  class CreditCardPayment(val paymentData: CreditCardData, val currency: Currency, val purchaserIds: PurchaserIdentifiers, val deliveryInstructions: Option[String]) extends Payment {
+    override def makeAccount = Account.stripe(purchaserIds.contactId, identityIdForAccount(purchaserIds), currency, autopay = true, deliveryInstructions = deliveryInstructions)
     override def makePaymentMethod = {
       stripeService.Customer.create(description = purchaserIds.description, card = paymentData.stripeToken)
         .map(a => CreditCardReferenceTransaction(
@@ -60,11 +61,13 @@ class PaymentService(val stripeService: StripeService) {
       paymentData: DirectDebitData,
       firstName: String,
       lastName: String,
-      purchaserIds: PurchaserIdentifiers) = DirectDebitPayment(paymentData, firstName,lastName, purchaserIds)
+      purchaserIds: PurchaserIdentifiers,
+      deliveryInstructions: Option[String]) = DirectDebitPayment(paymentData, firstName,lastName, purchaserIds, deliveryInstructions)
 
   def makeCreditCardPayment(
      paymentData: CreditCardData,
      currency: Currency,
-     purchaserIds: PurchaserIdentifiers) = new CreditCardPayment(paymentData, currency, purchaserIds)
+     purchaserIds: PurchaserIdentifiers,
+     deliveryInstructions: Option[String]) = new CreditCardPayment(paymentData, currency, purchaserIds, deliveryInstructions )
 
 }
