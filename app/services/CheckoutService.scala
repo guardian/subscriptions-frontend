@@ -243,7 +243,7 @@ class CheckoutService(
     }
   }
 
-  private def attachPaymentMethodToStripeCustomer(payment: PaymentService#Payment, purchaserIds: PurchaserIdentifiers): Future[NonEmptyList[SubsError] \/ PaymentMethod] =
+  private def attachPaymentMethodToStripeCustomer(payment: PaymentService#AccountAndPayment, purchaserIds: PurchaserIdentifiers): Future[NonEmptyList[SubsError] \/ PaymentMethod] =
     payment.makePaymentMethod.map(\/.right).recover {
         case e: Stripe.Error =>
           \/.left(NonEmptyList(CheckoutStripeError(
@@ -304,7 +304,7 @@ class CheckoutService(
     }
   }
 
-  private def createPaymentType(purchaserIds: PurchaserIdentifiers, subscriptionData: SubscribeRequest): Future[NonEmptyList[SubsError] \/ PaymentService#Payment] = {
+  private def createPaymentType(purchaserIds: PurchaserIdentifiers, subscriptionData: SubscribeRequest): Future[NonEmptyList[SubsError] \/ PaymentService#AccountAndPayment] = {
 
     val deliveryInstructions: Option[String] = subscriptionData.productData match {
       case Left(paperData) => paperData.deliveryInstructions
@@ -340,7 +340,7 @@ class CheckoutService(
       context: Context
     ): Future[\/[String, Any]] = {
 
-    def getPayment(contact: Contact, billto: Queries.Contact): PaymentService#Payment = {
+    def getPayment(contact: Contact, billto: Queries.Contact): PaymentService#AccountAndPayment = {
       val idMinimalUser = IdMinimalUser(contact.identityId, None)
       val purchaserIds = PurchaserIdentifiers(contact, Some(idMinimalUser))
       renewal.paymentData match {

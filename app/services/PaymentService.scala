@@ -13,12 +13,12 @@ import model._
 
 class PaymentService(val stripeService: StripeService) {
 
-  sealed trait Payment {
+  sealed trait AccountAndPayment {
     def makeAccount: Account
     def makePaymentMethod: Future[PaymentMethod]
   }
 
-  case class DirectDebitPayment(paymentData: DirectDebitData, firstName: String, lastName: String, purchaserIds: PurchaserIdentifiers, deliveryInstructions: Option[String]) extends Payment {
+  case class ZuoraAccountDirectDebit(paymentData: DirectDebitData, firstName: String, lastName: String, purchaserIds: PurchaserIdentifiers, deliveryInstructions: Option[String]) extends AccountAndPayment {
 
     override def makeAccount = Account(purchaserIds.contactId, identityIdForAccount(purchaserIds), GBP, autopay = true, GoCardless, deliveryInstructions = deliveryInstructions)
 
@@ -33,7 +33,7 @@ class PaymentService(val stripeService: StripeService) {
       ))
   }
 
-  class CreditCardPayment(val paymentData: CreditCardData, val currency: Currency, val purchaserIds: PurchaserIdentifiers, val deliveryInstructions: Option[String]) extends Payment {
+  class ZuoraAccountCreditCard(val paymentData: CreditCardData, val currency: Currency, val purchaserIds: PurchaserIdentifiers, val deliveryInstructions: Option[String]) extends AccountAndPayment {
     override def makeAccount = Account(purchaserIds.contactId, identityIdForAccount(purchaserIds), currency, autopay = true, Stripe, deliveryInstructions)
 
     override def makePaymentMethod = {
@@ -62,12 +62,12 @@ class PaymentService(val stripeService: StripeService) {
       firstName: String,
       lastName: String,
       purchaserIds: PurchaserIdentifiers,
-      deliveryInstructions: Option[String]) = DirectDebitPayment(paymentData, firstName,lastName, purchaserIds, deliveryInstructions)
+      deliveryInstructions: Option[String]) = ZuoraAccountDirectDebit(paymentData, firstName,lastName, purchaserIds, deliveryInstructions)
 
   def makeCreditCardPayment(
      paymentData: CreditCardData,
      currency: Currency,
      purchaserIds: PurchaserIdentifiers,
-     deliveryInstructions: Option[String]) = new CreditCardPayment(paymentData, currency, purchaserIds, deliveryInstructions )
+     deliveryInstructions: Option[String]) = new ZuoraAccountCreditCard(paymentData, currency, purchaserIds, deliveryInstructions )
 
 }
