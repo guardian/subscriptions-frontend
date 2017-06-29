@@ -5,7 +5,7 @@ import com.gu.i18n.Currency.GBP
 import com.gu.memsub.subsv2.CatalogPlan
 import com.gu.salesforce.ContactId
 import com.gu.stripe.StripeService
-import com.gu.zuora.soap.models.Commands.{Account, BankTransfer, CreditCardReferenceTransaction, PaymentMethod}
+import com.gu.zuora.soap.models.Commands._
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 import scala.concurrent.Future
@@ -20,8 +20,7 @@ class PaymentService(val stripeService: StripeService) {
 
   case class DirectDebitPayment(paymentData: DirectDebitData, firstName: String, lastName: String, purchaserIds: PurchaserIdentifiers, deliveryInstructions: Option[String]) extends Payment {
 
-    override def makeAccount = Account.goCardless(purchaserIds.contactId, identityIdForAccount(purchaserIds), GBP, autopay = true, deliveryInstructions = deliveryInstructions
-    )
+    override def makeAccount = Account(purchaserIds.contactId, identityIdForAccount(purchaserIds), GBP, autopay = true, GoCardless, deliveryInstructions = deliveryInstructions)
 
     override def makePaymentMethod =
       Future(BankTransfer(
@@ -35,7 +34,8 @@ class PaymentService(val stripeService: StripeService) {
   }
 
   class CreditCardPayment(val paymentData: CreditCardData, val currency: Currency, val purchaserIds: PurchaserIdentifiers, val deliveryInstructions: Option[String]) extends Payment {
-    override def makeAccount = Account.stripe(purchaserIds.contactId, identityIdForAccount(purchaserIds), currency, autopay = true, deliveryInstructions = deliveryInstructions)
+    override def makeAccount = Account(purchaserIds.contactId, identityIdForAccount(purchaserIds), currency, autopay = true, Stripe, deliveryInstructions)
+
     override def makePaymentMethod = {
       stripeService.Customer.create(description = purchaserIds.description, card = paymentData.stripeToken)
         .map(a => CreditCardReferenceTransaction(
