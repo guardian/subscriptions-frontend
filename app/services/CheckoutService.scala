@@ -316,12 +316,12 @@ class CheckoutService(
         case paymentData@DirectDebitData(_, _, _) =>
           val personalData = subscriptionData.genericData.personalData
           require(personalData.address.country.contains(Country.UK), "Direct Debit payment only works in the UK right now")
-          paymentService.makeDirectDebitPayment(paymentData, personalData.first, personalData.last, purchaserIds, deliveryInstructions)
+          paymentService.makeZuoraAccountWithDirectDebit(paymentData, personalData.first, personalData.last, purchaserIds, deliveryInstructions)
         case paymentData@CreditCardData(_) =>
           val plan = subscriptionData.productData.fold(_.plan, _.plan)
           val desiredCurrency = subscriptionData.genericData.currency
           val currency = if (plan.charges.price.currencies.contains(desiredCurrency)) desiredCurrency else GBP
-          paymentService.makeCreditCardPayment(paymentData, currency, purchaserIds, deliveryInstructions)
+          paymentService.makeZuoraAccountWithCreditCard(paymentData, currency, purchaserIds, deliveryInstructions)
       }
       Future.successful(\/.right(payment))
     } catch {
@@ -344,8 +344,8 @@ class CheckoutService(
       val idMinimalUser = IdMinimalUser(contact.identityId, None)
       val purchaserIds = PurchaserIdentifiers(contact, Some(idMinimalUser))
       renewal.paymentData match {
-        case cd: CreditCardData => paymentService.makeCreditCardPayment(cd, subscription.currency, purchaserIds, None)
-        case dd: DirectDebitData => paymentService.makeDirectDebitPayment(dd, billto.firstName, billto.lastName, purchaserIds, None)
+        case cd: CreditCardData => paymentService.makeZuoraAccountWithCreditCard(cd, subscription.currency, purchaserIds, None)
+        case dd: DirectDebitData => paymentService.makeZuoraAccountWithDirectDebit(dd, billto.firstName, billto.lastName, purchaserIds, None)
       }
     }
 

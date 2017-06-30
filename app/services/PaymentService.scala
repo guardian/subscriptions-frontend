@@ -57,14 +57,14 @@ class PaymentService(val stripeService: StripeService) {
     }
   }
 
-  def makeDirectDebitPayment(
+  def makeZuoraAccountWithDirectDebit(
       paymentData: DirectDebitData,
       firstName: String,
       lastName: String,
       purchaserIds: PurchaserIdentifiers,
       deliveryInstructions: Option[String]) = ZuoraAccountDirectDebit(paymentData, firstName,lastName, purchaserIds, deliveryInstructions)
 
-  def makeCreditCardPayment(
+  def makeZuoraAccountWithCreditCard(
      paymentData: CreditCardData,
      currency: Currency,
      purchaserIds: PurchaserIdentifiers,
