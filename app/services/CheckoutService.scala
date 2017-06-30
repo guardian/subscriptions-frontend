@@ -118,8 +118,7 @@ class CheckoutService(
         name = personalData, // TODO once we have gifting change this to the Giftee's name
         address = paperData.deliveryAddress,
         email = personalData.email, // TODO once we have gifting change this to the Giftee's email address
-        phone = personalData.telephoneNumber,
-        deliveryInstructions = paperData.deliveryInstructions
+        phone = personalData.telephoneNumber
       ))
       case _ => None
     }
@@ -244,7 +243,7 @@ class CheckoutService(
     }
   }
 
-  private def attachPaymentMethodToStripeCustomer(payment: PaymentService#Payment, purchaserIds: PurchaserIdentifiers): Future[NonEmptyList[SubsError] \/ PaymentMethod] =
+  private def attachPaymentMethodToStripeCustomer(payment: PaymentService#AccountAndPayment, purchaserIds: PurchaserIdentifiers): Future[NonEmptyList[SubsError] \/ PaymentMethod] =
     payment.makePaymentMethod.map(\/.right).recover {
         case e: Stripe.Error =>
           \/.left(NonEmptyList(CheckoutStripeError(
@@ -305,19 +304,24 @@ class CheckoutService(
     }
   }
 
-  private def createPaymentType(purchaserIds: PurchaserIdentifiers, subscriptionData: SubscribeRequest): Future[NonEmptyList[SubsError] \/ PaymentService#Payment] = {
+  private def createPaymentType(purchaserIds: PurchaserIdentifiers, subscriptionData: SubscribeRequest): Future[NonEmptyList[SubsError] \/ PaymentService#AccountAndPayment] = {
+
+    val deliveryInstructions: Option[String] = subscriptionData.productData match {
+      case Left(paperData) => paperData.deliveryInstructions
+      case _ => None
+    }
 
     try {
       val payment = subscriptionData.genericData.paymentData match {
         case paymentData@DirectDebitData(_, _, _) =>
           val personalData = subscriptionData.genericData.personalData
           require(personalData.address.country.contains(Country.UK), "Direct Debit payment only works in the UK right now")
-          paymentService.makeDirectDebitPayment(paymentData, personalData.first, personalData.last, purchaserIds)
+          paymentService.makeZuoraAccountWithDirectDebit(paymentData, personalData.first, personalData.last, purchaserIds, deliveryInstructions)
         case paymentData@CreditCardData(_) =>
           val plan = subscriptionData.productData.fold(_.plan, _.plan)
           val desiredCurrency = subscriptionData.genericData.currency
           val currency = if (plan.charges.price.currencies.contains(desiredCurrency)) desiredCurrency else GBP
-          paymentService.makeCreditCardPayment(paymentData, currency, purchaserIds)
+          paymentService.makeZuoraAccountWithCreditCard(paymentData, currency, purchaserIds, deliveryInstructions)
       }
       Future.successful(\/.right(payment))
     } catch {
@@ -336,12 +340,12 @@ class CheckoutService(
       context: Context
     ): Future[\/[String, Any]] = {
 
-    def getPayment(contact: Contact, billto: Queries.Contact): PaymentService#Payment = {
+    def getPayment(contact: Contact, billto: Queries.Contact): PaymentService#AccountAndPayment = {
       val idMinimalUser = IdMinimalUser(contact.identityId, None)
       val purchaserIds = PurchaserIdentifiers(contact, Some(idMinimalUser))
       renewal.paymentData match {
-        case cd: CreditCardData => paymentService.makeCreditCardPayment(cd, subscription.currency, purchaserIds)
-        case dd: DirectDebitData => paymentService.makeDirectDebitPayment(dd, billto.firstName, billto.lastName, purchaserIds)
+        case cd: CreditCardData => paymentService.makeZuoraAccountWithCreditCard(cd, subscription.currency, purchaserIds, None)
+        case dd: DirectDebitData => paymentService.makeZuoraAccountWithDirectDebit(dd, billto.firstName, billto.lastName, purchaserIds, None)
       }
     }
 

@@ -5,7 +5,7 @@ import com.gu.i18n.Currency.GBP
 import com.gu.memsub.subsv2.CatalogPlan
 import com.gu.salesforce.ContactId
 import com.gu.stripe.StripeService
-import com.gu.zuora.soap.models.Commands.{Account, BankTransfer, CreditCardReferenceTransaction, PaymentMethod}
+import com.gu.zuora.soap.models.Commands._
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 import scala.concurrent.Future
@@ -13,14 +13,14 @@ import model._
 
 class PaymentService(val stripeService: StripeService) {
 
-  sealed trait Payment {
+  sealed trait AccountAndPayment {
     def makeAccount: Account
     def makePaymentMethod: Future[PaymentMethod]
   }
 
-  case class DirectDebitPayment(paymentData: DirectDebitData, firstName: String, lastName: String, purchaserIds: PurchaserIdentifiers) extends Payment {
+  case class ZuoraAccountDirectDebit(paymentData: DirectDebitData, firstName: String, lastName: String, purchaserIds: PurchaserIdentifiers, deliveryInstructions: Option[String]) extends AccountAndPayment {
 
-    override def makeAccount = Account.goCardless(purchaserIds.contactId, identityIdForAccount(purchaserIds), GBP, autopay = true)
+    override def makeAccount = Account(purchaserIds.contactId, identityIdForAccount(purchaserIds), GBP, autopay = true, GoCardless, deliveryInstructions = deliveryInstructions)
 
     override def makePaymentMethod =
       Future(BankTransfer(
@@ -33,8 +33,9 @@ class PaymentService(val stripeService: StripeService) {
       ))
   }
 
-  class CreditCardPayment(val paymentData: CreditCardData, val currency: Currency, val purchaserIds: PurchaserIdentifiers) extends Payment {
-    override def makeAccount = Account.stripe(purchaserIds.contactId, identityIdForAccount(purchaserIds), currency, autopay = true)
+  class ZuoraAccountCreditCard(val paymentData: CreditCardData, val currency: Currency, val purchaserIds: PurchaserIdentifiers, val deliveryInstructions: Option[String]) extends AccountAndPayment {
+    override def makeAccount = Account(purchaserIds.contactId, identityIdForAccount(purchaserIds), currency, autopay = true, Stripe, deliveryInstructions)
+
     override def makePaymentMethod = {
       stripeService.Customer.create(description = purchaserIds.description, card = paymentData.stripeToken)
         .map(a => CreditCardReferenceTransaction(
@@ -56,15 +57,17 @@ class PaymentService(val stripeService: StripeService) {
     }
   }
 
-  def makeDirectDebitPayment(
+  def makeZuoraAccountWithDirectDebit(
       paymentData: DirectDebitData,
       firstName: String,
       lastName: String,
-      purchaserIds: PurchaserIdentifiers) = DirectDebitPayment(paymentData, firstName,lastName, purchaserIds)
+      purchaserIds: PurchaserIdentifiers,
+      deliveryInstructions: Option[String]) = ZuoraAccountDirectDebit(paymentData, firstName,lastName, purchaserIds, deliveryInstructions)
 
-  def makeCreditCardPayment(
+  def makeZuoraAccountWithCreditCard(
      paymentData: CreditCardData,
      currency: Currency,
-     purchaserIds: PurchaserIdentifiers) = new CreditCardPayment(paymentData, currency, purchaserIds)
+     purchaserIds: PurchaserIdentifiers,
+     deliveryInstructions: Option[String]) = new ZuoraAccountCreditCard(paymentData, currency, purchaserIds, deliveryInstructions )
 
 }
