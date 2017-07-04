@@ -11,7 +11,7 @@ import com.gu.memsub.promo.{Renewal, ValidPromotion, _}
 import com.gu.memsub.services.{GetSalesforceContactForSub, PromoService, PaymentService => CommonPaymentService}
 import com.gu.memsub.subsv2.SubscriptionPlan.WeeklyPlan
 import com.gu.memsub.subsv2.{Catalog, ReaderType, Subscription}
-import com.gu.memsub.{Address, BillingPeriod, Product}
+import com.gu.memsub.{Address, BillingPeriod, NormalisedTelephoneNumber, Product}
 import com.gu.salesforce.{Contact, ContactId}
 import com.gu.stripe.Stripe
 import com.gu.zuora.ZuoraRestService
@@ -118,7 +118,7 @@ class CheckoutService(
         name = personalData, // TODO once we have gifting change this to the Giftee's name
         address = paperData.deliveryAddress,
         email = personalData.email, // TODO once we have gifting change this to the Giftee's email address
-        phone = personalData.telephoneNumber
+        phone = NormalisedTelephoneNumber.fromStringAndCountry(personalData.telephoneNumber, personalData.address.country).map(n => s"${n.countryCode}${n.localNumber}")
       ))
       case _ => None
     }
@@ -285,7 +285,7 @@ class CheckoutService(
       contractAcceptance = firstPaymentDate,
       supplierCode = requestData.supplierCode,
       ipCountry = requestData.ipCountry,
-      phone = personalData.telephoneNumber
+      phone = NormalisedTelephoneNumber.fromStringAndCountry(personalData.telephoneNumber,personalData.address.country)
     )
   }
 
