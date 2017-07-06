@@ -273,6 +273,7 @@ class CheckoutService(
     val fulfilmentDate = fufilmentDelay.map(delay => now.plusDays(delay.getDays)).getOrElse(acquisitionDate)
     val firstPaymentDate = paymentDelay.map(delay => now.plusDays(delay.getDays)).getOrElse(fulfilmentDate)
 
+    val maybeTelephoneNumber = NormalisedTelephoneNumber.fromStringAndCountry(personalData.telephoneNumber, personalData.address.country)
     Subscribe(
       account = acc,
       paymentMethod = Some(paymentMethod),
@@ -285,7 +286,7 @@ class CheckoutService(
       contractAcceptance = firstPaymentDate,
       supplierCode = requestData.supplierCode,
       ipCountry = requestData.ipCountry,
-      phone = NormalisedTelephoneNumber.fromStringAndCountry(personalData.telephoneNumber,personalData.address.country)
+      phone = maybeTelephoneNumber.map(_.format)
     )
   }
 
