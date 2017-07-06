@@ -118,7 +118,7 @@ class CheckoutService(
         name = personalData, // TODO once we have gifting change this to the Giftee's name
         address = paperData.deliveryAddress,
         email = personalData.email, // TODO once we have gifting change this to the Giftee's email address
-        phone = NormalisedTelephoneNumber.fromStringAndCountry(personalData.telephoneNumber, personalData.address.country).map(n => s"${n.countryCode}${n.localNumber}")
+        phone = NormalisedTelephoneNumber.fromStringAndCountry(personalData.telephoneNumber, personalData.address.country)
       ))
       case _ => None
     }
@@ -273,7 +273,6 @@ class CheckoutService(
     val fulfilmentDate = fufilmentDelay.map(delay => now.plusDays(delay.getDays)).getOrElse(acquisitionDate)
     val firstPaymentDate = paymentDelay.map(delay => now.plusDays(delay.getDays)).getOrElse(fulfilmentDate)
 
-    val maybeTelephoneNumber = NormalisedTelephoneNumber.fromStringAndCountry(personalData.telephoneNumber, personalData.address.country)
     Subscribe(
       account = acc,
       paymentMethod = Some(paymentMethod),
@@ -286,7 +285,7 @@ class CheckoutService(
       contractAcceptance = firstPaymentDate,
       supplierCode = requestData.supplierCode,
       ipCountry = requestData.ipCountry,
-      phone = maybeTelephoneNumber.map(_.format)
+      phone = NormalisedTelephoneNumber.fromStringAndCountry(personalData.telephoneNumber, personalData.address.country)
     )
   }
 
