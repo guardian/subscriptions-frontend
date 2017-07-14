@@ -70,6 +70,12 @@ case class PaperData(
 
 object PersonalData {
   def fromIdUser(u: IdUser) = {
+    val phoneNumber: Option[String] = for {
+      identityPhoneNumber <- u.privateFields.flatMap(_.telephoneNumber)
+      countryCode <- identityPhoneNumber.countryCode
+      localNumber <- identityPhoneNumber.localNumber
+    } yield NormalisedTelephoneNumber(countryCode, localNumber).format
+
     val personalData = PersonalData(
       title = u.privateFields.flatMap(_.title).flatMap(Title.fromString),
       first = u.privateFields.flatMap(_.firstName).getOrElse(""),
@@ -77,7 +83,7 @@ object PersonalData {
       email = u.primaryEmailAddress,
       receiveGnmMarketing = u.statusFields.flatMap(_.receiveGnmMarketing).getOrElse(false),
       address = u.billingAddress,
-      telephoneNumber = u.privateFields.flatMap(_.telephoneNumber).flatMap(_.localNumber)
+      telephoneNumber = phoneNumber
     )
     personalData
   }

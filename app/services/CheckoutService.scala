@@ -11,7 +11,7 @@ import com.gu.memsub.promo.{Renewal, ValidPromotion, _}
 import com.gu.memsub.services.{GetSalesforceContactForSub, PromoService, PaymentService => CommonPaymentService}
 import com.gu.memsub.subsv2.SubscriptionPlan.WeeklyPlan
 import com.gu.memsub.subsv2.{Catalog, ReaderType, Subscription}
-import com.gu.memsub.{Address, BillingPeriod, Product}
+import com.gu.memsub.{Address, BillingPeriod, NormalisedTelephoneNumber, Product}
 import com.gu.salesforce.{Contact, ContactId}
 import com.gu.stripe.Stripe
 import com.gu.zuora.ZuoraRestService
@@ -113,12 +113,18 @@ class CheckoutService(
     def emailError: SubNel[Unit] = EitherT(Future.successful(\/.left(NonEmptyList(CheckoutIdentityFailure("Email in use")))))
 
     val idMinimalUser = authenticatedUserOpt.map(_.user)
+
+    val telephoneNumber = subscriptionData.productData match {
+      case Left(paperData) => NormalisedTelephoneNumber.fromStringAndCountry(personalData.telephoneNumber, paperData.deliveryAddress.country orElse personalData.address.country)
+      case _ => NormalisedTelephoneNumber.fromStringAndCountry(personalData.telephoneNumber, personalData.address.country)
+    }
+
     val soldToContact = subscriptionData.productData match {
       case Left(paperData) => Some(SoldToContact(
         name = personalData, // TODO once we have gifting change this to the Giftee's name
         address = paperData.deliveryAddress,
         email = personalData.email, // TODO once we have gifting change this to the Giftee's email address
-        phone = personalData.telephoneNumber
+        phone = telephoneNumber
       ))
       case _ => None
     }
@@ -140,7 +146,7 @@ class CheckoutService(
       paymentMethod <- EitherT(attachPaymentMethodToStripeCustomer(payment, combinedIds))
       //prepare a sub to send to zuora
       fulfilmentDelay = CheckoutService.fulfilmentDelay(subscriptionData.productData)
-      initialSubscribe = createSubscribeRequest(personalData, soldToContact, requestData, plan, combinedIds, paymentMethod, payment.makeAccount, Some(fulfilmentDelay), Some(paymentDelay))
+      initialSubscribe = createSubscribeRequest(personalData, soldToContact, requestData, plan, combinedIds, paymentMethod, payment.makeAccount, Some(fulfilmentDelay), Some(paymentDelay), telephoneNumber)
       withTrial = processSixWeekIntroductoryPeriod(fulfilmentDelay, initialSubscribe)
       //handle promotion
       validPromotion = promoCode.flatMap {
@@ -266,7 +272,8 @@ class CheckoutService(
       paymentMethod: PaymentMethod,
       acc: Account,
       fufilmentDelay: Option[Days],
-      paymentDelay: Option[Days]
+      paymentDelay: Option[Days],
+      telephoneNumber: Option[NormalisedTelephoneNumber]
                                     ): Subscribe = {
 
     val acquisitionDate = now
@@ -285,7 +292,7 @@ class CheckoutService(
       contractAcceptance = firstPaymentDate,
       supplierCode = requestData.supplierCode,
       ipCountry = requestData.ipCountry,
-      phone = personalData.telephoneNumber
+      phone = telephoneNumber
     )
   }
 

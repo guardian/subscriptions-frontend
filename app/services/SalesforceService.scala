@@ -44,7 +44,7 @@ object SalesforceService {
     Keys.MAILING_COUNTRY -> addr.country.fold(addr.countryName)(_.name)
   ) ++ paperData.flatMap(_.deliveryInstructions).fold(Json.obj())(instrs => Json.obj(
     Keys.DELIVERY_INSTRUCTIONS -> instrs
-  ))) ++ NormalisedTelephoneNumber.fromStringAndCountry(personalData.telephoneNumber, personalData.address.country).fold(Json.obj())(phone => Json.obj(Keys.TELEPHONE -> Seq(phone.countryCode, phone.localNumber).mkString("")))
+  ))) ++ NormalisedTelephoneNumber.fromStringAndCountry(personalData.telephoneNumber, personalData.address.country).fold(Json.obj())(phone => Json.obj(Keys.TELEPHONE -> phone.format))
 }
 
 case class SalesforceServiceError(s: String) extends Throwable {
