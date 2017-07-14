@@ -118,7 +118,7 @@ class CheckoutService(
         name = personalData, // TODO once we have gifting change this to the Giftee's name
         address = paperData.deliveryAddress,
         email = personalData.email, // TODO once we have gifting change this to the Giftee's email address
-        phone = NormalisedTelephoneNumber.fromStringAndCountry(personalData.telephoneNumber, personalData.address.country)
+        phone = NormalisedTelephoneNumber.fromStringAndCountry(personalData.telephoneNumber, paperData.deliveryAddress.country orElse personalData.address.country)
       ))
       case _ => None
     }
