@@ -19,6 +19,11 @@ define([
             'Landing': '8326272',
             'Checkout': '8326273',
             'Thankyou': '836985'
+        },
+        'weekly': {
+            'Landing': '8354456',
+            'Checkout': '8354460',
+            'Thankyou': '838548'
         }
     };
 
@@ -39,11 +44,14 @@ define([
         var parameterValue = pageCodes[pageType];
 
         var oImg = document.createElement('img');
-        oImg.setAttribute('src', 'https://secure.adnxs.com/' + pixelPath + '?t=2&' + parameterName + '=' + parameterValue);
         oImg.setAttribute('alt', 'AppNexus pixel');
         oImg.setAttribute('height', '0');
         oImg.setAttribute('width', '0');
         document.body.appendChild(oImg);
+
+        // Marketing are reporting the thankyou pixel recording two conversions happening at the same time.
+        // So in an attempt to mitigate, set the src attribute _after_ adding to the DOM to ensure no uncached preload.
+        oImg.setAttribute('src', 'https://secure.adnxs.com/' + pixelPath + '?t=2&' + parameterName + '=' + parameterValue);
     }
 
     return {
