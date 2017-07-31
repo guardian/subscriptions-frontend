@@ -182,21 +182,15 @@ object ManageWeekly extends ContextLogging {
 
     def getRenewalPlans(account: ZuoraRestService.AccountSummary, currency: Currency) = {
       val catalog = tpBackend.catalogService.unsafeCatalog
+
       // Identifies customers who have been wrongly migrated in on a price-adjusted Zone B or C rate plan and are
       // having the paper delivered to the UK or USA, and pay by GBP or USD respectively. These customers should
       // be offered Zone A rate plans upon renewal.
-      def switchToZoneAIfNecessary = account.soldToContact.country.find { soldToCountry =>
+      def shouldBeInZoneA = account.soldToContact.country.exists { soldToCountry =>
         (soldToCountry == UK && currency == GBP) || (soldToCountry == US && currency == USD)
-      }.map(_ => catalog.weekly.zoneA.plans)
-
-      // Determine the rate plans to offer for renewal based on what product the customer has currently
-      def usePlansBasedOnExistingProduct = weeklySubscription.planToManage.product match {
-        case Product.WeeklyZoneA => catalog.weekly.zoneA.plans
-        case Product.WeeklyZoneB => catalog.weekly.zoneB.plans
-        case Product.WeeklyZoneC => catalog.weekly.zoneC.plans
       }
 
-      val weeklyPlans = switchToZoneAIfNecessary getOrElse usePlansBasedOnExistingProduct
+      val weeklyPlans = if (shouldBeInZoneA) catalog.weekly.zoneA.plans else catalog.weekly.zoneB.plans
 
       val renewalPlans = weeklyPlans.filter(_.availableForRenewal)
 
