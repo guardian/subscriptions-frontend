@@ -25,16 +25,17 @@ import model.{Renewal, RenewalReads}
 import org.joda.time.LocalDate.now
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json._
-import play.api.mvc._
+import play.api.mvc.{AnyContent, _}
+import _root_.services.FulfilmentLookupService
 import utils.TestUsers.PreSigninTestCookie
 import views.html.account.thankYouRenew
 import views.support.Dates._
 import views.support.Pricing._
-
 import scala.concurrent.Future
 import scalaz.std.scalaFuture._
 import scalaz.syntax.std.option._
 import scalaz.{-\/, EitherT, OptionT, \/, \/-}
+
 // this handles putting subscriptions in and out of the session
 object SessionSubscription {
 
@@ -129,6 +130,28 @@ object ManageDelivery extends ContextLogging {
       case t: Throwable =>
         logger.error(t.toString)
         \/.left(replacementErrorMessage)
+    }
+  }
+
+  def raiseNonDeliveryCase(deliveryIssue: DeliveryIssue)(implicit request: Request[DeliveryIssue], touchpoint: TouchpointBackend.Resolution): Future[Result] = {
+    implicit val tpBackend = touchpoint.backend
+    logger.info(s"Delivery issue is: $deliveryIssue")
+    val futureResponse = FulfilmentLookupService.lookupSubscription(tpBackend.environmentName, deliveryIssue)
+    futureResponse.map { response =>
+      val responseBody = response.body().string()
+      response.body.close()
+      if (response.isSuccessful) {
+        logger.info(s"Successfully raised non-delivery case, for subscription ${deliveryIssue.subscriptionName}")
+        Ok(views.html.account.nonDeliverySuccess())
+      } else {
+        logger.error(s"Failed to raise non-delivery case due to error: ${responseBody}")
+        Ok(views.html.account.nonDeliveryFailure())
+      }
+    }.recoverWith {
+      case ex: Exception => Future {
+        logger.error(s"Future failed due to ${ex}")
+        Ok(views.html.account.nonDeliveryFailure())
+      }
     }
   }
 
@@ -396,4 +419,11 @@ object AccountManagement extends Controller with ContextLogging with CatalogProv
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     ManageWeekly.renewThankYou
   }
+
+  def reportDeliveryIssue: Action[DeliveryIssue]= accountManagementAction.async(parse.form(DeliveryIssueForm.lookup)) { implicit request =>
+    implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
+    val lookup = request.body
+    ManageDelivery.raiseNonDeliveryCase(lookup)
+  }
+
 }

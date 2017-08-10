@@ -56,7 +56,7 @@ POST        /manage/suspend                     controllers.AccountManagement.pr
 GET         /manage/signout                     controllers.AccountManagement.logout
 POST        /manage/renew                       controllers.AccountManagement.processRenewal
 GET         /manage/renew/thank-you             controllers.AccountManagement.renewThankYou
-
+POST        /manage/delivery-issue              controllers.AccountManagement.reportDeliveryIssue
 
 # Pattern Library
 GET         /patterns                        controllers.PatternLibrary.patterns

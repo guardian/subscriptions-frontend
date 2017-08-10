@@ -108,6 +108,31 @@
                 </section>
             }
 
+            <section class="mma-section">
+                <legend class="mma-section__header">
+                    Missed a paper?
+                </legend>
+                <div class="prose">
+                    <p>
+                        Please let us know the expected delivery date of your missing issue so that we can investigate.
+                    </p>
+                </div>
+                <form class="form js-issue-report-form" action="@routes.AccountManagement.reportDeliveryIssue().url" method="POST">
+                   <fieldset>
+                       @helper.CSRF.formField
+                       <div class="form-field">
+                           <input type="hidden" id="subscriptionName" name="subscriptionName" value="@subscription.name.get"/>
+                       </div>
+                       <div class="form-field">
+                           <div id="issueDatePicker"></div>
+                       </div>
+                       <button type="submit" class="input-submit button button--primary button--large u-margin-bottom mma-dates__button">
+                          Report Issue
+                       </button>
+                   </fieldset>
+                </form>
+            </section>
+
 
         </section>
     </main>

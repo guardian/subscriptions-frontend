@@ -10,6 +10,7 @@ require([
     'modules/password',
     'modules/inputMask',
     'modules/checkout',
+    'modules/issueReport',
     'modules/suspend',
     'modules/confirmation',
     'modules/patterns',
@@ -29,6 +30,7 @@ require([
     password,
     inputMask,
     checkout,
+    issueReport,
     suspend,
     confirmation,
     patterns,
@@ -51,12 +53,12 @@ require([
     password.init();
     inputMask.init();
     checkout.init();
+    issueReport.init();
     suspend.init();
     confirmation.init();
     cas.init();
     dropdown.init();
     objectFitImages();
-
     patterns.init();
     renew.init();
 });

@@ -1,0 +1,16 @@
+@main(s"Issue Submitted | The Guardian", bodyClasses=List("is-wide")) {
+    <main class="page-container gs-container gs-container--slim">
+        @fragments.page.header("Your issue has been submitted", None, List("l-padded"))
+        <section class="section-slice section-slice--bleed section-slice--limited">
+            <p>We're sorry to hear that you're having problems with your delivery. We will investigate this issue and get back to you within 24 hours.</p>
+            <p>
+                If you need further assistance, please contact customer services on: <a class="u-link" href="tel:+44 330 333 6767">+44 (0) 330 333 6767</a>
+                or email <a class="u-link" href="mailto:subscriptions@@theguardian.com">subscriptions@@theguardian.com</a>.
+            </p>
+        </section>
+        <section class="section-slice--bleed mma-section">
+            <a class="button button--primary button--large" href="@routes.AccountManagement.processLogin">
+                Back to subscription details</a>
+        </section>
+    </main>
+}
