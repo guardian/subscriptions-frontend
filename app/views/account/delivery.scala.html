@@ -110,24 +110,24 @@
 
             <section class="mma-section">
                 <legend class="mma-section__header">
-                    Missed a paper?
+                    Delivery Tracking
                 </legend>
                 <div class="prose">
                     <p>
-                        Please let us know the expected delivery date of your missing issue so that we can investigate.
+                      Use the form below to check the delivery status of your paper.
                     </p>
                 </div>
-                <form class="form js-issue-report-form" action="@routes.AccountManagement.reportDeliveryIssue().url" method="POST">
+                <form class="form js-track-delivery-form" action="@routes.AccountManagement.trackDelivery().url" method="POST">
                    <fieldset>
                        @helper.CSRF.formField
                        <div class="form-field">
                            <input type="hidden" id="subscriptionName" name="subscriptionName" value="@subscription.name.get"/>
                        </div>
                        <div class="form-field">
-                           <div id="issueDatePicker"></div>
+                           <div id="trackingDatePicker"></div>
                        </div>
                        <button type="submit" class="input-submit button button--primary button--large u-margin-bottom mma-dates__button">
-                          Report Issue
+                          Track Delivery
                        </button>
                    </fieldset>
                 </form>

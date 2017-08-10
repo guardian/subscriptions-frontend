@@ -19,7 +19,7 @@ export default {
     },
 
     init: function() {
-        const datePickerContainer = document.getElementById(formElements.ISSUE_REPORT_DATE_PICKER_ID);
+        const datePickerContainer = document.getElementById(formElements.TRACK_DELIVERY_DATE_PICKER_ID);
         this.renderDatePicker(datePickerContainer);
     }
 
