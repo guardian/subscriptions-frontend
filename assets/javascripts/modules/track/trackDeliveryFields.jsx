@@ -8,8 +8,12 @@ import 'react-datepicker/dist/react-datepicker.css'
 function renderDatePicker(container) {
 
     return ReactDOM.render(
-        <CustomDatePicker name="issueDate" className="input-text" dateFormat="D MMMM YYYY" locale="en-gb"
-                          minDate={moment().subtract(1, 'weeks')} maxDate={moment()}
+        <CustomDatePicker name="issueDate"
+                          className="input-text"
+                          dateFormat="D MMMM YYYY"
+                          locale="en-gb"
+                          minDate={moment().subtract(1, 'weeks')}
+                          maxDate={moment()}
         />,
         container
     );
