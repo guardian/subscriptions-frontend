@@ -39,12 +39,12 @@ object FulfilmentLookupService extends StrictLogging {
             \/-(validLookup.value)
           case error: JsError =>
             logger.error("Failed to parse response as FulfilmentLookup")
-            -\/(s"Response was successful but could not be parsed")
+            -\/(s"Response was successful but body could not be parsed")
         }
       } else {
         val errorBody = response.body.string()
         response.body.close()
-        val message = s"Failed to raise non-delivery case for subscription ${trackDelivery.subscriptionName} due to error: ${errorBody}"
+        val message = s"Failed to perform delivery tracking for ${trackDelivery.subscriptionName} due to error: ${errorBody}"
         logger.error(message)
         -\/(message)
       }
