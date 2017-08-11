@@ -31,28 +31,23 @@ object FulfilmentLookupService extends StrictLogging {
     val request = buildRequest(environment, trackDelivery)
     val futureResponse = httpClient(request)
     futureResponse.map { response =>
+      val responseBody = response.body.string
+      response.body.close
       if (response.isSuccessful) {
         logger.info(s"Successfully performed lookup for ${trackDelivery.subscriptionName}")
-        val jsonBody = Json.parse(response.body.string)
+        val jsonBody = Json.parse(responseBody)
         jsonBody.validate[FulfilmentLookup] match {
           case validLookup: JsSuccess[FulfilmentLookup] =>
             \/-(validLookup.value)
           case error: JsError =>
-            logger.error("Failed to parse response as FulfilmentLookup")
-            -\/(s"Response was successful but body could not be parsed")
+            -\/(s"Response was successful but body could not be parsed, we got: $responseBody")
         }
       } else {
-        val errorBody = response.body.string()
-        response.body.close()
-        val message = s"Failed to perform delivery tracking for ${trackDelivery.subscriptionName} due to error: ${errorBody}"
-        logger.error(message)
-        -\/(message)
+        -\/(s"Failed to perform delivery tracking for ${trackDelivery.subscriptionName}, we got: ${responseBody}")
       }
     }.recoverWith {
       case ex: Exception => Future {
-        val message = s"Future failed due to ${ex}"
-        logger.error(message)
-        -\/(message)
+        -\/(s"Failed to perform deliver tracking for ${trackDelivery.subscriptionName}, due to failed future: ${ex}")
       }
     }
   }
