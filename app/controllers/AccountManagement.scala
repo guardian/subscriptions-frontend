@@ -133,14 +133,15 @@ object ManageDelivery extends ContextLogging {
     }
   }
 
-  def fulfilmentCheck(trackDelivery: TrackDeliveryRequest)(implicit request: Request[TrackDeliveryRequest], touchpoint: TouchpointBackend.Resolution): Future[Result] = {
+  def fulfilmentCheck(implicit request: Request[TrackDeliveryRequest], touchpoint: TouchpointBackend.Resolution): Future[Result] = {
     implicit val tpBackend = touchpoint.backend
-    logger.info(s"Attempting to perform tracking lookup: $trackDelivery")
-    val futureLookupAttempt = FulfilmentLookupService.lookupSubscription(tpBackend.environmentName, trackDelivery)
+    val trackDeliveryRequest = request.body
+    logger.info(s"Attempting to perform tracking lookup: $trackDeliveryRequest")
+    val futureLookupAttempt = FulfilmentLookupService.lookupSubscription(tpBackend.environmentName, trackDeliveryRequest)
     futureLookupAttempt.map { lookupAttempt => lookupAttempt match {
         case \/-(lookup) =>
-          logger.info(s"Successful delivery tracking for $trackDelivery; showing deliveryTrackingSuccess")
-          Ok(views.html.account.deliveryTrackingSuccess(lookup, trackDelivery.issueDate))
+          logger.info(s"Successful delivery tracking for $trackDeliveryRequest; showing deliveryTrackingSuccess")
+          Ok(views.html.account.deliveryTrackingSuccess(lookup, trackDeliveryRequest.issueDate))
         case -\/(message) =>
           logger.error(message)
           Ok(views.html.account.deliveryTrackingFailure())
@@ -415,8 +416,7 @@ object AccountManagement extends Controller with ContextLogging with CatalogProv
 
   def trackDelivery: Action[TrackDeliveryRequest] = accountManagementAction.async(parse.form(TrackDeliveryForm.lookup)) { implicit request =>
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
-    val lookup = request.body
-    ManageDelivery.fulfilmentCheck(lookup)
+    ManageDelivery.fulfilmentCheck
   }
 
 }
