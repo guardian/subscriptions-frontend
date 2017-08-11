@@ -133,7 +133,7 @@ object ManageDelivery extends ContextLogging {
     }
   }
 
-  def fulfilmentCheck(trackDelivery: TrackDelivery)(implicit request: Request[TrackDelivery], touchpoint: TouchpointBackend.Resolution): Future[Result] = {
+  def fulfilmentCheck(trackDelivery: TrackDeliveryRequest)(implicit request: Request[TrackDeliveryRequest], touchpoint: TouchpointBackend.Resolution): Future[Result] = {
     implicit val tpBackend = touchpoint.backend
     logger.info(s"Attempting to perform tracking lookup: $trackDelivery")
     val futureLookupAttempt = FulfilmentLookupService.lookupSubscription(tpBackend.environmentName, trackDelivery)
@@ -413,7 +413,7 @@ object AccountManagement extends Controller with ContextLogging with CatalogProv
     ManageWeekly.renewThankYou
   }
 
-  def trackDelivery: Action[TrackDelivery] = accountManagementAction.async(parse.form(TrackDeliveryForm.lookup)) { implicit request =>
+  def trackDelivery: Action[TrackDeliveryRequest] = accountManagementAction.async(parse.form(TrackDeliveryForm.lookup)) { implicit request =>
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     val lookup = request.body
     ManageDelivery.fulfilmentCheck(lookup)

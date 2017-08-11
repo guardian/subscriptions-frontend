@@ -7,13 +7,13 @@ import play.api.data.Forms._
 
 object TrackDeliveryForm {
 
-  val lookup: Form[TrackDelivery] = Form(
+  val lookup: Form[TrackDeliveryRequest] = Form(
     mapping(
       "subscriptionName" -> nonEmptyText.transform[Name](Name, _.get),
       "issueDate" -> jodaLocalDate("dd MMMM yyyy")
-    )(TrackDelivery.apply)(TrackDelivery.unapply)
+    )(TrackDeliveryRequest.apply)(TrackDeliveryRequest.unapply)
   )
 
 }
 
-case class TrackDelivery(subscriptionName: Name, issueDate: LocalDate)
+case class TrackDeliveryRequest(subscriptionName: Name, issueDate: LocalDate)

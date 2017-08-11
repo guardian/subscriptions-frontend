@@ -3,7 +3,7 @@ package services
 import com.gu.okhttp.RequestRunners.futureRunner
 import com.typesafe.scalalogging.StrictLogging
 import configuration.Config
-import forms.TrackDelivery
+import forms.TrackDeliveryRequest
 import model.FulfilmentLookup
 import okhttp3.{MediaType, RequestBody}
 import org.joda.time.format.DateTimeFormat
@@ -16,7 +16,7 @@ object FulfilmentLookupService extends StrictLogging {
 
   val httpClient = futureRunner
 
-  def buildRequest(environment: String, trackDelivery: TrackDelivery): okhttp3.Request = {
+  def buildRequest(environment: String, trackDelivery: TrackDeliveryRequest): okhttp3.Request = {
     val apiDateFormatter = DateTimeFormat.forPattern("yyyy-MM-dd")
     val formattedDate = apiDateFormatter.print(trackDelivery.issueDate)
     val body = RequestBody.create(MediaType.parse("application/json"), Json.obj("subscriptionName" -> trackDelivery.subscriptionName.get, "issueDate" -> formattedDate).toString())
@@ -27,7 +27,7 @@ object FulfilmentLookupService extends StrictLogging {
       .build()
   }
 
-  def lookupSubscription(environment: String, trackDelivery: TrackDelivery): Future[String \/ FulfilmentLookup] = {
+  def lookupSubscription(environment: String, trackDelivery: TrackDeliveryRequest): Future[String \/ FulfilmentLookup] = {
     val request = buildRequest(environment, trackDelivery)
     val futureResponse = httpClient(request)
     futureResponse.map { response =>
