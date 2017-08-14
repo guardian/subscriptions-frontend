@@ -16,6 +16,7 @@ import com.gu.subscriptions.suspendresume.SuspensionService
 import com.gu.subscriptions.suspendresume.SuspensionService.{BadZuoraJson, ErrNel, HolidayRefund, PaymentHoliday}
 import com.gu.zuora.ZuoraRestService
 import com.gu.zuora.soap.models.Queries.Contact
+import com.typesafe.scalalogging.StrictLogging
 import configuration.{Config, ProfileLinks}
 import forms._
 import logging.{Context, ContextLogging}
@@ -36,7 +37,7 @@ import scalaz.std.scalaFuture._
 import scalaz.syntax.std.option._
 import scalaz.{-\/, EitherT, OptionT, \/, \/-}
 // this handles putting subscriptions in and out of the session
-object SessionSubscription {
+object SessionSubscription extends StrictLogging {
 
   val SUBSCRIPTION_SESSION_KEY = "subscriptionId"
 
@@ -50,14 +51,17 @@ object SessionSubscription {
 
   def subscriptionFromRequest(implicit request: Request[_]): Future[Option[Subscription[ContentSubscription]]] = {
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
-    implicit val tpBackend = resolution.backend
+    implicit val tpBackend: TouchpointBackend = resolution.backend
 
     (for {
       subscriptionId <- OptionT(Future.successful(request.session.data.get(SUBSCRIPTION_SESSION_KEY)))
       zuoraSubscription <- OptionT(tpBackend.subscriptionService.get[ContentSubscription](Name(subscriptionId)))
     } yield zuoraSubscription).orElse(for {
       identityUser <- OptionT(Future.successful(authenticatedUserFor(request)))
-      salesForceUser <- OptionT(tpBackend.salesforceService.repo.get(identityUser.user.id))
+      /* TODO: Use a Zuora-only based lookup from an Identity ID. This needs code pulling up from Members Data API into Membership Common */
+      salesForceUser <- OptionT(tpBackend.salesforceService.repo.get(identityUser.user.id).map { d =>
+        d.leftMap(e => logger.warn(s"Error looking up SF Contact for logged in user with Identity ID ${identityUser.user.id}: $e")).toOption.flatten
+      })
       zuoraSubscription <- OptionT(tpBackend.subscriptionService.current[ContentSubscription](salesForceUser).map(_.headOption/*FIXME if they have more than one they can only manage the first*/))
     } yield zuoraSubscription).run
   }
