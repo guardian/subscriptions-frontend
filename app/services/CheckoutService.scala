@@ -1,45 +1,44 @@
 package services
 
-import com.github.nscala_time.time.OrderingImplicits.LocalDateOrdering
 import com.gu.config.DiscountRatePlanIds
+import com.gu.i18n.Country
 import com.gu.i18n.Currency.GBP
-import com.gu.i18n.{Country, CountryGroup}
 import com.gu.identity.play.{AuthenticatedIdUser, IdMinimalUser}
 import com.gu.memsub.Subscription.ProductRatePlanId
 import com.gu.memsub.promo.Promotion._
-import com.gu.memsub.promo.{Renewal, ValidPromotion, _}
+import com.gu.memsub.promo.{ValidPromotion, _}
 import com.gu.memsub.services.{GetSalesforceContactForSub, PromoService, PaymentService => CommonPaymentService}
 import com.gu.memsub.subsv2.SubscriptionPlan.WeeklyPlan
-import com.gu.memsub.subsv2.{Catalog, ReaderType, Subscription}
-import com.gu.memsub.{Address, BillingPeriod, NormalisedTelephoneNumber, Product}
+import com.gu.memsub.subsv2.{Catalog, Subscription}
+import com.gu.memsub.{BillingPeriod, NormalisedTelephoneNumber, Product}
 import com.gu.salesforce.{Contact, ContactId}
 import com.gu.stripe.Stripe
 import com.gu.zuora.ZuoraRestService
 import com.gu.zuora.api.ZuoraService
 import com.gu.zuora.soap.models.Commands.{Account, PaymentMethod, RatePlan, Subscribe, _}
 import com.gu.zuora.soap.models.Queries
+import com.gu.zuora.soap.models.Queries.{Contact => ZuoraContact}
 import com.gu.zuora.soap.models.Results.{AmendResult, SubscribeResult}
 import com.gu.zuora.soap.models.errors._
 import logging.{Context, ContextLogging}
 import model.BillingPeriodOps._
 import model.SubscriptionOps._
+import model._
 import model.error.CheckoutService._
 import model.error.IdentityService._
 import model.error.SubsError
-import model.{Renewal, _}
 import org.joda.time.LocalDate.now
 import org.joda.time.{DateTimeConstants, Days, LocalDate}
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import touchpoint.ZuoraProperties
 import views.support.Pricing._
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 import scala.concurrent.Future
 import scalaz.std.option._
 import scalaz.std.scalaFuture._
 import scalaz.syntax.monad._
-import scalaz.{-\/, EitherT, Monad, NonEmptyList, \/, \/-}
 import scalaz.syntax.std.option._
-import com.gu.zuora.soap.models.Queries.{Contact => ZuoraContact}
+import scalaz.{-\/, EitherT, Monad, NonEmptyList, \/, \/-}
 
 
 object CheckoutService {
@@ -124,7 +123,8 @@ class CheckoutService(
         name = personalData, // TODO once we have gifting change this to the Giftee's name
         address = paperData.deliveryAddress,
         email = personalData.email, // TODO once we have gifting change this to the Giftee's email address
-        phone = telephoneNumber
+        phone = telephoneNumber,
+        deliveryInstructions = paperData.deliveryInstructions
       ))
       case _ => None
     }
@@ -312,23 +312,17 @@ class CheckoutService(
   }
 
   private def createPaymentType(purchaserIds: PurchaserIdentifiers, subscriptionData: SubscribeRequest): Future[NonEmptyList[SubsError] \/ PaymentService#AccountAndPayment] = {
-
-    val deliveryInstructions: Option[String] = subscriptionData.productData match {
-      case Left(paperData) => paperData.deliveryInstructions
-      case _ => None
-    }
-
     try {
       val payment = subscriptionData.genericData.paymentData match {
         case paymentData@DirectDebitData(_, _, _) =>
           val personalData = subscriptionData.genericData.personalData
           require(personalData.address.country.contains(Country.UK), "Direct Debit payment only works in the UK right now")
-          paymentService.makeZuoraAccountWithDirectDebit(paymentData, personalData.first, personalData.last, purchaserIds, deliveryInstructions)
+          paymentService.makeZuoraAccountWithDirectDebit(paymentData, personalData.first, personalData.last, purchaserIds)
         case paymentData@CreditCardData(_) =>
           val plan = subscriptionData.productData.fold(_.plan, _.plan)
           val desiredCurrency = subscriptionData.genericData.currency
           val currency = if (plan.charges.price.currencies.contains(desiredCurrency)) desiredCurrency else GBP
-          paymentService.makeZuoraAccountWithCreditCard(paymentData, currency, purchaserIds, deliveryInstructions)
+          paymentService.makeZuoraAccountWithCreditCard(paymentData, currency, purchaserIds)
       }
       Future.successful(\/.right(payment))
     } catch {
@@ -351,8 +345,8 @@ class CheckoutService(
       val idMinimalUser = IdMinimalUser(contact.identityId, None)
       val purchaserIds = PurchaserIdentifiers(contact, Some(idMinimalUser))
       renewal.paymentData match {
-        case cd: CreditCardData => paymentService.makeZuoraAccountWithCreditCard(cd, subscription.currency, purchaserIds, None)
-        case dd: DirectDebitData => paymentService.makeZuoraAccountWithDirectDebit(dd, billto.firstName, billto.lastName, purchaserIds, None)
+        case cd: CreditCardData => paymentService.makeZuoraAccountWithCreditCard(cd, subscription.currency, purchaserIds)
+        case dd: DirectDebitData => paymentService.makeZuoraAccountWithDirectDebit(dd, billto.firstName, billto.lastName, purchaserIds)
       }
     }
 
