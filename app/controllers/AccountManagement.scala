@@ -26,16 +26,17 @@ import model.{Renewal, RenewalReads}
 import org.joda.time.LocalDate.now
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json._
-import play.api.mvc._
+import play.api.mvc.{AnyContent, _}
+import _root_.services.FulfilmentLookupService
 import utils.TestUsers.PreSigninTestCookie
 import views.html.account.thankYouRenew
 import views.support.Dates._
 import views.support.Pricing._
-
 import scala.concurrent.Future
 import scalaz.std.scalaFuture._
 import scalaz.syntax.std.option._
 import scalaz.{-\/, EitherT, OptionT, \/, \/-}
+
 // this handles putting subscriptions in and out of the session
 object SessionSubscription extends StrictLogging {
 
@@ -133,6 +134,22 @@ object ManageDelivery extends ContextLogging {
       case t: Throwable =>
         logger.error(t.toString)
         \/.left(replacementErrorMessage)
+    }
+  }
+
+  def fulfilmentCheck(implicit request: Request[TrackDeliveryRequest], touchpoint: TouchpointBackend.Resolution): Future[Result] = {
+    implicit val tpBackend = touchpoint.backend
+    val trackDeliveryRequest = request.body
+    logger.info(s"Attempting to perform tracking lookup: $trackDeliveryRequest")
+    val futureLookupAttempt = FulfilmentLookupService.lookupSubscription(tpBackend.environmentName, trackDeliveryRequest)
+    futureLookupAttempt.map { lookupAttempt => lookupAttempt match {
+        case \/-(lookup) =>
+          logger.info(s"Successful delivery tracking for $trackDeliveryRequest; showing deliveryTrackingSuccess")
+          Ok(views.html.account.deliveryTrackingSuccess(lookup, trackDeliveryRequest.issueDate))
+        case -\/(message) =>
+          logger.error(message)
+          Ok(views.html.account.deliveryTrackingFailure())
+      }
     }
   }
 
@@ -400,4 +417,10 @@ object AccountManagement extends Controller with ContextLogging with CatalogProv
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     ManageWeekly.renewThankYou
   }
+
+  def trackDelivery: Action[TrackDeliveryRequest] = accountManagementAction.async(parse.form(TrackDeliveryForm.lookup)) { implicit request =>
+    implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
+    ManageDelivery.fulfilmentCheck
+  }
+
 }

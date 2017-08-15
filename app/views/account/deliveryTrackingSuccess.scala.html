@@ -1,0 +1,36 @@
+@import model.FulfilmentLookup
+@import org.joda.time.LocalDate
+@import views.support.Dates._
+@(
+    fulfilmentLookup: FulfilmentLookup,
+    date: LocalDate
+)
+
+@main("Delivery Status | The Guardian", bodyClasses=List("is-wide")) {
+    <main class="page-container gs-container gs-container--slim">
+        @fragments.page.header("Delivery Status", None, List("l-padded"))
+        <section class="section-slice section-slice--bleed section-slice--limited">
+            @if(fulfilmentLookup.subscriptionInFile) {
+                <p>
+                    Your issue was allocated for delivery on @prettyDateNoYear(date).
+                </p>
+                <p>
+                    If you have still not received your issue after the expected date, please contact customer services on: <a class="u-link" href="tel:+44 330 333 6767">+44 (0) 330 333 6767</a>
+                    or email <a class="u-link" href="mailto:subscriptions@@theguardian.com">subscriptions@@theguardian.com</a>.
+                </p>
+            } else {
+                <p>
+                    Our records show that there are no deliveries scheduled for @prettyDateNoYear(date).
+                </p>
+                <p>
+                    If you were expecting to receive an issue, please contact customer services on: <a class="u-link" href="tel:+44 330 333 6767">+44 (0) 330 333 6767</a>
+                    or email <a class="u-link" href="mailto:subscriptions@@theguardian.com">subscriptions@@theguardian.com</a>.
+                </p>
+            }
+        </section>
+        <section class="section-slice--bleed mma-section">
+            <a class="button button--primary button--large" href="@routes.AccountManagement.processLogin().url">
+                Back to subscription details</a>
+        </section>
+    </main>
+}

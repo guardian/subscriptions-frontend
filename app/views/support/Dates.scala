@@ -53,6 +53,8 @@ object Dates {
 
   def prettyDateNoYear(dt: DateTime): String = dt.toString("d MMMMM")
 
+  def prettyDateNoYear(dt: LocalDate): String = dt.toString("d MMMMM")
+
   def prettyTime(dt: DateTime): String =
     dt.toString(if (dt.getMinuteOfHour == 0) "h" else "h.mm") +dt.toString("a").toLowerCase
 
