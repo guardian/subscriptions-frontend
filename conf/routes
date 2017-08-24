@@ -83,6 +83,7 @@ GET         /Voucher                         controllers.Homepage.index
 GET         /offers                          controllers.Offers.offers
 GET         /:edition/offers                 controllers.Offers.offersPage(edition: String)
 
+# Temporary URL that will be gone after S&C's test 4 is finished
 GET         /offersUK                        controllers.Offers.offersTestUKPage
 
 # Editions hommepage or 404
