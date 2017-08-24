@@ -83,5 +83,7 @@ GET         /Voucher                         controllers.Homepage.index
 GET         /offers                          controllers.Offers.offers
 GET         /:edition/offers                 controllers.Offers.offersPage(edition: String)
 
+GET         /offersUK                        controllers.Offers.offersTestUKPage
+
 # Editions hommepage or 404
 GET         /:edition                        controllers.Homepage.landingPage(edition: String)
