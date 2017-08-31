@@ -13,7 +13,6 @@ class CheckoutSpec extends FeatureSpec with Browser
   before { /* each test */ Driver.reset() }
 
   override def beforeAll() = {
-    Screencast.storeId()
     Config.printSummary()
   }
 
