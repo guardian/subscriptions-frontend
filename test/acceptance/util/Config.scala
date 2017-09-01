@@ -16,7 +16,6 @@ object Config {
     case Success(url) => url
     case Failure(e) => ""
   }
-  val screencastIdFile = conf.getString("screencastId.file")
 
   def debug() = conf.root().render()
 
