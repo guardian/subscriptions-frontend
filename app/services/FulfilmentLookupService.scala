@@ -40,14 +40,14 @@ object FulfilmentLookupService extends StrictLogging {
           case validLookup: JsSuccess[FulfilmentLookup] =>
             \/-(validLookup.value)
           case error: JsError =>
-            -\/(s"Response was successful but body could not be parsed, we got: $responseBody")
+            -\/(s"response was successful but body could not be parsed, we got: $responseBody")
         }
       } else {
-        -\/(s"Failed to perform delivery tracking for ${trackDelivery.subscriptionName}, we got: ${responseBody}")
+        -\/(s"response was unsuccessful, we got a ${response.code}: ${responseBody}")
       }
     }.recoverWith {
       case ex: Exception => Future {
-        -\/(s"Failed to perform deliver tracking for ${trackDelivery.subscriptionName}, due to failed future: ${ex}")
+        -\/(s"future failed with: ${ex}")
       }
     }
   }

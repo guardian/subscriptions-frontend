@@ -147,7 +147,7 @@ object ManageDelivery extends ContextLogging {
           logger.info(s"Successful delivery tracking for $trackDeliveryRequest; showing deliveryTrackingSuccess")
           Ok(views.html.account.deliveryTrackingSuccess(lookup, trackDeliveryRequest.issueDate))
         case -\/(message) =>
-          logger.error(message)
+          logger.error(s"Failed to perform delivery tracking for ${trackDeliveryRequest.subscriptionName}: $message")
           Ok(views.html.account.deliveryTrackingFailure())
       }
     }
