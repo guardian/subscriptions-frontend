@@ -18,7 +18,7 @@
 <dd class="mma-section__list--content">
 @for(plan <- plans) {
     <div>
-    @if(plan.name == "Echo-Legacy") {
+    @if(plan.name == "Echo-Legacy" || plan.name == "Multi-day") {
         Multi-day (@{
         chosenPaperDays.map(_.id.replace("Print ", "")).mkString(", ")
     })
