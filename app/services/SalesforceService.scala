@@ -42,7 +42,7 @@ object SalesforceService {
     Keys.MAILING_POSTCODE -> addr.postCode,
     Keys.MAILING_STATE -> addr.countyOrState,
     Keys.MAILING_COUNTRY -> addr.country.fold(addr.countryName)(_.name)
-  ) ++ paperData.flatMap(_.deliveryInstructions).fold(Json.obj())(instrs => Json.obj(
+  ) ++ paperData.flatMap(_.sanitizedDeliveryInstructions).fold(Json.obj())(instrs => Json.obj(
     Keys.DELIVERY_INSTRUCTIONS -> instrs
   ))) ++ NormalisedTelephoneNumber.fromStringAndCountry(personalData.telephoneNumber, personalData.address.country).fold(Json.obj())(phone => Json.obj(Keys.TELEPHONE -> phone.format))
 }

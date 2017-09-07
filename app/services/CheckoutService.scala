@@ -124,7 +124,7 @@ class CheckoutService(
         address = paperData.deliveryAddress,
         email = personalData.email, // TODO once we have gifting change this to the Giftee's email address
         phone = telephoneNumber,
-        deliveryInstructions = paperData.deliveryInstructions
+        deliveryInstructions = paperData.sanitizedDeliveryInstructions
       ))
       case _ => None
     }
