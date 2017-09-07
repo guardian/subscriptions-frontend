@@ -66,7 +66,9 @@ case class PaperData(
   deliveryAddress: Address,
   deliveryInstructions: Option[String],
   plan: CatalogPlan.Paper
-)
+) {
+  val sanitizedDeliveryInstructions = deliveryInstructions.map(instructions => instructions.replaceAll("\"", ""))
+}
 
 object PersonalData {
   def fromIdUser(u: IdUser) = {
