@@ -7,12 +7,12 @@
 @import model.SubscriptionOps._
 @import views.support.Dates.prettyDate
 @import views.support.AccountManagementOps._
-@import org.joda.time.Days
-@import com.gu.memsub.BillingPeriod
 @import com.gu.memsub.subsv2.SubscriptionPlan.DailyPaper
 @import com.gu.memsub.Benefit.PaperDay
+@import com.gu.zuora.soap.models.Queries.Account
 @(
     subscription: Subscription[DailyPaper],
+    billingAccount: Account,
     holidayRefunds: Seq[HolidayRefund] = Seq.empty,
     billingSchedule: Option[BillingSchedule],
     chosenPaperDays: List[PaperDay],
@@ -108,31 +108,35 @@
                 </section>
             }
 
-            <section class="mma-section">
-                <legend class="mma-section__header">
-                    Delivery Tracking
-                </legend>
-                <div class="prose">
-                    <p>
-                      Use the form below to check the delivery status of your paper.
-                    </p>
-                </div>
-                <form class="form js-track-delivery-form" action="@routes.AccountManagement.trackDelivery().url" method="POST">
-                   <fieldset>
-                       @helper.CSRF.formField
-                       <div class="form-field">
-                           <input type="hidden" id="subscriptionName" name="subscriptionName" value="@subscription.name.get"/>
-                       </div>
-                       <div class="form-field">
-                           <div id="trackingDatePicker"></div>
-                       </div>
-                       <button type="submit" class="input-submit button button--primary button--large u-margin-bottom mma-dates__button">
-                          Track Delivery
-                       </button>
-                   </fieldset>
-                </form>
-            </section>
-
+            @billingAccount.sfContactId.map { contactId =>
+                <section class="mma-section">
+                    <legend class="mma-section__header">
+                        Delivery Tracking
+                    </legend>
+                    <div class="prose">
+                        <p>
+                            Use the form below to check the delivery status of your paper.
+                        </p>
+                    </div>
+                    <form class="form js-track-delivery-form" action="@routes.AccountManagement.trackDelivery().url" method="POST">
+                        <fieldset>
+                            @helper.CSRF.formField
+                            <div class="form-field">
+                                <input type="hidden" id="subscriptionName" name="subscriptionName" value="@subscription.name.get"/>
+                            </div>
+                            <div class="form-field">
+                                <input type="hidden" id="sfContactId" name="sfContactId" value="@contactId"/>
+                            </div>
+                            <div class="form-field">
+                                <div id="trackingDatePicker"></div>
+                            </div>
+                            <button type="submit" class="input-submit button button--primary button--large u-margin-bottom mma-dates__button">
+                                Track Delivery
+                            </button>
+                        </fieldset>
+                    </form>
+                </section>
+            }
 
         </section>
     </main>

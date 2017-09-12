@@ -19,7 +19,12 @@ object FulfilmentLookupService extends StrictLogging {
   def buildRequest(environment: String, trackDelivery: TrackDeliveryRequest): okhttp3.Request = {
     val apiDateFormatter = DateTimeFormat.forPattern("yyyy-MM-dd")
     val formattedDate = apiDateFormatter.print(trackDelivery.issueDate)
-    val body = RequestBody.create(MediaType.parse("application/json"), Json.obj("subscriptionName" -> trackDelivery.subscriptionName.get, "issueDate" -> formattedDate).toString())
+    val json = Json.obj(
+      "subscriptionName" -> trackDelivery.subscriptionName.get,
+      "sfContactId" -> trackDelivery.sfContactId,
+      "issueDate" -> formattedDate
+    )
+    val body = RequestBody.create(MediaType.parse("application/json"), json.toString())
     new okhttp3.Request.Builder()
       .addHeader("x-api-key", Config.fulfilmentLookupApiKey)
       .url(s"${Config.fulfilmentLookupApiUrl}/fulfilment-lookup")

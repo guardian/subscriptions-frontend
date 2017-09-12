@@ -10,10 +10,11 @@ object TrackDeliveryForm {
   val lookup: Form[TrackDeliveryRequest] = Form(
     mapping(
       "subscriptionName" -> nonEmptyText.transform[Name](Name, _.get),
+      "sfContactId" -> nonEmptyText,
       "issueDate" -> jodaLocalDate("dd MMMM yyyy")
     )(TrackDeliveryRequest.apply)(TrackDeliveryRequest.unapply)
   )
 
 }
 
-case class TrackDeliveryRequest(subscriptionName: Name, issueDate: LocalDate)
+case class TrackDeliveryRequest(subscriptionName: Name, sfContactId: String, issueDate: LocalDate)
