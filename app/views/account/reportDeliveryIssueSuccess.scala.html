@@ -1,0 +1,26 @@
+@import model.FulfilmentLookup
+@import org.joda.time.LocalDate
+@import views.support.Dates._
+@(
+    fulfilmentLookup: FulfilmentLookup,
+    date: LocalDate
+)
+
+@main("Delivery Issue | The Guardian", bodyClasses=List("is-wide")) {
+    <main class="page-container gs-container gs-container--slim">
+        @fragments.page.header("Issue Reported", None, List("l-padded"))
+        <section class="section-slice section-slice--bleed section-slice--limited">
+            <p>
+                Thanks for reporting this issue. We will look into the problem and get back to you soon.
+            </p>
+            <p>
+                If you need any further assistance, please contact customer services on: <a class="u-link" href="tel:+44 330 333 6767">+44 (0) 330 333 6767</a>
+                or email <a class="u-link" href="mailto:subscriptions@@theguardian.com">subscriptions@@theguardian.com</a>.
+            </p>
+        </section>
+        <section class="section-slice--bleed mma-section">
+            <a class="button button--primary button--large" href="@routes.AccountManagement.processLogin().url">
+                Back to subscription details</a>
+        </section>
+    </main>
+}

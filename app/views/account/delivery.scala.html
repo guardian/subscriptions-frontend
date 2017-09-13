@@ -20,7 +20,7 @@
     suspendedDays: Int,
     errorCodes: Set[String]
 )(implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackend.Resolution)
-@main("Cancel your papers while you're away | The Guardian", bodyClasses = List("is-wide"), edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution), managementPage = true) {
+@main("Manage your subscription | The Guardian", bodyClasses = List("is-wide"), edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution), managementPage = true) {
 
     <main class="page-container gs-container">
         <section class="suspend-container">
@@ -111,14 +111,14 @@
             @billingAccount.sfContactId.map { contactId =>
                 <section class="mma-section">
                     <legend class="mma-section__header">
-                        Delivery Tracking
+                        Report a delivery problem
                     </legend>
                     <div class="prose">
                         <p>
-                            Use the form below to check the delivery status of your paper.
+                            Please select the date of your missing paper using the form below.
                         </p>
                     </div>
-                    <form class="form js-track-delivery-form" action="@routes.AccountManagement.trackDelivery().url" method="POST">
+                    <form class="form js-report-delivery-issue-form" action="@routes.AccountManagement.reportDeliveryIssue().url" method="POST">
                         <fieldset>
                             @helper.CSRF.formField
                             <div class="form-field">
@@ -128,10 +128,10 @@
                                 <input type="hidden" id="sfContactId" name="sfContactId" value="@contactId"/>
                             </div>
                             <div class="form-field">
-                                <div id="trackingDatePicker"></div>
+                                <div id="issueReportDatePicker"></div>
                             </div>
                             <button type="submit" class="input-submit button button--primary button--large u-margin-bottom mma-dates__button">
-                                Track Delivery
+                                Report Issue
                             </button>
                         </fieldset>
                     </form>

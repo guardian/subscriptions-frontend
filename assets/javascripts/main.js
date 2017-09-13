@@ -10,7 +10,7 @@ require([
     'modules/password',
     'modules/inputMask',
     'modules/checkout',
-    'modules/trackDelivery',
+    'modules/reportDeliveryIssue',
     'modules/suspend',
     'modules/confirmation',
     'modules/patterns',
@@ -30,7 +30,7 @@ require([
     password,
     inputMask,
     checkout,
-    trackDelivery,
+    reportDeliveryIssue,
     suspend,
     confirmation,
     patterns,
@@ -44,7 +44,6 @@ require([
     ajax.init({page: {ajaxUrl: ''}});
     raven.init('https://6dd79da86ec54339b403277d8baac7c8@app.getsentry.com/47380');
     analytics.init();
-
     toggle.init();
     appendAround.init();
     profileMenu.init();
@@ -53,7 +52,7 @@ require([
     password.init();
     inputMask.init();
     checkout.init();
-    trackDelivery.init();
+    reportDeliveryIssue.init();
     suspend.init();
     confirmation.init();
     cas.init();

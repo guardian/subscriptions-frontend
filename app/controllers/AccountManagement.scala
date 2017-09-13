@@ -138,18 +138,18 @@ object ManageDelivery extends ContextLogging {
     }
   }
 
-  def fulfilmentCheck(implicit request: Request[TrackDeliveryRequest], touchpoint: TouchpointBackend.Resolution): Future[Result] = {
+  def fulfilmentLookup(implicit request: Request[ReportDeliveryIssue], touchpoint: TouchpointBackend.Resolution): Future[Result] = {
     implicit val tpBackend = touchpoint.backend
-    val trackDeliveryRequest = request.body
-    logger.info(s"Attempting to perform tracking lookup: $trackDeliveryRequest")
-    val futureLookupAttempt = FulfilmentLookupService.lookupSubscription(tpBackend.environmentName, trackDeliveryRequest)
+    val deliveryIssueRequest = request.body
+    logger.info(s"Attempting to raise a delivery issue: $deliveryIssueRequest")
+    val futureLookupAttempt = FulfilmentLookupService.lookupSubscription(tpBackend.environmentName, deliveryIssueRequest)
     futureLookupAttempt.map { lookupAttempt => lookupAttempt match {
         case \/-(lookup) =>
-          logger.info(s"Successful delivery tracking for $trackDeliveryRequest; showing deliveryTrackingSuccess")
-          Ok(views.html.account.deliveryTrackingSuccess(lookup, trackDeliveryRequest.issueDate))
+          logger.info(s"Successfully raised a delivery issue for $deliveryIssueRequest")
+          Ok(views.html.account.reportDeliveryIssueSuccess(lookup, deliveryIssueRequest.issueDate))
         case -\/(message) =>
-          logger.error(s"Failed to perform delivery tracking for ${trackDeliveryRequest.subscriptionName}: $message")
-          Ok(views.html.account.deliveryTrackingFailure())
+          logger.error(s"Failed to raise a delivery issue for ${deliveryIssueRequest.subscriptionName}: $message")
+          Ok(views.html.account.reportDeliveryIssueFailure())
       }
     }
   }
@@ -420,9 +420,9 @@ object AccountManagement extends Controller with ContextLogging with CatalogProv
     ManageWeekly.renewThankYou
   }
 
-  def trackDelivery: Action[TrackDeliveryRequest] = accountManagementAction.async(parse.form(TrackDeliveryForm.lookup)) { implicit request =>
+  def reportDeliveryIssue: Action[ReportDeliveryIssue] = accountManagementAction.async(parse.form(ReportDeliveryIssueForm.issueReport)) { implicit request =>
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
-    ManageDelivery.fulfilmentCheck
+    ManageDelivery.fulfilmentLookup
   }
 
 }

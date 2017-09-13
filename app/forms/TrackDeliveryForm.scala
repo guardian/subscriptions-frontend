@@ -5,16 +5,16 @@ import org.joda.time.LocalDate
 import play.api.data.Form
 import play.api.data.Forms._
 
-object TrackDeliveryForm {
+object ReportDeliveryIssueForm {
 
-  val lookup: Form[TrackDeliveryRequest] = Form(
+  val issueReport: Form[ReportDeliveryIssue] = Form(
     mapping(
       "subscriptionName" -> nonEmptyText.transform[Name](Name, _.get),
       "sfContactId" -> nonEmptyText,
       "issueDate" -> jodaLocalDate("dd MMMM yyyy")
-    )(TrackDeliveryRequest.apply)(TrackDeliveryRequest.unapply)
+    )(ReportDeliveryIssue.apply)(ReportDeliveryIssue.unapply)
   )
 
 }
 
-case class TrackDeliveryRequest(subscriptionName: Name, sfContactId: String, issueDate: LocalDate)
+case class ReportDeliveryIssue(subscriptionName: Name, sfContactId: String, issueDate: LocalDate)
