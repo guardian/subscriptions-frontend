@@ -3,7 +3,7 @@ package services
 import com.gu.okhttp.RequestRunners.futureRunner
 import com.typesafe.scalalogging.StrictLogging
 import configuration.Config
-import forms.ReportDeliveryIssue
+import forms.ReportDeliveryProblem
 import model.FulfilmentLookup
 import okhttp3.{MediaType, RequestBody}
 import org.joda.time.format.DateTimeFormat
@@ -16,12 +16,12 @@ object FulfilmentLookupService extends StrictLogging {
 
   val httpClient = futureRunner
 
-  def buildRequest(environment: String, deliveryIssue: ReportDeliveryIssue): okhttp3.Request = {
+  def buildRequest(environment: String, deliveryProblem: ReportDeliveryProblem): okhttp3.Request = {
     val apiDateFormatter = DateTimeFormat.forPattern("yyyy-MM-dd")
-    val formattedDate = apiDateFormatter.print(deliveryIssue.issueDate)
+    val formattedDate = apiDateFormatter.print(deliveryProblem.issueDate)
     val json = Json.obj(
-      "subscriptionName" -> deliveryIssue.subscriptionName.get,
-      "sfContactId" -> deliveryIssue.sfContactId,
+      "subscriptionName" -> deliveryProblem.subscriptionName.get,
+      "sfContactId" -> deliveryProblem.sfContactId,
       "issueDate" -> formattedDate
     )
     val body = RequestBody.create(MediaType.parse("application/json"), json.toString())
@@ -32,14 +32,14 @@ object FulfilmentLookupService extends StrictLogging {
       .build()
   }
 
-  def lookupSubscription(environment: String, deliveryIssue: ReportDeliveryIssue): Future[String \/ FulfilmentLookup] = {
-    val request = buildRequest(environment, deliveryIssue)
+  def lookupSubscription(environment: String, deliveryProblem: ReportDeliveryProblem): Future[String \/ FulfilmentLookup] = {
+    val request = buildRequest(environment, deliveryProblem)
     val futureResponse = httpClient(request)
     futureResponse.map { response =>
       val responseBody = response.body.string
       response.body.close
       if (response.isSuccessful) {
-        logger.info(s"Successfully performed lookup for ${deliveryIssue.subscriptionName}")
+        logger.info(s"Successfully performed lookup for ${deliveryProblem.subscriptionName}")
         val jsonBody = Json.parse(responseBody)
         jsonBody.validate[FulfilmentLookup] match {
           case validLookup: JsSuccess[FulfilmentLookup] =>

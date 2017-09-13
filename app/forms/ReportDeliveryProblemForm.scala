@@ -5,16 +5,16 @@ import org.joda.time.LocalDate
 import play.api.data.Form
 import play.api.data.Forms._
 
-object ReportDeliveryIssueForm {
+object ReportDeliveryProblemForm {
 
-  val issueReport: Form[ReportDeliveryIssue] = Form(
+  val report: Form[ReportDeliveryProblem] = Form(
     mapping(
       "subscriptionName" -> nonEmptyText.transform[Name](Name, _.get),
       "sfContactId" -> nonEmptyText,
       "issueDate" -> jodaLocalDate("dd MMMM yyyy")
-    )(ReportDeliveryIssue.apply)(ReportDeliveryIssue.unapply)
+    )(ReportDeliveryProblem.apply)(ReportDeliveryProblem.unapply)
   )
 
 }
 
-case class ReportDeliveryIssue(subscriptionName: Name, sfContactId: String, issueDate: LocalDate)
+case class ReportDeliveryProblem(subscriptionName: Name, sfContactId: String, issueDate: LocalDate)

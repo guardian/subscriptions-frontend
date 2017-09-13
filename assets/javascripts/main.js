@@ -10,7 +10,7 @@ require([
     'modules/password',
     'modules/inputMask',
     'modules/checkout',
-    'modules/reportDeliveryIssue',
+    'modules/reportDeliveryProblem',
     'modules/suspend',
     'modules/confirmation',
     'modules/patterns',
@@ -30,7 +30,7 @@ require([
     password,
     inputMask,
     checkout,
-    reportDeliveryIssue,
+    reportDeliveryProblem,
     suspend,
     confirmation,
     patterns,
@@ -52,7 +52,7 @@ require([
     password.init();
     inputMask.init();
     checkout.init();
-    reportDeliveryIssue.init();
+    reportDeliveryProblem.init();
     suspend.init();
     confirmation.init();
     cas.init();

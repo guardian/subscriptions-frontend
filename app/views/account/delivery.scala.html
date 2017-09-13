@@ -31,7 +31,7 @@
 
             <div class="prose">
                 <p>
-                    You can use this service to temporarily suspend delivery of your newspapers, view your billing schedule, or report a delivery issue.
+                    You can use this service to temporarily suspend delivery of your newspapers, view your billing schedule, or report a delivery problem.
                 </p>
                 <p>
                     If you have any other customer service enquir​ies,
@@ -115,7 +115,7 @@
                             Please select the date of your missing paper using the form below.
                         </p>
                     </div>
-                    <form class="form js-report-delivery-issue-form" action="@routes.AccountManagement.reportDeliveryIssue().url" method="POST">
+                    <form class="form js-report-delivery-problem-form" action="@routes.AccountManagement.reportDeliveryProblem().url" method="POST">
                         <fieldset>
                             @helper.CSRF.formField
                             <div class="form-field">
@@ -125,10 +125,10 @@
                                 <input type="hidden" id="sfContactId" name="sfContactId" value="@contactId"/>
                             </div>
                             <div class="form-field">
-                                <div id="issueReportDatePicker"></div>
+                                <div id="reportProblemDatePicker"></div>
                             </div>
                             <button type="submit" class="input-submit button button--primary button--large u-margin-bottom mma-dates__button">
-                                Report Issue
+                                Report Problem
                             </button>
                         </fieldset>
                     </form>

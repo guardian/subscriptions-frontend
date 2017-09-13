@@ -138,7 +138,7 @@ object ManageDelivery extends ContextLogging {
     }
   }
 
-  def fulfilmentLookup(implicit request: Request[ReportDeliveryIssue], touchpoint: TouchpointBackend.Resolution): Future[Result] = {
+  def fulfilmentLookup(implicit request: Request[ReportDeliveryProblem], touchpoint: TouchpointBackend.Resolution): Future[Result] = {
     implicit val tpBackend = touchpoint.backend
     val deliveryIssueRequest = request.body
     logger.info(s"Attempting to raise a delivery issue: $deliveryIssueRequest")
@@ -146,10 +146,10 @@ object ManageDelivery extends ContextLogging {
     futureLookupAttempt.map { lookupAttempt => lookupAttempt match {
         case \/-(lookup) =>
           logger.info(s"Successfully raised a delivery issue for $deliveryIssueRequest")
-          Ok(views.html.account.reportDeliveryIssueSuccess(lookup, deliveryIssueRequest.issueDate))
+          Ok(views.html.account.reportDeliveryProblemSuccess(lookup, deliveryIssueRequest.issueDate))
         case -\/(message) =>
           logger.error(s"Failed to raise a delivery issue for ${deliveryIssueRequest.subscriptionName}: $message")
-          Ok(views.html.account.reportDeliveryIssueFailure())
+          Ok(views.html.account.reportDeliveryProblemFailure())
       }
     }
   }
@@ -420,7 +420,7 @@ object AccountManagement extends Controller with ContextLogging with CatalogProv
     ManageWeekly.renewThankYou
   }
 
-  def reportDeliveryIssue: Action[ReportDeliveryIssue] = accountManagementAction.async(parse.form(ReportDeliveryIssueForm.issueReport)) { implicit request =>
+  def reportDeliveryProblem: Action[ReportDeliveryProblem] = accountManagementAction.async(parse.form(ReportDeliveryProblemForm.report)) { implicit request =>
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
     ManageDelivery.fulfilmentLookup
   }
