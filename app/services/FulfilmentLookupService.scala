@@ -16,7 +16,7 @@ object FulfilmentLookupService extends StrictLogging {
 
   val httpClient = futureRunner
 
-  def buildRequest(environment: String, deliveryProblem: ReportDeliveryProblem): okhttp3.Request = {
+  def buildRequest(env: String, deliveryProblem: ReportDeliveryProblem): okhttp3.Request = {
     val apiDateFormatter = DateTimeFormat.forPattern("yyyy-MM-dd")
     val formattedDate = apiDateFormatter.print(deliveryProblem.issueDate)
     val json = Json.obj(
@@ -26,8 +26,8 @@ object FulfilmentLookupService extends StrictLogging {
     )
     val body = RequestBody.create(MediaType.parse("application/json"), json.toString())
     new okhttp3.Request.Builder()
-      .addHeader("x-api-key", Config.fulfilmentLookupApiKey(environment))
-      .url(s"${Config.fulfilmentLookupApiUrl(environment)}/fulfilment-lookup")
+      .addHeader("x-api-key", Config.fulfilmentLookupApiKey(env))
+      .url(s"${Config.fulfilmentLookupApiUrl(env)}/fulfilment-lookup")
       .post(body)
       .build()
   }
