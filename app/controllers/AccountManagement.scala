@@ -139,16 +139,16 @@ object ManageDelivery extends ContextLogging {
   }
 
   def fulfilmentLookup(implicit request: Request[ReportDeliveryProblem], touchpoint: TouchpointBackend.Resolution): Future[Result] = {
-    implicit val tpBackend = touchpoint.backend
+    val env = touchpoint.backend.environmentName
     val deliveryProblem = request.body
-    logger.info(s"Attempting to raise a delivery issue: $deliveryProblem")
-    val futureLookupAttempt = FulfilmentLookupService.lookupSubscription(tpBackend.environmentName, deliveryProblem)
+    logger.info(s"[${env}] Attempting to raise a delivery issue: $deliveryProblem")
+    val futureLookupAttempt = FulfilmentLookupService.lookupSubscription(env, deliveryProblem)
     futureLookupAttempt.map { lookupAttempt => lookupAttempt match {
         case \/-(lookup) =>
-          logger.info(s"Successfully raised a delivery issue for $deliveryProblem")
+          logger.info(s"[${env}] Successfully raised a delivery issue for $deliveryProblem")
           Ok(views.html.account.reportDeliveryProblemSuccess(lookup, deliveryProblem.issueDate))
         case -\/(message) =>
-          logger.error(s"Failed to raise a delivery issue for ${deliveryProblem.subscriptionName}: $message")
+          logger.error(s"[${env}] Failed to raise a delivery issue for ${deliveryProblem.subscriptionName}: $message")
           Ok(views.html.account.reportDeliveryProblemFailure())
       }
     }

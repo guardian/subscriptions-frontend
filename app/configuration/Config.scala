@@ -128,8 +128,7 @@ object Config {
   val getAddressIOApiUrl = config.getString("get-address-io-api.url")
   val getAddressIOApiKey = config.getString("get-address-io-api.key")
 
-  val fulfilmentLookupApiKey = config.getString("fulfilment-lookup-api.key")
-
-  val fulfilmentLookupApiUrl = config.getString("fulfilment-lookup-api.url")
+  def fulfilmentLookupApiKey(env: String) = config.getString(s"fulfilment-lookup-api.$env.key")
+  def fulfilmentLookupApiUrl(env: String) = config.getString(s"fulfilment-lookup-api.$env.url")
 
 }
