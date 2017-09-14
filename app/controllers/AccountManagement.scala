@@ -28,6 +28,7 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json._
 import play.api.mvc.{AnyContent, _}
 import _root_.services.FulfilmentLookupService
+import com.gu.zuora.soap.models.Queries.Account
 import utils.TestUsers.PreSigninTestCookie
 import views.html.account.thankYouRenew
 import views.support.Dates._
@@ -73,11 +74,11 @@ object ManageDelivery extends ContextLogging {
 
   import play.api.mvc.Results._
 
-  def apply(errorCodes: Set[String], pendingHolidays: Seq[HolidayRefund], billingSchedule: Option[BillingSchedule], deliverySubscription: Subscription[Delivery])(implicit request: Request[AnyContent], touchpoint: TouchpointBackend.Resolution): Result = {
+  def apply(errorCodes: Set[String], pendingHolidays: Seq[HolidayRefund], billingSchedule: Option[BillingSchedule], deliverySubscription: Subscription[Delivery], account: Account)(implicit request: Request[AnyContent], touchpoint: TouchpointBackend.Resolution): Result = {
     val suspendedDays = SuspensionService.holidayToSuspendedDays(pendingHolidays, deliverySubscription.plan.charges.chargedDays.toList)
     val chosenPaperDays = deliverySubscription.plan.charges.chargedDays.toList.sortBy(_.dayOfTheWeekIndex)
     val suspendableDays = Config.suspendableWeeks * chosenPaperDays.size
-    Ok(views.html.account.delivery(deliverySubscription, pendingHolidays, billingSchedule, chosenPaperDays, suspendableDays, suspendedDays, errorCodes))
+    Ok(views.html.account.delivery(deliverySubscription, account, pendingHolidays, billingSchedule, chosenPaperDays, suspendableDays, suspendedDays, errorCodes))
   }
 
   def suspend(implicit request: Request[AnyContent], touchpoint: TouchpointBackend.Resolution): Future[Result] = {
@@ -137,18 +138,18 @@ object ManageDelivery extends ContextLogging {
     }
   }
 
-  def fulfilmentCheck(implicit request: Request[TrackDeliveryRequest], touchpoint: TouchpointBackend.Resolution): Future[Result] = {
+  def fulfilmentLookup(implicit request: Request[ReportDeliveryProblem], touchpoint: TouchpointBackend.Resolution): Future[Result] = {
     implicit val tpBackend = touchpoint.backend
-    val trackDeliveryRequest = request.body
-    logger.info(s"Attempting to perform tracking lookup: $trackDeliveryRequest")
-    val futureLookupAttempt = FulfilmentLookupService.lookupSubscription(tpBackend.environmentName, trackDeliveryRequest)
+    val deliveryProblem = request.body
+    logger.info(s"Attempting to raise a delivery issue: $deliveryProblem")
+    val futureLookupAttempt = FulfilmentLookupService.lookupSubscription(tpBackend.environmentName, deliveryProblem)
     futureLookupAttempt.map { lookupAttempt => lookupAttempt match {
         case \/-(lookup) =>
-          logger.info(s"Successful delivery tracking for $trackDeliveryRequest; showing deliveryTrackingSuccess")
-          Ok(views.html.account.deliveryTrackingSuccess(lookup, trackDeliveryRequest.issueDate))
+          logger.info(s"Successfully raised a delivery issue for $deliveryProblem")
+          Ok(views.html.account.reportDeliveryProblemSuccess(lookup, deliveryProblem.issueDate))
         case -\/(message) =>
-          logger.error(s"Failed to perform delivery tracking for ${trackDeliveryRequest.subscriptionName}: $message")
-          Ok(views.html.account.deliveryTrackingFailure())
+          logger.error(s"Failed to raise a delivery issue for ${deliveryProblem.subscriptionName}: $message")
+          Ok(views.html.account.reportDeliveryProblemFailure())
       }
     }
   }
@@ -353,12 +354,13 @@ object AccountManagement extends Controller with ContextLogging with CatalogProv
 
     val futureMaybeFutureManagePage = for {
       subscription <- OptionT(eventualMaybeSubscription).filter(!_.isCancelled)
+      account <- OptionT(tpBackend.zuoraService.getAccount(subscription.accountId).map{Some(_)}.recover{case t: Throwable => None})
       pendingHolidays <- OptionT(tpBackend.suspensionService.getUnfinishedHolidays(subscription.name, now).map(_.toOption))
-      billingSchedule <- OptionT(tpBackend.commonPaymentService.billingSchedule(subscription.id, subscription.accountId, numberOfBills = 13).map(Some(_):Option[Option[BillingSchedule]]))
+      billingSchedule <- OptionT(tpBackend.commonPaymentService.billingSchedule(subscription.id, account, numberOfBills = 13).map(Some(_):Option[Option[BillingSchedule]]))
     } yield {
       val maybeFutureManagePage = subscription.planToManage.product match {
         case Product.Delivery => subscription.asDelivery.map { deliverySubscription =>
-          Future.successful(ManageDelivery(errorCodes, pendingHolidays, billingSchedule, deliverySubscription))
+          Future.successful(ManageDelivery(errorCodes, pendingHolidays, billingSchedule, deliverySubscription, account))
         }
         case Product.Voucher => subscription.asVoucher.map { voucherSubscription =>
           Future.successful(Ok(views.html.account.voucher(voucherSubscription, billingSchedule)))
@@ -418,9 +420,9 @@ object AccountManagement extends Controller with ContextLogging with CatalogProv
     ManageWeekly.renewThankYou
   }
 
-  def trackDelivery: Action[TrackDeliveryRequest] = accountManagementAction.async(parse.form(TrackDeliveryForm.lookup)) { implicit request =>
+  def reportDeliveryProblem: Action[ReportDeliveryProblem] = accountManagementAction.async(parse.form(ReportDeliveryProblemForm.report)) { implicit request =>
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
-    ManageDelivery.fulfilmentCheck
+    ManageDelivery.fulfilmentLookup
   }
 
 }

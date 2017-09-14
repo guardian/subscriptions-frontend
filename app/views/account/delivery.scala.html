@@ -7,12 +7,12 @@
 @import model.SubscriptionOps._
 @import views.support.Dates.prettyDate
 @import views.support.AccountManagementOps._
-@import org.joda.time.Days
-@import com.gu.memsub.BillingPeriod
 @import com.gu.memsub.subsv2.SubscriptionPlan.DailyPaper
 @import com.gu.memsub.Benefit.PaperDay
+@import com.gu.zuora.soap.models.Queries.Account
 @(
     subscription: Subscription[DailyPaper],
+    billingAccount: Account,
     holidayRefunds: Seq[HolidayRefund] = Seq.empty,
     billingSchedule: Option[BillingSchedule],
     chosenPaperDays: List[PaperDay],
@@ -20,24 +20,21 @@
     suspendedDays: Int,
     errorCodes: Set[String]
 )(implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackend.Resolution)
-@main("Cancel your papers while you're away | The Guardian", bodyClasses = List("is-wide"), edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution), managementPage = true) {
+@main("Manage your subscription | The Guardian", bodyClasses = List("is-wide"), edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution), managementPage = true) {
 
     <main class="page-container gs-container">
         <section class="suspend-container">
 
             <div class="suspend-header">
-                <h1 class="suspend-header__title">Cancel your papers while you're away</h1>
+                <h1 class="suspend-header__title">Manage your subscription</h1>
             </div>
 
             <div class="prose">
                 <p>
-                    You can use this service to temporarily suspend delivery of your newspapers.
+                    You can use this service to temporarily suspend delivery of your newspapers, view your billing schedule, or report a delivery problem.
                 </p>
                 <p>
-                    Please give us at least 3 days notice, and we will reduce the next payment after you go away by the value of the cancelled papers, including delivery.
-                </p>
-                <p>
-                    If you have any customer service enquir​ies,
+                    If you have any other customer service enquir​ies,
                     please contact us on: <a href="tel:+44 330 333 6767">+44 (0) 330 333 6767</a>
                     or email <a href="mailto:homedelivery@@theguardian.com">homedelivery@@theguardian.com</a>.
                 </p>
@@ -91,8 +88,8 @@
                         </fieldset>
                     </form>
                     <span class="mma-dates__request">
-                        Please give us at least 3 days notice to process the delivery holiday. You can line up to @suspendableWeeks weeks of holidays.<strong>
-                        All dates are inclusive</strong>.
+                        Please give us at least 3 days notice to process the delivery holiday. You can line up to @suspendableWeeks weeks of holidays.
+                        <strong>All dates are inclusive</strong>.
                     </span>
                 </section>
             }
@@ -108,31 +105,35 @@
                 </section>
             }
 
-            <section class="mma-section">
-                <legend class="mma-section__header">
-                    Delivery Tracking
-                </legend>
-                <div class="prose">
-                    <p>
-                      Use the form below to check the delivery status of your paper.
-                    </p>
-                </div>
-                <form class="form js-track-delivery-form" action="@routes.AccountManagement.trackDelivery().url" method="POST">
-                   <fieldset>
-                       @helper.CSRF.formField
-                       <div class="form-field">
-                           <input type="hidden" id="subscriptionName" name="subscriptionName" value="@subscription.name.get"/>
-                       </div>
-                       <div class="form-field">
-                           <div id="trackingDatePicker"></div>
-                       </div>
-                       <button type="submit" class="input-submit button button--primary button--large u-margin-bottom mma-dates__button">
-                          Track Delivery
-                       </button>
-                   </fieldset>
-                </form>
-            </section>
-
+            @billingAccount.sfContactId.map { contactId =>
+                <section class="mma-section">
+                    <legend class="mma-section__header">
+                        Report a delivery problem
+                    </legend>
+                    <div class="prose">
+                        <p>
+                            Please select the date of your missing paper using the form below.
+                        </p>
+                    </div>
+                    <form class="form js-report-delivery-problem-form" action="@routes.AccountManagement.reportDeliveryProblem().url" method="POST">
+                        <fieldset>
+                            @helper.CSRF.formField
+                            <div class="form-field">
+                                <input type="hidden" id="subscriptionName" name="subscriptionName" value="@subscription.name.get"/>
+                            </div>
+                            <div class="form-field">
+                                <input type="hidden" id="sfContactId" name="sfContactId" value="@contactId"/>
+                            </div>
+                            <div class="form-field">
+                                <div id="reportProblemDatePicker"></div>
+                            </div>
+                            <button type="submit" class="input-submit button button--primary button--large u-margin-bottom mma-dates__button">
+                                Report Problem
+                            </button>
+                        </fieldset>
+                    </form>
+                </section>
+            }
 
         </section>
     </main>
