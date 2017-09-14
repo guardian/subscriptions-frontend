@@ -16,7 +16,7 @@ object FulfilmentLookupService extends StrictLogging {
 
   val httpClient = futureRunner
 
-  def buildRequest(environment: String, deliveryProblem: ReportDeliveryProblem): okhttp3.Request = {
+  def buildRequest(env: String, deliveryProblem: ReportDeliveryProblem): okhttp3.Request = {
     val apiDateFormatter = DateTimeFormat.forPattern("yyyy-MM-dd")
     val formattedDate = apiDateFormatter.print(deliveryProblem.issueDate)
     val json = Json.obj(
@@ -26,20 +26,20 @@ object FulfilmentLookupService extends StrictLogging {
     )
     val body = RequestBody.create(MediaType.parse("application/json"), json.toString())
     new okhttp3.Request.Builder()
-      .addHeader("x-api-key", Config.fulfilmentLookupApiKey)
-      .url(s"${Config.fulfilmentLookupApiUrl}/fulfilment-lookup")
+      .addHeader("x-api-key", Config.fulfilmentLookupApiKey(env))
+      .url(s"${Config.fulfilmentLookupApiUrl(env)}/fulfilment-lookup")
       .post(body)
       .build()
   }
 
-  def lookupSubscription(environment: String, deliveryProblem: ReportDeliveryProblem): Future[String \/ FulfilmentLookup] = {
-    val request = buildRequest(environment, deliveryProblem)
+  def lookupSubscription(env: String, deliveryProblem: ReportDeliveryProblem): Future[String \/ FulfilmentLookup] = {
+    val request = buildRequest(env, deliveryProblem)
     val futureResponse = httpClient(request)
     futureResponse.map { response =>
       val responseBody = response.body.string
       response.body.close
       if (response.isSuccessful) {
-        logger.info(s"Successfully performed lookup for ${deliveryProblem.subscriptionName}")
+        logger.info(s"[${env}] Successfully performed lookup for ${deliveryProblem.subscriptionName}")
         val jsonBody = Json.parse(responseBody)
         jsonBody.validate[FulfilmentLookup] match {
           case validLookup: JsSuccess[FulfilmentLookup] =>
