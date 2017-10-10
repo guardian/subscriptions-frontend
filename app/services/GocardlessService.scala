@@ -1,6 +1,7 @@
 package services
 
 import com.gocardless.errors.GoCardlessApiException
+import com.gocardless.resources.BankDetailsLookup.AvailableDebitScheme
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
 import model.DirectDebitData
@@ -33,15 +34,14 @@ object GoCardlessService extends GoCardlessService with LazyLogging {
    *         In the latter case an error is logged.
    */
   override def checkBankDetails(paymentData: DirectDebitData): Future[Boolean] = {
-    val sortCode = paymentData.sortCode.replaceAllLiterally("-", "")
-
     Future {
       client.bankDetailsLookups().create()
         .withAccountNumber(paymentData.account)
-        .withBranchCode(sortCode)
+        .withBranchCode(paymentData.sortCode)
         .withCountryCode("GB")
         .execute()
-      true
+    } map { bdl =>
+      bdl.getAvailableDebitSchemes.contains(AvailableDebitScheme.BACS)
     } recover { case e: GoCardlessApiException =>
       if (e.getCode == 429) {
         logger.error("Bypassing preliminary bank account check because the GoCardless rate limit has been reached for this endpoint. Someone might be using our website to proxy to GoCardless")
