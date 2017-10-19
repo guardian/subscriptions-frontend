@@ -28,7 +28,7 @@ object SubscriptionAcquisitionComponents {
             case Left(_) => Product.PaperSubscriptionEveryday
             case Right(_) => Product.DigitalSubscription
           },
-          paymentFrequency = PaymentFrequency.OneOff,
+          paymentFrequency = PaymentFrequency.Monthly,
           currency = "dummy",
           // Stripe amount is in smallest currency unit.
           // Convert e.g. Pence to Pounds, Cents to Dollars
