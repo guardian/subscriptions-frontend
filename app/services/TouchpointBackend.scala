@@ -80,7 +80,7 @@ object TouchpointBackend {
       val map = this.catalogService.catalog.map(_.fold[CatalogMap](error => {println(s"error: ${error.list.mkString}"); Map()}, _.map))
       lazy val subscriptionService = new subsv2.services.SubscriptionService[Future](newProductIds, map, simpleRestClient, zuoraService.getAccountIds)
       lazy val paymentService = new PaymentService(_stripeService)
-      lazy val commonPaymentService = new CommonPaymentService(_stripeService, zuoraService, this.catalogService.unsafeCatalog.productMap)
+      lazy val commonPaymentService = new CommonPaymentService(zuoraService, this.catalogService.unsafeCatalog.productMap)
       lazy val zuoraProperties = config.zuoraProperties
       lazy val promoService = new PromoService(promoCollection, new Discounter(this.discountRatePlanIds))
       lazy val promoCollection = new DynamoPromoCollection(this.promoStorage, 15.seconds)
