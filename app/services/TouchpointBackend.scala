@@ -6,7 +6,8 @@ import com.gu.memsub.promo.{DynamoPromoCollection, DynamoTables, PromotionCollec
 import com.gu.memsub.services.{PaymentService => CommonPaymentService, _}
 import com.gu.memsub.subsv2
 import com.gu.memsub.subsv2.services.SubscriptionService._
-import com.gu.monitoring.ServiceMetrics
+import com.gu.monitoring.{ServiceMetrics, StatusMetrics}
+import com.gu.okhttp.RequestRunners
 import com.gu.okhttp.RequestRunners._
 import com.gu.salesforce.SimpleContactRepository
 import com.gu.stripe.StripeService
@@ -39,6 +40,8 @@ trait TouchpointBackend {
   def catalogService : subsv2.services.CatalogService[Future]
   def zuoraService: zuora.api.ZuoraService
   def subscriptionService: subsv2.services.SubscriptionService[Future]
+  def stripeUKMembershipService: StripeService
+  def stripeAUMembershipService: StripeService
   def paymentService: PaymentService
   def commonPaymentService: CommonPaymentService
   def zuoraProperties: ZuoraProperties
@@ -63,12 +66,16 @@ object TouchpointBackend {
 
     val config = TouchpointBackendConfig.backendType(backendType, Config.config)
     val soapServiceMetrics = new ServiceMetrics(Config.stage, Config.appName, "zuora-soap-client")
-    val touchpointBackendMetrics = new ServiceMetrics(Config.stage, Config.appName, "Stripe") with TouchpointBackendMetrics {
-      val backendEnv = config.stripe.envName
+    val stripeUKMetrics = new ServiceMetrics(Config.stage, Config.appName, "Stripe UK Membership") with TouchpointBackendMetrics {
+      val backendEnv = config.stripeUK.envName
+    }
+
+    val stripeAUMetrics = new ServiceMetrics(Config.stage, Config.appName, "Stripe AU Membership") with TouchpointBackendMetrics {
+      val backendEnv = config.stripeAU.envName
     }
     val soapClient = new soap.ClientWithFeatureSupplier(Set.empty, config.zuoraSoap, loggingRunner(soapServiceMetrics), configurableLoggingRunner(20.seconds, soapServiceMetrics))
     val newProductIds = Config.productIds(config.environmentName)
-    val _stripeService = new StripeService(config.stripe, loggingRunner(touchpointBackendMetrics))
+
     val sfSimpleContactRepo = new SimpleContactRepository(config.salesforce, system.scheduler, Config.appName)
 
     new TouchpointBackend {
@@ -79,8 +86,10 @@ object TouchpointBackend {
       lazy val zuoraService = new zuora.ZuoraService(soapClient)
       val map = this.catalogService.catalog.map(_.fold[CatalogMap](error => {println(s"error: ${error.list.mkString}"); Map()}, _.map))
       lazy val subscriptionService = new subsv2.services.SubscriptionService[Future](newProductIds, map, simpleRestClient, zuoraService.getAccountIds)
-      lazy val paymentService = new PaymentService(_stripeService)
-      lazy val commonPaymentService = new CommonPaymentService(_stripeService, zuoraService, this.catalogService.unsafeCatalog.productMap)
+      lazy val stripeUKMembershipService = new StripeService(config.stripeUK, loggingRunner(stripeUKMetrics))
+      lazy val stripeAUMembershipService = new StripeService(config.stripeAU, loggingRunner(stripeAUMetrics))
+      lazy val paymentService = new PaymentService(stripeUKMembershipService)
+      lazy val commonPaymentService = new CommonPaymentService(zuoraService, this.catalogService.unsafeCatalog.productMap)
       lazy val zuoraProperties = config.zuoraProperties
       lazy val promoService = new PromoService(promoCollection, new Discounter(this.discountRatePlanIds))
       lazy val promoCollection = new DynamoPromoCollection(this.promoStorage, 15.seconds)
