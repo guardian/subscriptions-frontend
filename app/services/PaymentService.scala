@@ -3,6 +3,8 @@ import com.gu.i18n.Country.UK
 import com.gu.i18n.Currency.GBP
 import com.gu.i18n.{CountryGroup, Currency}
 import com.gu.stripe.StripeService
+import com.gu.zuora.api.GoCardless
+import com.gu.zuora.api.StripeUKMembershipGateway
 import com.gu.zuora.soap.models.Commands._
 import model._
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
@@ -32,7 +34,7 @@ class PaymentService(val stripeService: StripeService) {
   }
 
   class ZuoraAccountCreditCard(val paymentData: CreditCardData, val currency: Currency, val purchaserIds: PurchaserIdentifiers) extends AccountAndPayment {
-    override def makeAccount = Account(purchaserIds.contactId, identityIdForAccount(purchaserIds), currency, autopay = true, Stripe)
+    override def makeAccount = Account(purchaserIds.contactId, identityIdForAccount(purchaserIds), currency, autopay = true, StripeUKMembershipGateway)
 
     override def makePaymentMethod = {
       stripeService.Customer.create(description = purchaserIds.description, card = paymentData.stripeToken)

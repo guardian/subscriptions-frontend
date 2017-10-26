@@ -1,8 +1,9 @@
 package touchpoint
 
+import com.gu.i18n.Country
 import com.gu.salesforce.SalesforceConfig
 import com.gu.stripe.StripeApiConfig
-import com.gu.zuora.{ZuoraRestConfig, ZuoraSoapConfig, ZuoraApiConfig}
+import com.gu.zuora.{ZuoraApiConfig, ZuoraRestConfig, ZuoraSoapConfig}
 import com.typesafe.scalalogging.LazyLogging
 import org.joda.time.Days
 
@@ -48,7 +49,7 @@ object TouchpointBackendConfig extends LazyLogging {
       ZuoraApiConfig.soap(envBackendConf, environmentName),
       ZuoraApiConfig.rest(envBackendConf, environmentName),
       ZuoraProperties.from(envBackendConf, environmentName),
-      StripeApiConfig.from(envBackendConf, environmentName)
+      StripeApiConfig.from(envBackendConf, environmentName, Country.UK)
     )
   }
 }
