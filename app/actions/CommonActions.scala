@@ -45,6 +45,12 @@ object CommonActions {
 
   val CachedAction = resultModifier(Cached(_))
 
+  val StoreAcquisitionDataAction = new ActionBuilder[Request] {
+    def invokeBlock[A](request: Request[A], block: (Request[A]) => Future[Result]) = block(request).map(result => {
+      request.getQueryString("acquisitionData").fold(result)(a => result.withSession(request.session.data.toSeq ++ Seq("acquisitionData" -> a) :_*))
+    })
+  }
+
   val CSRFCachedAsyncAction = (block: Request[_] => Future[Result]) => CSRFCheck(action = CachedAction.async(block), config = CSRFConfig.global.copy(checkContentType = (x: Option[String]) => true))
 
   def noCache(result: Result): Result = NoCache(result)
