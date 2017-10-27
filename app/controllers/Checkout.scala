@@ -269,7 +269,11 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
         _ + _
       }
 
-      MockOphanService.submit(SubscriptionAcquisitionComponents(subscribeRequest))
+      val acquisitionData = request.session.get("acquisitionData")
+      if (acquisitionData.isEmpty) {
+        logger.warn(s"No acquisitionData in session")
+      }
+      MockOphanService.submit(SubscriptionAcquisitionComponents(subscribeRequest, acquisitionData))
 
       logger.info(s"User successfully became subscriber:\n\tUser: SF=${r.salesforceMember.salesforceContactId}\n\tPlan: ${subscribeRequest.productData.fold(_.plan, _.plan).name}\n\tSubscription: ${r.subscribeResult.subscriptionName}")
       Ok(Json.obj("redirect" -> routes.Checkout.thankYou().url)).withSession(session)
