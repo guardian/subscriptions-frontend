@@ -54,7 +54,9 @@ case class SubscriptionData(
    personalData: PersonalData,
    paymentData: PaymentData,
    promoCode: Option[PromoCode],
-   currency: Currency
+   currency: Currency,
+   ophanBrowserId: String,
+   ophanSubscriptionId: String
 )
 
 case class DigipackData(

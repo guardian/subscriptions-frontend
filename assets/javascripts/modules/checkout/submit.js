@@ -12,7 +12,8 @@ define([
     'modules/checkout/stripeErrorMessages',
     'modules/checkout/stripeCheckout',
     'modules/raven',
-    'modules/checkout/formElements'
+    'modules/checkout/formElements',
+    'modules/analytics/ophan'
 ], function ($,
              bean,
              ajax,
@@ -25,12 +26,13 @@ define([
              paymentErrorMessages,
              stripeCheckout,
              raven,
-             formElements) {
+             formElements,
+             ophan) {
     'use strict';
 
     function submitHandler() {
         if (formEls.$CHECKOUT_SUBMIT.length) {
-            formEls.$CHECKOUT_SUBMIT[0].addEventListener('click', submit, false);
+            formEls.$CHECKOUT_SUBMIT[0].addEventListener('click', ophan.loaded.then(submit), false);
         }
     }
 
@@ -89,6 +91,16 @@ define([
         var errorElement = $('.js-error');
 
         errorElement.text('');
+
+        data.ophanBrowserId = cookie.getCookie('bwid');
+
+        // https://github.com/guardian/ophan/blob/master/tracker-js/assets/coffee/ophan/transmit.coffee#L10
+        data.ophanPageviewId = ophan.viewId;
+
+        // What the hell is the visit id?
+
+        // why does below work in ga? since these vars aren't available in console
+        // guardian.ophan && guardian.ophan.pageViewId;
 
         ajax({
             url: '/checkout',
