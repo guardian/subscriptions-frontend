@@ -9,6 +9,7 @@ import com.typesafe.scalalogging.LazyLogging
 import ophan.thrift.event.PaymentProvider.{Gocardless, Stripe}
 import ophan.thrift.event.{AbTestInfo, Acquisition, PaymentFrequency, Product}
 import play.api.libs.json._
+
 //import com.gu.acquisition.model.ReferrerAcquisitionData.referrerAcquisitionDataReads
 
 case class SubscriptionAcquisitionComponents(
@@ -27,17 +28,27 @@ object SubscriptionAcquisitionComponents {
       Right(OphanIds(pageviewId = Some("dummy"), visitId = Some("dummy"), browserId = Some("dummy")))
     }
 
+    private def parseJsonSafely(json: String): Option[JsValue] = {
+      try {
+        Some(Json.parse(json))
+      } catch {
+        case scala.util.control.NonFatal(t) =>
+          logger.warn(s"""Unable to parse "$json" as JSON. ${t.getMessage()}""")
+          None
+      }
+    }
+
     override def buildAcquisition(components: SubscriptionAcquisitionComponents): Either[String, Acquisition] = {
       import components._
 
       val plan = subscribeRequest.productData.fold(_.plan, _.plan)
-      val acquisitionData = acquisitionDataJSON
-        .map(json => Json.fromJson[ReferrerAcquisitionData](Json.parse(json)))
+      val parsedJson = acquisitionDataJSON.flatMap(parseJsonSafely)
+      val acquisitionData = parsedJson
+        .map(json => Json.fromJson[ReferrerAcquisitionData](json))
         .flatMap({
           case JsSuccess(referrerAcquisitionData, _) => Some(referrerAcquisitionData)
           case e: JsError => {
-            logger.warn("Could not parse JSON")
-            // log: JsError.toJson(e).toString()
+            logger.warn(s"Unable to decode JSON $parsedJson to an instance of ReferrerAcquisitionData. ${JsError.toJson(e).toString()}")
             None
           }
         })
