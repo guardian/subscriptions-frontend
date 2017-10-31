@@ -13,7 +13,8 @@ define([
     'modules/checkout/stripeCheckout',
     'modules/raven',
     'modules/checkout/formElements',
-    'modules/analytics/ophan'
+    'modules/analytics/ophan',
+    'utils/cookie'
 ], function ($,
              bean,
              ajax,
@@ -27,16 +28,19 @@ define([
              stripeCheckout,
              raven,
              formElements,
-             ophan) {
+             ophan,
+             cookie) {
     'use strict';
 
     function submitHandler() {
         if (formEls.$CHECKOUT_SUBMIT.length) {
-            formEls.$CHECKOUT_SUBMIT[0].addEventListener('click', ophan.loaded.then(submit), false);
+            formEls.$CHECKOUT_SUBMIT[0].addEventListener('click', function(e) {
+                ophan.loaded.then(function(o) { submit(e, o.viewId) });
+            }, false);
         }
     }
 
-    function submit(e) {
+    function submit(e, ophanPageViewId) {
         e.preventDefault();
         loader.setLoaderElem(document.querySelector('.js-loader'));
         loader.startLoader();
@@ -45,7 +49,7 @@ define([
         submitEl.setAttribute('disabled', 'disabled');
 
         if (!formEls.$CARD_TYPE[0].checked) {
-            send();
+            send(ophanPageViewId);
             return;
         }
 
@@ -71,7 +75,7 @@ define([
             token: function (token) {
                 successfulCharge = token;
                 stripeCheckout.setPaymentToken(token.id);
-                send();
+                send(ophanPageViewId);
             },
             closed: function () {
                 if (!successfulCharge) {
@@ -80,11 +84,9 @@ define([
                 }
             }
         });
-
-
     }
 
-    function send() {
+    function send(ophanPageViewId) {
         var form = formEls.$CHECKOUT_FORM[0];
         var data = serializer([].slice.call(form.elements));
         var submitEl = formEls.$CHECKOUT_SUBMIT[0];
@@ -93,11 +95,9 @@ define([
         errorElement.text('');
 
         data.ophanBrowserId = cookie.getCookie('bwid');
-
+        data.ophanVisitId = cookie.getCookie('vsid');
+        data.ophanPageViewId = ophanPageViewId;
         // https://github.com/guardian/ophan/blob/master/tracker-js/assets/coffee/ophan/transmit.coffee#L10
-        data.ophanPageviewId = ophan.viewId;
-
-        // What the hell is the visit id?
 
         // why does below work in ga? since these vars aren't available in console
         // guardian.ophan && guardian.ophan.pageViewId;

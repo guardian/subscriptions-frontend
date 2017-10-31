@@ -6,8 +6,9 @@ import com.gu.memsub.BillingPeriod
 import com.gu.memsub.BillingPeriod.{Month, Quarter, SixMonths, Year}
 import com.gu.stripe.Stripe.Charge
 import com.typesafe.scalalogging.LazyLogging
+import forms.SubscriptionsForm
 import ophan.thrift.event.PaymentProvider.{Gocardless, Stripe}
-import ophan.thrift.event.{AbTestInfo, Acquisition, PaymentFrequency, Product}
+import ophan.thrift.event._
 import play.api.libs.json._
 
 //import com.gu.acquisition.model.ReferrerAcquisitionData.referrerAcquisitionDataReads
@@ -25,7 +26,14 @@ object SubscriptionAcquisitionComponents {
 
     def buildOphanIds(components: SubscriptionAcquisitionComponents): Either[String, OphanIds] = {
       import components._
-      Right(OphanIds(pageviewId = Some("dummy"), visitId = Some("dummy"), browserId = Some("dummy")))
+
+      Right(
+        OphanIds(
+          pageviewId = subscribeRequest.genericData.ophanPageViewId,
+          visitId = subscribeRequest.genericData.ophanVisitId,
+          browserId = subscribeRequest.genericData.ophanBrowserId
+        )
+      )
     }
 
     private def parseJsonSafely(json: String): Option[JsValue] = {
@@ -73,12 +81,18 @@ object SubscriptionAcquisitionComponents {
             .map(_.amount.toDouble).getOrElse(0),
 
           paymentProvider = subscribeRequest.genericData.paymentData match {
-            case DirectDebitData(_, _, _) => Some(Stripe)
-            case CreditCardData(_) => Some(Gocardless)
+            case DirectDebitData(_, _, _) => Some(Gocardless)
+            case CreditCardData(_) => Some(Stripe)
             case _ => None
           },
 
           countryCode = subscribeRequest.genericData.personalData.address.country.map(_.alpha2),
+
+          // printOptions
+          // discountLengthInDays
+          // discountPercentage
+
+          // TODO: platform Thrift definition!
 
           campaignCode = acquisitionData.flatMap(_.campaignCode.map(Set(_))),
           abTests = acquisitionData.flatMap(_.abTest.map(ab => AbTestInfo(Set(ab)))),

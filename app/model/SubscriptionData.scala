@@ -55,8 +55,9 @@ case class SubscriptionData(
    paymentData: PaymentData,
    promoCode: Option[PromoCode],
    currency: Currency,
-   ophanBrowserId: String,
-   ophanSubscriptionId: String
+   ophanPageViewId: Option[String],
+   ophanVisitId: Option[String],
+   ophanBrowserId: Option[String]
 )
 
 case class DigipackData(

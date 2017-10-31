@@ -39,6 +39,8 @@ import scalaz.std.option._
 import scalaz.std.scalaFuture._
 import scalaz.syntax.applicative._
 import scalaz.{NonEmptyList, OptionT}
+import cats.instances.future._
+
 object Checkout extends Controller with LazyLogging with CatalogProvider {
 
   import SessionKeys.{Currency => _, UserId => _, _}
@@ -273,7 +275,10 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
       if (acquisitionData.isEmpty) {
         logger.warn(s"No acquisitionData in session")
       }
-      MockOphanService.submit(SubscriptionAcquisitionComponents(subscribeRequest, acquisitionData))
+
+      val s = MockOphanService.submit(SubscriptionAcquisitionComponents(subscribeRequest, acquisitionData))
+
+      s.fold(println, println)
 
       logger.info(s"User successfully became subscriber:\n\tUser: SF=${r.salesforceMember.salesforceContactId}\n\tPlan: ${subscribeRequest.productData.fold(_.plan, _.plan).name}\n\tSubscription: ${r.subscribeResult.subscriptionName}")
       Ok(Json.obj("redirect" -> routes.Checkout.thankYou().url)).withSession(session)

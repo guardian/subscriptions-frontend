@@ -240,8 +240,9 @@ object SubscriptionsForm {
     "payment" -> of[PaymentData],
     "promoCode" -> optional(of[PromoCode]),
     "currency" -> of[Currency],
-    "ophanPageviewId" -> of[String],
-    "ophanBrowserId" -> of[String]
+    "ophanPageViewId" -> optional(of[String]),
+    "ophanVisitId" -> optional(of[String]),
+    "ophanBrowserId" -> optional(of[String])
   )(SubscriptionData.apply)(SubscriptionData.unapply)
     .verifying("DirectDebit is only available for GBP transactions in the UK", PaymentValidation.validateDirectDebit _))
 }
