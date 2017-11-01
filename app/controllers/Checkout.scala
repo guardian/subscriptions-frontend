@@ -276,7 +276,8 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
         logger.warn(s"No acquisitionData in session")
       }
 
-      val s = MockOphanService.submit(SubscriptionAcquisitionComponents(subscribeRequest, acquisitionData))
+      val promotion = subscribeRequest.genericData.promoCode.map(_.get).flatMap(code => tpBackend.promoService.findPromotion(NormalisedPromoCode.safeFromString(code)))
+      val s = MockOphanService.submit(SubscriptionAcquisitionComponents(subscribeRequest, promotion, acquisitionData))
 
       s.fold(println, println)
 
