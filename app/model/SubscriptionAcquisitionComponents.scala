@@ -154,7 +154,6 @@ object SubscriptionAcquisitionComponents {
             case _ => None
           },
 
-          // TODO: billing address or delivery address??
           countryCode = subscribeRequest.genericData.personalData.address.country.map(_.alpha2),
 
           printOptions = subscribeRequest.productData match {
