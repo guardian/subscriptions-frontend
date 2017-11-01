@@ -21,7 +21,7 @@ import model._
 import model.error.CheckoutService._
 import model.error.SubsError
 import org.joda.time.LocalDate
-import play.api.data.Form
+import play.api.data.{Form, FormError}
 import play.api.libs.json._
 import play.api.mvc._
 import services.AuthenticationService.authenticatedUserFor
@@ -33,11 +33,12 @@ import views.support.{PlanList, BillingPeriod => _, _}
 
 import scala.Function.const
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
+
 import scala.concurrent.Future
 import scalaz.std.option._
 import scalaz.std.scalaFuture._
 import scalaz.syntax.applicative._
-import scalaz.{NonEmptyList, OptionT}
+import scalaz.{NonEmptyList, OptionT, \/}
 object Checkout extends Controller with LazyLogging with CatalogProvider {
 
   import SessionKeys.{Currency => _, UserId => _, _}
@@ -172,7 +173,7 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(NameEnteredInForm, tempData)
     implicit val tpBackend = resolution.backend
     val idUserOpt = authenticatedUserFor(request)
-    val srEither = tpBackend.subsForm.bindFromRequest
+    val srEither: \/[Seq[FormError], SubscribeRequest] = tpBackend.subsForm.bindFromRequest
 
     val sr = srEither.valueOr {
       e => throw new Exception(s"Backend validation failed: identityId=${idUserOpt.map(_.user.id).mkString};" +

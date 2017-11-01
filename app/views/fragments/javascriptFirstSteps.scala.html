@@ -33,22 +33,16 @@
         product: 'Subscriber',
         productData: {}
     };
-    guardian.billingCountry = 'AU'; //TODO find the billing country on the page
-
     @for(
         touchpointBackendResolution <- touchpointBackendResolutionOpt;
         backend = touchpointBackendResolution.backend
     ) {
     guardian.stripe = {
-        ukKey: '@backend.stripeUKMembershipService.publicKey',
-        auKey: '@backend.stripeAUMembershipService.publicKey'
-    };
-
-    guardian.pickStripeKeyForCountry = function() {
-        guardian.billingCountry === 'AU' ? guardian.stripe.auKey : guardian.stripe.ukKey;
+        ukKey: '@backend.stripeUKMembershipService.publicKey.mkString',
+        auKey: '@backend.stripeAUMembershipService.publicKey.mkString'
     };
     guardian.stripeCheckout = {
-        key: guardian.billingCountry === 'AU' ? guardian.stripe.auKey : guardian.stripe.ukKey,
+        key: guardian.stripe.ukKey,
         image: 'https://d24w1tjgih0o9s.cloudfront.net/gu.png',
         locale: 'auto',
         name: 'Guardian',
@@ -56,10 +50,7 @@
         allowRememberMe: false
     };
     guardian.experience = '';
-
-
     }
-
 
     (function(isModern) {
         // We want to add/remove classes to HTML ASAP to avoid FOUC

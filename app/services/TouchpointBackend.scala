@@ -88,7 +88,7 @@ object TouchpointBackend {
       lazy val subscriptionService = new subsv2.services.SubscriptionService[Future](newProductIds, map, simpleRestClient, zuoraService.getAccountIds)
       lazy val stripeUKMembershipService = new StripeService(config.stripeUK, loggingRunner(stripeUKMetrics))
       lazy val stripeAUMembershipService = new StripeService(config.stripeAU, loggingRunner(stripeAUMetrics))
-      lazy val paymentService = new PaymentService(stripeUKMembershipService)
+      lazy val paymentService = new PaymentService(this.stripeUKMembershipService, this.stripeAUMembershipService)
       lazy val commonPaymentService = new CommonPaymentService(zuoraService, this.catalogService.unsafeCatalog.productMap)
       lazy val zuoraProperties = config.zuoraProperties
       lazy val promoService = new PromoService(promoCollection, new Discounter(this.discountRatePlanIds))

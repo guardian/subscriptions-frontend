@@ -12,7 +12,7 @@ import com.gu.memsub.subsv2.SubscriptionPlan.WeeklyPlan
 import com.gu.memsub.subsv2.{Catalog, Subscription}
 import com.gu.memsub.{BillingPeriod, NormalisedTelephoneNumber, Product}
 import com.gu.salesforce.{Contact, ContactId}
-import com.gu.stripe.Stripe
+import com.gu.stripe.{Stripe, StripeService}
 import com.gu.zuora.ZuoraRestService
 import com.gu.zuora.api.ZuoraService
 import com.gu.zuora.soap.models.Commands.{Account, PaymentMethod, RatePlan, Subscribe, _}
@@ -313,16 +313,17 @@ class CheckoutService(
 
   private def createPaymentType(purchaserIds: PurchaserIdentifiers, subscriptionData: SubscribeRequest): Future[NonEmptyList[SubsError] \/ PaymentService#AccountAndPayment] = {
     try {
+      val personalData = subscriptionData.genericData.personalData
+
       val payment = subscriptionData.genericData.paymentData match {
         case paymentData@DirectDebitData(_, _, _) =>
-          val personalData = subscriptionData.genericData.personalData
           require(personalData.address.country.contains(Country.UK), "Direct Debit payment only works in the UK right now")
           paymentService.makeZuoraAccountWithDirectDebit(paymentData, personalData.first, personalData.last, purchaserIds)
         case paymentData@CreditCardData(_) =>
           val plan = subscriptionData.productData.fold(_.plan, _.plan)
           val desiredCurrency = subscriptionData.genericData.currency
           val currency = if (plan.charges.price.currencies.contains(desiredCurrency)) desiredCurrency else GBP
-          paymentService.makeZuoraAccountWithCreditCard(paymentData, currency, purchaserIds)
+          paymentService.makeZuoraAccountWithCreditCard(paymentData, currency, purchaserIds, personalData.address.country)
       }
       Future.successful(\/.right(payment))
     } catch {
@@ -345,7 +346,7 @@ class CheckoutService(
       val idMinimalUser = IdMinimalUser(contact.identityId, None)
       val purchaserIds = PurchaserIdentifiers(contact, Some(idMinimalUser))
       renewal.paymentData match {
-        case cd: CreditCardData => paymentService.makeZuoraAccountWithCreditCard(cd, subscription.currency, purchaserIds)
+        case cd: CreditCardData => paymentService.makeZuoraAccountWithCreditCard(cd, subscription.currency, purchaserIds,billto.country)
         case dd: DirectDebitData => paymentService.makeZuoraAccountWithDirectDebit(dd, billto.firstName, billto.lastName, purchaserIds)
       }
     }

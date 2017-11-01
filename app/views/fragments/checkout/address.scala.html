@@ -72,7 +72,7 @@
                 <option data-currency-choice="@defaultCurrency"></option>
             }
             @for(c <- countriesWithCurrency) {
-                <option value="@c.alpha2" @c.country.validationRules.toAttributes @c.country.addressLabels data-currency-choice="@c.currency">@c.name</option>
+                <option value="@c.alpha2" @c.country.validationRules.toAttributes @c.country.addressLabels data-currency-choice="@c.currency" data-stripe-service-name="@c.stripeServiceName">@c.name</option>
             }
         </select>
         @fragments.forms.errorMessage("This field is required")

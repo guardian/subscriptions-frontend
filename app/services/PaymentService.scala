@@ -1,17 +1,16 @@
 package services
 import com.gu.i18n.Country.UK
 import com.gu.i18n.Currency.GBP
-import com.gu.i18n.{CountryGroup, Currency}
+import com.gu.i18n.{Country, CountryGroup, Currency}
 import com.gu.stripe.StripeService
-import com.gu.zuora.api.GoCardless
-import com.gu.zuora.api.StripeUKMembershipGateway
+import com.gu.zuora.api.{GoCardless, RegionalStripeGateways}
 import com.gu.zuora.soap.models.Commands._
 import model._
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 import scala.concurrent.Future
 
-class PaymentService(val stripeService: StripeService) {
+class PaymentService(val ukStripeService: StripeService, val auStripeService: StripeService) {
 
   sealed trait AccountAndPayment {
     def makeAccount: Account
@@ -33,8 +32,19 @@ class PaymentService(val stripeService: StripeService) {
       ))
   }
 
-  class ZuoraAccountCreditCard(val paymentData: CreditCardData, val currency: Currency, val purchaserIds: PurchaserIdentifiers) extends AccountAndPayment {
-    override def makeAccount = Account(purchaserIds.contactId, identityIdForAccount(purchaserIds), currency, autopay = true, StripeUKMembershipGateway)
+  class ZuoraAccountCreditCard(val paymentData: CreditCardData, val currency: Currency, val purchaserIds: PurchaserIdentifiers, val transactingCountry: Option[Country]) extends AccountAndPayment {
+
+    private def stripeServicePicker(country: Country) = {
+      if(RegionalStripeGateways.getGatewayForCountry(country) == auStripeService.paymentGateway) auStripeService
+      else ukStripeService
+    }
+
+    val stripeService = transactingCountry match {
+      case Some(data) => stripeServicePicker(data)
+      case None => ukStripeService
+    }
+
+    override def makeAccount = Account(purchaserIds.contactId, identityIdForAccount(purchaserIds), currency, autopay = true, stripeService.paymentGateway)
 
     override def makePaymentMethod = {
       stripeService.Customer.create(description = purchaserIds.description, card = paymentData.stripeToken)
@@ -50,6 +60,8 @@ class PaymentService(val stripeService: StripeService) {
     }
   }
 
+
+
   def identityIdForAccount(purchaserIds: PurchaserIdentifiers) = {
     purchaserIds.identityId match {
       case Some(idUser) => idUser.id
@@ -64,8 +76,9 @@ class PaymentService(val stripeService: StripeService) {
       purchaserIds: PurchaserIdentifiers) = ZuoraAccountDirectDebit(paymentData, firstName,lastName, purchaserIds)
 
   def makeZuoraAccountWithCreditCard(
-     paymentData: CreditCardData,
-     currency: Currency,
-     purchaserIds: PurchaserIdentifiers) = new ZuoraAccountCreditCard(paymentData, currency, purchaserIds)
+      paymentData: CreditCardData,
+      currency: Currency,
+      purchaserIds: PurchaserIdentifiers,
+      transactingCountry: Option[Country]) = new ZuoraAccountCreditCard(paymentData, currency, purchaserIds, transactingCountry)
 
 }
