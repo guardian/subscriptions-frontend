@@ -100,7 +100,6 @@ object SubscriptionAcquisitionComponents {
 
         case (Some(Sunday), Voucher, false) => PrintProduct.VoucherSunday
         case (Some(Sunday), Voucher, true) => PrintProduct.VoucherSundayPlus
-        // TODO: fix the spelling of this thrift def! ARGGGGHHHH
         case (Some(Weekend), Voucher, false) => PrintProduct.VoucerWeekend
         case (Some(Weekend), Voucher, true) => PrintProduct.VoucerWeekendPlus
         case (Some(Sixday), Voucher, false) => PrintProduct.VoucherSixday
@@ -160,12 +159,12 @@ object SubscriptionAcquisitionComponents {
             case PercentDiscount(_, amount) => amount
           },
 
-          // TODO: I can only find an amount in months. should I do expires - starts instead?
-          discountLengthInDays = promotion.map(_.promotionType) collect {
-            case PercentDiscount(Some(months), _) => months.toShort
-          },
-
-          // TODO: platform Thrift definition! add Subs!
+          // Currently we only have discountLengthInDays.
+          // It should have been discountLengthInMonths instead.
+          // Once the Thrift definition is updated, we can uncomment this.
+//          discountLengthInMonths = promotion.map(_.promotionType) collect {
+//            case PercentDiscount(Some(months), _) => months.toShort
+//          },
 
           campaignCode = referrerAcquisitionData.flatMap(_.campaignCode.map(Set(_))),
           abTests = referrerAcquisitionData.flatMap(_.abTest.map(ab => AbTestInfo(Set(ab)))),
