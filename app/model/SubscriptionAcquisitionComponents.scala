@@ -13,6 +13,8 @@ import ophan.thrift.event.PaymentProvider.{Gocardless, Stripe}
 import ophan.thrift.event._
 import play.api.libs.json._
 
+import scala.collection.Set
+
 //import com.gu.acquisition.model.ReferrerAcquisitionData.referrerAcquisitionDataReads
 
 case class SubscriptionAcquisitionComponents(
@@ -68,10 +70,13 @@ object SubscriptionAcquisitionComponents {
       import com.gu.memsub.Product.{Delivery, Voucher, Weekly}
       import com.gu.memsub.Benefit.{MondayPaper, TuesdayPaper, WednesdayPaper, ThursdayPaper, FridayPaper, SaturdayPaper, SundayPaper, Digipack}
 
-      val paperDays = p.plan.charges.benefits.list.filter(_ match {
-        case p: PaperDay => true
-        case _ => false
-      })
+      logger.info("PRINT OPTIONS")
+
+      val paperDays = p.plan.charges.benefits.list.collect {
+        case p: PaperDay => p
+      }
+
+      logger.info(s"paperDays: ${paperDays}")
 
       sealed trait When
       case object Sunday extends When
@@ -79,12 +84,14 @@ object SubscriptionAcquisitionComponents {
       case object Sixday extends When
       case object Everyday extends When
 
-      val when = Some(paperDays) collect {
+      val when = Some(paperDays.sortBy(_.dayOfTheWeekIndex)) collect {
         case List(SundayPaper) => Sunday
         case List(SaturdayPaper, SundayPaper) => Weekend
         case List(MondayPaper, TuesdayPaper, WednesdayPaper, ThursdayPaper, FridayPaper, SaturdayPaper) => Sixday
         case List(MondayPaper, TuesdayPaper, WednesdayPaper, ThursdayPaper, FridayPaper, SaturdayPaper, SundayPaper) => Everyday
       }
+
+      logger.info(s"when: ${when}")
 
       val hasDigipack = p.plan.charges.benefits.list.contains(Digipack)
 
@@ -111,6 +118,8 @@ object SubscriptionAcquisitionComponents {
         case (_, _: Weekly, true) => PrintProduct.GuardianWeeklyPlus
       }
 
+      logger.info(s"printProduct: ${printProduct}")
+
       for {
         d <- p.deliveryAddress.country.map(_.alpha2)
         p <- printProduct
@@ -122,6 +131,8 @@ object SubscriptionAcquisitionComponents {
 
       val plan = subscribeRequest.productData.fold(_.plan, _.plan)
       val referrerAcquisitionData = acquisitionDataJSON.flatMap(referrerAcquisitionDataFromJSON)
+
+      logger.info(s"subscribeRequest.productData: ${subscribeRequest.productData}")
 
       Right(
         Acquisition(
