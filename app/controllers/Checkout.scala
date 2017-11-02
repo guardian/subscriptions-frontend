@@ -30,7 +30,6 @@ import utils.RequestCountry._
 import utils.TestUsers.{NameEnteredInForm, PreSigninTestCookie}
 import views.html.{checkout => view}
 import views.support.{PlanList, BillingPeriod => _, _}
-import com.gu.acquisition.services.{MockOphanService, OphanService}
 
 import scala.Function.const
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
@@ -277,9 +276,13 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
       }
 
       val promotion = subscribeRequest.genericData.promoCode.map(_.get).flatMap(code => tpBackend.promoService.findPromotion(NormalisedPromoCode.safeFromString(code)))
-      val s = MockOphanService.submit(SubscriptionAcquisitionComponents(subscribeRequest, promotion, acquisitionData))
 
-      s.fold(println, println)
+      OphanService(isTestService = tpBackend.environmentName != "PROD")
+        .submit(SubscriptionAcquisitionComponents(subscribeRequest, promotion, acquisitionData))
+        .bimap(
+          err => logger.warn(s"Error submitting acquisition data to Ophan. ${err}"),
+          submission => logger.info(s"Submitted acquisition data to Ophan. ${submission}")
+        )
 
       logger.info(s"User successfully became subscriber:\n\tUser: SF=${r.salesforceMember.salesforceContactId}\n\tPlan: ${subscribeRequest.productData.fold(_.plan, _.plan).name}\n\tSubscription: ${r.subscribeResult.subscriptionName}")
       Ok(Json.obj("redirect" -> routes.Checkout.thankYou().url)).withSession(session)
