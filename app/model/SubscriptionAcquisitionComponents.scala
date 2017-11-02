@@ -49,9 +49,24 @@ object SubscriptionAcquisitionComponents {
       }
     }
 
+    private def referrerAcquisitionDataFromJSON(json: String): Option[ReferrerAcquisitionData] = {
+      val parsedJson = parseJsonSafely(json)
+
+      parsedJson
+        .map(json => Json.fromJson[ReferrerAcquisitionData](json))
+        .flatMap({
+          case JsSuccess(referrerAcquisitionData, _) => Some(referrerAcquisitionData)
+          case e: JsError => {
+            logger.warn(s"Unable to decode JSON $parsedJson to an instance of ReferrerAcquisitionData. ${JsError.toJson(e).toString()}")
+            None
+          }
+        })
+    }
+
     private def printOptionsFromPaperData(p: PaperData): Option[PrintOptions] = {
-      import com.gu.memsub.Product
-      import com.gu.memsub.Benefit._
+      // Explicit imports because Product and Benefit have name collisions
+      import com.gu.memsub.Product.{Delivery, Voucher, Weekly}
+      import com.gu.memsub.Benefit.{MondayPaper, TuesdayPaper, WednesdayPaper, ThursdayPaper, FridayPaper, SaturdayPaper, SundayPaper, Digipack}
 
       val paperDays = p.plan.charges.benefits.list.filter(_ match {
         case p: PaperDay => true
@@ -71,20 +86,9 @@ object SubscriptionAcquisitionComponents {
         case List(MondayPaper, TuesdayPaper, WednesdayPaper, ThursdayPaper, FridayPaper, SaturdayPaper, SundayPaper) => Everyday
       }
 
-      sealed trait How
-      case object Delivery extends How
-      case object Voucher extends How
-      case object GuardianWeekly extends How
-
-      val how = p.plan.product match {
-        case Product.WeeklyZoneA | Product.WeeklyZoneB | Product.WeeklyZoneC => GuardianWeekly
-        case Product.Delivery => Delivery
-        case Product.Voucher => Voucher
-      }
-
       val hasDigipack = p.plan.charges.benefits.list.contains(Digipack)
 
-      val printProduct = Some(when, how, hasDigipack) collect {
+      val printProduct = Some(when, p.plan.product, hasDigipack) collect {
         case (Some(Sunday), Delivery, false) => PrintProduct.HomeDeliverySunday
         case (Some(Sunday), Delivery, true) => PrintProduct.HomeDeliverySundayPlus
         case (Some(Weekend), Delivery, false) => PrintProduct.HomeDeliveryWeekend
@@ -104,8 +108,8 @@ object SubscriptionAcquisitionComponents {
         case (Some(Everyday), Voucher, false) => PrintProduct.VoucherEveryday
         case (Some(Everyday), Voucher, true) => PrintProduct.VoucherEverydayPlus
 
-        case (_, GuardianWeekly, false) => PrintProduct.GuardianWeekly
-        case (_, GuardianWeekly, true) => PrintProduct.GuardianWeeklyPlus
+        case (_, _: Weekly, false) => PrintProduct.GuardianWeekly
+        case (_, _: Weekly, true) => PrintProduct.GuardianWeeklyPlus
       }
 
       for {
@@ -118,16 +122,7 @@ object SubscriptionAcquisitionComponents {
       import components._
 
       val plan = subscribeRequest.productData.fold(_.plan, _.plan)
-      val parsedJson = acquisitionDataJSON.flatMap(parseJsonSafely)
-      val acquisitionData = parsedJson
-        .map(json => Json.fromJson[ReferrerAcquisitionData](json))
-        .flatMap({
-          case JsSuccess(referrerAcquisitionData, _) => Some(referrerAcquisitionData)
-          case e: JsError => {
-            logger.warn(s"Unable to decode JSON $parsedJson to an instance of ReferrerAcquisitionData. ${JsError.toJson(e).toString()}")
-            None
-          }
-        })
+      val referrerAcquisitionData = acquisitionDataJSON.flatMap(referrerAcquisitionDataFromJSON)
 
       Right(
         Acquisition(
@@ -172,13 +167,13 @@ object SubscriptionAcquisitionComponents {
 
           // TODO: platform Thrift definition! add Subs!
 
-          campaignCode = acquisitionData.flatMap(_.campaignCode.map(Set(_))),
-          abTests = acquisitionData.flatMap(_.abTest.map(ab => AbTestInfo(Set(ab)))),
-          referrerPageViewId = acquisitionData.flatMap(_.referrerPageviewId),
-          referrerUrl = acquisitionData.flatMap(_.referrerUrl),
-          componentId = acquisitionData.flatMap(_.componentId),
-          componentTypeV2 = acquisitionData.flatMap(_.componentType),
-          source = acquisitionData.flatMap(_.source)
+          campaignCode = referrerAcquisitionData.flatMap(_.campaignCode.map(Set(_))),
+          abTests = referrerAcquisitionData.flatMap(_.abTest.map(ab => AbTestInfo(Set(ab)))),
+          referrerPageViewId = referrerAcquisitionData.flatMap(_.referrerPageviewId),
+          referrerUrl = referrerAcquisitionData.flatMap(_.referrerUrl),
+          componentId = referrerAcquisitionData.flatMap(_.componentId),
+          componentTypeV2 = referrerAcquisitionData.flatMap(_.componentType),
+          source = referrerAcquisitionData.flatMap(_.source)
         )
       )
     }
