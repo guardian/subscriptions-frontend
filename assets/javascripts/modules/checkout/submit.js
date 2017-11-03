@@ -97,10 +97,6 @@ define([
         data.ophanBrowserId = cookie.getCookie('bwid');
         data.ophanVisitId = cookie.getCookie('vsid');
         data.ophanPageViewId = ophanPageViewId;
-        // https://github.com/guardian/ophan/blob/master/tracker-js/assets/coffee/ophan/transmit.coffee#L10
-
-        // why does below work in ga? since these vars aren't available in console
-        // guardian.ophan && guardian.ophan.pageViewId;
 
         ajax({
             url: '/checkout',
