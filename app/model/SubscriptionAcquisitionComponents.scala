@@ -70,13 +70,9 @@ object SubscriptionAcquisitionComponents {
       import com.gu.memsub.Product.{Delivery, Voucher, Weekly}
       import com.gu.memsub.Benefit.{MondayPaper, TuesdayPaper, WednesdayPaper, ThursdayPaper, FridayPaper, SaturdayPaper, SundayPaper, Digipack}
 
-      logger.info("PRINT OPTIONS")
-
       val paperDays = p.plan.charges.benefits.list.collect {
         case p: PaperDay => p
       }
-
-      logger.info(s"paperDays: ${paperDays}")
 
       sealed trait When
       case object Sunday extends When
@@ -90,8 +86,6 @@ object SubscriptionAcquisitionComponents {
         case List(MondayPaper, TuesdayPaper, WednesdayPaper, ThursdayPaper, FridayPaper, SaturdayPaper) => Sixday
         case List(MondayPaper, TuesdayPaper, WednesdayPaper, ThursdayPaper, FridayPaper, SaturdayPaper, SundayPaper) => Everyday
       }
-
-      logger.info(s"when: ${when}")
 
       val hasDigipack = p.plan.charges.benefits.list.contains(Digipack)
 
@@ -118,8 +112,6 @@ object SubscriptionAcquisitionComponents {
         case (_, _: Weekly, true) => PrintProduct.GuardianWeeklyPlus
       }
 
-      logger.info(s"printProduct: ${printProduct}")
-
       for {
         d <- p.deliveryAddress.country.map(_.alpha2)
         p <- printProduct
@@ -131,8 +123,6 @@ object SubscriptionAcquisitionComponents {
 
       val plan = subscribeRequest.productData.fold(_.plan, _.plan)
       val referrerAcquisitionData = acquisitionDataJSON.flatMap(referrerAcquisitionDataFromJSON)
-
-      logger.info(s"subscribeRequest.productData: ${subscribeRequest.productData}")
 
       Right(
         Acquisition(
