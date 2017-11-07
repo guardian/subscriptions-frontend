@@ -76,11 +76,11 @@ object ManageDelivery extends ContextLogging {
 
   import play.api.mvc.Results._
 
-  def apply(errorCodes: Set[String], pendingHolidays: Seq[HolidayRefund], billingSchedule: Option[BillingSchedule], deliverySubscription: Subscription[Delivery], account: Account)(implicit request: Request[AnyContent], touchpoint: TouchpointBackend.Resolution): Result = {
+  def apply(errorCodes: Set[String], pendingHolidays: Seq[HolidayRefund], billingSchedule: Option[BillingSchedule], deliverySubscription: Subscription[Delivery], account: Account, maybeEmail: Option[String])(implicit request: Request[AnyContent], touchpoint: TouchpointBackend.Resolution): Result = {
     val suspendedDays = SuspensionService.holidayToSuspendedDays(pendingHolidays, deliverySubscription.plan.charges.chargedDays.toList)
     val chosenPaperDays = deliverySubscription.plan.charges.chargedDays.toList.sortBy(_.dayOfTheWeekIndex)
     val suspendableDays = Config.suspendableWeeks * chosenPaperDays.size
-    Ok(views.html.account.delivery(deliverySubscription, account, pendingHolidays, billingSchedule, chosenPaperDays, suspendableDays, suspendedDays, errorCodes))
+    Ok(views.html.account.delivery(deliverySubscription, account, pendingHolidays, billingSchedule, chosenPaperDays, suspendableDays, suspendedDays, errorCodes, maybeEmail))
   }
 
   def suspend(implicit request: Request[AnyContent], touchpoint: TouchpointBackend.Resolution): Future[Result] = {
@@ -370,10 +370,10 @@ object AccountManagement extends Controller with ContextLogging with CatalogProv
 
       val maybeFutureManagePage = subscription.planToManage.product match {
         case Product.Delivery => subscription.asDelivery.map { deliverySubscription =>
-          Future.successful(ManageDelivery(errorCodes, pendingHolidays, billingSchedule, deliverySubscription, account))
+          Future.successful(ManageDelivery(errorCodes, pendingHolidays, billingSchedule, deliverySubscription, account, maybeEmail))
         }
         case Product.Voucher => subscription.asVoucher.map { voucherSubscription =>
-          Future.successful(Ok(views.html.account.voucher(voucherSubscription, billingSchedule)))
+          Future.successful(Ok(views.html.account.voucher(voucherSubscription, billingSchedule, maybeEmail)))
         }
         case _: Product.Weekly => subscription.asWeekly.map { weeklySubscription =>
           ManageWeekly(billingSchedule, weeklySubscription, maybeEmail, promoCode)

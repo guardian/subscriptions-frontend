@@ -18,7 +18,8 @@
     chosenPaperDays: List[PaperDay],
     suspendableDays: Int,
     suspendedDays: Int,
-    errorCodes: Set[String]
+    errorCodes: Set[String],
+    maybeEmail: Option[String]
 )(implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackend.Resolution)
 @main("Manage your subscription | The Guardian", bodyClasses = List("is-wide"), edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution), managementPage = true) {
 
@@ -134,7 +135,10 @@
                     </form>
                 </section>
             }
-
+            <section class="mma-section">
+                <h3 class="mma-section__header">Update your payment method</h3>
+                @views.html.account.fragments.paymentUpdate(subscription, maybeEmail)
+            </section>
         </section>
     </main>
 }

@@ -4,7 +4,7 @@
 @import model.SubscriptionOps._
 @import com.gu.memsub.subsv2.SubscriptionPlan.Voucher
 @(
-    subscription: Subscription[Voucher], billingSchedule: Option[BillingSchedule]
+    subscription: Subscription[Voucher], billingSchedule: Option[BillingSchedule], maybeEmail: Option[String]
 )(implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackend.Resolution)
 
 @main("Your Guardian subscription | The Guardian", bodyClasses = List("is-wide"), edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution), managementPage = true) {
@@ -32,6 +32,10 @@
                     @views.html.account.fragments.billingSchedule(bs, subscription.currency)
                 </section>
             }
+            <section class="mma-section">
+                <h3 class="mma-section__header">Update your payment method</h3>
+                @views.html.account.fragments.paymentUpdate(subscription, maybeEmail)
+            </section>
         </section>
     </main>
 }

@@ -3,4 +3,3 @@
 @import com.gu.zuora.ZuoraRestService.SoldToContact
 @(subscription:Subscription[SubscriptionPlan.ContentSubscription], maybeEmail: Option[String])
 <div class="js-payment-update" data-sub-id="@{subscription.name.get}" @for(email <- maybeEmail) {data-email="@email"}></div>
-`
