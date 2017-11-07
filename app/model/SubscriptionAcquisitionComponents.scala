@@ -14,6 +14,7 @@ import ophan.thrift.event._
 import play.api.libs.json._
 
 import scala.collection.Set
+import scalaz.\/
 
 //import com.gu.acquisition.model.ReferrerAcquisitionData.referrerAcquisitionDataReads
 
@@ -47,28 +48,18 @@ object SubscriptionAcquisitionComponents {
       )
     }
 
-    private def parseJsonSafely(json: String): Option[JsValue] = {
-      try {
-        Some(Json.parse(json))
-      } catch {
-        case scala.util.control.NonFatal(t) =>
-          logger.warn(s"""Unable to parse "$json" as JSON. ${t.getMessage}""")
-          None
-      }
-    }
-
     private def referrerAcquisitionDataFromJSON(json: String): Option[ReferrerAcquisitionData] = {
-      val parsedJson = parseJsonSafely(json)
+      import \/._
 
-      parsedJson
-        .map(json => Json.fromJson[ReferrerAcquisitionData](json))
-        .flatMap({
-          case JsSuccess(referrerAcquisitionData, _) => Some(referrerAcquisitionData)
-          case e: JsError => {
-            logger.warn(s"Unable to decode JSON $parsedJson to an instance of ReferrerAcquisitionData. ${JsError.toJson(e).toString()}")
-            None
-          }
-        })
+      fromTryCatchNonFatal(Json.parse(json))
+        .leftMap(err => s"""Unable to parse "$json" as JSON. $err""")
+        .flatMap { jsValue =>
+          Json.fromJson[ReferrerAcquisitionData](jsValue).fold(
+            errs => left(logger.warn(s"Unable to decode JSON $jsValue to an instance of ReferrerAcquisitionData. ${JsError.toJson(errs)}")),
+            referrerAcquisitionData => right(referrerAcquisitionData)
+          )
+        }
+        .toOption
     }
 
     private def printOptionsFromPaperData(p: PaperData): Option[PrintOptions] = {
