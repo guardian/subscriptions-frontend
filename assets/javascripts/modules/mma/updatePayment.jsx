@@ -9,11 +9,8 @@ export const init = (elem) => {
 }
 
 const getDetails = async (url) => {
-    console.log(url)
     let resp = await fetch(`${url}/user-attributes/me/mma-paper`, { method: 'get', credentials: 'include' })
-    // let json = await resp.json()
     let json = await resp.json()
-    console.log(resp, json)
     return json
 }
 const WAITING = 'waiting'
@@ -33,7 +30,6 @@ class Payment extends React.Component {
         const url = guardian.members_data_api
 
         const token = (t) => {
-            console.log(t)
             let form = new FormData();
             form.append('stripeToken', t.id)
             form.append('publicKey', this.state.card.stripePublicKeyForUpdate)
@@ -68,16 +64,12 @@ class Payment extends React.Component {
         getDetails(url).then(resp => {
             let sub = resp.subscription && resp.subscription.subscriberId
             if (!sub || sub != this.props.sub || !this.props.stripe) {
-                console.log("wrong sub id?")
                 this.setState({ state: FAILURE })
                 return
             }
-
-            console.log(resp)
             this.setState({ state: FORM, card: resp.subscription.card })
 
         }).catch((e) => {
-            console.log(e)
             this.setState({ state: FAILURE })
         })
     }

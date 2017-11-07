@@ -7,7 +7,6 @@ define(['$'],function($){
             require(['modules/mma/updatePayment.jsx'],function(mma){
                 curl('js!stripeCheckout').then(function(){
                     mma.init($UPDATE[0]);
-                    //init();
                 });
             });
         }
