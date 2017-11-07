@@ -46,7 +46,7 @@ object SubscriptionAcquisitionComponents {
         Some(Json.parse(json))
       } catch {
         case scala.util.control.NonFatal(t) =>
-          logger.warn(s"""Unable to parse "$json" as JSON. ${t.getMessage()}""")
+          logger.warn(s"""Unable to parse "$json" as JSON. ${t.getMessage}""")
           None
       }
     }
