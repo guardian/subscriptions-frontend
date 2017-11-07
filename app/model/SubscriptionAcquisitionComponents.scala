@@ -26,6 +26,12 @@ case class SubscriptionAcquisitionComponents(
 
 object SubscriptionAcquisitionComponents {
 
+  sealed trait When
+  case object Sunday extends When
+  case object Weekend extends When
+  case object Sixday extends When
+  case object Everyday extends When
+
   implicit object subscriptionAcquisitionSubmissionBuilder
     extends AcquisitionSubmissionBuilder[SubscriptionAcquisitionComponents] with LazyLogging {
 
@@ -73,12 +79,6 @@ object SubscriptionAcquisitionComponents {
       val paperDays = p.plan.charges.benefits.list.collect {
         case p: PaperDay => p
       }
-
-      sealed trait When
-      case object Sunday extends When
-      case object Weekend extends When
-      case object Sixday extends When
-      case object Everyday extends When
 
       val when = Some(paperDays.sortBy(_.dayOfTheWeekIndex)) collect {
         case List(SundayPaper) => Sunday
