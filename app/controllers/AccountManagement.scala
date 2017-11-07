@@ -10,7 +10,6 @@ import com.gu.i18n.Currency.{GBP, USD}
 import com.gu.memsub.Subscription.{Name, ProductRatePlanId}
 import com.gu.memsub.promo.{NormalisedPromoCode, PromoCode}
 import com.gu.memsub.subsv2.SubscriptionPlan._
-import com.gu.memsub.subsv2._
 import com.gu.memsub.{BillingSchedule, Product}
 import com.gu.subscriptions.suspendresume.SuspensionService
 import com.gu.subscriptions.suspendresume.SuspensionService.{BadZuoraJson, ErrNel, HolidayRefund, PaymentHoliday}
@@ -28,11 +27,14 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json._
 import play.api.mvc.{AnyContent, _}
 import _root_.services.FulfilmentLookupService
+import com.gu.memsub.subsv2.{Catalog, ReaderType, Subscription}
 import com.gu.zuora.soap.models.Queries.Account
+import services.IdentityService
 import utils.TestUsers.PreSigninTestCookie
 import views.html.account.thankYouRenew
 import views.support.Dates._
 import views.support.Pricing._
+
 import scala.concurrent.Future
 import scalaz.std.scalaFuture._
 import scalaz.syntax.std.option._
@@ -189,9 +191,10 @@ object ManageWeekly extends ContextLogging {
   }
 
   def apply(
-    billingSchedule: Option[BillingSchedule],
-    weeklySubscription: Subscription[WeeklyPlan],
-    promoCode: Option[PromoCode]
+             billingSchedule: Option[BillingSchedule],
+             weeklySubscription: Subscription[WeeklyPlan],
+             maybeEmail: Option[String],
+             promoCode: Option[PromoCode]
   )(implicit
     request: Request[AnyContent],
     resolution: TouchpointBackend.Resolution
@@ -233,7 +236,7 @@ object ManageWeekly extends ContextLogging {
           views.html.account.weeklyRenew(renewableSub, account.soldToContact, account.billToContact.email, billToCountry, weeklyPlanInfo, currency, promoCode)
         } getOrElse {
           info(s"sub is not renewable - showing weeklyDetails page")
-          views.html.account.weeklyDetails(weeklySubscription, billingSchedule, account.soldToContact)
+          views.html.account.weeklyDetails(weeklySubscription, billingSchedule, account.soldToContact, maybeEmail)
         })
       }
       Future.successful(renewPageResult)
@@ -351,13 +354,20 @@ object AccountManagement extends Controller with ContextLogging with CatalogProv
     implicit val tpBackend = resolution.backend
     val eventualMaybeSubscription = SessionSubscription.subscriptionFromRequest
     val errorCodes = errorCode.toSeq.flatMap(_.split(',').map(_.trim)).filterNot(_.isEmpty).toSet
+    val futureMaybeMaybeEmail = (for {
+      authUser <- OptionT(Future.successful(authenticatedUserFor(request)))
+      idUser <- OptionT(IdentityService.userLookupByCredentials(authUser.credentials))
+    } yield Option(idUser.primaryEmailAddress)).run.recover{case _ => None}
+
 
     val futureMaybeFutureManagePage = for {
       subscription <- OptionT(eventualMaybeSubscription).filter(!_.isCancelled)
       account <- OptionT(tpBackend.zuoraService.getAccount(subscription.accountId).map{Some(_)}.recover{case t: Throwable => None})
       pendingHolidays <- OptionT(tpBackend.suspensionService.getUnfinishedHolidays(subscription.name, now).map(_.toOption))
       billingSchedule <- OptionT(tpBackend.commonPaymentService.billingSchedule(subscription.id, account, numberOfBills = 13).map(Some(_):Option[Option[BillingSchedule]]))
+      maybeEmail <- OptionT(futureMaybeMaybeEmail)
     } yield {
+
       val maybeFutureManagePage = subscription.planToManage.product match {
         case Product.Delivery => subscription.asDelivery.map { deliverySubscription =>
           Future.successful(ManageDelivery(errorCodes, pendingHolidays, billingSchedule, deliverySubscription, account))
@@ -366,7 +376,7 @@ object AccountManagement extends Controller with ContextLogging with CatalogProv
           Future.successful(Ok(views.html.account.voucher(voucherSubscription, billingSchedule)))
         }
         case _: Product.Weekly => subscription.asWeekly.map { weeklySubscription =>
-          ManageWeekly(billingSchedule, weeklySubscription, promoCode)
+          ManageWeekly(billingSchedule, weeklySubscription, maybeEmail, promoCode)
         }
         case Product.Digipack => subscription.asDigipack.map { digipackSubscription =>
           Future.successful(Ok(views.html.account.digitalpack(digipackSubscription, billingSchedule)))
