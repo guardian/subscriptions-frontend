@@ -279,9 +279,8 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
 
       OphanService(isTestService = tpBackend.environmentName != "PROD")
         .submit(SubscriptionAcquisitionComponents(subscribeRequest, promotion, acquisitionData))
-        .bimap(
-          err => logger.warn(s"Error submitting acquisition data to Ophan. ${err}"),
-          submission => logger.info(s"Submitted acquisition data to Ophan. ${submission}")
+        .leftMap(
+          err => logger.warn(s"Error submitting acquisition data to Ophan. $err")
         )
 
       logger.info(s"User successfully became subscriber:\n\tUser: SF=${r.salesforceMember.salesforceContactId}\n\tPlan: ${subscribeRequest.productData.fold(_.plan, _.plan).name}\n\tSubscription: ${r.subscribeResult.subscriptionName}")
