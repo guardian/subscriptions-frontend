@@ -120,13 +120,15 @@ object SubscriptionAcquisitionComponents {
 
     override def buildAcquisition(components: SubscriptionAcquisitionComponents): Either[String, Acquisition] = {
       import components._
+      import components.subscribeRequest.productData
+      import components.subscribeRequest.genericData.{currency, paymentData, personalData}
 
-      val plan = subscribeRequest.productData.fold(_.plan, _.plan)
+      val plan = productData.fold(_.plan, _.plan)
       val referrerAcquisitionData = acquisitionDataJSON.flatMap(referrerAcquisitionDataFromJSON)
 
       Right(
         Acquisition(
-          product = subscribeRequest.productData match {
+          product = productData match {
             case Left(_) => Product.PrintSubscription
             case Right(_) => Product.DigitalSubscription
           },
@@ -138,20 +140,20 @@ object SubscriptionAcquisitionComponents {
             case Year => PaymentFrequency.Annually
           },
 
-          currency = subscribeRequest.genericData.currency.iso,
+          currency = currency.iso,
 
-          amount = plan.charges.price.getPrice(subscribeRequest.genericData.currency)
+          amount = plan.charges.price.getPrice(currency)
             .map(_.amount.toDouble).getOrElse(0),
 
-          paymentProvider = subscribeRequest.genericData.paymentData match {
+          paymentProvider = paymentData match {
             case DirectDebitData(_, _, _) => Some(Gocardless)
             case CreditCardData(_) => Some(Stripe)
             case _ => None
           },
 
-          countryCode = subscribeRequest.genericData.personalData.address.country.map(_.alpha2),
+          countryCode = personalData.address.country.map(_.alpha2),
 
-          printOptions = subscribeRequest.productData match {
+          printOptions = productData match {
             case Left(paperData) => printOptionsFromPaperData(paperData)
             case _ => None
           },
