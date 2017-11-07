@@ -16,8 +16,6 @@ import play.api.libs.json._
 import scala.collection.Set
 import scalaz.\/
 
-//import com.gu.acquisition.model.ReferrerAcquisitionData.referrerAcquisitionDataReads
-
 case class SubscriptionAcquisitionComponents(
   subscribeRequest: SubscribeRequest,
   promotion: Option[Promotion.AnyPromotion],
