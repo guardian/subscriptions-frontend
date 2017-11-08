@@ -35,15 +35,9 @@ object SubscriptionAcquisitionComponents {
     extends AcquisitionSubmissionBuilder[SubscriptionAcquisitionComponents] with LazyLogging {
 
     def buildOphanIds(components: SubscriptionAcquisitionComponents): Either[String, OphanIds] = {
-      import components._
+      import components.subscribeRequest.genericData.ophanData._
 
-      Right(
-        OphanIds(
-          pageviewId = subscribeRequest.genericData.ophanPageViewId,
-          visitId = subscribeRequest.genericData.ophanVisitId,
-          browserId = subscribeRequest.genericData.ophanBrowserId
-        )
-      )
+      Right(OphanIds(pageViewId, visitId, browserId))
     }
 
     private def referrerAcquisitionDataFromJSON(json: String): Option[ReferrerAcquisitionData] = {
