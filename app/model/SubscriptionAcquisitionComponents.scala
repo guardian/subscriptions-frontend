@@ -98,7 +98,6 @@ object SubscriptionAcquisitionComponents {
         case (Some(Everyday), Voucher, true) => PrintProduct.VoucherEverydayPlus
 
         case (_, _: Weekly, false) => PrintProduct.GuardianWeekly
-        case (_, _: Weekly, true) => PrintProduct.GuardianWeeklyPlus
       }
 
       for {
