@@ -35,21 +35,22 @@ define([
     function submitHandler() {
         if (formEls.$CHECKOUT_SUBMIT.length) {
             formEls.$CHECKOUT_SUBMIT[0].addEventListener('click', function(e) {
-                ophan.loaded.then(function(o) { submit(e, o.viewId) });
+                e.preventDefault();
+                ophan.loaded.then(submit, submit)
             }, false);
         }
     }
 
-    function submit(e, ophanPageViewId) {
-        e.preventDefault();
+    function submit(ophan) {
         loader.setLoaderElem(document.querySelector('.js-loader'));
         loader.startLoader();
         var submitEl = formEls.$CHECKOUT_SUBMIT[0];
+        var pageViewId = ophan && ophan.pageviewId;
 
         submitEl.setAttribute('disabled', 'disabled');
 
         if (!formEls.$CARD_TYPE[0].checked) {
-            send(ophanPageViewId);
+            send(pageViewId);
             return;
         }
 
@@ -75,7 +76,7 @@ define([
             token: function (token) {
                 successfulCharge = token;
                 stripeCheckout.setPaymentToken(token.id);
-                send(ophanPageViewId);
+                send(pageViewId);
             },
             closed: function () {
                 if (!successfulCharge) {
@@ -86,7 +87,7 @@ define([
         });
     }
 
-    function send(ophanPageViewId) {
+    function send(pageViewId) {
         var form = formEls.$CHECKOUT_FORM[0];
         var data = serializer([].slice.call(form.elements));
         var submitEl = formEls.$CHECKOUT_SUBMIT[0];
@@ -96,7 +97,7 @@ define([
 
         data.ophanBrowserId = cookie.getCookie('bwid');
         data.ophanVisitId = cookie.getCookie('vsid');
-        data.ophanPageViewId = ophanPageViewId;
+        data.ophanPageViewId = pageViewId;
 
         ajax({
             url: '/checkout',
