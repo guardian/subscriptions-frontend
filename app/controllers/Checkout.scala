@@ -38,6 +38,8 @@ import scalaz.std.option._
 import scalaz.std.scalaFuture._
 import scalaz.syntax.applicative._
 import scalaz.{NonEmptyList, OptionT}
+import cats.instances.future._
+
 object Checkout extends Controller with LazyLogging with CatalogProvider {
 
   import SessionKeys.{Currency => _, UserId => _, _}
@@ -267,6 +269,19 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
       val session = (productData ++ userSessionFields ++ appliedCodeSession ++ subscriptionDetails).foldLeft(request.session - AppliedPromoCode - PromotionTrackingCode) {
         _ + _
       }
+
+      val acquisitionData = request.session.get("acquisitionData")
+      if (acquisitionData.isEmpty) {
+        logger.warn(s"No acquisitionData in session")
+      }
+
+      val promotion = subscribeRequest.genericData.promoCode.map(_.get).flatMap(code => tpBackend.promoService.findPromotion(NormalisedPromoCode.safeFromString(code)))
+
+      OphanService(isTestService = tpBackend.environmentName != "PROD")
+        .submit(SubscriptionAcquisitionComponents(subscribeRequest, promotion, acquisitionData))
+        .leftMap(
+          err => logger.warn(s"Error submitting acquisition data to Ophan. $err")
+        )
 
       logger.info(s"User successfully became subscriber:\n\tUser: SF=${r.salesforceMember.salesforceContactId}\n\tPlan: ${subscribeRequest.productData.fold(_.plan, _.plan).name}\n\tSubscription: ${r.subscribeResult.subscriptionName}")
       Ok(Json.obj("redirect" -> routes.Checkout.thankYou().url)).withSession(session)

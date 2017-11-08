@@ -152,4 +152,37 @@ class SubscriptionsFormTest extends FreeSpec {
       assertResult(Right(PromoCode("code")))(mapping.bind(Map("promoCode" -> "code")))
     }
   }
+
+  "OphanDataMapping" - {
+    "maps form submissions to OphanData" in {
+      assertResult(Right(OphanData(
+        pageViewId = Some("blah"),
+        visitId = Some("blah"),
+        browserId = Some("blah")
+      )))(ophanDataMapping.bind(Map(
+        "ophanPageViewId" -> "blah",
+        "ophanVisitId" -> "blah",
+        "ophanBrowserId" -> "blah"
+      ) ++ formData))
+    }
+
+    "handles missing ophan data" in {
+      assertResult(Right(OphanData(
+        pageViewId = None,
+        visitId = Some("blah"),
+        browserId = Some("blah")
+      )))(ophanDataMapping.bind(Map(
+        "ophanVisitId" -> "blah",
+        "ophanBrowserId" -> "blah"
+      ) ++ formData))
+    }
+
+    "handles all ophan data missing" in {
+      assertResult(Right(OphanData(
+        pageViewId = None,
+        visitId = None,
+        browserId = None
+      )))(ophanDataMapping.bind(formData))
+    }
+  }
 }
