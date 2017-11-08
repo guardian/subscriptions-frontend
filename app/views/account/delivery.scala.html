@@ -5,6 +5,7 @@
 @import com.gu.subscriptions.suspendresume.SuspensionService.holidayToDays
 @import model.DigitalEdition.UK
 @import model.SubscriptionOps._
+@import com.gu.memsub.Product.Delivery
 @import views.support.Dates.prettyDate
 @import views.support.AccountManagementOps._
 @import com.gu.memsub.subsv2.SubscriptionPlan.DailyPaper
@@ -137,7 +138,7 @@
             }
             <section class="mma-section">
                 <h3 class="mma-section__header">Update your payment method</h3>
-                @views.html.account.fragments.paymentUpdate(subscription, maybeEmail)
+                @views.html.account.fragments.paymentUpdate(subscription, maybeEmail, subscription.plans.head.product, UK)
             </section>
         </section>
     </main>

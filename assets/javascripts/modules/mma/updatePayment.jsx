@@ -1,15 +1,21 @@
 import React from 'react'
 import ReactDOM from 'react-dom';
 
-
+const timeout = (t) => new Promise((resolve, reject)=>{
+    const timer = setTimeout(()=>{
+        clearTimeout(timer)
+        reject("Timeout")
+    },t)
+})
 
 export const init = (elem) => {
     let handler = window.StripeCheckout.configure(guardian.stripeCheckout)
-    ReactDOM.render(<Payment sub={elem.dataset.subId} email={elem.dataset.email} stripe={handler} />, elem)
+    ReactDOM.render(<Payment sub={elem.dataset.subId} email={elem.dataset.email} phone={elem.dataset.phone} stripe={handler} />, elem)
 }
 
 const getDetails = async (url) => {
-    let resp = await fetch(`${url}/user-attributes/me/mma-paper`, { method: 'get', credentials: 'include' })
+    let req = fetch(`${url}/user-attributes/me/mma-paper`, { method: 'get', credentials: 'include' })
+    let resp = await Promise.race([req,timeout(30000)])
     let json = await resp.json()
     return json
 }
@@ -20,7 +26,7 @@ const FORM = 'form'
 
 const CardUpdate = ({ card, handler }) => (<div><button className="button button--primary button--large" onClick={handler}>•••• •••• •••• {card.last4} Update Card</button></div>)
 const Success = () => (<p>Thank you, we have successfully updated your payment details.</p>)
-const Failure = () => (<p>Unfortunately, we are unable to update your payment details at this time, please contact the call centre.</p>)
+const Failure = (phone) => (<p>Unfortunately, we are unable to update your payment details at this time, please contact the call centre. {phone}</p>)
 const Waiting = () => (<div className="loader js-loader is-loading">Processing&hellip;</div>)
 
 class Payment extends React.Component {
@@ -33,7 +39,7 @@ class Payment extends React.Component {
             let form = new FormData();
             form.append('stripeToken', t.id)
             form.append('publicKey', this.state.card.stripePublicKeyForUpdate)
-            fetch(`${url}/user-attributes/me/paper-update-card`, {
+            let req = fetch(`${url}/user-attributes/me/paper-update-card`, {
                 method: 'post',
                 credentials: 'include',
                 mode: 'cors',
@@ -41,7 +47,8 @@ class Payment extends React.Component {
                     'Csrf-Token': 'nocheck',
                 },
                 body: form
-            }).then(resp => resp.json())
+            })
+            Promise.race([req, timeout(30000)]).then(resp => resp.json())
                 .then(json => {
                     this.setState({ state: SUCCESS })
                 })
@@ -53,7 +60,9 @@ class Payment extends React.Component {
             this.props.stripe.open({
                 key: this.state.card.stripePublicKeyForUpdate,
                 email: this.props.email,
-                token: token
+                token: token,
+                panelLabel: "Update",
+                closed: () => {this.setState({state: FORM})}
             })
             this.setState({ state: WAITING })
         }
@@ -78,7 +87,7 @@ class Payment extends React.Component {
             {this.state.state == FORM && <CardUpdate card={this.state.card} handler={this.handler} />}
             {this.state.state == WAITING && <Waiting />}
             {this.state.state == SUCCESS && <Success />}
-            {this.state.state == FAILURE && <Failure />}
+            {this.state.state == FAILURE && <Failure phone={this.props.phone} />}
         </div>
     }
 }

@@ -40,7 +40,7 @@
             }
             <section class="mma-section">
                 <h3 class="mma-section__header">Update your payment method</h3>
-                @views.html.account.fragments.paymentUpdate(subscription, maybeEmail)
+                @views.html.account.fragments.paymentUpdate(subscription, maybeEmail, subscription.plans.head.product, DigitalEdition.getForCountry(contact.country))
             </section>
         </section>
     </main>
