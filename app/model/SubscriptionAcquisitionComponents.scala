@@ -100,10 +100,16 @@ object SubscriptionAcquisitionComponents {
         case (_, _: Weekly, false) => PrintProduct.GuardianWeekly
       }
 
-      for {
+      val printOptions = for {
         d <- p.deliveryAddress.country.map(_.alpha2)
         p <- printProduct
       } yield PrintOptions(p, d)
+
+      if (printOptions.isEmpty) {
+        logger.error("Could not determine PrintOptions from PaperData")
+      }
+
+      printOptions
     }
 
     override def buildAcquisition(components: SubscriptionAcquisitionComponents): Either[String, Acquisition] = {
@@ -114,12 +120,14 @@ object SubscriptionAcquisitionComponents {
       val plan = productData.fold(_.plan, _.plan)
       val referrerAcquisitionData = acquisitionDataJSON.flatMap(referrerAcquisitionDataFromJSON)
 
+      val product = productData match {
+        case Left(_) => Product.PrintSubscription
+        case Right(_) => Product.DigitalSubscription
+      }
+
       Right(
         Acquisition(
-          product = productData match {
-            case Left(_) => Product.PrintSubscription
-            case Right(_) => Product.DigitalSubscription
-          },
+          product,
 
           paymentFrequency = plan.charges.billingPeriod match {
             case Month => PaymentFrequency.Monthly
@@ -136,7 +144,10 @@ object SubscriptionAcquisitionComponents {
           paymentProvider = paymentData match {
             case DirectDebitData(_, _, _) => Some(Gocardless)
             case CreditCardData(_) => Some(Stripe)
-            case _ => None
+            case _ => {
+              logger.error("No payment provider for acquisition event")
+              None
+            }
           },
 
           countryCode = personalData.address.country.map(_.alpha2),
