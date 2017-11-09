@@ -4,7 +4,7 @@ import com.gu.acquisition.model.{OphanIds, ReferrerAcquisitionData}
 import com.gu.acquisition.typeclasses.AcquisitionSubmissionBuilder
 import com.gu.memsub.Benefit.{PaperDay, Weekly}
 import com.gu.memsub.BillingPeriod
-import com.gu.memsub.BillingPeriod.{Month, Quarter, SixMonths, Year}
+import com.gu.memsub.BillingPeriod._
 import com.gu.memsub.promo.{PercentDiscount, Promotion}
 import com.gu.stripe.Stripe.Charge
 import com.typesafe.scalalogging.LazyLogging
@@ -119,17 +119,32 @@ object SubscriptionAcquisitionComponents {
         case Right(_) => Product.DigitalSubscription
       }
 
+      val paymentFrequency = plan.charges.billingPeriod match {
+        case oneOff: OneOffPeriod => oneOff match {
+          // SixWeeks is a special case.
+          // It means it's the "6 for £6" Guardian Weekly offer,
+          // which starts with a six week one-off billing period then
+          // changes to quarterly recurring at the end of the six weeks.
+          case SixWeeks => PaymentFrequency.Quarterly
+
+          // Any other one-off billing periods are probably impossible for new acquisitions,
+          // and only exist to model legacy print subscriptions.
+          // So we're fine to store these as OneOff.
+          case _ => PaymentFrequency.OneOff
+        }
+
+        case recurring: RecurringPeriod => recurring match {
+          case Month => PaymentFrequency.Monthly
+          case Quarter => PaymentFrequency.Quarterly
+          case SixMonthsRecurring => PaymentFrequency.SixMonthly
+          case Year => PaymentFrequency.Annually
+        }
+      }
+
       Right(
         Acquisition(
           product,
-
-          paymentFrequency = plan.charges.billingPeriod match {
-            case Month => PaymentFrequency.Monthly
-            case Quarter => PaymentFrequency.Quarterly
-            case SixMonths => PaymentFrequency.SixMonthly
-            case Year => PaymentFrequency.Annually
-          },
-
+          paymentFrequency,
           currency = currency.iso,
 
           amount = plan.charges.price.getPrice(currency)
