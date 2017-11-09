@@ -109,7 +109,7 @@ object SubscriptionAcquisitionComponents {
     override def buildAcquisition(components: SubscriptionAcquisitionComponents): Either[String, Acquisition] = {
       import components._
       import components.subscribeRequest.productData
-      import components.subscribeRequest.genericData.{currency, paymentData, personalData}
+      import components.subscribeRequest.genericData.{currency, paymentData, personalData, promoCode}
 
       val plan = productData.fold(_.plan, _.plan)
       val referrerAcquisitionData = acquisitionDataJSON.flatMap(referrerAcquisitionDataFromJSON)
@@ -119,13 +119,18 @@ object SubscriptionAcquisitionComponents {
         case Right(_) => Product.DigitalSubscription
       }
 
+      val isSixForSix = plan.charges.billingPeriod match {
+        // SixWeeks is a special case.
+        // It means it's the "6 for £6" Guardian Weekly offer,
+        // which starts with a six week one-off billing period then
+        // changes to quarterly recurring at the end of the six weeks.
+        case SixWeeks => true
+        case _ => false
+      }
+
       val paymentFrequency = plan.charges.billingPeriod match {
         case oneOff: OneOffPeriod => oneOff match {
-          // SixWeeks is a special case.
-          // It means it's the "6 for £6" Guardian Weekly offer,
-          // which starts with a six week one-off billing period then
-          // changes to quarterly recurring at the end of the six weeks.
-          case SixWeeks => PaymentFrequency.Quarterly
+          case _ if isSixForSix => PaymentFrequency.Quarterly
 
           // Any other one-off billing periods are probably impossible for new acquisitions,
           // and only exist to model legacy print subscriptions.
@@ -170,6 +175,7 @@ object SubscriptionAcquisitionComponents {
             case PercentDiscount(_, amount) => amount
           },
 
+          // TODO: uncomment
           // Currently we only have discountLengthInDays.
           // It should have been discountLengthInMonths instead.
           // Once the Thrift definition is updated, we can uncomment this.
@@ -184,6 +190,12 @@ object SubscriptionAcquisitionComponents {
           componentId = referrerAcquisitionData.flatMap(_.componentId),
           componentTypeV2 = referrerAcquisitionData.flatMap(_.componentType),
           source = referrerAcquisitionData.flatMap(_.source)
+
+          // TODO: add promoCode
+//          promoCode = promoCode.map(_.get)
+
+          // TODO: add label, if isSixForSix
+//          labels = if (isSixForSix) Some(Seq("guardian-weekly-six-for-six")) else None
         )
       )
     }
