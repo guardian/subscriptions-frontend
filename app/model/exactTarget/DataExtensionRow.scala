@@ -80,6 +80,7 @@ object DigipackWelcome1DataExtensionRow extends LazyLogging {
         "MandateID" -> mandateId
       )
       case _: PaymentCard => Seq("Default payment method" -> card)
+      case _ => Seq()
     }
 
     val promotionFields = promotionDescription.map(d => "Promotion description" -> trimPromotionDescription(d))
@@ -164,6 +165,7 @@ object PaperFieldsGenerator {
         "mandate_id" -> mandateId
       )
       case _: PaymentCard => Seq("payment_method" -> card)
+      case _ => Seq()
     }
 
     val promotionFields = promotionDescription.map(d => "promotion_details" -> trimPromotionDescription(d))

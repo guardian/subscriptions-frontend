@@ -35,7 +35,7 @@ lazy val root = (project in file(".")).enablePlugins(
   ))
 
 scalaVersion := "2.11.8"
-scalacOptions ++= Seq("-feature")
+scalacOptions ++= Seq("-feature", "-Xfatal-warnings")
 
 val scalatestVersion = "3.0.0"
 
