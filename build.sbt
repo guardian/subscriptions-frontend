@@ -65,7 +65,8 @@ libraryDependencies ++= Seq(
     "net.databinder.dispatch" %% "dispatch-core" % "0.11.3",
     "com.gu" % "kinesis-logback-appender" % "1.4.0",
     "net.logstash.logback" % "logstash-logback-encoder" % "4.9",
-    "com.fasterxml.jackson.dataformat" % "jackson-dataformat-cbor" % "2.8.7"
+    "com.fasterxml.jackson.dataformat" % "jackson-dataformat-cbor" % "2.8.7",
+    "com.gu" %% "acquisition-event-producer" % "2.0.1"
 )
 
 testOptions in Test ++= Seq(
@@ -81,7 +82,9 @@ resolvers ++= Seq(
     "Guardian Github Releases" at "https://guardian.github.io/maven/repo-releases",
     "Guardian Github Snapshots" at "http://guardian.github.com/maven/repo-snapshots",
     "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases",
-    Resolver.sonatypeRepo("releases"))
+    Resolver.sonatypeRepo("releases"),
+    Resolver.bintrayRepo("guardian", "ophan")
+)
 
 import com.typesafe.sbt.packager.archetypes.ServerLoader.Systemd
 serverLoading in Debian := Systemd

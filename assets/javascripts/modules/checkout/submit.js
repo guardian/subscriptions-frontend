@@ -12,7 +12,9 @@ define([
     'modules/checkout/stripeErrorMessages',
     'modules/checkout/stripeCheckout',
     'modules/raven',
-    'modules/checkout/formElements'
+    'modules/checkout/formElements',
+    'modules/analytics/ophan',
+    'utils/cookie'
 ], function ($,
              bean,
              ajax,
@@ -25,25 +27,30 @@ define([
              paymentErrorMessages,
              stripeCheckout,
              raven,
-             formElements) {
+             formElements,
+             ophan,
+             cookie) {
     'use strict';
 
     function submitHandler() {
         if (formEls.$CHECKOUT_SUBMIT.length) {
-            formEls.$CHECKOUT_SUBMIT[0].addEventListener('click', submit, false);
+            formEls.$CHECKOUT_SUBMIT[0].addEventListener('click', function(e) {
+                e.preventDefault();
+                ophan.loaded.then(submit, submit)
+            }, false);
         }
     }
 
-    function submit(e) {
-        e.preventDefault();
+    function submit(ophan) {
         loader.setLoaderElem(document.querySelector('.js-loader'));
         loader.startLoader();
         var submitEl = formEls.$CHECKOUT_SUBMIT[0];
+        var pageViewId = ophan && ophan.pageviewId;
 
         submitEl.setAttribute('disabled', 'disabled');
 
         if (!formEls.$CARD_TYPE[0].checked) {
-            send();
+            send(pageViewId);
             return;
         }
 
@@ -69,7 +76,7 @@ define([
             token: function (token) {
                 successfulCharge = token;
                 stripeCheckout.setPaymentToken(token.id);
-                send();
+                send(pageViewId);
             },
             closed: function () {
                 if (!successfulCharge) {
@@ -78,17 +85,19 @@ define([
                 }
             }
         });
-
-
     }
 
-    function send() {
+    function send(pageViewId) {
         var form = formEls.$CHECKOUT_FORM[0];
         var data = serializer([].slice.call(form.elements));
         var submitEl = formEls.$CHECKOUT_SUBMIT[0];
         var errorElement = $('.js-error');
 
         errorElement.text('');
+
+        data.ophanBrowserId = cookie.getCookie('bwid');
+        data.ophanVisitId = cookie.getCookie('vsid');
+        data.ophanPageViewId = pageViewId;
 
         ajax({
             url: '/checkout',
