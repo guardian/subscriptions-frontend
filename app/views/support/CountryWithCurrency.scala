@@ -9,7 +9,7 @@ sealed trait StripeServiceName {
   val jsLookupKey: String
 }
 case object UKStripeService extends StripeServiceName {
-  val jsLookupKey = "ukPublicKey"
+  val jsLookupKey = "ukPublicKey" // Referenced in assets/javascripts/modules/checkout/submit.js
 }
 case object AUStripeService extends StripeServiceName {
   val jsLookupKey = "auPublicKey"

@@ -1,9 +1,11 @@
 package services
+import com.gu.i18n.Country
 import com.gu.memsub.Benefit._
 import com.gu.memsub.Product.{Delivery, ZDigipack}
 import com.gu.memsub.Subscription.{ProductRatePlanChargeId, ProductRatePlanId}
 import com.gu.memsub._
 import com.gu.memsub.subsv2._
+import com.gu.zuora.api.InvoiceTemplate
 import model.{DigipackData, PaperData}
 import org.joda.time.{Days, LocalDate}
 import org.specs2.mutable.Specification
@@ -35,7 +37,7 @@ class CheckoutServiceTest extends Specification {
     s = Status.current
   )
 
-  val zuora = ZuoraProperties(defaultDigitalPackFreeTrialPeriod = Days.days(14), gracePeriodInDays = Days.days(2))
+  val zuora = ZuoraProperties(defaultDigitalPackFreeTrialPeriod = Days.days(14), gracePeriodInDays = Days.days(2), invoiceTemplates = List(InvoiceTemplate("foo", Country.UK)))
   val paperData = Left(PaperData(new LocalDate("2016-07-30"), address, None, paperPlan))
   val digipackData = Right(DigipackData(digiPlan))
 

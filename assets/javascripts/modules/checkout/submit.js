@@ -61,15 +61,15 @@ define([
 
         var successfulCharge = false;
         var ratePlan = document.querySelector('.js-rate-plans input:checked').dataset;
-        var stripeServiceName = document.querySelectorAll('#personal-address-country option:checked')[0].dataset.stripeServiceName || 'UKStripeService';
-        var stripePublicKeys = {'AUStripeService': guardian.stripe.auKey, 'UKStripeService': guardian.stripe.ukKey};
+        var checkedOption = document.querySelectorAll('#personal-address-country option:checked')[0];
+        var stripeServiceName = (checkedOption && checkedOption.dataset.stripeServiceName) || 'ukPublicKey';
 
         handler.open({
             currency: ratePlan.currency,
             description: ratePlan.optionMirrorPackage,
             panelLabel: 'Subscribe',
             email: formElements.$EMAIL.val(),
-            key: stripePublicKeys[stripeServiceName],
+            key: guardian.stripe[stripeServiceName],
             token: function (token) {
                 successfulCharge = token;
                 stripeCheckout.setPaymentToken(token.id);
