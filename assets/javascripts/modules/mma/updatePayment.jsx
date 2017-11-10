@@ -15,7 +15,7 @@ const handleStripeResponse = (t,url,key) => {
     let form = new FormData();
     form.append('stripeToken', t.id)
     form.append('publicKey', key)
-    let mmaPromise = fetch(`${url}/user-attributes/me/paper-update-card`, {
+    return fetch(`${url}/user-attributes/me/paper-update-card`, {
         method: 'post',
         credentials: 'include',
         mode: 'cors',
@@ -23,8 +23,7 @@ const handleStripeResponse = (t,url,key) => {
             'Csrf-Token': 'nocheck',
         },
         body: form
-    })
-    return Promise.race([mmaPromise, timeout(30000)]).then(resp => resp.json())
+    }).then(resp => resp.json())
 }
 
 const getDetails = async (url) => {
