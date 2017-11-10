@@ -175,13 +175,9 @@ object SubscriptionAcquisitionComponents {
             case PercentDiscount(_, amount) => amount
           },
 
-          // TODO: uncomment
-          // Currently we only have discountLengthInDays.
-          // It should have been discountLengthInMonths instead.
-          // Once the Thrift definition is updated, we can uncomment this.
-//          discountLengthInMonths = promotion.map(_.promotionType) collect {
-//            case PercentDiscount(Some(months), _) => months.toShort
-//          },
+          discountLengthInMonths = promotion.map(_.promotionType) collect {
+            case PercentDiscount(Some(months), _) => months.toShort
+          },
 
           campaignCode = referrerAcquisitionData.flatMap(_.campaignCode.map(Set(_))),
           abTests = referrerAcquisitionData.flatMap(_.abTest.map(ab => AbTestInfo(Set(ab)))),
@@ -190,15 +186,9 @@ object SubscriptionAcquisitionComponents {
           componentId = referrerAcquisitionData.flatMap(_.componentId),
           componentTypeV2 = referrerAcquisitionData.flatMap(_.componentType),
           source = referrerAcquisitionData.flatMap(_.source),
-
-          // TODO: add platform!
-//          platform = Some(Platform.Subscribe),
-
-          // TODO: add promoCode
-//          promoCode = promoCode.map(_.get),
-
-          // TODO: add label, if isSixForSix
-//          labels = if (isSixForSix) Some(Seq("guardian-weekly-six-for-six")) else None
+          platform = Some(Platform.Subscribe),
+          promoCode = promoCode.map(_.get),
+          labels = if (isSixForSix) Some(Set("guardian-weekly-six-for-six")) else None
         )
       )
     }
