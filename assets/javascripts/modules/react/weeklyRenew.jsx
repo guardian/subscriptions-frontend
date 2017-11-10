@@ -15,7 +15,6 @@ import {
 } from 'modules/renew/renew'
 
 
-import SwitchButton from 'babel?presets[]=react&presets[]=es2015!react-switch-button'; //This ensures that this module gets correctly transpiled.
 const empty = {
     value: '',
     isValid: false
@@ -315,6 +314,7 @@ class Payment extends React.Component {
 }
 
 class PaymentType extends React.Component {
+
     constructor(props) {
         super(props);
     }
