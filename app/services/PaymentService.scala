@@ -3,14 +3,14 @@ import com.gu.i18n.Country.UK
 import com.gu.i18n.Currency.GBP
 import com.gu.i18n.{Country, CountryGroup, Currency}
 import com.gu.stripe.StripeService
-import com.gu.zuora.api.{GoCardless, RegionalStripeGateways}
+import com.gu.zuora.api.{GoCardless, InvoiceTemplate}
 import com.gu.zuora.soap.models.Commands._
 import model._
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 import scala.concurrent.Future
 
-class PaymentService(val ukStripeService: StripeService, val auStripeService: StripeService) {
+class PaymentService(val ukStripeService: StripeService, val auStripeService: StripeService, invoiceTemplatesByCountry: Map[Country, InvoiceTemplate]) {
 
   sealed trait AccountAndPayment {
     def makeAccount: Account
@@ -34,19 +34,12 @@ class PaymentService(val ukStripeService: StripeService, val auStripeService: St
 
   class ZuoraAccountCreditCard(val paymentData: CreditCardData, val currency: Currency, val purchaserIds: PurchaserIdentifiers, val transactingCountry: Option[Country]) extends AccountAndPayment {
 
-    private def stripeServicePicker(country: Country) = {
-      if(RegionalStripeGateways.getGatewayForCountry(country) == auStripeService.paymentGateway) auStripeService
-      else ukStripeService
-    }
+    private val stripeService = if (transactingCountry.contains(auStripeService.accountCountry)) auStripeService else ukStripeService
+    private val overrideInvoiceTemplate = invoiceTemplatesByCountry.get(stripeService.accountCountry)
 
-    val stripeService = transactingCountry match {
-      case Some(data) => stripeServicePicker(data)
-      case None => ukStripeService
-    }
+    override def makeAccount = Account(purchaserIds.contactId, identityIdForAccount(purchaserIds), currency, autopay = true, stripeService.paymentGateway, overrideInvoiceTemplate)
 
-    override def makeAccount = Account(purchaserIds.contactId, identityIdForAccount(purchaserIds), currency, autopay = true, stripeService.paymentGateway)
-
-    override def makePaymentMethod = {
+    override def makePaymentMethod: Future[CreditCardReferenceTransaction] = {
       stripeService.Customer.create(description = purchaserIds.description, card = paymentData.stripeToken)
         .map(a => CreditCardReferenceTransaction(
           cardId = a.card.id,
@@ -62,7 +55,7 @@ class PaymentService(val ukStripeService: StripeService, val auStripeService: St
 
 
 
-  def identityIdForAccount(purchaserIds: PurchaserIdentifiers) = {
+  def identityIdForAccount(purchaserIds: PurchaserIdentifiers): String = {
     purchaserIds.identityId match {
       case Some(idUser) => idUser.id
       case None => ""

@@ -2,6 +2,7 @@
 @import model.JsVars
 @import controllers.CachedAssets.hashedPathFor
 @import configuration.Config
+@import views.support.{UKStripeService, AUStripeService}
 @(jsVars: JsVars, touchpointBackendResolutionOpt: Option[services.TouchpointBackend.Resolution])
 
 
@@ -38,11 +39,11 @@
         backend = touchpointBackendResolution.backend
     ) {
     guardian.stripe = {
-        ukKey: '@backend.stripeUKMembershipService.publicKey.mkString',
-        auKey: '@backend.stripeAUMembershipService.publicKey.mkString'
+        '@{UKStripeService.jsLookupKey}': '@backend.stripeUKMembershipService.publicKey.mkString',
+        '@{AUStripeService.jsLookupKey}': '@backend.stripeAUMembershipService.publicKey.mkString'
     };
     guardian.stripeCheckout = {
-        key: guardian.stripe.ukKey,
+        key: guardian.stripe['@{UKStripeService.jsLookupKey}'],
         image: 'https://d24w1tjgih0o9s.cloudfront.net/gu.png',
         locale: 'auto',
         name: 'Guardian',

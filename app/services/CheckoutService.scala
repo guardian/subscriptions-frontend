@@ -12,9 +12,9 @@ import com.gu.memsub.subsv2.SubscriptionPlan.WeeklyPlan
 import com.gu.memsub.subsv2.{Catalog, Subscription}
 import com.gu.memsub.{BillingPeriod, NormalisedTelephoneNumber, Product}
 import com.gu.salesforce.{Contact, ContactId}
-import com.gu.stripe.{Stripe, StripeService}
+import com.gu.stripe.Stripe
 import com.gu.zuora.ZuoraRestService
-import com.gu.zuora.api.ZuoraService
+import com.gu.zuora.api.{InvoiceTemplate, ZuoraService}
 import com.gu.zuora.soap.models.Commands.{Account, PaymentMethod, RatePlan, Subscribe, _}
 import com.gu.zuora.soap.models.Queries
 import com.gu.zuora.soap.models.Queries.{Contact => ZuoraContact}
@@ -68,7 +68,8 @@ class CheckoutService(
   zuoraProperties: ZuoraProperties,
   promoService: PromoService,
   promoPlans: DiscountRatePlanIds,
-  commonPaymentService: CommonPaymentService
+  commonPaymentService: CommonPaymentService,
+  invoiceTemplatesByCountry: Map[Country, InvoiceTemplate]
 ) extends ContextLogging {
 
   type NonFatalErrors = Seq[SubsError]
@@ -425,9 +426,10 @@ class CheckoutService(
       }
       else {
         val payment = getPayment(contactInfo.salesforceContact, contactInfo.billto)
+        val invoiceTemplateOverride = contactInfo.billto.country.flatMap(invoiceTemplatesByCountry.get)
         for {
           paymentMethod <- payment.makePaymentMethod
-          createPaymentMethod = CreatePaymentMethod(subscription.accountId, paymentMethod, payment.makeAccount.paymentGateway, contactInfo.billto)
+          createPaymentMethod = CreatePaymentMethod(subscription.accountId, paymentMethod, payment.makeAccount.paymentGateway, contactInfo.billto, invoiceTemplateOverride)
           updateResult <- zuoraService.createPaymentMethod(createPaymentMethod).withContextLogging("createPaymentMethod", _.id)
           renewCommand <- constructRenewCommand(promotion)
           _ <- ensureEmail(contactInfo.billto, subscription)

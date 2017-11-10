@@ -5,7 +5,7 @@ import Currency._
 import com.gu.memsub.BillingPeriod.{OneYear, Quarter, SixWeeks, Year}
 import com.gu.memsub.Product
 import com.gu.memsub.subsv2.CatalogPlan
-import views.support.{CountryWithCurrency, UKStripeService}
+import views.support.CountryWithCurrency
 import model.BillingPeriodOps._
 
 object ContentSubscriptionPlanOps {
@@ -35,7 +35,7 @@ object ContentSubscriptionPlanOps {
         case Product.Digipack => LocalizationSettings(None, allCountriesWithCurrencyOrGBP)
 
         case Product.Delivery =>
-          val deliveryCountries = List(CountryWithCurrency(Country.UK, GBP, UKStripeService))
+          val deliveryCountries = List(CountryWithCurrency(Country.UK, GBP))
           LocalizationSettings(Some(deliveryCountries), deliveryCountries)
 
         case Product.Voucher =>
