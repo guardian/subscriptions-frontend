@@ -189,10 +189,13 @@ object SubscriptionAcquisitionComponents {
           referrerUrl = referrerAcquisitionData.flatMap(_.referrerUrl),
           componentId = referrerAcquisitionData.flatMap(_.componentId),
           componentTypeV2 = referrerAcquisitionData.flatMap(_.componentType),
-          source = referrerAcquisitionData.flatMap(_.source)
+          source = referrerAcquisitionData.flatMap(_.source),
+
+          // TODO: add platform!
+//          platform = Some(Platform.Subscribe),
 
           // TODO: add promoCode
-//          promoCode = promoCode.map(_.get)
+//          promoCode = promoCode.map(_.get),
 
           // TODO: add label, if isSixForSix
 //          labels = if (isSixForSix) Some(Seq("guardian-weekly-six-for-six")) else None
