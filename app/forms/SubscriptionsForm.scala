@@ -172,6 +172,12 @@ object SubscriptionsForm {
     "title"-> of(titleFormatter)
   )(PersonalData.apply)(PersonalData.unapply)
 
+  val ophanDataMapping = mapping(
+    "ophanPageViewId" -> optional(text),
+    "ophanVisitId" -> optional(text),
+    "ophanBrowserId" -> optional(text)
+  )(OphanData.apply)(OphanData.unapply)
+
   def addressWithFallback(fallbackKey: String): Formatter[Address] = new Formatter[Address] {
     override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Address] = (
       \/.fromEither(addressDataMapping.withPrefix(key).bind(data)) orElse
@@ -239,7 +245,8 @@ object SubscriptionsForm {
     "personal" -> personalDataMapping,
     "payment" -> of[PaymentData],
     "promoCode" -> optional(of[PromoCode]),
-    "currency" -> of[Currency]
+    "currency" -> of[Currency],
+    "ophan" -> ophanDataMapping
   )(SubscriptionData.apply)(SubscriptionData.unapply)
     .verifying("DirectDebit is only available for GBP transactions in the UK", PaymentValidation.validateDirectDebit _))
 }
