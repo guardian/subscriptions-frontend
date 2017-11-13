@@ -107,7 +107,7 @@ object SubscriptionAcquisitionComponents {
     }
 
     def getAbTests(referrerAcquisitionData: Option[ReferrerAcquisitionData]): Option[AbTestInfo] =
-     referrerAcquisitionData.flatMap { r =>
+      referrerAcquisitionData.flatMap { r =>
        r.abTests match {
          case Some(tests) => Some(AbTestInfo(tests))
          case None => r.abTest.map(abTest => AbTestInfo(Set(abTest)))
