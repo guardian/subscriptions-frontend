@@ -106,6 +106,14 @@ object SubscriptionAcquisitionComponents {
       printOptions
     }
 
+    def getAbTests(referrerAcquisitionData: Option[ReferrerAcquisitionData]): Option[AbTestInfo] =
+     referrerAcquisitionData.flatMap { r =>
+       r.abTests match {
+         case Some(tests) => Some(AbTestInfo(tests))
+         case None => r.abTest.map(abTest => AbTestInfo(Set(abTest)))
+       }
+     }
+
     override def buildAcquisition(components: SubscriptionAcquisitionComponents): Either[String, Acquisition] = {
       import components._
       import components.subscribeRequest.productData
@@ -180,7 +188,7 @@ object SubscriptionAcquisitionComponents {
           },
 
           campaignCode = referrerAcquisitionData.flatMap(_.campaignCode.map(Set(_))),
-          abTests = referrerAcquisitionData.flatMap(_.abTest.map(ab => AbTestInfo(Set(ab)))),
+          abTests = getAbTests(referrerAcquisitionData),
           referrerPageViewId = referrerAcquisitionData.flatMap(_.referrerPageviewId),
           referrerUrl = referrerAcquisitionData.flatMap(_.referrerUrl),
           componentId = referrerAcquisitionData.flatMap(_.componentId),
