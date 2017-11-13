@@ -14,7 +14,7 @@ import com.gu.memsub.{BillingPeriod, NormalisedTelephoneNumber, Product}
 import com.gu.salesforce.{Contact, ContactId}
 import com.gu.stripe.Stripe
 import com.gu.zuora.ZuoraRestService
-import com.gu.zuora.api.ZuoraService
+import com.gu.zuora.api.{InvoiceTemplate, ZuoraService}
 import com.gu.zuora.soap.models.Commands.{Account, PaymentMethod, RatePlan, Subscribe, _}
 import com.gu.zuora.soap.models.Queries
 import com.gu.zuora.soap.models.Queries.{Contact => ZuoraContact}
@@ -68,7 +68,8 @@ class CheckoutService(
   zuoraProperties: ZuoraProperties,
   promoService: PromoService,
   promoPlans: DiscountRatePlanIds,
-  commonPaymentService: CommonPaymentService
+  commonPaymentService: CommonPaymentService,
+  invoiceTemplatesByCountry: Map[Country, InvoiceTemplate]
 ) extends ContextLogging {
 
   type NonFatalErrors = Seq[SubsError]
@@ -313,16 +314,17 @@ class CheckoutService(
 
   private def createPaymentType(purchaserIds: PurchaserIdentifiers, subscriptionData: SubscribeRequest): Future[NonEmptyList[SubsError] \/ PaymentService#AccountAndPayment] = {
     try {
+      val personalData = subscriptionData.genericData.personalData
+
       val payment = subscriptionData.genericData.paymentData match {
         case paymentData@DirectDebitData(_, _, _) =>
-          val personalData = subscriptionData.genericData.personalData
           require(personalData.address.country.contains(Country.UK), "Direct Debit payment only works in the UK right now")
           paymentService.makeZuoraAccountWithDirectDebit(paymentData, personalData.first, personalData.last, purchaserIds)
         case paymentData@CreditCardData(_) =>
           val plan = subscriptionData.productData.fold(_.plan, _.plan)
           val desiredCurrency = subscriptionData.genericData.currency
           val currency = if (plan.charges.price.currencies.contains(desiredCurrency)) desiredCurrency else GBP
-          paymentService.makeZuoraAccountWithCreditCard(paymentData, currency, purchaserIds)
+          paymentService.makeZuoraAccountWithCreditCard(paymentData, currency, purchaserIds, personalData.address.country)
       }
       Future.successful(\/.right(payment))
     } catch {
@@ -345,7 +347,7 @@ class CheckoutService(
       val idMinimalUser = IdMinimalUser(contact.identityId, None)
       val purchaserIds = PurchaserIdentifiers(contact, Some(idMinimalUser))
       renewal.paymentData match {
-        case cd: CreditCardData => paymentService.makeZuoraAccountWithCreditCard(cd, subscription.currency, purchaserIds)
+        case cd: CreditCardData => paymentService.makeZuoraAccountWithCreditCard(cd, subscription.currency, purchaserIds, billto.country)
         case dd: DirectDebitData => paymentService.makeZuoraAccountWithDirectDebit(dd, billto.firstName, billto.lastName, purchaserIds)
       }
     }
@@ -424,9 +426,10 @@ class CheckoutService(
       }
       else {
         val payment = getPayment(contactInfo.salesforceContact, contactInfo.billto)
+        val invoiceTemplateOverride = contactInfo.billto.country.flatMap(invoiceTemplatesByCountry.get)
         for {
           paymentMethod <- payment.makePaymentMethod
-          createPaymentMethod = CreatePaymentMethod(subscription.accountId, paymentMethod, payment.makeAccount.paymentGateway, contactInfo.billto)
+          createPaymentMethod = CreatePaymentMethod(subscription.accountId, paymentMethod, payment.makeAccount.paymentGateway, contactInfo.billto, invoiceTemplateOverride)
           updateResult <- zuoraService.createPaymentMethod(createPaymentMethod).withContextLogging("createPaymentMethod", _.id)
           renewCommand <- constructRenewCommand(promotion)
           _ <- ensureEmail(contactInfo.billto, subscription)

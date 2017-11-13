@@ -2,18 +2,20 @@ package touchpoint
 
 import com.gu.i18n.Country
 import com.gu.salesforce.SalesforceConfig
-import com.gu.stripe.StripeApiConfig
+import com.gu.stripe.StripeServiceConfig
+import com.gu.zuora.api.{InvoiceTemplate, InvoiceTemplates}
 import com.gu.zuora.{ZuoraApiConfig, ZuoraRestConfig, ZuoraSoapConfig}
 import com.typesafe.scalalogging.LazyLogging
 import org.joda.time.Days
 
 case class TouchpointBackendConfig(
-  environmentName: String,
-  salesforce: SalesforceConfig,
-  zuoraSoap: ZuoraSoapConfig,
-  zuoraRest: ZuoraRestConfig,
-  zuoraProperties: ZuoraProperties,
-  stripe: StripeApiConfig
+    environmentName: String,
+    salesforce: SalesforceConfig,
+    zuoraSoap: ZuoraSoapConfig,
+    zuoraRest: ZuoraRestConfig,
+    zuoraProperties: ZuoraProperties,
+    stripeUK: StripeServiceConfig,
+    stripeAU: StripeServiceConfig
 )
 
 object TouchpointBackendConfig extends LazyLogging {
@@ -49,7 +51,8 @@ object TouchpointBackendConfig extends LazyLogging {
       ZuoraApiConfig.soap(envBackendConf, environmentName),
       ZuoraApiConfig.rest(envBackendConf, environmentName),
       ZuoraProperties.from(envBackendConf, environmentName),
-      StripeApiConfig.from(envBackendConf, environmentName, Country.UK)
+      StripeServiceConfig.from(envBackendConf, environmentName, Country.UK),
+      StripeServiceConfig.from(envBackendConf, environmentName, Country.Australia, "au-membership")
     )
   }
 }
@@ -58,11 +61,13 @@ object ZuoraProperties {
   def from(config: com.typesafe.config.Config, environmentName: String) = {
     ZuoraProperties(
       Days.days(config.getInt("zuora.paymentDelayInDays")),
-      Days.days(config.getInt("zuora.paymentDelayGracePeriod"))
+      Days.days(config.getInt("zuora.paymentDelayGracePeriod")),
+      InvoiceTemplates.fromConfig(config.getConfig("zuora.invoiceTemplateIds"))
     )
   }
 }
 case class ZuoraProperties(
   defaultDigitalPackFreeTrialPeriod: Days,
-  gracePeriodInDays: Days
+  gracePeriodInDays: Days,
+  invoiceTemplates: List[InvoiceTemplate]
 )

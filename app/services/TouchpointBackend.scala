@@ -1,6 +1,7 @@
 package services
 
 import com.gu.config.DiscountRatePlanIds
+import com.gu.i18n.Country
 import com.gu.memsub.promo.Promotion._
 import com.gu.memsub.promo.{DynamoPromoCollection, DynamoTables, PromotionCollection}
 import com.gu.memsub.services.{PaymentService => CommonPaymentService, _}
@@ -13,12 +14,12 @@ import com.gu.stripe.StripeService
 import com.gu.subscriptions.Discounter
 import com.gu.subscriptions.suspendresume.SuspensionService
 import com.gu.zuora
+import com.gu.zuora.api.InvoiceTemplate
 import com.gu.zuora.rest.SimpleClient
-import com.gu.zuora.{ZuoraRestService, rest, soap}
+import com.gu.zuora.{rest, soap}
 import configuration.Config
 import forms.SubscriptionsForm
 import monitoring.TouchpointBackendMetrics
-import org.joda.time.LocalDate
 import play.api.Play.current
 import play.api.libs.concurrent.Akka
 import play.api.libs.concurrent.Execution.Implicits._
@@ -39,6 +40,8 @@ trait TouchpointBackend {
   def catalogService : subsv2.services.CatalogService[Future]
   def zuoraService: zuora.api.ZuoraService
   def subscriptionService: subsv2.services.SubscriptionService[Future]
+  def stripeUKMembershipService: StripeService
+  def stripeAUMembershipService: StripeService
   def paymentService: PaymentService
   def commonPaymentService: CommonPaymentService
   def zuoraProperties: ZuoraProperties
@@ -50,6 +53,7 @@ trait TouchpointBackend {
   def subsForm: SubscriptionsForm
   def exactTargetService: ExactTargetService
   def checkoutService: CheckoutService
+  def invoiceTemplateIdsByCountry: Map[Country, InvoiceTemplate]
   implicit def simpleRestClient: SimpleClient[Future]
 }
 
@@ -63,33 +67,40 @@ object TouchpointBackend {
 
     val config = TouchpointBackendConfig.backendType(backendType, Config.config)
     val soapServiceMetrics = new ServiceMetrics(Config.stage, Config.appName, "zuora-soap-client")
-    val touchpointBackendMetrics = new ServiceMetrics(Config.stage, Config.appName, "Stripe") with TouchpointBackendMetrics {
-      val backendEnv = config.stripe.envName
+    val stripeUKMetrics = new ServiceMetrics(Config.stage, Config.appName, "Stripe UK Membership") with TouchpointBackendMetrics {
+      val backendEnv = config.stripeUK.envName
+    }
+
+    val stripeAUMetrics = new ServiceMetrics(Config.stage, Config.appName, "Stripe AU Membership") with TouchpointBackendMetrics {
+      val backendEnv = config.stripeAU.envName
     }
     val soapClient = new soap.ClientWithFeatureSupplier(Set.empty, config.zuoraSoap, loggingRunner(soapServiceMetrics), configurableLoggingRunner(20.seconds, soapServiceMetrics))
     val newProductIds = Config.productIds(config.environmentName)
-    val _stripeService = new StripeService(config.stripe, loggingRunner(touchpointBackendMetrics))
+
     val sfSimpleContactRepo = new SimpleContactRepository(config.salesforce, system.scheduler, Config.appName)
 
     new TouchpointBackend {
       implicit val simpleRestClient: SimpleClient[Future] = new rest.SimpleClient[Future](config.zuoraRest, futureRunner)
-      lazy val environmentName = config.environmentName
+      lazy val environmentName: String = config.environmentName
       lazy val salesforceService = new SalesforceServiceImp(sfSimpleContactRepo)
       lazy val catalogService = new subsv2.services.CatalogService[Future](newProductIds, simpleRestClient, Await.result(_, 10.seconds), backendType.name)
       lazy val zuoraService = new zuora.ZuoraService(soapClient)
-      val map = this.catalogService.catalog.map(_.fold[CatalogMap](error => {println(s"error: ${error.list.mkString}"); Map()}, _.map))
+      private val map = this.catalogService.catalog.map(_.fold[CatalogMap](error => {println(s"error: ${error.list.mkString}"); Map()}, _.map))
       lazy val subscriptionService = new subsv2.services.SubscriptionService[Future](newProductIds, map, simpleRestClient, zuoraService.getAccountIds)
-      lazy val paymentService = new PaymentService(_stripeService)
+      lazy val stripeUKMembershipService = new StripeService(config.stripeUK, loggingRunner(stripeUKMetrics))
+      lazy val stripeAUMembershipService = new StripeService(config.stripeAU, loggingRunner(stripeAUMetrics))
+      lazy val invoiceTemplateIdsByCountry: Map[Country, InvoiceTemplate] = this.zuoraProperties.invoiceTemplates.map(it => it.country -> it).toMap
+      lazy val paymentService = new PaymentService(this.stripeUKMembershipService, this.stripeAUMembershipService, invoiceTemplateIdsByCountry)
       lazy val commonPaymentService = new CommonPaymentService(zuoraService, this.catalogService.unsafeCatalog.productMap)
-      lazy val zuoraProperties = config.zuoraProperties
+      lazy val zuoraProperties: ZuoraProperties = config.zuoraProperties
       lazy val promoService = new PromoService(promoCollection, new Discounter(this.discountRatePlanIds))
       lazy val promoCollection = new DynamoPromoCollection(this.promoStorage, 15.seconds)
-      lazy val promoStorage = JsonDynamoService.forTable[AnyPromotion](DynamoTables.promotions(Config.config, config.environmentName))
-      lazy val discountRatePlanIds = Config.discountRatePlanIds(config.environmentName)
+      lazy val promoStorage: JsonDynamoService[AnyPromotion, Future] = JsonDynamoService.forTable[AnyPromotion](DynamoTables.promotions(Config.config, config.environmentName))
+      lazy val discountRatePlanIds: DiscountRatePlanIds = Config.discountRatePlanIds(config.environmentName)
       lazy val suspensionService = new SuspensionService[Future](Config.holidayRatePlanIds(config.environmentName), simpleRestClient)
       lazy val subsForm = new forms.SubscriptionsForm(this.catalogService.unsafeCatalog)
       lazy val exactTargetService: ExactTargetService = new ExactTargetService(this.subscriptionService, this.commonPaymentService, this.zuoraService, this.salesforceService)
-      lazy val checkoutService: CheckoutService = new CheckoutService(IdentityService, this.salesforceService, this.paymentService, this.catalogService.unsafeCatalog, this.zuoraService, this.exactTargetService, this.zuoraProperties, this.promoService, this.discountRatePlanIds, this.commonPaymentService)
+      lazy val checkoutService: CheckoutService = new CheckoutService(IdentityService, this.salesforceService, this.paymentService, this.catalogService.unsafeCatalog, this.zuoraService, this.exactTargetService, this.zuoraProperties, this.promoService, this.discountRatePlanIds, this.commonPaymentService, this.invoiceTemplateIdsByCountry)
     }
   }
 

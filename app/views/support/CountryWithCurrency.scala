@@ -5,12 +5,21 @@ import com.gu.i18n.{Country, CountryGroup, Currency}
 
 import scala.language.implicitConversions
 
-case class CountryWithCurrency(country: i18n.Country, currency: i18n.Currency)
+sealed trait StripeServiceName {
+  val jsLookupKey: String
+}
+case object UKStripeService extends StripeServiceName {
+  val jsLookupKey = "ukPublicKey" // Referenced in assets/javascripts/modules/checkout/submit.js
+}
+case object AUStripeService extends StripeServiceName {
+  val jsLookupKey = "auPublicKey"
+}
+
+case class CountryWithCurrency(country: i18n.Country, currency: i18n.Currency) {
+  val stripeServiceName: StripeServiceName = if(country == Country.Australia) AUStripeService else UKStripeService
+}
 
 object CountryWithCurrency {
-  val all = i18n.CountryGroup.allGroups.flatMap(fromCountryGroup).sortBy(_.country.name)
-
-  def withCurrency(c: Currency) = all.map(_.copy(currency = c))
 
   def fromCountryGroup(countryGroup: CountryGroup): List[CountryWithCurrency] = countryGroup.countries.map(c => CountryWithCurrency(c, countryGroup.currency))
 
