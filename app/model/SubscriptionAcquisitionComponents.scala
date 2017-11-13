@@ -186,7 +186,7 @@ object SubscriptionAcquisitionComponents {
           componentId = referrerAcquisitionData.flatMap(_.componentId),
           componentTypeV2 = referrerAcquisitionData.flatMap(_.componentType),
           source = referrerAcquisitionData.flatMap(_.source),
-          platform = Some(Platform.Subscribe),
+          platform = Some(Platform.Membership),
           promoCode = promoCode.map(_.get),
           labels = if (isSixForSix) Some(Set("guardian-weekly-six-for-six")) else None
         )
