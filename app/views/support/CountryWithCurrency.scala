@@ -16,7 +16,7 @@ case object AUStripeService extends StripeServiceName {
 }
 
 case class CountryWithCurrency(country: i18n.Country, currency: i18n.Currency) {
-  val stripePublicKeyLookup: StripeServiceName = if(country == Country.Australia) AUStripeService else UKStripeService
+  val stripeServiceName: StripeServiceName = if(country == Country.Australia) AUStripeService else UKStripeService
 }
 
 object CountryWithCurrency {

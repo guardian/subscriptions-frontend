@@ -39,7 +39,6 @@ import scalaz.std.option._
 import scalaz.std.scalaFuture._
 import scalaz.syntax.applicative._
 import scalaz.{NonEmptyList, OptionT, \/}
-import scalaz.{NonEmptyList, OptionT}
 import cats.instances.future._
 
 object Checkout extends Controller with LazyLogging with CatalogProvider {
@@ -176,22 +175,26 @@ object Checkout extends Controller with LazyLogging with CatalogProvider {
     implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(NameEnteredInForm, tempData)
     implicit val tpBackend = resolution.backend
     val idUserOpt = authenticatedUserFor(request)
-    val srEither: \/[Seq[FormError], SubscribeRequest] = tpBackend.subsForm.bindFromRequest
 
-    val sr = srEither.valueOr {
-      e => throw new Exception(s"Backend validation failed: identityId=${idUserOpt.map(_.user.id).mkString};" +
-        s" JavaScriptEnabled=${request.headers.toMap.contains("X-Requested-With")};" +
-        s" ${e.map(err => s"${err.key} ${err.message}").mkString(", ")}")
+    def marshalSubscribeRequest: SubscribeRequest = {
+      tpBackend.subsForm.bindFromRequest.valueOr {
+        e => throw new Exception(s"Backend validation failed: identityId=${idUserOpt.map(_.user.id).mkString};" +
+          s" JavaScriptEnabled=${request.headers.toMap.contains("X-Requested-With")};" +
+          s" ${e.map(err => s"${err.key} ${err.message}").mkString(", ")}")
+      }
     }
+
     val sessionTrackingCode = request.session.get(PromotionTrackingCode)
     val sessionSupplierCode = request.session.get(SupplierTrackingCode)
-    val subscribeRequest = sr.copy(
-      genericData = sr.genericData.copy(
-        promoCode = sr.genericData.promoCode orElse sessionTrackingCode.map(PromoCode)
+
+    val preliminarySubscribeRequest = marshalSubscribeRequest
+    val subscribeRequest = preliminarySubscribeRequest.copy(
+      genericData = preliminarySubscribeRequest.genericData.copy(
+        promoCode = preliminarySubscribeRequest.genericData.promoCode orElse sessionTrackingCode.map(PromoCode)
       )
     )
 
-    val thankYouEdition = model.DigitalEdition.getForCountry(sr.genericData.personalData.address.country)
+    val thankYouEdition = model.DigitalEdition.getForCountry(subscribeRequest.genericData.personalData.address.country)
 
     val requestData = SubscriptionRequestData(
       ipCountry = request.getFastlyCountry,
