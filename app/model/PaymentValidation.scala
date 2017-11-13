@@ -9,7 +9,7 @@ import views.support.CountryWithCurrency
 
 object PaymentValidation {
 
-  private val nonOverridableCountries = Seq(UK, US, Australia)
+  private val nonOverridableCountries = Set(UK, US, Australia)
 
   def validateDirectDebit(subscriptionData: SubscriptionData): Boolean = {
     subscriptionData.paymentData match {
