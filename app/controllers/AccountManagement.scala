@@ -34,6 +34,7 @@ import utils.TestUsers.PreSigninTestCookie
 import views.html.account.thankYouRenew
 import views.support.Dates._
 import views.support.Pricing._
+import utils.RequestCountry._
 
 import scala.concurrent.Future
 import scalaz.std.scalaFuture._
@@ -381,7 +382,7 @@ object AccountManagement extends Controller with ContextLogging with CatalogProv
           ManageWeekly(billingSchedule, weeklySubscription, maybeEmail, promoCode)
         }
         case Product.Digipack => subscription.asDigipack.map { digipackSubscription =>
-          Future.successful(Ok(views.html.account.digitalpack(digipackSubscription, billingSchedule)))
+          Future.successful(Ok(views.html.account.digitalpack(digipackSubscription, billingSchedule, request.getFastlyCountry,maybeEmail)))
         }
       }
       maybeFutureManagePage.getOrElse {

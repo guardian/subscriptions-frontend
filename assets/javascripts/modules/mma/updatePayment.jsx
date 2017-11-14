@@ -8,26 +8,30 @@ const timeout = (t) => new Promise((resolve, reject) => {
 })
 export const init = (elem) => {
     let handler = window.StripeCheckout.configure(guardian.stripeCheckout)
-    ReactDOM.render(<Payment sub={elem.dataset.subId} email={elem.dataset.email} phone={elem.dataset.phone} stripe={handler} />, elem)
+    ReactDOM.render(<Payment sub={elem.dataset.subId} email={elem.dataset.email} phone={elem.dataset.phone} stripe={handler} product={elem.dataset.product} />, elem)
 }
 
-const handleStripeResponse = (t,url,key) => {
+const handleStripeResponse = (t, url, endpoint, key) => {
     let form = new FormData();
     form.append('stripeToken', t.id)
     form.append('publicKey', key)
-    return fetch(`${url}/user-attributes/me/paper-update-card`, {
-        method: 'post',
-        credentials: 'include',
-        mode: 'cors',
-        headers: {
-            'Csrf-Token': 'nocheck',
-        },
-        body: form
-    }).then(resp => resp.json())
+    return fetch(`${url}/user-attributes/me/${endpoint}-update-card`,
+        {
+            method: 'post',
+            credentials: 'include',
+            mode: 'cors',
+            headers: {
+                'Csrf-Token': 'nocheck',
+            },
+            body: form
+        }).then(resp => resp.json())
 }
 
-const getDetails = async (url) => {
-    let resp = await fetch(`${url}/user-attributes/me/mma-paper`, { method: 'get', credentials: 'include' })
+const getDetails = async (url, endpoint) => {
+    let resp = await fetch(`${url}/user-attributes/me/mma-${endpoint}`,
+        {
+            method: 'get', credentials: 'include'
+        })
     let json = await resp.json()
     return json
 }
@@ -40,7 +44,7 @@ const FORM = 'form'
 
 const CardUpdate = ({ card, handler }) => (<div><button className="button button--primary button--large" onClick={handler}>•••• •••• •••• {card.last4} Update Card</button></div>)
 const Success = () => (<p>Thank you, we have successfully updated your payment details.</p>)
-const Failure = ({phone}) =>  <p>Unfortunately, we are unable to update your payment details at this time, please contact the call centre. {phone}</p>
+const Failure = ({ phone }) => <p>Unfortunately, we are unable to update your payment details at this time, please contact the call centre. {phone}</p>
 
 
 const Waiting = () => (<div className="loader js-loader is-loading">Processing&hellip;</div>)
@@ -52,22 +56,23 @@ class Payment extends React.Component {
         const url = guardian.members_data_api
 
         const token = (t) => {
-            this.setState({state: WAITING})   
-            handleStripeResponse(t,url,this.state.stripePublicKeyForUpdate).then(json => {
-                    this.setState({ state: SUCCESS })
-                })
+            this.setState({ state: WAITING })
+            handleStripeResponse(t, url, getEndpoint(), this.state.stripePublicKeyForUpdate).then(json => {
+                this.setState({ state: SUCCESS })
+            })
                 .catch(() => {
                     this.setState({ state: FAILURE })
                 })
-            }
+        }
+
         this.handler = () => {
-            this.setState({ state: OPEN })            
+            this.setState({ state: OPEN })
             this.props.stripe.open({
                 key: this.state.card.stripePublicKeyForUpdate,
                 email: this.props.email,
                 token: token,
                 panelLabel: "Update",
-                closed: () => {if(this.state.state == OPEN) this.setState({ state: FORM }) }
+                closed: () => { if (this.state.state == OPEN) this.setState({ state: FORM }) }
             })
         }
         this.state = {
@@ -75,8 +80,7 @@ class Payment extends React.Component {
             card: null
         }
 
-
-        Promise.race([getDetails(url), timeout(10000)]).then(resp => {
+        Promise.race([getDetails(url, getEndpoint()), timeout(10000)]).then(resp => {
             let sub = resp.subscription && resp.subscription.subscriberId
             if (!sub || sub != this.props.sub || !this.props.stripe) {
                 this.setState({ state: FAILURE })
@@ -89,11 +93,16 @@ class Payment extends React.Component {
                 this.setState({ state: FAILURE })
             })
     }
+
+    getEndpoint() {
+        return this.props.product === 'digitalpack' ? 'digipack' : 'paper'
+    }
+
     render() {
         return <div>
             {this.state.state == FORM && <CardUpdate card={this.state.card} handler={this.handler} />}
             {this.state.state == WAITING && <Waiting />}
-            {this.state.state == OPEN    && <Waiting />}
+            {this.state.state == OPEN && <Waiting />}
             {this.state.state == SUCCESS && <Success />}
             {this.state.state == FAILURE && <Failure phone={this.props.phone} />}
         </div>
