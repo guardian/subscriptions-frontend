@@ -10,7 +10,6 @@ import com.gu.i18n.Currency.{GBP, USD}
 import com.gu.memsub.Subscription.{Name, ProductRatePlanId}
 import com.gu.memsub.promo.{NormalisedPromoCode, PromoCode}
 import com.gu.memsub.subsv2.SubscriptionPlan._
-import com.gu.memsub.subsv2._
 import com.gu.memsub.{BillingSchedule, Product}
 import com.gu.subscriptions.suspendresume.SuspensionService
 import com.gu.subscriptions.suspendresume.SuspensionService.{BadZuoraJson, ErrNel, HolidayRefund, PaymentHoliday}
@@ -28,11 +27,14 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json._
 import play.api.mvc.{AnyContent, _}
 import _root_.services.FulfilmentLookupService
+import com.gu.memsub.subsv2.{Catalog, ReaderType, Subscription}
 import com.gu.zuora.soap.models.Queries.Account
+import services.IdentityService
 import utils.TestUsers.PreSigninTestCookie
 import views.html.account.thankYouRenew
 import views.support.Dates._
 import views.support.Pricing._
+
 import scala.concurrent.Future
 import scalaz.std.scalaFuture._
 import scalaz.syntax.std.option._
@@ -74,11 +76,11 @@ object ManageDelivery extends ContextLogging {
 
   import play.api.mvc.Results._
 
-  def apply(errorCodes: Set[String], pendingHolidays: Seq[HolidayRefund], billingSchedule: Option[BillingSchedule], deliverySubscription: Subscription[Delivery], account: Account)(implicit request: Request[AnyContent], touchpoint: TouchpointBackend.Resolution): Result = {
+  def apply(errorCodes: Set[String], pendingHolidays: Seq[HolidayRefund], billingSchedule: Option[BillingSchedule], deliverySubscription: Subscription[Delivery], account: Account, maybeEmail: Option[String])(implicit request: Request[AnyContent], touchpoint: TouchpointBackend.Resolution): Result = {
     val suspendedDays = SuspensionService.holidayToSuspendedDays(pendingHolidays, deliverySubscription.plan.charges.chargedDays.toList)
     val chosenPaperDays = deliverySubscription.plan.charges.chargedDays.toList.sortBy(_.dayOfTheWeekIndex)
     val suspendableDays = Config.suspendableWeeks * chosenPaperDays.size
-    Ok(views.html.account.delivery(deliverySubscription, account, pendingHolidays, billingSchedule, chosenPaperDays, suspendableDays, suspendedDays, errorCodes))
+    Ok(views.html.account.delivery(deliverySubscription, account, pendingHolidays, billingSchedule, chosenPaperDays, suspendableDays, suspendedDays, errorCodes, maybeEmail))
   }
 
   def suspend(implicit request: Request[AnyContent], touchpoint: TouchpointBackend.Resolution): Future[Result] = {
@@ -189,13 +191,14 @@ object ManageWeekly extends ContextLogging {
   }
 
   def apply(
-    billingSchedule: Option[BillingSchedule],
-    weeklySubscription: Subscription[WeeklyPlan],
-    promoCode: Option[PromoCode]
-  )(implicit
-    request: Request[AnyContent],
-    resolution: TouchpointBackend.Resolution
-  ): Future[Result] = {
+             billingSchedule: Option[BillingSchedule],
+             weeklySubscription: Subscription[WeeklyPlan],
+             maybeEmail: Option[String],
+             promoCode: Option[PromoCode]
+           )(implicit
+             request: Request[AnyContent],
+             resolution: TouchpointBackend.Resolution
+           ): Future[Result] = {
     implicit val tpBackend = resolution.backend
     implicit val rest = tpBackend.simpleRestClient
     implicit val zuoraRest = new ZuoraRestService[Future]
@@ -224,7 +227,7 @@ object ManageWeekly extends ContextLogging {
 
     def choosePage(account: ZuoraRestService.AccountSummary) = {
       val renewPageResult = for {
-        billToCountry <-  account.billToContact.country.toRightDisjunction(s"no valid bill to country for account ${account.id}")
+        billToCountry <- account.billToContact.country.toRightDisjunction(s"no valid bill to country for account ${account.id}")
         currency <- account.currency.toRightDisjunction(s"couldn't get new rate/currency for renewal ${account.id}")
         weeklyPlanInfo <- getRenewalPlans(account, currency).leftMap(errorMessage => s"couldn't get new rate: $errorMessage")
       } yield {
@@ -233,7 +236,7 @@ object ManageWeekly extends ContextLogging {
           views.html.account.weeklyRenew(renewableSub, account.soldToContact, account.billToContact.email, billToCountry, weeklyPlanInfo, currency, promoCode)
         } getOrElse {
           info(s"sub is not renewable - showing weeklyDetails page")
-          views.html.account.weeklyDetails(weeklySubscription, billingSchedule, account.soldToContact)
+          views.html.account.weeklyDetails(weeklySubscription, billingSchedule, account.soldToContact, maybeEmail)
         })
       }
       Future.successful(renewPageResult)
@@ -352,21 +355,30 @@ object AccountManagement extends Controller with ContextLogging with CatalogProv
     val eventualMaybeSubscription = SessionSubscription.subscriptionFromRequest
     val errorCodes = errorCode.toSeq.flatMap(_.split(',').map(_.trim)).filterNot(_.isEmpty).toSet
 
+    val futureMaybeEmail: OptionT[Future, String] = for {
+      authUser <- OptionT(Future.successful(authenticatedUserFor(request)))
+      idUser <- OptionT(IdentityService.userLookupByCredentials(authUser.credentials))
+    } yield idUser.primaryEmailAddress
+
+    val futureSomeMaybeEmail: Future[Option[Option[String]]] =  futureMaybeEmail.run.map(a => Some(a))
+
     val futureMaybeFutureManagePage = for {
       subscription <- OptionT(eventualMaybeSubscription).filter(!_.isCancelled)
       account <- OptionT(tpBackend.zuoraService.getAccount(subscription.accountId).map{Some(_)}.recover{case t: Throwable => None})
       pendingHolidays <- OptionT(tpBackend.suspensionService.getUnfinishedHolidays(subscription.name, now).map(_.toOption))
       billingSchedule <- OptionT(tpBackend.commonPaymentService.billingSchedule(subscription.id, account, numberOfBills = 13).map(Some(_):Option[Option[BillingSchedule]]))
+      maybeEmail <- OptionT(futureSomeMaybeEmail)
     } yield {
+
       val maybeFutureManagePage = subscription.planToManage.product match {
         case Product.Delivery => subscription.asDelivery.map { deliverySubscription =>
-          Future.successful(ManageDelivery(errorCodes, pendingHolidays, billingSchedule, deliverySubscription, account))
+          Future.successful(ManageDelivery(errorCodes, pendingHolidays, billingSchedule, deliverySubscription, account, maybeEmail))
         }
         case Product.Voucher => subscription.asVoucher.map { voucherSubscription =>
-          Future.successful(Ok(views.html.account.voucher(voucherSubscription, billingSchedule)))
+          Future.successful(Ok(views.html.account.voucher(voucherSubscription, billingSchedule, maybeEmail)))
         }
         case _: Product.Weekly => subscription.asWeekly.map { weeklySubscription =>
-          ManageWeekly(billingSchedule, weeklySubscription, promoCode)
+          ManageWeekly(billingSchedule, weeklySubscription, maybeEmail, promoCode)
         }
         case Product.Digipack => subscription.asDigipack.map { digipackSubscription =>
           Future.successful(Ok(views.html.account.digitalpack(digipackSubscription, billingSchedule)))

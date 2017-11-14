@@ -1,0 +1,10 @@
+@import com.gu.memsub.subsv2.Subscription
+@import com.gu.memsub.subsv2.SubscriptionPlan
+@import model.DigitalEdition
+@import com.gu.memsub.Product
+
+@import views.support.PlanOps._
+
+@import com.gu.zuora.ZuoraRestService.SoldToContact
+@(subscription:Subscription[SubscriptionPlan.ContentSubscription], maybeEmail: Option[String], product: Product, edition: DigitalEdition)
+<div class="js-payment-update" data-sub-id="@{subscription.name.get}" @for(email <- maybeEmail) {data-email="@email"} data-phone="@product.phone(edition)"></div>

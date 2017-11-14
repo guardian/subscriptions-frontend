@@ -6,7 +6,7 @@
 @(jsVars: JsVars, touchpointBackendResolutionOpt: Option[services.TouchpointBackend.Resolution])
 
 
-<script src="https://polyfill.guim.co.uk/v2/polyfill.min.js?features=default-3.6,Element.prototype.dataset,Array.prototype.includes"></script>
+<script src="https://polyfill.guim.co.uk/v2/polyfill.min.js?features=default-3.6,Element.prototype.dataset,Array.prototype.includes,fetch"></script>
 
 
 <script id="gu">
@@ -50,6 +50,7 @@
         zipCode: false,
         allowRememberMe: false
     };
+    guardian.members_data_api = 'https://members-data-api.thegulocal.com';
     guardian.experience = '';
     }
 

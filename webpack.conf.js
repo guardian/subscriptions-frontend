@@ -35,17 +35,40 @@ module.exports = function(debug) { return {
                 exclude: /node_modules/,
                 loader: 'babel',
                 query: {
-                    presets: ['es2015'],
+                    "presets": [
+                        ["env", {
+                            "targets": {
+                                "browsers": ["last 2 versions", "safari >= 7"]
+                            }
+                        }]
+                    ],
                     cacheDirectory: '',
-                    plugins: ["transform-flow-strip-types"]
-                }
+                    plugins: ["transform-flow-strip-types", ["transform-runtime", {
+                        "helpers": false,
+                        "polyfill": false,
+                        "regenerator": true,
+                        "moduleName": "babel-runtime"
+                    }]]
+
+}
             },
             {
                 test: /\.jsx?$/,
                 exclude: /node_modules/,
                 loader: 'babel-loader',
                 query: {
-                    presets: ['es2015', 'react']
+                    presets:  [["env", {
+                        "targets": {
+                            "browsers": ["last 2 versions", "safari >= 7"]
+                        }
+                    }], 'react'],
+                    cacheDirectory: '',
+                    plugins: ["transform-flow-strip-types", ["transform-runtime", {
+                        "helpers": false,
+                        "polyfill": false,
+                        "regenerator": true,
+                        "moduleName": "babel-runtime"
+                    }]]
                 }
             },
             {

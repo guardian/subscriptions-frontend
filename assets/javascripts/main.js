@@ -16,6 +16,7 @@ require([
     'modules/patterns',
     'modules/cas/form',
     'modules/renew/loader',
+    'modules/mma/loader',
     'modules/animatedDropdown',
     'object-fit-images'
 ], function (
@@ -36,6 +37,7 @@ require([
     patterns,
     cas,
     renew,
+    mma,
     dropdown,
     objectFitImages
 ) {
@@ -60,4 +62,5 @@ require([
     objectFitImages();
     patterns.init();
     renew.init();
+    mma.init();
 });
