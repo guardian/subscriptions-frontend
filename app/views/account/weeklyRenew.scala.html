@@ -1,8 +1,6 @@
 @import configuration.Links
-@import com.gu.memsub.BillingSchedule
 @import com.gu.memsub.subsv2.Subscription
 @import model.DigitalEdition.UK
-@import com.gu.salesforce.Contact
 @import views.support.Dates.prettyDate
 @import com.gu.i18n.Country
 @import controllers.ManageWeekly.WeeklyPlanInfo
@@ -13,13 +11,20 @@
 @import com.gu.i18n.Currency
 @import com.gu.memsub.promo.PromoCode
 @import org.joda.time.LocalDate.now
-@import com.gu.memsub.subsv2.ReaderType
 @import com.gu.zuora.ZuoraRestService.SoldToContact
 @(
     subscription: Subscription[WeeklyPlanOneOff], contact: SoldToContact, email: Option[String], billToCountry: Country, plans: List[WeeklyPlanInfo], currency: Currency, promoCode: Option[PromoCode]
 )(implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackend.Resolution)
 
-@main("Your Guardian Weekly subscription | The Guardian", bodyClasses = List("is-wide"), edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution), managementPage = true) {
+@main(
+    title ="Your Guardian Weekly subscription | The Guardian",
+    bodyClasses = List("is-wide"),
+    edition = UK,
+    touchpointBackendResolutionOpt = Some(touchpointBackendResolution),
+    managementPage = true,
+    jsVars = model.JsVars(currency = currency, country = Some(billToCountry))
+) {
+
     @helper.javascriptRouter("jsRoutes")(
         routes.javascript.Promotion.validate
     )

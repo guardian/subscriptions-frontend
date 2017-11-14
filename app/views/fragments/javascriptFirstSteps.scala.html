@@ -2,9 +2,10 @@
 @import model.JsVars
 @import controllers.CachedAssets.hashedPathFor
 @import configuration.Config
-@import views.support.{UKStripeService, AUStripeService}
+@import views.support.{UKStripeService, AUStripeService, CountryWithCurrency}
+@import com.gu.i18n.Country.UK
 @(jsVars: JsVars, touchpointBackendResolutionOpt: Option[services.TouchpointBackend.Resolution])
-
+@countryWithCurrency = @{CountryWithCurrency(jsVars.country.getOrElse(UK), jsVars.currency)}
 
 <script src="https://polyfill.guim.co.uk/v2/polyfill.min.js?features=default-3.6,Element.prototype.dataset,Array.prototype.includes,fetch"></script>
 
@@ -43,7 +44,7 @@
         '@{AUStripeService.jsLookupKey}': '@backend.stripeAUMembershipService.publicKey.mkString'
     };
     guardian.stripeCheckout = {
-        key: guardian.stripe['@{UKStripeService.jsLookupKey}'],
+        key: guardian.stripe['@countryWithCurrency.stripeServiceName.jsLookupKey'],
         image: 'https://d24w1tjgih0o9s.cloudfront.net/gu.png',
         locale: 'auto',
         name: 'Guardian',

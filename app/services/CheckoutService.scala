@@ -68,8 +68,7 @@ class CheckoutService(
   zuoraProperties: ZuoraProperties,
   promoService: PromoService,
   promoPlans: DiscountRatePlanIds,
-  commonPaymentService: CommonPaymentService,
-  invoiceTemplatesByCountry: Map[Country, InvoiceTemplate]
+  commonPaymentService: CommonPaymentService
 ) extends ContextLogging {
 
   type NonFatalErrors = Seq[SubsError]
@@ -426,10 +425,10 @@ class CheckoutService(
       }
       else {
         val payment = getPayment(contactInfo.salesforceContact, contactInfo.billto)
-        val invoiceTemplateOverride = contactInfo.billto.country.flatMap(invoiceTemplatesByCountry.get)
+        val account = payment.makeAccount
         for {
           paymentMethod <- payment.makePaymentMethod
-          createPaymentMethod = CreatePaymentMethod(subscription.accountId, paymentMethod, payment.makeAccount.paymentGateway, contactInfo.billto, invoiceTemplateOverride)
+          createPaymentMethod = CreatePaymentMethod(subscription.accountId, paymentMethod, account.paymentGateway, contactInfo.billto, account.invoiceTemplate)
           updateResult <- zuoraService.createPaymentMethod(createPaymentMethod).withContextLogging("createPaymentMethod", _.id)
           renewCommand <- constructRenewCommand(promotion)
           _ <- ensureEmail(contactInfo.billto, subscription)
