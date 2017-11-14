@@ -112,7 +112,7 @@ define([
 
     var redrawCurrencyOverride = function (selectedCurrency) {
         var currencySelector = $('.js-checkout-currency-override');
-        if (selectedCurrency === 'GBP') {
+        if (selectedCurrency === 'GBP' || selectedCurrency === 'AUD') {
             formElements.$CURRENCY_OVERRIDE_CHECKBOX.addClass('js-ignore');
             currencySelector.hide();
         } else {
