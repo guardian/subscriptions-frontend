@@ -195,10 +195,10 @@ object ManageWeekly extends ContextLogging {
              weeklySubscription: Subscription[WeeklyPlan],
              maybeEmail: Option[String],
              promoCode: Option[PromoCode]
-  )(implicit
-    request: Request[AnyContent],
-    resolution: TouchpointBackend.Resolution
-  ): Future[Result] = {
+           )(implicit
+             request: Request[AnyContent],
+             resolution: TouchpointBackend.Resolution
+           ): Future[Result] = {
     implicit val tpBackend = resolution.backend
     implicit val rest = tpBackend.simpleRestClient
     implicit val zuoraRest = new ZuoraRestService[Future]
@@ -227,7 +227,7 @@ object ManageWeekly extends ContextLogging {
 
     def choosePage(account: ZuoraRestService.AccountSummary) = {
       val renewPageResult = for {
-        billToCountry <-  account.billToContact.country.toRightDisjunction(s"no valid bill to country for account ${account.id}")
+        billToCountry <- account.billToContact.country.toRightDisjunction(s"no valid bill to country for account ${account.id}")
         currency <- account.currency.toRightDisjunction(s"couldn't get new rate/currency for renewal ${account.id}")
         weeklyPlanInfo <- getRenewalPlans(account, currency).leftMap(errorMessage => s"couldn't get new rate: $errorMessage")
       } yield {
@@ -354,18 +354,20 @@ object AccountManagement extends Controller with ContextLogging with CatalogProv
     implicit val tpBackend = resolution.backend
     val eventualMaybeSubscription = SessionSubscription.subscriptionFromRequest
     val errorCodes = errorCode.toSeq.flatMap(_.split(',').map(_.trim)).filterNot(_.isEmpty).toSet
-    val futureMaybeMaybeEmail = (for {
+
+    val futureMaybeEmail: OptionT[Future, String] = for {
       authUser <- OptionT(Future.successful(authenticatedUserFor(request)))
       idUser <- OptionT(IdentityService.userLookupByCredentials(authUser.credentials))
-    } yield Option(idUser.primaryEmailAddress)).run.recover{case _ => None}
+    } yield idUser.primaryEmailAddress
 
+    val futureSomeMaybeEmail: Future[Option[Option[String]]] =  futureMaybeEmail.run.map(a => Some(a))
 
     val futureMaybeFutureManagePage = for {
       subscription <- OptionT(eventualMaybeSubscription).filter(!_.isCancelled)
       account <- OptionT(tpBackend.zuoraService.getAccount(subscription.accountId).map{Some(_)}.recover{case t: Throwable => None})
       pendingHolidays <- OptionT(tpBackend.suspensionService.getUnfinishedHolidays(subscription.name, now).map(_.toOption))
       billingSchedule <- OptionT(tpBackend.commonPaymentService.billingSchedule(subscription.id, account, numberOfBills = 13).map(Some(_):Option[Option[BillingSchedule]]))
-      maybeEmail <- OptionT(futureMaybeMaybeEmail)
+      maybeEmail <- OptionT(futureSomeMaybeEmail)
     } yield {
 
       val maybeFutureManagePage = subscription.planToManage.product match {
