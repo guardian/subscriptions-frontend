@@ -53,7 +53,6 @@ trait TouchpointBackend {
   def subsForm: SubscriptionsForm
   def exactTargetService: ExactTargetService
   def checkoutService: CheckoutService
-  def invoiceTemplateIdsByCountry: Map[Country, InvoiceTemplate]
   implicit def simpleRestClient: SimpleClient[Future]
 }
 
@@ -89,8 +88,7 @@ object TouchpointBackend {
       lazy val subscriptionService = new subsv2.services.SubscriptionService[Future](newProductIds, map, simpleRestClient, zuoraService.getAccountIds)
       lazy val stripeUKMembershipService = new StripeService(config.stripeUK, loggingRunner(stripeUKMetrics))
       lazy val stripeAUMembershipService = new StripeService(config.stripeAU, loggingRunner(stripeAUMetrics))
-      lazy val invoiceTemplateIdsByCountry: Map[Country, InvoiceTemplate] = this.zuoraProperties.invoiceTemplates.map(it => it.country -> it).toMap
-      lazy val paymentService = new PaymentService(this.stripeUKMembershipService, this.stripeAUMembershipService, invoiceTemplateIdsByCountry)
+      lazy val paymentService = new PaymentService(this.stripeUKMembershipService, this.stripeAUMembershipService, this.zuoraProperties.invoiceTemplates.map(it => it.country -> it).toMap)
       lazy val commonPaymentService = new CommonPaymentService(zuoraService, this.catalogService.unsafeCatalog.productMap)
       lazy val zuoraProperties: ZuoraProperties = config.zuoraProperties
       lazy val promoService = new PromoService(promoCollection, new Discounter(this.discountRatePlanIds))
@@ -100,7 +98,7 @@ object TouchpointBackend {
       lazy val suspensionService = new SuspensionService[Future](Config.holidayRatePlanIds(config.environmentName), simpleRestClient)
       lazy val subsForm = new forms.SubscriptionsForm(this.catalogService.unsafeCatalog)
       lazy val exactTargetService: ExactTargetService = new ExactTargetService(this.subscriptionService, this.commonPaymentService, this.zuoraService, this.salesforceService)
-      lazy val checkoutService: CheckoutService = new CheckoutService(IdentityService, this.salesforceService, this.paymentService, this.catalogService.unsafeCatalog, this.zuoraService, this.exactTargetService, this.zuoraProperties, this.promoService, this.discountRatePlanIds, this.commonPaymentService, this.invoiceTemplateIdsByCountry)
+      lazy val checkoutService: CheckoutService = new CheckoutService(IdentityService, this.salesforceService, this.paymentService, this.catalogService.unsafeCatalog, this.zuoraService, this.exactTargetService, this.zuoraProperties, this.promoService, this.discountRatePlanIds, this.commonPaymentService)
     }
   }
 
