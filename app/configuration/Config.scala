@@ -36,6 +36,8 @@ object Config {
 
   val timezone = DateTimeZone.forID("Europe/London")
 
+  val membersDataApiUrl = config.getString("members-data-api.url")
+
   object Identity {
     private val idConfig = config.getConfig("identity")
 
