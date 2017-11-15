@@ -11,11 +11,11 @@ export const init = (elem) => {
     ReactDOM.render(<Payment sub={elem.dataset.subId} email={elem.dataset.email} phone={elem.dataset.phone} stripe={handler} product={elem.dataset.product} />, elem)
 }
 
-const handleStripeResponse = (t, url, endpoint, key) => {
+const handleStripeResponse = (t, url, key) => {
     let form = new FormData();
     form.append('stripeToken', t.id)
     form.append('publicKey', key)
-    return fetch(`${url}/user-attributes/me/${endpoint}-update-card`,
+    return fetch(url,
         {
             method: 'post',
             credentials: 'include',
@@ -27,12 +27,10 @@ const handleStripeResponse = (t, url, endpoint, key) => {
         }).then(resp => resp.json())
 }
 
-getEndpoint() {
-    return this.props.product === 'digitalpack' ? 'digipack' : 'paper'
-}
 
-const getDetails = async (url, endpoint) => {
-    let resp = await fetch(`${url}/user-attributes/me/mma-${endpoint}`,
+
+const getDetails = async (url) => {
+    let resp = await fetch(url,
         {
             method: 'get', credentials: 'include'
         })
@@ -57,11 +55,15 @@ class Payment extends React.Component {
 
     constructor(props) {
         super(props)
+        const endpoint = props.product === 'digitalpack' ? 'digitalpack' : 'paper'
+        console.log(props, endpoint)
         const url = guardian.members_data_api
+        const dataUrl = `${url}/user-attributes/me/mma-${endpoint}`
+        const cardUrl = `${url}/user-attributes/me/${endpoint}-update-card`
 
         const token = (t) => {
             this.setState({ state: WAITING })
-            handleStripeResponse(t, url, getEndpoint(), this.state.stripePublicKeyForUpdate).then(json => {
+            handleStripeResponse(t, cardUrl, this.state.stripePublicKeyForUpdate).then(json => {
                 this.setState({ state: SUCCESS })
             })
                 .catch(() => {
@@ -84,7 +86,7 @@ class Payment extends React.Component {
             card: null
         }
 
-        Promise.race([getDetails(url, getEndpoint()), timeout(10000)]).then(resp => {
+        Promise.race([getDetails(dataUrl), timeout(10000)]).then(resp => {
             let sub = resp.subscription && resp.subscription.subscriberId
             if (!sub || sub != this.props.sub || !this.props.stripe) {
                 this.setState({ state: FAILURE })

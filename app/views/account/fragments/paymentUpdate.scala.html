@@ -7,4 +7,4 @@
 
 @import com.gu.zuora.ZuoraRestService.SoldToContact
 @(subscription:Subscription[SubscriptionPlan.ContentSubscription], maybeEmail: Option[String], product: Product, edition: DigitalEdition)
-<div class="js-payment-update" data-sub-id="@{subscription.name.get}" @for(email <- maybeEmail) {data-email="@email"} data-phone="@product.phone(edition)" data-project="@product.name"></div>
+<div class="js-payment-update" data-sub-id="@{subscription.name.get}" @for(email <- maybeEmail) {data-email="@email"} data-phone="@product.phone(edition)" data-product="@product.name"></div>
