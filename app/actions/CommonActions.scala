@@ -12,7 +12,16 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.concurrent.Future
 object CommonActions {
 
-  val NoCacheAction = resultModifier(noCache)
+  val StoreAcquisitionDataAction = new ActionBuilder[Request] {
+    def invokeBlock[A](request: Request[A], block: (Request[A]) => Future[Result]) = block(request).map(result => {
+      request.getQueryString("acquisitionData").fold(result)(a => {
+        val sessionWithAcquisitionData = request.session.data.toSeq ++ Seq("acquisitionData" -> a)
+        result.withSession(sessionWithAcquisitionData: _*)
+      })
+    })
+  }
+
+  val NoCacheAction = StoreAcquisitionDataAction andThen resultModifier(noCache)
 
   type GoogleAuthRequest[A] = AuthenticatedRequest[A, googleauth.UserIdentity]
 
@@ -44,15 +53,6 @@ object CommonActions {
   ))
 
   val CachedAction = resultModifier(Cached(_))
-
-  val StoreAcquisitionDataAction = new ActionBuilder[Request] {
-    def invokeBlock[A](request: Request[A], block: (Request[A]) => Future[Result]) = block(request).map(result => {
-      request.getQueryString("acquisitionData").fold(result)(a => {
-        val sessionWithAcquisitionData = request.session.data.toSeq ++ Seq("acquisitionData" -> a)
-        result.withSession(sessionWithAcquisitionData: _*)
-      })
-    })
-  }
 
   val CSRFCachedAsyncAction = (block: Request[_] => Future[Result]) => CSRFCheck(action = CachedAction.async(block), config = CSRFConfig.global.copy(checkContentType = (x: Option[String]) => true))
 
