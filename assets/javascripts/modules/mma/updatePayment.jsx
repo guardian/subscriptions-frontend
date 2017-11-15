@@ -27,6 +27,10 @@ const handleStripeResponse = (t, url, endpoint, key) => {
         }).then(resp => resp.json())
 }
 
+getEndpoint() {
+    return this.props.product === 'digitalpack' ? 'digipack' : 'paper'
+}
+
 const getDetails = async (url, endpoint) => {
     let resp = await fetch(`${url}/user-attributes/me/mma-${endpoint}`,
         {
@@ -92,10 +96,6 @@ class Payment extends React.Component {
             .catch((e) => {
                 this.setState({ state: FAILURE })
             })
-    }
-
-    getEndpoint() {
-        return this.props.product === 'digitalpack' ? 'digipack' : 'paper'
     }
 
     render() {

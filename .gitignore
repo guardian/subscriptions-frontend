@@ -42,3 +42,4 @@ public/webpack
 public/images
 public/javascripts
 public/stylesheets
+.vscode/settings.json
