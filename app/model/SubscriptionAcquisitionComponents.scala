@@ -84,8 +84,8 @@ object SubscriptionAcquisitionComponents {
 
         case (Some(Sunday), Voucher, false) => PrintProduct.VoucherSunday
         case (Some(Sunday), Voucher, true) => PrintProduct.VoucherSundayPlus
-        case (Some(Weekend), Voucher, false) => PrintProduct.VoucerWeekend
-        case (Some(Weekend), Voucher, true) => PrintProduct.VoucerWeekendPlus
+        case (Some(Weekend), Voucher, false) => PrintProduct.VoucherWeekend
+        case (Some(Weekend), Voucher, true) => PrintProduct.VoucherWeekendPlus
         case (Some(Sixday), Voucher, false) => PrintProduct.VoucherSixday
         case (Some(Sixday), Voucher, true) => PrintProduct.VoucherSixdayPlus
         case (Some(Everyday), Voucher, false) => PrintProduct.VoucherEveryday
