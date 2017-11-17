@@ -1,11 +1,14 @@
 package filters
 
+import javax.inject.Inject
+
+import akka.stream.Materializer
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.mvc._
 
 import scala.concurrent.Future
 
-object HandleXFrameOptionsOverrideHeader extends Filter {
+class HandleXFrameOptionsOverrideHeader @Inject()(implicit  val mat: Materializer) extends Filter {
   val HEADER_KEY = "X-Frame-Options-Override"
 
   def apply(nextFilter: RequestHeader => Future[Result])(requestHeader: RequestHeader): Future[Result] = {
