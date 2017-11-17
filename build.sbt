@@ -1,6 +1,6 @@
 import play.sbt.PlayImport
 
-name := "frontend"
+name := "subscriptions-frontend"
 
 version := "1.0-SNAPSHOT"
 
@@ -47,7 +47,7 @@ libraryDependencies ++= Seq(
     filters,
     PlayImport.specs2,
     "com.gu" %% "membership-common" % "0.483",
-    "com.gu" %% "memsub-common-play-auth" % "0.8",
+    "com.gu" %% "memsub-common-play-auth" % "1.2",
     "com.gu" %% "identity-test-users" % "0.6",
     "com.gu" %% "content-authorisation-common" % "0.1",
     "com.gu" %% "tip" % "0.1.1",
@@ -63,8 +63,8 @@ libraryDependencies ++= Seq(
     "com.squareup.okhttp3" % "okhttp" % "3.4.1" % "test",
     "org.scalaz" %% "scalaz-core" % "7.1.3",
     "org.pegdown" % "pegdown" % "1.6.0",
-    "com.amazonaws" % "aws-java-sdk-sqs" % "1.11.95",
-    "net.databinder.dispatch" %% "dispatch-core" % "0.11.3",
+    "com.amazonaws" % "aws-java-sdk-sqs" % "1.11.226",
+    "net.databinder.dispatch" %% "dispatch-core" % "0.13.2",
     "com.gu" % "kinesis-logback-appender" % "1.4.0",
     "net.logstash.logback" % "logstash-logback-encoder" % "4.9",
     "com.fasterxml.jackson.dataformat" % "jackson-dataformat-cbor" % "2.8.7",
@@ -88,8 +88,8 @@ resolvers ++= Seq(
     Resolver.bintrayRepo("guardian", "ophan")
 )
 
-import com.typesafe.sbt.packager.archetypes.ServerLoader.Systemd
-serverLoading in Debian := Systemd
+import com.typesafe.sbt.packager.archetypes.systemloader.ServerLoader.Systemd
+serverLoading in Debian := Some(Systemd)
 debianPackageDependencies := Seq("openjdk-8-jre-headless")
 maintainer := "Membership Dev <membership.dev@theguardian.com>"
 packageSummary := "Subscription Frontend"
