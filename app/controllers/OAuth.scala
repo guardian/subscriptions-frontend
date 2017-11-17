@@ -1,6 +1,6 @@
 package controllers
 
-import actions.OAuthActions.LOGIN_ORIGIN_KEY
+import com.gu.googleauth.GoogleAuthFilters.LOGIN_ORIGIN_KEY
 import actions.CommonActions.NoCacheAction
 import com.gu.googleauth.{GoogleAuth, UserIdentity}
 import configuration.Config

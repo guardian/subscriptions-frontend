@@ -39,35 +39,35 @@ lazy val root = (project in file(".")).enablePlugins(
 scalaVersion := "2.11.12"
 scalacOptions ++= Seq("-feature", "-Xfatal-warnings")
 
-val scalatestVersion = "3.0.0"
+val scalatestVersion = "3.0.4"
 
 libraryDependencies ++= Seq(
     cache,
     ws,
     filters,
     PlayImport.specs2,
-    "com.gu" %% "membership-common" % "0.483",
+    "com.gu" %% "membership-common" % "0.484",
     "com.gu" %% "memsub-common-play-auth" % "1.2",
     "com.gu" %% "identity-test-users" % "0.6",
     "com.gu" %% "content-authorisation-common" % "0.1",
     "com.gu" %% "tip" % "0.1.1",
-    "com.github.nscala-time" %% "nscala-time" % "2.8.0",
+    "com.github.nscala-time" %% "nscala-time" % "2.16.0",
     "com.getsentry.raven" % "raven-logback" % "8.0.3",
     "com.typesafe.scala-logging" %% "scala-logging" % "3.5.0",
     "org.scalatest" %% "scalatest" % scalatestVersion % "test",
     "org.scalactic" %% "scalactic" % scalatestVersion % "test",
-    "org.seleniumhq.selenium" % "selenium-java" % "3.0.1" % "test",
-    "org.seleniumhq.selenium" % "htmlunit-driver" % "2.27" % "test",
-    "io.github.bonigarcia" % "webdrivermanager" % "1.7.1" % "test",
-    "com.gocardless" % "gocardless-pro" % "1.16.0",
-    "com.squareup.okhttp3" % "okhttp" % "3.4.1" % "test",
-    "org.scalaz" %% "scalaz-core" % "7.1.3",
+    "org.seleniumhq.selenium" % "selenium-java" % "3.7.1" % "test",
+    "org.seleniumhq.selenium" % "htmlunit-driver" % "2.28" % "test",
+    "io.github.bonigarcia" % "webdrivermanager" % "1.7.2" % "test",
+    "com.gocardless" % "gocardless-pro" % "1.20.0",
+    "com.squareup.okhttp3" % "okhttp" % "3.4.2" % "test",
+    "org.scalaz" %% "scalaz-core" % "7.1.4",
     "org.pegdown" % "pegdown" % "1.6.0",
-    "com.amazonaws" % "aws-java-sdk-sqs" % "1.11.226",
+    "com.amazonaws" % "aws-java-sdk-sqs" % "1.11.231",
     "net.databinder.dispatch" %% "dispatch-core" % "0.13.2",
-    "com.gu" % "kinesis-logback-appender" % "1.4.0",
-    "net.logstash.logback" % "logstash-logback-encoder" % "4.9",
-    "com.fasterxml.jackson.dataformat" % "jackson-dataformat-cbor" % "2.8.7",
+    "com.gu" % "kinesis-logback-appender" % "1.4.2",
+    "net.logstash.logback" % "logstash-logback-encoder" % "4.11",
+    "com.fasterxml.jackson.dataformat" % "jackson-dataformat-cbor" % "2.9.2",
     "com.gu" %% "acquisition-event-producer" % "2.0.3"
 )
 
