@@ -2,14 +2,17 @@
 @import com.gu.memsub.subsv2.SubscriptionPlan.Digipack
 @import com.gu.memsub.subsv2.Subscription
 @import model.DigitalEdition.UK
+@import model.DigitalEdition
 @import model.SubscriptionOps._
 @import org.joda.time.LocalDate.now
 @import org.joda.time.Days.daysBetween
 @import views.support.Dates._
 @import views.support.Pricing._
+@import com.gu.zuora.ZuoraRestService.SoldToContact
 
+@import com.gu.i18n.Country
 @(
-    subscription: Subscription[Digipack], billingSchedule: Option[BillingSchedule]
+    subscription: Subscription[Digipack], billingSchedule: Option[BillingSchedule], country: Option[Country], maybeEmail:Option[String]
 )(implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackend.Resolution)
 
 @main("Your Guardian Digital Pack subscription | The Guardian", bodyClasses = List("is-wide"), edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution), managementPage = true) {
@@ -56,6 +59,11 @@
                     @views.html.account.fragments.billingSchedule(bs, subscription.currency)
                 </section>
             }
+
+            <section class="mma-section">
+                <h3 class="mma-section__header">Update your payment method</h3>
+                @views.html.account.fragments.paymentUpdate(subscription, maybeEmail, subscription.plans.head.product, DigitalEdition.getForCountry(country))
+            </section>
 
         </section>
     </main>
