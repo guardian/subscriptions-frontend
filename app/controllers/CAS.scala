@@ -1,6 +1,8 @@
 package controllers
 
-import actions.CommonActions._
+import javax.inject.Inject
+
+import actions.OAuthActions
 import com.gu.cas.{TokenPayload, Valid}
 import com.gu.googleauth.UserIdentity
 import com.gu.subscriptions.CAS.{CASError, CASSuccess}
@@ -9,6 +11,7 @@ import configuration.Config
 import forms.CASForm
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.json.Json
+import play.api.libs.ws.WSClient
 import play.api.mvc.Controller
 import play.api.mvc.Security.AuthenticatedRequest
 import views.support.CASResultOps._
@@ -17,7 +20,7 @@ import views.support.TokenPayloadOps._
 import scala.concurrent.Future
 import scala.util.{Success, Try}
 
-object CAS extends Controller with LazyLogging {
+class CAS @Inject()(override val wsClient: WSClient)  extends Controller with LazyLogging with OAuthActions {
   private implicit val encoder = Config.CAS.emergencyEncoder
 
   def index = StaffAuthorisedForCASAction { implicit request =>

@@ -1,12 +1,14 @@
 package controllers
-import actions.CommonActions._
+import javax.inject.Inject
+
+import actions.CommonActions
 import com.gu.i18n.CountryGroup.UK
 import com.gu.memsub.subsv2.CatalogPlan
 import model.Subscriptions._
 import play.api.mvc._
 import services.TouchpointBackend
 
-object Shipping extends Controller {
+class Shipping @Inject()  extends Controller with CommonActions {
 
   // no need to support test users here really as plans seldom change
   val catalog = TouchpointBackend.Normal.catalogService.unsafeCatalog

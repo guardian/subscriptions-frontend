@@ -1,6 +1,9 @@
 package controllers
 
 
+import javax.inject.Inject
+
+import actions.CommonActions
 import actions.CommonActions._
 import com.gu.i18n._
 import com.gu.memsub.Subscription.ProductRatePlanId
@@ -16,10 +19,9 @@ import utils.TestUsers.PreSigninTestCookie
 import views.html.{checkout => view}
 import views.support.Pricing._
 import views.support.{BillingPeriod => _}
-
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
-object Promotion extends Controller with LazyLogging with CatalogProvider {
+class Promotion @Inject()  extends Controller with LazyLogging with CatalogProvider with CommonActions {
 
 
   private val fallbackCurrency = CountryGroup.UK.currency

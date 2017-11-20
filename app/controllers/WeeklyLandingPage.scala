@@ -1,9 +1,12 @@
 package controllers
 
-import actions.CommonActions.{CachedAction, _}
+import javax.inject.Inject
+
+import actions.CommonActions
 import com.gu.i18n.{Country, CountryGroup}
 import configuration.Config
 import model.WeeklyRegion
+import play.api.libs.ws.WSClient
 import play.api.mvc._
 import services.TouchpointBackend
 import views.html.promotion.weeklyLandingPage
@@ -11,7 +14,7 @@ import views.html.weekly.landing_description
 import views.support.PegdownMarkdownRenderer
 import utils.RequestCountry._
 
-object WeeklyLandingPage extends Controller {
+class WeeklyLandingPage @Inject()   extends Controller with CommonActions {
 
   val tpBackend = TouchpointBackend.Normal
   val international = "int"

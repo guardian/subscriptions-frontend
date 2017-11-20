@@ -37,7 +37,7 @@ lazy val root = (project in file(".")).enablePlugins(
   ))
 
 scalaVersion := "2.11.12"
-scalacOptions ++= Seq("-feature", "-Xfatal-warnings")
+scalacOptions ++= Seq("-feature")
 
 val scalatestVersion = "3.0.4"
 
@@ -96,6 +96,8 @@ packageSummary := "Subscription Frontend"
 packageDescription := """Subscription Frontend"""
 
 riffRaffPackageType := (packageBin in Debian).value
+
+routesGenerator := StaticRoutesGenerator
 
 javaOptions in Universal ++= Seq(
       "-Dpidfile.path=/dev/null",

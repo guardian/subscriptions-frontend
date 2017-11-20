@@ -1,13 +1,17 @@
 package controllers
 
+import javax.inject.Inject
+
 import actions.CommonActions._
+import actions.OAuthActions
 import com.typesafe.scalalogging.LazyLogging
 import model.Subscriptions.{SubscriptionOption, SubscriptionProduct}
+import play.api.libs.ws.WSClient
 import play.api.mvc.{Controller, Cookie}
 import services.TouchpointBackend
 import utils.TestUsers.testUsers
 
-object Testing extends Controller with LazyLogging {
+class Testing @Inject()(override val wsClient: WSClient)  extends Controller with LazyLogging with OAuthActions {
 
   val AnalyticsCookieName = "ANALYTICS_OFF_KEY"
 
