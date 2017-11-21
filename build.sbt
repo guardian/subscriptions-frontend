@@ -1,6 +1,6 @@
 import play.sbt.PlayImport
 
-name := "frontend"
+name := "subscriptions-frontend"
 
 version := "1.0-SNAPSHOT"
 
