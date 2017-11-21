@@ -57,7 +57,7 @@ libraryDependencies ++= Seq(
     "org.scalatest" %% "scalatest" % scalatestVersion % "test",
     "org.scalactic" %% "scalactic" % scalatestVersion % "test",
     "org.seleniumhq.selenium" % "selenium-java" % "3.7.1" % "test",
-    "org.seleniumhq.selenium" % "htmlunit-driver" % "2.28" % "test",
+    "org.seleniumhq.selenium" % "htmlunit-driver" % "2.28.1" % "test",
     "io.github.bonigarcia" % "webdrivermanager" % "1.7.2" % "test",
     "com.gocardless" % "gocardless-pro" % "1.20.0",
     "com.squareup.okhttp3" % "okhttp" % "3.4.2" % "test",
@@ -68,7 +68,8 @@ libraryDependencies ++= Seq(
     "com.gu" % "kinesis-logback-appender" % "1.4.2",
     "net.logstash.logback" % "logstash-logback-encoder" % "4.11",
     "com.fasterxml.jackson.dataformat" % "jackson-dataformat-cbor" % "2.9.2",
-    "com.gu" %% "acquisition-event-producer" % "2.0.3"
+    "com.gu" %% "acquisition-event-producer" % "2.0.3",
+    "com.google.guava" % "guava" % "23.4-jre" % "test"
 )
 
 testOptions in Test ++= Seq(
