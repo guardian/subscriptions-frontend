@@ -22,7 +22,7 @@
             </ul>
         </div>
         <div class="block__footer">
-            <a class="button button--large button--primary" href="@routes.PromoLandingPage.render(promoCodes(Digital), None).url?edition=@UK.id" data-test-id="subscriptions-uk-digital">Subscribe now</a>
+            <a class="button button--large button--primary" href="@routes.PromoLandingPage.render(promoCodes(Digital), UK.countryGroup.defaultCountry).url" data-test-id="subscriptions-uk-digital">Subscribe now</a>
         </div>
     </div>
     <div class="row__item block block--primary block--paper-digital">
