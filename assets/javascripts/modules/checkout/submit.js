@@ -45,7 +45,7 @@ define([
         loader.setLoaderElem(document.querySelector('.js-loader'));
         loader.startLoader();
         var submitEl = formEls.$CHECKOUT_SUBMIT[0];
-        var pageViewId = ophan && ophan.pageviewId;
+        var pageViewId = ophan && ophan.viewId;
 
         submitEl.setAttribute('disabled', 'disabled');
 
