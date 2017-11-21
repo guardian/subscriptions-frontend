@@ -4,7 +4,6 @@ package controllers
 import javax.inject.Inject
 
 import actions.CommonActions
-import actions.CommonActions._
 import com.gu.i18n._
 import com.gu.memsub.Subscription.ProductRatePlanId
 import com.gu.memsub.promo.Formatters.PromotionFormatters._

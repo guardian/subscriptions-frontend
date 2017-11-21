@@ -9,40 +9,40 @@ GET         /favicon.ico                     controllers.CacheBustedAssets.at(pa
 GET         /                                @controllers.Homepage.index
 
 # Health check
-GET         /healthcheck                     controllers.Management.healthcheck
+GET         /healthcheck                     @controllers.Management.healthcheck
 # Manifest
-GET         /management/manifest             controllers.Management.manifest
+GET         /management/manifest             @controllers.Management.manifest
 
 # Digital pack
 GET         /digital                         controllers.DigitalPack.redirect
 GET         /:code/digital                   controllers.DigitalPack.landingPage(code: String)
 
 # Checkout AJAX endpoints
-POST        /checkout                        controllers.Checkout.handleCheckout
-GET         /checkout/check-identity         controllers.Checkout.checkIdentity(email: String)
-POST        /checkout/check-account          controllers.Checkout.checkAccount
-POST        /checkout/register-guest-user    controllers.Checkout.convertGuestUser
+POST        /checkout                        @controllers.Checkout.handleCheckout
+GET         /checkout/check-identity         @controllers.Checkout.checkIdentity(email: String)
+POST        /checkout/check-account          @controllers.Checkout.checkAccount
+POST        /checkout/register-guest-user    @controllers.Checkout.convertGuestUser
 GET         /checkout/lookupPromotion        @controllers.Promotion.validateForProductRatePlan(promoCode: PromoCode, productRatePlanId: ProductRatePlanId, country: Country, currency: Option[Currency])
 GET         /promotion/validate              @controllers.Promotion.validate(promoCode: PromoCode, country: Country, currency: Option[Currency])
-GET         /checkout/findAddress            controllers.Checkout.findAddress(postCode: String)
+GET         /checkout/findAddress            @controllers.Checkout.findAddress(postCode: String)
 
 # Checkout pages
-GET         /checkout/thank-you              controllers.Checkout.thankYou()
-GET         /checkout                        controllers.Checkout.renderCheckout(countryGroup: String ?= CountryGroup.UK.id, promoCode: Option[PromoCode], supplierCode: Option[SupplierCode], forThisPlan = "digitalpack-digitalpackmonthly")
-GET         /checkout/:forThisPlan           controllers.Checkout.renderCheckout(countryGroup: String ?= CountryGroup.UK.id, promoCode: Option[PromoCode], supplierCode: Option[SupplierCode], forThisPlan: String)
+GET         /checkout/thank-you              @controllers.Checkout.thankYou()
+GET         /checkout                        @controllers.Checkout.renderCheckout(countryGroup: String ?= CountryGroup.UK.id, promoCode: Option[PromoCode], supplierCode: Option[SupplierCode], forThisPlan = "digitalpack-digitalpackmonthly")
+GET         /checkout/:forThisPlan           @controllers.Checkout.renderCheckout(countryGroup: String ?= CountryGroup.UK.id, promoCode: Option[PromoCode], supplierCode: Option[SupplierCode], forThisPlan: String)
 
 # collection and delivery
 GET         /collection/paper-digital        @controllers.Shipping.viewCollectionPaperDigital
 GET         /collection/paper                @controllers.Shipping.viewCollectionPaper
 GET         /delivery/paper-digital          @controllers.Shipping.viewDeliveryPaperDigital
 GET         /delivery/paper                  @controllers.Shipping.viewDeliveryPaper
-GET         /weekly                          @controllers.WeeklyLandingPage.index(country: Option[Country])
-GET         /weekly/:country                 @controllers.WeeklyLandingPage.withCountry(country: String)
+GET         /weekly                          controllers.WeeklyLandingPage.index(country: Option[Country])
+GET         /weekly/:country                 controllers.WeeklyLandingPage.withCountry(country: String)
 
 # Staff signin (note, done by OAuth, in addition to regular signin)
 GET         /staff/login                     @controllers.OAuth.login
 GET         /staff/loginAction               @controllers.OAuth.loginAction
-GET         /staff/catalog                   controllers.Management.catalog
+GET         /staff/catalog                   @controllers.Management.catalog
 GET         /staff/cas                       @controllers.CAS.index
 POST        /staff/cas/subscription          @controllers.CAS.searchSubscription
 POST        /staff/cas/token                 @controllers.CAS.generateToken
@@ -67,11 +67,11 @@ GET         /assets/*file                    controllers.CachedAssets.at(path="/
 GET         /test-users                      @controllers.Testing.testUser
 
 # Promotions
-GET         /p/:promoCodeStr                 controllers.PromoLandingPage.render(promoCodeStr: String, country: Option[Country])
-GET         /p/:promoCodeStr/terms           controllers.PromoLandingPage.terms(promoCodeStr: String)
+GET         /p/:promoCodeStr                 @controllers.PromoLandingPage.render(promoCodeStr: String, country: Option[Country])
+GET         /p/:promoCodeStr/terms           @controllers.PromoLandingPage.terms(promoCodeStr: String)
 
 # NOCSRF
-POST        /q                               controllers.PromoLandingPage.preview(country: Option[Country])
+POST        /q                               @controllers.PromoLandingPage.preview(country: Option[Country])
 
 # Promotions
 GET         /s/:supplierCodeStr              @controllers.Homepage.supplierRedirect(supplierCodeStr: String)

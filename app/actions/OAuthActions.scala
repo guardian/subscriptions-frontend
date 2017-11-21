@@ -6,6 +6,7 @@ import com.gu.googleauth
 import play.api.libs.ws.{WS, WSClient}
 import play.api.mvc.Security.AuthenticatedRequest
 import play.api.mvc.{ActionBuilder, Call}
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 trait OAuthActions extends googleauth.Actions with googleauth.Filters with CommonActions {
   val authConfig  = Config.googleAuthConfig

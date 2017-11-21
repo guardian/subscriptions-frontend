@@ -1,5 +1,7 @@
 package controllers
-import actions.CommonActions._
+import javax.inject.Inject
+
+import actions.{CommonActions, OAuthActions}
 import com.gu.i18n.CountryGroup.byCountryCode
 import com.gu.i18n.{Country, CountryGroup}
 import com.gu.memsub.Benefit.Digipack
@@ -21,10 +23,10 @@ import utils.Tracking.internalCampaignCode
 import views.html.promotion._
 import views.html.weekly.landing_description
 import views.support.PegdownMarkdownRenderer
-
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
+import play.api.libs.ws.WSClient
 
-object PromoLandingPage extends Controller {
+class PromoLandingPage @Inject()(override val wsClient: WSClient) extends Controller with OAuthActions {
 
   private val tpBackend = TouchpointBackend.Normal
   private val catalog = tpBackend.catalogService.unsafeCatalog

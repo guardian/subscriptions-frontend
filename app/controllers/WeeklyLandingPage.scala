@@ -14,7 +14,7 @@ import views.html.weekly.landing_description
 import views.support.PegdownMarkdownRenderer
 import utils.RequestCountry._
 
-class WeeklyLandingPage @Inject()   extends Controller with CommonActions {
+object WeeklyLandingPage extends Controller with CommonActions {
 
   val tpBackend = TouchpointBackend.Normal
   val international = "int"

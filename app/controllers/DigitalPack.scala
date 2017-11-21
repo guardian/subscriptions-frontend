@@ -1,14 +1,14 @@
 package controllers
 
-import actions.CommonActions._
-import com.gu.i18n.CountryGroup.UK
-import model.DigitalEdition
-import model.DigitalEdition._
-import play.api.mvc._
-import services.TouchpointBackend
-import utils.RequestCountry._
+ import actions.CommonActions
+ import com.gu.i18n.CountryGroup.UK
+ import model.DigitalEdition
+ import model.DigitalEdition._
+ import play.api.mvc._
+ import services.TouchpointBackend
+ import utils.RequestCountry._
 
-object DigitalPack extends Controller {
+object DigitalPack extends Controller with CommonActions {
 
   private val queryParamHint = "edition"
 
