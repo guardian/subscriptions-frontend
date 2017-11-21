@@ -26,12 +26,6 @@ object DigitalEdition {
         case _ => "https://membership.theguardian.com/join" ? params
       }
     }
-
-    def digitalPackSaving = edition match {
-      case US | AU | UK => Some(75)
-      case INT => None
-    }
-
   }
 
 }
