@@ -4,6 +4,12 @@ name := "subscriptions-frontend"
 
 version := "1.0-SNAPSHOT"
 
+def commitId(): String = try {
+    "git rev-parse HEAD".!!.trim
+} catch {
+    case _: Exception => "unknown"
+}
+
 lazy val root = (project in file(".")).enablePlugins(
     PlayScala,
     BuildInfoPlugin,
@@ -12,11 +18,7 @@ lazy val root = (project in file(".")).enablePlugins(
 ).settings(
     buildInfoKeys := Seq[BuildInfoKey](
 	name,
-	BuildInfoKey.constant("gitCommitId", Option(System.getenv("BUILD_VCS_NUMBER")) getOrElse (try {
-	    "git rev-parse HEAD".!!.trim
-	} catch {
-	    case e: Exception => "unknown"
-	})),
+	BuildInfoKey.constant("gitCommitId", Option(System.getenv("BUILD_VCS_NUMBER")) getOrElse commitId()),
 	BuildInfoKey.constant("buildNumber", Option(System.getenv("BUILD_NUMBER")) getOrElse "DEV"),
 	BuildInfoKey.constant("buildTime", System.currentTimeMillis)
     ),
