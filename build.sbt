@@ -50,7 +50,7 @@ libraryDependencies ++= Seq(
     "com.gu" %% "memsub-common-play-auth" % "1.2",
     "com.gu" %% "identity-test-users" % "0.6",
     "com.gu" %% "content-authorisation-common" % "0.1",
-    "com.gu" %% "tip" % "0.1.1",
+    "com.gu" %% "tip" % "0.3.2",
     "com.github.nscala-time" %% "nscala-time" % "2.16.0",
     "com.getsentry.raven" % "raven-logback" % "8.0.3",
     "com.typesafe.scala-logging" %% "scala-logging" % "3.5.0",
