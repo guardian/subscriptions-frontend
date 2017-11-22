@@ -14,11 +14,11 @@ object Offers extends Controller {
     Redirect(routes.Offers.offersPage(digitalEdition.id).url, request.queryString, SEE_OTHER)
   }
 
-  def offersTestUKPage = CachedAction {
+  def offersTestUKPage = NoCacheAction {
     Ok(views.html.offers.offers_test_uk())
   }
 
-  def offersPage(edition: String) = CachedAction {
+  def offersPage(edition: String) = NoCacheAction {
     getById(edition) map {
       case UK => Ok(views.html.offers.offers_uk())
       case digitalEdition => Ok(views.html.offers.offers_international(digitalEdition))

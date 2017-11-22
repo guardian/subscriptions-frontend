@@ -18,7 +18,7 @@ object Homepage extends Controller {
     Redirect(routes.Homepage.landingPage(digitalEdition.id).url, request.queryString, SEE_OTHER)
   }
 
-  def landingPage(code: String) = CachedAction {
+  def landingPage(code: String) = NoCacheAction {
     getById(code).fold {
       NotFound(views.html.error404())
     } {
