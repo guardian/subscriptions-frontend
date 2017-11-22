@@ -2,8 +2,8 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
-GET         /robots.txt                      controllers.CachedAssets.at(path="/public", file="robots.txt")
-GET         /favicon.ico                     controllers.CacheBustedAssets.at(path="images/favicons/32x32.ico")
+GET         /robots.txt                      @controllers.CachedAssets.at(path="/public", file="robots.txt")
+GET         /favicon.ico                     @controllers.CachedAssets.busted(path="images/favicons/32x32.ico")
 
 # Editions homepage
 GET         /                                @controllers.Homepage.index
@@ -14,8 +14,8 @@ GET         /healthcheck                     @controllers.Management.healthcheck
 GET         /management/manifest             @controllers.Management.manifest
 
 # Digital pack
-GET         /digital                         controllers.DigitalPack.redirect
-GET         /:code/digital                   controllers.DigitalPack.landingPage(code: String)
+GET         /digital                         @controllers.DigitalPack.redirect
+GET         /:code/digital                   @controllers.DigitalPack.landingPage(code: String)
 
 # Checkout AJAX endpoints
 POST        /checkout                        @controllers.Checkout.handleCheckout
@@ -36,8 +36,8 @@ GET         /collection/paper-digital        @controllers.Shipping.viewCollectio
 GET         /collection/paper                @controllers.Shipping.viewCollectionPaper
 GET         /delivery/paper-digital          @controllers.Shipping.viewDeliveryPaperDigital
 GET         /delivery/paper                  @controllers.Shipping.viewDeliveryPaper
-GET         /weekly                          controllers.WeeklyLandingPage.index(country: Option[Country])
-GET         /weekly/:country                 controllers.WeeklyLandingPage.withCountry(country: String)
+GET         /weekly                          @controllers.WeeklyLandingPage.index(country: Option[Country])
+GET         /weekly/:country                 @controllers.WeeklyLandingPage.withCountry(country: String)
 
 # Staff signin (note, done by OAuth, in addition to regular signin)
 GET         /staff/login                     @controllers.OAuth.login
@@ -59,10 +59,10 @@ GET         /manage/renew/thank-you          @controllers.AccountManagement.rene
 POST        /manage/report-problem           @controllers.AccountManagement.reportDeliveryProblem
 
 # Pattern Library
-GET         /patterns                        controllers.PatternLibrary.patterns
+GET         /patterns                        @controllers.PatternLibrary.patterns
 
 # Map static resources from the /public folder to the /assets URL path
-GET         /assets/*file                    controllers.CachedAssets.at(path="/public", file)
+GET         /assets/*file                    @controllers.CachedAssets.at(path="/public", file)
 
 GET         /test-users                      @controllers.Testing.testUser
 
@@ -80,8 +80,8 @@ GET         /s/:supplierCodeStr              @controllers.Homepage.supplierRedir
 GET         /Voucher                         @controllers.Homepage.index
 
 # Offers page
-GET         /offers                          controllers.Offers.offers
-GET         /:edition/offers                 controllers.Offers.offersPage(edition: String)
+GET         /offers                          @controllers.Offers.offers
+GET         /:edition/offers                 @controllers.Offers.offersPage(edition: String)
 
 # Editions hommepage or 404
 GET         /:edition                        @controllers.Homepage.landingPage(edition: String)

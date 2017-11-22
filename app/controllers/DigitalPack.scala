@@ -8,7 +8,7 @@ package controllers
  import services.TouchpointBackend
  import utils.RequestCountry._
 
-object DigitalPack extends Controller with CommonActions {
+class DigitalPack extends Controller with CommonActions {
 
   private val queryParamHint = "edition"
 

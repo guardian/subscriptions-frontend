@@ -6,7 +6,7 @@ import model.DigitalEdition.{INT, UK, getById}
 import play.api.mvc.Controller
 import utils.RequestCountry._
 
-object Offers extends Controller with CommonActions {
+class Offers extends Controller with CommonActions {
 
   def offers = NoCacheAction { implicit request =>
     val countryGroup = request.getFastlyCountryGroup.getOrElse(CountryGroup.UK)
