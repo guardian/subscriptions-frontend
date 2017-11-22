@@ -21,7 +21,7 @@ object Shipping extends Controller {
       routes.Checkout.renderCheckout(UK.id, None, None, in.slug).url
     )
 
-  def viewCollectionPaperDigital() = CachedAction {
+  def viewCollectionPaperDigital() = NoCacheAction {
     val segment = "paper-digital"
     index(CollectionSubscriptionProduct(
       title = "Paper + digital voucher subscription",
@@ -31,7 +31,7 @@ object Shipping extends Controller {
     ), segment)
   }
 
-  def viewCollectionPaper() = CachedAction {
+  def viewCollectionPaper() = NoCacheAction {
     val segment = "paper"
     index(CollectionSubscriptionProduct(
       title = "Paper voucher subscription",
@@ -41,7 +41,7 @@ object Shipping extends Controller {
     ), segment)
   }
 
-  def viewDeliveryPaperDigital() = CachedAction {
+  def viewDeliveryPaperDigital() = NoCacheAction {
     val segment = "paper-digital"
     index(DeliverySubscriptionProduct(
       title = "Paper + digital home delivery subscription",
@@ -52,7 +52,7 @@ object Shipping extends Controller {
     ), segment)
   }
 
-  def viewDeliveryPaper() = CachedAction {
+  def viewDeliveryPaper() = NoCacheAction {
     val segment = "paper"
     index(DeliverySubscriptionProduct(
       title = "Paper home delivery subscription",

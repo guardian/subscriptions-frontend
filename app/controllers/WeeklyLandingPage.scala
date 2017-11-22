@@ -25,7 +25,7 @@ object WeeklyLandingPage extends Controller {
 
   val description = landing_description()
 
-  def withCountry(country: String) = CachedAction {
+  def withCountry(country: String) = NoCacheAction {
     val parsedCountry = if (country == international) Some(Country.UK) else CountryGroup.countryByCode(country)
     parsedCountry.fold {
       MovedPermanently(routes.WeeklyLandingPage.withCountry(international).url)

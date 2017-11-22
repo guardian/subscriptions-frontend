@@ -26,7 +26,7 @@ object DigitalPack extends Controller {
     }
   }
 
-  def landingPage(code: String) = CachedAction { _ =>
+  def landingPage(code: String) = NoCacheAction { _ =>
     val digitalEdition = getById(code).getOrElse(INT)
     val plan = TouchpointBackend.Normal.catalogService.unsafeCatalog.digipack.month
     val price = plan.charges.price.getPrice(digitalEdition.countryGroup.currency).getOrElse(plan.charges.gbpPrice)
