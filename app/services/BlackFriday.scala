@@ -13,7 +13,7 @@ object BlackFriday {
     val startTime = new DateTime(2017, 11, 24, 0, 0)
     val endTime = new DateTime(2017, 12, 4, 0, 0)
     val now = new DateTime()
-    now.isAfter(startTime) && now.isBefore(endTime) //|| !Config.stageProd //allow testing on CODE
+    now.isAfter(startTime) && now.isBefore(endTime) || !Config.stageProd //allow testing on CODE
   }
 
   def homePromoCodes: Map[PromoCodeKey, String] = homePromoCodes(DigitalEdition.UK)
