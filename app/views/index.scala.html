@@ -10,7 +10,7 @@
 
     <main class="page-container gs-container">
         @fragments.page.header("Subscriptions and Membership")
-        @fragments.productLists.productListUk(BlackFriday.homePromoCodes)
+        @fragments.productLists.productListUk(BlackFriday.homePromoCodes, includeEditionInUrl = true)
         <div class="row row--items-1">
             <div class="row__item">
                 @fragments.promos.members("uk", UK.membershipLandingPage)
