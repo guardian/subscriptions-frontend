@@ -1,6 +1,7 @@
 @import model.DigitalEdition
 @import views.support.DigitalEdition._
 
+@import services.BlackFriday
 @(edition: DigitalEdition)
 
 @main(s"${edition.name} | Subscriptions | The Guardian",
@@ -9,37 +10,6 @@
 
     <main class="page-container gs-container">
         @fragments.page.header("Subscription offers", Some("Select your preferred package"))
-        <div class="row row--items-2">
-            <div class="row__item block block--primary block--digital">
-                <h2 class="block__title">Subscribe to the Guardian <span class="break-tablet">digital pack</span></h2>
-                <div class="block__info">
-                    <ul class="block__list">
-                        <li class="block__list-item">14-day free trial</li>
-                        @edition.digitalPackSaving.map {saving => <li class="block__list-item"><strong>Save up to @{saving}% on the app store price</strong></li>}
-                        <li class="block__list-item">Access to the Daily Edition, the digital version of the UK Guardian newspaper</li>
-                        <li class="block__list-item">Access to the advert-free Guardian App Premium Tier</li>
-                        <li class="block__list-item">Available on Apple, Android and Kindle Fire</li>
-                        <li class="block__list-item">Use on up to 10 devices</li>
-                    </ul>
-                </div>
-                <div class="block__footer">
-                    <a class="button button--large button--primary button--arrow" href="@routes.PromoLandingPage.render(s"DOFF${edition.id.toUpperCase}1", edition.countryGroup.defaultCountry).url">Subscribe now</a>
-                </div>
-            </div>
-            <div class="row__item block block--primary block--weekly">
-                <h2 class="block__title">Subscribe to the Guardian Weekly</h2>
-                <div class="block__info">
-                    <ul class="block__list">
-                        <li class="block__list-item">A selection of international editorial from the Guardian, Observer and Washington Post</li>
-                        <li class="block__list-item">A unique blend of international news, politics, culture and comment</li>
-                        <li class="block__list-item">Save on the retail price</li>
-                        <li class="block__list-item">Free delivery to your door, wherever you are in the world</li>
-                    </ul>
-                </div>
-                <div class="block__footer">
-                    <a class="button button--large button--primary" href="@routes.PromoLandingPage.render("WAL41X", edition.countryGroup.defaultCountry).url">Subscribe now</a>
-                </div>
-            </div>
-        </div>
+        @fragments.productLists.productListInternational(edition, BlackFriday.offersPromoCodes(edition))
     </main>
 }
