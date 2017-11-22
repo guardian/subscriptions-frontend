@@ -13,8 +13,3 @@
         @Html(md.render(d))
     }
 </div>
-@promotion.expires.filter(now.plusMonths(1).isAfter).map { e =>
-    <p class="promotion-description @promotion.getDescriptionBorder">
-        But hurry! Offer expires @dayInMonthWithSuffixAndMonth(e.minusSeconds(1)).
-    </p>
-}
