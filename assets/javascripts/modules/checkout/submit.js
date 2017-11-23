@@ -99,9 +99,9 @@ define([
 
         errorElement.text('');
 
-        data.ophanBrowserId = cookie.getCookie('bwid');
-        data.ophanVisitId = cookie.getCookie('vsid');
-        data.ophanPageViewId = pageViewId;
+        data['ophan.browserId'] = cookie.getCookie('bwid');
+        data['ophan.visitId'] = cookie.getCookie('vsid');
+        data['ophan.pageViewId'] = pageViewId;
 
         ajax({
             url: '/checkout',

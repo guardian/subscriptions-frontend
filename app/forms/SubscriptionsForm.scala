@@ -173,9 +173,9 @@ object SubscriptionsForm {
   )(PersonalData.apply)(PersonalData.unapply)
 
   val ophanDataMapping = mapping(
-    "ophanPageViewId" -> optional(text),
-    "ophanVisitId" -> optional(text),
-    "ophanBrowserId" -> optional(text)
+    "pageViewId" -> optional(text),
+    "visitId" -> optional(text),
+    "browserId" -> optional(text)
   )(OphanData.apply)(OphanData.unapply)
 
   def addressWithFallback(fallbackKey: String): Formatter[Address] = new Formatter[Address] {
