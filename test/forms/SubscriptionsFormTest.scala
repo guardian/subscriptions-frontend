@@ -1,6 +1,7 @@
 package forms
 
 import com.gu.i18n.Country
+import com.gu.i18n.Currency.GBP
 import com.gu.memsub.promo.PromoCode
 import com.gu.memsub.Address
 import forms.SubscriptionsForm._
@@ -160,9 +161,9 @@ class SubscriptionsFormTest extends FreeSpec {
         visitId = Some("blah"),
         browserId = Some("blah")
       )))(ophanDataMapping.bind(Map(
-        "ophanPageViewId" -> "blah",
-        "ophanVisitId" -> "blah",
-        "ophanBrowserId" -> "blah"
+        "pageViewId" -> "blah",
+        "visitId" -> "blah",
+        "browserId" -> "blah"
       ) ++ formData))
     }
 
@@ -172,8 +173,8 @@ class SubscriptionsFormTest extends FreeSpec {
         visitId = Some("blah"),
         browserId = Some("blah")
       )))(ophanDataMapping.bind(Map(
-        "ophanVisitId" -> "blah",
-        "ophanBrowserId" -> "blah"
+        "visitId" -> "blah",
+        "browserId" -> "blah"
       ) ++ formData))
     }
 
@@ -183,6 +184,68 @@ class SubscriptionsFormTest extends FreeSpec {
         visitId = None,
         browserId = None
       )))(ophanDataMapping.bind(formData))
+    }
+  }
+
+  "Checkout form" - {
+    val formData = Map(
+      "csrfToken" -> "0e8b61a3653c59b798a2755f7d342268cdb72d1c-1511366056806-3497ae30a15909d24dc651e7",
+      "ratePlanId" -> "2c92c0f84bbfec8b014bc655f4852d9d",
+      "promoCode" -> "promo",
+      "personal.first" -> "first",
+      "personal.last" -> "last",
+      "personal.emailValidation.email" -> "a@example.com",
+      "personal.emailValidation.confirm" -> "a@example.com",
+      "currency" -> GBP.iso,
+      "personal.address.address1" -> "address1",
+      "personal.address.address2" -> "address2",
+      "personal.address.town" -> "town",
+      "personal.address.country" -> Country.UK.alpha2,
+      "personal.address.subdivision" -> "subdivision",
+      "personal.address.postcode" -> "POSTCODE",
+      "payment.type" -> "direct-debit",
+      "payment.token" -> "token",
+      "payment.sortcode" -> "sortcode",
+      "payment.account" -> "account",
+      "payment.holder" -> "holder",
+      "ophan.browserId" -> "bwid",
+      "ophan.visitId" -> "vid",
+      "ophan.pageViewId" -> "pvid"
+    )
+
+    val address = Address(
+      lineOne = "address1",
+      lineTwo = "address2",
+      town = "town",
+      countyOrState = "subdivision",
+      postCode = "POSTCODE",
+      countryName = Country.UK.name
+    )
+
+    val personalData = PersonalData(
+      first = "first",
+      last = "last",
+      email = "a@example.com",
+      receiveGnmMarketing = false,
+      address = address,
+      telephoneNumber = None
+    )
+
+    val ophanData = OphanData(Some("pvid"), Some("vid"), Some("bwid"))
+
+    val paymentData = DirectDebitData("account", "sortcode", "holder")
+
+    val subscriptionData = SubscriptionData(
+      personalData,
+      paymentData,
+      Some(PromoCode("promo")),
+      GBP,
+      ophanData
+    )
+
+    "handles all sections" in {
+      val boundForm = subsForm.bind(formData)
+      assertResult(Some(subscriptionData))(boundForm.value)
     }
   }
 }
