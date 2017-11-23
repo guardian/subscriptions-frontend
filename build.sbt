@@ -90,6 +90,7 @@ resolvers ++= Seq(
 )
 
 import com.typesafe.sbt.packager.archetypes.systemloader.ServerLoader.Systemd
+enablePlugins(SystemdPlugin)
 serverLoading in Debian := Some(Systemd)
 debianPackageDependencies := Seq("openjdk-8-jre-headless")
 maintainer := "Membership Dev <membership.dev@theguardian.com>"
