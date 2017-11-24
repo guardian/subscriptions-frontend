@@ -1,5 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom';
+import { Raven } from 'modules/raven';
+
 const timeout = (t) => new Promise((resolve, reject) => {
     const timer = setTimeout(() => {
         clearTimeout(timer)
@@ -56,7 +58,6 @@ class Payment extends React.Component {
     constructor(props) {
         super(props)
         const endpoint = props.product === 'digitalpack' ? 'digitalpack' : 'paper'
-        console.log(props, endpoint)
         const url = guardian.members_data_api
         const dataUrl = `${url}/user-attributes/me/mma-${endpoint}`
         const cardUrl = `${url}/user-attributes/me/${endpoint}-update-card`
@@ -66,7 +67,8 @@ class Payment extends React.Component {
             handleStripeResponse(t, cardUrl, this.state.stripePublicKeyForUpdate).then(json => {
                 this.setState({ state: SUCCESS })
             })
-                .catch(() => {
+                .catch((e) => {
+                    Raven.captureException(e)
                     this.setState({ state: FAILURE })
                 })
         }
@@ -96,6 +98,7 @@ class Payment extends React.Component {
 
         })
             .catch((e) => {
+                Raven.captureException(e)
                 this.setState({ state: FAILURE })
             })
     }
