@@ -1,5 +1,6 @@
 package controllers
 import java.util.Date
+import javax.inject.Inject
 
 import app.BuildInfo
 
@@ -9,17 +10,19 @@ import com.typesafe.scalalogging.LazyLogging
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.mvc._
 import services.TouchpointBackend
-import actions.CommonActions._
+ import actions.OAuthActions
 import com.gu.monitoring.CloudWatchHealth
 import play.api.Logger._
 import views.support.Catalog._
 import play.api.Play.current
 import play.api.libs.concurrent.Akka
 import com.github.nscala_time.time.Imports._
+import play.api.libs.ws.WSClient
+
 import scalaz.{Semigroup, Validation, ValidationNel}
 import scalaz.syntax.std.option._
 
-object Management extends Controller with LazyLogging {
+class Management @Inject()(override val wsClient: WSClient)  extends Controller with LazyLogging with OAuthActions {
 
   implicit val as = Akka.system
   implicit val unitSemigroup = Semigroup.firstSemigroup[Unit]

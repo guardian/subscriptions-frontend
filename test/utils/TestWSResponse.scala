@@ -1,5 +1,6 @@
 package utils
 
+import akka.util.ByteString
 import play.api.libs.json.{JsNull, JsValue}
 import play.api.libs.ws.{WSCookie, WSResponse}
 
@@ -23,5 +24,5 @@ case class TestWSResponse (
 
   def cookie(name: String): Option[WSCookie] = None
 
-  def bodyAsBytes: Array[Byte] = body.getBytes
+  def bodyAsBytes: ByteString = ByteString(body.getBytes)
 }

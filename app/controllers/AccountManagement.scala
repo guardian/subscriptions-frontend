@@ -3,7 +3,6 @@ package controllers
 import _root_.services.AuthenticationService._
 import _root_.services.TouchpointBackend
 import _root_.services.TouchpointBackend.Resolution
-import actions.CommonActions._
 import com.gu.i18n.Country.{UK, US}
 import com.gu.i18n.Currency
 import com.gu.i18n.Currency.{GBP, USD}
@@ -27,6 +26,7 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json._
 import play.api.mvc.{AnyContent, _}
 import _root_.services.FulfilmentLookupService
+import actions.CommonActions
 import com.gu.memsub.subsv2.{Catalog, ReaderType, Subscription}
 import com.gu.zuora.soap.models.Queries.Account
 import services.IdentityService
@@ -321,7 +321,7 @@ object ManageWeekly extends ContextLogging {
 }
 
 
-object AccountManagement extends Controller with ContextLogging with CatalogProvider {
+class AccountManagement extends Controller with ContextLogging with CatalogProvider with CommonActions {
 
   val accountManagementAction = NoCacheAction
 

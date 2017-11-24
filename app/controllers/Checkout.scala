@@ -1,6 +1,8 @@
 package controllers
 
-import actions.CommonActions._
+import javax.inject.Inject
+
+import actions.CommonActions
 import com.gu.i18n.CountryGroup.{UK, US}
 import com.gu.i18n.Currency._
 import com.gu.i18n._
@@ -41,7 +43,7 @@ import scalaz.syntax.applicative._
 import scalaz.{NonEmptyList, OptionT, \/}
 import cats.instances.future._
 
-object Checkout extends Controller with LazyLogging with CatalogProvider {
+class Checkout @Inject() extends Controller with LazyLogging with CatalogProvider with CommonActions {
 
   import SessionKeys.{Currency => _, UserId => _, _}
 

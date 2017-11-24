@@ -1,19 +1,24 @@
 package controllers
 
-import actions.CommonActions._
+import javax.inject.Inject
+
+import actions.OAuthActions
 import com.typesafe.scalalogging.LazyLogging
 import model.Subscriptions.{SubscriptionOption, SubscriptionProduct}
+import play.api.libs.ws.WSClient
 import play.api.mvc.{Controller, Cookie}
 import services.TouchpointBackend
 import utils.TestUsers.testUsers
 
-object Testing extends Controller with LazyLogging {
-
+object Testing {
   val AnalyticsCookieName = "ANALYTICS_OFF_KEY"
 
   val analyticsOffCookie = Cookie(AnalyticsCookieName, "true", httpOnly = false)
 
   val PreSigninTestCookieName = "pre-signin-test-user"
+}
+
+class Testing @Inject()(override val wsClient: WSClient)  extends Controller with LazyLogging with OAuthActions {
 
   lazy val products = TouchpointBackend.Test.catalogService.unsafeCatalog.allSubs
 
@@ -23,12 +28,12 @@ object Testing extends Controller with LazyLogging {
 
     val testUserString = testUsers.generate()
     logger.info(s"Generated test user string $testUserString")
-    val testUserCookie = Cookie(PreSigninTestCookieName, testUserString, Some(30 * 60), httpOnly = true)
-    Ok(views.html.testing.testUsers(testUserString, products)).withCookies(testUserCookie, analyticsOffCookie)
+    val testUserCookie = Cookie(Testing.PreSigninTestCookieName, testUserString, Some(30 * 60), httpOnly = true)
+    Ok(views.html.testing.testUsers(testUserString, products)).withCookies(testUserCookie, Testing.analyticsOffCookie)
   }
 
   def analyticsOff = CachedAction {
-    Ok(s"${analyticsOffCookie.name} cookie dropped").withCookies(analyticsOffCookie)
+    Ok(s"${Testing.analyticsOffCookie.name} cookie dropped").withCookies(Testing.analyticsOffCookie)
   }
 
 }

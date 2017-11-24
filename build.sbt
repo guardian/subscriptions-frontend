@@ -36,39 +36,40 @@ lazy val root = (project in file(".")).enablePlugins(
       "com.gu.memsub.Subscription.ProductRatePlanId"
   ))
 
-scalaVersion := "2.11.8"
-scalacOptions ++= Seq("-feature", "-Xfatal-warnings")
+scalaVersion := "2.11.12"
+scalacOptions ++= Seq("-feature")
 
-val scalatestVersion = "3.0.0"
+val scalatestVersion = "3.0.4"
 
 libraryDependencies ++= Seq(
     cache,
     ws,
     filters,
-    PlayImport.specs2,
-    "com.gu" %% "membership-common" % "0.477",
-    "com.gu" %% "memsub-common-play-auth" % "0.8",
+    PlayImport.specs2 % "test",
+    "com.gu" %% "membership-common" % "0.484",
+    "com.gu" %% "memsub-common-play-auth" % "1.2",
     "com.gu" %% "identity-test-users" % "0.6",
     "com.gu" %% "content-authorisation-common" % "0.1",
     "com.gu" %% "tip" % "0.1.1",
-    "com.github.nscala-time" %% "nscala-time" % "2.8.0",
+    "com.github.nscala-time" %% "nscala-time" % "2.16.0",
     "com.getsentry.raven" % "raven-logback" % "8.0.3",
-    "com.typesafe.scala-logging" %% "scala-logging" % "3.5.0",
+    "com.typesafe.scala-logging" %% "scala-logging" % "3.7.2",
     "org.scalatest" %% "scalatest" % scalatestVersion % "test",
     "org.scalactic" %% "scalactic" % scalatestVersion % "test",
-    "org.seleniumhq.selenium" % "selenium-java" % "3.0.1" % "test",
-    "org.seleniumhq.selenium" % "htmlunit-driver" % "2.27" % "test",
-    "io.github.bonigarcia" % "webdrivermanager" % "1.7.1" % "test",
-    "com.gocardless" % "gocardless-pro" % "1.16.0",
-    "com.squareup.okhttp3" % "okhttp" % "3.4.1" % "test",
-    "org.scalaz" %% "scalaz-core" % "7.1.3",
+    "org.seleniumhq.selenium" % "selenium-java" % "3.7.1" % "test",
+    "org.seleniumhq.selenium" % "htmlunit-driver" % "2.28.1" % "test",
+    "io.github.bonigarcia" % "webdrivermanager" % "1.7.2" % "test",
+    "com.gocardless" % "gocardless-pro" % "2.7.0",
+    "com.squareup.okhttp3" % "okhttp" % "3.4.2" % "test",
+    "org.scalaz" %% "scalaz-core" % "7.1.4",
     "org.pegdown" % "pegdown" % "1.6.0",
-    "com.amazonaws" % "aws-java-sdk-sqs" % "1.11.95",
-    "net.databinder.dispatch" %% "dispatch-core" % "0.11.3",
-    "com.gu" % "kinesis-logback-appender" % "1.4.0",
-    "net.logstash.logback" % "logstash-logback-encoder" % "4.9",
-    "com.fasterxml.jackson.dataformat" % "jackson-dataformat-cbor" % "2.8.7",
-    "com.gu" %% "acquisition-event-producer" % "2.0.3"
+    "com.amazonaws" % "aws-java-sdk-sqs" % "1.11.231",
+    "net.databinder.dispatch" %% "dispatch-core" % "0.13.2",
+    "com.gu" % "kinesis-logback-appender" % "1.4.2",
+    "net.logstash.logback" % "logstash-logback-encoder" % "4.11",
+    "com.fasterxml.jackson.dataformat" % "jackson-dataformat-cbor" % "2.9.2",
+    "com.gu" %% "acquisition-event-producer-play25" % "2.0.4",
+    "com.google.guava" % "guava" % "23.4-jre" % "test"
 )
 
 testOptions in Test ++= Seq(
@@ -88,14 +89,17 @@ resolvers ++= Seq(
     Resolver.bintrayRepo("guardian", "ophan")
 )
 
-import com.typesafe.sbt.packager.archetypes.ServerLoader.Systemd
-serverLoading in Debian := Systemd
+import com.typesafe.sbt.packager.archetypes.systemloader.ServerLoader.Systemd
+enablePlugins(SystemdPlugin)
+serverLoading in Debian := Some(Systemd)
 debianPackageDependencies := Seq("openjdk-8-jre-headless")
 maintainer := "Membership Dev <membership.dev@theguardian.com>"
 packageSummary := "Subscription Frontend"
 packageDescription := """Subscription Frontend"""
 
 riffRaffPackageType := (packageBin in Debian).value
+
+routesGenerator := StaticRoutesGenerator
 
 javaOptions in Universal ++= Seq(
       "-Dpidfile.path=/dev/null",

@@ -6,8 +6,7 @@ import play.api.libs.json.Json
 import play.api.mvc.{Action, Controller}
 
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
-
-object CachedAssets extends Controller with LazyLogging {
+object CachedAssets extends LazyLogging  {
   val hashedPaths: Map[String, String] =
     (for {
       resourceIs <- Option(getClass.getClassLoader.getResourceAsStream("assets.map"))
@@ -18,11 +17,12 @@ object CachedAssets extends Controller with LazyLogging {
     }
 
   /**
-   * Returns a hashed asset *path* suitable for rending out to the browser - forcing them to fetch new
-   * assets when the hash changes.
-   */
+    * Returns a hashed asset *path* suitable for rending out to the browser - forcing them to fetch new
+    * assets when the hash changes.
+    */
   def hashedPathFor(path: String): String = "/assets/" + hashedPaths.getOrElse(path, path)
-
+}
+class CachedAssets extends Controller with LazyLogging {
   /**
    * Serves an asset, wrapping it with cache headers if appropriate
    */
@@ -36,4 +36,5 @@ object CachedAssets extends Controller with LazyLogging {
       if (result.header.headers.contains(CACHE_CONTROL)) result else Cached(2)(result)
     }
   }
+  def busted(path: String) = at("/public", CachedAssets.hashedPaths(path), aggressiveCaching = true)
 }
