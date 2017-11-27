@@ -1,5 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom';
+import { RadioGroup, RadioButton as UnspacedRadioButton } from 'react-radio-buttons';
+
 import {DirectDebit} from 'modules/react/directDebit'
 import {PromoCode, status} from 'modules/react/promoCode'
 import {validatePromoCode, combinePromotionAndPlans} from '../promoCode';
@@ -14,6 +16,8 @@ import {
     init as stripeInit
 } from 'modules/renew/renew'
 
+const RadioButton =({children, ...props}) => <div style={{boxSizing:'unset'}}><UnspacedRadioButton pointColor="#005689" {...props}><span style={{paddingRight:'10px'}}>{children}</span></UnspacedRadioButton></div>;
+//This component sets styles directly, and they conflict a bit with our css.
 
 const empty = {
     value: '',
@@ -150,8 +154,8 @@ class WeeklyRenew extends React.Component {
         this.setState({email: {value: email, isValid: validEmail(email)}});
     };
 
-    handlePaymentType(e) {
-        this.setState({paymentType: e.target.checked ? DIRECT_DEBIT : STRIPE})
+    handlePaymentType(value) {
+        this.setState({paymentType: value})
     };
 
     handleSortCode(e) {
@@ -173,13 +177,12 @@ class WeeklyRenew extends React.Component {
         this.setState({directDebitConfirmed: {value: checked, isValid: checked === true}})
     }
 
-    handlePlan(plan) {
-        return () => {
-            this.setState({plan: plan.id, displayedPrice: this.getPrice(plan)});
-        }
+    handlePlan(id) {
+            this.setState({plan: id, displayedPrice: this.getPrice(id)});
     }
 
-    getPrice(plan) {
+    getPrice(id) {
+        let plan = this.state.plans.find(p => p.id == id)
         return plan.promotionalPrice || plan.price;
     }
 
@@ -274,7 +277,7 @@ class EmailField extends React.Component {
 
         return <div>
             <dt className="mma-section__list--title">
-                <label className="label" for="renew-email">Email address</label>
+                <label className="label" htmlFor="renew-email">Email address</label>
             </dt>
             <dd className="mma-section__list--content">
                 <input id="renew-email" value={email} onChange={this.props.handleChange} className="input-text"/>
@@ -323,11 +326,12 @@ class PaymentType extends React.Component {
         return <div>
             <dt className="mma-section__list--title">Payment method</dt>
             <dd className="mma-section__list--content option__label">
-                <SwitchButton labelRight="Direct Debit" label="Credit Card"
-                              onChange={this.props.handlePaymentType}
-                              checked={this.props.paymentType === DIRECT_DEBIT}
-                              defaultChecked={this.props.paymentType === DIRECT_DEBIT}
-                />
+                <div style={{boxSizing:'unset'}}>
+                <RadioGroup onChange={this.props.handlePaymentType} value={this.props.paymentType} horizontal>
+                    <RadioButton value={DIRECT_DEBIT}>Direct Debit</RadioButton>
+                    <RadioButton value={STRIPE}>Credit Card</RadioButton>
+                </RadioGroup>
+                </div>
             </dd>
         </div>
     }
@@ -335,36 +339,23 @@ class PaymentType extends React.Component {
 
 class PlanChooser extends React.Component {
     render() {
-        let plans = this.props.plans.map((plan) => {
-            let checked = plan == this.props.selected;
-            return <Plan key={plan.id} id={plan.id} price={plan.price} promotionalPrice={plan.promotionalPrice} checked={checked}
-                         handleChange={this.props.handleChange(plan)}/>
-        });
+        let plans = this.props.plans.map((plan) =><RadioButton key={plan.id} value={plan.id}><Plan price={plan.price} promotionalPrice={plan.promotionalPrice} /></RadioButton>);
         return <div>
             <dt className="mma-section__list--title">Payment options</dt>
             <dd className="mma-section__list--content">
+            <RadioGroup onChange={this.props.handleChange}>
                 {plans}
+                </RadioGroup>
             </dd>
         </div>
     }
 }
-class Plan extends React.Component {
-    price() {
-        if (this.props.promotionalPrice) {
+const Plan = ({promotionalPrice,price}) => {
+        if (promotionalPrice) {
             return <span className="option__label">
-                <s>{this.props.price}</s>
-                <strong>&nbsp;{this.props.promotionalPrice}</strong>
+                <s>{props.price}</s>
+                <strong>&nbsp;{promotionalPrice}</strong>
             </span>
         }
-        return <span className="option__label">{this.props.price}</span>
-    }
-
-    render() {
-        return <label className="option">
-            <input type="radio" name="planchooser" value={this.props.id}
-                                                 checked={this.props.checked}
-                                                onChange={this.props.handleChange}/>
-            {this.price()}
-        </label>
-    }
+        return <span className="option__label">{price}</span>
 }

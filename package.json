@@ -69,6 +69,7 @@
   "scripts": {
     "flow": "flow; test $? -eq 0 -o $? -eq 2",
     "compile": "echo 'compiling assets' && grunt compile",
+    "compile-dev": "echo 'compiling assets' && grunt compile --dev",
     "test": "grunt test"
   },
   "dependencies": {
