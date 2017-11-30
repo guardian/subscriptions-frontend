@@ -2,9 +2,9 @@ import React from 'react'
 import ReactDOM from 'react-dom';
 import { RadioGroup, RadioButton as UnspacedRadioButton } from 'react-radio-buttons';
 
-import {DirectDebit} from 'modules/react/directDebit'
-import {PromoCode, status} from 'modules/react/promoCode'
-import {validatePromoCode, combinePromotionAndPlans} from '../promoCode';
+import { DirectDebit } from 'modules/react/directDebit'
+import { PromoCode, status } from 'modules/react/promoCode'
+import { validatePromoCode, combinePromotionAndPlans } from '../promoCode';
 import {
     SortCode,
     validAccount,
@@ -16,7 +16,7 @@ import {
     init as stripeInit
 } from 'modules/renew/renew'
 
-const RadioButton =({children, ...props}) => <div style={{boxSizing:'unset'}}><UnspacedRadioButton pointColor="#005689" {...props}><span style={{paddingRight:'10px'}}>{children}</span></UnspacedRadioButton></div>;
+const RadioButton = ({ children, ...props }) => <div style={{ boxSizing: 'unset' }}><UnspacedRadioButton pointColor="#005689" {...props}><span style={{ paddingRight: '10px' }}>{children}</span></UnspacedRadioButton></div>;
 //This component sets styles directly, and they conflict a bit with our css.
 
 const empty = {
@@ -40,7 +40,7 @@ export function init(container) {
         privacyPolicyHref={container.dataset.privacyPolicyHref}
         privacyPolicyTitle={container.dataset.privacyPolicyTitle}
         whyYourDataMattersToUsHref={container.dataset.whyYourDataMattersToUsHref}
-        />,
+    />,
         container);
 }
 
@@ -49,7 +49,7 @@ class WeeklyRenew extends React.Component {
         super(props);
         this.state = {
             error: false,
-            email: props.email ? {value: props.email, isValid: true} : empty,
+            email: props.email ? { value: props.email, isValid: true } : empty,
             paymentType: this.props.showPaymentType ? DIRECT_DEBIT : STRIPE,
             sortCode: empty,
             accountNumber: empty,
@@ -80,16 +80,16 @@ class WeeklyRenew extends React.Component {
         this.handlePlan = this.handlePlan.bind(this);
         this.getPlan = this.getPlan.bind(this);
 
-        if(this.props.promoCode !== ''){
+        if (this.props.promoCode !== '') {
             this.validatePromo();
         }
     }
 
 
     click() {
-        this.setState({showValidity: true});
+        this.setState({ showValidity: true });
         if (validState(this.state)) {
-            this.setState({loading: true});
+            this.setState({ loading: true });
             send(this.state, this.handleError);
         }
     }
@@ -110,7 +110,7 @@ class WeeklyRenew extends React.Component {
 
         validatePromoCode(this.state.promoCode, this.props.country, this.props.currency).then((response) => {
             let newPlans = combinePromotionAndPlans(response, this.state.plans);
-            let valid = response.promotion.promotionType.name === 'retention' || (response.promotion.promotionType.name === 'double' && ( response.promotion.promotionType.a.name === 'retention' || response.promotion.promotionType.b.name === 'retention'));
+            let valid = response.promotion.promotionType.name === 'retention' || (response.promotion.promotionType.name === 'double' && (response.promotion.promotionType.a.name === 'retention' || response.promotion.promotionType.b.name === 'retention'));
             if (valid) {
                 let price = this.getPrice(this.getPlan(newPlans));
                 //This is a weekly promotion
@@ -133,12 +133,12 @@ class WeeklyRenew extends React.Component {
         }).catch((payload) => {
             let price = this.getPrice(this.getPlan(this.props.plans));
             let error = "Invalid Promotion";
-            if("response" in payload){
-              try{
-                  error = JSON.parse(payload.response).errorMessage;
-              } catch(e){
-                  console.error(e);
-              }
+            if ("response" in payload) {
+                try {
+                    error = JSON.parse(payload.response).errorMessage;
+                } catch (e) {
+                    console.error(e);
+                }
             }
             this.setState({
                 promotionDescription: error,
@@ -151,34 +151,34 @@ class WeeklyRenew extends React.Component {
 
     handleEmail(e) {
         let email = e.target.value;
-        this.setState({email: {value: email, isValid: validEmail(email)}});
+        this.setState({ email: { value: email, isValid: validEmail(email) } });
     };
 
     handlePaymentType(value) {
-        this.setState({paymentType: value})
+        this.setState({ paymentType: value })
     };
 
     handleSortCode(e) {
-        this.setState({sortCode: new SortCode(e.target.value)})
+        this.setState({ sortCode: new SortCode(e.target.value) })
     }
 
     handleAccountNumber(e) {
         let accountNumber = e.target.value;
-        this.setState({accountNumber: {value: accountNumber, isValid: validAccount(accountNumber)}});
+        this.setState({ accountNumber: { value: accountNumber, isValid: validAccount(accountNumber) } });
     }
 
     handleAccountHolder(e) {
         let name = e.target.value;
-        this.setState({accountHolder: {value: name, isValid: name.length > 0}});
+        this.setState({ accountHolder: { value: name, isValid: name.length > 0 } });
     }
 
     handleDirectDebitConfirmation(e) {
         let checked = e.target.checked;
-        this.setState({directDebitConfirmed: {value: checked, isValid: checked === true}})
+        this.setState({ directDebitConfirmed: { value: checked, isValid: checked === true } })
     }
 
     handlePlan(id) {
-            this.setState({plan: id, displayedPrice: this.getPrice(id)});
+        this.setState({ plan: id, displayedPrice: this.getPrice(id) });
     }
 
     getPrice(id) {
@@ -196,7 +196,7 @@ class WeeklyRenew extends React.Component {
     }
 
     handleError(error) {
-        this.setState({error: error, loading: false});
+        this.setState({ error: error, loading: false });
     }
 
     buttonText() {
@@ -206,59 +206,59 @@ class WeeklyRenew extends React.Component {
 
     render() {
         return <div>
-            {this.state.loading && <div className="loader is-loading"> Processing</div> }
+            {this.state.loading && <div className="loader is-loading"> Processing</div>}
             {this.state.error && <div className="mma-error"> {this.state.error}</div>}
             {!this.state.loading && !this.state.error &&
-            <div>
+                <div>
 
-                <dl className="mma-section__list">
+                    <dl className="mma-section__list">
 
-                    <PromoCode
-                        value={this.state.promoCode}
-                        handler={this.handlePromo}
-                        send={this.validatePromo}
-                        status={this.state.promoStatus}
-                        copy={this.state.promotionDescription}
-                    />
-                    <PlanChooser plans={this.state.plans} selected={this.getPlan()} handleChange={this.handlePlan}/>
-                    {this.showEmail &&
-                    <EmailField value={this.state.email.value}
+                        <PromoCode
+                            value={this.state.promoCode}
+                            handler={this.handlePromo}
+                            send={this.validatePromo}
+                            status={this.state.promoStatus}
+                            copy={this.state.promotionDescription}
+                        />
+                        <PlanChooser plans={this.state.plans} selected={this.getPlan()} handleChange={this.handlePlan} />
+                        {this.showEmail &&
+                            <EmailField value={this.state.email.value}
                                 valid={!this.state.showValidity || this.state.email.isValid}
-                                handleChange={this.handleEmail}/>}
-                    <Payment
-                        showPaymentType={this.props.showPaymentType}
-                        handlePaymentType={this.handlePaymentType}
-                        paymentType={this.state.paymentType}
-                        handleSortCode={this.handleSortCode}
-                        handleAccountNumber={this.handleAccountNumber}
-                        handleAccountHolder={this.handleAccountHolder}
-                        handleDirectDebitConfirmation={this.handleDirectDebitConfirmation}
-                        sortCode={this.state.sortCode.value}
-                        accountNumber={this.state.accountNumber.value}
-                        accountHolder={this.state.accountHolder.value}
-                        directDebitConfirmed={this.state.directDebitConfirmed.value}
-                        validSortCode={!this.state.showValidity || this.state.sortCode.isValid}
-                        validAccountNumber={!this.state.showValidity || this.state.accountNumber.isValid}
-                        validAccountHolder={!this.state.showValidity || this.state.accountHolder.isValid}
-                        validDirectDebitConfirmed={!this.state.showValidity || this.state.directDebitConfirmed.isValid}
-                        directDebitLogo={this.props.directDebitLogo}
-                    />
-                </dl>
-                <dl className="mma-section__list">
-                    <dt className="mma-section__list--title">Review and confirm</dt>
-                    <dd className="mma-section__list--content">
-                        <div className="u-note prose">
-                            <p>
-                                Our <a href={this.props.privacyPolicyHref} target="_blank">{this.props.privacyPolicyTitle}</a> explains in further detail how we use your information and you can find out why your data matters to us <a href={this.props.whyYourDataMattersToUsHref} target="_blank">here</a>.
+                                handleChange={this.handleEmail} />}
+                        <Payment
+                            showPaymentType={this.props.showPaymentType}
+                            handlePaymentType={this.handlePaymentType}
+                            paymentType={this.state.paymentType}
+                            handleSortCode={this.handleSortCode}
+                            handleAccountNumber={this.handleAccountNumber}
+                            handleAccountHolder={this.handleAccountHolder}
+                            handleDirectDebitConfirmation={this.handleDirectDebitConfirmation}
+                            sortCode={this.state.sortCode.value}
+                            accountNumber={this.state.accountNumber.value}
+                            accountHolder={this.state.accountHolder.value}
+                            directDebitConfirmed={this.state.directDebitConfirmed.value}
+                            validSortCode={!this.state.showValidity || this.state.sortCode.isValid}
+                            validAccountNumber={!this.state.showValidity || this.state.accountNumber.isValid}
+                            validAccountHolder={!this.state.showValidity || this.state.accountHolder.isValid}
+                            validDirectDebitConfirmed={!this.state.showValidity || this.state.directDebitConfirmed.isValid}
+                            directDebitLogo={this.props.directDebitLogo}
+                        />
+                    </dl>
+                    <dl className="mma-section__list">
+                        <dt className="mma-section__list--title">Review and confirm</dt>
+                        <dd className="mma-section__list--content">
+                            <div className="u-note prose">
+                                <p>
+                                    Our <a href={this.props.privacyPolicyHref} target="_blank">{this.props.privacyPolicyTitle}</a> explains in further detail how we use your information and you can find out why your data matters to us <a href={this.props.whyYourDataMattersToUsHref} target="_blank">here</a>.
                             </p>
-                            <p>
-                                By proceeding you agree to the <a href={this.props.weeklyTermsConditionsHref} target="_blank">{this.props.weeklyTermsConditionsTitle}</a> for the Guardian Weekly print subscription services.
+                                <p>
+                                    By proceeding you agree to the <a href={this.props.weeklyTermsConditionsHref} target="_blank">{this.props.weeklyTermsConditionsTitle}</a> for the Guardian Weekly print subscription services.
                             </p>
-                        </div>
-                        <button className="button button--primary" onClick={this.click}>{this.buttonText()}</button>
-                    </dd>
-                </dl>
-            </div>
+                            </div>
+                            <button className="button button--primary" onClick={this.click}>{this.buttonText()}</button>
+                        </dd>
+                    </dl>
+                </div>
             }
 
         </div>
@@ -280,54 +280,54 @@ class EmailField extends React.Component {
                 <label className="label" htmlFor="renew-email">Email address</label>
             </dt>
             <dd className="mma-section__list--content">
-                <input id="renew-email" value={email} onChange={this.props.handleChange} className="input-text"/>
+                <input id="renew-email" value={email} onChange={this.props.handleChange} className="input-text" />
                 {invalid && <p className="mma-error"> Please enter a valid email address</p>}
             </dd>
         </div>
     }
 }
 
-const Payment =({paymentType,handlePaymentType,showPaymentType,...props}) => {
-         
-        return <div>{showPaymentType &&
-        <PaymentType handlePaymentType={handlePaymentType} paymentType={paymentType}/>}
-            {this.props.paymentType === DIRECT_DEBIT &&
-            <DirectDebit {...props}/>}
+const Payment = ({ paymentType, handlePaymentType, showPaymentType, ...props }) => {
+
+    return <div>{showPaymentType &&
+        <PaymentType handlePaymentType={handlePaymentType} paymentType={paymentType} />}
+        {this.props.paymentType === DIRECT_DEBIT &&
+            <DirectDebit {...props} />}
+    </div>
+}
+
+const PaymentType = ({ handlePayment, paymentType }) => <div>
+    <dt className="mma-section__list--title">Payment method</dt>
+    <dd className="mma-section__list--content option__label">
+        <div style={{ boxSizing: 'unset' }}>
+            <RadioGroup onChange={handlePaymentType} value={paymentType} horizontal>
+                <RadioButton value={DIRECT_DEBIT}>Direct Debit</RadioButton>
+                <RadioButton value={STRIPE}>Credit Card</RadioButton>
+            </RadioGroup>
         </div>
-    }
-
-const PaymentType = ({handlePayment, paymentType}) => <div>
-            <dt className="mma-section__list--title">Payment method</dt>
-            <dd className="mma-section__list--content option__label">
-                <div style={{boxSizing:'unset'}}>
-                <RadioGroup onChange={handlePaymentType} value={paymentType} horizontal>
-                    <RadioButton value={DIRECT_DEBIT}>Direct Debit</RadioButton>
-                    <RadioButton value={STRIPE}>Credit Card</RadioButton>
-                </RadioGroup>
-                </div>
-            </dd>
-        </div>
-    
+    </dd>
+</div>
 
 
-const PlanChooser = ({plans, selected, handleChange}) => {
-        let renderedPlans = plans.map((plan) =><RadioButton key={plan.id} value={plan.id}><Plan price={plan.price} promotionalPrice={plan.promotionalPrice} /></RadioButton>);
-        return <div>
-            <dt className="mma-section__list--title">Payment options</dt>
-            <dd className="mma-section__list--content">
+
+const PlanChooser = ({ plans, selected, handleChange }) => {
+    let renderedPlans = plans.map((plan) => <RadioButton key={plan.id} value={plan.id}><Plan price={plan.price} promotionalPrice={plan.promotionalPrice} /></RadioButton>);
+    return <div>
+        <dt className="mma-section__list--title">Payment options</dt>
+        <dd className="mma-section__list--content">
             <RadioGroup value={selected.id} onChange={handleChange}>
                 {renderedPlans}
-                </RadioGroup>
-            </dd>
-        </div>
-    }
+            </RadioGroup>
+        </dd>
+    </div>
+}
 
-const Plan = ({promotionalPrice,price}) => {
-        if (promotionalPrice) {
-            return <span className="option__label">
-                <s>{props.price}</s>
-                <strong>&nbsp;{promotionalPrice}</strong>
-            </span>
-        }
-        return <span className="option__label">{price}</span>
+const Plan = ({ promotionalPrice, price }) => {
+    if (promotionalPrice) {
+        return <span className="option__label">
+            <s>{props.price}</s>
+            <strong>&nbsp;{promotionalPrice}</strong>
+        </span>
+    }
+    return <span className="option__label">{price}</span>
 }
