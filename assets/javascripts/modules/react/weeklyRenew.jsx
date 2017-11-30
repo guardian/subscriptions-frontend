@@ -287,68 +287,41 @@ class EmailField extends React.Component {
     }
 }
 
-class Payment extends React.Component {
-    constructor(props) {
-        super(props);
-    }
-
-    render() {
-        let showPaymentType = this.props.showPaymentType;
+const Payment =({paymentType,handlePaymentType,showPaymentType,...props}) => {
+         
         return <div>{showPaymentType &&
-        <PaymentType handlePaymentType={this.props.handlePaymentType} paymentType={this.props.paymentType}/>}
+        <PaymentType handlePaymentType={handlePaymentType} paymentType={paymentType}/>}
             {this.props.paymentType === DIRECT_DEBIT &&
-            <DirectDebit
-                handleSortCode={this.props.handleSortCode}
-                handleAccountNumber={this.props.handleAccountNumber}
-                handleAccountHolder={this.props.handleAccountHolder}
-                handleDirectDebitConfirmation={this.props.handleDirectDebitConfirmation}
-                sortCode={this.props.sortCode}
-                accountNumber={this.props.accountNumber}
-                accountHolder={this.props.accountHolder}
-                directDebitConfirmed={this.props.directDebitConfirmed}
-                validSortCode={this.props.validSortCode}
-                validAccountNumber={this.props.validAccountNumber}
-                validAccountHolder={this.props.validAccountHolder}
-                validDirectDebitConfirmed={this.props.validDirectDebitConfirmed}
-                directDebitLogo={this.props.directDebitLogo}
-            />}
+            <DirectDebit {...props}/>}
         </div>
     }
-}
 
-class PaymentType extends React.Component {
-
-    constructor(props) {
-        super(props);
-    }
-
-    render() {
-        return <div>
+const PaymentType = ({handlePayment, paymentType}) => <div>
             <dt className="mma-section__list--title">Payment method</dt>
             <dd className="mma-section__list--content option__label">
                 <div style={{boxSizing:'unset'}}>
-                <RadioGroup onChange={this.props.handlePaymentType} value={this.props.paymentType} horizontal>
+                <RadioGroup onChange={handlePaymentType} value={paymentType} horizontal>
                     <RadioButton value={DIRECT_DEBIT}>Direct Debit</RadioButton>
                     <RadioButton value={STRIPE}>Credit Card</RadioButton>
                 </RadioGroup>
                 </div>
             </dd>
         </div>
-    }
-}
+    
+
 
 const PlanChooser = ({plans, selected, handleChange}) => {
-        let plans = plans.map((plan) =><RadioButton key={plan.id} value={plan.id}><Plan price={plan.price} promotionalPrice={plan.promotionalPrice} /></RadioButton>);
+        let renderedPlans = plans.map((plan) =><RadioButton key={plan.id} value={plan.id}><Plan price={plan.price} promotionalPrice={plan.promotionalPrice} /></RadioButton>);
         return <div>
             <dt className="mma-section__list--title">Payment options</dt>
             <dd className="mma-section__list--content">
             <RadioGroup value={selected.id} onChange={handleChange}>
-                {plans}
+                {renderedPlans}
                 </RadioGroup>
             </dd>
         </div>
     }
-}
+
 const Plan = ({promotionalPrice,price}) => {
         if (promotionalPrice) {
             return <span className="option__label">
