@@ -1,5 +1,5 @@
 {
-  "name": "Subscriptions Stylesheets",
+  "name": "subscriptions-stylesheets",
   "dependencies": {
     "guss-colours": "~3.0",
     "guss-grid-system": "~1.2",

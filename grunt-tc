@@ -1,14 +1,30 @@
 #!/bin/bash
-NODE_VERSION="6.2.1"
+NODE_VERSION="8.9.1"
 
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
 
+nvm install ${NODE_VERSION}
 nvm use ${NODE_VERSION}
 
 set -o xtrace
 set -o nounset
 set -o errexit
+
+# Installing yarn
+YARN_VERSION="1.3.2"
+YARN_LOCATION="tools/${YARN_VERSION}"
+
+if [ ! -d "$YARN_LOCATION" ]; then
+        mkdir -p ${YARN_LOCATION}
+        cd ${YARN_LOCATION}/
+        wget -qO- https://github.com/yarnpkg/yarn/releases/download/v${YARN_VERSION}/yarn-v${YARN_VERSION}.tar.gz | tar zvx
+        cd ../..
+fi
+PATH="$PATH:${YARN_LOCATION}/yarn-v${YARN_VERSION}/bin/"
+yarn
+
+
 
 ################################################################################
 #
@@ -19,8 +35,6 @@ set -o errexit
 JS_DIR=assets/javascripts
 SCSS_DIR=assets/stylesheets
 
-npm install
-
 pushd $JS_DIR
 ../../node_modules/bower/bin/bower install
 popd
@@ -29,4 +43,4 @@ pushd $SCSS_DIR
 ../../node_modules/bower/bin/bower install
 popd
 
-grunt "$@"
+yarn run "$@"

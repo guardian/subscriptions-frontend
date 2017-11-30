@@ -1,5 +1,5 @@
 {
-  "name": "Subscriptions JavaScript",
+  "name": "subscriptions-javascript",
   "dependencies": {
     "bean": "~1.0.6",
     "bonzo": "~2.0.0",
