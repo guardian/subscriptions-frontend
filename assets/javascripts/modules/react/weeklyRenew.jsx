@@ -343,7 +343,7 @@ class PlanChooser extends React.Component {
         return <div>
             <dt className="mma-section__list--title">Payment options</dt>
             <dd className="mma-section__list--content">
-            <RadioGroup onChange={this.props.handleChange}>
+            <RadioGroup value={this.props.selected.id} onChange={this.props.handleChange}>
                 {plans}
                 </RadioGroup>
             </dd>
