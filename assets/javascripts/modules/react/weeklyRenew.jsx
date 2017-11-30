@@ -337,13 +337,12 @@ class PaymentType extends React.Component {
     }
 }
 
-class PlanChooser extends React.Component {
-    render() {
-        let plans = this.props.plans.map((plan) =><RadioButton key={plan.id} value={plan.id}><Plan price={plan.price} promotionalPrice={plan.promotionalPrice} /></RadioButton>);
+const PlanChooser = ({plans, selected, handleChange}) => {
+        let plans = plans.map((plan) =><RadioButton key={plan.id} value={plan.id}><Plan price={plan.price} promotionalPrice={plan.promotionalPrice} /></RadioButton>);
         return <div>
             <dt className="mma-section__list--title">Payment options</dt>
             <dd className="mma-section__list--content">
-            <RadioGroup value={this.props.selected.id} onChange={this.props.handleChange}>
+            <RadioGroup value={selected.id} onChange={handleChange}>
                 {plans}
                 </RadioGroup>
             </dd>
