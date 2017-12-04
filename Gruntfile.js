@@ -112,29 +112,14 @@ module.exports = function(grunt) {
             }
         },
 
-        px_to_rem: {
-            dist: {
-                options: {
-                    map: isDev,
-                    base: 16,
-                    fallback: false,
-                    max_decimals: 5
-                },
-                files: [{
-                    expand: true,
-                    cwd: '<%= dirs.public.stylesheets %>',
-                    src: ['*.css', '!ie-old*'],
-                    dest: '<%= dirs.public.stylesheets %>'
-                }]
-            }
-        },
 
         postcss: {
             options: {
                 map: isDev ? true : false,
                 processors: [
-                    require('autoprefixer-core')({browsers: ['> 5%', 'last 2 versions']}),
-                    require('postcss-object-fit-images')
+                    require('autoprefixer'),
+                    require('postcss-object-fit-images'),
+                    require('postcss-pxtorem')
                 ]
             },
             dist: { src: '<%= dirs.public.stylesheets %>/*.css' }
@@ -256,7 +241,7 @@ module.exports = function(grunt) {
     grunt.registerTask('validate', ['eslint']);
 
     grunt.registerTask('build:images', ['svgSprite', 'copy:images']);
-    grunt.registerTask('build:css', ['sass', 'px_to_rem', 'postcss']);
+    grunt.registerTask('build:css', ['sass', 'postcss']);
     grunt.registerTask('build:js', function(){
         if (!isDev) {
             grunt.task.run(['validate']);

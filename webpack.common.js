@@ -42,11 +42,7 @@ const path = require('path');
                 loader: 'babel-loader',
                 query: {
                     "presets": [
-                        ["env", {
-                            "targets": {
-                                "browsers": ["last 2 versions", "safari >= 7"]
-                            }
-                        }]
+                        ["env"]
                     ],
                     cacheDirectory: '',
                     plugins: ["transform-object-rest-spread","transform-flow-strip-types", ["transform-runtime", {
@@ -63,11 +59,7 @@ const path = require('path');
                 exclude: /node_modules/,
                 loader: 'babel-loader',
                 query: {
-                    presets:  [["env", {
-                        "targets": {
-                            "browsers": ["last 2 versions", "safari >= 7"]
-                        }
-                    }], 'react'],
+                    presets:  ["env", 'react'],
                     cacheDirectory: '',
                     plugins: ["transform-object-rest-spread","transform-flow-strip-types", ["transform-runtime", {
                         "helpers": false,
