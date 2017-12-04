@@ -39,7 +39,7 @@ export function DirectDebit(props: {
                         amount will be sent to you within three working days. All the normal Direct Debit safeguards and
                         guarantees apply.</p>
                 <p>
-                    Your payments are protected by the <a target="_blank" href="https://www.directdebit.co.uk/DirectDebitExplained/pages/directdebitguarantee.aspx">Direct Debit guarantee</a>.
+                    Your payments are protected by the <a target="_blank" rel="noopener noreferrer" href="https://www.directdebit.co.uk/DirectDebitExplained/pages/directdebitguarantee.aspx">Direct Debit guarantee</a>.
                 </p>
                 <div>
                     <div>The Guardian, Unit 16, Coalfield Way, Ashby Park, Ashby-De-La-Zouch, LE65 1JT United Kingdom</div>

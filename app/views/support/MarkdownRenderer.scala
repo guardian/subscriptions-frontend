@@ -11,7 +11,7 @@ trait MarkdownRenderer {
 object PegdownMarkdownRenderer extends MarkdownRenderer {
 
   val linkRenderer = new LinkRenderer {
-    def addAttrs(in: Rendering): Rendering = in.withAttribute("class", "u-link").withAttribute("target", "_blank")
+    def addAttrs(in: Rendering): Rendering = in.withAttribute("class", "u-link").withAttribute("target", "_blank").withAttribute("rel","noopener noreferrer")
     override def render(node: ExpLinkNode, text: String): LinkRenderer.Rendering = addAttrs(super.render(node, text))
     override def render(node: AnchorLinkNode): LinkRenderer.Rendering = addAttrs(super.render(node))
     override def render(node: MailLinkNode): LinkRenderer.Rendering = addAttrs(super.render(node))

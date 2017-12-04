@@ -228,6 +228,8 @@ module.exports = function(grunt) {
                         'utils/**/*.js',                        
                         'modules/**/*.es6',
                         'utils/**/*.es6',
+                        'modules/**/*.jsx',
+                        'utils/**/*.jsx',
                         'main.js'
                     ]
                 }]

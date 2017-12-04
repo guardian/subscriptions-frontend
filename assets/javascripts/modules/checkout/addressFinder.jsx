@@ -5,8 +5,10 @@ import formEls from './formElements';
 import ChooseAddress from '../react/addressChooser';
 
 function showNothingFound(addressSection) {
-    var component = ReactDOM.render(<ChooseAddress addressSection={addressSection} />, addressSection.$ADDRESS_CHOOSER[0]);
-    component.setState(component.getInitialState());
+    ReactDOM.render(
+    <ChooseAddress addressSection={addressSection} />,
+    addressSection.$ADDRESS_CHOOSER[0],
+    (component) => component.setState(component.getInitialState()));
 }
 
 function fillInChooseAddressBox(addressSection, addresses) {
@@ -20,11 +22,10 @@ function fillInChooseAddressBox(addressSection, addresses) {
             name: addresses[i].replace(/[, ]+/g, ', ')
         });
     }
-    var component = ReactDOM.render(<ChooseAddress addressSection={addressSection} />, addressSection.$ADDRESS_CHOOSER[0]);
-    component.setState({
+    ReactDOM.render(<ChooseAddress addressSection={addressSection} />, addressSection.$ADDRESS_CHOOSER[0], component => component.setState({
         value: '-1',
         options: options
-    });
+    }));
 }
 
 function getSantitisedPostcode(addressSection) {

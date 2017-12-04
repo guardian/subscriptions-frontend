@@ -1,10 +1,10 @@
 import React from 'react'
 
 export const status = {
-    VALID:"VALID",
-    INVALID:"INVALID",
-    NOTCHECKED:"NOTCHECKED",
-    LOADING:"LOADING"
+    VALID:'VALID',
+    INVALID:'INVALID',
+    NOTCHECKED:'NOTCHECKED',
+    LOADING:'LOADING'
 };
 
 export class PromoCode extends React.Component {

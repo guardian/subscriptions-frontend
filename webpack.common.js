@@ -45,7 +45,7 @@ const path = require('path');
                         ["env"]
                     ],
                     cacheDirectory: '',
-                    plugins: ["transform-object-rest-spread","transform-flow-strip-types", ["transform-runtime", {
+                    plugins: ["transform-class-properties","transform-object-rest-spread","transform-flow-strip-types", ["transform-runtime", {
                         "helpers": false,
                         "polyfill": false,
                         "regenerator": true,
@@ -61,7 +61,7 @@ const path = require('path');
                 query: {
                     presets:  ["env", 'react'],
                     cacheDirectory: '',
-                    plugins: ["transform-object-rest-spread","transform-flow-strip-types", ["transform-runtime", {
+                    plugins: ["transform-class-properties","transform-object-rest-spread","transform-flow-strip-types", ["transform-runtime", {
                         "helpers": false,
                         "polyfill": false,
                         "regenerator": true,

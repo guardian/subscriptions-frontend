@@ -16,7 +16,7 @@ const CUTOFF_WEEKDAY = 3;
 const CUTOFF_HOUR = 6;
 
 const NORMAL_DELIVERY_DELAY = 3;
-const EXTRA_DELIVERY_DELAY  = 4;
+const EXTRA_DELIVERY_DELAY = 4;
 
 
 function getFirstSelectableDate(filterFn) {
@@ -50,39 +50,40 @@ function getDefaultProps() {
 }
 
 export default {
-    renderDatePicker (container, defaultState) {
-        if (!(container && defaultState)) return;
+    renderDatePicker(container, defaultState, curriedCalback) {
+        if (!(container && defaultState)) { return; }
 
-        return ReactDOM.render(
+        ReactDOM.render(
             <CustomDatePicker name="startDate" className="input-text" dateFormat="dddd D MMMM YYYY" locale="en-gb"
-                              minDate={defaultState.minDate} maxDate={defaultState.maxDate } filterDate={defaultState.filterDate} />,
-            container
+                minDate={defaultState.minDate} maxDate={defaultState.maxDate} filterDate={defaultState.filterDate} />,
+            container,
+            curriedCalback(container)
         );
     },
-    registerRatePlanChangeEvent (datePickerContainer, datePickerComponent) {
-        if (!(datePickerContainer && datePickerComponent)) return; // don't register handlers if no component to update
 
-        const self = this;
-
-        ratePlanChoice.registerOnChangeAction(() => {
-
-            // Reset the startDate (i.e. date of first paper) to the new minDate
-            // iff the current selection is not in the new filter
-            const defaultState = getDefaultProps();
-            if (!defaultState.filterDate(datePickerComponent.state.startDate)) {
-                datePickerComponent.handleChange(defaultState.minDate);
-                reviewDetails.repopulateDetails();
-            }
-
-            self.renderDatePicker(datePickerContainer, defaultState);
-        });
-    },
-    init: function() {
-
-        const datePickerContainer = document.getElementById(formElements.VOUCHER_CHECKOUT_DATE_PICKER_ID);
-        const datePickerComponent = this.renderDatePicker(datePickerContainer, getDefaultProps());
-
+    init: function () {
         // if the chosen rate plan changes, we need to reset the state in the datePickerComponent
-        this.registerRatePlanChangeEvent(datePickerContainer, datePickerComponent);
+        const registerRatePlanChangeEvent = datePickerContainer => datePickerComponent => {
+            if (!(datePickerContainer && datePickerComponent)) { return; } // don't register handlers if no component to update
+
+            const self = this;
+
+            ratePlanChoice.registerOnChangeAction(() => {
+
+                // Reset the startDate (i.e. date of first paper) to the new minDate
+                // iff the current selection is not in the new filter
+                const defaultState = getDefaultProps();
+                if (!defaultState.filterDate(datePickerComponent.state.startDate)) {
+                    datePickerComponent.handleChange(defaultState.minDate);
+                    reviewDetails.repopulateDetails();
+                }
+
+                self.renderDatePicker(datePickerContainer, defaultState);
+            });
+        };
+        const datePickerContainer = document.getElementById(formElements.VOUCHER_CHECKOUT_DATE_PICKER_ID);
+        this.renderDatePicker(datePickerContainer, getDefaultProps(), registerRatePlanChangeEvent);
+
+
     }
 }
