@@ -30,7 +30,7 @@ export function init() {
             return e !== element
         });
         let children = [...document.querySelectorAll('.js-dropdown-' + element.dataset.dropdownMenu)];
-        element.addEventListener('click', (event) => {
+        element.addEventListener('click', () => {
             if (element.classList.contains(SHOW_CLASS)) {
                 element.classList.remove(SHOW_CLASS);
                 otherElements.map(show);

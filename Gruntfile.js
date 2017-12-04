@@ -1,6 +1,5 @@
 module.exports = function(grunt) {
     'use strict';
-
     require('time-grunt')(grunt);
 
     /**
@@ -14,6 +13,9 @@ module.exports = function(grunt) {
      * Load all grunt-* tasks
      */
     require('load-grunt-tasks')(grunt);
+
+    //load path for absolute paths
+    var path = require('path');
 
     if (isDev) {
         grunt.log.subhead('Running Grunt in DEV mode');
@@ -110,29 +112,14 @@ module.exports = function(grunt) {
             }
         },
 
-        px_to_rem: {
-            dist: {
-                options: {
-                    map: isDev,
-                    base: 16,
-                    fallback: false,
-                    max_decimals: 5
-                },
-                files: [{
-                    expand: true,
-                    cwd: '<%= dirs.public.stylesheets %>',
-                    src: ['*.css', '!ie-old*'],
-                    dest: '<%= dirs.public.stylesheets %>'
-                }]
-            }
-        },
 
         postcss: {
             options: {
                 map: isDev ? true : false,
                 processors: [
-                    require('autoprefixer-core')({browsers: ['> 5%', 'last 2 versions']}),
-                    require('postcss-object-fit-images')
+                    require('autoprefixer'),
+                    require('postcss-object-fit-images'),
+                    require('postcss-pxtorem')
                 ]
             },
             dist: { src: '<%= dirs.public.stylesheets %>/*.css' }
@@ -143,19 +130,7 @@ module.exports = function(grunt) {
          ***********************************************************************/
 
         webpack: {
-            options: require('./webpack.conf.js')(isDev),
-            frontend: {
-                output: {
-                    path: 'public/',
-                    chunkFilename:  'webpack/[chunkhash].js',
-                    filename: "javascripts/[name].min.js",
-                    publicPath: '/assets/'
-                },
-
-                entry: {
-                    main: "./main"
-                }
-            }
+            frontend: require('./webpack.dev.js')
         },
 
         /***********************************************************************
@@ -249,7 +224,9 @@ module.exports = function(grunt) {
                     cwd: '<%= dirs.assets.javascripts %>/',
                     src: [
                         'modules/**/*.js',
-                        'utils/**/*.js',
+                        'utils/**/*.js',                        
+                        'modules/**/*.es6',
+                        'utils/**/*.es6',
                         'main.js'
                     ]
                 }]
@@ -266,7 +243,7 @@ module.exports = function(grunt) {
     grunt.registerTask('validate', ['eslint']);
 
     grunt.registerTask('build:images', ['svgSprite', 'copy:images']);
-    grunt.registerTask('build:css', ['sass', 'px_to_rem', 'postcss']);
+    grunt.registerTask('build:css', ['sass', 'postcss']);
     grunt.registerTask('build:js', function(){
         if (!isDev) {
             grunt.task.run(['validate']);

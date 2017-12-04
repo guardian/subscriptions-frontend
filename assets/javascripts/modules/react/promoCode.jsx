@@ -11,7 +11,7 @@ export class PromoCode extends React.Component {
 render(){
     return <div>
         <dt className="mma-section__list--title">
-            <label className="label" for="promoCode">Promo code</label>
+            <label className="label" htmlFor="promoCode">Promo code</label>
         </dt>
         <dd className="mma-section__list--content">
             <PromoField value={this.props.value} handler={this.props.handler} />

@@ -3,7 +3,7 @@ module.exports = function(config) {
 
         // base path that will be used to resolve all patterns (eg. files, exclude)
         basePath: '',
-        
+
         // frameworks to use
         // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
         frameworks: ['jasmine'],
@@ -19,14 +19,14 @@ module.exports = function(config) {
         exclude: [
             'assets/javascripts/src/main.js'
         ],
-        
+
         // preprocess matching files before serving them to the browser
         // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
         preprocessors: {
             'test/js/spec/**/*.js': ['webpack', 'coverage']
         },
 
-        webpack: require('./webpack.conf.js')(true),
+        webpack: require('./webpack.dev.js'),
 
 
         coverageReporter: {

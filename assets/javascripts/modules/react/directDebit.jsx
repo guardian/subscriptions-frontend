@@ -56,7 +56,7 @@ function SortCodeComponent(props: {valid:boolean,value:string,onChange:Function}
     let invalid = props.valid === false;
     return <div>
         <dt className="mma-section__list--title">
-            <label className="label" for="payment-sortcode">Sort code</label>
+            <label className="label" htmlFor="payment-sortcode">Sort code</label>
         </dt>
         <dd className="mma-section__list--content">
             <input value={props.value} onChange={props.onChange}
@@ -76,7 +76,7 @@ function AccountNumber(props: {valid: boolean, onChange: Function, value: string
     let invalid = props.valid === false;
     return <div>
         <dt className="mma-section__list--title">
-            <label className="label" for="payment-account">Account number</label>
+            <label className="label" htmlFor="payment-account">Account number</label>
         </dt>
         <dd className="mma-section__list--content">
             <input value={props.value}
@@ -107,7 +107,7 @@ function AccountHolder(props: {valid:boolean,value:string,onChange:Function}) {
 
     return <div>
         <dt className="mma-section__list--title">
-            <label for="payment-holder">Account holder</label>
+            <label htmlFor="payment-holder">Account holder</label>
         </dt>
         <dd className="mma-section__list--content">
             <input

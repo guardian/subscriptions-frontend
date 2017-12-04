@@ -1,18 +1,24 @@
-var Uglify = require("webpack/lib/optimize/UglifyJsPlugin");
+const webpack = require("webpack");
 
-var webpack = require("webpack");
-
-var path = require('path');
-
-module.exports = function(debug) { return {
+const path = require('path');
+ module.exports = /* function(debug) { return */{
+    entry: {
+        main: "./main"
+    },
+    output: {
+        path: path.resolve('public/'),
+        chunkFilename:  'webpack/[chunkhash].js',
+        filename: "javascripts/[name].min.js",
+        publicPath: '/assets/'
+    },
     resolve: {
-        root: [
-          path.join(__dirname, "node_modules"),
-          path.join(__dirname, "assets", "javascripts"),
-          path.join(__dirname, "assets", "..", "node_modules"),
-          path.join(__dirname, "test")
+        modules: [
+          path.resolve(__dirname, "node_modules"),
+          path.resolve(__dirname, "assets", "javascripts"),
+          path.resolve(__dirname, "assets", "..", "node_modules"),
+          path.resolve(__dirname, "test")
         ],
-        extensions: ["", ".js", ".es6", '.jsx'],
+        extensions: [".js", ".es6", '.jsx'],
         alias: {
             '$$': 'utils/$',
             'lodash': 'lodash-amd/modern',
@@ -33,17 +39,13 @@ module.exports = function(debug) { return {
             {
                 test: /\.es6$/,
                 exclude: /node_modules/,
-                loader: 'babel',
+                loader: 'babel-loader',
                 query: {
                     "presets": [
-                        ["env", {
-                            "targets": {
-                                "browsers": ["last 2 versions", "safari >= 7"]
-                            }
-                        }]
+                        ["env"]
                     ],
                     cacheDirectory: '',
-                    plugins: ["transform-flow-strip-types", ["transform-runtime", {
+                    plugins: ["transform-object-rest-spread","transform-flow-strip-types", ["transform-runtime", {
                         "helpers": false,
                         "polyfill": false,
                         "regenerator": true,
@@ -57,13 +59,9 @@ module.exports = function(debug) { return {
                 exclude: /node_modules/,
                 loader: 'babel-loader',
                 query: {
-                    presets:  [["env", {
-                        "targets": {
-                            "browsers": ["last 2 versions", "safari >= 7"]
-                        }
-                    }], 'react'],
+                    presets:  ["env", 'react'],
                     cacheDirectory: '',
-                    plugins: ["transform-flow-strip-types", ["transform-runtime", {
+                    plugins: ["transform-object-rest-spread","transform-flow-strip-types", ["transform-runtime", {
                         "helpers": false,
                         "polyfill": false,
                         "regenerator": true,
@@ -78,21 +76,7 @@ module.exports = function(debug) { return {
         ]
     },
 
-    plugins: !debug ? [
-        new webpack.DefinePlugin({
-            'process.env':{
-                'NODE_ENV': JSON.stringify('production')
-            }
-        }),
-        new Uglify({compress: {warnings: false}})
-    ] : [],
-
-    progress: true,
-    failOnError: true,
-    watch: false,
-    keepalive: false,
-    inline: true,
-    hot: false,
+          watch: false,
 
     stats: {
         modules: true,
@@ -101,6 +85,5 @@ module.exports = function(debug) { return {
     },
 
     context: path.join(__dirname, 'assets', 'javascripts'),
-    debug: true,
     devtool: 'source-map'
-}};
+}/*}*/;
