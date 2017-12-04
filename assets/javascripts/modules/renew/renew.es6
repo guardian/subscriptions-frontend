@@ -1,6 +1,6 @@
 // @flow
 import ajax from 'ajax';
-import {check} from '../promoCode';
+import { Raven } from 'modules/raven';
 
 let stripeHandler = null;
 
@@ -26,11 +26,11 @@ export function validAccount(accountNumber) {
 }
 
 export function validEmail(email) {
-    return /.\@./.test(email);
+    return /.@./.test(email);
 }
 
-export const STRIPE = "STRIPE";
-export const DIRECT_DEBIT = "DIRECTDEBIT";
+export const STRIPE = 'STRIPE';
+export const DIRECT_DEBIT = 'DIRECTDEBIT';
 
 export function validState(state) {
     if (!state.email.isValid) {
@@ -93,6 +93,7 @@ export function send(state, errorHandler) {
         }).then((response) => {
             window.location.assign(response.redirect);
         }).catch((r) => {
+            Raven.captureException(r);
             errorHandler(renewErrorMessage);
         });
     };

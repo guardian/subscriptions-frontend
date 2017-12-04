@@ -224,7 +224,9 @@ module.exports = function(grunt) {
                     cwd: '<%= dirs.assets.javascripts %>/',
                     src: [
                         'modules/**/*.js',
-                        'utils/**/*.js',
+                        'utils/**/*.js',                        
+                        'modules/**/*.es6',
+                        'utils/**/*.es6',
                         'main.js'
                     ]
                 }]
