@@ -292,7 +292,8 @@ const Payment = ({ paymentType, handlePaymentType, showPaymentType, ...props }) 
     return <div>{showPaymentType &&
         <PaymentType handlePaymentType={handlePaymentType} paymentType={paymentType} />}
         {paymentType === DIRECT_DEBIT &&
-            <DirectDebit {...props} />}
+            <DirectDebit {...props} />
+        }
     </div>
 }
 
