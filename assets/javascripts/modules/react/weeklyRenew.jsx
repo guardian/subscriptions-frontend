@@ -326,7 +326,7 @@ const PlanChooser = ({ plans, selected, handleChange }) => {
 const Plan = ({ promotionalPrice, price }) => {
     if (promotionalPrice) {
         return <span className="option__label">
-            <s>{props.price}</s>
+            <s>{price}</s>
             <strong>&nbsp;{promotionalPrice}</strong>
         </span>
     }
