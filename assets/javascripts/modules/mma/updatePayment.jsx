@@ -46,7 +46,7 @@ const SUCCESS = 'success'
 const FAILURE = 'failure'
 const FORM = 'form'
 
-const CardUpdate = ({ card, handler }) => (<div><button className="button button--primary button--large" onClick={handler}>•••• •••• •••• {card.last4} Update Card</button></div>)
+const CardUpdate = ({ card, handler }) => (<div><button className="button button--primary button--large" onClick={handler}>•••• •••• •••• {card && card.last4 || "••••"} Update Card</button></div>)
 const Success = () => (<p>Thank you, we have successfully updated your payment details.</p>)
 const Failure = ({ phone }) => <p>Unfortunately, we are unable to update your payment details at this time, please contact the call centre. {phone}</p>
 

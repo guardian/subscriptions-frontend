@@ -291,12 +291,13 @@ const Payment = ({ paymentType, handlePaymentType, showPaymentType, ...props }) 
 
     return <div>{showPaymentType &&
         <PaymentType handlePaymentType={handlePaymentType} paymentType={paymentType} />}
-        {this.props.paymentType === DIRECT_DEBIT &&
-            <DirectDebit {...props} />}
+        {paymentType === DIRECT_DEBIT &&
+            <DirectDebit {...props} />
+        }
     </div>
 }
 
-const PaymentType = ({ handlePayment, paymentType }) => <div>
+const PaymentType = ({ handlePaymentType, paymentType }) => <div>
     <dt className="mma-section__list--title">Payment method</dt>
     <dd className="mma-section__list--content option__label">
         <div style={{ boxSizing: 'unset' }}>
