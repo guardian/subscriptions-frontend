@@ -296,7 +296,7 @@ const Payment = ({ paymentType, handlePaymentType, showPaymentType, ...props }) 
     </div>
 }
 
-const PaymentType = ({ handlePayment, paymentType }) => <div>
+const PaymentType = ({ handlePaymentType, paymentType }) => <div>
     <dt className="mma-section__list--title">Payment method</dt>
     <dd className="mma-section__list--content option__label">
         <div style={{ boxSizing: 'unset' }}>
