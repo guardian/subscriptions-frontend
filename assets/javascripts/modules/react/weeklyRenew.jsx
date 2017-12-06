@@ -178,12 +178,10 @@ class WeeklyRenew extends React.Component {
     }
 
     handlePlan(id) {
-        this.setState({ plan: id, displayedPrice: this.getPrice(id) });
+        this.setState({ plan: id, displayedPrice: this.getPrice(this.state.plans.find(p => p.id == id)) });
     }
 
-    getPrice(idOrPlan) {
-        let id = idOrPlan.id || idOrPlan;
-        let plan = this.state.plans.find(p => p.id == id)
+    getPrice(plan) {
         return plan.promotionalPrice || plan.price;
     }
 
