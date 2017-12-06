@@ -35,7 +35,7 @@ trait OAuthActions extends googleauth.Actions with googleauth.Filters with Commo
   ))
 
   val StaffAuthorisedForCASAction = GoogleAuthenticatedStaffAction andThen requireGroup[GoogleAuthRequest](Set(
-    "customer.experience@guardian.co.uk",
+    "customer.operations@guardian.co.uk",
     "directteam@guardian.co.uk",
     "userhelp@guardian.co.uk",
     "dig.qa@guardian.co.uk",
