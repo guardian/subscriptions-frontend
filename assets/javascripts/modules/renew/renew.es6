@@ -103,7 +103,6 @@ export function send(state, errorHandler) {
                     //We got a 200, and then couldn't parse the JSON.
                     //The renewal probably worked, and we should not really be in this branch.
                     errorHandler(renewNetworkErrorMessage)
-
                 })
                 return;
             }
