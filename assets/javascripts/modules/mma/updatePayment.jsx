@@ -64,7 +64,7 @@ class Payment extends React.Component {
 
         const token = (t) => {
             this.setState({ state: WAITING })
-            handleStripeResponse(t, cardUrl, this.state.stripePublicKeyForUpdate).then(json => {
+            handleStripeResponse(t, cardUrl, this.state.card.stripePublicKeyForUpdate).then(json => {
                 this.setState({ state: SUCCESS })
             })
                 .catch((e) => {
