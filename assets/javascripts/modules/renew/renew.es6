@@ -94,7 +94,6 @@ export function send(state, errorHandler) {
         })
         fetch(request).then((response) => {
             if (response.status == 200) {
-                console.log(response)
                 response.json().then((json) => {
                     window.location.assign(json.redirect);
                 }).catch((e) => {
