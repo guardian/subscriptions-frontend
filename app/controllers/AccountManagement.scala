@@ -68,7 +68,7 @@ object SessionSubscription extends StrictLogging {
         d.leftMap(e => logger.warn(s"Error looking up SF Contact for logged in user with Identity ID ${identityUser.user.id}: $e")).toOption.flatten
       })
       zuoraSubscription <- OptionT(tpBackend.subscriptionService.current[ContentSubscription](salesForceUser).map{subs =>
-        if (subs.length > 1) logger.warn("User with multiple subscriptions, only serving first.")
+        if (subs.length > 1) logger.warn(s"Logged in user with Identity ID ${identityUser.user.id}: with ${subs.length} subscriptions, only serving first.")
         subs.headOption
         /*FIXME if they have more than one they can only manage the first*/})
     } yield zuoraSubscription).run
