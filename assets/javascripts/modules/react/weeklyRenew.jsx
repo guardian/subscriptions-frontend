@@ -206,7 +206,7 @@ class WeeklyRenew extends React.Component {
     render() {
         return <div>
             {this.state.loading && <div className="loader is-loading"> Processing</div>}
-            {this.state.error && <div className="mma-error"> {this.state.error}</div>}
+            {this.state.error && <div className="mma-error"><h3 className="mma-section__header">{this.state.error.title}</h3><p> {this.state.error.body}</p></div>}
             {!this.state.loading && !this.state.error &&
                 <div>
 

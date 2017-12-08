@@ -19,10 +19,9 @@ export class SortCode {
 
 }
 
-let renewErrorMessage = 'Sorry, your subscription could not be renewed. Please contact us at gwsubs@theguardian.com or call +44 (0) 330 333 6767. Lines open weekdays 8am-8pm, weekend 8pm-6pm';
+let renewErrorMessage = {title:'Sorry', body:'Your subscription could not be renewed. Please contact us at gwsubs@theguardian.com or call +44 (0) 330 333 6767. Lines open weekdays 8am-8pm, weekend 8pm-6pm'};
 
-let renewNetworkErrorMessage = `A response was not received when attempting to renew your subscription. Please refresh this page and try again. If you have seen this error before: please contact us at gwsubs@theguardian.com or call +44 (0) 330 333 6767. Lines open weekdays 8am-8pm, weekend 8pm-6pm
-`
+let renewNetworkErrorMessage = {title:'Connection Error', body:'Please refresh the page to see the current status of your subscription. Alternatively, please contact us at gwsubs@theguardian.com or call +44 (0) 330 333 6767. Lines open weekdays 8am-8pm, weekend 8pm-6pm'};
 
 export function validAccount(accountNumber) {
     return /^\d{6,10}$/.test(accountNumber);
