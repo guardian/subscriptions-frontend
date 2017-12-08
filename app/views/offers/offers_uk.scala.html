@@ -1,6 +1,6 @@
 @import model.DigitalEdition.UK
+@import model.promoCodes.PromoCodes
 @import views.support.DigitalEdition._
-@import services.BlackFriday
 @()
 
 @main(
@@ -10,7 +10,7 @@
 
     <main class="page-container gs-container">
         @fragments.page.header("Subscription offers")
-        @fragments.productLists.productListUk(BlackFriday.offersPromoCodes)
+        @fragments.productLists.productListUk(PromoCodes.offers)
         <div class="row row--items-1">
             <div class="row__item block block--primary block--weekly">
                 <h2 class="block__title">Subscribe to the Guardian Weekly</h2>
