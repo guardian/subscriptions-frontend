@@ -1,7 +1,6 @@
 @import model.DigitalEdition
+@import model.promoCodes.PromoCodes
 @import views.support.DigitalEdition._
-
-@import services.BlackFriday
 @(edition: DigitalEdition)
 
 @main(s"${edition.name} | Subscriptions and Membership | The Guardian",
@@ -10,7 +9,7 @@
 
 <main class="page-container gs-container">
     @fragments.page.header("Subscriptions and Membership", Some("Select your preferred package"))
-    @fragments.productLists.productListInternational(edition, BlackFriday.homePromoCodes(edition), includeEditionInUrl = true)
+    @fragments.productLists.productListInternational(edition, PromoCodes.home(edition), includeEditionInUrl = true)
     <div class="row row--items-1">
         <div class="row__item">
             @fragments.promos.members(edition.id, edition.membershipLandingPage)
