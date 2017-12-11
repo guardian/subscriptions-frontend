@@ -1,5 +1,4 @@
 // @flow
-import ajax from 'ajax';
 import { Raven } from 'modules/raven';
 
 let stripeHandler = null;
@@ -19,7 +18,10 @@ export class SortCode {
 
 
 }
-let renewErrorMessage = 'Sorry, your subscription could not be renewed. Please contact us at gwsubs@theguardian.com or call +44 (0) 330 333 6767. Lines open weekdays 8am-8pm, weekend 8pm-6pm';
+
+let renewErrorMessage = {title:'Sorry', body:'Your subscription could not be renewed. Please contact us at gwsubs@theguardian.com or call +44 (0) 330 333 6767. Lines open weekdays 8am-8pm, weekend 8pm-6pm'};
+
+let renewNetworkErrorMessage = {title:'Connection Error', body:'Please refresh the page to see the current status of your subscription. Alternatively, please contact us at gwsubs@theguardian.com or call +44 (0) 330 333 6767. Lines open weekdays 8am-8pm, weekend 8pm-6pm'};
 
 export function validAccount(accountNumber) {
     return /^\d{6,10}$/.test(accountNumber);
@@ -81,20 +83,37 @@ export function send(state, errorHandler) {
         if(promoCode){
             payload.promoCode = promoCode;
         }
-            ajax({
-            type: 'json',
+        let request = new Request('/manage/renew', { 
             method: 'POST',
-            url: '/manage/renew',
-            headers: {
-                'Csrf-Token': document.querySelector('input[name="csrfToken"]').getAttribute('value')
-            },
-            contentType: 'application/json',
-            data: JSON.stringify(payload)
-        }).then((response) => {
-            window.location.assign(response.redirect);
+            body: JSON.stringify(payload),
+            headers: new Headers({
+                'Csrf-Token': document.querySelector('input[name="csrfToken"]').getAttribute('value'),
+                'Content-Type':  'application/json'
+            }),
+            credentials: 'include'
+        })
+        fetch(request).then((response) => {
+            if (response.status == 200) {
+                response.json().then((json) => {
+                    window.location.assign(json.redirect);
+                }).catch((e) => {
+                    Raven.captureException(e)
+                    //We got a 200, and then couldn't parse the JSON.
+                    //The renewal probably worked, and we should not really be in this branch.
+                    errorHandler(renewNetworkErrorMessage)
+                })
+                return;
+            }
+            Raven.captureException(`Renewal failed with status code ${response.status}`);
+            if (response.status == 500 || response.status == 400) {
+                errorHandler(renewErrorMessage);
+                return;
+            }
+            errorHandler(renewNetworkErrorMessage)
+            return;
         }).catch((r) => {
             Raven.captureException(r);
-            errorHandler(renewErrorMessage);
+            errorHandler(renewNetworkErrorMessage);
         });
     };
     if (state.paymentType === STRIPE) {
