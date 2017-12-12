@@ -49,3 +49,32 @@
     padding-bottom: 0;
   }
 }
+
+.button--primary {
+  background-color: #f8f8f8;
+  color: guss-colour(neutral-1);
+  border-color: guss-colour(neutral-1);
+
+  &:hover {
+    background-color: guss-colour(neutral-1);
+    color: #fff;
+
+    &:after {
+      background-image: svg-url('<svg
+        className="svg-arrow-right-straight"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path fill="#fff" d="M20 9.35l-9.08 8.54-.86-.81 6.54-7.31H0V8.12h16.6L10.06.81l.86-.81L20 8.51v.84z" />
+      </svg>');
+    }
+  }
+
+  &:after {
+    background-image: svg-url('<svg
+      className="svg-arrow-right-straight"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path fill="#333" d="M20 9.35l-9.08 8.54-.86-.81 6.54-7.31H0V8.12h16.6L10.06.81l.86-.81L20 8.51v.84z" />
+    </svg>');
+  }
+}
