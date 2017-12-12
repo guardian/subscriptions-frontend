@@ -5,13 +5,13 @@ import model.DigitalEdition
 import model.promoCodes.{GuardianWeekly, _}
 import org.joda.time.DateTime
 
-//TODO: Remove after 3rd December 2017
-object BlackFriday {
+object FlashSale {
 
   def inOfferPeriod = {
-    //The offer is valid between 24th November & 3rd December 2017
-    val startTime = new DateTime(2017, 11, 24, 0, 0)
-    val endTime = new DateTime(2017, 12, 4, 0, 0)
+    //The offer is valid between 19th December 2017 & 3rd January 2018
+    //The current sale is digital only paper & paper + digital is unaffected
+    val startTime = new DateTime(2017, 12, 19, 0, 0)
+    val endTime = new DateTime(2018, 1, 4, 0, 0)
     val now = new DateTime()
     now.isAfter(startTime) && now.isBefore(endTime) || !Config.stageProd //allow testing on CODE
   }
@@ -20,9 +20,9 @@ object BlackFriday {
 
   def homePromoCodes(edition: DigitalEdition): Map[PromoCodeKey, String] = if (inOfferPeriod) {
     Map(
-      Digital -> "DBQ80F",
-      PaperAndDigital -> "GBQ80H",
-      Paper -> "GBQ80G",
+      Digital -> "DBR80F",
+      PaperAndDigital -> s"NHOME${edition.id.toUpperCase}D",
+      Paper -> s"NHOME${edition.id.toUpperCase}P",
       GuardianWeekly -> s"WHOME${edition.id.toUpperCase}"
     )
   }
@@ -39,9 +39,9 @@ object BlackFriday {
 
   def offersPromoCodes(edition: DigitalEdition): Map[PromoCodeKey, String] = if (inOfferPeriod) {
     Map(
-      Digital -> "DBQ80J",
-      PaperAndDigital -> "GBQ80L",
-      Paper -> "GBQ80K",
+      Digital -> "DBR80G",
+      PaperAndDigital -> s"NOFF${edition.id.toUpperCase}D",
+      Paper -> s"NOFF${edition.id.toUpperCase}P",
       GuardianWeekly -> "WAL41X"
     )
   } else {

@@ -1,7 +1,7 @@
 @import model.DigitalEdition
 @import views.support.DigitalEdition._
 
-@import services.BlackFriday
+@import services.FlashSale
 @(edition: DigitalEdition)
 
 @main(s"${edition.name} | Subscriptions | The Guardian",
@@ -10,6 +10,6 @@
 
     <main class="page-container gs-container">
         @fragments.page.header("Subscription offers", Some("Select your preferred package"))
-        @fragments.productLists.productListInternational(edition, BlackFriday.offersPromoCodes(edition))
+        @fragments.productLists.productListInternational(edition, FlashSale.offersPromoCodes(edition))
     </main>
 }
