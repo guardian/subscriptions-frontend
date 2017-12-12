@@ -14,7 +14,7 @@ trait CommonActions {
   val StoreAcquisitionDataAction = new ActionBuilder[Request] {
     def invokeBlock[A](request: Request[A], block: (Request[A]) => Future[Result]) = block(request).map(result => {
       request.getQueryString("acquisitionData").fold(result)(a => {
-        val sessionWithAcquisitionData = request.session.data.toSeq ++ Seq("acquisitionData" -> a)
+        val sessionWithAcquisitionData = result.session(request).data.toSeq ++ Seq("acquisitionData" -> a)
         result.withSession(sessionWithAcquisitionData: _*)
       })
     })
