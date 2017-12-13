@@ -203,12 +203,15 @@ class CheckoutService(
         EitherT(identityService.updateUserDetails(personalData, deliveryAddress)(authenticatedIdUser)).leftMap(addErrContext("Authenticated"))
       case None =>
         logger.info(s"User does not have an Identity account. Creating a guest account")
-        EitherT(identityService.registerGuest(personalData, deliveryAddress)).leftMap(addErrContext("Guest")).map { succ =>
-          EitherT(salesforceService.repo.updateIdentityId(memberId, succ.userData.id.id)).swap.map(err =>
-            logger.error(s"Error updating salesforce contact ${memberId.salesforceContactId} with identity id ${succ.userData.id.id}: ${err.getMessage}")
+        EitherT(identityService.registerGuest(personalData, deliveryAddress)).leftMap(addErrContext("Guest")).map { identitySuccess =>
+          val id = identitySuccess.userData.id.id
+          EitherT(salesforceService.repo.updateIdentityId(memberId, id)).swap.map(err =>
+            logger.error(s"Error updating salesforce contact ${memberId.salesforceContactId} with identity id ${id}: ${err.getMessage}")
           )
-          zuoraRestService.updateAccountIdentityId(AccountId(result.accountId),succ.userData.id.id)
-          succ
+          EitherT(zuoraRestService.updateAccountIdentityId(AccountId(result.accountId), id)).swap.map(err =>
+            logger.error(s"Error updating Zuora account ${result.accountId} with identity id ${id}: ${err}")
+          )
+          identitySuccess
         }
     }
   }
