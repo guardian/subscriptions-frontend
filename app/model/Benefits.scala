@@ -18,7 +18,7 @@ object Benefits {
     BenefitItem("Complete supplements", "Including The Guide, Cook and Food Monthly"),
     BenefitItem("Video and audio content", "Embedded audio, video and image galleries — plus all our crosswords"),
     BenefitItem("Available offline", "Downloaded automatically by 4am every morning. Perfect for travel"),
-    BenefitItem("Designed for tablets", "Specially adapted to your device, whether you're using iPad, Android or Kindle Fire"),
+    BenefitItem("Designed for tablets", "Specially adapted to your iPad"),
     BenefitItem("30-day archive", "A month of back issues. Take your time, sit back, and enjoy")
   ))
 
