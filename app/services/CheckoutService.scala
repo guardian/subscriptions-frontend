@@ -4,7 +4,7 @@ import com.gu.config.DiscountRatePlanIds
 import com.gu.i18n.Country
 import com.gu.i18n.Currency.GBP
 import com.gu.identity.play.{AuthenticatedIdUser, IdMinimalUser}
-import com.gu.memsub.Subscription.ProductRatePlanId
+import com.gu.memsub.Subscription.{AccountId, ProductRatePlanId}
 import com.gu.memsub.promo.Promotion._
 import com.gu.memsub.promo.{ValidPromotion, _}
 import com.gu.memsub.services.{GetSalesforceContactForSub, PromoService, PaymentService => CommonPaymentService}
@@ -64,6 +64,7 @@ class CheckoutService(
   paymentService: PaymentService,
   catalog: Catalog,
   zuoraService: ZuoraService,
+  zuoraRestService: ZuoraRestService[Future],
   exactTargetService: ExactTargetService,
   zuoraProperties: ZuoraProperties,
   promoService: PromoService,
@@ -171,7 +172,7 @@ class CheckoutService(
 
     val purchaserIds = PurchaserIdentifiers(contactId, user.map(_.user))
     val res = (
-      storeIdentityDetails(subscriptionData, user, contactId).run |@|
+      storeIdentityDetails(subscriptionData, user, contactId, result).run |@|
       sendETDataExtensionRow(result, subscriptionData, gracePeriod(promotion), purchaserIds, promotion)
     ) { case(id, email) =>
       (id.toOption.map(_.userData), id.swap.toOption.toSeq.flatMap(_.list) ++ email.swap.toOption.toSeq.flatMap(_.list))
@@ -185,7 +186,7 @@ class CheckoutService(
   private def storeIdentityDetails(
       subscribeRequest: SubscribeRequest,
       authenticatedUserOpt: Option[AuthenticatedIdUser],
-      memberId: ContactId): EitherT[Future, NonEmptyList[SubsError], IdentitySuccess] = {
+      memberId: ContactId,result: SubscribeResult): EitherT[Future, NonEmptyList[SubsError], IdentitySuccess] = {
 
     val personalData = subscribeRequest.genericData.personalData
     val deliveryAddress = subscribeRequest.productData.left.toOption.map(_.deliveryAddress)
@@ -206,6 +207,7 @@ class CheckoutService(
           EitherT(salesforceService.repo.updateIdentityId(memberId, succ.userData.id.id)).swap.map(err =>
             logger.error(s"Error updating salesforce contact ${memberId.salesforceContactId} with identity id ${succ.userData.id.id}: ${err.getMessage}")
           )
+          zuoraRestService.updateAccountIdentityId(AccountId(result.accountId),succ.userData.id.id)
           succ
         }
     }

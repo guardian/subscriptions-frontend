@@ -16,7 +16,7 @@ import com.gu.subscriptions.suspendresume.SuspensionService
 import com.gu.zuora
 import com.gu.zuora.api.InvoiceTemplate
 import com.gu.zuora.rest.SimpleClient
-import com.gu.zuora.{rest, soap}
+import com.gu.zuora.{ZuoraRestService, rest, soap}
 import configuration.Config
 import forms.SubscriptionsForm
 import monitoring.TouchpointBackendMetrics
@@ -98,7 +98,7 @@ object TouchpointBackend {
       lazy val suspensionService = new SuspensionService[Future](Config.holidayRatePlanIds(config.environmentName), simpleRestClient)
       lazy val subsForm = new forms.SubscriptionsForm(this.catalogService.unsafeCatalog)
       lazy val exactTargetService: ExactTargetService = new ExactTargetService(this.subscriptionService, this.commonPaymentService, this.zuoraService, this.salesforceService)
-      lazy val checkoutService: CheckoutService = new CheckoutService(IdentityService, this.salesforceService, this.paymentService, this.catalogService.unsafeCatalog, this.zuoraService, this.exactTargetService, this.zuoraProperties, this.promoService, this.discountRatePlanIds, this.commonPaymentService)
+      lazy val checkoutService: CheckoutService = new CheckoutService(IdentityService, this.salesforceService, this.paymentService, this.catalogService.unsafeCatalog, this.zuoraService, new ZuoraRestService[Future], this.exactTargetService, this.zuoraProperties, this.promoService, this.discountRatePlanIds, this.commonPaymentService)
     }
   }
 
