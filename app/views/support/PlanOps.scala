@@ -47,7 +47,7 @@ object PlanOps {
       case Digipack :: Nil =>
         ResponsiveImageGroup(
           availableImages = Seq(ResponsiveImage(controllers.CachedAssets.hashedPathFor("images/digital-pack.png"), 300)),
-            altText = Some("Guardian apps demoed on Apple, Android and Kindle Fire devices")
+            altText = Some("Guardian apps demoed on Apple and Android devices")
         )
       case Weekly :: Nil =>
         ResponsiveImageGroup(
