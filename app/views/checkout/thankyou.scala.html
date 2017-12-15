@@ -29,7 +29,9 @@
         zuoraId: '@subscription.name.get',
         productSegment: '@{subscription.firstPlan.segment}',
         productType: '@subscription.firstProduct.productType',
-        productPurchased: '@{subscription.firstPlan.name}'
+        productPurchased: '@{subscription.firstPlan.name}',
+        promoCode: '@{promotion.map(_.description).getOrElse("")}'
+        currency: '@{subscription.currency}'
     };
 </script>
 

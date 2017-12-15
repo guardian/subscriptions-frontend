@@ -4,14 +4,16 @@ define(['modules/analytics/ga',
         'modules/analytics/krux',
         'modules/analytics/facebook',
         'modules/analytics/appnexus',
-        'modules/analytics/affectv'
+        'modules/analytics/affectv',
+        'modules/analytics/awin'
 ], function (ga,
              ophan,
              remarketing,
              krux,
              facebook,
              appnexus,
-             affectv) {
+             affectv,
+             awin) {
     'use strict';
 
     function init() {
@@ -23,6 +25,7 @@ define(['modules/analytics/ga',
         facebook.init();
         appnexus.init();
         affectv.init();
+        awin.init();
     }
 
     return {
