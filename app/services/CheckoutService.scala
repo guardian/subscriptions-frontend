@@ -186,7 +186,8 @@ class CheckoutService(
   private def storeIdentityDetails(
       subscribeRequest: SubscribeRequest,
       authenticatedUserOpt: Option[AuthenticatedIdUser],
-      memberId: ContactId, result: SubscribeResult): EitherT[Future, NonEmptyList[SubsError], IdentitySuccess] = {
+      memberId: ContactId,
+      result: SubscribeResult): EitherT[Future, NonEmptyList[SubsError], IdentitySuccess] = {
 
     val personalData = subscribeRequest.genericData.personalData
     val deliveryAddress = subscribeRequest.productData.left.toOption.map(_.deliveryAddress)
