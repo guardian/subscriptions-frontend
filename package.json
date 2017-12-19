@@ -7,7 +7,6 @@
     "babel-core": "^6.26.0",
     "babel-eslint": "^8.0.3",
     "babel-loader": "^7.1.2",
-    "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-plugin-transform-flow-strip-types": "^6.22.0",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-plugin-transform-runtime": "^6.23.0",
@@ -18,7 +17,6 @@
     "bower": "^1.3.11",
     "circular-dependency-plugin": "^4.2.1",
     "css-loader": "^0.28.7",
-    "eslint": "4",
     "eslint-plugin-react": "^7.5.1",
     "flow-bin": "^0.59.0",
     "grunt": "^1.0.1",
@@ -66,7 +64,7 @@
     "style-loader": "^0.19.0",
     "time-grunt": "^1.2.1",
     "webpack": "^3.9.1",
-    "webpack-dev-server": "^2.9.4",
+  "webpack-dev-server": "^2.9.4",
     "webpack-merge": "^4.1.1",
     "zxcvbn": "^4.3.0"
   },
@@ -74,6 +72,7 @@
     "flow": "flow; test $? -eq 0 -o $? -eq 2",
     "compile": "echo 'compiling assets' && grunt compile",
     "compile-dev": "echo 'compiling assets' && grunt compile --dev",
+    "watch": "echo 'compiling assets' && grunt watch",
     "test": "grunt test",
     "lint": "grunt validate"
   },

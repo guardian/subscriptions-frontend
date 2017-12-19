@@ -26,7 +26,16 @@ const handleStripeResponse = (t, url, key) => {
                 'Csrf-Token': 'nocheck',
             },
             body: form
-        }).then(resp => resp.json())
+        }).then(resp => {
+            console.log(resp)
+            if (resp.status == 200) {
+                return resp.json()
+            } else {
+                console.log('wow this is bad')
+                Raven.captureException(`Renewal failed with status code ${resp.status}`)
+                return Promise.reject(`Renewal failed with status code ${resp.status}`)
+            }
+        })
 }
 
 
@@ -64,15 +73,11 @@ class Payment extends React.Component {
 
         const token = (t) => {
             this.setState({ state: WAITING })
-            handleStripeResponse(t, cardUrl, this.state.card.stripePublicKeyForUpdate).then(json => {
-                this.setState({ state: SUCCESS })
+            handleStripeResponse(t, cardUrl, this.state.card.stripePublicKeyForUpdate).then(() => this.setState({ state: SUCCESS })).catch((e) => {
+                Raven.captureException(e)
+                this.setState({ state: FAILURE })
             })
-                .catch((e) => {
-                    Raven.captureException(e)
-                    this.setState({ state: FAILURE })
-                })
         }
-
         this.handler = () => {
             this.setState({ state: OPEN })
             this.props.stripe.open({
@@ -80,9 +85,10 @@ class Payment extends React.Component {
                 email: this.props.email,
                 token: token,
                 panelLabel: 'Update',
-                closed: () => { if (this.state.state == OPEN) {this.setState({ state: FORM })} }
+                closed: () => { if (this.state.state == OPEN) { this.setState({ state: FORM }) } }
             })
         }
+
         this.state = {
             state: WAITING,
             card: null
@@ -96,11 +102,10 @@ class Payment extends React.Component {
             }
             this.setState({ state: FORM, card: resp.subscription.card })
 
+        }).catch((e) => {
+            Raven.captureException(e)
+            this.setState({ state: FAILURE })
         })
-            .catch((e) => {
-                Raven.captureException(e)
-                this.setState({ state: FAILURE })
-            })
     }
 
     render() {
