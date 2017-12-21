@@ -68,7 +68,7 @@ export default class CustomDateRangePicker extends React.Component {
             <div className="form-field">
                 <label className="label" htmlFor="this.startDate">Starting on</label>
                 <DatePicker
-                    name="this.startDate"
+                    name="startDate"
                     minDate={this.state.startMinDate}
                     maxDate={this.props.lastStartDate}
                     selected={this.state.startDate}
