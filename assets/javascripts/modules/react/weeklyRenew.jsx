@@ -101,7 +101,7 @@ class WeeklyRenew extends React.Component {
             plans: this.props.plans
         });
 
-    };
+    }
 
     validatePromo() {
         this.setState({
@@ -132,8 +132,8 @@ class WeeklyRenew extends React.Component {
             }
         }).catch((payload) => {
             let price = this.getPrice(this.getPlan(this.props.plans));
-            let error = "Invalid Promotion";
-            if ("response" in payload) {
+            let error = 'Invalid Promotion';
+            if ('response' in payload) {
                 try {
                     error = JSON.parse(payload.response).errorMessage;
                 } catch (e) {
@@ -152,11 +152,11 @@ class WeeklyRenew extends React.Component {
     handleEmail(e) {
         let email = e.target.value;
         this.setState({ email: { value: email, isValid: validEmail(email) } });
-    };
+    }
 
     handlePaymentType(value) {
         this.setState({ paymentType: value })
-    };
+    }
 
     handleSortCode(e) {
         this.setState({ sortCode: new SortCode(e.target.value) })
@@ -248,10 +248,10 @@ class WeeklyRenew extends React.Component {
                         <dd className="mma-section__list--content">
                             <div className="u-note prose">
                                 <p>
-                                    Our <a href={this.props.privacyPolicyHref} target="_blank">{this.props.privacyPolicyTitle}</a> explains in further detail how we use your information and you can find out why your data matters to us <a href={this.props.whyYourDataMattersToUsHref} target="_blank">here</a>.
+                                    Our <a href={this.props.privacyPolicyHref} target="_blank" rel="noopener noreferrer">{this.props.privacyPolicyTitle}</a> explains in further detail how we use your information and you can find out why your data matters to us <a href={this.props.whyYourDataMattersToUsHref} target="_blank">here</a>.
                             </p>
                                 <p>
-                                    By proceeding you agree to the <a href={this.props.weeklyTermsConditionsHref} target="_blank">{this.props.weeklyTermsConditionsTitle}</a> for the Guardian Weekly print subscription services.
+                                    By proceeding you agree to the <a href={this.props.weeklyTermsConditionsHref} target="_blank" rel="noopener noreferrer">{this.props.weeklyTermsConditionsTitle}</a> for the Guardian Weekly print subscription services.
                             </p>
                             </div>
                             <button className="button button--primary" onClick={this.click}>{this.buttonText()}</button>

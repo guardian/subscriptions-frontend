@@ -4,7 +4,6 @@ define([
 ], function (formElements, ratePlanChoice) {
     'use strict';
 
-
     return function() {
         let packageName = ratePlanChoice.getSelectedRatePlanName();
         let deliveredProduct = formElements.$DELIVERED_PRODUCT_TYPE.val();
@@ -20,7 +19,7 @@ define([
                 sixday: (date) => date.day() !== 0,
                 sunday: (date) => date.day() === 0,
                 weekend: (date) => date.day() === 6 || date.day() === 0,
-                allDays: (date) => true
+                allDays: () => true
             },
             weekly: (date) => date.day() === 5
         };

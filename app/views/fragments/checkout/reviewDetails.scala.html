@@ -103,24 +103,24 @@
         <div class="loader js-loader">Processing&hellip;</div>
 
         <p class="u-note prose">
-            Our <a href="@Links.privacyPolicy.href" target="_blank">@Links.privacyPolicy.title</a>
+            Our <a href="@Links.privacyPolicy.href" target="_blank" rel="noopener noreferrer">@Links.privacyPolicy.title</a>
             explains in further detail how we use your information and you can find out why your data matters to us
-            <a href="@Links.whyYourDataMattersToUs.href" target="_blank">here</a>.
+            <a href="@Links.whyYourDataMattersToUs.href" target="_blank" rel="noopener noreferrer">here</a>.
         </p>
 
         <p class="u-note prose">
         @if(productData.isDigitalPack) {
             By proceeding you agree to the
-            <a href="@Links.digipackTerms.href" target="_blank">@Links.digipackTerms.title</a>
+            <a href="@Links.digipackTerms.href" target="_blank" rel="noopener noreferrer">@Links.digipackTerms.title</a>
             for Guardian and Observer digital subscriptions.
         } else {
             @if(productData.isGuardianWeekly) {
                 By proceeding you agree to the
-                <a href="@Links.weeklyTerms.href" target="_blank">@Links.weeklyTerms.title</a>
+                <a href="@Links.weeklyTerms.href" target="_blank" rel="noopener noreferrer">@Links.weeklyTerms.title</a>
                 for the Guardian Weekly print subscription services.
             } else {
                 By proceeding you agree to the
-                <a href="@Links.paperTerms.href" target="_blank">@Links.paperTerms.title</a>
+                <a href="@Links.paperTerms.href" target="_blank" rel="noopener noreferrer">@Links.paperTerms.title</a>
                 for the Guardian and Observer voucher and home delivery subscription services.
             }
         }
