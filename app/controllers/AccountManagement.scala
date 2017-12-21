@@ -198,7 +198,8 @@ object ManageWeekly extends ContextLogging {
              billingSchedule: Option[BillingSchedule],
              weeklySubscription: Subscription[WeeklyPlan],
              maybeEmail: Option[String],
-             promoCode: Option[PromoCode]
+             promoCode: Option[PromoCode],
+             paymentMethodIsPaymentCard: Boolean
            )(implicit
              request: Request[AnyContent],
              resolution: TouchpointBackend.Resolution
@@ -240,7 +241,7 @@ object ManageWeekly extends ContextLogging {
           views.html.account.weeklyRenew(renewableSub, account.soldToContact, account.billToContact.email, billToCountry, weeklyPlanInfo, currency, promoCode)
         } getOrElse {
           info(s"sub is not renewable - showing weeklyDetails page")
-          views.html.account.weeklyDetails(weeklySubscription, billingSchedule, account.soldToContact, maybeEmail)
+          views.html.account.weeklyDetails(weeklySubscription, billingSchedule, account.soldToContact, maybeEmail, paymentMethodIsPaymentCard)
         })
       }
       Future.successful(renewPageResult)
@@ -374,20 +375,19 @@ class AccountManagement extends Controller with ContextLogging with CatalogProvi
       maybeEmail <- OptionT(futureSomeMaybeEmail)
       maybePaymentMethod <- OptionT(tpBackend.commonPaymentService.getPaymentMethod(subscription.accountId).map(Option(_)))
     } yield {
-
+      val paymentMethodIsPaymentCard = maybePaymentMethod.collect { case _:PaymentCard => true }.isDefined
       val maybeFutureManagePage = subscription.planToManage.product match {
         case Product.Delivery => subscription.asDelivery.map { deliverySubscription =>
-          val paymentMethodIsPaymentCard = maybePaymentMethod.collect { case _:PaymentCard => true }.isDefined
           Future.successful(ManageDelivery(errorCodes, pendingHolidays, billingSchedule, deliverySubscription, account, maybeEmail, paymentMethodIsPaymentCard))
         }
         case Product.Voucher => subscription.asVoucher.map { voucherSubscription =>
-          Future.successful(Ok(views.html.account.voucher(voucherSubscription, billingSchedule, maybeEmail)))
+          Future.successful(Ok(views.html.account.voucher(voucherSubscription, billingSchedule, maybeEmail, paymentMethodIsPaymentCard)))
         }
         case _: Product.Weekly => subscription.asWeekly.map { weeklySubscription =>
-          ManageWeekly(billingSchedule, weeklySubscription, maybeEmail, promoCode)
+          ManageWeekly(billingSchedule, weeklySubscription, maybeEmail, promoCode, paymentMethodIsPaymentCard)
         }
         case Product.Digipack => subscription.asDigipack.map { digipackSubscription =>
-          Future.successful(Ok(views.html.account.digitalpack(digipackSubscription, billingSchedule, request.getFastlyCountry, maybeEmail)))
+          Future.successful(Ok(views.html.account.digitalpack(digipackSubscription, billingSchedule, request.getFastlyCountry, maybeEmail, paymentMethodIsPaymentCard)))
         }
       }
       maybeFutureManagePage.getOrElse {

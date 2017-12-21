@@ -7,7 +7,7 @@
 @import org.joda.time.LocalDate.now
 @import com.gu.zuora.ZuoraRestService.SoldToContact
 @(
-    subscription: Subscription[SubscriptionPlan.WeeklyPlan], billingSchedule: Option[BillingSchedule], contact: SoldToContact, maybeEmail:Option[String]
+    subscription: Subscription[SubscriptionPlan.WeeklyPlan], billingSchedule: Option[BillingSchedule], contact: SoldToContact, maybeEmail:Option[String], paymentMethodIsPaymentCard: Boolean
 )(implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackend.Resolution)
 
 @main("Your Guardian Weekly subscription | The Guardian", bodyClasses = List("is-wide"), edition = DigitalEdition.getForCountry(contact.country), touchpointBackendResolutionOpt = Some(touchpointBackendResolution), managementPage = true) {
@@ -38,10 +38,12 @@
                     @views.html.account.fragments.billingSchedule(bs, subscription.currency)
                 </section>
             }
-            <section class="mma-section">
-                <h3 class="mma-section__header">Update your payment method</h3>
-                @views.html.account.fragments.paymentUpdate(subscription, maybeEmail, subscription.plans.head.product, DigitalEdition.getForCountry(contact.country))
-            </section>
+            @if(paymentMethodIsPaymentCard) {
+                <section class="mma-section">
+                    <h3 class="mma-section__header">Update your payment method</h3>
+                    @views.html.account.fragments.paymentUpdate(subscription, maybeEmail, subscription.plans.head.product, DigitalEdition.getForCountry(contact.country))
+                </section>
+            }
         </section>
     </main>
 }
