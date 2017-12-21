@@ -377,7 +377,7 @@ class AccountManagement extends Controller with ContextLogging with CatalogProvi
 
       val maybeFutureManagePage = subscription.planToManage.product match {
         case Product.Delivery => subscription.asDelivery.map { deliverySubscription =>
-          val paymentMethodIsPaymentCard = maybePaymentMethod.exists(p => p.isInstanceOf[PaymentCard])
+          val paymentMethodIsPaymentCard = maybePaymentMethod.collect { case _:PaymentCard => true }.isDefined
           Future.successful(ManageDelivery(errorCodes, pendingHolidays, billingSchedule, deliverySubscription, account, maybeEmail, paymentMethodIsPaymentCard))
         }
         case Product.Voucher => subscription.asVoucher.map { voucherSubscription =>
