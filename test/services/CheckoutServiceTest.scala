@@ -2,7 +2,7 @@ package services
 import com.gu.i18n.Country
 import com.gu.memsub.Benefit._
 import com.gu.memsub.Product.{Delivery, ZDigipack}
-import com.gu.memsub.Subscription.{ProductRatePlanChargeId, ProductRatePlanId}
+import com.gu.memsub.Subscription.{ProductRatePlanChargeId, ProductRatePlanId, SubscriptionRatePlanChargeId}
 import com.gu.memsub._
 import com.gu.memsub.subsv2._
 import com.gu.zuora.api.InvoiceTemplate
@@ -31,7 +31,7 @@ class CheckoutServiceTest extends Specification {
     id = ProductRatePlanId("p"),
     name = "name",
     description = "desc",
-    charges = PaidCharge(Digipack, BillingPeriod.Month, PricingSummary(Map.empty), ProductRatePlanChargeId("foo")),
+    charges = PaidCharge(Digipack, BillingPeriod.Month, PricingSummary(Map.empty), ProductRatePlanChargeId("foo"), SubscriptionRatePlanChargeId("")),
     product = Product.Digipack,
     saving = None,
     s = Status.current
