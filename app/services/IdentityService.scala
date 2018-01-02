@@ -239,7 +239,7 @@ object IdentityApiClient extends IdentityApiClient with LazyLogging {
 
   override val convertGuest: (Password, IdentityToken) => Future[WSResponse] = (password, token) => {
     val endpoint = authoriseCall(WS.url(s"$identityEndpoint/guest/password"))
-    val json = Json.obj("password" -> password)
+    val json = Json.obj("password" -> password, "validate-email" -> false)
 
     endpoint
       .withHeaders("X-Guest-Registration-Token" -> token.toString)
