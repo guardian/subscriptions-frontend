@@ -20,6 +20,7 @@ class IdentityServiceTest extends FreeSpec {
     override def updateUserDetails: (PersonalData, Option[Address], AccessCredentials.Cookies) => Future[WSResponse] = ???
     override def convertGuest: (String, IdentityToken) => Future[WSResponse] = ???
     override def userLookupByEmail: (String) => Future[WSResponse] = ???
+    override def consentEmail = ???
   }
 
   def makeIdentityService(client: IdentityApiClient) = new IdentityService(client)

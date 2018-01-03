@@ -161,6 +161,8 @@ trait IdentityApiClient {
   def userLookupByEmail: Email => Future[WSResponse]
 
   def updateUserDetails: (PersonalData, Option[Address], AccessCredentials.Cookies) => Future[WSResponse]
+
+  def consentEmail: Email => Future[WSResponse]
 }
 
 object IdentityApiClient extends IdentityApiClient with LazyLogging {
@@ -255,6 +257,15 @@ object IdentityApiClient extends IdentityApiClient with LazyLogging {
       createOnlyFields.foldLeft(userJson) { (map, field) => map - field }
 
     endpoint.withHeaders(authCookies.forwardingHeader).post(updatedFields)
+      .withWSFailureLogging(endpoint)
+      .withCloudwatchMonitoringOfPost
+  }
+
+  override val consentEmail: Email => Future[WSResponse] = { email =>
+    val endpoint = authoriseCall(WS.url(s"$identityEndpoint/consent-email"))
+
+    val json = Json.obj("email" -> email, "set-consents" -> List("supporter"))
+    endpoint.post(json)
       .withWSFailureLogging(endpoint)
       .withCloudwatchMonitoringOfPost
   }
