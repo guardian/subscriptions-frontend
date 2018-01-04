@@ -3,12 +3,13 @@ package controllers
 import javax.inject.Inject
 
 import actions.CommonActions
+import cats.instances.future._
 import com.gu.i18n.CountryGroup.{UK, US}
 import com.gu.i18n.Currency._
 import com.gu.i18n._
-import com.gu.memsub.Subscription.{Name, ProductRatePlanId}
+import com.gu.memsub.Subscription.Name
 import com.gu.memsub.promo.Promotion._
-import com.gu.memsub.promo.{NewUsers, NormalisedPromoCode, PromoCode}
+import com.gu.memsub.promo.{NormalisedPromoCode, PromoCode}
 import com.gu.memsub.subsv2.CatalogPlan.ContentSubscription
 import com.gu.memsub.subsv2.{CatalogPlan, PlansWithIntroductory}
 import com.gu.memsub.{Product, SupplierCode}
@@ -23,7 +24,8 @@ import model._
 import model.error.CheckoutService._
 import model.error.SubsError
 import org.joda.time.LocalDate
-import play.api.data.{Form, FormError}
+import play.api.data.Form
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json._
 import play.api.mvc._
 import services.AuthenticationService.authenticatedUserFor
@@ -34,14 +36,11 @@ import views.html.{checkout => view}
 import views.support.{PlanList, BillingPeriod => _, _}
 
 import scala.Function.const
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 import scala.concurrent.Future
-import scalaz.std.option._
+import scala.util.Try
 import scalaz.std.scalaFuture._
-import scalaz.syntax.applicative._
-import scalaz.{NonEmptyList, OptionT, \/}
-import cats.instances.future._
+import scalaz.{NonEmptyList, OptionT}
 
 class Checkout @Inject() extends Controller with LazyLogging with CatalogProvider with CommonActions {
 
@@ -271,9 +270,9 @@ class Checkout @Inject() extends Controller with LazyLogging with CatalogProvide
       val appliedCode = r.validPromotion.flatMap(vp => vp.promotion.asTracking.fold[Option[PromoCode]](Some(vp.code))(_ => None))
       val appliedCodeSession = appliedCode.map(promoCode => Seq(AppliedPromoCode -> promoCode.get)).getOrElse(Seq.empty)
       val subscriptionDetails = Some(StartDate -> subscribeRequest.productData.fold(_.startDate, _ => LocalDate.now).toString("d MMMM YYYY"))
-
+      val marketingOptIn = Seq(MarketingOptIn -> subscribeRequest.genericData.personalData.receiveGnmMarketing.toString)
       // Don't remove the SupplierTrackingCode from the session
-      val session = (productData ++ userSessionFields ++ appliedCodeSession ++ subscriptionDetails).foldLeft(request.session - AppliedPromoCode - PromotionTrackingCode) {
+      val session = (productData ++ userSessionFields ++ marketingOptIn ++ appliedCodeSession ++ subscriptionDetails).foldLeft(request.session - AppliedPromoCode - PromotionTrackingCode) {
         _ + _
       }
 
@@ -299,7 +298,9 @@ class Checkout @Inject() extends Controller with LazyLogging with CatalogProvide
 
   def convertGuestUser = NoCacheAction.async(parse.form(FinishAccountForm())) { implicit request =>
     val guestAccountData = request.body
-    IdentityService.convertGuest(guestAccountData.password, IdentityToken(guestAccountData.token))
+    val marketingOptIn = Try(request.session.get(MarketingOptIn).getOrElse("false").toBoolean).getOrElse(false)
+
+    IdentityService.convertGuest(guestAccountData.password, IdentityToken(guestAccountData.token), marketingOptIn)
       .map { cookies =>
         Ok(Json.obj("profileUrl" -> webAppProfileUrl.toString())).withCookies(cookies: _*)
       }

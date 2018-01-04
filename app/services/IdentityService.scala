@@ -70,8 +70,8 @@ class IdentityService(identityApiClient: => IdentityApiClient) extends LazyLoggi
           Some(response.json.toString()))))
   }
 
-  def convertGuest(password: String, token: IdentityToken): Future[Seq[Cookie]] = {
-    IdentityApiClient.convertGuest(password, token).map { r =>
+  def convertGuest(password: String, token: IdentityToken, marketingOptIn: Boolean): Future[Seq[Cookie]] = {
+    IdentityApiClient.convertGuest(password, token, marketingOptIn).map { r =>
       if (r.status == Status.OK) {
         CookieBuilder.fromGuestConversion(r.json, Some(Config.Identity.sessionDomain)).fold({ err =>
           logger.error(s"Error while parsing the identity cookies: $err")
@@ -169,7 +169,7 @@ trait IdentityApiClient {
 
   def createGuest: (PersonalData, Option[Address]) => Future[WSResponse]
 
-  def convertGuest: (Password, IdentityToken) => Future[WSResponse]
+  def convertGuest: (Password, IdentityToken, Boolean) => Future[WSResponse]
 
   def userLookupByEmail: Email => Future[WSResponse]
 
@@ -255,9 +255,13 @@ object IdentityApiClient extends IdentityApiClient with LazyLogging {
         .withCloudwatchMonitoringOfPost
   }
 
-  override val convertGuest: (Password, IdentityToken) => Future[WSResponse] = (password, token) => {
+  override val convertGuest: (Password, IdentityToken, Boolean) => Future[WSResponse] = (password, token, marketingOptIn) => {
     val endpoint = authoriseCall(WS.url(s"$identityEndpoint/guest/password"))
-    val json = Json.obj("password" -> password, "validate-email" -> false)
+    //If marketingOptIn is true then we will already have sent an email to the user asking them
+    //to confirm their marketing preference. In this case to prevent sending them 2 emails in quick
+    //succession we suppress the standard validation email with the validate-email flag.
+    //more info here: https://docs.google.com/document/d/1JDEpehzToi9aAMg4Fk7n_mnvQ_GOOf_kgOPSyWLBweA
+    val json = Json.obj("password" -> password, "validate-email" -> !marketingOptIn)
 
     endpoint
       .withHeaders("X-Guest-Registration-Token" -> token.toString)
