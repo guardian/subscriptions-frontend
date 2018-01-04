@@ -27,7 +27,7 @@ class IdentityService(identityApiClient: => IdentityApiClient) extends LazyLoggi
   def doesUserExist(email: String): Future[Boolean] =
     identityApiClient.userLookupByEmail(email).map { response =>
       response.status match {
-        case Status.OK =>  true
+        case Status.OK => true
         case Status.NOT_FOUND => false
         case status => {
           logger.error(s"ID API failed on email check with HTTP status $status")
@@ -38,9 +38,9 @@ class IdentityService(identityApiClient: => IdentityApiClient) extends LazyLoggi
     }
 
   def userLookupByCredentials(accessCredentials: AccessCredentials): Future[Option[IdUser]] = accessCredentials match {
-    case cookies: AccessCredentials.Cookies => identityApiClient.userLookupByCookies (cookies).map {
-        response => (response.json \ "user").asOpt[IdUser]
-      }
+    case cookies: AccessCredentials.Cookies => identityApiClient.userLookupByCookies(cookies).map {
+      response => (response.json \ "user").asOpt[IdUser]
+    }
     case _ => Future.successful {
       logger.error("ID API only supports forwarded access for Cookies")
       None
@@ -57,6 +57,17 @@ class IdentityService(identityApiClient: => IdentityApiClient) extends LazyLoggi
           Some(response.json.toString()))))
       }
     }
+  }
+
+  def consentEmail(email: String): Future[\/[NonEmptyList[IdentityFailure], Unit]] = identityApiClient.consentEmail(email).map {
+    response =>
+      if (response.status == 200)
+        \/.right(Unit)
+      else
+        \/.left(NonEmptyList(IdentityFailure(
+          "Consent email could not be sent for user",
+          Some(email),
+          Some(response.json.toString()))))
   }
 
   def convertGuest(password: String, token: IdentityToken): Future[Seq[Cookie]] = {
@@ -79,7 +90,8 @@ class IdentityService(identityApiClient: => IdentityApiClient) extends LazyLoggi
           personalData,
           delivery,
           cookies
-        ).map { response => response.status match {
+        ).map { response =>
+          response.status match {
             case Status.OK => \/.right(IdentitySuccess(RegisteredUser(IdMinimalUser("", None))))
             case _ =>
               \/.left(NonEmptyList(IdentityFailure(
@@ -101,34 +113,35 @@ object IdentityService extends IdentityService(IdentityApiClient) {
 
 }
 
-object  PersonalDataJsonSerialiser {
+object PersonalDataJsonSerialiser {
   val primaryEmailAddress = "primaryEmailAddress"
   val publicFields = "publicFields"
 
   implicit def convertToUser(personalData: PersonalData, deliveryAddress: Option[Address]): JsObject = {
-    val telephoneNumber = NormalisedTelephoneNumber.fromStringAndCountry(personalData.telephoneNumber,personalData.address.country)
+    val telephoneNumber = NormalisedTelephoneNumber.fromStringAndCountry(personalData.telephoneNumber, personalData.address.country)
     Json.obj(
       primaryEmailAddress -> personalData.email,
       publicFields -> Json.obj(
         "displayName" -> s"${personalData.first} ${personalData.last}"
       ),
       "privateFields" -> Json.obj(
-      "firstName" -> personalData.first,
-      "secondName" -> personalData.last,
-      "billingAddress1" -> personalData.address.lineOne,
-      "billingAddress2" -> personalData.address.lineTwo,
-      "billingAddress3" -> personalData.address.town,
-      "billingAddress4" -> personalData.address.countyOrState,
-      "billingPostcode" -> personalData.address.postCode,
-      "billingCountry"  -> personalData.address.country.fold(personalData.address.countryName)(_.name)
+        "firstName" -> personalData.first,
+        "secondName" -> personalData.last,
+        "billingAddress1" -> personalData.address.lineOne,
+        "billingAddress2" -> personalData.address.lineTwo,
+        "billingAddress3" -> personalData.address.town,
+        "billingAddress4" -> personalData.address.countyOrState,
+        "billingPostcode" -> personalData.address.postCode,
+        "billingCountry" -> personalData.address.country.fold(personalData.address.countryName)(_.name)
       ).++(
         personalData.title.fold(Json.obj())(title =>
           Json.obj("title" -> title.title))
       ).++(
-         telephoneNumber.fold[JsObject](Json.obj()){t =>
-           Json.obj(
-             "telephoneNumber" -> Json.toJson(t)
-           )}
+        telephoneNumber.fold[JsObject](Json.obj()) { t =>
+          Json.obj(
+            "telephoneNumber" -> Json.toJson(t)
+          )
+        }
       ).++(deliveryAddress.fold(Json.obj()) { addr =>
         Json.obj(
           "address1" -> addr.lineOne,
@@ -175,8 +188,8 @@ object IdentityApiClient extends IdentityApiClient with LazyLogging {
   implicit class FutureWSLike(eventualResponse: Future[WSResponse]) {
     /**
      * Example of ID API Response: `{"status":"error","errors":[{"message":"Forbidden","description":"Field access denied","context":"privateFields.billingAddress1"}]}`
-      *
-      * @return
+     *
+     * @return
      */
     private def applyOnSpecificErrors(reasons: List[String])(block: WSResponse => Unit): Unit = {
       def errorMessageFilter(error: JsValue): Boolean =
@@ -185,8 +198,8 @@ object IdentityApiClient extends IdentityApiClient with LazyLogging {
       eventualResponse.map(response =>
         (response.json \ "status").asOpt[String].filter(_ == "error")
           .foreach(_ => (response.json \ "errors").asOpt[JsArray].flatMap(_.value.headOption)
-          .filter(errorMessageFilter)
-          .foreach(_ => block(response))))
+            .filter(errorMessageFilter)
+            .foreach(_ => block(response))))
     }
 
     def withWSFailureLogging(request: WSRequest) = {
@@ -219,21 +232,24 @@ object IdentityApiClient extends IdentityApiClient with LazyLogging {
   override val userLookupByEmail: Email => Future[WSResponse] = {
     val endpoint = authoriseCall(WS.url(s"$identityEndpoint/user"))
 
-    email => endpoint.withQueryString(("emailAddress", email)).execute()
-      .withWSFailureLogging(endpoint)
-      .withCloudwatchMonitoringOfGet
+    email =>
+      endpoint.withQueryString(("emailAddress", email)).execute()
+        .withWSFailureLogging(endpoint)
+        .withCloudwatchMonitoringOfGet
   }
 
   override val userLookupByCookies: AccessCredentials.Cookies => Future[WSResponse] = {
     val endpoint = authoriseCall(WS.url(s"$identityEndpoint/user/me").withHeaders(("Referer", s"$identityEndpoint/")))
 
-    cookies => endpoint.withHeaders(cookies.forwardingHeader).execute()
-      .withWSFailureLogging(endpoint)
-      .withCloudwatchMonitoringOfGet
+    cookies =>
+      endpoint.withHeaders(cookies.forwardingHeader).execute()
+        .withWSFailureLogging(endpoint)
+        .withCloudwatchMonitoringOfGet
   }
 
-  override val createGuest: (PersonalData, Option[Address]) => Future[WSResponse] = { case (data, addr) =>
-    val endpoint = authoriseCall(WS.url(s"$identityEndpoint/guest"))
+  override val createGuest: (PersonalData, Option[Address]) => Future[WSResponse] = {
+    case (data, addr) =>
+      val endpoint = authoriseCall(WS.url(s"$identityEndpoint/guest"))
       endpoint.post(convertToUser(data, addr))
         .withWSFailureLogging(endpoint)
         .withCloudwatchMonitoringOfPost
@@ -272,9 +288,9 @@ object IdentityApiClient extends IdentityApiClient with LazyLogging {
 }
 
 class IdApiMetrics(val stage: String) extends CloudWatch
-with StatusMetrics
-with RequestMetrics
-with AuthenticationMetrics {
+  with StatusMetrics
+  with RequestMetrics
+  with AuthenticationMetrics {
 
   val region = Region.getRegion(Regions.EU_WEST_1)
   val application = Config.appName

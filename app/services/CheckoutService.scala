@@ -171,17 +171,27 @@ class CheckoutService(
                          promotion: Option[ValidPromotion[NewUsers]]): SubNel[PostSubscribeResult] = {
 
     val purchaserIds = PurchaserIdentifiers(contactId, user.map(_.user))
-    val res = (
-      storeIdentityDetails(subscriptionData, user, contactId, result).run |@|
-      sendETDataExtensionRow(result, subscriptionData, gracePeriod(promotion), purchaserIds, promotion)
-    ) { case(id, email) =>
-      (id.toOption.map(_.userData), id.swap.toOption.toSeq.flatMap(_.list) ++ email.swap.toOption.toSeq.flatMap(_.list))
-    }
+
+    val res = for {
+      id <- storeIdentityDetails(subscriptionData, user, contactId, result).run
+      _ <- sendConsentEmail(subscriptionData)
+      email <- sendETDataExtensionRow(result, subscriptionData, gracePeriod(promotion), purchaserIds, promotion)
+    } yield (id.toOption.map(_.userData), id.swap.toOption.toSeq.flatMap(_.list) ++ email.swap.toOption.toSeq.flatMap(_.list))
+
     EitherT(res.map(\/.right[FatalErrors, PostSubscribeResult]))
   }
 
   private def gracePeriod(promo: Option[ValidPromotion[NewUsers]]) =
     promo.flatMap(_.promotion.asDiscount).fold(zuoraProperties.gracePeriodInDays)(_ => Days.ZERO)
+
+  private def sendConsentEmail(subscribeRequest: SubscribeRequest): Future[\/[NonEmptyList[IdentityFailure], Unit]] = {
+    val personalData = subscribeRequest.genericData.personalData
+    if (personalData.receiveGnmMarketing)
+      identityService.consentEmail(personalData.email)
+    else
+      Future.successful(\/.right(Unit))
+  }
+
 
   private def storeIdentityDetails(
       subscribeRequest: SubscribeRequest,
@@ -207,10 +217,10 @@ class CheckoutService(
         EitherT(identityService.registerGuest(personalData, deliveryAddress)).leftMap(addErrContext("Guest")).map { identitySuccess =>
           val id = identitySuccess.userData.id.id
           EitherT(salesforceService.repo.updateIdentityId(memberId, id)).swap.map(err =>
-            logger.error(s"Error updating salesforce contact ${memberId.salesforceContactId} with identity id ${id}: ${err.getMessage}")
+            logger.error(s"Error updating salesforce contact ${memberId.salesforceContactId} with identity id $id: ${err.getMessage}")
           )
           EitherT(zuoraRestService.updateAccountIdentityId(AccountId(result.accountId), id)).swap.map(err =>
-            logger.error(s"Error updating Zuora account ${result.accountId} with identity id ${id}: ${err}")
+            logger.error(s"Error updating Zuora account ${result.accountId} with identity id $id: $err")
           )
           identitySuccess
         }
