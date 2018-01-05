@@ -256,12 +256,13 @@ object IdentityApiClient extends IdentityApiClient with LazyLogging {
   }
 
   override val convertGuest: (Password, IdentityToken, Boolean) => Future[WSResponse] = (password, token, marketingOptIn) => {
-    val endpoint = authoriseCall(WS.url(s"$identityEndpoint/guest/password"))
     //If marketingOptIn is true then we will already have sent an email to the user asking them
     //to confirm their marketing preference. In this case to prevent sending them 2 emails in quick
-    //succession we suppress the standard validation email with the validate-email flag.
+    //succession we suppress the standard validation email with the validate-email query parameter.
     //more info here: https://docs.google.com/document/d/1JDEpehzToi9aAMg4Fk7n_mnvQ_GOOf_kgOPSyWLBweA
-    val json = Json.obj("password" -> password, "validate-email" -> !marketingOptIn)
+    val validateEmail = if (marketingOptIn) 0 else 1 //Identity expects 1/0 rather than true/false
+    val endpoint = authoriseCall(WS.url(s"$identityEndpoint/guest/password?validate-email=$validateEmail"))
+    val json = Json.obj("password" -> password)
 
     endpoint
       .withHeaders("X-Guest-Registration-Token" -> token.toString)
