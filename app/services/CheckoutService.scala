@@ -186,10 +186,14 @@ class CheckoutService(
 
   private def sendConsentEmail(subscribeRequest: SubscribeRequest): Future[\/[NonEmptyList[IdentityFailure], Unit]] = {
     val personalData = subscribeRequest.genericData.personalData
-    if (personalData.receiveGnmMarketing)
+    if (personalData.receiveGnmMarketing) {
+      logger.info("User consented to marketing, sending consent email")
       identityService.consentEmail(personalData.email)
-    else
+    }
+    else {
+      logger.info("User did not consent to marketing, skipping consent email")
       Future.successful(\/.right(Unit))
+    }
   }
 
 
