@@ -22,8 +22,6 @@ define([
     }
 
     return {
-        //TODO - use analyticsEnabled
-        test: analyticsEnabled(dntEnabled(init)),
-        init: init
+        init: analyticsEnabled(dntEnabled(init))
     };
 });
