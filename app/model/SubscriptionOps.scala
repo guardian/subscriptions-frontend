@@ -54,6 +54,7 @@ object SubscriptionOps extends LazyLogging {
       }
     }
 
+    def firstPrice = firstPlan.charges.price.getPrice(currency).map(_.amount).getOrElse(0F)
     def firstPlan = sortedPlans.head
     def firstProduct = firstPlan.product
     def currentPlans = subscription.plans.list.filter(p => (p.start == now || p.start.isBefore(now)) && p.end.isAfter(now))

@@ -11,11 +11,12 @@ define([
         AWIN.Tracking.Sale = {};
 
         /*** Set your transaction parameters ***/
-        AWIN.Tracking.Sale.amount = '{{order_subtotal}}';
-        AWIN.Tracking.Sale.orderRef = '{{order_ref}}';
-        AWIN.Tracking.Sale.parts = '{{commission_group}}:{{sale_amount}}';
-        AWIN.Tracking.Sale.voucher = '{{voucher_code}}';
-        AWIN.Tracking.Sale.currency = '{{currency_code}}';
+        const productData = guardian.pageInfo.productData
+        AWIN.Tracking.Sale.amount = productData.amount;
+        AWIN.Tracking.Sale.orderRef = productData.subscriptionId;
+        AWIN.Tracking.Sale.parts = productData.productSegment + ':' + productData.amount;
+        AWIN.Tracking.Sale.voucher = productData.promoCode;
+        AWIN.Tracking.Sale.currency = productData.currency;
         AWIN.Tracking.Sale.test = '0';
         AWIN.Tracking.Sale.channel = 'aw';
     }
