@@ -11,4 +11,5 @@ object SessionKeys {
   val Currency = "newSubs_currency"
   val StartDate = "newSubs_startDate"
   val Edition = "newSubs_edition"
+  val MarketingOptIn = "newSubs_marketingOptIn"
 }
