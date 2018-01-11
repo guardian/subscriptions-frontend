@@ -85,7 +85,19 @@ body {
   }
 }
 
-.block--paper, .block--paper-digital, .block--digital, .block--weekly {
+@include mq($from: tablet) {
+  .block--paper, .block--paper-digital, .block--digital, .block--weekly {
+    .block__info {
+      padding-bottom: 360px;
+    }
+
+    .block__footer {
+      bottom: 330px;
+    }
+  }
+}
+
+.block--weekly {
   background-image: none;
 }
 
@@ -101,8 +113,10 @@ body {
   display: none;
 }
 
-.digipack__shots, .promotion-cta__image {
-  display: none;
+@include mq($from: tablet) {
+  .digipack__shots {
+    margin-left: 15%;
+  }
 }
 
 .digital-tablet-previews {
