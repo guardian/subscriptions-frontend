@@ -75,29 +75,22 @@
         </div>
     </div>
     <div class="review-details__item">
-        <span class="review-details__heading">Membership, supporting and subscribing to the Guardian</span>
+        <span class="review-details__heading">We would like to keep in touch</span>
         <div class="review-details__list">
             <ul class="o-unstyled-list">
                 <li class="u-margin-bottom">
-                    <span class="u-note">
-                        Whether you’re a subscriber, a member or you support us via a regular or one-off contribution, opt in here so we can keep sending you news, updates and more. Make sure you opt in so you don’t miss out.
+                    @defining(personalData.exists(_.receiveGnmMarketing)) { gnmMarketingOpt =>
+                        <span class="field">
+                            <input type="checkbox"
+                            name="personal.receiveGnmMarketing"
+                            id="receive-gnm-marketing"
+                                @if(gnmMarketingOpt) { checked="checked" }
+                            >
+                        </span>
+                    }
+                    <span class="review-panel__note">
+                        Get related news and offers - whether you are a subscriber, member, supporter or would like to become one
                     </span>
-                </li>
-                <li>
-                    <span class="u-note">
-                        If you’d like to hear about our wide range of subscription offers - or you’re interested in helping to secure our future with a recurring, or one-off contribution, then you’ll need to opt in here, too. Don’t worry, you can opt out at any time.
-                    </span>
-                </li>
-                <li>
-                @defining(personalData.exists(_.receiveGnmMarketing)) { gnmMarketingOpt =>
-                    <span class="option__input">
-                        <input type="checkbox"
-                        name="personal.receiveGnmMarketing"
-                        id="receive-gnm-marketing"
-                            @if(gnmMarketingOpt) { checked="checked" }
-                        >
-                    </span>
-                }
                 </li>
             </ul>
         </div>
