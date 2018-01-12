@@ -5,10 +5,12 @@
 
 // ----- Garnett Styles ----- //
 
+// Make the background on all pages white.
 body {
   background-color: #fff;
 }
 
+// Applies the new header.
 .global-header, .global-nav, .global-nav__inner, .global-brandbar, .global-brandbar__inner {
   background-color: #f8f8f8;
 }
@@ -56,6 +58,7 @@ body {
   }
 }
 
+// Changes the default button colours.
 .button--primary {
   background-color: transparent;
   color: guss-colour(neutral-1);
@@ -85,6 +88,7 @@ body {
   }
 }
 
+// Tweaks the landing page blocks to fit the new packshots.
 @include mq($from: tablet) {
   .block--paper, .block--paper-digital, .block--digital, .block--weekly {
     .block__info {
@@ -97,6 +101,7 @@ body {
   }
 }
 
+// Hides the weekly packshot on the international landing page.
 .block--weekly {
   background-image: none;
 }
@@ -105,6 +110,7 @@ body {
   visibility: hidden;
 }
 
+// Hides the weekly images on the weekly landing page, and changes the colour of the banner.
 .hero-banner {
   background-color: #efefec;
 }
@@ -121,10 +127,6 @@ body {
   .digipack__shots {
     margin-left: 15%;
   }
-}
-
-.digital-tablet-previews {
-  display: none;
 }
 
 .global-header__controls {
