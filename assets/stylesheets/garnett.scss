@@ -64,7 +64,7 @@ body {
   color: guss-colour(neutral-1);
   border-color: guss-colour(neutral-1);
 
-  &:hover {
+  &:hover, &:active, &:focus {
     background-color: guss-colour(neutral-1);
     color: #fff;
 
