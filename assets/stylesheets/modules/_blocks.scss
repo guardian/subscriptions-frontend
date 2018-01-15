@@ -100,7 +100,7 @@
 
 .block--paper {
     @include mq(tablet) {
-        background-image: url(/assets/images/backgrounds/bg-paper-only.png);
+        background-image: url(/assets/images/backgrounds/bg-paper-only-garnett.png);
         background-position: bottom right;
         background-repeat: no-repeat;
         background-size: contain;
@@ -109,7 +109,7 @@
 
 .block--paper-digital {
     @include mq(tablet) {
-        background-image: url(/assets/images/backgrounds/bg-paper-digital.png);
+        background-image: url(/assets/images/backgrounds/bg-paper-digital-garnett.png);
         background-position: bottom right;
         background-repeat: no-repeat;
         background-size: contain;
@@ -118,7 +118,7 @@
 
 .block--digital {
     @include mq(tablet) {
-        background-image: url(/assets/images/backgrounds/bg-digital-pack.png);
+        background-image: url(/assets/images/backgrounds/bg-digital-pack-garnett.png);
         background-position: bottom right;
         background-repeat: no-repeat;
         background-size: contain;

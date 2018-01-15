@@ -8,7 +8,6 @@ module.exports = function(grunt) {
     var pkg = grunt.file.readJSON('package.json');
     var isDev = (grunt.option('dev') !== undefined) ? Boolean(grunt.option('dev')) : process.env.GRUNT_ISDEV === '1';
     var singleRun = grunt.option('single-run') !== false;
-    const isGarnett = process.env && process.env.SUBSCRIPTIONS_FRONTEND_GARNETT === 'true';
 
     /**
      * Load all grunt-* tasks
@@ -106,7 +105,7 @@ module.exports = function(grunt) {
             },
             dist: {
                 files: {
-                    '<%= dirs.public.stylesheets %>/main.min.css': `<%= dirs.assets.stylesheets %>/${isGarnett ? 'garnett.scss' : 'main.scss'}`,
+                    '<%= dirs.public.stylesheets %>/main.min.css': '<%= dirs.assets.stylesheets %>/garnett.scss',
                     '<%= dirs.public.stylesheets %>/ie9.min.css': '<%= dirs.assets.stylesheets %>/ie9.scss',
                     '<%= dirs.public.stylesheets %>/ie-old.min.css': '<%= dirs.assets.stylesheets %>/ie-old.scss'
                 }
