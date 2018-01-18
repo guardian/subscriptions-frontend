@@ -5445,11 +5445,11 @@ react-onclickoutside@^4.8.0:
     object-assign "^4.0.1"
 
 react-radio-buttons@^1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/react-radio-buttons/-/react-radio-buttons-1.2.0.tgz#7bcad56c0a22a3a0f460b2171ce1acbcba397ee2"
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/react-radio-buttons/-/react-radio-buttons-1.2.1.tgz#a61c878be9b84fbb79a271293469af1ba2fd2257"
   dependencies:
     prop-types "^15.5.10"
-    react "^15.3.2"
+    react "^15.6.1"
     react-dom "^15.3.2"
 
 react-redux@^4.4.5:
@@ -5463,7 +5463,7 @@ react-redux@^4.4.5:
     loose-envify "^1.1.0"
     prop-types "^15.5.4"
 
-react@^15.1.0, react@^15.3.2:
+react@^15.1.0, react@^15.6.1:
   version "15.6.2"
   resolved "https://registry.yarnpkg.com/react/-/react-15.6.2.tgz#dba0434ab439cfe82f108f0f511663908179aa72"
   dependencies:

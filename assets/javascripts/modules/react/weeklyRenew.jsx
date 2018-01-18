@@ -16,7 +16,7 @@ import {
     init as stripeInit
 } from 'modules/renew/renew'
 
-const RadioButton = ({ children, ...props }) => <div style={{ boxSizing: 'unset' }}><UnspacedRadioButton pointColor="#005689" {...props}><span style={{ paddingRight: '10px' }}>{children}</span></UnspacedRadioButton></div>;
+const RadioButton = ({ children, ...props }) => <div style={{ boxSizing: 'unset', minWidth: '250px' }}><UnspacedRadioButton pointColor="#005689" {...props}><span style={{ paddingRight: '10px' }}>{children}</span></UnspacedRadioButton></div>;
 //This component sets styles directly, and they conflict a bit with our css.
 
 const empty = {
