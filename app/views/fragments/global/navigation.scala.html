@@ -3,16 +3,16 @@
 @(edition: DigitalEdition, managementPage: Boolean)
 <nav class="global-nav">
     <div class="global-nav__inner gs-container">
-        <a href="/" class="global-nav__link">home</a>
-        <a href="@routes.PromoLandingPage.render(s"DNAV${edition.id.toUpperCase}1", None).url?edition=@edition.id" class="global-nav__link">digital</a>
+        <a href="/" class="global-nav__link">Home</a>
+        <a href="@routes.PromoLandingPage.render(s"DNAV${edition.id.toUpperCase}1", None).url?edition=@edition.id" class="global-nav__link">Digital</a>
         @if(edition == UK) {
-            <a href="@routes.PromoLandingPage.render(s"NNAV${edition.id.toUpperCase}P", None).url" class="global-nav__link">paper</a>
+            <a href="@routes.PromoLandingPage.render(s"NNAV${edition.id.toUpperCase}P", None).url" class="global-nav__link">Paper</a>
         }
-        <a href="@routes.PromoLandingPage.render(s"WNAV${edition.id.toUpperCase}", edition.countryGroup.defaultCountry).url" class="global-nav__link">weekly</a>
+        <a href="@routes.PromoLandingPage.render(s"WNAV${edition.id.toUpperCase}", edition.countryGroup.defaultCountry).url" class="global-nav__link">Weekly</a>
         @if(managementPage) {
-            <a href="@routes.AccountManagement.logout" class="global-nav__link global-nav__link--right">sign out</a>
+            <a href="@routes.AccountManagement.logout" class="global-nav__link global-nav__link--right">Sign Out</a>
         } else {
-            <a href="/manage" class="global-nav__link global-nav__link--right">manage</a>
+            <a href="/manage" class="global-nav__link global-nav__link--right">Manage</a>
         }
     </div>
 </nav>
