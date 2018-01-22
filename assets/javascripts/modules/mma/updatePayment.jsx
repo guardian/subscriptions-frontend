@@ -54,11 +54,12 @@ const WAITING = 'waiting'
 const SUCCESS = 'success'
 const FAILURE = 'failure'
 const FORM = 'form'
+const UNAVAILABLE = 'unavailable'
 
 const CardUpdate = ({ card, handler }) => (<div><button className="button button--primary button--large" onClick={handler}>•••• •••• •••• {card && card.last4 || '••••'} Update Card</button></div>)
 const Success = () => (<p>Thank you, we have successfully updated your payment details.</p>)
 const Failure = ({ phone }) => <p>Unfortunately, we are unable to update your payment details at this time, please contact the call centre. {phone}</p>
-
+const Unavailable = ({ phone }) => (<p>Unfortunately, it is not possible to update your payment details online. To update your payment details, please contact the call centre. {phone}</p>)
 
 const Waiting = () => (<div className="loader js-loader is-loading">Processing&hellip;</div>)
 
@@ -97,14 +98,14 @@ class Payment extends React.Component {
         Promise.race([getDetails(dataUrl), timeout(10000)]).then(resp => {
             let sub = resp.subscription && resp.subscription.subscriberId
             if (!sub || sub != this.props.sub || !this.props.stripe) {
-                this.setState({ state: FAILURE })
+                this.setState({ state: UNAVAILABLE })
                 return
             }
             this.setState({ state: FORM, card: resp.subscription.card })
 
         }).catch((e) => {
             Raven.captureException(e)
-            this.setState({ state: FAILURE })
+            this.setState({ state: UNAVAILABLE })
         })
     }
 
@@ -115,6 +116,7 @@ class Payment extends React.Component {
             {this.state.state == OPEN && <Waiting />}
             {this.state.state == SUCCESS && <Success />}
             {this.state.state == FAILURE && <Failure phone={this.props.phone} />}
+            {this.state.state == UNAVAILABLE && <Unavailable phone={this.props.phone} />}
         </div>
     }
 }
