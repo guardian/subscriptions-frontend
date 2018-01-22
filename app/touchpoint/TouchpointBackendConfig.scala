@@ -15,7 +15,8 @@ case class TouchpointBackendConfig(
     zuoraRest: ZuoraRestConfig,
     zuoraProperties: ZuoraProperties,
     stripeUK: StripeServiceConfig,
-    stripeAU: StripeServiceConfig
+    stripeAU: StripeServiceConfig,
+    goCardlessToken: GoCardlessToken
 )
 
 object TouchpointBackendConfig extends LazyLogging {
@@ -52,13 +53,14 @@ object TouchpointBackendConfig extends LazyLogging {
       ZuoraApiConfig.rest(envBackendConf, environmentName),
       ZuoraProperties.from(envBackendConf, environmentName),
       StripeServiceConfig.from(envBackendConf, environmentName, Country.UK),
-      StripeServiceConfig.from(envBackendConf, environmentName, Country.Australia, "au-membership")
+      StripeServiceConfig.from(envBackendConf, environmentName, Country.Australia, "au-membership"),
+      GoCardlessToken.from(envBackendConf, environmentName)
     )
   }
 }
 
 object ZuoraProperties {
-  def from(config: com.typesafe.config.Config, environmentName: String) = {
+  def from(config: com.typesafe.config.Config, environmentName: String): ZuoraProperties = {
     ZuoraProperties(
       Days.days(config.getInt("zuora.paymentDelayInDays")),
       Days.days(config.getInt("zuora.paymentDelayGracePeriod")),
@@ -71,3 +73,13 @@ case class ZuoraProperties(
   gracePeriodInDays: Days,
   invoiceTemplates: List[InvoiceTemplate]
 )
+
+object GoCardlessToken {
+  def from(config: com.typesafe.config.Config, environmentName: String): GoCardlessToken = {
+    GoCardlessToken(
+      token = config.getString("gocardless.token"),
+      isProdToken = environmentName == "PROD"
+    )
+  }
+}
+case class GoCardlessToken(token: String, isProdToken: Boolean)

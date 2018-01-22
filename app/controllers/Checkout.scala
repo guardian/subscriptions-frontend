@@ -344,7 +344,7 @@ class Checkout @Inject() extends Controller with LazyLogging with CatalogProvide
 
   }
 
-  def checkIdentity(email: String) = CachedAction.async { implicit request =>
+  def checkIdentity(email: String) = NoCacheAction.async { implicit request =>
     for {
       doesUserExist <- IdentityService.doesUserExist(email)
     } yield Ok(Json.obj("emailInUse" -> doesUserExist))
@@ -352,13 +352,15 @@ class Checkout @Inject() extends Controller with LazyLogging with CatalogProvide
 
   val parseDirectDebitForm: BodyParser[DirectDebitData] = parse.form[DirectDebitData](Form(SubscriptionsForm.directDebitDataMapping))
 
-  def checkAccount = CachedAction.async(parseDirectDebitForm) { implicit request =>
+  def checkAccount = NoCacheAction.async(parseDirectDebitForm) { implicit request =>
+    implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
+    implicit val tpBackend = resolution.backend
     for {
-      isAccountValid <- GoCardlessService.checkBankDetails(request.body)
+      isAccountValid <- tpBackend.goCardlessService.checkBankDetails(request.body)
     } yield Ok(Json.obj("accountValid" -> isAccountValid))
   }
 
-  def findAddress(postCode: String) = CSRFCachedAsyncAction { implicit request =>
+  def findAddress(postCode: String) = CSRFNoCacheAsyncAction { implicit request =>
     GetAddressIOService.find(postCode).map { result =>
       // Capital A 'Addresses' is for compatibility with the https://api.getaddress.io/v2/uk/ response,
       // should a client want not to proxy via this server.

@@ -86,11 +86,6 @@ object Config {
 
   lazy val Salesforce =  SalesforceConfig.from(config.getConfig("touchpoint.backend.environments").getConfig(stage), stage)
 
-  object GoCardless {
-    private val token = config.getString("gocardless.token")
-    val client = GoCardlessClient.create(token, Environment.SANDBOX)
-  }
-
   def discountRatePlanIds(env: String): DiscountRatePlanIds =
     DiscountRatePlanIds.fromConfig(config.getConfig(s"touchpoint.backend.environments.$env.zuora.ratePlanIds"))
 

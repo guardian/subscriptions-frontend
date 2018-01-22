@@ -1,23 +1,21 @@
 package services
 
+import com.gocardless.GoCardlessClient
+import com.gocardless.GoCardlessClient.Environment.{LIVE, SANDBOX}
 import com.gocardless.errors.GoCardlessApiException
 import com.gocardless.resources.BankDetailsLookup.AvailableDebitScheme
 import com.typesafe.scalalogging.LazyLogging
-import configuration.Config
 import model.DirectDebitData
-
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
+import touchpoint.GoCardlessToken
+
 import scala.concurrent.Future
 
-trait GoCardlessService {
-  def mandatePDFUrl(paymentData: DirectDebitData): Future[String]
-  def checkBankDetails(paymentData: DirectDebitData): Future[Boolean]
-}
+class GoCardlessService(goCardlessToken: GoCardlessToken) extends LazyLogging {
 
-object GoCardlessService extends GoCardlessService with LazyLogging {
-  lazy val client = Config.GoCardless.client
+  lazy val client: GoCardlessClient = GoCardlessClient.create(goCardlessToken.token, if (goCardlessToken.isProdToken) LIVE else SANDBOX)
 
-  override def mandatePDFUrl(paymentData: DirectDebitData): Future[String] =
+  def mandatePDFUrl(paymentData: DirectDebitData): Future[String] =
     Future {
       client.mandatePdfs().create()
         .withAccountHolderName(paymentData.holder)
@@ -33,7 +31,7 @@ object GoCardlessService extends GoCardlessService with LazyLogging {
    * @return true if either the bank details are correct, or the rate limit for this enpoint is reached.
    *         In the latter case an error is logged.
    */
-  override def checkBankDetails(paymentData: DirectDebitData): Future[Boolean] = {
+  def checkBankDetails(paymentData: DirectDebitData): Future[Boolean] = {
     Future {
       client.bankDetailsLookups().create()
         .withAccountNumber(paymentData.account)
