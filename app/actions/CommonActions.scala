@@ -24,7 +24,7 @@ trait CommonActions {
 
   val CachedAction = resultModifier(Cached(_))
 
-  val CSRFCachedAsyncAction = (block: Request[_] => Future[Result]) => CSRFCheck(action = CachedAction.async(block), config = CSRFConfig.global.copy(checkContentType = (x: Option[String]) => true))
+  val CSRFNoCacheAsyncAction = (block: Request[_] => Future[Result]) => CSRFCheck(action = NoCacheAction.async(block), config = CSRFConfig.global.copy(checkContentType = (x: Option[String]) => true))
 
   def noCache(result: Result): Result = NoCache(result)
 

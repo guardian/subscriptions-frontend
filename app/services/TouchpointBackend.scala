@@ -1,7 +1,9 @@
 package services
 
+import com.gocardless.GoCardlessClient
+import com.gocardless.GoCardlessClient.Environment
+import com.gocardless.GoCardlessClient.Environment.{LIVE, SANDBOX}
 import com.gu.config.DiscountRatePlanIds
-import com.gu.i18n.Country
 import com.gu.memsub.promo.Promotion._
 import com.gu.memsub.promo.{DynamoPromoCollection, DynamoTables, PromotionCollection}
 import com.gu.memsub.services.{PaymentService => CommonPaymentService, _}
@@ -14,7 +16,6 @@ import com.gu.stripe.StripeService
 import com.gu.subscriptions.Discounter
 import com.gu.subscriptions.suspendresume.SuspensionService
 import com.gu.zuora
-import com.gu.zuora.api.InvoiceTemplate
 import com.gu.zuora.rest.SimpleClient
 import com.gu.zuora.{ZuoraRestService, rest, soap}
 import configuration.Config
@@ -53,6 +54,7 @@ trait TouchpointBackend {
   def subsForm: SubscriptionsForm
   def exactTargetService: ExactTargetService
   def checkoutService: CheckoutService
+  def goCardlessService: GoCardlessService
   implicit def simpleRestClient: SimpleClient[Future]
 }
 
@@ -99,6 +101,7 @@ object TouchpointBackend {
       lazy val subsForm = new forms.SubscriptionsForm(this.catalogService.unsafeCatalog)
       lazy val exactTargetService: ExactTargetService = new ExactTargetService(this.subscriptionService, this.commonPaymentService, this.zuoraService, this.salesforceService)
       lazy val checkoutService: CheckoutService = new CheckoutService(IdentityService, this.salesforceService, this.paymentService, this.catalogService.unsafeCatalog, this.zuoraService, new ZuoraRestService[Future], this.exactTargetService, this.zuoraProperties, this.promoService, this.discountRatePlanIds, this.commonPaymentService)
+      lazy val goCardlessService: GoCardlessService = new GoCardlessService(config.goCardlessToken)
     }
   }
 
