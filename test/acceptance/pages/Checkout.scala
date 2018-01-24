@@ -42,7 +42,7 @@ case class Checkout(testUser: TestUser, endpoint: String = "checkout") extends P
 
   def reviewSectionHasLoaded(): Boolean = pageHasElement(ReviewSection.submitPaymentButton)
 
-  def userIsSignedIn: Boolean = elementHasText(userDisplayName, testUser.username.toLowerCase)
+  def userIsSignedIn: Boolean = {elementHasText(userDisplayName, testUser.username)}
 
   def userDetailsArePrefilled: Boolean = {
     elementHasValue(PersonalDetails.firstName, testUser.username) &&
