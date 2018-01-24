@@ -58,10 +58,10 @@ const UNAVAILABLE = 'unavailable'
 const CardUpdate = ({ card, handler }) => (<div><button className="button button--primary button--large" onClick={handler}>•••• •••• •••• {card && card.last4 || '••••'} Update Card</button></div>)
 const Success = () => (<p>Thank you, we have successfully updated your payment details.</p>)
 const Failure = ({ phone }) => <p>Unfortunately, we are unable to update your payment details at this time, please contact the call centre. {phone}</p>
-const Unavailable = ({ phone }) => (<React.Fragment>
-    <p>We are currently unable to retreive your payment details online.</p>
-    <p>If you wish to update your payment details, please contact the call centre. {phone}</p>
-    </React.Fragment>)
+const Unavailable = ({ phone }) => <span>
+    <p>Sorry, unfortunately we are unable to retreive your payment details at this time.</p>
+    <p>If you wish to update your payment details, please refresh the page, alternatively contact the call centre. {phone}</p>
+    </span>
 
 const Waiting = () => (<div className="loader js-loader is-loading">Processing&hellip;</div>)
 
