@@ -18,7 +18,7 @@ case class ThankYou(val testUser: TestUser) extends Page with Browser {
 
   def pageHasLoaded(): Boolean = elementIsPresent(subscriptionDetails)
 
-  def userIsSignedIn: Boolean = elementHasText(userDisplayName, testUser.username.toLowerCase)
+  def userIsSignedIn: Boolean = elementHasText(userDisplayName, testUser.username)
 
   def hasMyProfileButton = pageHasElement(myProfileButton)
 
