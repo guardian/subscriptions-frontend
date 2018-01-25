@@ -4,18 +4,13 @@
 @()
 
 @main(
-    "Subscriptions and Membership | The Guardian",
+    "Subscriptions | The Guardian",
     Some("Subscribe to The Guardian & Observer. Support our independent, award-winning journalism."),
     edition = UK) {
 
     <main class="page-container gs-container">
-        @fragments.page.header("Subscriptions and Membership")
+        @fragments.page.header("Subscriptions")
         @fragments.productLists.productListUk(FlashSale.homePromoCodes, includeEditionInUrl = true)
-        <div class="row row--items-1">
-            <div class="row__item">
-                @fragments.promos.members("uk", UK.membershipLandingPage)
-            </div>
-        </div>
         <div class="row row--items-3">
             <div class="row__item block">
                 <h2 class="block__title">Guardian Weekly</h2>
