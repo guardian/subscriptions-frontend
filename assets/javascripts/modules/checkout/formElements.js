@@ -66,6 +66,7 @@ define(['$'], function ($) {
         $PROMO_CODE_BTN: $('.js-promo-code-validate'),
 
         $DELIVERY_AS_BILLING: $('.js-checkout-use-delivery'),
+        PAYMENT_MEHTOD: '.js-checkout-payment-method .js-option-switch',
         $PAYMENT_METHOD: $('.js-checkout-payment-method .js-option-switch'),
 
         // Direct Debit
