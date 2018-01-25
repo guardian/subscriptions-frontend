@@ -74,7 +74,7 @@
     "flow": "flow; test $? -eq 0 -o $? -eq 2",
     "compile": "echo 'compiling assets' && grunt compile",
     "compile-dev": "echo 'compiling assets' && grunt compile --dev",
-    "watch": "echo 'compiling assets' && grunt watch",
+    "watch": "echo 'compiling assets' && grunt watch --dev",
     "test": "grunt test",
     "lint": "grunt validate"
   },
