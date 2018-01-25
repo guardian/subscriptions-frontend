@@ -78,6 +78,7 @@
   },
   "dependencies": {
     "babel-runtime": "^6.26.0",
+    "lodash.debounce": "^4.0.8",
     "react-radio-buttons": "^1.2.0"
   },
   "browserslist": [
