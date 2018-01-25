@@ -1,6 +1,8 @@
 define(['$'], function ($) {
     'use strict';
 
+    var PAYMENT_METHOD = '.js-checkout-payment-method .js-option-switch';
+
     var _PAPER_CHECKOUT_DATE_PICKER_FORM_FIELD_NAME = 'startDate';
     var _PAPER_CHECKOUT_DELIVERY_INSTRUCTIONS_FIELD_NAME = 'deliveryInstructions';
 
@@ -66,8 +68,8 @@ define(['$'], function ($) {
         $PROMO_CODE_BTN: $('.js-promo-code-validate'),
 
         $DELIVERY_AS_BILLING: $('.js-checkout-use-delivery'),
-        PAYMENT_MEHTOD: '.js-checkout-payment-method .js-option-switch',
-        $PAYMENT_METHOD: $('.js-checkout-payment-method .js-option-switch'),
+        PAYMENT_METHOD: PAYMENT_METHOD,
+        $PAYMENT_METHOD: $(PAYMENT_METHOD),
 
         // Direct Debit
         $ACCOUNT_CONTAINER: $('.js-checkout-account'),
