@@ -1,27 +1,26 @@
-const webpack = require("webpack");
+const webpack = require('webpack');
 
 const path = require('path');
  module.exports = /* function(debug) { return */{
     entry: {
-        main: "./main"
+        main: './main'
     },
     output: {
         path: path.resolve('public/'),
         chunkFilename:  'webpack/[chunkhash].js',
-        filename: "javascripts/[name].min.js",
+        filename: 'javascripts/[name].min.js',
         publicPath: '/assets/'
     },
     resolve: {
         modules: [
-          path.resolve(__dirname, "node_modules"),
-          path.resolve(__dirname, "assets", "javascripts"),
-          path.resolve(__dirname, "assets", "..", "node_modules"),
-          path.resolve(__dirname, "test")
+          path.resolve(__dirname, 'node_modules'),
+          path.resolve(__dirname, 'assets', 'javascripts'),
+          path.resolve(__dirname, 'assets', '..', 'node_modules'),
+          path.resolve(__dirname, 'test')
         ],
-        extensions: [".js", ".es6", '.jsx'],
+        extensions: ['.js', '.es6', '.jsx'],
         alias: {
             '$$': 'utils/$',
-            'lodash': 'lodash-amd/modern',
             'bean': 'bean/bean',
             'bonzo': 'bonzo/bonzo',
             'qwery': 'qwery/qwery',
@@ -41,15 +40,15 @@ const path = require('path');
                 exclude: /node_modules/,
                 loader: 'babel-loader',
                 query: {
-                    "presets": [
-                        ["env"]
+                    'presets': [
+                        ['env']
                     ],
                     cacheDirectory: '',
-                    plugins: ["transform-class-properties","transform-object-rest-spread","transform-flow-strip-types", ["transform-runtime", {
-                        "helpers": false,
-                        "polyfill": false,
-                        "regenerator": true,
-                        "moduleName": "babel-runtime"
+                    plugins: ['transform-class-properties','transform-object-rest-spread','transform-flow-strip-types', ['transform-runtime', {
+                        'helpers': false,
+                        'polyfill': false,
+                        'regenerator': true,
+                        'moduleName': 'babel-runtime'
                     }]]
 
 }
@@ -59,19 +58,19 @@ const path = require('path');
                 exclude: /node_modules/,
                 loader: 'babel-loader',
                 query: {
-                    presets:  ["env", 'react'],
+                    presets:  ['env', 'react'],
                     cacheDirectory: '',
-                    plugins: ["transform-class-properties","transform-object-rest-spread","transform-flow-strip-types", ["transform-runtime", {
-                        "helpers": false,
-                        "polyfill": false,
-                        "regenerator": true,
-                        "moduleName": "babel-runtime"
+                    plugins: ['transform-class-properties','transform-object-rest-spread','transform-flow-strip-types', ['transform-runtime', {
+                        'helpers': false,
+                        'polyfill': false,
+                        'regenerator': true,
+                        'moduleName': 'babel-runtime'
                     }]]
                 }
             },
             {
                 test: /\.css$/,
-                loader: "style-loader!css-loader"
+                loader: 'style-loader!css-loader'
             }
         ]
     },

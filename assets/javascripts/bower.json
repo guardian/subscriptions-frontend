@@ -4,7 +4,6 @@
     "bean": "~1.0.6",
     "bonzo": "~2.0.0",
     "domready": "~1.0.8",
-    "lodash-amd": "~3.10.0",
     "promise-polyfill": "~2.1.0",
     "qwery": "~4.0.0",
     "raven-js": "~3.0.4",
