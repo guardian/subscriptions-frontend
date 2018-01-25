@@ -51,7 +51,7 @@
     "phantomjs": "~1.9.15",
     "postcss-object-fit-images": "^1.1.2",
     "postcss-pxtorem": "^4.0.1",
-    "prop-types": "^15.5.10",
+    "prop-types": "^15.6.0",
     "qwery": "^4.0.0",
     "raven-js": "^3.0.5",
     "react": "^15.1.0",
