@@ -44,7 +44,7 @@ export default {
         let deliveryInstructionElement = document.getElementById(formElements.DELIVERY_INSTRUCTIONS_ID);
         if (deliveryInstructionElement) {
             ReactDOM.render(
-                <CharacterCountedTextArea name="deliveryInstructions" maxLength="250" className="input-text js-input" rows="4" />,
+                <CharacterCountedTextArea name="deliveryInstructions" maxLength={250} className="input-text js-input" rows="4" />,
                 deliveryInstructionElement
             )
         }
