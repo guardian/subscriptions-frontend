@@ -11,30 +11,27 @@ function chooseAddress(addressSection, addressStr) {
     }
 }
 
-export default React.createClass({
-    displayName: 'ChooseAddress',
-    getDefaultProps () {
-        return {
-            addressSection: null
-        };
-    },
-    getInitialState () {
-        return {
+export default class ChooseAddress extends React.Component {
+    constructor(props) {
+        super(props)
+        this.state = {
             value: '?',
             options: [{
                 value: '-1',
                 name: 'No address found'
             }]
-        };
-    },
-    handleChange (e) {
-        var target = e.target;
-        this.state.value = target.value;
+        }
+    }
+
+    handleChange = (e) => {
+        let target = e.target;
+        this.setState({ value: target.value });
         chooseAddress(this.props.addressSection, target.value);
         this.forceUpdate();
-    },
-    render () {
-        var createItem = function (item, key) {
+    }
+
+    render() {
+        let createItem = (item, key) => {
             return <option key={key} value={item.value}>{item.name}</option>;
         };
         return (
@@ -43,4 +40,4 @@ export default React.createClass({
             </select>
         );
     }
-})
+}

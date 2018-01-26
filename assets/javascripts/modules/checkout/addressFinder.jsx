@@ -7,8 +7,7 @@ import ChooseAddress from '../react/addressChooser';
 function showNothingFound(addressSection) {
     ReactDOM.render(
     <ChooseAddress addressSection={addressSection} />,
-    addressSection.$ADDRESS_CHOOSER[0],
-    (component) => component.setState(component.getInitialState()));
+    addressSection.$ADDRESS_CHOOSER[0]);
 }
 
 function fillInChooseAddressBox(addressSection, addresses) {
