@@ -46,7 +46,7 @@ libraryDependencies ++= Seq(
     ws,
     filters,
     PlayImport.specs2 % "test",
-    "com.gu" %% "membership-common" % "0.494",
+    "com.gu" %% "membership-common" % "0.1-SNAPSHOT",
     "com.gu" %% "memsub-common-play-auth" % "1.2",
     "com.gu" %% "identity-test-users" % "0.6",
     "com.gu" %% "content-authorisation-common" % "0.1",
@@ -99,7 +99,7 @@ packageDescription := """Subscription Frontend"""
 
 riffRaffPackageType := (packageBin in Debian).value
 
-routesGenerator := StaticRoutesGenerator
+routesGenerator := InjectedRoutesGenerator
 
 javaOptions in Universal ++= Seq(
       "-Dpidfile.path=/dev/null",

@@ -20,68 +20,81 @@ import views.support.Pricing._
 import views.support.{BillingPeriod => _}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
-class Promotion @Inject()  extends Controller with LazyLogging with CatalogProvider with CommonActions {
+import scala.concurrent.Future
+
+class Promotion(fBackendFactory: TouchpointBackends)  extends Controller with LazyLogging with CommonActions {
 
 
   private val fallbackCurrency = CountryGroup.UK.currency
 
   private def getDefaultCurrencyForCountry(country: Country) = CountryGroup.byCountryCode(country.alpha2).map(_.currency)
 
-  def getAdjustedRatePlans(promo: AnyPromotion, country:Country, requestedCurrency: Option[Currency])(implicit tpBackend:TouchpointBackend): Option[Map[String, String]] = {
+  def getAdjustedRatePlans(promo: AnyPromotion, country: Country, requestedCurrency: Option[Currency])(implicit tpBackend: TouchpointBackend): Future[Option[Map[String, String]]] = {
     val currency = requestedCurrency orElse getDefaultCurrencyForCountry(country) getOrElse fallbackCurrency
 
     case class RatePlanPrice(ratePlanId: ProductRatePlanId, chargeList: PaidChargeList)
     promo.asDiscount.map { discountPromo =>
-    catalog.allSubs.flatten
-        .filter(plan => promo.appliesTo.productRatePlanIds contains plan.id)
-        .filter(plan => plan.charges.currencies contains currency)
-        .map(plan => RatePlanPrice(plan.id, plan.charges)).map { ratePlanPrice =>
+      tpBackend.catalogService.catalog.map(_.map { catalog =>
+        catalog.allSubs.flatten
+          .filter(plan => promo.appliesTo.productRatePlanIds contains plan.id)
+          .filter(plan => plan.charges.currencies contains currency)
+          .map(plan => RatePlanPrice(plan.id, plan.charges)).map { ratePlanPrice =>
           ratePlanPrice.ratePlanId.get -> ratePlanPrice.chargeList.prettyPricingForDiscountedPeriod(discountPromo, currency)
-      }.toMap
-    }
+        }.toMap
+      }.toOption
+      )
+    }.getOrElse(Future.successful(None))
   }
 
 
-
   def validateForProductRatePlan(promoCode: PromoCode, prpId: ProductRatePlanId, country: Country, currency: Option[Currency]) = NoCacheAction.async { implicit request =>
-    implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
+    implicit val resolution: TouchpointBackends.Resolution = fBackendFactory.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
-    tpBackend.promoService.findPromotionFuture(promoCode).map { promotion =>
+    tpBackend.promoService.findPromotionFuture(promoCode).flatMap { promotion =>
       promotion.filterNot(_.isTracking).fold {
-        NotFound(Json.obj("errorMessage" -> s"Sorry, we can't find that code."))
+        Future.successful(NotFound(Json.obj("errorMessage" -> s"Sorry, we can't find that code.")))
       } {
         promo =>
-          val result = promo.validateFor(prpId, country)
-          def body = Json.obj(
-            "promotion" -> Json.toJson(promo),
-            "adjustedRatePlans" -> Json.toJson(getAdjustedRatePlans(promo, country, currency)),
-            "isValid" -> result.isRight,
-            "errorMessage" -> result.swap.toOption.map(_.msg)
-          )
-          result.fold(_ => NotAcceptable(body), _ => Ok(body))
+          getAdjustedRatePlans(promo, country, currency).map { ratePlans =>
+            val result = promo.validateFor(prpId, country)
+
+            def body = Json.obj(
+              "promotion" -> Json.toJson(promo),
+              "adjustedRatePlans" -> Json.toJson(ratePlans),
+              "isValid" -> result.isRight,
+              "errorMessage" -> result.swap.toOption.map(_.msg)
+            )
+
+            result.fold(_ => NotAcceptable(body), _ => Ok(body))
+          }
       }
     }
   }
 
 
   def validate(promoCode: PromoCode, country: Country, currency: Option[Currency]) = NoCacheAction.async { implicit request =>
-    implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
+    implicit val resolution: TouchpointBackends.Resolution = fBackendFactory.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
 
-    tpBackend.promoService.findPromotionFuture(promoCode).map { promotion =>
+    tpBackend.promoService.findPromotionFuture(promoCode).flatMap { promotion =>
       promotion.fold {
-        NotFound(Json.obj("errorMessage" -> s"Sorry, we can't find that code."))
+        Future.successful(NotFound(Json.obj("errorMessage" -> s"Sorry, we can't find that code.")))
       } { promo =>
-        val result = promo.validate(country)
-        def body = Json.obj(
-          "promotion" -> Json.toJson(promo),
-          "adjustedRatePlans" -> Json.toJson(getAdjustedRatePlans(promo, country, currency)),
-          "isValid" -> result.isRight,
-          "errorMessage" -> result.swap.toOption.map(_.msg)
-        )
-        result.fold(_ => NotAcceptable/*!?! fix this*/(body), _ => Ok(body))
-      }
+        getAdjustedRatePlans(promo, country, currency).map { ratePlans =>
+          val result = promo.validate(country)
 
+          def body = Json.obj(
+            "promotion" -> Json.toJson(promo),
+            "adjustedRatePlans" -> Json.toJson(ratePlans),
+            "isValid" -> result.isRight,
+            "errorMessage" -> result.swap.toOption.map(_.msg)
+          )
+
+          result.fold(_ => NotAcceptable /*!?! fix this*/ (body), _ => Ok(body))
+        }
+
+      }
     }
   }
+
 }

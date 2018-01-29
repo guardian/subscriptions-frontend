@@ -14,7 +14,7 @@
 @import com.gu.zuora.ZuoraRestService.SoldToContact
 @(
     subscription: Subscription[WeeklyPlanOneOff], contact: SoldToContact, email: Option[String], billToCountry: Country, plans: List[WeeklyPlanInfo], currency: Currency, promoCode: Option[PromoCode]
-)(implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackend.Resolution)
+)(implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackends.Resolution)
 
 @main(
     title ="Your Guardian Weekly subscription | The Guardian",

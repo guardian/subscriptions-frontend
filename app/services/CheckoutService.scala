@@ -62,14 +62,13 @@ class CheckoutService(
   identityService: IdentityService,
   salesforceService: SalesforceService,
   paymentService: PaymentService,
-  catalog: Catalog,
+  catalog: Future[Catalog],
   zuoraService: ZuoraService,
   zuoraRestService: ZuoraRestService[Future],
   exactTargetService: ExactTargetService,
   zuoraProperties: ZuoraProperties,
   promoService: PromoService,
-  promoPlans: DiscountRatePlanIds,
-  commonPaymentService: CommonPaymentService
+  promoPlans: DiscountRatePlanIds
 ) extends ContextLogging {
 
   type NonFatalErrors = Seq[SubsError]
@@ -82,24 +81,26 @@ class CheckoutService(
     case _ => false
   }
 
-  private val allSixWeekAssociations = List(catalog.weekly.zoneA.associations, catalog.weekly.zoneC.associations).flatten
+  private val allSixWeekAssociations = catalog.map(catalog => List(catalog.weekly.zoneA.associations, catalog.weekly.zoneC.associations).flatten)
 
   // This method is not genericised because the '6' is not stored in the association.
-  def processSixWeekIntroductoryPeriod(daysUntilFirstIssue: Days, originalCommand: Subscribe): Subscribe = {
-    val maybeSixWeekAssociation = allSixWeekAssociations.find(_._1.id.get == originalCommand.ratePlans.head.productRatePlanId)
-    val updatedCommand = maybeSixWeekAssociation.map { case (sixWeekPlan, recurringPlan) =>
-      val sixWeeksPlanStartDate = originalCommand.contractEffective.plusDays(daysUntilFirstIssue.getDays)
-      val replacementPlans = NonEmptyList(
-        RatePlan(
-          sixWeekPlan.id.get,
-          Some(ChargeOverride(sixWeekPlan.charges.chargeId.get, triggerDate = Some(sixWeeksPlanStartDate)))
-        ),
-        RatePlan(recurringPlan.id.get, None)
-      )
-      val updatedContractAcceptance = sixWeeksPlanStartDate.plusWeeks(6)
-      originalCommand.copy(ratePlans = replacementPlans, contractAcceptance = updatedContractAcceptance)
+  def processSixWeekIntroductoryPeriod(daysUntilFirstIssue: Days, originalCommand: Subscribe): Future[Subscribe] = {
+    allSixWeekAssociations.map { allSixWeekAssociations =>
+      val maybeSixWeekAssociation = allSixWeekAssociations.find(_._1.id.get == originalCommand.ratePlans.head.productRatePlanId)
+      val updatedCommand = maybeSixWeekAssociation.map { case (sixWeekPlan, recurringPlan) =>
+        val sixWeeksPlanStartDate = originalCommand.contractEffective.plusDays(daysUntilFirstIssue.getDays)
+        val replacementPlans = NonEmptyList(
+          RatePlan(
+            sixWeekPlan.id.get,
+            Some(ChargeOverride(sixWeekPlan.charges.chargeId.get, triggerDate = Some(sixWeeksPlanStartDate)))
+          ),
+          RatePlan(recurringPlan.id.get, None)
+        )
+        val updatedContractAcceptance = sixWeeksPlanStartDate.plusWeeks(6)
+        originalCommand.copy(ratePlans = replacementPlans, contractAcceptance = updatedContractAcceptance)
+      }
+      updatedCommand.getOrElse(originalCommand)
     }
-    updatedCommand.getOrElse(originalCommand)
   }
 
   def processSubscription(subscriptionData: SubscribeRequest,
@@ -135,7 +136,7 @@ class CheckoutService(
 
     (for {
       //check user exists
-      userExists <- EitherT(IdentityService.doesUserExist(personalData.email).map(\/.right[FatalErrors, Boolean]))
+      userExists <- EitherT(identityService.doesUserExist(personalData.email).map(\/.right[FatalErrors, Boolean]))
       _ <- Monad[SubNel].whenM(userExists && authenticatedUserOpt.isEmpty)(emailError)
       //update salesforce contact
       contactId <- EitherT(createOrUpdateUserInSalesforce(subscriptionData, idMinimalUser))
@@ -148,17 +149,18 @@ class CheckoutService(
       //prepare a sub to send to zuora
       fulfilmentDelay = CheckoutService.fulfilmentDelay(subscriptionData.productData)
       initialSubscribe = createSubscribeRequest(personalData, soldToContact, requestData, plan, combinedIds, paymentMethod, payment.makeAccount, Some(fulfilmentDelay), Some(paymentDelay), telephoneNumber)
-      withTrial = processSixWeekIntroductoryPeriod(fulfilmentDelay, initialSubscribe)
+      withTrial <- EitherT(processSixWeekIntroductoryPeriod(fulfilmentDelay, initialSubscribe).map(\/.right[FatalErrors, Subscribe]))
       //handle promotion
       validPromotion = promoCode.flatMap {
         promoService.validate[NewUsers](_, personalData.address.country.getOrElse(Country.UK), subscriptionData.productRatePlanId).toOption
       }.withLogging("validating promotion")
-      withPromo = validPromotion.map{v =>
-        //TODO: This should just be type PlanFinder
-        val planFinder : ProductRatePlanId => BillingPeriod = prpId => catalog.paid.find(_.id == prpId).map(_.charges.billingPeriod).get
-        promotionApplicator.apply(v, planFinder, promoPlans)(withTrial)
-      }.getOrElse(withTrial)
-
+      withPromo <- EitherT(catalog.map { catalog =>
+        validPromotion.map { v =>
+          //TODO: This should just be type PlanFinder
+          val planFinder: ProductRatePlanId => BillingPeriod = prpId => catalog.paid.find(_.id == prpId).map(_.charges.billingPeriod).get
+          promotionApplicator.apply(v, planFinder, promoPlans)(withTrial)
+        }.getOrElse(withTrial)
+      }.map(\/.right[FatalErrors, Subscribe]))
       result <- EitherT(createSubscription(withPromo, combinedIds))
       out <- postSubscribeSteps(authenticatedUserOpt, contactId, result, subscriptionData, validPromotion)
     } yield CheckoutSuccess(contactId, out._1, result, validPromotion, out._2)).run
@@ -378,7 +380,7 @@ class CheckoutService(
       if (currentVersionExpired) CheckoutService.determineFirstAvailableWeeklyDate(now) else subscription.termEndDate
     }.withContextLogging("startDateForRenewal")
 
-    def constructRenewCommand(maybeValidPromo: Option[ValidPromotion[com.gu.memsub.promo.Renewal]]): Future[Renew] = Future {
+    def constructRenewCommand(maybeValidPromo: Option[ValidPromotion[com.gu.memsub.promo.Renewal]]): Future[Renew] = {
       val newRatePlan = RatePlan(renewal.plan.id.get, None)
       val basicRenewCommand = Renew(
         subscriptionId = subscription.id.get,
@@ -400,15 +402,17 @@ class CheckoutService(
       validPromotion <- promoService.validate[com.gu.memsub.promo.Renewal](code, country, renewal.plan.id).leftMap(_.msg).withContextLogging("validated promotion")
     } yield validPromotion
 
-    def applyPromoIfNecessary(maybeValidPromo: Option[ValidPromotion[com.gu.memsub.promo.Renewal]], basicRenewCommand: Renew): Renew = {
-      maybeValidPromo match {
-        case Some(validPromotion) => {
-          info(s"Attempting to apply the promotion ${validPromotion.code}")
-          p.apply(validPromotion, prpId => catalog.paid.find(_.id == prpId).map(_.charges.billingPeriod).get, promoPlans)(basicRenewCommand)
-        }
-        case None => {
-          info(s"No promotion to apply, keeping basicRenewCommand")
-          basicRenewCommand
+    def applyPromoIfNecessary(maybeValidPromo: Option[ValidPromotion[com.gu.memsub.promo.Renewal]], basicRenewCommand: Renew): Future[Renew] = {
+      catalog.map { catalog =>
+        maybeValidPromo match {
+          case Some(validPromotion) => {
+            info(s"Attempting to apply the promotion ${validPromotion.code}")
+            p.apply(validPromotion, prpId => catalog.paid.find(_.id == prpId).map(_.charges.billingPeriod).get, promoPlans)(basicRenewCommand)
+          }
+          case None => {
+            info(s"No promotion to apply, keeping basicRenewCommand")
+            basicRenewCommand
+          }
         }
       }
     }

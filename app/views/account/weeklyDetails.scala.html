@@ -8,7 +8,7 @@
 @import com.gu.zuora.ZuoraRestService.SoldToContact
 @(
     subscription: Subscription[SubscriptionPlan.WeeklyPlan], billingSchedule: Option[BillingSchedule], contact: SoldToContact, maybeEmail:Option[String], paymentMethodIsPaymentCard: Boolean
-)(implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackend.Resolution)
+)(implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackends.Resolution)
 
 @main("Your Guardian Weekly subscription | The Guardian", bodyClasses = List("is-wide"), edition = DigitalEdition.getForCountry(contact.country), touchpointBackendResolutionOpt = Some(touchpointBackendResolution), managementPage = true) {
     @helper.javascriptRouter("jsRoutes")(

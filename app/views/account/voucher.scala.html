@@ -5,7 +5,7 @@
 @import com.gu.memsub.subsv2.SubscriptionPlan.Voucher
 @(
     subscription: Subscription[Voucher], billingSchedule: Option[BillingSchedule], maybeEmail: Option[String], paymentMethodIsPaymentCard: Boolean
-)(implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackend.Resolution)
+)(implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackends.Resolution)
 
 @main("Your Guardian subscription | The Guardian", bodyClasses = List("is-wide"), edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution), managementPage = true) {
 
