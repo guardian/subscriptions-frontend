@@ -11,20 +11,8 @@ function showNothingFound(addressSection) {
 }
 
 function fillInChooseAddressBox(addressSection, addresses) {
-    var options = [{
-        value: '-1',
-        name: 'Please choose an address'
-    }];
-    for (var i = 0, leni = addresses.length; i < leni; i++) {
-        options.push({
-            value: addresses[i],
-            name: addresses[i].replace(/[, ]+/g, ', ')
-        });
-    }
-    ReactDOM.render(<ChooseAddress addressSection={addressSection} />, addressSection.$ADDRESS_CHOOSER[0], component => component.setState({
-        value: '-1',
-        options: options
-    }));
+    let options = addresses.map(address => ({name: address.replace(/[, ]+/g, ', '), value: address}))
+    ReactDOM.render(<ChooseAddress addressSection={addressSection} options={options} />, addressSection.$ADDRESS_CHOOSER[0]);
 }
 
 function getSantitisedPostcode(addressSection) {

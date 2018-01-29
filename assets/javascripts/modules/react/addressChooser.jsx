@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types';
 
 function chooseAddress(addressSection, addressStr) {
     if (!addressSection) { return; }
@@ -15,12 +16,26 @@ export default class ChooseAddress extends React.Component {
     constructor(props) {
         super(props)
         this.state = {
-            value: '?',
-            options: [{
-                value: '-1',
-                name: 'No address found'
-            }]
+            value: '-1'
         }
+        if(props.options){
+            this.options = [
+                {
+                    value: '-1',
+                    name: 'Please select an address'
+                },
+                ... props.options
+            ]
+        } else {
+            this.options = [
+
+                {
+                    value: '-1',
+                    name: 'No address found'
+                }
+            ]
+        }
+        
     }
 
     handleChange = (e) => {
@@ -36,8 +51,16 @@ export default class ChooseAddress extends React.Component {
         };
         return (
             <select className="select select--wide" onChange={this.handleChange} value={this.state.value}>
-                {this.state.options.map(createItem)}
+                {this.options.map(createItem)}
             </select>
         );
     }
+}
+
+ChooseAddress.propTypes = {
+    addressSection: PropTypes.object.isRequired,
+    options: PropTypes.arrayOf(PropTypes.shape({
+        name: PropTypes.string,
+        value: PropTypes.string
+    }))
 }
