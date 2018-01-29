@@ -2,7 +2,7 @@
  * Append-around pattern
  * Based on https://github.com/filamentgroup/AppendAround
  */
-define(['lodash/function/debounce'], function (debounce) {
+define(['lodash.debounce'], function (debounce) {
     'use strict';
 
     var APPEND_SELECTOR = '.js-append';

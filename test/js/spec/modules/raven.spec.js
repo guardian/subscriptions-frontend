@@ -1,4 +1,4 @@
-define(['modules/raven', 'lodash/lang/isEqual'], function (raven, isEqual) {
+define(['modules/raven'], function (raven) {
     describe('Raven', function () {
         it('should return a tags object', function () {
             var tags = raven.getTags('DEV');
@@ -11,10 +11,6 @@ define(['modules/raven', 'lodash/lang/isEqual'], function (raven, isEqual) {
             });
             expect(tags.build_number).toBe('1234');
             expect(tags.userIdentityId).toBe('4321');
-            expect(isEqual(tags, {
-                build_number: '1234',
-                userIdentityId: '4321'
-            })).toBe(true);
         });
     });
 });

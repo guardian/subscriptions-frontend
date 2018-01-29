@@ -1,13 +1,16 @@
-define(['lodash/object/pick', 'utils/user', 'raven-js'], function (pick, userUtil, Raven) {
+define(['utils/user', 'raven-js'], function (userUtil, Raven) {
     'use strict';
 
     function getTags(buildNumber, user) {
-        return pick({
-            build_number: buildNumber,
-            userIdentityId: user ? user.id : undefined
-        }, function (val) {
-            return val !== undefined;
-        });
+        if (user && user.id) {
+            return {
+                build_number: buildNumber,
+                userIdentityId: user.id
+            }
+        }
+        return {
+            build_number: buildNumber
+        }
     }
 
     function init(dsn) {
@@ -42,4 +45,4 @@ define(['lodash/object/pick', 'utils/user', 'raven-js'], function (pick, userUti
         Raven: Raven
     };
 })
-;
+    ;

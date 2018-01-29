@@ -1,4 +1,4 @@
-define(['lodash/object/extend'], function (extend) {
+define([], function () {
     'use strict';
 
     /**
@@ -9,7 +9,7 @@ define(['lodash/object/extend'], function (extend) {
      * @returns {{}}
      */
     var serializer = function (elems, mixin) {
-        var data = extend({}, mixin);
+        var data = {...mixin};
         elems.filter(function (elem) {
             return elem.name !== '' && !elem.disabled && elem.type && (elem.type !== 'checkbox' && elem.type !== 'radio' || elem.checked);
         }).map(function (elem) {
