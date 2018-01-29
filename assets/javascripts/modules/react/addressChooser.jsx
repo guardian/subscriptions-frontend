@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types';
 
 function chooseAddress(addressSection, addressStr) {
     if (!addressSection) { return; }
@@ -11,36 +12,55 @@ function chooseAddress(addressSection, addressStr) {
     }
 }
 
-export default React.createClass({
-    displayName: 'ChooseAddress',
-    getDefaultProps () {
-        return {
-            addressSection: null
-        };
-    },
-    getInitialState () {
-        return {
-            value: '?',
-            options: [{
-                value: '-1',
-                name: 'No address found'
-            }]
-        };
-    },
-    handleChange (e) {
-        var target = e.target;
-        this.state.value = target.value;
+export default class ChooseAddress extends React.Component {
+    constructor(props) {
+        super(props)
+        this.state = {
+            value: '-1'
+        }
+        if(props.options){
+            this.options = [
+                {
+                    value: '-1',
+                    name: 'Please select an address'
+                },
+                ... props.options
+            ]
+        } else {
+            this.options = [
+
+                {
+                    value: '-1',
+                    name: 'No address found'
+                }
+            ]
+        }
+        
+    }
+
+    handleChange = (e) => {
+        let target = e.target;
+        this.setState({ value: target.value });
         chooseAddress(this.props.addressSection, target.value);
         this.forceUpdate();
-    },
-    render () {
-        var createItem = function (item, key) {
+    }
+
+    render() {
+        let createItem = (item, key) => {
             return <option key={key} value={item.value}>{item.name}</option>;
         };
         return (
             <select className="select select--wide" onChange={this.handleChange} value={this.state.value}>
-                {this.state.options.map(createItem)}
+                {this.options.map(createItem)}
             </select>
         );
     }
-})
+}
+
+ChooseAddress.propTypes = {
+    addressSection: PropTypes.object.isRequired,
+    options: PropTypes.arrayOf(PropTypes.shape({
+        name: PropTypes.string,
+        value: PropTypes.string
+    }))
+}

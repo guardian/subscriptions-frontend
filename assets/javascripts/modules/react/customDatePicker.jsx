@@ -2,31 +2,25 @@ import React from 'react'
 import DatePicker from 'react-datepicker'
 import moment from 'moment'
 
-export default React.createClass({
-    displayName: 'CustomDatePick',
+export default class CustomDatePick extends React.Component {
+    constructor(props) {
+        super(props)
 
-    getDefaultProps () {
-        return {
-            minDate: moment()
+        this.state = {
+            startDate: props.minDate || moment()
         }
-    },
+    }
 
-    getInitialState () {
-        return {
-            startDate: this.props.minDate
-        }
-    },
-
-    handleChange (date) {
+    render() {
+        return <DatePicker
+            selected={this.state.startDate}
+            onChange={this.handleChange}
+            {...this.props} />
+    }
+    
+    handleChange = (date) => {
         this.setState({
             startDate: date
         })
-    },
-
-    render () {
-        return <DatePicker
-                    selected={this.state.startDate}
-                    onChange={this.handleChange}
-                    {...this.props} />
     }
-})
+}
