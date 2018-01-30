@@ -1,35 +1,16 @@
-import javax.inject.Inject
-
-import akka.stream.Materializer
 import configuration.Config
-import controllers.AccountManagement
-import controllers.CAS
-import controllers.CachedAssets
-import controllers.Checkout
-import controllers.DigitalPack
-import controllers.Homepage
-import controllers.Management
-import controllers.OAuth
-import controllers.Offers
-import controllers.PatternLibrary
-import controllers.PromoLandingPage
-import controllers.Promotion
-import controllers.Shipping
-import controllers.Testing
-import controllers.WeeklyLandingPage
+import controllers._
 import filters.{AddEC2InstanceHeader, AddGuIdentityHeaders, CheckCacheHeadersFilter, HandleXFrameOptionsOverrideHeader}
 import loghandling.Logstash
 import monitoring.SentryLogging
-import play.api._
 import play.api.ApplicationLoader.Context
-import play.api.http.DefaultHttpFilters
-import play.api.libs.concurrent.AkkaComponents
+import play.api._
 import play.api.libs.ws.ahc.AhcWSComponents
 import play.api.mvc.EssentialFilter
-import play.filters.csrf.{CSRFComponents, CSRFFilter}
+import play.filters.csrf.CSRFComponents
 import play.filters.headers.{SecurityHeadersConfig, SecurityHeadersFilter}
 import router.Routes
-import services.{IdentityService, TouchpointBackends}
+import services.TouchpointBackends
 
 class MyApplicationLoader extends ApplicationLoader {
   def load(context: Context) = {
@@ -45,10 +26,8 @@ class MyApplicationLoader extends ApplicationLoader {
 class MyComponents(context: Context)
   extends BuiltInComponentsFromContext(context)
     with AhcWSComponents
-with CSRFComponents
+    with CSRFComponents
 {
-
-  val a = IdentityService
 
   val touchpointBackends = new TouchpointBackends(actorSystem, wsClient)
 
