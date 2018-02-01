@@ -327,12 +327,12 @@ object ManageWeekly extends ContextLogging {
 }
 
 
-class AccountManagement(fBackendFactory: TouchpointBackends) extends Controller with ContextLogging with CommonActions {
+class AccountManagement(touchpointBackends: TouchpointBackends) extends Controller with ContextLogging with CommonActions {
 
   val accountManagementAction = NoCacheAction
 
   def subscriptionFromUserDetails(loginRequestOpt: Option[AccountManagementLoginRequest])(implicit request: Request[AnyContent]): Future[Option[Subscription[ContentSubscription]]] = {
-    implicit val resolution: TouchpointBackends.Resolution = fBackendFactory.forRequest(PreSigninTestCookie, request.cookies)
+    implicit val resolution: TouchpointBackends.Resolution = touchpointBackends.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
 
     def detailsMatch(zuoraContact: Contact, loginRequest: AccountManagementLoginRequest): Boolean = {
@@ -357,14 +357,14 @@ class AccountManagement(fBackendFactory: TouchpointBackends) extends Controller 
   }
 
   def manage(subscriberId: Option[String] = None, errorCode: Option[String] = None, promoCode: Option[PromoCode] = None): Action[AnyContent] = accountManagementAction.async { implicit request =>
-    implicit val resolution: TouchpointBackends.Resolution = fBackendFactory.forRequest(PreSigninTestCookie, request.cookies)
+    implicit val resolution: TouchpointBackends.Resolution = touchpointBackends.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
     val eventualMaybeSubscription = SessionSubscription.subscriptionFromRequest
     val errorCodes = errorCode.toSeq.flatMap(_.split(',').map(_.trim)).filterNot(_.isEmpty).toSet
 
     val futureMaybeEmail: OptionT[Future, String] = for {
       authUser <- OptionT(Future.successful(authenticatedUserFor(request)))
-      idUser <- OptionT(fBackendFactory.identityService.userLookupByCredentials(authUser.credentials))
+      idUser <- OptionT(touchpointBackends.identityService.userLookupByCredentials(authUser.credentials))
     } yield idUser.primaryEmailAddress
 
     val futureSomeMaybeEmail: Future[Option[Option[String]]] =  futureMaybeEmail.run.map(a => Some(a))
@@ -422,7 +422,7 @@ class AccountManagement(fBackendFactory: TouchpointBackends) extends Controller 
   }
 
   def processSuspension: Action[AnyContent] = accountManagementAction.async { implicit request =>
-    implicit val resolution: Resolution = fBackendFactory.forRequest(PreSigninTestCookie, request.cookies)
+    implicit val resolution: Resolution = touchpointBackends.forRequest(PreSigninTestCookie, request.cookies)
     ManageDelivery.suspend
   }
 
@@ -431,17 +431,17 @@ class AccountManagement(fBackendFactory: TouchpointBackends) extends Controller 
   }
 
   def processRenewal: Action[AnyContent] = accountManagementAction.async { implicit request =>
-    implicit val resolution: TouchpointBackends.Resolution = fBackendFactory.forRequest(PreSigninTestCookie, request.cookies)
+    implicit val resolution: TouchpointBackends.Resolution = touchpointBackends.forRequest(PreSigninTestCookie, request.cookies)
     ManageWeekly.renew
   }
 
   def renewThankYou: Action[AnyContent] = accountManagementAction.async { implicit request =>
-    implicit val resolution: TouchpointBackends.Resolution = fBackendFactory.forRequest(PreSigninTestCookie, request.cookies)
+    implicit val resolution: TouchpointBackends.Resolution = touchpointBackends.forRequest(PreSigninTestCookie, request.cookies)
     ManageWeekly.renewThankYou
   }
 
   def reportDeliveryProblem: Action[ReportDeliveryProblem] = accountManagementAction.async(parse.form(ReportDeliveryProblemForm.report)) { implicit request =>
-    implicit val resolution: TouchpointBackends.Resolution = fBackendFactory.forRequest(PreSigninTestCookie, request.cookies)
+    implicit val resolution: TouchpointBackends.Resolution = touchpointBackends.forRequest(PreSigninTestCookie, request.cookies)
     ManageDelivery.fulfilmentLookup
   }
 
