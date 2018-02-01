@@ -46,7 +46,7 @@ libraryDependencies ++= Seq(
     ws,
     filters,
     PlayImport.specs2 % "test",
-    "com.gu" %% "membership-common" % "0.1-SNAPSHOT",
+    "com.gu" %% "membership-common" % "0.495",
     "com.gu" %% "memsub-common-play-auth" % "1.2",
     "com.gu" %% "identity-test-users" % "0.6",
     "com.gu" %% "content-authorisation-common" % "0.1",
