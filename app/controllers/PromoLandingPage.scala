@@ -141,18 +141,18 @@ class PromoLandingPage (override val wsClient: WSClient, tpBackend: TouchpointBa
 
     val maybeLandingPage = for {
       promotion <- OptionT(Future.successful(maybePromotion))
-    aaa<- {
-      val promoCode: PromoCode = promotion.codes.headOption.getOrElse(undefinedPromoCode)
-      val country = (maybeCountry orElse request.getFastlyCountry).getOrElse(Country.UK)
+      landingPageHtml <- {
+        val promoCode: PromoCode = promotion.codes.headOption.getOrElse(undefinedPromoCode)
+        val country = (maybeCountry orElse request.getFastlyCountry).getOrElse(Country.UK)
 
-      val hreflangs = CountryGroup.countries.map { country =>
-        Hreflang(Config.subscriptionsUrl + routes.PromoLandingPage.preview(Some(country)).url, s"en-${country.alpha2}")
+        val hreflangs = CountryGroup.countries.map { country =>
+          Hreflang(Config.subscriptionsUrl + routes.PromoLandingPage.preview(Some(country)).url, s"en-${country.alpha2}")
+        }
+        val hreflang = Hreflangs(Config.subscriptionsUrl + routes.PromoLandingPage.preview(Some(country)).url, hreflangs)
+
+        OptionT(catalogPromoLandingPage.map(_.getLandingPage(promotion, country, hreflang)(promoCode)))
       }
-      val hreflang = Hreflangs(Config.subscriptionsUrl + routes.PromoLandingPage.preview(Some(country)).url, hreflangs)
-
-      OptionT(catalogPromoLandingPage.map(_.getLandingPage(promotion, country, hreflang)(promoCode)))
-    }
-    } yield aaa
+    } yield landingPageHtml
 
     maybeLandingPage.run.map(_.map(OkWithPreviewHeaders).getOrElse(NotFound))
   }
