@@ -37,7 +37,7 @@ class DigitalPack(touchpointBackend: TouchpointBackend) extends Controller with 
       Ok(views.html.digitalpack.info(digitalEdition, price))
     }.valueOr { err =>
       logger.error(s"failed landingPage: ${err.list.mkString(", ")}")
-      InternalServerError("oops")
+      InternalServerError("failed to read catalog, see the logs")
     })
   }
 
