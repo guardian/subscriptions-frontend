@@ -169,8 +169,8 @@ class Checkout(fBackendFactory: TouchpointBackends) extends Controller with Lazy
         }
       }
     }.valueOr { err =>
-      logger.error(s"failed landingPage: ${err.list.mkString(", ")}")
-      Future.successful(InternalServerError("oops"))
+      logger.error(s"failed renderCheckout: ${err.list.mkString(", ")}")
+      Future.successful(InternalServerError("failed to render checkout due to catalog issues"))
     }
     }.flatMap(identity)
   }
