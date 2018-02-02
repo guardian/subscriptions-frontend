@@ -2,7 +2,7 @@ import configuration.Config
 import controllers._
 import filters.{AddEC2InstanceHeader, AddGuIdentityHeaders, CheckCacheHeadersFilter, HandleXFrameOptionsOverrideHeader}
 import loghandling.Logstash
-import monitoring.SentryLogging
+import monitoring.{ErrorHandler, SentryLogging}
 import play.api.ApplicationLoader.Context
 import play.api._
 import play.api.libs.ws.ahc.AhcWSComponents
@@ -31,7 +31,10 @@ class MyComponents(context: Context)
 
   val touchpointBackends = new TouchpointBackends(actorSystem, wsClient)
 
-  lazy val router = new Routes(
+  override lazy val httpErrorHandler: ErrorHandler =
+    new ErrorHandler(environment, configuration, sourceMapper, Some(router))
+
+  lazy val router: Routes = new Routes(
     httpErrorHandler,
     new CachedAssets(),
     new Homepage(),
