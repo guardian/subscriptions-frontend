@@ -22,7 +22,7 @@
     errorCodes: Set[String],
     maybeEmail: Option[String],
     paymentMethodIsPaymentCard: Boolean
-)(implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackend.Resolution)
+)(implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackends.Resolution)
 @main("Manage your subscription | The Guardian", bodyClasses = List("is-wide"), edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution), managementPage = true) {
 
     <main class="page-container gs-container">

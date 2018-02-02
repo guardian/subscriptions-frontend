@@ -5,7 +5,7 @@
     subscriberId: Option[String],
     promoCode: Option[PromoCode],
     message: Option[String]= None
-)(implicit request: RequestHeader, flash: Flash, touchpointBackendResolution: services.TouchpointBackend.Resolution)
+)(implicit request: RequestHeader, flash: Flash, touchpointBackendResolution: services.TouchpointBackends.Resolution)
 
 @main("Manage your subscription | The Guardian", edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
 

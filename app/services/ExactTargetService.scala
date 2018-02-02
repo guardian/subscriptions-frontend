@@ -43,7 +43,7 @@ import scalaz.{-\/, EitherT, \/, \/-}
   */
 class ExactTargetService(
   subscriptionService: subsv2.services.SubscriptionService[Future],
-  paymentService: CommonPaymentService,
+  paymentService: Future[CommonPaymentService],
   zuoraService: ZuoraService,
   salesforceService: SalesforceService
 ) extends ContextLogging {
@@ -63,8 +63,8 @@ class ExactTargetService(
 
     val zuoraPaymentMethod: Future[PaymentMethod] =
       Retry(2, s"Failed to get Zuora payment method ${subscribeResult.subscriptionName} for ${purchaserIds.identityId}") {
-        paymentService.getPaymentMethod(AccountId(subscribeResult.accountId)).map(
-          _.getOrElse(throw new Exception(s"Subscription with no payment method found, ${subscribeResult.subscriptionId}")))}
+        paymentService.flatMap(_.getPaymentMethod(AccountId(subscribeResult.accountId)).map(
+          _.getOrElse(throw new Exception(s"Subscription with no payment method found, ${subscribeResult.subscriptionId}"))))}
 
     def buildRow(sub: Subscription[Plan.Paid], pm: PaymentMethod) = {
       val personalData = subscriptionData.genericData.personalData
@@ -214,9 +214,9 @@ class ExactTargetService(
     }
 
     def getPaymentMethod(accountId: AccountId): Future[\/[Error, PaymentMethod]] =
-      paymentService.getPaymentMethod(oldSub.accountId).map { maybePaymentMethod =>
+      paymentService.flatMap(_.getPaymentMethod(oldSub.accountId).map { maybePaymentMethod =>
         maybePaymentMethod.toRightDisjunction(SimpleError(s"Failed to enqueue guardian weekly renewal email. No payment method found in account"))
-      }
+      })
 
     def sendToQueue(row: GuardianWeeklyRenewalDataExtensionRow): Future[\/[Error, SendMessageResult]] =
       SqsClient.sendDataExtensionToQueue(Config.holidaySuspensionEmailQueue, row).map {

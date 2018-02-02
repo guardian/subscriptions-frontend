@@ -8,7 +8,7 @@
 @import model.DigitalEdition
 @(  subscription: Subscription[ContentSubscription],
     guestAccountForm: Option[Form[model.GuestAccountData]] = None,
-    touchpointBackendResolution: services.TouchpointBackend.Resolution,
+    touchpointBackendResolution: services.TouchpointBackends.Resolution,
     promotion: Option[AnyPromotion] = None,
     startDate: String,
     edition: DigitalEdition

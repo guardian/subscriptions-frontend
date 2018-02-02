@@ -6,7 +6,7 @@
 @import com.gu.memsub.BillingPeriod.OneOffPeriod
 @(plan: SubscriptionPlan.ContentSubscription,
   maybeBillingSchedule: Option[BillingSchedule],
-  touchpointBackendResolution: services.TouchpointBackend.Resolution
+  touchpointBackendResolution: services.TouchpointBackends.Resolution
 )(implicit request: RequestHeader)
 
 @main(s"Confirmation | The Guardian", bodyClasses=List("is-wide"), touchpointBackendResolutionOpt = Some(touchpointBackendResolution), product = Some(plan.product)) {

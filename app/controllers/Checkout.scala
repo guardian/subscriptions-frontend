@@ -42,160 +42,167 @@ import scala.util.Try
 import scalaz.std.scalaFuture._
 import scalaz.{NonEmptyList, OptionT}
 
-class Checkout @Inject() extends Controller with LazyLogging with CatalogProvider with CommonActions {
+class Checkout(fBackendFactory: TouchpointBackends) extends Controller with LazyLogging with CommonActions {
 
   import SessionKeys.{Currency => _, UserId => _, _}
 
-  def checkoutService(implicit res: TouchpointBackend.Resolution): CheckoutService =
+  def checkoutService(implicit res: TouchpointBackends.Resolution): CheckoutService =
     res.backend.checkoutService
 
   def getBetterPlans[A <: CatalogPlan.Paid](plan: A, allPlans: List[A]) =
     allPlans.sortBy(_.charges.gbpPrice.amount).dropWhile(_.charges.gbpPrice.amount <= plan.charges.gbpPrice.amount)
 
   def renderCheckout(countryGroup: String, promoCode: Option[PromoCode], supplierCode: Option[SupplierCode], forThisPlan: String) = NoCacheAction.async { implicit request =>
-    implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
+    implicit val resolution: TouchpointBackends.Resolution = fBackendFactory.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
 
     // countryGroup String above basically means now 'countryOrCountryGroup' so we'll use the fromHint API on DetermineCountryGroup
     val determinedCountryGroup = DetermineCountryGroup.fromHint(countryGroup) getOrElse UK
 
-    val matchingPlanList: Option[PlanList[ContentSubscription]] = {
+    tpBackend.catalogService.catalog.map { _.map { catalog =>
 
-      val testOnlyPlans = if (tpBackend == TouchpointBackend.Test) List(catalog.weekly.zoneB.plansWithAssociations) else List.empty
+      val matchingPlanList: Option[PlanList[ContentSubscription]] = {
 
-      val productsWithoutIntroductoryPlans = List(
-        catalog.delivery.list,
-        catalog.voucher.list,
-        catalog.digipack.plans
-      ).map(plans => PlansWithIntroductory(plans, List.empty))
+        val testOnlyPlans = if (tpBackend == fBackendFactory.Test) List(catalog.weekly.zoneB.plansWithAssociations) else List.empty
 
-      val productsWithIntroductoryPlans = List(
-        catalog.weekly.zoneA.plansWithAssociations,
-        catalog.weekly.zoneC.plansWithAssociations
-      ) ++ testOnlyPlans
+        val productsWithoutIntroductoryPlans = List(
+          catalog.delivery.list,
+          catalog.voucher.list,
+          catalog.digipack.plans
+        ).map(plans => PlansWithIntroductory(plans, List.empty))
 
-      val contentSubscriptionPlans = productsWithoutIntroductoryPlans ++ productsWithIntroductoryPlans
-      contentSubscriptionPlans.flatMap {
-        case PlansWithIntroductory(plans, associations)
-          if (plans.exists(_.slug == forThisPlan)) => {
-        val buyablePlans = plans.filter(_.availableForCheckout)
-        val plansInPriceOrder = buyablePlans.sortBy(_.charges.gbpPrice.amount)
-        val selectedPlan = plansInPriceOrder.find(_.slug == forThisPlan)
-        selectedPlan.map(PlanList(associations,_,plansInPriceOrder))
+        val productsWithIntroductoryPlans = List(
+          catalog.weekly.zoneA.plansWithAssociations,
+          catalog.weekly.zoneC.plansWithAssociations
+        ) ++ testOnlyPlans
+
+        val contentSubscriptionPlans = productsWithoutIntroductoryPlans ++ productsWithIntroductoryPlans
+        contentSubscriptionPlans.flatMap {
+          case PlansWithIntroductory(plans, associations)
+            if (plans.exists(_.slug == forThisPlan)) => {
+            val buyablePlans = plans.filter(_.availableForCheckout)
+            val plansInPriceOrder = buyablePlans.sortBy(_.charges.gbpPrice.amount)
+            val selectedPlan = plansInPriceOrder.find(_.slug == forThisPlan)
+            selectedPlan.map(PlanList(associations,_,plansInPriceOrder))
+          }
+          case _ => None
+        }.headOption
       }
-        case _ => None
-      }.headOption
-    }
 
-    val idUser = (for {
-      authUser <- OptionT(Future.successful(authenticatedUserFor(request)))
-      idUser <- OptionT(IdentityService.userLookupByCredentials(authUser.credentials))
-    } yield idUser).run
+      val idUser = (for {
+        authUser <- OptionT(Future.successful(authenticatedUserFor(request)))
+        idUser <- OptionT(fBackendFactory.identityService.userLookupByCredentials(authUser.credentials))
+      } yield idUser).run
 
-    idUser map { user =>
+      idUser map { user =>
 
-      def renderCheckoutFor(planList: PlanList[CatalogPlan.ContentSubscription]) = {
+        def renderCheckoutFor(planList: PlanList[CatalogPlan.ContentSubscription]) = {
 
-        val personalData = user.map(PersonalData.fromIdUser)
+          val personalData = user.map(PersonalData.fromIdUser)
 
-        def getSettings(fallbackCountry: Option[Country], fallbackCurrency: Currency) = {
-          val localizationSettings = planList.default.localizationSettings
-          val availableCountries = localizationSettings.availableDeliveryCountriesWithCurrency.getOrElse(localizationSettings.availableBillingCountriesWithCurrency)
+          def getSettings(fallbackCountry: Option[Country], fallbackCurrency: Currency) = {
+            val localizationSettings = planList.default.localizationSettings
+            val availableCountries = localizationSettings.availableDeliveryCountriesWithCurrency.getOrElse(localizationSettings.availableBillingCountriesWithCurrency)
 
-          def availableCountryWithCurrencyFor(country: Option[Country]) = country.flatMap(c => availableCountries.find(_.country == c))
-          val personalDataCountry = personalData.flatMap(data => data.address.country)
+            def availableCountryWithCurrencyFor(country: Option[Country]) = country.flatMap(c => availableCountries.find(_.country == c))
+            val personalDataCountry = personalData.flatMap(data => data.address.country)
 
-          val defaultCountryWithCurrency = availableCountryWithCurrencyFor(personalDataCountry) orElse availableCountryWithCurrencyFor(fallbackCountry)
+            val defaultCountryWithCurrency = availableCountryWithCurrencyFor(personalDataCountry) orElse availableCountryWithCurrencyFor(fallbackCountry)
 
-          CountryAndCurrencySettings(
-            availableDeliveryCountries = localizationSettings.availableDeliveryCountriesWithCurrency,
-            availableBillingCountries = localizationSettings.availableBillingCountriesWithCurrency,
-            defaultCountry = defaultCountryWithCurrency.map(_.country),
-            defaultCurrency = defaultCountryWithCurrency.map(_.currency).getOrElse(fallbackCurrency)
-          )
-        }
+            CountryAndCurrencySettings(
+              availableDeliveryCountries = localizationSettings.availableDeliveryCountriesWithCurrency,
+              availableBillingCountries = localizationSettings.availableBillingCountriesWithCurrency,
+              defaultCountry = defaultCountryWithCurrency.map(_.country),
+              defaultCurrency = defaultCountryWithCurrency.map(_.currency).getOrElse(fallbackCurrency)
+            )
+          }
 
-        val countryAndCurrencySettings = planList.default.product match {
-          case Product.Digipack => getSettings(determinedCountryGroup.defaultCountry, determinedCountryGroup.currency)
-          case Product.Delivery => getSettings(UK.defaultCountry, UK.currency)
-          case Product.Voucher => getSettings(UK.defaultCountry, UK.currency)
-          case Product.WeeklyZoneA => {
-            if (Set(UK, US).contains(determinedCountryGroup)) {
-              getSettings(determinedCountryGroup.defaultCountry, determinedCountryGroup.currency)
-            } else {
-              getSettings(UK.defaultCountry, UK.currency)
+          val countryAndCurrencySettings = planList.default.product match {
+            case Product.Digipack => getSettings(determinedCountryGroup.defaultCountry, determinedCountryGroup.currency)
+            case Product.Delivery => getSettings(UK.defaultCountry, UK.currency)
+            case Product.Voucher => getSettings(UK.defaultCountry, UK.currency)
+            case Product.WeeklyZoneA => {
+              if (Set(UK, US).contains(determinedCountryGroup)) {
+                getSettings(determinedCountryGroup.defaultCountry, determinedCountryGroup.currency)
+              } else {
+                getSettings(UK.defaultCountry, UK.currency)
+              }
+            }
+            case Product.WeeklyZoneB | Product.WeeklyZoneC => {
+              if (Set(UK, US).contains(determinedCountryGroup)) {
+                getSettings(None, USD)
+              } else {
+                getSettings(determinedCountryGroup.defaultCountry, determinedCountryGroup.currency)
+              }
             }
           }
-          case Product.WeeklyZoneB | Product.WeeklyZoneC => {
-            if (Set(UK, US).contains(determinedCountryGroup)) {
-              getSettings(None, USD)
-            } else {
-              getSettings(determinedCountryGroup.defaultCountry, determinedCountryGroup.currency)
-            }
-          }
+
+          val digitalEdition = model.DigitalEdition.getForCountry(countryAndCurrencySettings.defaultCountry)
+
+          // either a code to send to the form (left) or a tracking code for the session (right)
+          val countryToValidatePromotionAgainst = countryAndCurrencySettings.defaultCountry orElse determinedCountryGroup.defaultCountry
+
+          val promotion = promoCode.flatMap(tpBackend.promoService.findPromotion)
+
+          val trackingPromotion = promotion.flatMap(_.asTracking)
+          val displayPromoCode = if(promotion.isDefined && trackingPromotion.isEmpty) promoCode else None
+          val trackingCodeSessionData: Seq[(String, String)] = trackingPromotion.flatMap(_ => promoCode.map(p => (PromotionTrackingCode -> p.get))).toSeq
+
+          val resolvedSupplierCode = supplierCode orElse request.session.get(SupplierTrackingCode).map(SupplierCode) // query param wins
+          val supplierCodeSessionData = resolvedSupplierCode.map(code => Seq(SupplierTrackingCode -> code.get)).getOrElse(Seq.empty)
+          val productData = ProductPopulationData(user.map(_.address), planList)
+          Ok(views.html.checkout.payment(
+            personalData = personalData,
+            productData = productData,
+            countryGroup = determinedCountryGroup,
+            touchpointBackendResolution = resolution,
+            promoCode = displayPromoCode,
+            supplierCode = resolvedSupplierCode,
+            edition = digitalEdition,
+            countryAndCurrencySettings = countryAndCurrencySettings
+          )).withSession(request.session.data.toSeq ++ trackingCodeSessionData ++ supplierCodeSessionData: _*)
         }
 
-        val digitalEdition = model.DigitalEdition.getForCountry(countryAndCurrencySettings.defaultCountry)
-
-        // either a code to send to the form (left) or a tracking code for the session (right)
-        val countryToValidatePromotionAgainst = countryAndCurrencySettings.defaultCountry orElse determinedCountryGroup.defaultCountry
-
-        val promotion = promoCode.flatMap(tpBackend.promoService.findPromotion)
-
-        val trackingPromotion = promotion.flatMap(_.asTracking)
-        val displayPromoCode = if(promotion.isDefined && trackingPromotion.isEmpty) promoCode else None
-        val trackingCodeSessionData: Seq[(String, String)] = trackingPromotion.flatMap(_ => promoCode.map(p => (PromotionTrackingCode -> p.get))).toSeq
-
-        val resolvedSupplierCode = supplierCode orElse request.session.get(SupplierTrackingCode).map(SupplierCode) // query param wins
-        val supplierCodeSessionData = resolvedSupplierCode.map(code => Seq(SupplierTrackingCode -> code.get)).getOrElse(Seq.empty)
-        val productData = ProductPopulationData(user.map(_.address), planList)
-        Ok(views.html.checkout.payment(
-          personalData = personalData,
-          productData = productData,
-          countryGroup = determinedCountryGroup,
-          touchpointBackendResolution = resolution,
-          promoCode = displayPromoCode,
-          supplierCode = resolvedSupplierCode,
-          edition = digitalEdition,
-          countryAndCurrencySettings = countryAndCurrencySettings
-        )).withSession(request.session.data.toSeq ++ trackingCodeSessionData ++ supplierCodeSessionData: _*)
+        matchingPlanList match {
+          case Some(planList) => renderCheckoutFor(planList)
+          case None => Redirect(routes.Homepage.index())
+        }
       }
-
-      matchingPlanList match {
-        case Some(planList) => renderCheckoutFor(planList)
-        case None => Redirect(routes.Homepage.index())
-      }
+    }.valueOr { err =>
+      logger.error(s"failed renderCheckout: ${err.list.mkString(", ")}")
+      Future.successful(InternalServerError("failed to render checkout due to catalog issues"))
     }
-
+    }.flatMap(identity)
   }
 
   def handleCheckout = NoCacheAction.async { implicit request =>
 
     //there's an annoying circular dependency going on here
     val tempData = SubscriptionsForm.subsForm.bindFromRequest().value
-    implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(NameEnteredInForm, tempData)
+    implicit val resolution: TouchpointBackends.Resolution = fBackendFactory.forRequest(NameEnteredInForm, tempData)
     implicit val tpBackend = resolution.backend
     val idUserOpt = authenticatedUserFor(request)
-
-    def marshalSubscribeRequest: SubscribeRequest = {
-      tpBackend.subsForm.bindFromRequest.valueOr {
-        e => throw new Exception(s"Backend validation failed: identityId=${idUserOpt.map(_.user.id).mkString};" +
-          s" JavaScriptEnabled=${request.headers.toMap.contains("X-Requested-With")};" +
-          s" ${e.map(err => s"${err.key} ${err.message}").mkString(", ")}")
-      }
-    }
 
     val sessionTrackingCode = request.session.get(PromotionTrackingCode)
     val sessionSupplierCode = request.session.get(SupplierTrackingCode)
 
-    val preliminarySubscribeRequest = marshalSubscribeRequest
-    val subscribeRequest = preliminarySubscribeRequest.copy(
-      genericData = preliminarySubscribeRequest.genericData.copy(
-        promoCode = preliminarySubscribeRequest.genericData.promoCode orElse sessionTrackingCode.map(PromoCode)
-      )
-    )
+    tpBackend.subsForm.flatMap { subsForm =>
 
-    val thankYouEdition = model.DigitalEdition.getForCountry(subscribeRequest.genericData.personalData.address.country)
+      val preliminarySubscribeRequest = {
+        subsForm.bindFromRequest.valueOr {
+          e =>
+            throw new Exception(s"Backend validation failed: identityId=${idUserOpt.map(_.user.id).mkString};" +
+              s" JavaScriptEnabled=${request.headers.toMap.contains("X-Requested-With")};" +
+              s" ${e.map(err => s"${err.key} ${err.message}").mkString(", ")}")
+        }
+      }
+      val subscribeRequest = preliminarySubscribeRequest.copy(
+        genericData = preliminarySubscribeRequest.genericData.copy(
+          promoCode = preliminarySubscribeRequest.genericData.promoCode orElse sessionTrackingCode.map(PromoCode)
+        )
+      )
+
+      val thankYouEdition = model.DigitalEdition.getForCountry(subscribeRequest.genericData.personalData.address.country)
 
     val requestData = SubscriptionRequestData(
       ipCountry = request.getFastlyCountry,
@@ -294,20 +301,23 @@ class Checkout @Inject() extends Controller with LazyLogging with CatalogProvide
     }
 
     checkoutResult.map(_.fold(failure, success))
+
+    }
+
   }
 
   def convertGuestUser = NoCacheAction.async(parse.form(FinishAccountForm())) { implicit request =>
     val guestAccountData = request.body
     val marketingOptIn = Try(request.session.get(MarketingOptIn).getOrElse("false").toBoolean).getOrElse(false)
 
-    IdentityService.convertGuest(guestAccountData.password, IdentityToken(guestAccountData.token), marketingOptIn)
+    fBackendFactory.identityService.convertGuest(guestAccountData.password, IdentityToken(guestAccountData.token), marketingOptIn)
       .map { cookies =>
         Ok(Json.obj("profileUrl" -> webAppProfileUrl.toString())).withCookies(cookies: _*)
       }
   }
 
   def thankYou() = NoCacheAction.async { implicit request =>
-    implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
+    implicit val resolution: TouchpointBackends.Resolution = fBackendFactory.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
     val session = request.session
 
@@ -346,14 +356,14 @@ class Checkout @Inject() extends Controller with LazyLogging with CatalogProvide
 
   def checkIdentity(email: String) = NoCacheAction.async { implicit request =>
     for {
-      doesUserExist <- IdentityService.doesUserExist(email)
+      doesUserExist <- fBackendFactory.identityService.doesUserExist(email)
     } yield Ok(Json.obj("emailInUse" -> doesUserExist))
   }
 
   val parseDirectDebitForm: BodyParser[DirectDebitData] = parse.form[DirectDebitData](Form(SubscriptionsForm.directDebitDataMapping))
 
   def checkAccount = NoCacheAction.async(parseDirectDebitForm) { implicit request =>
-    implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
+    implicit val resolution: TouchpointBackends.Resolution = fBackendFactory.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
     for {
       isAccountValid <- tpBackend.goCardlessService.checkBankDetails(request.body)

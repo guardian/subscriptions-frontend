@@ -4,7 +4,7 @@
 @import configuration.Config
 @import views.support.{UKStripeService, AUStripeService, CountryWithCurrency}
 @import com.gu.i18n.Country.UK
-@(jsVars: JsVars, touchpointBackendResolutionOpt: Option[services.TouchpointBackend.Resolution])
+@(jsVars: JsVars, touchpointBackendResolutionOpt: Option[services.TouchpointBackends.Resolution])
 @countryWithCurrency = @{CountryWithCurrency(jsVars.country.getOrElse(UK), jsVars.currency)}
 
 <script src="https://polyfill.guim.co.uk/v2/polyfill.min.js?features=default-3.6,Element.prototype.dataset,Array.prototype.includes,Array.prototype.find,fetch,Array.prototype.findIndex,&unknown=polyfill"></script>

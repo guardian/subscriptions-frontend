@@ -3,15 +3,18 @@ import javax.inject.Inject
 
 import actions.CommonActions
 import com.gu.i18n.CountryGroup.UK
-import com.gu.memsub.subsv2.CatalogPlan
+import com.gu.memsub.subsv2.{Catalog, CatalogPlan}
 import model.Subscriptions._
 import play.api.mvc._
-import services.TouchpointBackend
+import services.{TouchpointBackend, TouchpointBackends}
 
-class Shipping @Inject()  extends Controller with CommonActions {
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
+
+class Shipping(touchpointBackend: TouchpointBackend)  extends Controller with CommonActions {
 
   // no need to support test users here really as plans seldom change
-  val catalog = TouchpointBackend.Normal.catalogService.unsafeCatalog
+  val catalog: Future[Catalog] = touchpointBackend.catalogService.catalog.map(_.valueOr(e => throw new IllegalStateException(s"$e while getting catalog")))
 
   private def index(subscriptionCollection: SubscriptionProduct, productSegment: String) = {
     Ok(views.html.shipping.shipping(subscriptionCollection, productSegment))
@@ -23,45 +26,54 @@ class Shipping @Inject()  extends Controller with CommonActions {
       routes.Checkout.renderCheckout(UK.id, None, None, in.slug).url
     )
 
-  def viewCollectionPaperDigital() = NoCacheAction {
+  def viewCollectionPaperDigital() = NoCacheAction.async {
     val segment = "paper-digital"
-    index(CollectionSubscriptionProduct(
-      title = "Paper + digital voucher subscription",
-      description = "Save money on your newspapers and digital content. Plus start using the daily edition and premium live news app immediately.",
-      altPackagePath = s"/delivery/$segment",
-      options = catalog.voucher.list.filter(_.charges.digipack.isDefined).map(planToOptions).sortBy(_.weeklyPrice).reverse
-    ), segment)
+    catalog.map { catalog =>
+      index(CollectionSubscriptionProduct(
+        title = "Paper + digital voucher subscription",
+        description = "Save money on your newspapers and digital content. Plus start using the daily edition and premium live news app immediately.",
+        altPackagePath = s"/delivery/$segment",
+        options = catalog.voucher.list.filter(_.charges.digipack.isDefined).map(planToOptions).sortBy(_.weeklyPrice).reverse
+      ), segment)
+    }
   }
 
-  def viewCollectionPaper() = NoCacheAction {
+  def viewCollectionPaper() = NoCacheAction.async {
     val segment = "paper"
-    index(CollectionSubscriptionProduct(
-      title = "Paper voucher subscription",
-      description = "Save money on your newspapers.",
-      altPackagePath = s"/delivery/$segment",
-      options = catalog.voucher.list.filter(_.charges.digipack.isEmpty).map(planToOptions).sortBy(_.weeklyPrice).reverse
-    ), segment)
+    catalog.map { catalog =>
+      index(CollectionSubscriptionProduct(
+        title = "Paper voucher subscription",
+        description = "Save money on your newspapers.",
+        altPackagePath = s"/delivery/$segment",
+        options = catalog.voucher.list.filter(_.charges.digipack.isEmpty).map(planToOptions).sortBy(_.weeklyPrice).reverse
+      ), segment)
+    }
   }
 
-  def viewDeliveryPaperDigital() = NoCacheAction {
+  def viewDeliveryPaperDigital() = NoCacheAction.async {
     val segment = "paper-digital"
-    index(DeliverySubscriptionProduct(
-      title = "Paper + digital home delivery subscription",
-      description = """|If you live within the M25 you can have your papers delivered by 7am Monday - Saturday and 8.30am on Sunday.
-                      |Plus you can start using the daily edition and premium live news app immediately.""".stripMargin,
-      altPackagePath = s"/collection/$segment",
-      options = catalog.delivery.list.filter(_.charges.digipack.isDefined).map(planToOptions).sortBy(_.weeklyPrice).reverse
-    ), segment)
+    catalog.map { catalog =>
+      index(DeliverySubscriptionProduct(
+        title = "Paper + digital home delivery subscription",
+        description =
+          """|If you live within the M25 you can have your papers delivered by 7am Monday - Saturday and 8.30am on Sunday.
+             |Plus you can start using the daily edition and premium live news app immediately.""".stripMargin,
+        altPackagePath = s"/collection/$segment",
+        options = catalog.delivery.list.filter(_.charges.digipack.isDefined).map(planToOptions).sortBy(_.weeklyPrice).reverse
+      ), segment)
+    }
   }
 
-  def viewDeliveryPaper() = NoCacheAction {
+  def viewDeliveryPaper() = NoCacheAction.async {
     val segment = "paper"
-    index(DeliverySubscriptionProduct(
-      title = "Paper home delivery subscription",
-      description = "If you live within the M25 you can have your papers delivered by 7am Monday - Saturday and 8.30 on Sunday.",
-      altPackagePath = s"/collection/$segment",
-      options = catalog.delivery.list.filter(_.charges.digipack.isEmpty).map(planToOptions).sortBy(_.weeklyPrice).reverse
-    ), segment)
+    catalog.map { catalog =>
+      index(DeliverySubscriptionProduct(
+        title = "Paper home delivery subscription",
+        description = "If you live within the M25 you can have your papers delivered by 7am Monday - Saturday and 8.30 on Sunday.",
+        altPackagePath = s"/collection/$segment",
+        options = catalog.delivery.list.filter(_.charges.digipack.isEmpty).map(planToOptions).sortBy(_.weeklyPrice).reverse
+      ), segment)
+    }
   }
 
 }

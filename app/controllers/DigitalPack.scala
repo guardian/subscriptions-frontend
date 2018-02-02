@@ -1,14 +1,17 @@
 package controllers
 
- import actions.CommonActions
- import com.gu.i18n.CountryGroup.UK
- import model.DigitalEdition
- import model.DigitalEdition._
- import play.api.mvc._
- import services.TouchpointBackend
- import utils.RequestCountry._
+import actions.CommonActions
+import com.gu.i18n.CountryGroup.UK
+import com.typesafe.scalalogging.StrictLogging
+import model.DigitalEdition
+import model.DigitalEdition._
+import play.api.mvc._
+import services.{TouchpointBackend, TouchpointBackends}
+import utils.RequestCountry._
 
-class DigitalPack extends Controller with CommonActions {
+import scala.concurrent.ExecutionContext.Implicits.global
+
+class DigitalPack(touchpointBackend: TouchpointBackend) extends Controller with CommonActions with StrictLogging {
 
   private val queryParamHint = "edition"
 
@@ -26,11 +29,16 @@ class DigitalPack extends Controller with CommonActions {
     }
   }
 
-  def landingPage(code: String) = NoCacheAction { _ =>
+  def landingPage(code: String) = NoCacheAction.async { _ =>
     val digitalEdition = getById(code).getOrElse(INT)
-    val plan = TouchpointBackend.Normal.catalogService.unsafeCatalog.digipack.month
-    val price = plan.charges.price.getPrice(digitalEdition.countryGroup.currency).getOrElse(plan.charges.gbpPrice)
-    Ok(views.html.digitalpack.info(digitalEdition, price))
+    touchpointBackend.catalogService.catalog.map(_.map { catalog =>
+      val plan = catalog.digipack.month
+      val price = plan.charges.price.getPrice(digitalEdition.countryGroup.currency).getOrElse(plan.charges.gbpPrice)
+      Ok(views.html.digitalpack.info(digitalEdition, price))
+    }.valueOr { err =>
+      logger.error(s"Failed to load the Digital Pack landing page: ${err.list.mkString(", ")}")
+      InternalServerError("failed to read catalog, see the logs")
+    })
   }
 
 }

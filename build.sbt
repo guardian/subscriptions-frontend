@@ -99,7 +99,7 @@ packageDescription := """Subscription Frontend"""
 
 riffRaffPackageType := (packageBin in Debian).value
 
-routesGenerator := StaticRoutesGenerator
+routesGenerator := InjectedRoutesGenerator
 
 javaOptions in Universal ++= Seq(
       "-Dpidfile.path=/dev/null",

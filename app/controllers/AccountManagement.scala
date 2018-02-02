@@ -1,8 +1,8 @@
 package controllers
 
 import _root_.services.AuthenticationService._
-import _root_.services.TouchpointBackend
-import _root_.services.TouchpointBackend.Resolution
+import _root_.services.{FulfilmentLookupService, IdentityService, TouchpointBackend, TouchpointBackends}
+import _root_.services.TouchpointBackends.Resolution
 import com.gu.i18n.Country.{UK, US}
 import com.gu.i18n.Currency
 import com.gu.i18n.Currency.{GBP, USD}
@@ -25,11 +25,9 @@ import org.joda.time.LocalDate.now
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json._
 import play.api.mvc.{AnyContent, _}
-import _root_.services.FulfilmentLookupService
 import actions.CommonActions
 import com.gu.memsub.subsv2.{Catalog, ReaderType, Subscription}
 import com.gu.zuora.soap.models.Queries.Account
-import services.IdentityService
 import utils.TestUsers.PreSigninTestCookie
 import views.html.account.thankYouRenew
 import views.support.Dates._
@@ -39,7 +37,7 @@ import utils.RequestCountry._
 import scala.concurrent.Future
 import scalaz.std.scalaFuture._
 import scalaz.syntax.std.option._
-import scalaz.{-\/, EitherT, OptionT, \/, \/-}
+import scalaz.{-\/, EitherT, NonEmptyList, OptionT, \/, \/-}
 
 // this handles putting subscriptions in and out of the session
 object SessionSubscription extends StrictLogging {
@@ -54,9 +52,7 @@ object SessionSubscription extends StrictLogging {
   def clear(result: Result)(implicit request: Request[AnyContent]): Result =
     result.withSession(request.session - SUBSCRIPTION_SESSION_KEY)
 
-  def subscriptionFromRequest(implicit request: Request[_]): Future[Option[Subscription[ContentSubscription]]] = {
-    implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
-    implicit val tpBackend: TouchpointBackend = resolution.backend
+  def subscriptionFromRequest(implicit request: Request[_], tpBackend: TouchpointBackend): Future[Option[Subscription[ContentSubscription]]] = {
 
     (for {
       subscriptionId <- OptionT(Future.successful(request.session.data.get(SUBSCRIPTION_SESSION_KEY)))
@@ -80,14 +76,14 @@ object ManageDelivery extends ContextLogging {
 
   import play.api.mvc.Results._
 
-  def apply(errorCodes: Set[String], pendingHolidays: Seq[HolidayRefund], billingSchedule: Option[BillingSchedule], deliverySubscription: Subscription[Delivery], account: Account, maybeEmail: Option[String], paymentMethodIsPaymentCard: Boolean)(implicit request: Request[AnyContent], touchpoint: TouchpointBackend.Resolution): Result = {
+  def apply(errorCodes: Set[String], pendingHolidays: Seq[HolidayRefund], billingSchedule: Option[BillingSchedule], deliverySubscription: Subscription[Delivery], account: Account, maybeEmail: Option[String], paymentMethodIsPaymentCard: Boolean)(implicit request: Request[AnyContent], touchpoint: TouchpointBackends.Resolution): Result = {
     val suspendedDays = SuspensionService.holidayToSuspendedDays(pendingHolidays, deliverySubscription.plan.charges.chargedDays.toList)
     val chosenPaperDays = deliverySubscription.plan.charges.chargedDays.toList.sortBy(_.dayOfTheWeekIndex)
     val suspendableDays = Config.suspendableWeeks * chosenPaperDays.size
     Ok(views.html.account.delivery(deliverySubscription, account, pendingHolidays, billingSchedule, chosenPaperDays, suspendableDays, suspendedDays, errorCodes, maybeEmail, paymentMethodIsPaymentCard))
   }
 
-  def suspend(implicit request: Request[AnyContent], touchpoint: TouchpointBackend.Resolution): Future[Result] = {
+  def suspend(implicit request: Request[AnyContent], touchpoint: TouchpointBackends.Resolution): Future[Result] = {
     implicit val tpBackend = touchpoint.backend
     implicit val rest = tpBackend.simpleRestClient
     implicit val zuoraRestService = new ZuoraRestService[Future]
@@ -100,9 +96,9 @@ object ManageDelivery extends ContextLogging {
       newHoliday = PaymentHoliday(sub.name, form.startDate, form.endDate)
       _ <- EitherT(tpBackend.suspensionService.renewIfNeeded(sub,newHoliday))
       // 26 because one year from now could be end of second years sub + 2 extra months needed in calculation to cover setting a 6-week suspension on the day before your 12th billing day!
-      oldBS <- EitherT(tpBackend.commonPaymentService.billingSchedule(sub.id, account, numberOfBills = 26).map(_ \/> "Error getting billing schedule"))
+      oldBS <- EitherT(tpBackend.commonPaymentService.flatMap(_.billingSchedule(sub.id, account, numberOfBills = 26).map(_ \/> "Error getting billing schedule")))
       result <- EitherT(tpBackend.suspensionService.addHoliday(newHoliday, oldBS, account.billCycleDay, sub.termEndDate)).leftMap(getAndLogRefundError(_).map(_.code).list.mkString(","))
-      newBS <- EitherT(tpBackend.commonPaymentService.billingSchedule(sub.id, account, numberOfBills = 24).map(_ \/> "Error getting billing schedule"))
+      newBS <- EitherT(tpBackend.commonPaymentService.flatMap(_.billingSchedule(sub.id, account, numberOfBills = 24).map(_ \/> "Error getting billing schedule")))
       pendingHolidays <- EitherT(tpBackend.suspensionService.getUnfinishedHolidays(sub.name, now)).leftMap(_ => "Error getting holidays")
       suspendableDays = Config.suspendableWeeks * sub.plan.charges.chargedDays.size
       suspendedDays = SuspensionService.holidayToSuspendedDays(pendingHolidays, sub.plan.charges.chargedDays.toList)
@@ -144,7 +140,7 @@ object ManageDelivery extends ContextLogging {
     }
   }
 
-  def fulfilmentLookup(implicit request: Request[ReportDeliveryProblem], touchpoint: TouchpointBackend.Resolution): Future[Result] = {
+  def fulfilmentLookup(implicit request: Request[ReportDeliveryProblem], touchpoint: TouchpointBackends.Resolution): Future[Result] = {
     val env = touchpoint.backend.environmentName
     val deliveryProblem = request.body
     logger.info(s"[${env}] Attempting to raise a delivery issue: $deliveryProblem")
@@ -167,16 +163,18 @@ object ManageWeekly extends ContextLogging {
   import play.api.mvc.Results._
 
   // this sequencing concatenates errors if any, otherwise aggregates rights
-  def sequence[A](list: List[\/[String, A]]): \/[String, List[A]] = {
-    val errors = list collect {
-      case -\/(x) => x
+  def sequence[A](list: List[\/[NonEmptyList[String], A]]): \/[NonEmptyList[String], List[A]] = {
+    val errors = (list collect {
+      case -\/(x) => x.list
+    }).flatten
+    errors match {
+      case head :: tail =>
+        -\/(NonEmptyList(head, tail: _*))
+      case Nil =>
+        \/-(list collect {
+          case \/-(x) => x
+        })
     }
-    if (errors.nonEmpty)
-      -\/(errors.mkString(", "))
-    else
-      \/-(list collect {
-        case \/-(x) => x
-      })
   }
 
   case class WeeklyPlanInfo(id: ProductRatePlanId, price: String)
@@ -202,7 +200,7 @@ object ManageWeekly extends ContextLogging {
              paymentMethodIsPaymentCard: Boolean
            )(implicit
              request: Request[AnyContent],
-             resolution: TouchpointBackend.Resolution
+             resolution: TouchpointBackends.Resolution
            ): Future[Result] = {
     implicit val tpBackend = resolution.backend
     implicit val rest = tpBackend.simpleRestClient
@@ -210,31 +208,34 @@ object ManageWeekly extends ContextLogging {
     implicit val flash = request.flash
     implicit val subContext = weeklySubscription
 
-    def getRenewalPlans(account: ZuoraRestService.AccountSummary, currency: Currency) = {
-      val catalog = tpBackend.catalogService.unsafeCatalog
+    def getRenewalPlans(account: ZuoraRestService.AccountSummary, currency: Currency): Future[\/[NonEmptyList[String], List[WeeklyPlanInfo]]] = {
+      EitherT(tpBackend.catalogService.catalog).flatMap { catalog =>
 
-      // Identifies customers who have been wrongly migrated in on a price-adjusted Zone B or C rate plan and are
-      // having the paper delivered to the UK or USA, and pay by GBP or USD respectively. These customers should
-      // be offered Zone A rate plans upon renewal.
-      def shouldBeInZoneA = account.soldToContact.country.exists { soldToCountry =>
-        (soldToCountry == UK && currency == GBP) || (soldToCountry == US && currency == USD)
-      }
+        // Identifies customers who have been wrongly migrated in on a price-adjusted Zone B or C rate plan and are
+        // having the paper delivered to the UK or USA, and pay by GBP or USD respectively. These customers should
+        // be offered Zone A rate plans upon renewal.
+        def shouldBeInZoneA = account.soldToContact.country.exists { soldToCountry =>
+          (soldToCountry == UK && currency == GBP) || (soldToCountry == US && currency == USD)
+        }
 
-      val weeklyPlans = if (shouldBeInZoneA) catalog.weekly.zoneA.plans else catalog.weekly.zoneB.plans
+        val weeklyPlans = if (shouldBeInZoneA) catalog.weekly.zoneA.plans else catalog.weekly.zoneB.plans
 
-      val renewalPlans = weeklyPlans.filter(_.availableForRenewal)
+        val renewalPlans = weeklyPlans.filter(_.availableForRenewal)
 
-      sequence(renewalPlans.map { plan =>
-        val price = plan.charges.price.getPrice(currency).toRightDisjunction(s"could not find price in $currency for plan ${plan.id} ${plan.name}")
-        price.map(price => WeeklyPlanInfo(plan.id, plan.charges.prettyPricing(price.currency)))
-      })
+        val renewalPlansInfo: \/[NonEmptyList[String], List[WeeklyPlanInfo]] = sequence(renewalPlans.map { plan =>
+          val price = plan.charges.price.getPrice(currency).toRightDisjunction(NonEmptyList(s"could not find price in $currency for plan ${plan.id} ${plan.name}"))
+          price.map(price => WeeklyPlanInfo(plan.id, plan.charges.prettyPricing(price.currency)))
+        })
+
+        EitherT(Future.successful(renewalPlansInfo): Future[\/[NonEmptyList[String], List[WeeklyPlanInfo]]])
+      }.run
     }
 
-    def choosePage(account: ZuoraRestService.AccountSummary) = {
+    def choosePage(account: ZuoraRestService.AccountSummary): Future[\/[String, Result]] = {
       val renewPageResult = for {
-        billToCountry <- account.billToContact.country.toRightDisjunction(s"no valid bill to country for account ${account.id}")
-        currency <- account.currency.toRightDisjunction(s"couldn't get new rate/currency for renewal ${account.id}")
-        weeklyPlanInfo <- getRenewalPlans(account, currency).leftMap(errorMessage => s"couldn't get new rate: $errorMessage")
+        billToCountry <- EitherT(Future.successful(account.billToContact.country.toRightDisjunction(s"no valid bill to country for account ${account.id}")))
+        currency <- EitherT(Future.successful(account.currency.toRightDisjunction(s"couldn't get new rate/currency for renewal ${account.id}")))
+        weeklyPlanInfo <- EitherT(getRenewalPlans(account, currency).map(_.leftMap(errorMessage => s"couldn't get new rate: $errorMessage")))
       } yield {
         Ok(weeklySubscription.asRenewable.map { renewableSub =>
           info(s"sub is renewable - showing weeklyRenew page")
@@ -244,7 +245,7 @@ object ManageWeekly extends ContextLogging {
           views.html.account.weeklyDetails(weeklySubscription, billingSchedule, account.soldToContact, maybeEmail, paymentMethodIsPaymentCard)
         })
       }
-      Future.successful(renewPageResult)
+      renewPageResult.run
     }
 
     def maybePageToShow = {
@@ -265,7 +266,7 @@ object ManageWeekly extends ContextLogging {
     }
   }
 
-  def renew(implicit request: Request[AnyContent], touchpoint: TouchpointBackend.Resolution): Future[Result] = {
+  def renew(implicit request: Request[AnyContent], touchpoint: TouchpointBackends.Resolution): Future[Result] = {
     implicit val tpBackend = touchpoint.backend
     implicit val rest = tpBackend.simpleRestClient
     implicit val zuoraRestService = new ZuoraRestService[Future]
@@ -278,12 +279,13 @@ object ManageWeekly extends ContextLogging {
       InternalServerError(jsonError(fullError))
     }
 
-    SessionSubscription.subscriptionFromRequest flatMap { maybeSub =>
+    SessionSubscription.subscriptionFromRequest flatMap { maybeSub: Option[Subscription[ContentSubscription]] =>
       val response = for {
-        sub <- maybeSub.toRightDisjunction("no subscription in request")
-        weeklySub <- sub.asWeekly.toRightDisjunction("subscription is not weekly")
-        renewableSub <- weeklySub.asRenewable(sub).toRightDisjunction("subscription is not renewable")
-        renew <- parseRenewalRequest(request, tpBackend.catalogService.unsafeCatalog)
+        sub <- EitherT[Future, String, Subscription[ContentSubscription]](Future.successful(maybeSub.toRightDisjunction("no subscription in request")))
+        weeklySub <- EitherT(Future.successful(sub.asWeekly.toRightDisjunction("subscription is not weekly")))
+        renewableSub <- EitherT(Future.successful(weeklySub.asRenewable(sub).toRightDisjunction("subscription is not renewable")))
+        catalog <- EitherT(tpBackend.catalogService.catalog.map(_.leftMap(_.list.mkString(", "))))
+        renew <- EitherT(Future.successful(parseRenewalRequest(request, catalog)))
       } yield {
         info(s"Attempting to renew onto ${renew.plan.name} with promo code: ${renew.promoCode}")(sub)
         tpBackend.checkoutService.renewSubscription(renewableSub, renew)(implicitly, implicitly, sub).map {
@@ -296,18 +298,18 @@ object ManageWeekly extends ContextLogging {
             returnError(e.getMessage, sub)
         }
       }
-      response.valueOr(error => Future(BadRequest(jsonError(error))))
+      response.run.map(_.valueOr(error => Future(BadRequest(jsonError(error))))).flatMap(identity)
     }
   }
 
-  def renewThankYou(implicit request: Request[AnyContent], touchpoint: TouchpointBackend.Resolution): Future[Result] = {
+  def renewThankYou(implicit request: Request[AnyContent], touchpoint: TouchpointBackends.Resolution): Future[Result] = {
     implicit val tpBackend = touchpoint.backend
 
     import model.SubscriptionOps._
 
     val res = for {
       subscription <- OptionT(SessionSubscription.subscriptionFromRequest)
-      billingSchedule <- OptionT(tpBackend.commonPaymentService.billingSchedule(subscription.id, subscription.accountId, numberOfBills = 13).map(Some(_):Option[Option[BillingSchedule]]))
+      billingSchedule <- OptionT(tpBackend.commonPaymentService.flatMap(_.billingSchedule(subscription.id, subscription.accountId, numberOfBills = 13).map(Some(_):Option[Option[BillingSchedule]])))
     } yield {
       Ok(thankYouRenew(subscription.nextPlan, billingSchedule, touchpoint))
     }
@@ -325,12 +327,12 @@ object ManageWeekly extends ContextLogging {
 }
 
 
-class AccountManagement extends Controller with ContextLogging with CatalogProvider with CommonActions {
+class AccountManagement(touchpointBackends: TouchpointBackends) extends Controller with ContextLogging with CommonActions {
 
   val accountManagementAction = NoCacheAction
 
   def subscriptionFromUserDetails(loginRequestOpt: Option[AccountManagementLoginRequest])(implicit request: Request[AnyContent]): Future[Option[Subscription[ContentSubscription]]] = {
-    implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
+    implicit val resolution: TouchpointBackends.Resolution = touchpointBackends.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
 
     def detailsMatch(zuoraContact: Contact, loginRequest: AccountManagementLoginRequest): Boolean = {
@@ -355,14 +357,14 @@ class AccountManagement extends Controller with ContextLogging with CatalogProvi
   }
 
   def manage(subscriberId: Option[String] = None, errorCode: Option[String] = None, promoCode: Option[PromoCode] = None): Action[AnyContent] = accountManagementAction.async { implicit request =>
-    implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
+    implicit val resolution: TouchpointBackends.Resolution = touchpointBackends.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
     val eventualMaybeSubscription = SessionSubscription.subscriptionFromRequest
     val errorCodes = errorCode.toSeq.flatMap(_.split(',').map(_.trim)).filterNot(_.isEmpty).toSet
 
     val futureMaybeEmail: OptionT[Future, String] = for {
       authUser <- OptionT(Future.successful(authenticatedUserFor(request)))
-      idUser <- OptionT(IdentityService.userLookupByCredentials(authUser.credentials))
+      idUser <- OptionT(touchpointBackends.identityService.userLookupByCredentials(authUser.credentials))
     } yield idUser.primaryEmailAddress
 
     val futureSomeMaybeEmail: Future[Option[Option[String]]] =  futureMaybeEmail.run.map(a => Some(a))
@@ -371,9 +373,9 @@ class AccountManagement extends Controller with ContextLogging with CatalogProvi
       subscription <- OptionT(eventualMaybeSubscription).filter(!_.isCancelled)
       account <- OptionT(tpBackend.zuoraService.getAccount(subscription.accountId).map(Option(_)))
       pendingHolidays <- OptionT(tpBackend.suspensionService.getUnfinishedHolidays(subscription.name, now).map(_.toOption))
-      billingSchedule <- OptionT(tpBackend.commonPaymentService.billingSchedule(subscription.id, account, numberOfBills = 13).map(Option(_)))
+      billingSchedule <- OptionT(tpBackend.commonPaymentService.flatMap(_.billingSchedule(subscription.id, account, numberOfBills = 13).map(Option(_))))
       maybeEmail <- OptionT(futureSomeMaybeEmail)
-      maybePaymentMethod <- OptionT(tpBackend.commonPaymentService.getPaymentMethod(subscription.accountId).map(Option(_)))
+      maybePaymentMethod <- OptionT(tpBackend.commonPaymentService.flatMap(_.getPaymentMethod(subscription.accountId).map(Option(_))))
     } yield {
       val paymentMethodIsPaymentCard = maybePaymentMethod.collect { case _:PaymentCard => true }.isDefined
       val maybeFutureManagePage = subscription.planToManage.product match {
@@ -420,7 +422,7 @@ class AccountManagement extends Controller with ContextLogging with CatalogProvi
   }
 
   def processSuspension: Action[AnyContent] = accountManagementAction.async { implicit request =>
-    implicit val resolution: Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
+    implicit val resolution: Resolution = touchpointBackends.forRequest(PreSigninTestCookie, request.cookies)
     ManageDelivery.suspend
   }
 
@@ -429,17 +431,17 @@ class AccountManagement extends Controller with ContextLogging with CatalogProvi
   }
 
   def processRenewal: Action[AnyContent] = accountManagementAction.async { implicit request =>
-    implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
+    implicit val resolution: TouchpointBackends.Resolution = touchpointBackends.forRequest(PreSigninTestCookie, request.cookies)
     ManageWeekly.renew
   }
 
   def renewThankYou: Action[AnyContent] = accountManagementAction.async { implicit request =>
-    implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
+    implicit val resolution: TouchpointBackends.Resolution = touchpointBackends.forRequest(PreSigninTestCookie, request.cookies)
     ManageWeekly.renewThankYou
   }
 
   def reportDeliveryProblem: Action[ReportDeliveryProblem] = accountManagementAction.async(parse.form(ReportDeliveryProblemForm.report)) { implicit request =>
-    implicit val resolution: TouchpointBackend.Resolution = TouchpointBackend.forRequest(PreSigninTestCookie, request.cookies)
+    implicit val resolution: TouchpointBackends.Resolution = touchpointBackends.forRequest(PreSigninTestCookie, request.cookies)
     ManageDelivery.fulfilmentLookup
   }
 

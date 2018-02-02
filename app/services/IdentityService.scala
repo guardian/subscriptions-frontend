@@ -11,14 +11,16 @@ import model.error.SubsError
 import play.api.Play.current
 import play.api.http.Status
 import play.api.libs.json._
-import play.api.libs.ws.{WS, WSRequest, WSResponse}
+import play.api.libs.ws.{WS, WSClient, WSRequest, WSResponse}
 import play.api.mvc.Cookie
-
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
+
 import scala.language.implicitConversions
 import scala.concurrent.Future
 import scalaz.{NonEmptyList, \/}
 import model.error.IdentityService._
+import services.IdentityApiClient.{authoriseCall, identityEndpoint}
+import services.PersonalDataJsonSerialiser.convertToUser
 
 class IdentityService(identityApiClient: => IdentityApiClient) extends LazyLogging {
 
@@ -71,7 +73,7 @@ class IdentityService(identityApiClient: => IdentityApiClient) extends LazyLoggi
   }
 
   def convertGuest(password: String, token: IdentityToken, marketingOptIn: Boolean): Future[Seq[Cookie]] = {
-    IdentityApiClient.convertGuest(password, token, marketingOptIn).map { r =>
+    identityApiClient.convertGuest(password, token, marketingOptIn).map { r =>
       if (r.status == Status.OK) {
         CookieBuilder.fromGuestConversion(r.json, Some(Config.Identity.sessionDomain)).fold({ err =>
           logger.error(s"Error while parsing the identity cookies: $err")
@@ -107,7 +109,7 @@ class IdentityService(identityApiClient: => IdentityApiClient) extends LazyLoggi
     }
 }
 
-object IdentityService extends IdentityService(IdentityApiClient) {
+object IdentityService {
 
   class IdentityGuestPasswordError(jsonMsg: String) extends RuntimeException(s"Cannot set password for Identity guest user.")
 
@@ -178,7 +180,75 @@ trait IdentityApiClient {
   def consentEmail: Email => Future[WSResponse]
 }
 
-object IdentityApiClient extends IdentityApiClient with LazyLogging {
+class IdentityApiClientImpl(wsClient: WSClient) extends IdentityApiClient with LazyLogging {
+
+  import IdentityApiClient._
+
+  override val userLookupByEmail: Email => Future[WSResponse] = {
+    val endpoint = authoriseCall(wsClient.url(s"$identityEndpoint/user"))
+
+    email =>
+      endpoint.withQueryString(("emailAddress", email)).execute()
+        .withWSFailureLogging(endpoint)
+        .withCloudwatchMonitoringOfGet
+  }
+
+  override val userLookupByCookies: AccessCredentials.Cookies => Future[WSResponse] = {
+    val endpoint = authoriseCall(wsClient.url(s"$identityEndpoint/user/me").withHeaders(("Referer", s"$identityEndpoint/")))
+
+    cookies =>
+      endpoint.withHeaders(cookies.forwardingHeader).execute()
+        .withWSFailureLogging(endpoint)
+        .withCloudwatchMonitoringOfGet
+  }
+
+  override val createGuest: (PersonalData, Option[Address]) => Future[WSResponse] = {
+    case (data, addr) =>
+      val endpoint = authoriseCall(wsClient.url(s"$identityEndpoint/guest"))
+      endpoint.post(convertToUser(data, addr))
+        .withWSFailureLogging(endpoint)
+        .withCloudwatchMonitoringOfPost
+  }
+
+  override val convertGuest: (Password, IdentityToken, Boolean) => Future[WSResponse] = (password, token, marketingOptIn) => {
+    //If marketingOptIn is true then we will already have sent an email to the user asking them
+    //to confirm their marketing preference. In this case to prevent sending them 2 emails in quick
+    //succession we suppress the standard validation email with the validate-email query parameter.
+    //more info here: https://docs.google.com/document/d/1JDEpehzToi9aAMg4Fk7n_mnvQ_GOOf_kgOPSyWLBweA
+    val validateEmail = if (marketingOptIn) 0 else 1 //Identity expects 1/0 rather than true/false
+    val endpoint = authoriseCall(wsClient.url(s"$identityEndpoint/guest/password?validate-email=$validateEmail"))
+    val json = Json.obj("password" -> password)
+
+    endpoint
+      .withHeaders("X-Guest-Registration-Token" -> token.toString)
+      .put(json)
+      .withWSFailureLogging(endpoint)
+      .withCloudwatchMonitoringOfPut
+  }
+
+  override val updateUserDetails: (PersonalData, Option[Address], AccessCredentials.Cookies) => Future[WSResponse] = { (personalData, addr, authCookies) =>
+    val endpoint = authoriseCall(wsClient.url(s"$identityEndpoint/user/me"))
+    val userJson: JsObject = convertToUser(personalData, addr)
+    val updatedFields =
+      createOnlyFields.foldLeft(userJson) { (map, field) => map - field }
+
+    endpoint.withHeaders(authCookies.forwardingHeader).post(updatedFields)
+      .withWSFailureLogging(endpoint)
+      .withCloudwatchMonitoringOfPost
+  }
+
+  override val consentEmail: Email => Future[WSResponse] = { email =>
+    val endpoint = authoriseCall(wsClient.url(s"$identityEndpoint/consent-email"))
+
+    val json = Json.obj("email" -> email, "set-consents" -> List("supporter"))
+    endpoint.post(json)
+      .withWSFailureLogging(endpoint)
+      .withCloudwatchMonitoringOfPost
+  }
+
+}
+
+object IdentityApiClient extends LazyLogging {
 
   import PersonalDataJsonSerialiser._
 
@@ -226,70 +296,9 @@ object IdentityApiClient extends IdentityApiClient with LazyLogging {
     def withCloudwatchMonitoringOfPut = withCloudwatchMonitoring("PUT")
   }
 
-  private val authoriseCall = (request: WSRequest) =>
+  val authoriseCall = (request: WSRequest) =>
     request.withHeaders(("X-GU-ID-Client-Access-Token", s"Bearer ${Config.Identity.apiToken}"))
 
-  override val userLookupByEmail: Email => Future[WSResponse] = {
-    val endpoint = authoriseCall(WS.url(s"$identityEndpoint/user"))
-
-    email =>
-      endpoint.withQueryString(("emailAddress", email)).execute()
-        .withWSFailureLogging(endpoint)
-        .withCloudwatchMonitoringOfGet
-  }
-
-  override val userLookupByCookies: AccessCredentials.Cookies => Future[WSResponse] = {
-    val endpoint = authoriseCall(WS.url(s"$identityEndpoint/user/me").withHeaders(("Referer", s"$identityEndpoint/")))
-
-    cookies =>
-      endpoint.withHeaders(cookies.forwardingHeader).execute()
-        .withWSFailureLogging(endpoint)
-        .withCloudwatchMonitoringOfGet
-  }
-
-  override val createGuest: (PersonalData, Option[Address]) => Future[WSResponse] = {
-    case (data, addr) =>
-      val endpoint = authoriseCall(WS.url(s"$identityEndpoint/guest"))
-      endpoint.post(convertToUser(data, addr))
-        .withWSFailureLogging(endpoint)
-        .withCloudwatchMonitoringOfPost
-  }
-
-  override val convertGuest: (Password, IdentityToken, Boolean) => Future[WSResponse] = (password, token, marketingOptIn) => {
-    //If marketingOptIn is true then we will already have sent an email to the user asking them
-    //to confirm their marketing preference. In this case to prevent sending them 2 emails in quick
-    //succession we suppress the standard validation email with the validate-email query parameter.
-    //more info here: https://docs.google.com/document/d/1JDEpehzToi9aAMg4Fk7n_mnvQ_GOOf_kgOPSyWLBweA
-    val validateEmail = if (marketingOptIn) 0 else 1 //Identity expects 1/0 rather than true/false
-    val endpoint = authoriseCall(WS.url(s"$identityEndpoint/guest/password?validate-email=$validateEmail"))
-    val json = Json.obj("password" -> password)
-
-    endpoint
-      .withHeaders("X-Guest-Registration-Token" -> token.toString)
-      .put(json)
-      .withWSFailureLogging(endpoint)
-      .withCloudwatchMonitoringOfPut
-  }
-
-  override val updateUserDetails: (PersonalData, Option[Address], AccessCredentials.Cookies) => Future[WSResponse] = { (personalData, addr, authCookies) =>
-    val endpoint = authoriseCall(WS.url(s"$identityEndpoint/user/me"))
-    val userJson: JsObject = convertToUser(personalData, addr)
-    val updatedFields =
-      createOnlyFields.foldLeft(userJson) { (map, field) => map - field }
-
-    endpoint.withHeaders(authCookies.forwardingHeader).post(updatedFields)
-      .withWSFailureLogging(endpoint)
-      .withCloudwatchMonitoringOfPost
-  }
-
-  override val consentEmail: Email => Future[WSResponse] = { email =>
-    val endpoint = authoriseCall(WS.url(s"$identityEndpoint/consent-email"))
-
-    val json = Json.obj("email" -> email, "set-consents" -> List("supporter"))
-    endpoint.post(json)
-      .withWSFailureLogging(endpoint)
-      .withCloudwatchMonitoringOfPost
-  }
 }
 
 class IdApiMetrics(val stage: String) extends CloudWatch

@@ -1,5 +1,6 @@
 package services
 
+import akka.actor.ActorSystem
 import com.gocardless.GoCardlessClient
 import com.gocardless.GoCardlessClient.Environment
 import com.gocardless.GoCardlessClient.Environment.{LIVE, SANDBOX}
@@ -8,6 +9,7 @@ import com.gu.memsub.promo.Promotion._
 import com.gu.memsub.promo.{DynamoPromoCollection, DynamoTables, PromotionCollection}
 import com.gu.memsub.services.{PaymentService => CommonPaymentService, _}
 import com.gu.memsub.subsv2
+import com.gu.memsub.subsv2.Catalog
 import com.gu.memsub.subsv2.services.SubscriptionService._
 import com.gu.monitoring.ServiceMetrics
 import com.gu.okhttp.RequestRunners._
@@ -24,7 +26,9 @@ import monitoring.TouchpointBackendMetrics
 import play.api.Play.current
 import play.api.libs.concurrent.Akka
 import play.api.libs.concurrent.Execution.Implicits._
+import play.api.libs.ws.WSClient
 import play.api.mvc.RequestHeader
+import services.TouchpointBackends.Resolution
 import touchpoint.TouchpointBackendConfig.BackendType
 import touchpoint.TouchpointBackendConfig.BackendType.Testing
 import touchpoint.{TouchpointBackendConfig, ZuoraProperties}
@@ -44,25 +48,27 @@ trait TouchpointBackend {
   def stripeUKMembershipService: StripeService
   def stripeAUMembershipService: StripeService
   def paymentService: PaymentService
-  def commonPaymentService: CommonPaymentService
+  def commonPaymentService: Future[CommonPaymentService]
   def zuoraProperties: ZuoraProperties
   def promoService: PromoService
   def promoCollection: PromotionCollection
   def promoStorage: JsonDynamoService[AnyPromotion, Future]
   def discountRatePlanIds: DiscountRatePlanIds
   def suspensionService: SuspensionService[Future]
-  def subsForm: SubscriptionsForm
+  def subsForm: Future[SubscriptionsForm]
   def exactTargetService: ExactTargetService
   def checkoutService: CheckoutService
   def goCardlessService: GoCardlessService
   implicit def simpleRestClient: SimpleClient[Future]
 }
 
-object TouchpointBackend {
+class TouchpointBackends(actorSystem: ActorSystem, wsClient: WSClient) {
 
   def logE[A](a: => A): A = Try(a).recoverWith({case e: Throwable => e.printStackTrace; Failure(e)}).get
 
-  private implicit val system = logE(Akka.system)
+  private implicit val system: ActorSystem = actorSystem
+
+  lazy val identityService = new IdentityService(new IdentityApiClientImpl(wsClient))
 
   def apply(backendType: TouchpointBackendConfig.BackendType): TouchpointBackend = {
 
@@ -78,41 +84,36 @@ object TouchpointBackend {
     val soapClient = new soap.ClientWithFeatureSupplier(Set.empty, config.zuoraSoap, loggingRunner(soapServiceMetrics), configurableLoggingRunner(20.seconds, soapServiceMetrics))
     val newProductIds = Config.productIds(config.environmentName)
 
-    val sfSimpleContactRepo = new SimpleContactRepository(config.salesforce, system.scheduler, Config.appName)
+    lazy val sfSimpleContactRepo = new SimpleContactRepository(config.salesforce, system.scheduler, Config.appName)
 
     new TouchpointBackend {
       implicit val simpleRestClient: SimpleClient[Future] = new rest.SimpleClient[Future](config.zuoraRest, futureRunner)
       lazy val environmentName: String = config.environmentName
       lazy val salesforceService = new SalesforceServiceImp(sfSimpleContactRepo)
       lazy val catalogService = new subsv2.services.CatalogService[Future](newProductIds, simpleRestClient, Await.result(_, 10.seconds), backendType.name)
+      private val slightlyUnsafeCatalog: Future[Catalog] = catalogService.catalog.map(_.valueOr(e => throw new IllegalStateException(s"$e while getting catalog")))
       lazy val zuoraService = new zuora.ZuoraService(soapClient)
       private val map = this.catalogService.catalog.map(_.fold[CatalogMap](error => {println(s"error: ${error.list.mkString}"); Map()}, _.map))
       lazy val subscriptionService = new subsv2.services.SubscriptionService[Future](newProductIds, map, simpleRestClient, zuoraService.getAccountIds)
       lazy val stripeUKMembershipService = new StripeService(config.stripeUK, loggingRunner(stripeUKMetrics))
       lazy val stripeAUMembershipService = new StripeService(config.stripeAU, loggingRunner(stripeAUMetrics))
       lazy val paymentService = new PaymentService(this.stripeUKMembershipService, this.stripeAUMembershipService, this.zuoraProperties.invoiceTemplates.map(it => it.country -> it).toMap)
-      lazy val commonPaymentService = new CommonPaymentService(zuoraService, this.catalogService.unsafeCatalog.productMap)
+      lazy val commonPaymentService = slightlyUnsafeCatalog.map(catalog => new CommonPaymentService(zuoraService, catalog.productMap))
       lazy val zuoraProperties: ZuoraProperties = config.zuoraProperties
       lazy val promoService = new PromoService(promoCollection, new Discounter(this.discountRatePlanIds))
       lazy val promoCollection = new DynamoPromoCollection(this.promoStorage, 15.seconds)
       lazy val promoStorage: JsonDynamoService[AnyPromotion, Future] = JsonDynamoService.forTable[AnyPromotion](DynamoTables.promotions(Config.config, config.environmentName))
       lazy val discountRatePlanIds: DiscountRatePlanIds = Config.discountRatePlanIds(config.environmentName)
       lazy val suspensionService = new SuspensionService[Future](Config.holidayRatePlanIds(config.environmentName), simpleRestClient)
-      lazy val subsForm = new forms.SubscriptionsForm(this.catalogService.unsafeCatalog)
+      lazy val subsForm = slightlyUnsafeCatalog.map(catalog => new forms.SubscriptionsForm(catalog))
       lazy val exactTargetService: ExactTargetService = new ExactTargetService(this.subscriptionService, this.commonPaymentService, this.zuoraService, this.salesforceService)
-      lazy val checkoutService: CheckoutService = new CheckoutService(IdentityService, this.salesforceService, this.paymentService, this.catalogService.unsafeCatalog, this.zuoraService, new ZuoraRestService[Future], this.exactTargetService, this.zuoraProperties, this.promoService, this.discountRatePlanIds, this.commonPaymentService)
+      lazy val checkoutService: CheckoutService = new CheckoutService(identityService, this.salesforceService, this.paymentService, slightlyUnsafeCatalog, this.zuoraService, new ZuoraRestService[Future], this.exactTargetService, this.zuoraProperties, this.promoService, this.discountRatePlanIds)
       lazy val goCardlessService: GoCardlessService = new GoCardlessService(config.goCardlessToken)
     }
   }
 
-  lazy val Normal = logE(TouchpointBackend(BackendType.Default))
-  lazy val Test = logE(TouchpointBackend(BackendType.Testing))
-
-  case class Resolution(
-    backend: TouchpointBackend,
-    typ: TouchpointBackendConfig.BackendType,
-    validTestUserCredentialOpt: Option[TestUserCredentialType[_]]
-  )
+  lazy val Normal = logE(apply(BackendType.Default))
+  lazy val Test = logE(apply(BackendType.Testing))
 
   /**
    * Alternate credentials are used *only* when the user is not signed in - if you're logged in as
@@ -125,4 +126,12 @@ object TouchpointBackend {
     Resolution(if (backendType == Testing) Test else Normal, backendType, validTestUserCredentialOpt)
   }
 }
+object TouchpointBackends {
 
+  case class Resolution(
+    backend: TouchpointBackend,
+    typ: TouchpointBackendConfig.BackendType,
+    validTestUserCredentialOpt: Option[TestUserCredentialType[_]]
+  )
+
+}

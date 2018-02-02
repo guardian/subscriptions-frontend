@@ -4,7 +4,7 @@ import com.gu.memsub.subsv2.Subscription
 import com.gu.memsub.subsv2.SubscriptionPlan.AnyPlan
 import com.typesafe.scalalogging.StrictLogging
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
-import services.TouchpointBackend
+import services.TouchpointBackends
 
 import scala.concurrent.Future
 import scala.language.implicitConversions
@@ -16,8 +16,8 @@ case class Context(
 
 trait ContextLogging extends StrictLogging {
 
-  implicit def makeContext(implicit sub: Subscription[AnyPlan], resolution: TouchpointBackend.Resolution) = Context(sub, resolution.backend.environmentName)
-  implicit def makeContextFromSub(sub: Subscription[AnyPlan])(implicit resolution: TouchpointBackend.Resolution) = makeContext(sub, resolution)
+  implicit def makeContext(implicit sub: Subscription[AnyPlan], resolution: TouchpointBackends.Resolution) = Context(sub, resolution.backend.environmentName)
+  implicit def makeContextFromSub(sub: Subscription[AnyPlan])(implicit resolution: TouchpointBackends.Resolution) = makeContext(sub, resolution)
 
   // as long as there's an implicit subscription context available, log will output the subscription name automatically
   def info(message: String)(implicit context: Context) = log(logger.info(_), message, context)
