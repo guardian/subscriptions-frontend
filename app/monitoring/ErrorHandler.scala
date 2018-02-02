@@ -1,25 +1,22 @@
 package monitoring
 
-import javax.inject._
-
 import controllers.{Cached, NoCache}
 import play.api._
 import play.api.http.DefaultHttpErrorHandler
 import play.api.mvc.Results._
 import play.api.mvc._
 import play.api.routing.Router
-import com.gu.zuora.soap
+import play.core.SourceMapper
 
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.concurrent._
 
-class ErrorHandler @Inject() (env: Environment,
-                              config: Configuration,
-                              sourceMapper: OptionalSourceMapper,
-                              router: Provider[Router]
-                              ) extends DefaultHttpErrorHandler(env, config, sourceMapper, router) {
-
-  type Handler = PartialFunction[Throwable, Future[Result]]
+class ErrorHandler(
+  env: Environment,
+  config: Configuration,
+  sourceMapper: Option[SourceMapper],
+  router: => Option[Router]
+) extends DefaultHttpErrorHandler(env, config, sourceMapper, router) {
 
   override def onClientError(request: RequestHeader, statusCode: Int, message: String = ""): Future[Result] = {
     super.onClientError(request, statusCode, message).map(Cached(_))
