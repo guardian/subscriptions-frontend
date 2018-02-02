@@ -370,7 +370,7 @@ class Checkout(fBackendFactory: TouchpointBackends) extends Controller with Lazy
     } yield Ok(Json.obj("accountValid" -> isAccountValid))
   }
 
-  def findAddress(postCode: String) = CSRFNoCacheAsyncAction { implicit request =>
+  def findAddress(postCode: String) = NoCacheAction.async { implicit request =>
     GetAddressIOService.find(postCode).map { result =>
       // Capital A 'Addresses' is for compatibility with the https://api.getaddress.io/v2/uk/ response,
       // should a client want not to proxy via this server.
