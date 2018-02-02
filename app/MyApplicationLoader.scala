@@ -5,7 +5,6 @@ import loghandling.Logstash
 import monitoring.{ErrorHandler, SentryLogging}
 import play.api.ApplicationLoader.Context
 import play.api._
-import play.api.http.DefaultHttpErrorHandler
 import play.api.libs.ws.ahc.AhcWSComponents
 import play.api.mvc.EssentialFilter
 import play.filters.csrf.CSRFComponents
