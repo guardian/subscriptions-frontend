@@ -169,9 +169,10 @@ Resources:
           Statement:
           - Effect: Allow
             Action:
-            - logs:*
-            Resource:
-            - arn:aws:logs:*:*:*
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+            Resource: !GetAtt SubscriptionsFrontendLogGroup.Arn
       - PolicyName: PushMetrics
         PolicyDocument:
           Version: '2012-10-17'
@@ -281,6 +282,11 @@ Resources:
       TTL: '120'
       ResourceRecords:
       - !GetAtt 'FrontendElasticLoadBalancer.DNSName'
+  SubscriptionsFrontendLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub subscriptions-frontend-${Stage}
+      RetentionInDays: 14
 Outputs:
   URL:
     Description: URL of the Frontend website
