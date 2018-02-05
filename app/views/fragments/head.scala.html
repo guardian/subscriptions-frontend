@@ -41,10 +41,6 @@
     <link rel="stylesheet" href="@hashedPathFor("stylesheets/ie-old.min.css")"/>
 <![endif]-->
 
-@if(Play.isDev(Play.current)) {
-    <link rel="shortcut icon" type="image/png" href="@hashedPathFor("images/favicons/32x32-dev.ico")"/>
-} else {
-    <link rel="shortcut icon" type="image/png" href="@hashedPathFor("images/favicons/32x32.ico")"/>
-}
+<link rel="shortcut icon" type="image/png" href="@hashedPathFor("images/favicons/32x32.ico")"/>
 
 @fragments.javascriptLaterSteps()

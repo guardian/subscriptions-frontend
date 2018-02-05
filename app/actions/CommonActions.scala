@@ -1,14 +1,10 @@
 package actions
 
- import com.gu.googleauth
-import com.typesafe.scalalogging.LazyLogging
-import configuration.QA.passthroughCookie
-import controllers.{Cached, NoCache}
-import play.api.mvc.Security.AuthenticatedRequest
-import play.api.mvc._
-import play.filters.csrf.{CSRFCheck, CSRFConfig}
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
-import scala.concurrent.Future
+ import controllers.{Cached, NoCache}
+ import play.api.libs.concurrent.Execution.Implicits.defaultContext
+ import play.api.mvc._
+
+ import scala.concurrent.Future
 trait CommonActions {
 
   val StoreAcquisitionDataAction = new ActionBuilder[Request] {
@@ -23,8 +19,6 @@ trait CommonActions {
   val NoCacheAction = StoreAcquisitionDataAction andThen resultModifier(noCache)
 
   val CachedAction = resultModifier(Cached(_))
-
-  val CSRFNoCacheAsyncAction = (block: Request[_] => Future[Result]) => CSRFCheck(action = NoCacheAction.async(block), config = CSRFConfig.global.copy(checkContentType = (x: Option[String]) => true))
 
   def noCache(result: Result): Result = NoCache(result)
 
