@@ -16,20 +16,20 @@ object LandingPageOps {
 
   implicit class ForPromoWithDigitalPackLandingPage(promotion: PromoWithDigitalPackLandingPage) {
     def landingPageSectionColour: String = {
-      getSectionColour(promotion.landingPage) match {
+      getSectionColour(promotion.landingPage.value) match {
         case Blue => "section-blue"
         case Grey => "section-grey"
         case White => "section-white"
       }
     }
     def getSectionSeparator: String = {
-      getSectionColour(promotion.landingPage) match {
+      getSectionColour(promotion.landingPage.value) match {
         case White => "section-separator"
         case _ => if (promotion.asFreeTrial.isDefined) "section-separator" else ""
       }
     }
     def getDescriptionBorder: String = {
-      if (promotion.landingPage.image.isDefined && promotion.expires.exists(now.plusMonths(1).isAfter))
+      if (promotion.landingPage.value.image.isDefined && promotion.expires.exists(now.plusMonths(1).isAfter))
         "promotion-description--bordered"
       else
         ""

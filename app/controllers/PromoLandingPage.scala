@@ -39,7 +39,7 @@ class PromoLandingPage (tpBackend: TouchpointBackend, commonActions: CommonActio
   class CatalogPromoLandingPage(val catalog: Catalog) {
 
     val digitalPackRatePlanIds = catalog.digipack.plans.map(_.id).toSet
-    val allPaperPackages = catalog.delivery.list ++ catalog.voucher.list.toList
+    val allPaperPackages = catalog.delivery.list.toList ++ catalog.voucher.list.toList
     val paperPlusPackageRatePlanIds = allPaperPackages.filter(_.charges.benefits.list.toList.contains(Digipack)).map(_.id).toSet
     val paperOnlyPackageRatePlanIds = allPaperPackages.filterNot(_.charges.benefits.list.toList.contains(Digipack)).map(_.id).toSet
     val guardianWeeklyRatePlanIds = catalog.weekly.zoneA.plans.map(_.id).toSet ++ catalog.weekly.zoneC.plans.map(_.id).toSet
@@ -69,7 +69,7 @@ class PromoLandingPage (tpBackend: TouchpointBackend, commonActions: CommonActio
 
     private def getWeeklyLandingPage(promotion: AnyPromotion, country: Country, hreflangs: Hreflangs)(implicit promoCode: PromoCode): Option[Html] = {
       promotion.asWeekly.filter(p => isActive(asAnyPromotion(p))).map { promotionWithLandingPage =>
-        val description = promotionWithLandingPage.landingPage.description.map { desc =>
+        val description = promotionWithLandingPage.landingPage.value.description.map { desc =>
           Html(PegdownMarkdownRenderer.render(desc)
           )
         }.getOrElse(landing_description())

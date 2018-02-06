@@ -11,7 +11,7 @@
 @deliveryPlans = @{catalog.delivery.list.toList.filter(p => promotion.appliesTo.productRatePlanIds.contains(p.id))}
 @anyPromotion = @{asAnyPromotion(promotion)}
 @title = @{"Subscribe to the Guardian and Observer"}
-@hash = @{s"${promotion.landingPage.defaultProduct}"}
+@hash = @{s"${promotion.landingPage.value.defaultProduct}"}
 @products = @{
     val adapter = planToOptions(promoCode, anyPromotion) _
     val voucherProduct = CollectionSubscriptionProduct(
@@ -34,7 +34,7 @@
         },
         isDiscounted = promotion.asDiscount.isDefined
     )
-    if (promotion.landingPage.defaultProduct == "voucher") {
+    if (promotion.landingPage.value.defaultProduct == "voucher") {
         Seq(voucherProduct, deliveryProduct).filterNot(_.options.isEmpty)
     } else {
         Seq(deliveryProduct, voucherProduct).filterNot(_.options.isEmpty)
@@ -59,7 +59,7 @@
         @fragments.page.header(title)
 
         <section class="promotion-description">
-            @promotion.landingPage.description.fold {
+            @promotion.landingPage.value.description.fold {
                 <p>@promotion.description</p>
             } { d =>
                 <div>@Html(md.render(d))</div>

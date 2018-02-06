@@ -137,13 +137,13 @@ object WeeklyPromotion {
       plan <- plans
       sixOrDiscount = isSixWeek(plan) || maybePromotion.exists(_.appliesTo.productRatePlanIds.contains(plan.id))
       pretty = maybePromotion.filter(_.appliesTo.productRatePlanIds.contains(plan.id)).flatMap(_.asDiscount)
-        .map { discountPromo => plan.charges.prettyPricingForDiscountedPeriod[scalaz.Id.Id, WeeklyLandingPage](discountPromo, currency) }
+        .map { discountPromo => plan.charges.prettyPricingForDiscountedPeriod[scalaz.Id.Identity, WeeklyLandingPage](discountPromo, currency) }
         .getOrElse(plan.charges.billingPeriod match {
           case SixWeeks => s"${currency.identifier}6 for six issues"
           case _ => plan.charges.prettyPricing(currency)
         })
       headline = maybePromotion.flatMap(_.asDiscount)
-        .map { discountPromo => plan.charges.headlinePricingForDiscountedPeriod[scalaz.Id.Id, WeeklyLandingPage](discountPromo, currency) }.getOrElse(plan.charges.billingPeriod match {
+        .map { discountPromo => plan.charges.headlinePricingForDiscountedPeriod[scalaz.Id.Identity, WeeklyLandingPage](discountPromo, currency) }.getOrElse(plan.charges.billingPeriod match {
         case SixWeeks => s"${currency.identifier}6 for six issues"
         case _ => plan.charges.prettyPricing(currency)
       })

@@ -7,7 +7,7 @@
 
 @(promotion: PromoWithDigitalPackLandingPage, md: MarkdownRenderer)
 <div class="promotion-description @promotion.getDescriptionBorder">
-    @promotion.landingPage.description.fold {
+    @promotion.landingPage.value.description.fold {
         <p>@promotion.description</p>
     } { d =>
         @Html(md.render(d))
