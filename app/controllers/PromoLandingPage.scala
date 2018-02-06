@@ -1,5 +1,5 @@
 package controllers
-import actions.OAuthActions
+import actions.{CommonActions, OAuthActions}
 import com.gu.i18n.CountryGroup.byCountryCode
 import com.gu.i18n.{Country, CountryGroup}
 import com.gu.memsub.Benefit.Digipack
@@ -29,7 +29,10 @@ import scala.concurrent.Future
 import scalaz.OptionT
 import scalaz.std.scalaFuture._
 
-class PromoLandingPage (override val wsClient: WSClient, tpBackend: TouchpointBackend) extends Controller with OAuthActions {
+class PromoLandingPage (tpBackend: TouchpointBackend, commonActions: CommonActions, oAuthActions: OAuthActions) extends Controller {
+
+  import commonActions._
+  import oAuthActions._
 
   private val catalogPromoLandingPage: Future[CatalogPromoLandingPage] = tpBackend.catalogService.catalog.map(_.map(c => new CatalogPromoLandingPage(c)).valueOr(e => throw new IllegalStateException(s"$e while getting catalog")))
 

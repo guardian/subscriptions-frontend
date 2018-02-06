@@ -11,8 +11,9 @@ import utils.RequestCountry._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class DigitalPack(touchpointBackend: TouchpointBackend) extends Controller with CommonActions with StrictLogging {
+class DigitalPack(touchpointBackend: TouchpointBackend, commonActions: CommonActions) extends Controller with StrictLogging {
 
+  import commonActions.NoCacheAction
   private val queryParamHint = "edition"
 
   private def redirectResult(digitalEdition: DigitalEdition)(implicit request: Request[AnyContent]) = {

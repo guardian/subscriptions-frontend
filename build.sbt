@@ -45,8 +45,9 @@ libraryDependencies ++= Seq(
     cache,
     ws,
     filters,
+    jodaForms,
     PlayImport.specs2 % "test",
-    "com.gu" %% "membership-common" % "0.496",
+    "com.gu" %% "membership-common" % "0.1-SNAPSHOT",
     "com.gu" %% "memsub-common-play-auth" % "1.2",
     "com.gu" %% "identity-test-users" % "0.6",
     "com.gu" %% "content-authorisation-common" % "0.1",
@@ -61,14 +62,14 @@ libraryDependencies ++= Seq(
     "io.github.bonigarcia" % "webdrivermanager" % "1.7.2" % "test",
     "com.gocardless" % "gocardless-pro" % "2.7.0",
     "com.squareup.okhttp3" % "okhttp" % "3.4.2" % "test",
-    "org.scalaz" %% "scalaz-core" % "7.1.4",
+    "org.scalaz" %% "scalaz-core" % "7.2.7",
     "org.pegdown" % "pegdown" % "1.6.0",
     "com.amazonaws" % "aws-java-sdk-sqs" % "1.11.231",
     "net.databinder.dispatch" %% "dispatch-core" % "0.13.2",
     "com.gu" % "kinesis-logback-appender" % "1.4.2",
     "net.logstash.logback" % "logstash-logback-encoder" % "4.11",
     "com.fasterxml.jackson.dataformat" % "jackson-dataformat-cbor" % "2.9.2",
-    "com.gu" %% "acquisition-event-producer-play25" % "2.0.4",
+    "com.gu" %% "acquisition-event-producer-play26" % "2.0.4",
     "com.google.guava" % "guava" % "23.4-jre" % "test"
 )
 

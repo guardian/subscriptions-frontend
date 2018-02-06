@@ -22,7 +22,9 @@ object WeeklyLandingPage{
   case class Hreflangs(canonical: String, hreflangs: List[Hreflang])
 }
 
-class WeeklyLandingPage(tpBackend: TouchpointBackend) extends Controller with CommonActions {
+class WeeklyLandingPage(tpBackend: TouchpointBackend, commonActions: CommonActions) extends Controller {
+
+  import commonActions._
 
   val international = "int"
 

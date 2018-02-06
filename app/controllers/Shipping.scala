@@ -11,8 +11,9 @@ import services.{TouchpointBackend, TouchpointBackends}
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class Shipping(touchpointBackend: TouchpointBackend)  extends Controller with CommonActions {
+class Shipping(touchpointBackend: TouchpointBackend, commonActions: CommonActions)  extends Controller {
 
+  import commonActions._
   // no need to support test users here really as plans seldom change
   val catalog: Future[Catalog] = touchpointBackend.catalogService.catalog.map(_.valueOr(e => throw new IllegalStateException(s"$e while getting catalog")))
 

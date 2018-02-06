@@ -42,8 +42,9 @@ import scala.util.Try
 import scalaz.std.scalaFuture._
 import scalaz.{NonEmptyList, OptionT}
 
-class Checkout(fBackendFactory: TouchpointBackends) extends Controller with LazyLogging with CommonActions {
+class Checkout(fBackendFactory: TouchpointBackends, commonActions: CommonActions) extends Controller with LazyLogging {
 
+  import commonActions._
   import SessionKeys.{Currency => _, UserId => _, _}
 
   def checkoutService(implicit res: TouchpointBackends.Resolution): CheckoutService =

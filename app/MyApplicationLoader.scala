@@ -1,3 +1,4 @@
+import actions.{CommonActions, OAuthActions}
 import configuration.Config
 import controllers._
 import filters.{AddEC2InstanceHeader, AddGuIdentityHeaders, CheckCacheHeadersFilter, HandleXFrameOptionsOverrideHeader}
@@ -34,23 +35,26 @@ class MyComponents(context: Context)
   override lazy val httpErrorHandler: ErrorHandler =
     new ErrorHandler(environment, configuration, sourceMapper, Some(router))
 
+  val commonActions = new CommonActions(executionContext = executionContext, csrfCheck, parser = playBodyParsers.default)
+  val oAuthActions = new OAuthActions(wsClient = wsClient, commonActions)
+
   lazy val router: Routes = new Routes(
     httpErrorHandler,
     new CachedAssets(),
-    new Homepage(),
-    new Management(wsClient = wsClient, actorSystem = actorSystem, touchpointBackends),
-    new DigitalPack(touchpointBackends.Normal),
-    new Checkout(touchpointBackends),
-    new Promotion(touchpointBackends),
-    new Shipping(touchpointBackends.Normal),
-    new WeeklyLandingPage(touchpointBackends.Normal),
-    new OAuth(wsClient = wsClient),
-    new CAS(wsClient = wsClient),
-    new AccountManagement(touchpointBackends),
-    new PatternLibrary(),
-    new Testing(wsClient = wsClient, touchpointBackends.Test),
-    new PromoLandingPage(wsClient = wsClient, touchpointBackends.Normal),
-    new Offers()
+    new Homepage(commonActions),
+    new Management(actorSystem = actorSystem, touchpointBackends, oAuthActions),
+    new DigitalPack(touchpointBackends.Normal, commonActions),
+    new Checkout(touchpointBackends, commonActions),
+    new Promotion(touchpointBackends, commonActions),
+    new Shipping(touchpointBackends.Normal, commonActions),
+    new WeeklyLandingPage(touchpointBackends.Normal, commonActions),
+    new OAuth(wsClient = wsClient, commonActions),
+    new CAS(oAuthActions),
+    new AccountManagement(touchpointBackends, commonActions),
+    new PatternLibrary(commonActions),
+    new Testing(touchpointBackends.Test, commonActions, oAuthActions),
+    new PromoLandingPage(touchpointBackends.Normal, commonActions, oAuthActions),
+    new Offers(commonActions)
   )
 
   override lazy val httpFilters: Seq[EssentialFilter] = Seq(

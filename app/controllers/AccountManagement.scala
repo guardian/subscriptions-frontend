@@ -327,7 +327,9 @@ object ManageWeekly extends ContextLogging {
 }
 
 
-class AccountManagement(touchpointBackends: TouchpointBackends) extends Controller with ContextLogging with CommonActions {
+class AccountManagement(touchpointBackends: TouchpointBackends, commonActions: CommonActions) extends Controller with ContextLogging {
+
+  import commonActions.NoCacheAction
 
   val accountManagementAction = NoCacheAction
 
