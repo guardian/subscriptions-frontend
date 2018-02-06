@@ -7,8 +7,8 @@
 @import model.Subscriptions._
 
 @(catalog: Catalog, promoCode: PromoCode, promotion: PromoWithNewspaperLandingPage, md: MarkdownRenderer)
-@voucherPlans = @{catalog.voucher.list.filter(p => promotion.appliesTo.productRatePlanIds.contains(p.id))}
-@deliveryPlans = @{catalog.delivery.list.filter(p => promotion.appliesTo.productRatePlanIds.contains(p.id))}
+@voucherPlans = @{catalog.voucher.list.toList.filter(p => promotion.appliesTo.productRatePlanIds.contains(p.id))}
+@deliveryPlans = @{catalog.delivery.list.toList.filter(p => promotion.appliesTo.productRatePlanIds.contains(p.id))}
 @anyPromotion = @{asAnyPromotion(promotion)}
 @title = @{"Subscribe to the Guardian and Observer"}
 @hash = @{s"${promotion.landingPage.defaultProduct}"}
@@ -19,8 +19,8 @@
         description = "",
         altPackagePath = "#delivery",
         options = {
-            voucherPlans.filter(_.charges.digipack.isEmpty).map(adapter).sortBy(_.weeklyPrice).reverse ++
-            voucherPlans.filter(_.charges.digipack.isDefined).map(adapter).sortBy(_.weeklyPrice).reverse
+            voucherPlans.filter(_.charges.digipack.isEmpty).map(adapter).sortBy(_.weeklyPrice).reverse.toList ++
+            voucherPlans.filter(_.charges.digipack.isDefined).map(adapter).sortBy(_.weeklyPrice).reverse.toList
         },
         isDiscounted = promotion.asDiscount.isDefined
     )

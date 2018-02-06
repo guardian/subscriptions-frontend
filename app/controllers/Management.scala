@@ -63,7 +63,7 @@ class Management(actorSystem: ActorSystem, fBackendFactory: TouchpointBackends, 
     Cached(1) {
       tests.fold(
         errors => {
-          errors.list.foreach(warn(_))
+          errors.list.toList.foreach(warn(_))
           ServiceUnavailable("Service Unavailable")
         },
         _ => Ok("OK")

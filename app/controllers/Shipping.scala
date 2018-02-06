@@ -34,7 +34,7 @@ class Shipping(touchpointBackend: TouchpointBackend, commonActions: CommonAction
         title = "Paper + digital voucher subscription",
         description = "Save money on your newspapers and digital content. Plus start using the daily edition and premium live news app immediately.",
         altPackagePath = s"/delivery/$segment",
-        options = catalog.voucher.list.filter(_.charges.digipack.isDefined).map(planToOptions).sortBy(_.weeklyPrice).reverse
+        options = catalog.voucher.list.toList.filter(_.charges.digipack.isDefined).map(planToOptions).sortBy(_.weeklyPrice).reverse
       ), segment)
     }
   }
@@ -46,7 +46,7 @@ class Shipping(touchpointBackend: TouchpointBackend, commonActions: CommonAction
         title = "Paper voucher subscription",
         description = "Save money on your newspapers.",
         altPackagePath = s"/delivery/$segment",
-        options = catalog.voucher.list.filter(_.charges.digipack.isEmpty).map(planToOptions).sortBy(_.weeklyPrice).reverse
+        options = catalog.voucher.list.toList.filter(_.charges.digipack.isEmpty).map(planToOptions).sortBy(_.weeklyPrice).reverse
       ), segment)
     }
   }
@@ -60,7 +60,7 @@ class Shipping(touchpointBackend: TouchpointBackend, commonActions: CommonAction
           """|If you live within the M25 you can have your papers delivered by 7am Monday - Saturday and 8.30am on Sunday.
              |Plus you can start using the daily edition and premium live news app immediately.""".stripMargin,
         altPackagePath = s"/collection/$segment",
-        options = catalog.delivery.list.filter(_.charges.digipack.isDefined).map(planToOptions).sortBy(_.weeklyPrice).reverse
+        options = catalog.delivery.list.toList.filter(_.charges.digipack.isDefined).map(planToOptions).sortBy(_.weeklyPrice).reverse
       ), segment)
     }
   }
@@ -72,7 +72,7 @@ class Shipping(touchpointBackend: TouchpointBackend, commonActions: CommonAction
         title = "Paper home delivery subscription",
         description = "If you live within the M25 you can have your papers delivered by 7am Monday - Saturday and 8.30 on Sunday.",
         altPackagePath = s"/collection/$segment",
-        options = catalog.delivery.list.filter(_.charges.digipack.isEmpty).map(planToOptions).sortBy(_.weeklyPrice).reverse
+        options = catalog.delivery.list.toList.filter(_.charges.digipack.isEmpty).map(planToOptions).sortBy(_.weeklyPrice).reverse
       ), segment)
     }
   }

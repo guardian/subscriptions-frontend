@@ -67,8 +67,8 @@ class Checkout(fBackendFactory: TouchpointBackends, commonActions: CommonActions
         val testOnlyPlans = if (tpBackend == fBackendFactory.Test) List(catalog.weekly.zoneB.plansWithAssociations) else List.empty
 
         val productsWithoutIntroductoryPlans = List(
-          catalog.delivery.list,
-          catalog.voucher.list,
+          catalog.delivery.list.toList,
+          catalog.voucher.list.toList,
           catalog.digipack.plans
         ).map(plans => PlansWithIntroductory(plans, List.empty))
 
@@ -170,7 +170,7 @@ class Checkout(fBackendFactory: TouchpointBackends, commonActions: CommonActions
         }
       }
     }.valueOr { err =>
-      logger.error(s"failed renderCheckout: ${err.list.mkString(", ")}")
+      logger.error(s"failed renderCheckout: ${err.list.toList.mkString(", ")}")
       Future.successful(InternalServerError("failed to render checkout due to catalog issues"))
     }
     }.flatMap(identity)

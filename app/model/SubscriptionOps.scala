@@ -29,7 +29,7 @@ object SubscriptionOps extends LazyLogging {
 
     private def containsPlanFor(p:Product):Boolean = nonExpiredPlans.exists(_.product == p)
 
-    def hasDigitalPack: Boolean = nonExpiredPlans.exists(_.charges.benefits.list.contains(Digipack))
+    def hasDigitalPack: Boolean = nonExpiredPlans.exists(_.charges.benefits.list.toList.contains(Digipack))
 
     val currency = subscription.plans.head.charges.currencies.head
     val nextPlan = subscription.plans.list.maxBy(_.end)
@@ -47,7 +47,7 @@ object SubscriptionOps extends LazyLogging {
         expiredPlans.maxBy(_.end)
       } else {
         // Has a plan(s) starting soon
-        if (subscription.plans.size > 1) {
+        if (subscription.plans.list.size > 1) {
           logger.warn("User has multiple future plans, we are showing them their last ending plan")
         }
         nextPlan

@@ -39,9 +39,9 @@ class PromoLandingPage (tpBackend: TouchpointBackend, commonActions: CommonActio
   class CatalogPromoLandingPage(val catalog: Catalog) {
 
     val digitalPackRatePlanIds = catalog.digipack.plans.map(_.id).toSet
-    val allPaperPackages = catalog.delivery.list ++ catalog.voucher.list
-    val paperPlusPackageRatePlanIds = allPaperPackages.filter(_.charges.benefits.list.contains(Digipack)).map(_.id).toSet
-    val paperOnlyPackageRatePlanIds = allPaperPackages.filterNot(_.charges.benefits.list.contains(Digipack)).map(_.id).toSet
+    val allPaperPackages = catalog.delivery.list ++ catalog.voucher.list.toList
+    val paperPlusPackageRatePlanIds = allPaperPackages.filter(_.charges.benefits.list.toList.contains(Digipack)).map(_.id).toSet
+    val paperOnlyPackageRatePlanIds = allPaperPackages.filterNot(_.charges.benefits.list.toList.contains(Digipack)).map(_.id).toSet
     val guardianWeeklyRatePlanIds = catalog.weekly.zoneA.plans.map(_.id).toSet ++ catalog.weekly.zoneC.plans.map(_.id).toSet
 
     private def isActive(promotion: AnyPromotion): Boolean = {

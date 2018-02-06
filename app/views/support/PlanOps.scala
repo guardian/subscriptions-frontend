@@ -43,7 +43,7 @@ object PlanOps {
 
   implicit class PrettyPlan[+A <: CatalogPlan.Paid](in: A) {
 
-    def packImage: ResponsiveImageGroup = in.charges.benefits.list match {
+    def packImage: ResponsiveImageGroup = in.charges.benefits.list.toList match {
       case Digipack :: Nil =>
         ResponsiveImageGroup(
           availableImages = Seq(ResponsiveImage(controllers.CachedAssets.hashedPathFor("images/digital-pack.png"), 300)),
@@ -61,7 +61,7 @@ object PlanOps {
         )
     }
 
-    def changeRatePlanText: String = in.charges.benefits.list match {
+    def changeRatePlanText: String = in.charges.benefits.list.toList match {
       case Digipack :: Nil | Weekly :: Nil=> "Change payment frequency"
       case _ => "Add more"
     }
@@ -79,9 +79,9 @@ object PlanOps {
       case _ => false
     }
 
-    def hasPhysicalBenefits: Boolean = in.charges.benefits.list.exists(_.isPhysical)
+    def hasPhysicalBenefits: Boolean = in.charges.benefits.list.toList.exists(_.isPhysical)
 
-    def hasDigitalPack: Boolean = in.charges.benefits.list.contains(Digipack)
+    def hasDigitalPack: Boolean = in.charges.benefits.list.toList.contains(Digipack)
 
     def segment: String = {
       if (in.isDigitalPack) {
