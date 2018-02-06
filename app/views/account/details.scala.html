@@ -52,7 +52,7 @@
                             </legend>
                             <div class="field-panel__intro">
                                 <div class="field-note field-note--offset">
-                                @fragments.forms.securityNote()
+                                @_root_.views.html.fragments.forms.securityNote()
                                 </div>
                                 <div class="field-note field-note--offset prose">
                                     <span class="field-note__label">Already have a Guardian account?</span>
@@ -67,13 +67,13 @@
                                     <label class="label" for="first">Subscriber ID</label>
                                     <input type="text" class="input-text js-input" name="subscriptionId" id="first"
                                     value="@subscriberId" maxlength="30" required>
-                                    @fragments.forms.errorMessage("This field is required")
+                                    @_root_.views.html.fragments.forms.errorMessage("This field is required")
                                 </div>
                                 <div class="form-field js-suspend-last">
                                     <label class="label" for="last">Last name</label>
                                     <input type="text" class="input-text js-input" name="lastname" id="last"
                                     value="" maxlength="50" required>
-                                    @fragments.forms.errorMessage("This field is required")
+                                    @_root_.views.html.fragments.forms.errorMessage("This field is required")
                                 </div>
                                 @promoCode.map{promo=>
                                     <input type="hidden" value="@promo.get" name="promoCode"/>
