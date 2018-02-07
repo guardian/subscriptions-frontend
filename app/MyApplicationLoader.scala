@@ -1,5 +1,8 @@
 import actions.{CommonActions, OAuthActions}
+import com.gu.googleauth.GoogleAuthConfig
+import com.gu.memsub.auth.common.MemSub.Google.googleAuthConfigFor
 import configuration.Config
+import configuration.Config.config
 import controllers._
 import filters.{AddEC2InstanceHeader, AddGuIdentityHeaders, CheckCacheHeadersFilter, HandleXFrameOptionsOverrideHeader}
 import loghandling.Logstash
@@ -8,6 +11,7 @@ import play.api.ApplicationLoader.Context
 import play.api._
 import play.api.libs.ws.ahc.AhcWSComponents
 import play.api.mvc.EssentialFilter
+import play.components.HttpConfigurationComponents
 import play.filters.csrf.CSRFComponents
 import play.filters.headers.{SecurityHeadersConfig, SecurityHeadersFilter}
 import router.Routes
@@ -28,6 +32,7 @@ class MyComponents(context: Context)
   extends BuiltInComponentsFromContext(context)
     with AhcWSComponents
     with CSRFComponents
+    with HttpConfigurationComponents
 {
 
   val touchpointBackends = new TouchpointBackends(actorSystem, wsClient)
@@ -36,7 +41,9 @@ class MyComponents(context: Context)
     new ErrorHandler(environment, configuration, sourceMapper, Some(router))
 
   val commonActions = new CommonActions(executionContext = executionContext, csrfCheck, parser = playBodyParsers.default)
-  val oAuthActions = new OAuthActions(wsClient = wsClient, commonActions)
+  val oAuthActions = new OAuthActions(wsClient, commonActions, playBodyParsers.default, googleAuthConfig)
+
+  lazy val googleAuthConfig: GoogleAuthConfig = googleAuthConfigFor(config, httpConfiguration = httpConfiguration)
 
   lazy val router: Routes = new Routes(
     httpErrorHandler,
@@ -48,7 +55,7 @@ class MyComponents(context: Context)
     new Promotion(touchpointBackends, commonActions),
     new Shipping(touchpointBackends.Normal, commonActions),
     new WeeklyLandingPage(touchpointBackends.Normal, commonActions),
-    new OAuth(wsClient = wsClient, commonActions),
+    new OAuth(wsClient = wsClient, commonActions, oAuthActions),
     new CAS(oAuthActions),
     new AccountManagement(touchpointBackends, commonActions),
     new PatternLibrary(commonActions),
