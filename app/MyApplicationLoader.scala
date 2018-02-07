@@ -33,6 +33,7 @@ class MyComponents(context: Context)
     with AhcWSComponents
     with CSRFComponents
     with HttpConfigurationComponents
+    with AssetsComponents
 {
 
   val touchpointBackends = new TouchpointBackends(actorSystem, wsClient)
@@ -47,7 +48,7 @@ class MyComponents(context: Context)
 
   lazy val router: Routes = new Routes(
     httpErrorHandler,
-    new CachedAssets(),
+    new CachedAssets(assets),
     new Homepage(commonActions),
     new Management(actorSystem = actorSystem, touchpointBackends, oAuthActions),
     new DigitalPack(touchpointBackends.Normal, commonActions),
