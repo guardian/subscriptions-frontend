@@ -69,7 +69,7 @@ class PromoLandingPage (tpBackend: TouchpointBackend, commonActions: CommonActio
 
     private def getWeeklyLandingPage(promotion: AnyPromotion, country: Country, hreflangs: Hreflangs)(implicit promoCode: PromoCode): Option[Html] = {
       promotion.asWeekly.filter(p => isActive(asAnyPromotion(p))).map { promotionWithLandingPage =>
-        val description = promotionWithLandingPage.landingPage.value.description.map { desc =>
+        val description = promotionWithLandingPage.landingPage.description.map { desc =>
           Html(PegdownMarkdownRenderer.render(desc)
           )
         }.getOrElse(landing_description())

@@ -38,7 +38,7 @@
         </section>
         <section class="section-grey section--dark-sides">
             <div class="gs-container gs-container--slim page-slice">
-                @fragments.promotion.digipack(country, plan, promoCode, promotion.landingPage.value.roundelHtml.map(md.render))
+                @fragments.promotion.digipack(country, plan, promoCode, promotion.landingPage.roundelHtml.map(md.render))
             </div>
         </section>
         <section class="section-white section--dark-sides">
@@ -53,9 +53,9 @@
             <section class="@promotion.landingPageSectionColour section--dark-sides">
                 <div class="gs-container gs-container--slim page-slice page-slice">
                     <div class="page-slice__content @promotion.getSectionSeparator">
-                        <h2 class="promo-landing-page__section-head">@promotion.landingPage.value.title.getOrElse(promotion.name)</h2>
+                        <h2 class="promo-landing-page__section-head">@promotion.landingPage.title.getOrElse(promotion.name)</h2>
                         @{
-                            promotion.landingPage.value.image.fold {
+                            promotion.landingPage.image.fold {
                                 fragments.promotion.promotionDescription(promotion, md)
                             } {
                                 img => fragments.promotion.promotionWithImage(promotion, img, md)

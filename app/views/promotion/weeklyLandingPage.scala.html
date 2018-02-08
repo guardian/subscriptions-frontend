@@ -48,10 +48,10 @@
             guardian.pageInfo.productData.productSegment = 'weekly';
         </script>
 
-        @fragments.heroBanner(promotion.flatMap(_.landingPage.value.image).getOrElse(defaultImage)){
+        @fragments.heroBanner(promotion.flatMap(_.landingPage.image).getOrElse(defaultImage)){
             @title
         } {
-            @CommaSplit.split(promotion.flatMap(_.landingPage.value.title).getOrElse("Get the world in perspective, every single week"))
+            @CommaSplit.split(promotion.flatMap(_.landingPage.title).getOrElse("Get the world in perspective, every single week"))
         }
 
         <main class="page-container">
@@ -106,7 +106,7 @@
                             <a href="@plan.url.toString" class="weekly__package">
                                 <div class="weekly__package__info">
                                     <span class="weekly__package__title">@if(plan.discounted) {
-                                        @promotion.flatMap(_.landingPage.value.roundelHtml).map { text =>
+                                        @promotion.flatMap(_.landingPage.roundelHtml).map { text =>
                                             <span class="weekly__package__special">
                                                 @text
                                             </span>
