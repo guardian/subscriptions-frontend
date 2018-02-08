@@ -1,6 +1,6 @@
 @import com.gu.i18n.Country
 @import com.gu.memsub.Benefit.PaperDay
-@import com.gu.memsub.BillingSchedule
+@import com.gu.memsub.{BillingSchedule, Product}
 @import com.gu.memsub.subsv2.Subscription
 @import com.gu.memsub.subsv2.SubscriptionPlan.DailyPaper
 @import com.gu.subscriptions.suspendresume.SuspensionService.{HolidayRefund, holidayToDays}
@@ -23,7 +23,7 @@
     maybeEmail: Option[String],
     paymentMethodIsPaymentCard: Boolean
 )(implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackends.Resolution)
-@main("Manage your subscription | The Guardian", bodyClasses = List("is-wide"), edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution), managementPage = true, contactUsCountry = Some(Country.UK)) {
+@main("Manage your subscription | The Guardian", bodyClasses = List("is-wide"), edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution), managementPage = true, contactUsCountry = Some(Country.UK), product = Some(Product.Delivery)) {
 
     <main class="page-container gs-container">
         <section class="suspend-container">

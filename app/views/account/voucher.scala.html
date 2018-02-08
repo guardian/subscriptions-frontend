@@ -1,5 +1,5 @@
 @import com.gu.i18n.Country
-@import com.gu.memsub.BillingSchedule
+@import com.gu.memsub.{BillingSchedule, Product}
 @import com.gu.memsub.subsv2.Subscription
 @import com.gu.memsub.subsv2.SubscriptionPlan.Voucher
 @import model.DigitalEdition.UK
@@ -8,7 +8,7 @@
     subscription: Subscription[Voucher], billingSchedule: Option[BillingSchedule], maybeEmail: Option[String], paymentMethodIsPaymentCard: Boolean
 )(implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackends.Resolution)
 
-@main("Your Guardian subscription | The Guardian", bodyClasses = List("is-wide"), edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution), managementPage = true, contactUsCountry = Some(Country.UK)) {
+@main("Your Guardian subscription | The Guardian", bodyClasses = List("is-wide"), edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution), managementPage = true, contactUsCountry = Some(Country.UK), product = Some(Product.Voucher)) {
 
     <main class="page-container gs-container">
         <section class="suspend-container">
