@@ -255,11 +255,11 @@ object ManageWeekly extends ContextLogging {
 
     if (weeklySubscription.readerType == ReaderType.Agent) {
       info(s"don't support agents, can't manage sub")
-      Future.successful(Ok(views.html.account.details(None, promoCode, Some("You subscribe via an agent, at present you can't manage it via the web, please contact customer services for help.")))) // don't support gifts (yet) as they have related contacts in salesforce of unknown structure
+      Future.successful(Ok(views.html.account.details(None, promoCode, Some("You subscribe via an agent, at present you can't manage it via the web, please contact Customer Services for help.")))) // don't support gifts (yet) as they have related contacts in salesforce of unknown structure
     } else {
       maybePageToShow.map(_.leftMap(errorMessage => {
         error(s"problem getting account: $errorMessage")
-        Ok(views.html.account.details(None, promoCode, Some("We found your subscription, but it can't be managed via the web, please contact customer services for help.")))
+        Ok(views.html.account.details(None, promoCode, Some("We found your subscription, but it can't be managed via the web, please contact Customer Services for help.")))
       }).fold(identity, identity))
     }
   }
@@ -393,7 +393,7 @@ class AccountManagement(touchpointBackends: TouchpointBackends) extends Controll
       }
       maybeFutureManagePage.getOrElse {
         // the product type didn't have the right charges
-        Future.successful(Ok(views.html.account.details(None, promoCode, Some("We found your subscription, but can't manage it via the web, please contact customer services for help."))))
+        Future.successful(Ok(views.html.account.details(None, promoCode, Some("We found your subscription, but can't manage it via the web, please contact Customer Services for help."))))
       }
     }
 
@@ -414,7 +414,7 @@ class AccountManagement(touchpointBackends: TouchpointBackends) extends Controll
       "error" -> errorMessage
     )
     subscriptionFromUserDetails(loginRequest).map {
-        case Some(sub) if (sub.isCancelled) =>  loginError(s"Your subscription is cancelled as of ${sub.termEndDate.pretty}, please contact customer services.")
+        case Some(sub) if (sub.isCancelled) =>  loginError(s"Your subscription is cancelled as of ${sub.termEndDate.pretty}, please contact Customer Services.")
         case Some(sub) => SessionSubscription.set(Redirect(routes.AccountManagement.manage(None, None, promoCode)), sub)
         case _ => loginError("Unable to verify your details.")
     }
