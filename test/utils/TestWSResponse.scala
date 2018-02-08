@@ -1,6 +1,5 @@
 package utils
 
-import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import play.api.libs.json.{JsNull, JsValue}
 import play.api.libs.ws.{WSCookie, WSResponse}
@@ -20,15 +19,10 @@ case class TestWSResponse (
 
   def xml: Elem = XML.loadString(body)
 
-  override def header(key: String): Option[String] =
+  def header(key: String): Option[String] =
     allHeaders.get(key).flatMap(_.headOption)
 
   def cookie(name: String): Option[WSCookie] = None
 
   def bodyAsBytes: ByteString = ByteString(body.getBytes)
-
-  override def headers: Map[String, Seq[String]] = allHeaders
-
-  override def bodyAsSource: Source[ByteString, _] = Source.single(bodyAsBytes)
-
 }

@@ -1,10 +1,11 @@
 @import com.gu.i18n.Currency
 @import views.support.CountryWithCurrency
+@import views.html.fragments.checkout.address
 @import views.support.ProductPopulationData
 
 @(data: ProductPopulationData, countriesWithCurrency: List[CountryWithCurrency])
 
-@_root_.views.html.fragments.checkout.address(
+@address(
     address = data.deliveryAddress,
     namePrefix = "delivery",
     countriesWithCurrency = countriesWithCurrency,

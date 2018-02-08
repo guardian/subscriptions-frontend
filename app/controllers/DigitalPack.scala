@@ -11,9 +11,8 @@ import utils.RequestCountry._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class DigitalPack(touchpointBackend: TouchpointBackend, commonActions: CommonActions) extends Controller with StrictLogging {
+class DigitalPack(touchpointBackend: TouchpointBackend) extends Controller with CommonActions with StrictLogging {
 
-  import commonActions.NoCacheAction
   private val queryParamHint = "edition"
 
   private def redirectResult(digitalEdition: DigitalEdition)(implicit request: Request[AnyContent]) = {
@@ -37,7 +36,7 @@ class DigitalPack(touchpointBackend: TouchpointBackend, commonActions: CommonAct
       val price = plan.charges.price.getPrice(digitalEdition.countryGroup.currency).getOrElse(plan.charges.gbpPrice)
       Ok(views.html.digitalpack.info(digitalEdition, price))
     }.valueOr { err =>
-      logger.error(s"Failed to load the Digital Pack landing page: ${err.list.toList.mkString(", ")}")
+      logger.error(s"Failed to load the Digital Pack landing page: ${err.list.mkString(", ")}")
       InternalServerError("failed to read catalog, see the logs")
     })
   }

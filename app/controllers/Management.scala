@@ -10,7 +10,7 @@ import com.typesafe.scalalogging.LazyLogging
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.mvc._
 import services.TouchpointBackends
-import actions.{CommonActions, OAuthActions}
+import actions.OAuthActions
 import akka.actor.ActorSystem
 import com.gu.monitoring.CloudWatchHealth
 import play.api.Logger._
@@ -23,9 +23,7 @@ import play.api.libs.ws.WSClient
 import scalaz.{Semigroup, Validation, ValidationNel}
 import scalaz.syntax.std.option._
 
-class Management(actorSystem: ActorSystem, fBackendFactory: TouchpointBackends, oAuthActions: OAuthActions)  extends Controller with LazyLogging {
-
-  import oAuthActions._
+class Management(override val wsClient: WSClient, actorSystem: ActorSystem, fBackendFactory: TouchpointBackends)  extends Controller with LazyLogging with OAuthActions {
 
   implicit val as: ActorSystem = actorSystem
   implicit val unitSemigroup = Semigroup.firstSemigroup[Unit]
@@ -63,7 +61,7 @@ class Management(actorSystem: ActorSystem, fBackendFactory: TouchpointBackends, 
     Cached(1) {
       tests.fold(
         errors => {
-          errors.list.toList.foreach(warn(_))
+          errors.list.foreach(warn(_))
           ServiceUnavailable("Service Unavailable")
         },
         _ => Ok("OK")

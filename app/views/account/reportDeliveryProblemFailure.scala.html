@@ -3,7 +3,7 @@
 
 @main("Delivery Problem | The Guardian", bodyClasses=List("is-wide")) {
     <main class="page-container gs-container gs-container--slim">
-        @_root_.views.html.fragments.page.header("Sorry, we were unable to determine your delivery status", None, List("l-padded"))
+        @fragments.page.header("Sorry, we were unable to determine your delivery status", None, List("l-padded"))
         <section class="section-slice section-slice--bleed section-slice--limited">
             In order to resolve this problem, please contact Customer Services on: <a class="u-link" href="@ContactCentreOps.hrefTelNumber(UK)">@ContactCentreOps.directLine(UK)</a>
             or email <a class="u-link" href="@ContactCentreOps.hrefMailto">@ContactCentreOps.email</a>.

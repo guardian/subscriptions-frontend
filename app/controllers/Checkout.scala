@@ -39,9 +39,8 @@ import scala.util.Try
 import scalaz.std.scalaFuture._
 import scalaz.{NonEmptyList, OptionT}
 
-class Checkout(fBackendFactory: TouchpointBackends, commonActions: CommonActions) extends Controller with LazyLogging {
+class Checkout(fBackendFactory: TouchpointBackends) extends Controller with LazyLogging with CommonActions {
 
-  import commonActions._
   import SessionKeys.{Currency => _, UserId => _, _}
 
   def checkoutService(implicit res: TouchpointBackends.Resolution): CheckoutService =
@@ -64,8 +63,8 @@ class Checkout(fBackendFactory: TouchpointBackends, commonActions: CommonActions
         val testOnlyPlans = if (tpBackend == fBackendFactory.Test) List(catalog.weekly.zoneB.plansWithAssociations) else List.empty
 
         val productsWithoutIntroductoryPlans = List(
-          catalog.delivery.list.toList,
-          catalog.voucher.list.toList,
+          catalog.delivery.list,
+          catalog.voucher.list,
           catalog.digipack.plans
         ).map(plans => PlansWithIntroductory(plans, List.empty))
 
@@ -167,7 +166,7 @@ class Checkout(fBackendFactory: TouchpointBackends, commonActions: CommonActions
         }
       }
     }.valueOr { err =>
-      logger.error(s"failed renderCheckout: ${err.list.toList.mkString(", ")}")
+      logger.error(s"failed renderCheckout: ${err.list.mkString(", ")}")
       Future.successful(InternalServerError("failed to render checkout due to catalog issues"))
     }
     }.flatMap(identity)

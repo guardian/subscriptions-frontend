@@ -4,7 +4,6 @@ import com.gu.memsub.Subscription.Name
 import org.joda.time.LocalDate
 import play.api.data.Form
 import play.api.data.Forms._
-import play.api.data.JodaForms._
 
 object ReportDeliveryProblemForm {
 

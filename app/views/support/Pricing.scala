@@ -80,12 +80,12 @@ object Pricing {
   implicit class PrettyProductPlan(in: CatalogPlan.Paid) {
     implicit val planWithPricing = new PlanWithPricing(in.charges)
 
-    def prefix = in.charges.benefits.list.toList match {
+    def prefix = in.charges.benefits.list match {
       case Digipack :: Nil => ""
       case b => if (b.contains(Weekly)) "" else s"${in.packageName} - "
     }
 
-    def prettyName(currency: Currency): String = in.charges.benefits.list.toList match {
+    def prettyName(currency: Currency): String = in.charges.benefits.list match {
       case Digipack :: Nil | Weekly :: Nil => planWithPricing.prettyPricing(currency)
       case _ => s"$prefix${planWithPricing.prettyPricing(currency)}"
     }
