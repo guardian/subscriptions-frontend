@@ -1,19 +1,21 @@
 package controllers
 
 import _root_.services.AuthenticationService._
-import _root_.services.{FulfilmentLookupService, IdentityService, TouchpointBackend, TouchpointBackends}
 import _root_.services.TouchpointBackends.Resolution
+import _root_.services.{FulfilmentLookupService, TouchpointBackend, TouchpointBackends}
+import actions.CommonActions
 import com.gu.i18n.Country.{UK, US}
 import com.gu.i18n.Currency
 import com.gu.i18n.Currency.{GBP, USD}
 import com.gu.memsub.Subscription.{Name, ProductRatePlanId}
 import com.gu.memsub.promo.{NormalisedPromoCode, PromoCode}
 import com.gu.memsub.subsv2.SubscriptionPlan._
-import com.gu.memsub.{BillingSchedule, PaymentCard, PaymentMethod, Product}
+import com.gu.memsub.subsv2.{Catalog, ReaderType, Subscription}
+import com.gu.memsub.{BillingSchedule, PaymentCard, Product}
 import com.gu.subscriptions.suspendresume.SuspensionService
 import com.gu.subscriptions.suspendresume.SuspensionService.{BadZuoraJson, ErrNel, HolidayRefund, PaymentHoliday}
 import com.gu.zuora.ZuoraRestService
-import com.gu.zuora.soap.models.Queries.Contact
+import com.gu.zuora.soap.models.Queries.{Account, Contact}
 import com.typesafe.scalalogging.StrictLogging
 import configuration.{Config, ProfileLinks}
 import forms._
@@ -25,14 +27,10 @@ import org.joda.time.LocalDate.now
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json._
 import play.api.mvc.{AnyContent, _}
-import actions.CommonActions
-import com.gu.memsub.subsv2.{Catalog, ReaderType, Subscription}
-import com.gu.zuora.soap.models.Queries.Account
 import utils.TestUsers.PreSigninTestCookie
 import views.html.account.thankYouRenew
 import views.support.Dates._
 import views.support.Pricing._
-import utils.RequestCountry._
 
 import scala.concurrent.Future
 import scalaz.std.scalaFuture._
@@ -242,7 +240,7 @@ object ManageWeekly extends ContextLogging {
           views.html.account.weeklyRenew(renewableSub, account.soldToContact, account.billToContact.email, billToCountry, weeklyPlanInfo, currency, promoCode)
         } getOrElse {
           info(s"sub is not renewable - showing weeklyDetails page")
-          views.html.account.weeklyDetails(weeklySubscription, billingSchedule, account.soldToContact, maybeEmail, paymentMethodIsPaymentCard)
+          views.html.account.weeklyDetails(weeklySubscription, billingSchedule, account.soldToContact, maybeEmail, paymentMethodIsPaymentCard, Some(billToCountry))
         })
       }
       renewPageResult.run
@@ -372,6 +370,7 @@ class AccountManagement(touchpointBackends: TouchpointBackends) extends Controll
     val futureMaybeFutureManagePage = for {
       subscription <- OptionT(eventualMaybeSubscription).filter(!_.isCancelled)
       account <- OptionT(tpBackend.zuoraService.getAccount(subscription.accountId).map(Option(_)))
+      billToContact <- OptionT(tpBackend.zuoraService.getContact(account.billToId).map(Option(_)))
       pendingHolidays <- OptionT(tpBackend.suspensionService.getUnfinishedHolidays(subscription.name, now).map(_.toOption))
       billingSchedule <- OptionT(tpBackend.commonPaymentService.flatMap(_.billingSchedule(subscription.id, account, numberOfBills = 13).map(Option(_))))
       maybeEmail <- OptionT(futureSomeMaybeEmail)
@@ -389,7 +388,7 @@ class AccountManagement(touchpointBackends: TouchpointBackends) extends Controll
           ManageWeekly(billingSchedule, weeklySubscription, maybeEmail, promoCode, paymentMethodIsPaymentCard)
         }
         case Product.Digipack => subscription.asDigipack.map { digipackSubscription =>
-          Future.successful(Ok(views.html.account.digitalpack(digipackSubscription, billingSchedule, request.getFastlyCountry, maybeEmail, paymentMethodIsPaymentCard)))
+          Future.successful(Ok(views.html.account.digitalpack(digipackSubscription, billingSchedule, billToContact.country, maybeEmail, paymentMethodIsPaymentCard)))
         }
       }
       maybeFutureManagePage.getOrElse {

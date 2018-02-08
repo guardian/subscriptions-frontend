@@ -1,7 +1,5 @@
 package controllers
 
-import javax.inject.Inject
-
 import actions.CommonActions
 import cats.instances.future._
 import com.gu.i18n.CountryGroup.{UK, US}
@@ -36,7 +34,6 @@ import views.html.{checkout => view}
 import views.support.{PlanList, BillingPeriod => _, _}
 
 import scala.Function.const
-
 import scala.concurrent.Future
 import scala.util.Try
 import scalaz.std.scalaFuture._
@@ -202,8 +199,6 @@ class Checkout(fBackendFactory: TouchpointBackends) extends Controller with Lazy
         )
       )
 
-      val thankYouEdition = model.DigitalEdition.getForCountry(subscribeRequest.genericData.personalData.address.country)
-
     val requestData = SubscriptionRequestData(
       ipCountry = request.getFastlyCountry,
       supplierCode = sessionSupplierCode.map(SupplierCode)
@@ -265,7 +260,7 @@ class Checkout(fBackendFactory: TouchpointBackends) extends Controller with Lazy
         SubsName -> r.subscribeResult.subscriptionName,
         RatePlanId -> subscribeRequest.productRatePlanId.get,
         SessionKeys.Currency -> subscribeRequest.genericData.currency.toString,
-        Edition -> thankYouEdition.id
+        BillingCountryName -> subscribeRequest.genericData.personalData.address.countryName
       )
 
       val userSessionFields = r.userIdData match {
@@ -340,12 +335,13 @@ class Checkout(fBackendFactory: TouchpointBackends) extends Controller with Lazy
       } // Don't display the user registration form if the user is logged in
 
       val promotion = session.get(AppliedPromoCode).flatMap(code => resolution.backend.promoService.findPromotion(NormalisedPromoCode.safeFromString(code)))
-      val edition: model.DigitalEdition = session.get(Edition).flatMap(model.DigitalEdition.getById).getOrElse(model.DigitalEdition.INT)
+      val billingCountry = session.get(BillingCountryName).flatMap(CountryGroup.countryByNameOrCode) orElse request.getFastlyCountry
+      val edition: model.DigitalEdition = model.DigitalEdition.getForCountry(billingCountry)
       val eventualMaybeSubscription = tpBackend.subscriptionService.get[com.gu.memsub.subsv2.SubscriptionPlan.ContentSubscription](Name(subsName))
       eventualMaybeSubscription.map { maybeSub =>
         maybeSub.map { sub =>
           if (tpBackend.environmentName == "PROD") Tip.verify()
-          Ok(view.thankyou(sub, passwordForm, resolution, promotion, startDate, edition))
+          Ok(view.thankyou(sub, passwordForm, resolution, promotion, startDate, edition, billingCountry))
         }.getOrElse {
           Redirect(routes.Homepage.index()).withNewSession
         }

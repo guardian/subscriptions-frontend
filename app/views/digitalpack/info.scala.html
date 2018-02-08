@@ -1,7 +1,7 @@
 @import com.gu.memsub.Price
+@import com.gu.memsub.Product.Digipack
 @import model.DigitalEdition
 @import views.support.DigitalEdition._
-@import model.DigitalEdition.UK
 @(edition: DigitalEdition, price: Price)
 
 @import model.Benefits
@@ -25,7 +25,9 @@
     title = s"Subscribe to the Guardian Digital Pack | The Guardian (${edition.name})",
     description = Some("The Digital Pack gives you access to the Guardian & Observer daily editions as well as premium tier access to the iOS and Android live news apps"),
     bodyClasses = List("is-wide"),
-    edition=edition
+    edition = edition,
+    product = Some(Digipack),
+    contactUsCountry = edition.countryGroup.defaultCountry
 ) {
 <script>
     guardian.pageInfo.pageType = 'Landing';
@@ -35,7 +37,7 @@
 
     <section class="page-slice">
         <div class="page-slice__content">
-            @fragments.page.header("Digital Pack", Some("Digital access to our Daily Edition and Guardian App Premium Tier"))
+            @fragments.page.header(s"Digital Pack", Some("Digital access to our Daily Edition and Guardian App Premium Tier"))
             @startTrial(edition, price)
         </div>
     </section>

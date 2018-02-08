@@ -1,16 +1,16 @@
+@import com.gu.i18n.Country
+@import com.gu.memsub.Benefit.PaperDay
 @import com.gu.memsub.BillingSchedule
-@import com.gu.subscriptions.suspendresume.SuspensionService.HolidayRefund
 @import com.gu.memsub.subsv2.Subscription
+@import com.gu.memsub.subsv2.SubscriptionPlan.DailyPaper
+@import com.gu.subscriptions.suspendresume.SuspensionService.{HolidayRefund, holidayToDays}
+@import com.gu.zuora.soap.models.Queries.Account
 @import configuration.Config.suspendableWeeks
-@import com.gu.subscriptions.suspendresume.SuspensionService.holidayToDays
 @import model.DigitalEdition.UK
 @import model.SubscriptionOps._
-@import com.gu.memsub.Product.Delivery
-@import views.support.Dates.prettyDate
 @import views.support.AccountManagementOps._
-@import com.gu.memsub.subsv2.SubscriptionPlan.DailyPaper
-@import com.gu.memsub.Benefit.PaperDay
-@import com.gu.zuora.soap.models.Queries.Account
+@import views.support.ContactCentreOps
+@import views.support.Dates.prettyDate
 @(
     subscription: Subscription[DailyPaper],
     billingAccount: Account,
@@ -23,7 +23,7 @@
     maybeEmail: Option[String],
     paymentMethodIsPaymentCard: Boolean
 )(implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackends.Resolution)
-@main("Manage your subscription | The Guardian", bodyClasses = List("is-wide"), edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution), managementPage = true) {
+@main("Manage your subscription | The Guardian", bodyClasses = List("is-wide"), edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution), managementPage = true, contactUsCountry = Some(Country.UK)) {
 
     <main class="page-container gs-container">
         <section class="suspend-container">
@@ -38,7 +38,7 @@
                 </p>
                 <p>
                     If you have any other customer service enquir​ies,
-                    please contact us on: <a href="tel:+44 330 333 6767">+44 (0) 330 333 6767</a>
+                    please contact us on: <a href="@ContactCentreOps.hrefTelNumber(Country.UK)">@ContactCentreOps.directLine(Country.UK)</a>
                     or email <a href="mailto:homedelivery@@theguardian.com">homedelivery@@theguardian.com</a>.
                 </p>
             </div>
@@ -140,7 +140,7 @@
             @if(paymentMethodIsPaymentCard) {
                 <section class="mma-section">
                     <h3 class="mma-section__header">Update your payment method</h3>
-                    @views.html.account.fragments.paymentUpdate(subscription, maybeEmail, subscription.plans.head.product, UK)
+                    @views.html.account.fragments.paymentUpdate(subscription, maybeEmail, subscription.plans.head.product, Some(Country.UK))
                 </section>
             }
         </section>

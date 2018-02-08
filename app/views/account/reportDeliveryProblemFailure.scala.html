@@ -1,9 +1,12 @@
+@import com.gu.i18n.Country.UK
+@import views.support.ContactCentreOps
+
 @main("Delivery Problem | The Guardian", bodyClasses=List("is-wide")) {
     <main class="page-container gs-container gs-container--slim">
         @fragments.page.header("Sorry, we were unable to determine your delivery status", None, List("l-padded"))
         <section class="section-slice section-slice--bleed section-slice--limited">
-            In order to resolve this problem, please contact customer services on: <a class="u-link" href="tel:+44 330 333 6767">+44 (0) 330 333 6767</a>
-            or email <a class="u-link" href="mailto:subscriptions@@theguardian.com">subscriptions@@theguardian.com</a>.
+            In order to resolve this problem, please contact Customer Services on: <a class="u-link" href="@ContactCentreOps.hrefTelNumber(UK)">@ContactCentreOps.directLine(UK)</a>
+            or email <a class="u-link" href="@ContactCentreOps.hrefMailto">@ContactCentreOps.email</a>.
         </section>
         <section class="section-slice--bleed mma-section">
             <a class="button button--primary button--large" href="@routes.AccountManagement.processLogin().url">

@@ -1,28 +1,27 @@
-@import configuration.Links
-@import org.joda.time.DateTime
-@import com.gu.memsub.BillingPeriod
-@import views.support.PlanOps._
-@import com.gu.memsub.subsv2.CatalogPlan
-@import com.gu.memsub.Current
-@import model.DigitalEdition
+@import com.gu.i18n.Country
 @import com.gu.memsub.Product
+@import com.gu.memsub.Product.Digipack
+@import model.DigitalEdition
+@import org.joda.time.DateTime
+@import views.support.PlanOps._
+@(maybeProduct: Option[Product], edition: DigitalEdition, contactUsCountry: Option[Country])
 
-@(maybeProduct: Option[Product], edition: DigitalEdition)
-@product = @{maybeProduct.getOrElse(Product.Digipack)}
+@email = @{maybeProduct.email(contactUsCountry)}
+@phone = @{maybeProduct.phone(contactUsCountry)}
 <footer class="global-footer">
 
     @fragments.global.brandbar()
-    @fragments.global.navigation(edition, false)
+    @fragments.global.navigation(edition, managementPage = false)
 
     <div class="global-footer__info">
         <div class="gs-container">
             <p>
               For help with Guardian and Observer subscription services please email
-                  <a href="mailto:@maybeProduct.fold("subscriptions@theguardian.com")(_.email)">@maybeProduct.fold("subscriptions@theguardian.com")(_.email)</a> or call            @product.phone(edition)
+                  <a href="mailto:@email">@email</a> or call @phone
             </p>
             <p>
                 You may also find help in our
-                <a href="@product.faqHref"
+                <a href="@maybeProduct.getOrElse(Digipack).faqHref"
                    title="Frequently Asked Questions">
                    Frequently Asked Questions.
                 </a>

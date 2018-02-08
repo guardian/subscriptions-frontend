@@ -43,8 +43,8 @@ export function DirectDebit(props: {
                 </p>
                 <div>
                     <div>The Guardian, Unit 16, Coalfield Way, Ashby Park, Ashby-De-La-Zouch, LE65 1JT United Kingdom</div>
-                    <div>Tel: +44 (0) 330 333 6767</div>
-                    <div><a href="mailto:gwsubs@theguardian.com">gwsubs@theguardian.com</a></div>
+                    <div>Tel: 0330 333 6767</div>
+                    <div><a href="mailto:subscriptions@theguardian.com">subscriptions@theguardian.com</a></div>
                 </div>
             </div>
         </dd>

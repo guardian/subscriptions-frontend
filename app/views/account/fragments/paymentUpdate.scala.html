@@ -1,10 +1,7 @@
-@import com.gu.memsub.subsv2.Subscription
-@import com.gu.memsub.subsv2.SubscriptionPlan
-@import model.DigitalEdition
+@import com.gu.i18n.Country
 @import com.gu.memsub.Product
-
+@import com.gu.memsub.subsv2.{Subscription, SubscriptionPlan}
 @import views.support.PlanOps._
 
-@import com.gu.zuora.ZuoraRestService.SoldToContact
-@(subscription:Subscription[SubscriptionPlan.ContentSubscription], maybeEmail: Option[String], product: Product, edition: DigitalEdition)
-<div class="js-payment-update" data-sub-id="@{subscription.name.get}" @for(email <- maybeEmail) {data-email="@email"} data-phone="@product.phone(edition)" data-product="@product.name"></div>
+@(subscription:Subscription[SubscriptionPlan.ContentSubscription], maybeEmail: Option[String], product: Product, contactUsCountry: Option[Country])
+<div class="js-payment-update" data-sub-id="@{subscription.name.get}" @for(email <- maybeEmail) {data-email="@email"} data-phone="@product.phone(contactUsCountry)" data-product="@product.name"></div>

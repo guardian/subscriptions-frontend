@@ -1,5 +1,7 @@
+@import com.gu.i18n.Country.UK
 @import model.FulfilmentLookup
 @import org.joda.time.LocalDate
+@import views.support.ContactCentreOps
 @(
     fulfilmentLookup: FulfilmentLookup,
     date: LocalDate
@@ -13,8 +15,8 @@
                 Thanks for reporting this problem. We will investigate and get back to you soon.
             </p>
             <p>
-                If you need any further assistance, please contact customer services on: <a class="u-link" href="tel:+44 330 333 6767">+44 (0) 330 333 6767</a>
-                or email <a class="u-link" href="mailto:subscriptions@@theguardian.com">subscriptions@@theguardian.com</a>.
+                If you need any further assistance, please contact customer services on: <a class="u-link" href="@ContactCentreOps.hrefTelNumber(UK)">@ContactCentreOps.phone(UK)</a>
+                or email <a class="u-link" href="@ContactCentreOps.hrefMailto">@ContactCentreOps.email</a>.
             </p>
         </section>
         <section class="section-slice--bleed mma-section">

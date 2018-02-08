@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom';
-import { Raven } from 'modules/raven';
+import {Raven} from 'modules/raven';
 
 const timeout = (t) => new Promise((resolve, reject) => {
     const timer = setTimeout(() => {
@@ -58,9 +58,9 @@ const UNAVAILABLE = 'unavailable'
 const CardUpdate = ({ card, handler }) => (<div><button className="button button--primary button--large" onClick={handler}>•••• •••• •••• {card && card.last4 || '••••'} Update Card</button></div>)
 const Success = () => (<p>Thank you, we have successfully updated your payment details.</p>)
 const Failure = ({ phone }) => <p>Unfortunately, we are unable to update your payment details at this time, please contact the call centre. {phone}</p>
-const Unavailable = ({ phone }) => <span>
+const Unavailable = ({ phone }) => <div>
     <p>To update your payment details, please contact the call centre. {phone}</p>
-    </span>
+</div>
 
 const Waiting = () => (<div className="loader js-loader is-loading">Processing&hellip;</div>)
 

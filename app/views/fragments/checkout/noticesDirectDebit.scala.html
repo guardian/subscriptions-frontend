@@ -1,7 +1,8 @@
+@import com.gu.i18n.Country
+@import com.gu.memsub.subsv2.CatalogPlan
 @import controllers.CachedAssets.hashedPathFor
 @import views.support.PlanOps._
-@import com.gu.memsub.subsv2.CatalogPlan
-@(plan: CatalogPlan.Paid)
+@(plan: CatalogPlan.Paid, defaultCountry: Option[Country])
 
 @fragments.checkout.notice("Advance Notice") {
     <p>
@@ -23,8 +24,8 @@
     </address>
 
     <ul class="o-unstyled-list">
-        <li>Tel: +44 (0) 330 333 6767</li>
-        <li><a href="mailto:@plan.product.email">@plan.product.email</a></li>
+        <li>Tel: @plan.product.phone(defaultCountry)</li>
+        <li><a href="mailto:@plan.product.email(defaultCountry)">@plan.product.email(defaultCountry)</a></li>
     </ul>
 
     <aside class="direct-debit">

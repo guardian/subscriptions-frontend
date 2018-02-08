@@ -1,13 +1,14 @@
+@import com.gu.i18n.Country
 @import com.gu.memsub.BillingSchedule
 @import com.gu.memsub.subsv2.Subscription
+@import com.gu.memsub.subsv2.SubscriptionPlan.Voucher
 @import model.DigitalEdition.UK
 @import model.SubscriptionOps._
-@import com.gu.memsub.subsv2.SubscriptionPlan.Voucher
 @(
     subscription: Subscription[Voucher], billingSchedule: Option[BillingSchedule], maybeEmail: Option[String], paymentMethodIsPaymentCard: Boolean
 )(implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackends.Resolution)
 
-@main("Your Guardian subscription | The Guardian", bodyClasses = List("is-wide"), edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution), managementPage = true) {
+@main("Your Guardian subscription | The Guardian", bodyClasses = List("is-wide"), edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution), managementPage = true, contactUsCountry = Some(Country.UK)) {
 
     <main class="page-container gs-container">
         <section class="suspend-container">
@@ -35,7 +36,7 @@
             @if(paymentMethodIsPaymentCard) {
                 <section class="mma-section">
                     <h3 class="mma-section__header">Update your payment method</h3>
-                    @views.html.account.fragments.paymentUpdate(subscription, maybeEmail, subscription.plans.head.product, UK)
+                    @views.html.account.fragments.paymentUpdate(subscription, maybeEmail, subscription.plans.head.product, Some(Country.UK))
                 </section>
             }
         </section>

@@ -1,17 +1,13 @@
-@import model.JsVars
-@import configuration.Config.Identity._
-@import views.support.Pricing._
-@import com.gu.memsub.promo.PromoCode
-@import com.gu.memsub.SupplierCode
-@import model.PersonalData
-@import views.support.PlanOps._
-@import views.support.ProductPopulationData
-@import com.gu.memsub.subsv2.CatalogPlan
-@import com.gu.i18n.Currency
-@import com.gu.i18n._
-@import model.DigitalEdition
-@import views.support.CountryAndCurrencySettings
+@import com.gu.i18n.{Currency, _}
 @import com.gu.memsub.Product.WeeklyZoneC
+@import com.gu.memsub.SupplierCode
+@import com.gu.memsub.promo.PromoCode
+@import com.gu.memsub.subsv2.CatalogPlan
+@import configuration.Config.Identity._
+@import model.{DigitalEdition, JsVars, PersonalData}
+@import views.support.PlanOps._
+@import views.support.Pricing._
+@import views.support.{CountryAndCurrencySettings, ProductPopulationData}
 
 @(
     personalData: Option[PersonalData],
@@ -68,7 +64,8 @@
     bodyClasses = List("is-wide"),
     touchpointBackendResolutionOpt = Some(touchpointBackendResolution),
     product = Some(productData.plans.default.product),
-    edition = edition
+    edition = edition,
+    contactUsCountry = countryAndCurrencySettings.defaultCountry
 ) {
 <script>
     guardian.supplierCode = '@{supplierCode.mkString}';
@@ -132,7 +129,7 @@
                         }
                         </div>
                         <div class="js-payment-type-direct-debit u-note" hidden="true">
-                            @fragments.checkout.noticesDirectDebit(productData.plans.default)
+                            @fragments.checkout.noticesDirectDebit(productData.plans.default, countryAndCurrencySettings.defaultCountry)
                         </div>
                         <div class="js-payment-type-card u-note" hidden="true">
                             @fragments.checkout.noticesCard()

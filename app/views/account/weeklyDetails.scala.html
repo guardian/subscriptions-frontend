@@ -1,16 +1,14 @@
+@import com.gu.i18n.Country
 @import com.gu.memsub.BillingSchedule
-@import com.gu.memsub.subsv2.SubscriptionPlan
-@import com.gu.memsub.subsv2.Subscription
-@import model.DigitalEdition
-@import com.gu.salesforce.Contact
-@import model.SubscriptionOps._
-@import org.joda.time.LocalDate.now
+@import com.gu.memsub.subsv2.{Subscription, SubscriptionPlan}
 @import com.gu.zuora.ZuoraRestService.SoldToContact
+@import model.DigitalEdition
+@import model.SubscriptionOps._
 @(
-    subscription: Subscription[SubscriptionPlan.WeeklyPlan], billingSchedule: Option[BillingSchedule], contact: SoldToContact, maybeEmail:Option[String], paymentMethodIsPaymentCard: Boolean
+    subscription: Subscription[SubscriptionPlan.WeeklyPlan], billingSchedule: Option[BillingSchedule], contact: SoldToContact, maybeEmail:Option[String], paymentMethodIsPaymentCard: Boolean, contactUsCountry: Option[Country]
 )(implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackends.Resolution)
 
-@main("Your Guardian Weekly subscription | The Guardian", bodyClasses = List("is-wide"), edition = DigitalEdition.getForCountry(contact.country), touchpointBackendResolutionOpt = Some(touchpointBackendResolution), managementPage = true) {
+@main("Your Guardian Weekly subscription | The Guardian", bodyClasses = List("is-wide"), edition = DigitalEdition.getForCountry(contactUsCountry), touchpointBackendResolutionOpt = Some(touchpointBackendResolution), managementPage = true, contactUsCountry = contactUsCountry) {
     @helper.javascriptRouter("jsRoutes")(
         routes.javascript.Promotion.validate
     )
@@ -41,7 +39,7 @@
             @if(paymentMethodIsPaymentCard) {
                 <section class="mma-section">
                     <h3 class="mma-section__header">Update your payment method</h3>
-                    @views.html.account.fragments.paymentUpdate(subscription, maybeEmail, subscription.plans.head.product, DigitalEdition.getForCountry(contact.country))
+                    @views.html.account.fragments.paymentUpdate(subscription, maybeEmail, subscription.plans.head.product, contactUsCountry)
                 </section>
             }
         </section>
