@@ -10,7 +10,9 @@ import play.api.mvc._
 import SessionKeys.SupplierTrackingCode
 import utils.Tracking.internalCampaignCode
 
-class Homepage extends Controller with CommonActions {
+class Homepage(commonActions: CommonActions) extends Controller {
+
+  import commonActions._
 
   def index = NoCacheAction { implicit request =>
     val countryGroup = request.getFastlyCountryGroup.getOrElse(CountryGroup.UK)

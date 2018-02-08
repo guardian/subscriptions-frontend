@@ -95,7 +95,7 @@ object ManageDelivery extends ContextLogging {
       _ <- EitherT(tpBackend.suspensionService.renewIfNeeded(sub,newHoliday))
       // 26 because one year from now could be end of second years sub + 2 extra months needed in calculation to cover setting a 6-week suspension on the day before your 12th billing day!
       oldBS <- EitherT(tpBackend.commonPaymentService.flatMap(_.billingSchedule(sub.id, account, numberOfBills = 26).map(_ \/> "Error getting billing schedule")))
-      result <- EitherT(tpBackend.suspensionService.addHoliday(newHoliday, oldBS, account.billCycleDay, sub.termEndDate)).leftMap(getAndLogRefundError(_).map(_.code).list.mkString(","))
+      result <- EitherT(tpBackend.suspensionService.addHoliday(newHoliday, oldBS, account.billCycleDay, sub.termEndDate)).leftMap(getAndLogRefundError(_).map(_.code).list.toList.mkString(","))
       newBS <- EitherT(tpBackend.commonPaymentService.flatMap(_.billingSchedule(sub.id, account, numberOfBills = 24).map(_ \/> "Error getting billing schedule")))
       pendingHolidays <- EitherT(tpBackend.suspensionService.getUnfinishedHolidays(sub.name, now)).leftMap(_ => "Error getting holidays")
       suspendableDays = Config.suspendableWeeks * sub.plan.charges.chargedDays.size
@@ -163,7 +163,7 @@ object ManageWeekly extends ContextLogging {
   // this sequencing concatenates errors if any, otherwise aggregates rights
   def sequence[A](list: List[\/[NonEmptyList[String], A]]): \/[NonEmptyList[String], List[A]] = {
     val errors = (list collect {
-      case -\/(x) => x.list
+      case -\/(x) => x.list.toList
     }).flatten
     errors match {
       case head :: tail =>
@@ -282,7 +282,7 @@ object ManageWeekly extends ContextLogging {
         sub <- EitherT[Future, String, Subscription[ContentSubscription]](Future.successful(maybeSub.toRightDisjunction("no subscription in request")))
         weeklySub <- EitherT(Future.successful(sub.asWeekly.toRightDisjunction("subscription is not weekly")))
         renewableSub <- EitherT(Future.successful(weeklySub.asRenewable(sub).toRightDisjunction("subscription is not renewable")))
-        catalog <- EitherT(tpBackend.catalogService.catalog.map(_.leftMap(_.list.mkString(", "))))
+        catalog <- EitherT(tpBackend.catalogService.catalog.map(_.leftMap(_.list.toList.mkString(", "))))
         renew <- EitherT(Future.successful(parseRenewalRequest(request, catalog)))
       } yield {
         info(s"Attempting to renew onto ${renew.plan.name} with promo code: ${renew.promoCode}")(sub)
@@ -325,7 +325,9 @@ object ManageWeekly extends ContextLogging {
 }
 
 
-class AccountManagement(touchpointBackends: TouchpointBackends) extends Controller with ContextLogging with CommonActions {
+class AccountManagement(touchpointBackends: TouchpointBackends, commonActions: CommonActions) extends Controller with ContextLogging {
+
+  import commonActions.NoCacheAction
 
   val accountManagementAction = NoCacheAction
 

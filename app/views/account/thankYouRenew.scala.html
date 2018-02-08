@@ -11,7 +11,7 @@
 
 @main(s"Confirmation | The Guardian", bodyClasses=List("is-wide"), touchpointBackendResolutionOpt = Some(touchpointBackendResolution), product = Some(plan.product)) {
     <main class="page-container gs-container gs-container--slim">
-        @fragments.page.header("Thank you", None, List("l-padded"))
+        @_root_.views.html.fragments.page.header("Thank you", None, List("l-padded"))
         <section class="section-slice section-slice--bleed section-slice--limited">
             <p>Your Guardian Weekly subscription has been renewed.</p>
         </section>
