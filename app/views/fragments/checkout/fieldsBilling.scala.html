@@ -4,6 +4,7 @@
 @import views.support.CountryWithCurrency
 @import scalaz.syntax.std.boolean._
 @import com.gu.memsub.subsv2.CatalogPlan
+@import views.html.fragments.checkout.address
 
 @(billingAddress: Option[Address], canBeHidden: Boolean, countriesWithCurrency: List[CountryWithCurrency], plan: CatalogPlan.Paid, determinesPriceBanding: Boolean, currency: Currency)
 
@@ -21,7 +22,7 @@
 }
 @* ===== Address ===== *@
 <div class="js-billing-address @{if(canBeHidden && billingAddress.forall(_.isEmpty)) "is-hidden" else ""}"   data-determines-price-banding="@determinesPriceBanding">
-    @_root_.views.html.fragments.checkout.address(
+    @address(
         address = billingAddress,
         namePrefix = "personal.address",
         countriesWithCurrency = countriesWithCurrency,

@@ -7,7 +7,7 @@
 @(billingSchedule: BillingSchedule, currency: Currency)
 
 <div class="mma-section__schedule">
-    @billingSchedule.billsToDisplay.toList.map { bill =>
+    @for(bill <- billingSchedule.billsToDisplay) {
         <div class="mma-section__calendar">
             <div class="mma-section__calendar--date">
                 <span class="mma-section__calendar--sub">@bill.date.shortDay</span>

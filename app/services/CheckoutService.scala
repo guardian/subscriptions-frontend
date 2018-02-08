@@ -178,7 +178,7 @@ class CheckoutService(
       id <- storeIdentityDetails(subscriptionData, user, contactId, result).run
       _ <- sendConsentEmail(subscriptionData)
       email <- sendETDataExtensionRow(result, subscriptionData, gracePeriod(promotion), purchaserIds, promotion)
-    } yield (id.toOption.map(_.userData), id.swap.toOption.toSeq.flatMap(_.list.toList) ++ email.swap.toOption.toSeq.flatMap(_.list.toList))
+    } yield (id.toOption.map(_.userData), id.swap.toOption.toSeq.flatMap(_.list) ++ email.swap.toOption.toSeq.flatMap(_.list))
 
     EitherT(res.map(\/.right[FatalErrors, PostSubscribeResult]))
   }

@@ -63,14 +63,14 @@ object SubscriptionAcquisitionComponents {
         case p: PaperDay => p
       }
 
-      val when = Some(paperDays.toList.sortBy(_.dayOfTheWeekIndex)) collect {
+      val when = Some(paperDays.sortBy(_.dayOfTheWeekIndex)) collect {
         case List(SundayPaper) => Sunday
         case List(SaturdayPaper, SundayPaper) => Weekend
         case List(MondayPaper, TuesdayPaper, WednesdayPaper, ThursdayPaper, FridayPaper, SaturdayPaper) => Sixday
         case List(MondayPaper, TuesdayPaper, WednesdayPaper, ThursdayPaper, FridayPaper, SaturdayPaper, SundayPaper) => Everyday
       }
 
-      val hasDigipack = p.plan.charges.benefits.list.toList.contains(Digipack)
+      val hasDigipack = p.plan.charges.benefits.list.contains(Digipack)
 
       val printProduct = Some(when, p.plan.product, hasDigipack) collect {
         case (Some(Sunday), Delivery, false) => PrintProduct.HomeDeliverySunday

@@ -27,6 +27,8 @@ object Config {
 
   val playSecret = config.getString("play.crypto.secret")
 
+  lazy val googleAuthConfig = googleAuthConfigFor(config)
+
   lazy val googleGroupChecker = googleGroupCheckerFor(config)
 
   val stage = config.getString("stage")

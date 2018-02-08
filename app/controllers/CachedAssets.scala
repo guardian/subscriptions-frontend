@@ -22,12 +22,12 @@ object CachedAssets extends LazyLogging  {
     */
   def hashedPathFor(path: String): String = "/assets/" + hashedPaths.getOrElse(path, path)
 }
-class CachedAssets(assets: Assets) extends Controller with LazyLogging {
+class CachedAssets extends Controller with LazyLogging {
   /**
    * Serves an asset, wrapping it with cache headers if appropriate
    */
   def at(path: String, file: String, aggressiveCaching: Boolean = false) = Action.async { request =>
-    assets.at(path, file, aggressiveCaching).apply(request).recover {
+    controllers.Assets.at(path, file, aggressiveCaching).apply(request).recover {
       case e: RuntimeException => {
         Logger.warn(s"Asset run time exception for path $path $file. Does this file exist?", e)
         Cached(NotFound)
