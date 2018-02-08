@@ -1,14 +1,14 @@
 package views.support
 
+import com.gu.i18n.Country
 import com.gu.memsub.Benefit._
 import com.gu.memsub.BillingPeriod.SixWeeks
 import com.gu.memsub.Product.{Delivery, Voucher}
 import com.gu.memsub._
 import com.gu.memsub.images.{ResponsiveImage, ResponsiveImageGenerator, ResponsiveImageGroup}
+import com.gu.memsub.subsv2.CatalogPlan.ContentSubscription
 import com.gu.memsub.subsv2.{CatalogPlan, Plan}
 import com.netaporter.uri.dsl._
-import model.{DigitalEdition => DigEd}
-import model.DigitalEdition.{AU, US}
 
 import scala.reflect.internal.util.StringOps
 object PlanOps {
@@ -17,7 +17,7 @@ object PlanOps {
     def title: String = in.product match {
       case Product.Digipack => "Guardian Digital Pack"
       case _: Product.Weekly  => "Guardian Weekly"
-      case x => "Guardian/Observer Newspapers"
+      case _ => "Guardian/Observer Newspapers"
     }
 
     def packageName: String = in.product match {
@@ -102,13 +102,13 @@ object PlanOps {
 
   implicit class ProductOps(product: Product) {
 
-    def email: String =
+    def email(contactUsCountry: Option[Country]): String =
       product match {
         case Delivery => "homedelivery@theguardian.com"
         case Voucher => "vouchersubs@theguardian.com"
         case Product.Digipack => "digitalpack@theguardian.com"
-        case _: Product.Weekly => "gwsubs@theguardian.com"
-        case _ => "subscriptions@theguardian.com"
+        case _: Product.Weekly => ContactCentreOps.weeklyEmail(contactUsCountry)
+        case _ => ContactCentreOps.email
       }
 
     def faqHref: String =
@@ -117,11 +117,7 @@ object PlanOps {
         case _ => "https://www.theguardian.com/subscriber-direct/subscription-frequently-asked-questions"
       }
 
-    def phone(digitalEdition: DigEd): String = product match {
-      case _: Product.Weekly if digitalEdition == US => {"1-844-632-2010 (toll free); 917-900-4663 (direct line)"}
-      case _: Product.Weekly if digitalEdition == AU => {"1800 773 766 (toll free within Australia)"}
-      case _ => {"+44 (0) 330 333 6767. Open BST 8am to 8pm, Monday to Sunday"}
-    }
+    def phone(contactUsCountry: Option[Country]): String = ContactCentreOps.phone(contactUsCountry)
 
     def productType: String = product match {
       case Delivery => "Home Delivery"
@@ -133,8 +129,13 @@ object PlanOps {
 
   }
 
+  implicit class OptionProductOps(maybeProduct: Option[Product]) {
+    def email(contactUsCountry: Option[Country]): String = maybeProduct.map(_.email(contactUsCountry)).getOrElse(ContactCentreOps.email)
+    def phone(contactUsCountry: Option[Country]): String = maybeProduct.map(_.phone(contactUsCountry)).getOrElse(ContactCentreOps.phone(contactUsCountry))
+  }
+
   implicit class ProductPopulationDataOps(in: ProductPopulationData) {
-    val products = in.plans.default
+    val products: ContentSubscription = in.plans.default
     def isHomeDelivery: Boolean = products.isHomeDelivery
     def isGuardianWeekly: Boolean = products.isGuardianWeekly
     def isPhysical: Boolean = products.hasPhysicalBenefits

@@ -1,12 +1,8 @@
-@import com.gu.memsub.ProductFamily
-@import com.gu.memsub.Subscriptions
-@import utils.TestUsers.{PreSigninTestCookie, NameEnteredInForm, SignedInUsername}
-@import com.gu.memsub.subsv2.CatalogPlan
-@import com.gu.memsub.BillingPeriod
+@import com.gu.i18n.Country
 @import com.gu.memsub.Product
-@import model.DigitalEdition
-
 @import controllers.WeeklyLandingPage.Hreflangs
+@import model.DigitalEdition
+@import utils.TestUsers.{NameEnteredInForm, PreSigninTestCookie, SignedInUsername}
 @(
     title: String,
     description: Option[String] = None,
@@ -16,7 +12,8 @@
     product: Option[Product] = None,
     edition: DigitalEdition = DigitalEdition.INT,
     managementPage: Boolean = false,
-    hreflangs: Option[Hreflangs] = None
+    hreflangs: Option[Hreflangs] = None,
+    contactUsCountry: Option[Country] = None
 )(content: Html)
 
 <!DOCTYPE html>
@@ -47,7 +44,7 @@
             @content
         </div>
 
-        @fragments.global.footer(product, edition)
+        @fragments.global.footer(product, edition, contactUsCountry)
         @fragments.footerJavaScript()
     </body>
 </html>

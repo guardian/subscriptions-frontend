@@ -1,25 +1,13 @@
-@import com.gu.memsub.promo.PromoCode
-@import com.gu.memsub.promo.Promotion.PromoWithWeeklyLandingPage
-@import com.gu.memsub.promo.Promotion.asAnyPromotion
-@import views.support.LandingPageOps._
-@import configuration.Links
-@import model.DigitalEdition
-@import views.support.CommaSplit
-@import views.support.{MarkdownRenderer}
-@import com.gu.memsub.subsv2.Catalog
-@import model.Subscriptions._
-@import controllers.CachedAssets.hashedPathFor
 @import com.gu.i18n.Country
-@import views.support.WeeklyPromotion
-@import com.gu.memsub.promo.Grey
-@import com.gu.memsub.promo.Blue
-@import com.gu.memsub.promo.White
-@import com.gu.memsub.images.ResponsiveImageGroup
-@import com.gu.memsub.images.ResponsiveImageGenerator
 @import com.gu.memsub.BillingPeriod.SixWeeks
-
 @import com.gu.memsub.Product.WeeklyZoneA
+@import com.gu.memsub.images.{ResponsiveImageGenerator, ResponsiveImageGroup}
+@import com.gu.memsub.promo.PromoCode
+@import com.gu.memsub.promo.Promotion.{PromoWithWeeklyLandingPage, asAnyPromotion}
+@import com.gu.memsub.subsv2.Catalog
 @import controllers.WeeklyLandingPage.Hreflangs
+@import model.DigitalEdition
+@import views.support.{CommaSplit, MarkdownRenderer, WeeklyPromotion}
 @(
     country: Country,
     catalog: Catalog,
@@ -40,7 +28,8 @@
         bodyClasses = List("is-wide"),
         product = Some(WeeklyZoneA),// don't specifically need zone a, any weekly is fine
         hreflangs = Some(hreflangs),
-        edition = DigitalEdition.getForCountry(Some(country))
+        edition = DigitalEdition.getForCountry(Some(country)),
+        contactUsCountry = Some(country)
     ) {
 
         <script>

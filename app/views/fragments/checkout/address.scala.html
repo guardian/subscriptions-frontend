@@ -1,11 +1,11 @@
+@import com.gu.i18n.Country.UK
 @import com.gu.i18n.Currency
 @import com.gu.memsub.Address
 @import com.gu.memsub.subsv2.CatalogPlan
 @import views.support.AddressValidationRulesOps._
 @import views.support.CountryOps._
-@import views.support.CountryWithCurrency
+@import views.support.{ContactCentreOps, CountryWithCurrency}
 @import views.support.PlanOps._
-
 @(address: Option[Address], namePrefix: String, countriesWithCurrency: List[CountryWithCurrency], plan: CatalogPlan.Paid, usePostcodeLookup: Boolean, determinesPriceBanding: Boolean, defaultCurrency: Currency)
 
 
@@ -21,7 +21,7 @@
     <div class="form-field js-checkout-postcode"
         @if(plan.isHomeDelivery) {
             data-validate-for="@namePrefix"
-            data-error-message="Sorry, we cannot deliver a paper to an address with this postcode. Please call Customer Services on: +44 (0) 330 333 6767 or press Back to purchase a voucher subscription."
+            data-error-message="Sorry, we cannot deliver a paper to an address with this postcode. Please call Customer Services on: @{ContactCentreOps.directLine(UK)} or press Back to purchase a voucher subscription."
         }>
         <label class="label" @labelFor("postcode")>Postcode</label>
         @if(usePostcodeLookup) {

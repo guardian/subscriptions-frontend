@@ -1,13 +1,12 @@
 @import model.DigitalEdition
-@import views.support.DigitalEdition._
-
 @import services.FlashSale
 @(edition: DigitalEdition)
 
 @main(s"${edition.name} | Subscriptions | The Guardian",
     Some("Subscribe to The Guardian. Support our independent, award-winning journalism."),
-    edition = edition) {
-
+    edition = edition,
+    contactUsCountry = edition.countryGroup.defaultCountry
+) {
     <main class="page-container gs-container">
         @fragments.page.header("Subscription offers", Some("Select your preferred package"))
         @fragments.productLists.productListInternational(edition, FlashSale.offersPromoCodes(edition))

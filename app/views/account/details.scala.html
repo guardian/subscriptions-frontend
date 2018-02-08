@@ -1,45 +1,39 @@
-@import model.DigitalEdition.UK
-@import configuration.Config.Identity.idWebAppSigninUrl
+@import com.gu.i18n.Country
 @import com.gu.memsub.promo.PromoCode
+@import configuration.Config.Identity.idWebAppSigninUrl
+@import model.DigitalEdition.UK
+@import views.support.ContactCentreOps._
 @(
     subscriberId: Option[String],
     promoCode: Option[PromoCode],
     message: Option[String]= None
 )(implicit request: RequestHeader, flash: Flash, touchpointBackendResolution: services.TouchpointBackends.Resolution)
 
-@main("Manage your subscription | The Guardian", edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution)) {
+@main("Manage your subscription | The Guardian", edition = UK, touchpointBackendResolutionOpt = Some(touchpointBackendResolution), managementPage = true) {
 
     <main class="page-container gs-container">
 
         <section class="suspend-container">
 
             <div class="suspend-header">
-                <h1 class="suspend-header__title">Manage your Guardian subscription</h1>
+                <h1 class="suspend-header__title">Manage your subscription</h1>
             </div>
 
             <div>
-                <p>All subscribers - check your subscription details and payment schedule here.</p>
-                <p>In addition:</p>
-                <p>Home Delivery subscribers - suspend your deliveries while you're away.</p>
-                <p>Guardian Weekly subscribers - renew your subscription here.</p>
+                <h3>In this area you can:</h3>
+                <p>Review your subscription details and payment schedule.</p>
+                <p>If you get your copy of The Guardian or The Observer delivered, you can suspend delivery while you're away.</p>
+                <p>If you have a fixed-term Guardian Weekly subscription, you can renew it here.</p>
             </div>
 
-            <br/>
-
-            <div class="prose">
+            <div>
+                <h3>Instructions</h3>
                 <p>
-                    Please log in below using your ​​Subscriber ID​, which you can find on any correspondence.
-                </p>
-                <p>
-                    If you do not have your Subscriber ID to hand, or need anything else,
-                    please contact customer services on: <a class="u-link" href="tel:+44 330 333 6767">+44 (0) 330 333 6767</a>
-                    or email <a class="u-link" href="mailto:subscriptions@@theguardian.com">subscriptions@@theguardian.com</a>.
+                    Please log in below using your ​​Subscriber ID​, which you can find on any correspondence, and your last name.
                 </p>
             </div>
 
-            <br/>
-
-            <form class="form js-suspend-form" action="@routes.AccountManagement.processLogin().url" method="POST" novalidate>
+            <form class="form js-suspend-form u-cf" action="@routes.AccountManagement.processLogin().url" method="POST" novalidate>
 
                 @helper.CSRF.formField
 
@@ -94,6 +88,19 @@
                 </div>
 
             </form>
+
+            <div>
+                <p>
+                    If you do not have your Subscriber ID to hand, or need anything else,
+                    please email <a class="u-link" href="@hrefMailto">@email</a> or contact Customer Services:
+                </p>
+                <h4>Australia and New Zealand</h4>
+                <p>@phone(Country.Australia)&#46;</p>
+                <h4>United States and Canada</h4>
+                <p>@phone(Country.US)&#46;</p>
+                <h4>UK and rest of the world</h4>
+                <p>@phone()&#46;</p>
+            </div>
 
         </section>
         <br/>

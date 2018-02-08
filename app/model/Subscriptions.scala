@@ -1,5 +1,6 @@
 package model
 
+import com.gu.memsub.Product
 import com.gu.memsub.Product.{Delivery, Voucher}
 import play.twirl.api.Html
 
@@ -26,6 +27,7 @@ object Subscriptions {
     val steps: Seq[String]
     val insideM25: Boolean
     val isDiscounted: Boolean
+    val catalogProduct: Product
     def capitalizedTitle = title.split("\\s").map(_.capitalize).mkString(" ")
   }
 
@@ -36,6 +38,7 @@ object Subscriptions {
     options: Seq[SubscriptionOption],
     isDiscounted: Boolean = false
   ) extends SubscriptionProduct {
+    override val catalogProduct = Product.Delivery
     override val insideM25 = true
     override val id = Delivery.name
     val stepsHeading = "This is how direct delivery works"
@@ -53,6 +56,7 @@ object Subscriptions {
     options: Seq[SubscriptionOption],
     isDiscounted: Boolean = false
   ) extends SubscriptionProduct {
+    override val catalogProduct = Product.Voucher
     override val insideM25 = false
     override val id = Voucher.name
     val stepsHeading = "This is how the voucher scheme works"

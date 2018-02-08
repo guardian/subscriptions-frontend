@@ -1,7 +1,8 @@
+@import com.gu.i18n.Country
 @import model.DigitalEdition.UK
 @(subscription: model.Subscriptions.SubscriptionProduct, productSegment: String)
 
-@main(s"${subscription.capitalizedTitle} | Choose a Package | Subscriptions | The Guardian", edition = UK) {
+@main(s"${subscription.capitalizedTitle} | Choose a Package | Subscriptions | The Guardian", edition = UK, contactUsCountry = Some(Country.UK), product = Some(subscription.catalogProduct)) {
 
     <script>
         guardian.pageInfo.pageType = 'Landing';

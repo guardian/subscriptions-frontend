@@ -1,17 +1,15 @@
-@import configuration.Links
-@import com.gu.memsub.subsv2.Subscription
-@import model.DigitalEdition.UK
-@import views.support.Dates.prettyDate
-@import com.gu.i18n.Country
-@import controllers.ManageWeekly.WeeklyPlanInfo
-@import model.SubscriptionOps._
-@import play.api.libs.json.Json
-@import controllers.CachedAssets.hashedPathFor
-
-@import com.gu.i18n.Currency
+@import com.gu.i18n.{Country, Currency}
 @import com.gu.memsub.promo.PromoCode
-@import org.joda.time.LocalDate.now
+@import com.gu.memsub.subsv2.Subscription
 @import com.gu.zuora.ZuoraRestService.SoldToContact
+@import configuration.Links
+@import controllers.CachedAssets.hashedPathFor
+@import controllers.ManageWeekly.WeeklyPlanInfo
+@import model.DigitalEdition.UK
+@import model.SubscriptionOps._
+@import org.joda.time.LocalDate.now
+@import play.api.libs.json.Json
+@import views.support.Dates.prettyDate
 @(
     subscription: Subscription[WeeklyPlanOneOff], contact: SoldToContact, email: Option[String], billToCountry: Country, plans: List[WeeklyPlanInfo], currency: Currency, promoCode: Option[PromoCode]
 )(implicit r: RequestHeader, touchpointBackendResolution: services.TouchpointBackends.Resolution)
@@ -22,7 +20,8 @@
     edition = UK,
     touchpointBackendResolutionOpt = Some(touchpointBackendResolution),
     managementPage = true,
-    jsVars = model.JsVars(currency = currency, country = Some(billToCountry))
+    jsVars = model.JsVars(currency = currency, country = Some(billToCountry)),
+    contactUsCountry = Some(billToCountry)
 ) {
 
     @helper.javascriptRouter("jsRoutes")(
