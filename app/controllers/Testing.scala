@@ -2,7 +2,7 @@ package controllers
 
 import javax.inject.Inject
 
-import actions.OAuthActions
+import actions.{CommonActions, OAuthActions}
 import com.gu.memsub.subsv2.CatalogPlan.Paid
 import com.typesafe.scalalogging.LazyLogging
 import model.Subscriptions.{SubscriptionOption, SubscriptionProduct}
@@ -22,7 +22,10 @@ object Testing {
   val PreSigninTestCookieName = "pre-signin-test-user"
 }
 
-class Testing @Inject()(override val wsClient: WSClient, touchpointBackend: TouchpointBackend)  extends Controller with LazyLogging with OAuthActions {
+class Testing (touchpointBackend: TouchpointBackend, commonActions: CommonActions, oAuthActions: OAuthActions)  extends Controller with LazyLogging {
+
+  import commonActions._
+  import oAuthActions._
 
   lazy val products: Future[List[List[Paid]]] = touchpointBackend.catalogService.catalog.map(_.valueOr(e => throw new IllegalStateException(s"$e while getting catalog")).allSubs)
 

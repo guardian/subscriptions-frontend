@@ -125,7 +125,7 @@ object PaperFieldsGenerator {
     fieldsFor(
       deliveryAddress = paperData.deliveryAddress,
       maybeBillingAddress = Some(personalData.address),
-      includesDigipack = paperData.plan.charges.benefits.list.contains(Digipack),
+      includesDigipack = paperData.plan.charges.benefits.list.toList.contains(Digipack),
       email = personalData.email,
       title = personalData.title,
       firstName = personalData.first,
@@ -302,7 +302,7 @@ object HolidaySuspensionBillingScheduleDataExtensionRow {
         "days_remaining" -> (daysAllowed - daysUsed).toString,
         "number_of_suspensions_lined_up" -> numberOfSuspensionsLinedUp.toString,
         "normal_price" -> Price(thereafterBill.amount, subscriptionCurrency).pretty
-      ) ++ futureBills.list
+      ) ++ futureBills.list.toList
     )
   }
 
