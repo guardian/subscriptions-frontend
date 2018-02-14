@@ -113,7 +113,7 @@ class CheckoutSpec extends FeatureSpec with Browser
         assert(Driver.cookiesSet.map(_.getName).contains(idCookie)) }
     }
 
-    //temporarily ignoring this until userd details pre-fill is fixed
+    //temporarily ignoring this until user details pre-fill is fixed
     ignore("Identity user subscribes to the Voucher Everyday package with direct debit", Acceptance) {
       withRegisteredIdentityUserFixture { testUser =>
 
