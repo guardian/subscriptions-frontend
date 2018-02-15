@@ -71,7 +71,7 @@ libraryDependencies ++= Seq(
     "com.gu" % "kinesis-logback-appender" % "1.4.2",
     "net.logstash.logback" % "logstash-logback-encoder" % "4.11",
     "com.fasterxml.jackson.dataformat" % "jackson-dataformat-cbor" % "2.9.2",
-    "com.gu" %% "acquisition-event-producer-play26" % "2.0.4",
+    "com.gu" %% "acquisition-event-producer-play26" % "3.0.0",
     "com.google.guava" % "guava" % "23.4-jre" % "test"
 )
 
