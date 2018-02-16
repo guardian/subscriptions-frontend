@@ -1,5 +1,5 @@
 package controllers
-import actions.OAuthActions
+import actions.{CommonActions, OAuthActions}
 import com.gu.i18n.CountryGroup.byCountryCode
 import com.gu.i18n.{Country, CountryGroup}
 import com.gu.memsub.Benefit.Digipack
@@ -29,16 +29,19 @@ import scala.concurrent.Future
 import scalaz.OptionT
 import scalaz.std.scalaFuture._
 
-class PromoLandingPage (override val wsClient: WSClient, tpBackend: TouchpointBackend) extends Controller with OAuthActions {
+class PromoLandingPage (tpBackend: TouchpointBackend, commonActions: CommonActions, oAuthActions: OAuthActions) extends Controller {
+
+  import commonActions._
+  import oAuthActions._
 
   private val catalogPromoLandingPage: Future[CatalogPromoLandingPage] = tpBackend.catalogService.catalog.map(_.map(c => new CatalogPromoLandingPage(c)).valueOr(e => throw new IllegalStateException(s"$e while getting catalog")))
 
   class CatalogPromoLandingPage(val catalog: Catalog) {
 
     val digitalPackRatePlanIds = catalog.digipack.plans.map(_.id).toSet
-    val allPaperPackages = catalog.delivery.list ++ catalog.voucher.list
-    val paperPlusPackageRatePlanIds = allPaperPackages.filter(_.charges.benefits.list.contains(Digipack)).map(_.id).toSet
-    val paperOnlyPackageRatePlanIds = allPaperPackages.filterNot(_.charges.benefits.list.contains(Digipack)).map(_.id).toSet
+    val allPaperPackages = catalog.delivery.list.toList ++ catalog.voucher.list.toList
+    val paperPlusPackageRatePlanIds = allPaperPackages.filter(_.charges.benefits.list.toList.contains(Digipack)).map(_.id).toSet
+    val paperOnlyPackageRatePlanIds = allPaperPackages.filterNot(_.charges.benefits.list.toList.contains(Digipack)).map(_.id).toSet
     val guardianWeeklyRatePlanIds = catalog.weekly.zoneA.plans.map(_.id).toSet ++ catalog.weekly.zoneC.plans.map(_.id).toSet
 
     private def isActive(promotion: AnyPromotion): Boolean = {

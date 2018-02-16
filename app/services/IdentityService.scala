@@ -11,7 +11,7 @@ import model.error.SubsError
 import play.api.Play.current
 import play.api.http.Status
 import play.api.libs.json._
-import play.api.libs.ws.{WS, WSClient, WSRequest, WSResponse}
+import play.api.libs.ws.{WSClient, WSRequest, WSResponse}
 import play.api.mvc.Cookie
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 

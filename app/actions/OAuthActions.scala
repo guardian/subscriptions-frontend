@@ -3,18 +3,23 @@ package actions
 import configuration.Config
 import controllers.routes
 import com.gu.googleauth
-import play.api.libs.ws.{WS, WSClient}
+import com.gu.googleauth.{AuthAction, GoogleAuthConfig}
+import play.api.libs.ws.WSClient
 import play.api.mvc.Security.AuthenticatedRequest
-import play.api.mvc.{ActionBuilder, Call}
+import play.api.mvc._
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
-trait OAuthActions extends googleauth.Actions with googleauth.Filters with CommonActions {
-  val authConfig  = Config.googleAuthConfig
+final class OAuthActions(override val wsClient: WSClient, commonActions: CommonActions, bodyParser: BodyParser[AnyContent], val authConfig: GoogleAuthConfig) extends googleauth.LoginSupport with googleauth.Filters {
+
+  import commonActions._
+
+  def loginAction()(implicit request: RequestHeader) = startGoogleLogin()
+
   val loginTarget = routes.OAuth.loginAction()
   lazy val groupChecker = Config.googleGroupChecker
   type GoogleAuthRequest[A] = AuthenticatedRequest[A, googleauth.UserIdentity]
 
-  val GoogleAuthAction: ActionBuilder[GoogleAuthRequest] = AuthAction
+  val GoogleAuthAction: ActionBuilder[GoogleAuthRequest, AnyContent] = new AuthAction(authConfig, loginTarget, bodyParser)
 
   override val failureRedirectTarget: Call = routes.Homepage.index()
   override val defaultRedirectTarget: Call = routes.OAuth.loginAction()

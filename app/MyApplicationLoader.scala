@@ -1,4 +1,8 @@
+import actions.{CommonActions, OAuthActions}
+import com.gu.googleauth.GoogleAuthConfig
+import com.gu.memsub.auth.common.MemSub.Google.googleAuthConfigFor
 import configuration.Config
+import configuration.Config.config
 import controllers._
 import filters.{AddEC2InstanceHeader, AddGuIdentityHeaders, CheckCacheHeadersFilter, HandleXFrameOptionsOverrideHeader}
 import loghandling.Logstash
@@ -7,6 +11,7 @@ import play.api.ApplicationLoader.Context
 import play.api._
 import play.api.libs.ws.ahc.AhcWSComponents
 import play.api.mvc.EssentialFilter
+import play.components.HttpConfigurationComponents
 import play.filters.csrf.CSRFComponents
 import play.filters.headers.{SecurityHeadersConfig, SecurityHeadersFilter}
 import router.Routes
@@ -27,6 +32,8 @@ class MyComponents(context: Context)
   extends BuiltInComponentsFromContext(context)
     with AhcWSComponents
     with CSRFComponents
+    with HttpConfigurationComponents
+    with AssetsComponents
 {
 
   val touchpointBackends = new TouchpointBackends(actorSystem, wsClient)
@@ -34,23 +41,28 @@ class MyComponents(context: Context)
   override lazy val httpErrorHandler: ErrorHandler =
     new ErrorHandler(environment, configuration, sourceMapper, Some(router))
 
+  val commonActions = new CommonActions(executionContext = executionContext, csrfCheck, parser = playBodyParsers.default)
+  val oAuthActions = new OAuthActions(wsClient, commonActions, playBodyParsers.default, googleAuthConfig)
+
+  lazy val googleAuthConfig: GoogleAuthConfig = googleAuthConfigFor(config, httpConfiguration = httpConfiguration)
+
   lazy val router: Routes = new Routes(
     httpErrorHandler,
-    new CachedAssets(),
-    new Homepage(),
-    new Management(wsClient = wsClient, actorSystem = actorSystem, touchpointBackends),
-    new DigitalPack(touchpointBackends.Normal),
-    new Checkout(touchpointBackends),
-    new Promotion(touchpointBackends),
-    new Shipping(touchpointBackends.Normal),
-    new WeeklyLandingPage(touchpointBackends.Normal),
-    new OAuth(wsClient = wsClient),
-    new CAS(wsClient = wsClient),
-    new AccountManagement(touchpointBackends),
-    new PatternLibrary(),
-    new Testing(wsClient = wsClient, touchpointBackends.Test),
-    new PromoLandingPage(wsClient = wsClient, touchpointBackends.Normal),
-    new Offers()
+    new CachedAssets(assets),
+    new Homepage(commonActions),
+    new Management(actorSystem = actorSystem, touchpointBackends, oAuthActions),
+    new DigitalPack(touchpointBackends.Normal, commonActions),
+    new Checkout(touchpointBackends, commonActions),
+    new Promotion(touchpointBackends, commonActions),
+    new Shipping(touchpointBackends.Normal, commonActions),
+    new WeeklyLandingPage(touchpointBackends.Normal, commonActions),
+    new OAuth(wsClient = wsClient, commonActions, oAuthActions),
+    new CAS(oAuthActions),
+    new AccountManagement(touchpointBackends, commonActions),
+    new PatternLibrary(commonActions),
+    new Testing(touchpointBackends.Test, commonActions, oAuthActions),
+    new PromoLandingPage(touchpointBackends.Normal, commonActions, oAuthActions),
+    new Offers(commonActions)
   )
 
   override lazy val httpFilters: Seq[EssentialFilter] = Seq(

@@ -22,8 +22,9 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 import scala.concurrent.Future
 
-class Promotion(fBackendFactory: TouchpointBackends)  extends Controller with LazyLogging with CommonActions {
+class Promotion(fBackendFactory: TouchpointBackends, commonActions: CommonActions)  extends Controller with LazyLogging {
 
+  import commonActions._
 
   private val fallbackCurrency = CountryGroup.UK.currency
 
