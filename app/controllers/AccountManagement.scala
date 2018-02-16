@@ -145,9 +145,9 @@ class ManageDelivery(implicit val executionContext: ExecutionContext) extends Co
     logger.info(s"[${env}] Attempting to raise a delivery issue: $deliveryProblem")
     val futureLookupAttempt = LookupSubscriptionFulfilment(env, httpClient, deliveryProblem)
     futureLookupAttempt.map { lookupAttempt => lookupAttempt match {
-        case \/-(lookup) =>
+        case \/-(_) =>
           logger.info(s"[${env}] Successfully raised a delivery issue for $deliveryProblem")
-          Ok(views.html.account.reportDeliveryProblemSuccess(lookup, deliveryProblem.issueDate))
+          Ok(views.html.account.reportDeliveryProblemSuccess())
         case -\/(message) =>
           logger.error(s"[${env}] Failed to raise a delivery issue for ${deliveryProblem.subscriptionName}: $message")
           Ok(views.html.account.reportDeliveryProblemFailure())

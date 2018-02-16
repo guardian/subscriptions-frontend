@@ -3,12 +3,12 @@ package services
 import com.typesafe.scalalogging.StrictLogging
 import configuration.Config
 import forms.ReportDeliveryProblem
-import model.FulfilmentLookup
 import okhttp3.{MediaType, Request, RequestBody, Response}
 import org.joda.time.format.DateTimeFormat
-import play.api.libs.json.{JsError, JsSuccess, Json}
+import play.api.libs.json.{Json}
 
 import scala.concurrent.{ExecutionContext, Future}
+
 import scalaz.{-\/, \/, \/-}
 
 object LookupSubscriptionFulfilment extends StrictLogging {
@@ -29,7 +29,7 @@ object LookupSubscriptionFulfilment extends StrictLogging {
       .build()
   }
 
-  def apply(env: String, httpClient: Request => Future[Response], deliveryProblem: ReportDeliveryProblem)(implicit executionContext: ExecutionContext): Future[String \/ FulfilmentLookup] = {
+  def apply(env: String, httpClient: Request => Future[Response], deliveryProblem: ReportDeliveryProblem)(implicit executionContext: ExecutionContext): Future[String \/ Unit] = {
     val request = buildRequest(env, deliveryProblem)
     val futureResponse = httpClient(request)
     futureResponse.map { response =>
@@ -37,13 +37,7 @@ object LookupSubscriptionFulfilment extends StrictLogging {
       response.body.close
       if (response.isSuccessful) {
         logger.info(s"[${env}] Successfully performed lookup for ${deliveryProblem.subscriptionName}")
-        val jsonBody = Json.parse(responseBody)
-        jsonBody.validate[FulfilmentLookup] match {
-          case validLookup: JsSuccess[FulfilmentLookup] =>
-            \/-(validLookup.value)
-          case error: JsError =>
-            -\/(s"response was successful but body could not be parsed, we got: $responseBody")
-        }
+        \/-(())
       } else {
         -\/(s"response was unsuccessful, we got a ${response.code}: ${responseBody}")
       }

@@ -44,7 +44,6 @@ define([
         var parameterValue = pageCodes[pageType];
 
         var oImg = document.createElement('img');
-        oImg.setAttribute('alt', 'AppNexus pixel');
         oImg.setAttribute('height', '0');
         oImg.setAttribute('width', '0');
         document.body.appendChild(oImg);
