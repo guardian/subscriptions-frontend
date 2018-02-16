@@ -246,15 +246,13 @@ class IdentityApiClientImpl(wsClient: WSClient)(implicit executionContext: Execu
   lazy val metrics = new IdApiMetrics(Config.stage)
 
   implicit class FutureWSLike(eventualResponse: Future[WSResponse]) {
-    /**
-      * Example of ID API Response: `{"status":"error","errors":[{"message":"Forbidden","description":"Field access denied","context":"privateFields.billingAddress1"}]}`
-      *
-      * @return
-      */
+
     private def applyOnSpecificErrors(reasons: List[String])(block: WSResponse => Unit): Unit = {
       def errorMessageFilter(error: JsValue): Boolean =
         (error \ "message").asOpt[JsString].exists(e => reasons.contains(e.value))
 
+      //Example of ID API Response:
+      // `{"status":"error","errors":[{"message":"Forbidden","description":"Field access denied","context":"privateFields.billingAddress1"}]}`
       eventualResponse.map(response =>
         (response.json \ "status").asOpt[String].filter(_ == "error")
           .foreach(_ => (response.json \ "errors").asOpt[JsArray].flatMap(_.value.headOption)
