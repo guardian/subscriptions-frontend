@@ -1,57 +1,54 @@
 package services
 
+import cats.Id
 import com.gu.identity.play.AccessCredentials
 import com.gu.memsub.Address
 import model.PersonalData
-import org.scalatest.FreeSpec
+import org.scalatest.{FreeSpec, Matchers}
+import play.api.http.Status
 import play.api.libs.json._
 import play.api.libs.ws.WSResponse
 import utils.TestIdUser._
 import utils.TestPersonalData.testPersonalData
 import utils.TestWSResponse
 
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
-import scala.concurrent.Future
-
-class IdentityServiceTest extends FreeSpec {
-  class TestIdentityApiClient extends IdentityApiClient {
-    override def userLookupByCookies: (AccessCredentials.Cookies) => Future[WSResponse] = ???
-    override def createGuest: (PersonalData, Option[Address]) => Future[WSResponse] = ???
-    override def updateUserDetails: (PersonalData, Option[Address], AccessCredentials.Cookies) => Future[WSResponse] = ???
-    override def convertGuest: (String, IdentityToken, Boolean) => Future[WSResponse] = ???
-    override def userLookupByEmail: (String) => Future[WSResponse] = ???
+class IdentityServiceTest extends FreeSpec with Matchers {
+  class TestIdentityApiClient extends IdentityApiClient[Id] {
+    override def userLookupByCookies: (AccessCredentials.Cookies) => Id[WSResponse] = ???
+    override def createGuest: (PersonalData, Option[Address]) => Id[WSResponse] = ???
+    override def updateUserDetails: (PersonalData, Option[Address], AccessCredentials.Cookies) => Id[WSResponse] = ???
+    override def convertGuest: (String, IdentityToken, Boolean) => Id[WSResponse] = ???
+    override def userLookupByEmail: (String) => Id[WSResponse] = ???
     override def consentEmail = ???
   }
 
-  def makeIdentityService(client: IdentityApiClient) = new IdentityService(client)
+  def makeIdentityService(client: IdentityApiClient[Id]) = new IdentityService(client)
 
   "doesUserExists" - {
     val existingEmail = "existing@example.com"
     val client = new TestIdentityApiClient {
       override val userLookupByEmail = (email: String) =>
-        Future {
-          val body =
+        {
+          val (body, status) =
             if (email == existingEmail)
-              Json.obj(
+              (Json.obj(
                 "user" -> Json.obj("id" -> "123")
-              )
+              ), Status.OK)
             else
-              JsNull
+              (JsNull, Status.NOT_FOUND)
 
-          TestWSResponse(json = body)
+          TestWSResponse(json = body, status = status)
         }
     }
 
     "returns true if looking up a user by email is successful" in {
-      makeIdentityService(client).doesUserExist(existingEmail).map { res =>
-        assert(res)
-      }
+      val res = makeIdentityService(client).doesUserExist(existingEmail)
+      res should be(true)
     }
 
     "returns false if looking up a user by email is unsuccessful" in {
-      makeIdentityService(client).doesUserExist("unknown@example.com").map { res =>
-        assert(!res)
-      }
+      val res = makeIdentityService(client).doesUserExist("unknown@example.com")
+      res should be(false)
     }
   }
 
@@ -61,7 +58,7 @@ class IdentityServiceTest extends FreeSpec {
 
     val client = new TestIdentityApiClient {
       override val userLookupByCookies = (cookies: AccessCredentials.Cookies) =>
-        Future {
+        {
           val body =
             if (cookies == validCookies)
               Json.obj(
@@ -75,9 +72,8 @@ class IdentityServiceTest extends FreeSpec {
     }
 
     "returns true if looking up a user by cookie is successful" in {
-      makeIdentityService(client).userLookupByCredentials(validCookies).map { res =>
+      val res = makeIdentityService(client).userLookupByCredentials(validCookies)
         assertResult(Some(testUser))(res)
-      }
     }
 
     "returns false if looking up a user by cookie is unsuccessful" in {

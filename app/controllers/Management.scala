@@ -7,7 +7,6 @@ import app.BuildInfo
 import scalaz.syntax.nel._
 import scalaz.syntax.std.boolean._
 import com.typesafe.scalalogging.LazyLogging
-import play.api.libs.concurrent.Execution.Implicits._
 import play.api.mvc._
 import services.TouchpointBackends
 import actions.{CommonActions, OAuthActions}
@@ -20,10 +19,11 @@ import play.api.libs.concurrent.Akka
 import com.github.nscala_time.time.Imports._
 import play.api.libs.ws.WSClient
 
+import scala.concurrent.ExecutionContext
 import scalaz.{Semigroup, Validation, ValidationNel}
 import scalaz.syntax.std.option._
 
-class Management(actorSystem: ActorSystem, fBackendFactory: TouchpointBackends, oAuthActions: OAuthActions)  extends Controller with LazyLogging {
+class Management(actorSystem: ActorSystem, fBackendFactory: TouchpointBackends, oAuthActions: OAuthActions)(implicit val executionContext: ExecutionContext)  extends Controller with LazyLogging {
 
   import oAuthActions._
 

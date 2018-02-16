@@ -8,7 +8,6 @@ import play.api.mvc._
 import play.api.routing.Router
 import play.core.SourceMapper
 
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.concurrent._
 
 class ErrorHandler(
@@ -16,7 +15,7 @@ class ErrorHandler(
   config: Configuration,
   sourceMapper: Option[SourceMapper],
   router: => Option[Router]
-) extends DefaultHttpErrorHandler(env, config, sourceMapper, router) {
+)(implicit executionContext: ExecutionContext) extends DefaultHttpErrorHandler(env, config, sourceMapper, router) {
 
   override def onClientError(request: RequestHeader, statusCode: Int, message: String = ""): Future[Result] = {
     super.onClientError(request, statusCode, message).map(Cached(_))

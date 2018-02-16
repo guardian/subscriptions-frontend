@@ -5,7 +5,8 @@ import play.api.Logger
 import play.api.libs.json.Json
 import play.api.mvc.{Action, Controller}
 
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
+import scala.concurrent.ExecutionContext
+
 object CachedAssets extends LazyLogging  {
   val hashedPaths: Map[String, String] =
     (for {
@@ -22,7 +23,7 @@ object CachedAssets extends LazyLogging  {
     */
   def hashedPathFor(path: String): String = "/assets/" + hashedPaths.getOrElse(path, path)
 }
-class CachedAssets(assets: Assets) extends Controller with LazyLogging {
+class CachedAssets(assets: Assets)(implicit executionContext: ExecutionContext) extends Controller with LazyLogging {
   /**
    * Serves an asset, wrapping it with cache headers if appropriate
    */

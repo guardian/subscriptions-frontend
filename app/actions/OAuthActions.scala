@@ -7,9 +7,15 @@ import com.gu.googleauth.{AuthAction, GoogleAuthConfig}
 import play.api.libs.ws.WSClient
 import play.api.mvc.Security.AuthenticatedRequest
 import play.api.mvc._
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
-final class OAuthActions(override val wsClient: WSClient, commonActions: CommonActions, bodyParser: BodyParser[AnyContent], val authConfig: GoogleAuthConfig) extends googleauth.LoginSupport with googleauth.Filters {
+import scala.concurrent.ExecutionContext
+
+final class OAuthActions(
+  override val wsClient: WSClient,
+  commonActions: CommonActions,
+  bodyParser: BodyParser[AnyContent],
+  val authConfig: GoogleAuthConfig
+)(implicit private val executionContext: ExecutionContext) extends googleauth.LoginSupport with googleauth.Filters {
 
   import commonActions._
 

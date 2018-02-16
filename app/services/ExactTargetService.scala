@@ -26,12 +26,11 @@ import model.exactTarget.HolidaySuspensionBillingScheduleDataExtensionRow.constr
 import model.exactTarget._
 import model.{PurchaserIdentifiers, Renewal, SubscribeRequest}
 import org.joda.time.{Days, LocalDate}
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json._
 import views.support.PlanOps._
 import views.support.Pricing._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 import scalaz.Scalaz._
 import scalaz.{-\/, EitherT, \/, \/-}
@@ -46,7 +45,7 @@ class ExactTargetService(
   paymentService: Future[CommonPaymentService],
   zuoraService: ZuoraService,
   salesforceService: SalesforceService
-) extends ContextLogging {
+)(implicit val executionContext: ExecutionContext) extends ContextLogging {
 
   private def buildWelcomeEmailDataExtensionRow(
       subscribeResult: SubscribeResult,
@@ -168,7 +167,7 @@ class ExactTargetService(
   )(implicit zuoraRestService: ZuoraRestService[Future]): Future[Unit] = {
 
     val buildDataExtensionRow =
-      EitherT(GetSalesforceContactForSub(subscription)(zuoraService, salesforceService.repo, defaultContext).flatMap { salesforceContact =>
+      EitherT(GetSalesforceContactForSub(subscription)(zuoraService, salesforceService.repo, executionContext).flatMap { salesforceContact =>
         EitherT(zuoraRestService.getAccount(subscription.accountId)).map { account =>
           HolidaySuspensionBillingScheduleDataExtensionRow(
             email = account.billToContact.email,
@@ -250,7 +249,7 @@ object SqsClient extends LazyLogging {
     .withRegion(EU_WEST_1)
     .build()
 
-  def sendDataExtensionToQueue(queueName: String, row: DataExtensionRow): Future[Try[SendMessageResult]] = {
+  def sendDataExtensionToQueue(queueName: String, row: DataExtensionRow)(implicit executionContext: ExecutionContext): Future[Try[SendMessageResult]] = {
     Future {
       val payload = Json.obj(
         "To" -> Json.obj(

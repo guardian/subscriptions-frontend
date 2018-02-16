@@ -6,12 +6,11 @@ import com.gocardless.errors.GoCardlessApiException
 import com.gocardless.resources.BankDetailsLookup.AvailableDebitScheme
 import com.typesafe.scalalogging.LazyLogging
 import model.DirectDebitData
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import touchpoint.GoCardlessToken
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-class GoCardlessService(goCardlessToken: GoCardlessToken) extends LazyLogging {
+class GoCardlessService(goCardlessToken: GoCardlessToken)(implicit executionContext: ExecutionContext) extends LazyLogging {
 
   lazy val client: GoCardlessClient = GoCardlessClient.create(goCardlessToken.token, if (goCardlessToken.isProdToken) LIVE else SANDBOX)
 

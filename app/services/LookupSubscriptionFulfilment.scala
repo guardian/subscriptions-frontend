@@ -1,20 +1,17 @@
 package services
 
-import com.gu.okhttp.RequestRunners.futureRunner
 import com.typesafe.scalalogging.StrictLogging
 import configuration.Config
 import forms.ReportDeliveryProblem
 import model.FulfilmentLookup
-import okhttp3.{MediaType, RequestBody}
+import okhttp3.{MediaType, Request, RequestBody, Response}
 import org.joda.time.format.DateTimeFormat
 import play.api.libs.json.{JsError, JsSuccess, Json}
-import scala.concurrent.Future
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
+
+import scala.concurrent.{ExecutionContext, Future}
 import scalaz.{-\/, \/, \/-}
 
-object FulfilmentLookupService extends StrictLogging {
-
-  val httpClient = futureRunner
+object LookupSubscriptionFulfilment extends StrictLogging {
 
   def buildRequest(env: String, deliveryProblem: ReportDeliveryProblem): okhttp3.Request = {
     val apiDateFormatter = DateTimeFormat.forPattern("yyyy-MM-dd")
@@ -32,7 +29,7 @@ object FulfilmentLookupService extends StrictLogging {
       .build()
   }
 
-  def lookupSubscription(env: String, deliveryProblem: ReportDeliveryProblem): Future[String \/ FulfilmentLookup] = {
+  def apply(env: String, httpClient: Request => Future[Response], deliveryProblem: ReportDeliveryProblem)(implicit executionContext: ExecutionContext): Future[String \/ FulfilmentLookup] = {
     val request = buildRequest(env, deliveryProblem)
     val futureResponse = httpClient(request)
     futureResponse.map { response =>

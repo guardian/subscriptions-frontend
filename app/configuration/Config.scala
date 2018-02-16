@@ -17,7 +17,6 @@ import com.typesafe.config.ConfigFactory
 import com.getsentry.raven.dsn.Dsn
 import org.joda.time.Days
 import play.api.mvc.{Call, RequestHeader}
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.util.Try
 
 object Config {
@@ -102,12 +101,6 @@ object Config {
       val secret = conf.getString("secret")
       PrefixedTokens(secretKey = secret, emergencySubscriberAuthPrefix = prefix)
     }
-  }
-
-  lazy val casService = {
-    val metrics = new ServiceMetrics(stage, appName, "CAS service")
-    val api = new CASApi(CAS.url, RequestRunners.loggingRunner(metrics))
-    new CASService(api)
   }
 
   val previewXFrameOptionsOverride = config.getString("subscriptions.preview-x-frame-options-override")

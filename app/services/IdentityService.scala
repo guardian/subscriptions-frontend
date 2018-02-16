@@ -13,21 +13,20 @@ import play.api.http.Status
 import play.api.libs.json._
 import play.api.libs.ws.{WSClient, WSRequest, WSResponse}
 import play.api.mvc.Cookie
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
-import scala.language.implicitConversions
-import scala.concurrent.Future
-import scalaz.{NonEmptyList, \/}
+import scala.language.{higherKinds, implicitConversions}
+import scala.concurrent.{ExecutionContext, Future}
+import scalaz.{Monad, NonEmptyList, \/}
 import model.error.IdentityService._
 import services.IdentityApiClient.{authoriseCall, identityEndpoint}
 import services.PersonalDataJsonSerialiser.convertToUser
 
-class IdentityService(identityApiClient: => IdentityApiClient) extends LazyLogging {
+class IdentityService[M[_]](identityApiClient: => IdentityApiClient[M])(implicit monad: Monad[M]) extends LazyLogging {
 
   import IdentityService._
 
-  def doesUserExist(email: String): Future[Boolean] =
-    identityApiClient.userLookupByEmail(email).map { response =>
+  def doesUserExist(email: String): M[Boolean] =
+    monad.map(identityApiClient.userLookupByEmail(email)) { response =>
       response.status match {
         case Status.OK => true
         case Status.NOT_FOUND => false
@@ -39,18 +38,18 @@ class IdentityService(identityApiClient: => IdentityApiClient) extends LazyLoggi
 
     }
 
-  def userLookupByCredentials(accessCredentials: AccessCredentials): Future[Option[IdUser]] = accessCredentials match {
-    case cookies: AccessCredentials.Cookies => identityApiClient.userLookupByCookies(cookies).map {
+  def userLookupByCredentials(accessCredentials: AccessCredentials): M[Option[IdUser]] = accessCredentials match {
+    case cookies: AccessCredentials.Cookies => monad.map(identityApiClient.userLookupByCookies(cookies)) {
       response => (response.json \ "user").asOpt[IdUser]
     }
-    case _ => Future.successful {
+    case _ => monad.point {
       logger.error("ID API only supports forwarded access for Cookies")
       None
     }
   }
 
-  def registerGuest(personalData: PersonalData, delivery: Option[Address]): Future[NonEmptyList[SubsError] \/ IdentitySuccess] = {
-    identityApiClient.createGuest(personalData, delivery).map { response =>
+  def registerGuest(personalData: PersonalData, delivery: Option[Address]): M[NonEmptyList[SubsError] \/ IdentitySuccess] = {
+    monad.map(identityApiClient.createGuest(personalData, delivery)) { response =>
       response.json.asOpt[GuestUser] match {
         case Some(guest) => \/.right(IdentitySuccess(guest))
         case None => \/.left(NonEmptyList(IdentityFailure(
@@ -61,7 +60,7 @@ class IdentityService(identityApiClient: => IdentityApiClient) extends LazyLoggi
     }
   }
 
-  def consentEmail(email: String): Future[\/[NonEmptyList[IdentityFailure], Unit]] = identityApiClient.consentEmail(email).map {
+  def consentEmail(email: String): M[\/[NonEmptyList[IdentityFailure], Unit]] = monad.map(identityApiClient.consentEmail(email)) {
     response =>
       if (response.status == 200)
         \/.right(Unit)
@@ -72,8 +71,8 @@ class IdentityService(identityApiClient: => IdentityApiClient) extends LazyLoggi
           Some(response.json.toString()))))
   }
 
-  def convertGuest(password: String, token: IdentityToken, marketingOptIn: Boolean): Future[Seq[Cookie]] = {
-    identityApiClient.convertGuest(password, token, marketingOptIn).map { r =>
+  def convertGuest(password: String, token: IdentityToken, marketingOptIn: Boolean): M[Seq[Cookie]] = {
+    monad.map(identityApiClient.convertGuest(password, token, marketingOptIn)) { r =>
       if (r.status == Status.OK) {
         CookieBuilder.fromGuestConversion(r.json, Some(Config.Identity.sessionDomain)).fold({ err =>
           logger.error(s"Error while parsing the identity cookies: $err")
@@ -85,14 +84,14 @@ class IdentityService(identityApiClient: => IdentityApiClient) extends LazyLoggi
     }
   }
 
-  def updateUserDetails(personalData: PersonalData, delivery: Option[Address])(authenticatedUser: AuthenticatedIdUser): Future[NonEmptyList[SubsError] \/ IdentitySuccess] =
+  def updateUserDetails(personalData: PersonalData, delivery: Option[Address])(authenticatedUser: AuthenticatedIdUser): M[NonEmptyList[SubsError] \/ IdentitySuccess] =
     authenticatedUser.credentials match {
       case cookies: AccessCredentials.Cookies =>
-        identityApiClient.updateUserDetails(
+        monad.map(identityApiClient.updateUserDetails(
           personalData,
           delivery,
           cookies
-        ).map { response =>
+        )) { response =>
           response.status match {
             case Status.OK => \/.right(IdentitySuccess(RegisteredUser(IdMinimalUser("", None))))
             case _ =>
@@ -103,7 +102,7 @@ class IdentityService(identityApiClient: => IdentityApiClient) extends LazyLoggi
           }
         }
 
-      case _ => Future.successful(\/.left(NonEmptyList(IdentityFailure(
+      case _ => monad.point(\/.left(NonEmptyList(IdentityFailure(
         "ID API only supports forwarded access for Cookies",
         Some(personalData.toStringSanitized)))))
     }
@@ -159,7 +158,7 @@ object PersonalDataJsonSerialiser {
   }
 }
 
-trait IdentityApiClient {
+trait IdentityApiClient[M[_]] {
 
   import PersonalDataJsonSerialiser._
 
@@ -167,20 +166,20 @@ trait IdentityApiClient {
   type Password = String
   type Email = String
 
-  def userLookupByCookies: AccessCredentials.Cookies => Future[WSResponse]
+  def userLookupByCookies: AccessCredentials.Cookies => M[WSResponse]
 
-  def createGuest: (PersonalData, Option[Address]) => Future[WSResponse]
+  def createGuest: (PersonalData, Option[Address]) => M[WSResponse]
 
-  def convertGuest: (Password, IdentityToken, Boolean) => Future[WSResponse]
+  def convertGuest: (Password, IdentityToken, Boolean) => M[WSResponse]
 
-  def userLookupByEmail: Email => Future[WSResponse]
+  def userLookupByEmail: Email => M[WSResponse]
 
-  def updateUserDetails: (PersonalData, Option[Address], AccessCredentials.Cookies) => Future[WSResponse]
+  def updateUserDetails: (PersonalData, Option[Address], AccessCredentials.Cookies) => M[WSResponse]
 
-  def consentEmail: Email => Future[WSResponse]
+  def consentEmail: Email => M[WSResponse]
 }
 
-class IdentityApiClientImpl(wsClient: WSClient) extends IdentityApiClient with LazyLogging {
+class IdentityApiClientImpl(wsClient: WSClient)(implicit executionContext: ExecutionContext) extends IdentityApiClient[Future] with LazyLogging {
 
   import IdentityApiClient._
 
@@ -246,21 +245,14 @@ class IdentityApiClientImpl(wsClient: WSClient) extends IdentityApiClient with L
       .withCloudwatchMonitoringOfPost
   }
 
-}
-
-object IdentityApiClient extends LazyLogging {
-
-  import PersonalDataJsonSerialiser._
-
-  lazy val identityEndpoint = Config.Identity.baseUri
   lazy val metrics = new IdApiMetrics(Config.stage)
 
   implicit class FutureWSLike(eventualResponse: Future[WSResponse]) {
     /**
-     * Example of ID API Response: `{"status":"error","errors":[{"message":"Forbidden","description":"Field access denied","context":"privateFields.billingAddress1"}]}`
-     *
-     * @return
-     */
+      * Example of ID API Response: `{"status":"error","errors":[{"message":"Forbidden","description":"Field access denied","context":"privateFields.billingAddress1"}]}`
+      *
+      * @return
+      */
     private def applyOnSpecificErrors(reasons: List[String])(block: WSResponse => Unit): Unit = {
       def errorMessageFilter(error: JsValue): Boolean =
         (error \ "message").asOpt[JsString].exists(e => reasons.contains(e.value))
@@ -295,6 +287,14 @@ object IdentityApiClient extends LazyLogging {
 
     def withCloudwatchMonitoringOfPut = withCloudwatchMonitoring("PUT")
   }
+
+}
+
+object IdentityApiClient extends LazyLogging {
+
+  import PersonalDataJsonSerialiser._
+
+  lazy val identityEndpoint = Config.Identity.baseUri
 
   val authoriseCall = (request: WSRequest) =>
     request.withHeaders(("X-GU-ID-Client-Access-Token", s"Bearer ${Config.Identity.apiToken}"))

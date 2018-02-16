@@ -5,14 +5,13 @@ import com.gu.googleauth.GoogleAuthFilters.LOGIN_ORIGIN_KEY
 import com.gu.googleauth.{GoogleAuth, UserIdentity}
 import configuration.Config
 import model.FlashMessage
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json.Json
 import play.api.libs.ws.WSClient
 import play.api.mvc._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-class OAuth (val wsClient: WSClient, commonActions: CommonActions, oAuthActions: OAuthActions) extends Controller {
+class OAuth (val wsClient: WSClient, commonActions: CommonActions, oAuthActions: OAuthActions)(implicit executionContext: ExecutionContext) extends Controller {
 
   import commonActions._
 
