@@ -1,10 +1,10 @@
 @import com.gu.i18n.Currency
 @import com.gu.i18n.Currency.GBP
-@import com.gu.memsub.subsv2.Catalog
 @import com.gu.memsub.promo.Promotion.AnyPromotion
-@import views.support.Catalog._
-@import configuration.Links
+@import com.gu.memsub.subsv2.Catalog
 @import configuration.Config.Zuora.defaultDigitalPackFreeTrialPeriod
+@import configuration.Links
+@import views.support.Catalog._
 
 @(catalog: Catalog, promotion: AnyPromotion, currency: Currency = GBP)
 @if(promotion.asDigitalPack.isDefined) {

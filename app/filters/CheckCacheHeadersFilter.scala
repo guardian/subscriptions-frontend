@@ -1,12 +1,10 @@
 package filters
 
-import javax.inject.Inject
-
 import akka.stream.Materializer
+import controllers.Cached.suitableForCaching
 import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}
-import controllers.Cached.suitableForCaching
 
 class CheckCacheHeadersFilter (implicit val mat: Materializer, val executionContext: ExecutionContext) extends Filter {
 

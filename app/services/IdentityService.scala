@@ -2,24 +2,22 @@ package services
 
 import com.amazonaws.regions.{Region, Regions}
 import com.gu.identity.play._
-import com.gu.monitoring.{AuthenticationMetrics, CloudWatch, RequestMetrics, StatusMetrics}
 import com.gu.memsub.{Address, NormalisedTelephoneNumber}
+import com.gu.monitoring.{AuthenticationMetrics, CloudWatch, RequestMetrics, StatusMetrics}
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
 import model.PersonalData
+import model.error.IdentityService._
 import model.error.SubsError
-import play.api.Play.current
 import play.api.http.Status
 import play.api.libs.json._
 import play.api.libs.ws.{WSClient, WSRequest, WSResponse}
 import play.api.mvc.Cookie
-
-import scala.language.{higherKinds, implicitConversions}
-import scala.concurrent.{ExecutionContext, Future}
-import scalaz.{Monad, NonEmptyList, \/}
-import model.error.IdentityService._
-import services.IdentityApiClient.{authoriseCall, identityEndpoint}
 import services.PersonalDataJsonSerialiser.convertToUser
+
+import scala.concurrent.{ExecutionContext, Future}
+import scala.language.{higherKinds, implicitConversions}
+import scalaz.{Monad, NonEmptyList, \/}
 
 class IdentityService[M[_]](identityApiClient: => IdentityApiClient[M])(implicit monad: Monad[M]) extends LazyLogging {
 
@@ -291,8 +289,6 @@ class IdentityApiClientImpl(wsClient: WSClient)(implicit executionContext: Execu
 }
 
 object IdentityApiClient extends LazyLogging {
-
-  import PersonalDataJsonSerialiser._
 
   lazy val identityEndpoint = Config.Identity.baseUri
 

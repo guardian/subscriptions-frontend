@@ -1,8 +1,8 @@
-@import com.gu.memsub.promo.Promotion.AnyPromotion
-@import views.support.MarkdownRenderer
-@import views.support.LandingPageOps._
-@import com.gu.memsub.subsv2.Catalog
 @import com.gu.memsub.promo.PromoCode
+@import com.gu.memsub.promo.Promotion.AnyPromotion
+@import com.gu.memsub.subsv2.Catalog
+@import views.support.LandingPageOps._
+@import views.support.MarkdownRenderer
 
 @(promoCode: PromoCode, catalog: Catalog, promotion: AnyPromotion, md: MarkdownRenderer)
 @isDigipack = @{(catalog.digipack.plans.map(_.id).toSet intersect promotion.appliesTo.productRatePlanIds).nonEmpty}

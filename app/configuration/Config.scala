@@ -1,22 +1,18 @@
 package configuration
 
 
+import com.getsentry.raven.dsn.Dsn
 import com.github.nscala_time.time.Imports._
-import com.gocardless.GoCardlessClient
-import com.gocardless.GoCardlessClient.Environment
 import com.gu.cas.PrefixedTokens
 import com.gu.config._
 import com.gu.identity.cookie.{PreProductionKeys, ProductionKeys}
 import com.gu.memsub.auth.common.MemSub.Google._
-import com.gu.monitoring.ServiceMetrics
 import com.gu.salesforce.SalesforceConfig
-import com.gu.subscriptions.{CASApi, CASService}
-import com.gu.okhttp.RequestRunners
 import com.netaporter.uri.dsl._
 import com.typesafe.config.ConfigFactory
-import com.getsentry.raven.dsn.Dsn
 import org.joda.time.Days
 import play.api.mvc.{Call, RequestHeader}
+
 import scala.util.Try
 
 object Config {

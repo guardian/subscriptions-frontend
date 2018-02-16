@@ -1,12 +1,10 @@
-@import com.gu.i18n.Currency
-@import com.gu.i18n.Country
+@import com.gu.i18n.{Country, Currency}
 @import com.gu.memsub.promo.PromoCode
 @import com.gu.memsub.promo.Promotion.{PromoWithDigitalPackLandingPage, asAnyPromotion}
 @import com.gu.memsub.subsv2.Catalog
+@import controllers.WeeklyLandingPage.Hreflangs
 @import views.support.LandingPageOps._
 @import views.support.MarkdownRenderer
-
-@import controllers.WeeklyLandingPage.Hreflangs
 @(
     currency: Currency,
     country: Country,

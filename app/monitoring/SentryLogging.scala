@@ -2,9 +2,9 @@ package monitoring
 
 import ch.qos.logback.classic.filter.ThresholdFilter
 import ch.qos.logback.classic.{Logger, LoggerContext}
-import configuration.Config
 import com.getsentry.raven.RavenFactory
 import com.getsentry.raven.logback.SentryAppender
+import configuration.Config
 import org.slf4j.Logger.ROOT_LOGGER_NAME
 import org.slf4j.LoggerFactory
 

@@ -1,11 +1,9 @@
-@import com.gu.memsub.subsv2.SubscriptionPlan
-@import com.gu.memsub.subsv2.Subscription
 @import com.gu.memsub.Benefit.PaperDay
-@import scala.collection.immutable.List.empty
-@import com.gu.salesforce.Contact
+@import com.gu.memsub.subsv2.{Subscription, SubscriptionPlan}
+@import com.gu.zuora.ZuoraRestService.SoldToContact
 @import model.SubscriptionOps._
 
-@import com.gu.zuora.ZuoraRestService.SoldToContact
+@import scala.collection.immutable.List.empty
 @(chosenPaperDays: List[PaperDay] = empty, maybeContact: Option[SoldToContact] = None, subscription: Subscription[SubscriptionPlan.ContentSubscription])(extra: Html = Html(""))
 <dl class="mma-section__list">
     <dt class="mma-section__list--title">Subscriber ID</dt>

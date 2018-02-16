@@ -1,8 +1,6 @@
 package controllers
 
 
-import javax.inject.Inject
-
 import actions.CommonActions
 import com.gu.i18n._
 import com.gu.memsub.Subscription.ProductRatePlanId

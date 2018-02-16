@@ -1,9 +1,6 @@
 package services
 
 import akka.actor.ActorSystem
-import com.gocardless.GoCardlessClient
-import com.gocardless.GoCardlessClient.Environment
-import com.gocardless.GoCardlessClient.Environment.{LIVE, SANDBOX}
 import com.gu.config.DiscountRatePlanIds
 import com.gu.memsub.promo.Promotion._
 import com.gu.memsub.promo.{DynamoPromoCollection, DynamoTables, PromotionCollection}
@@ -23,8 +20,6 @@ import com.gu.zuora.{ZuoraRestService, rest, soap}
 import configuration.Config
 import forms.SubscriptionsForm
 import monitoring.TouchpointBackendMetrics
-import play.api.Play.current
-import play.api.libs.concurrent.Akka
 import play.api.libs.ws.WSClient
 import play.api.mvc.RequestHeader
 import services.TouchpointBackends.Resolution

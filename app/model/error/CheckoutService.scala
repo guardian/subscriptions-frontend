@@ -1,7 +1,7 @@
 package model.error
 
 import com.gu.identity.play.IdMinimalUser
-import com.gu.memsub.promo.{NewUsers, PromoCode, ValidPromotion}
+import com.gu.memsub.promo.{NewUsers, ValidPromotion}
 import com.gu.salesforce.ContactId
 import com.gu.stripe.Stripe
 import com.gu.zuora.soap.models.Results.SubscribeResult

@@ -1,9 +1,10 @@
 @import com.gu.i18n.Currency
 @import com.gu.memsub.Address
+@import com.gu.memsub.subsv2.CatalogPlan
 @import views.support.AddressOps._
 @import views.support.CountryWithCurrency
+
 @import scalaz.syntax.std.boolean._
-@import com.gu.memsub.subsv2.CatalogPlan
 
 @(billingAddress: Option[Address], canBeHidden: Boolean, countriesWithCurrency: List[CountryWithCurrency], plan: CatalogPlan.Paid, determinesPriceBanding: Boolean, currency: Currency)
 

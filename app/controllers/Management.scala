@@ -1,27 +1,22 @@
 package controllers
 import java.util.Date
-import javax.inject.Inject
 
+import actions.OAuthActions
+import akka.actor.ActorSystem
 import app.BuildInfo
-
-import scalaz.syntax.nel._
-import scalaz.syntax.std.boolean._
+import com.github.nscala_time.time.Imports._
+import com.gu.monitoring.CloudWatchHealth
 import com.typesafe.scalalogging.LazyLogging
+import play.api.Logger._
 import play.api.mvc._
 import services.TouchpointBackends
-import actions.{CommonActions, OAuthActions}
-import akka.actor.ActorSystem
-import com.gu.monitoring.CloudWatchHealth
-import play.api.Logger._
 import views.support.Catalog._
-import play.api.Play.current
-import play.api.libs.concurrent.Akka
-import com.github.nscala_time.time.Imports._
-import play.api.libs.ws.WSClient
 
 import scala.concurrent.ExecutionContext
-import scalaz.{Semigroup, Validation, ValidationNel}
+import scalaz.syntax.nel._
+import scalaz.syntax.std.boolean._
 import scalaz.syntax.std.option._
+import scalaz.{Semigroup, Validation, ValidationNel}
 
 class Management(actorSystem: ActorSystem, fBackendFactory: TouchpointBackends, oAuthActions: OAuthActions)(implicit val executionContext: ExecutionContext)  extends Controller with LazyLogging {
 

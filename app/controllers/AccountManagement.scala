@@ -18,7 +18,6 @@ import com.gu.zuora.ZuoraRestService
 import com.gu.zuora.soap.models.Queries.{Account, Contact}
 import com.typesafe.scalalogging.StrictLogging
 import configuration.{Config, ProfileLinks}
-import controllers.ManageWeekly.WeeklyPlanInfo
 import forms._
 import logging.{Context, ContextLogging}
 import model.ContentSubscriptionPlanOps._
@@ -193,8 +192,8 @@ object ManageWeekly extends ContextLogging {
 
 class ManageWeekly(implicit val executionContext: ExecutionContext) extends ContextLogging {
 
-  import play.api.mvc.Results._
   import ManageWeekly._
+  import play.api.mvc.Results._
 
   def apply(
              billingSchedule: Option[BillingSchedule],

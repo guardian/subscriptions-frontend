@@ -14,7 +14,7 @@ import com.gu.memsub.{BillingPeriod, NormalisedTelephoneNumber, Product}
 import com.gu.salesforce.{Contact, ContactId}
 import com.gu.stripe.Stripe
 import com.gu.zuora.ZuoraRestService
-import com.gu.zuora.api.{InvoiceTemplate, ZuoraService}
+import com.gu.zuora.api.ZuoraService
 import com.gu.zuora.soap.models.Commands.{Account, PaymentMethod, RatePlan, Subscribe, _}
 import com.gu.zuora.soap.models.Queries
 import com.gu.zuora.soap.models.Queries.{Contact => ZuoraContact}
@@ -35,7 +35,6 @@ import views.support.Pricing._
 import scala.concurrent.{ExecutionContext, Future}
 import scalaz.std.option._
 import scalaz.std.scalaFuture._
-import scalaz.syntax.monad._
 import scalaz.syntax.std.option._
 import scalaz.{-\/, EitherT, Monad, NonEmptyList, \/, \/-}
 

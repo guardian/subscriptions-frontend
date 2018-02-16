@@ -1,9 +1,9 @@
 package actions
 
-import configuration.Config
-import controllers.routes
 import com.gu.googleauth
 import com.gu.googleauth.{AuthAction, GoogleAuthConfig}
+import configuration.Config
+import controllers.routes
 import play.api.libs.ws.WSClient
 import play.api.mvc.Security.AuthenticatedRequest
 import play.api.mvc._

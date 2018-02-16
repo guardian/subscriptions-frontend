@@ -40,8 +40,8 @@ import scalaz.{NonEmptyList, OptionT}
 
 class Checkout(fBackendFactory: TouchpointBackends, commonActions: CommonActions)(implicit executionContext: ExecutionContext) extends Controller with LazyLogging {
 
-  import commonActions._
   import SessionKeys.{Currency => _, UserId => _, _}
+  import commonActions._
 
   def checkoutService(implicit res: TouchpointBackends.Resolution): CheckoutService =
     res.backend.checkoutService

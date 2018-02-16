@@ -1,6 +1,5 @@
 package controllers
 import actions.{CommonActions, OAuthActions}
-import cats.Functor
 import com.gu.i18n.CountryGroup.byCountryCode
 import com.gu.i18n.{Country, CountryGroup}
 import com.gu.memsub.Benefit.Digipack
@@ -15,7 +14,6 @@ import controllers.WeeklyLandingPage.{Hreflang, Hreflangs}
 import filters.HandleXFrameOptionsOverrideHeader
 import play.api.data.{Form, Forms}
 import play.api.libs.json.Json
-import play.api.libs.ws.WSClient
 import play.api.mvc._
 import play.twirl.api.Html
 import services.TouchpointBackend

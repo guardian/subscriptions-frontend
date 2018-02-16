@@ -1,18 +1,14 @@
 package controllers
 
-import javax.inject.Inject
-
 import actions.{CommonActions, OAuthActions}
 import com.gu.memsub.subsv2.CatalogPlan.Paid
 import com.typesafe.scalalogging.LazyLogging
-import model.Subscriptions.{SubscriptionOption, SubscriptionProduct}
-import play.api.libs.ws.WSClient
 import play.api.mvc.{Controller, Cookie}
-import services.{TouchpointBackend, TouchpointBackends}
+import services.TouchpointBackend
 import utils.TestUsers.testUsers
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 object Testing {
   val AnalyticsCookieName = "ANALYTICS_OFF_KEY"

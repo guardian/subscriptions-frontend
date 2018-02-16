@@ -1,8 +1,7 @@
 package views.support
 
-import com.gu.i18n.{CountryGroup, Country}
+import com.gu.i18n.{Country, CountryGroup}
 import model.AddressValidationRules
-import play.api.data.Form
 import play.twirl.api.Html
 
 object CountryOps {

@@ -2,12 +2,11 @@ package controllers
 
 import actions.CommonActions
 import com.gu.i18n.CountryGroup
-import com.gu.memsub.SupplierCode
 import com.gu.memsub.SupplierCodeBuilder
+import controllers.SessionKeys.SupplierTrackingCode
 import model.DigitalEdition._
-import utils.RequestCountry._
 import play.api.mvc._
-import SessionKeys.SupplierTrackingCode
+import utils.RequestCountry._
 import utils.Tracking.internalCampaignCode
 
 class Homepage(commonActions: CommonActions) extends Controller {

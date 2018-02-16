@@ -1,12 +1,12 @@
 package model
 
+import com.gu.i18n.Currency._
 import com.gu.i18n._
-import Currency._
 import com.gu.memsub.BillingPeriod.{OneYear, Quarter, SixWeeks, Year}
 import com.gu.memsub.Product
 import com.gu.memsub.subsv2.CatalogPlan
-import views.support.CountryWithCurrency
 import model.BillingPeriodOps._
+import views.support.CountryWithCurrency
 
 object ContentSubscriptionPlanOps {
   val weeklyUkCountries = CountryGroup.UK.copy(

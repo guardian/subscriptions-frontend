@@ -1,12 +1,11 @@
 package controllers
 
 import com.gu.i18n.{Country, CountryGroup, Currency}
-import com.gu.memsub.{ProductFamily, SupplierCode, SupplierCodeBuilder}
 import com.gu.memsub.Subscription.ProductRatePlanId
-import com.gu.memsub.promo.PromoCode
-import com.gu.memsub.promo.NormalisedPromoCode
-import play.api.mvc.QueryStringBindable.{Parsing => QueryParsing}
+import com.gu.memsub.promo.{NormalisedPromoCode, PromoCode}
+import com.gu.memsub.{ProductFamily, SupplierCode, SupplierCodeBuilder}
 import play.api.mvc.PathBindable.{Parsing => PathParsing}
+import play.api.mvc.QueryStringBindable.{Parsing => QueryParsing}
 
 import scala.reflect.runtime.universe._
 

@@ -5,10 +5,9 @@ import configuration.Config
 import forms.ReportDeliveryProblem
 import okhttp3.{MediaType, Request, RequestBody, Response}
 import org.joda.time.format.DateTimeFormat
-import play.api.libs.json.{Json}
+import play.api.libs.json.Json
 
 import scala.concurrent.{ExecutionContext, Future}
-
 import scalaz.{-\/, \/, \/-}
 
 object LookupSubscriptionFulfilment extends StrictLogging {

@@ -1,8 +1,8 @@
 package views.support
 import org.pegdown.Extensions._
-import org.pegdown.{LinkRenderer, PegDownProcessor}
 import org.pegdown.LinkRenderer.Rendering
 import org.pegdown.ast.{AnchorLinkNode, ExpLinkNode, MailLinkNode}
+import org.pegdown.{LinkRenderer, PegDownProcessor}
 
 trait MarkdownRenderer {
   def render(in: String): String

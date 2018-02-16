@@ -11,7 +11,8 @@ import com.typesafe.scalalogging.LazyLogging
 import logging.{Context, ContextLogging}
 import model.BillingPeriodOps._
 import org.joda.time.LocalDate.now
-import PartialFunction.cond
+
+import scala.PartialFunction.cond
 
 object SubscriptionOps extends LazyLogging {
 
