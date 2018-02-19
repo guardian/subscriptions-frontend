@@ -15,10 +15,11 @@ import com.gu.memsub.subsv2.reads.SubPlanReads._
 import com.gu.memsub.subsv2.{Subscription, SubscriptionPlan => Plan}
 import com.gu.memsub.{Subscription => _, _}
 import com.gu.salesforce.Contact
-import com.gu.zuora.ZuoraRestService
+import com.gu.zuora.rest.ZuoraRestService
 import com.gu.zuora.api.ZuoraService
 import com.gu.zuora.soap.models.Results.SubscribeResult
 import com.typesafe.scalalogging.LazyLogging
+import com.gu.monitoring.SafeLogger._
 import configuration.Config
 import logging.{Context, ContextLogging}
 import model.SubscriptionOps._
@@ -55,13 +56,13 @@ class ExactTargetService(
       purchaserIds: PurchaserIdentifiers): Future[DataExtensionRow] = {
 
     val zuoraPaidSubscription: Future[Subscription[Plan.Paid]] =
-      Retry(2, s"Failed to get Zuora paid subscription ${subscribeResult.subscriptionName} for ${purchaserIds.identityId}") {
+      Retry(2, scrub"Failed to get Zuora paid subscription ${subscribeResult.subscriptionName} for ${purchaserIds.identityId}") {
         subscriptionData.productData.fold(
           { paper => subscriptionService.get[Plan.PaperPlan](Name(subscribeResult.subscriptionName)).map(_.get) },
           { digipack => subscriptionService.get[Plan.Digipack](Name(subscribeResult.subscriptionName)).map(_.get) })}
 
     val zuoraPaymentMethod: Future[PaymentMethod] =
-      Retry(2, s"Failed to get Zuora payment method ${subscribeResult.subscriptionName} for ${purchaserIds.identityId}") {
+      Retry(2, scrub"Failed to get Zuora payment method ${subscribeResult.subscriptionName} for ${purchaserIds.identityId}") {
         paymentService.flatMap(_.getPaymentMethod(AccountId(subscribeResult.accountId)).map(
           _.getOrElse(throw new Exception(s"Subscription with no payment method found, ${subscribeResult.subscriptionId}"))))}
 

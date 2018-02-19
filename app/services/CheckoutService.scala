@@ -13,7 +13,7 @@ import com.gu.memsub.subsv2.{Catalog, Subscription}
 import com.gu.memsub.{BillingPeriod, NormalisedTelephoneNumber, Product}
 import com.gu.salesforce.{Contact, ContactId}
 import com.gu.stripe.Stripe
-import com.gu.zuora.ZuoraRestService
+import com.gu.zuora.rest.ZuoraRestService
 import com.gu.zuora.api.ZuoraService
 import com.gu.zuora.soap.models.Commands.{Account, PaymentMethod, RatePlan, Subscribe, _}
 import com.gu.zuora.soap.models.Queries

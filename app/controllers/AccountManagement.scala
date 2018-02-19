@@ -14,7 +14,7 @@ import com.gu.memsub.subsv2.{Catalog, ReaderType, Subscription}
 import com.gu.memsub.{BillingSchedule, PaymentCard, Product}
 import com.gu.subscriptions.suspendresume.SuspensionService
 import com.gu.subscriptions.suspendresume.SuspensionService.{BadZuoraJson, ErrNel, HolidayRefund, PaymentHoliday}
-import com.gu.zuora.ZuoraRestService
+import com.gu.zuora.rest.ZuoraRestService
 import com.gu.zuora.soap.models.Queries.{Account, Contact}
 import com.typesafe.scalalogging.StrictLogging
 import configuration.{Config, ProfileLinks}
