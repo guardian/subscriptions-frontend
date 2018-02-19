@@ -5,7 +5,7 @@
 @import com.gu.salesforce.Contact
 @import model.SubscriptionOps._
 
-@import com.gu.zuora.ZuoraRestService.SoldToContact
+@import com.gu.zuora.rest.ZuoraRestService.SoldToContact
 @(chosenPaperDays: List[PaperDay] = empty, maybeContact: Option[SoldToContact] = None, subscription: Subscription[SubscriptionPlan.ContentSubscription])(extra: Html = Html(""))
 <dl class="mma-section__list">
     <dt class="mma-section__list--title">Subscriber ID</dt>

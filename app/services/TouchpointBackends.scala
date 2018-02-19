@@ -19,7 +19,8 @@ import com.gu.subscriptions.Discounter
 import com.gu.subscriptions.suspendresume.SuspensionService
 import com.gu.zuora
 import com.gu.zuora.rest.SimpleClient
-import com.gu.zuora.{ZuoraRestService, rest, soap}
+import com.gu.zuora.rest.ZuoraRestService
+import com.gu.zuora.{rest, soap}
 import configuration.Config
 import forms.SubscriptionsForm
 import monitoring.TouchpointBackendMetrics
@@ -92,7 +93,7 @@ class TouchpointBackends(actorSystem: ActorSystem, wsClient: WSClient) {
       lazy val salesforceService = new SalesforceServiceImp(sfSimpleContactRepo)
       lazy val catalogService = new subsv2.services.CatalogService[Future](newProductIds, simpleRestClient, Await.result(_, 10.seconds), backendType.name)
       private val slightlyUnsafeCatalog: Future[Catalog] = catalogService.catalog.map(_.valueOr(e => throw new IllegalStateException(s"$e while getting catalog")))
-      lazy val zuoraService = new zuora.ZuoraService(soapClient)
+      lazy val zuoraService = new zuora.ZuoraSoapService(soapClient)
       private val map = this.catalogService.catalog.map(_.fold[CatalogMap](error => {println(s"error: ${error.list.toList.mkString}"); Map()}, _.map))
       lazy val subscriptionService = new subsv2.services.SubscriptionService[Future](newProductIds, map, simpleRestClient, zuoraService.getAccountIds)
       lazy val stripeUKMembershipService = new StripeService(config.stripeUK, loggingRunner(stripeUKMetrics))
