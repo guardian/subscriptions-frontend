@@ -185,16 +185,16 @@ class IdentityApiClientImpl(wsClient: WSClient)(implicit executionContext: Execu
     val endpoint = authoriseCall(wsClient.url(s"$identityEndpoint/user"))
 
     email =>
-      endpoint.withQueryString(("emailAddress", email)).execute()
+      endpoint.addQueryStringParameters(("emailAddress", email)).execute()
         .withWSFailureLogging(endpoint)
         .withCloudwatchMonitoringOfGet
   }
 
   override val userLookupByCookies: AccessCredentials.Cookies => Future[WSResponse] = {
-    val endpoint = authoriseCall(wsClient.url(s"$identityEndpoint/user/me").withHeaders(("Referer", s"$identityEndpoint/")))
+    val endpoint = authoriseCall(wsClient.url(s"$identityEndpoint/user/me").addHttpHeaders(("Referer", s"$identityEndpoint/")))
 
     cookies =>
-      endpoint.withHeaders(cookies.forwardingHeader).execute()
+      endpoint.addHttpHeaders(cookies.forwardingHeader).execute()
         .withWSFailureLogging(endpoint)
         .withCloudwatchMonitoringOfGet
   }
@@ -217,7 +217,7 @@ class IdentityApiClientImpl(wsClient: WSClient)(implicit executionContext: Execu
     val json = Json.obj("password" -> password)
 
     endpoint
-      .withHeaders("X-Guest-Registration-Token" -> token.toString)
+      .addHttpHeaders("X-Guest-Registration-Token" -> token.toString)
       .put(json)
       .withWSFailureLogging(endpoint)
       .withCloudwatchMonitoringOfPut
@@ -229,7 +229,7 @@ class IdentityApiClientImpl(wsClient: WSClient)(implicit executionContext: Execu
     val updatedFields =
       createOnlyFields.foldLeft(userJson) { (map, field) => map - field }
 
-    endpoint.withHeaders(authCookies.forwardingHeader).post(updatedFields)
+    endpoint.addHttpHeaders(authCookies.forwardingHeader).post(updatedFields)
       .withWSFailureLogging(endpoint)
       .withCloudwatchMonitoringOfPost
   }
@@ -291,7 +291,7 @@ object IdentityApiClient extends LazyLogging {
   lazy val identityEndpoint = Config.Identity.baseUri
 
   val authoriseCall = (request: WSRequest) =>
-    request.withHeaders(("X-GU-ID-Client-Access-Token", s"Bearer ${Config.Identity.apiToken}"))
+    request.addHttpHeaders(("X-GU-ID-Client-Access-Token", s"Bearer ${Config.Identity.apiToken}"))
 
 }
 
