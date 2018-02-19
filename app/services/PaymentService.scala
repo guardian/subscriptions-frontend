@@ -6,11 +6,10 @@ import com.gu.stripe.StripeService
 import com.gu.zuora.api.{GoCardless, InvoiceTemplate}
 import com.gu.zuora.soap.models.Commands._
 import model._
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-class PaymentService(val ukStripeService: StripeService, val auStripeService: StripeService, invoiceTemplatesByCountry: Map[Country, InvoiceTemplate]) {
+class PaymentService(val ukStripeService: StripeService, val auStripeService: StripeService, invoiceTemplatesByCountry: Map[Country, InvoiceTemplate])(implicit executionContext: ExecutionContext) {
 
   sealed trait AccountAndPayment {
     def makeAccount: Account

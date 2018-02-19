@@ -23,7 +23,6 @@ import model.error.CheckoutService._
 import model.error.SubsError
 import org.joda.time.LocalDate
 import play.api.data.Form
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json._
 import play.api.mvc._
 import services.AuthenticationService.authenticatedUserFor
@@ -34,15 +33,15 @@ import views.html.{checkout => view}
 import views.support.{PlanList, BillingPeriod => _, _}
 
 import scala.Function.const
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 import scalaz.std.scalaFuture._
 import scalaz.{NonEmptyList, OptionT}
 
-class Checkout(fBackendFactory: TouchpointBackends, commonActions: CommonActions) extends Controller with LazyLogging {
+class Checkout(fBackendFactory: TouchpointBackends, commonActions: CommonActions)(implicit executionContext: ExecutionContext) extends Controller with LazyLogging {
 
-  import commonActions._
   import SessionKeys.{Currency => _, UserId => _, _}
+  import commonActions._
 
   def checkoutService(implicit res: TouchpointBackends.Resolution): CheckoutService =
     res.backend.checkoutService
@@ -368,7 +367,7 @@ class Checkout(fBackendFactory: TouchpointBackends, commonActions: CommonActions
   }
 
   def findAddress(postCode: String) = NoCacheAction.async { implicit request =>
-    GetAddressIOService.find(postCode).map { result =>
+    new GetAddressIOService().find(postCode).map { result =>
       // Capital A 'Addresses' is for compatibility with the https://api.getaddress.io/v2/uk/ response,
       // should a client want not to proxy via this server.
       Ok(Json.obj("Addresses" -> result.Addresses))

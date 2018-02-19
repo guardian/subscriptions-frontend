@@ -1,17 +1,14 @@
 package filters
 
-import javax.inject.Inject
-
 import akka.stream.Materializer
 import play.api.http.HeaderNames
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.mvc._
 import services.AuthenticationService
 import utils.TestUsers._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-class AddGuIdentityHeaders @Inject()(implicit  val mat: Materializer) extends Filter with HeaderNames {
+class AddGuIdentityHeaders (implicit val mat: Materializer, val executionContext: ExecutionContext) extends Filter with HeaderNames {
 
   def apply(nextFilter: RequestHeader => Future[Result])(requestHeader: RequestHeader): Future[Result] = for {
     result <- nextFilter(requestHeader)

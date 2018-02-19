@@ -1,7 +1,7 @@
 package model
 
-import com.gu.i18n.{Currency, Country}
-import Currency.GBP
+import com.gu.i18n.Currency.GBP
+import com.gu.i18n.{Country, Currency}
 import play.api.libs.json._
 
 object JsVars {

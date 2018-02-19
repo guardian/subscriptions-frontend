@@ -1,7 +1,7 @@
 package views.support
 import com.gu.memsub._
 import com.gu.memsub.subsv2.CatalogPlan
-import com.gu.memsub.subsv2.CatalogPlan.{ContentSubscription, RecurringPlan}
+import com.gu.memsub.subsv2.CatalogPlan.ContentSubscription
 
 
 case class PlanList[+A](associations: List[(ContentSubscription, ContentSubscription)], default: A, list: List[A]) {

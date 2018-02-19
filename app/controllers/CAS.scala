@@ -3,21 +3,24 @@ package controllers
 import actions.OAuthActions
 import com.gu.cas.{TokenPayload, Valid}
 import com.gu.googleauth.UserIdentity
+import com.gu.monitoring.ServiceMetrics
+import com.gu.okhttp.RequestRunners
 import com.gu.subscriptions.CAS.{CASError, CASSuccess}
+import com.gu.subscriptions.{CASApi, CASService}
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
+import configuration.Config.{CAS, appName, stage}
 import forms.CASForm
-import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.json.Json
 import play.api.mvc.Controller
 import play.api.mvc.Security.AuthenticatedRequest
 import views.support.CASResultOps._
 import views.support.TokenPayloadOps._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Success, Try}
 
-class CAS(oAuthActions: OAuthActions) extends Controller with LazyLogging {
+class CAS(oAuthActions: OAuthActions)(implicit executionContext: ExecutionContext) extends Controller with LazyLogging {
 
   import oAuthActions._
 
@@ -25,6 +28,12 @@ class CAS(oAuthActions: OAuthActions) extends Controller with LazyLogging {
 
   def index = StaffAuthorisedForCASAction { implicit request =>
     Ok(views.html.staff.cas())
+  }
+
+  lazy val casService = {
+    val metrics = new ServiceMetrics(stage, appName, "CAS service")
+    val api = new CASApi(CAS.url, RequestRunners.loggingRunner(metrics))
+    new CASService(api)
   }
 
   def searchSubscription = StaffAuthorisedForCASAction.async(parse.form(CASForm.lookup)) { request =>
@@ -35,7 +44,7 @@ class CAS(oAuthActions: OAuthActions) extends Controller with LazyLogging {
       case Success(Valid(payload)) =>
         Future.successful(Ok(Json.toJson(payload)))
       case _ =>
-        Config.casService.check(lookup.subscriptionName, lookup.password, triggersActivation = false).map {
+        casService.check(lookup.subscriptionName, lookup.password, triggersActivation = false).map {
           case r: CASSuccess => Ok(Json.toJson(r))
           case r: CASError => BadRequest(Json.toJson(r))
         }

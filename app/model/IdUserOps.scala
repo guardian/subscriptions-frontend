@@ -1,7 +1,6 @@
 package model
 
-import com.gu.identity.play.PrivateFields
-import com.gu.identity.play.IdUser
+import com.gu.identity.play.{IdUser, PrivateFields}
 import com.gu.memsub.Address
 
 object IdUserOps {

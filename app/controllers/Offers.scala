@@ -1,7 +1,7 @@
 package controllers
 
 import actions.CommonActions
- import com.gu.i18n.CountryGroup
+import com.gu.i18n.CountryGroup
 import model.DigitalEdition.{INT, UK, getById}
 import play.api.mvc.Controller
 import utils.RequestCountry._

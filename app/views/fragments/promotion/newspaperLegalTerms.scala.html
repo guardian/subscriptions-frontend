@@ -1,7 +1,7 @@
-@import com.gu.memsub.promo.Promotion.AnyPromotion
-@import views.support.MarkdownRenderer
 @import com.gu.memsub.promo.PromoCode
+@import com.gu.memsub.promo.Promotion.AnyPromotion
 @import views.support.Dates.prettyLegalDate
+@import views.support.MarkdownRenderer
 @(promoCode: PromoCode, promotion: AnyPromotion, md: MarkdownRenderer)
 @Html(md.render(
 s"""

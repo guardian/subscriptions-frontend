@@ -2,10 +2,9 @@ package loghandling
 
 import com.amazonaws.auth.AWSCredentialsProvider
 import com.amazonaws.util.EC2MetadataUtils
-import configuration.Config
-import play.api.Configuration
 import com.gu.aws.CredentialsProvider
 import com.typesafe.scalalogging.StrictLogging
+import configuration.Config
 
 case class LogStashConf(enabled: Boolean,
   stream: String,

@@ -4,9 +4,9 @@ import com.gu.i18n.{CountryGroup, Currency, Title}
 import com.gu.identity.play.IdUser
 import com.gu.memsub._
 import com.gu.memsub.promo.PromoCode
-import IdUserOps._
-import org.joda.time.LocalDate
 import com.gu.memsub.subsv2._
+import model.IdUserOps._
+import org.joda.time.LocalDate
 
 sealed trait PaymentType {
   def toKey: String

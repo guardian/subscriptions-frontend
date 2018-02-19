@@ -4,8 +4,6 @@ import org.joda.time.{Days, LocalDate}
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.data.JodaForms._
-import play.api.libs.Crypto
-import scalaz.syntax.std.boolean._
 
 case class Suspension(startDate: LocalDate, endDate: LocalDate) {
 

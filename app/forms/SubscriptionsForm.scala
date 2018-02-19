@@ -1,19 +1,19 @@
 package forms
 
 import com.gu.i18n._
-import com.gu.memsub._
 import com.gu.memsub.Subscription.ProductRatePlanId
+import com.gu.memsub._
 import com.gu.memsub.promo.PromoCode
-import com.gu.memsub.subsv2.{Catalog, CatalogPlan, PaidCharge}
+import com.gu.memsub.subsv2.{Catalog, CatalogPlan}
 import forms.SubscriptionsForm._
+import model.ContentSubscriptionPlanOps._
 import model.{SubscribeRequest, _}
 import play.api.data.Forms._
+import play.api.data.JodaForms._
 import play.api.data.format.Formats._
 import play.api.data.format.Formatter
 import play.api.data.{Form, _}
 import play.api.mvc.{AnyContent, Request}
-import model.ContentSubscriptionPlanOps._
-import play.api.data.JodaForms._
 
 import scalaz.\/
 
