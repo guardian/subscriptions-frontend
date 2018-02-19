@@ -48,8 +48,6 @@ class MyComponents(context: Context)
 
   val httpClient = com.gu.okhttp.RequestRunners.futureRunner
 
-  val cc = controllerComponents
-
   lazy val router: Routes = new Routes(
     httpErrorHandler,
     new CachedAssets(assets, controllerComponents),
