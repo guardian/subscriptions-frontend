@@ -48,23 +48,25 @@ class MyComponents(context: Context)
 
   val httpClient = com.gu.okhttp.RequestRunners.futureRunner
 
+  implicit val cc = controllerComponents
+
   lazy val router: Routes = new Routes(
     httpErrorHandler,
-    new CachedAssets(assets),
-    new Homepage(commonActions),
+    new CachedAssets(assets, controllerComponents),
+    new Homepage(commonActions, controllerComponents),
     new Management(actorSystem = actorSystem, touchpointBackends, oAuthActions),
-    new DigitalPack(touchpointBackends.Normal, commonActions),
+    new DigitalPack(touchpointBackends.Normal, commonActions, controllerComponents),
     new Checkout(touchpointBackends, commonActions),
     new Promotion(touchpointBackends, commonActions),
     new Shipping(touchpointBackends.Normal, commonActions),
-    new WeeklyLandingPage(touchpointBackends.Normal, commonActions),
+    new WeeklyLandingPage(touchpointBackends.Normal, commonActions, controllerComponents),
     new OAuth(wsClient = wsClient, commonActions, oAuthActions),
     new CAS(oAuthActions),
-    new AccountManagement(touchpointBackends, commonActions, httpClient),
-    new PatternLibrary(commonActions),
-    new Testing(touchpointBackends.Test, commonActions, oAuthActions),
+    new AccountManagement(touchpointBackends, commonActions, httpClient, controllerComponents),
+    new PatternLibrary(commonActions, controllerComponents),
+    new Testing(touchpointBackends.Test, commonActions, oAuthActions, controllerComponents),
     new PromoLandingPage(touchpointBackends.Normal, commonActions, oAuthActions),
-    new Offers(commonActions)
+    new Offers(commonActions, controllerComponents)
   )
 
   override lazy val httpFilters: Seq[EssentialFilter] = Seq(

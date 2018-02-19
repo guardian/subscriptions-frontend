@@ -31,7 +31,7 @@ class PromoLandingPage(
   tpBackend: TouchpointBackend,
   commonActions: CommonActions,
   oAuthActions: OAuthActions
-)(implicit val executionContext: ExecutionContext) extends Controller {
+)(implicit val executionContext: ExecutionContext, override protected val controllerComponents: ControllerComponents) extends BaseController {
 
   import commonActions._
   import oAuthActions._

@@ -3,10 +3,10 @@ package controllers
 import actions.CommonActions
 import com.gu.i18n.CountryGroup
 import model.DigitalEdition.{INT, UK, getById}
-import play.api.mvc.Controller
+import play.api.mvc.{BaseController, ControllerComponents}
 import utils.RequestCountry._
 
-class Offers(commonActions: CommonActions) extends Controller {
+class Offers(commonActions: CommonActions, override protected val controllerComponents: ControllerComponents) extends BaseController {
 
   import commonActions._
 

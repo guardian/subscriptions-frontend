@@ -19,7 +19,7 @@ import views.support.{BillingPeriod => _}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class Promotion(fBackendFactory: TouchpointBackends, commonActions: CommonActions)(implicit val executionContext: ExecutionContext) extends Controller with LazyLogging {
+class Promotion(fBackendFactory: TouchpointBackends, commonActions: CommonActions)(implicit val executionContext: ExecutionContext, override protected val controllerComponents: ControllerComponents) extends BaseController with LazyLogging {
 
   import commonActions._
 

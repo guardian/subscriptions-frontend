@@ -18,7 +18,7 @@ object WeeklyLandingPage{
   case class Hreflangs(canonical: String, hreflangs: List[Hreflang])
 }
 
-class WeeklyLandingPage(tpBackend: TouchpointBackend, commonActions: CommonActions) extends Controller {
+class WeeklyLandingPage(tpBackend: TouchpointBackend, commonActions: CommonActions, override protected val controllerComponents: ControllerComponents) extends BaseController {
 
   import commonActions._
 

@@ -12,15 +12,15 @@ import configuration.Config
 import configuration.Config.{CAS, appName, stage}
 import forms.CASForm
 import play.api.libs.json.Json
-import play.api.mvc.Controller
 import play.api.mvc.Security.AuthenticatedRequest
+import play.api.mvc.{BaseController, ControllerComponents}
 import views.support.CASResultOps._
 import views.support.TokenPayloadOps._
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Success, Try}
 
-class CAS(oAuthActions: OAuthActions)(implicit executionContext: ExecutionContext) extends Controller with LazyLogging {
+class CAS(oAuthActions: OAuthActions)(implicit executionContext: ExecutionContext, override protected val controllerComponents: ControllerComponents) extends BaseController with LazyLogging {
 
   import oAuthActions._
 

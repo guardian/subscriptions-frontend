@@ -9,7 +9,7 @@ import play.api.mvc._
 import utils.RequestCountry._
 import utils.Tracking.internalCampaignCode
 
-class Homepage(commonActions: CommonActions) extends Controller {
+class Homepage(commonActions: CommonActions, override protected val controllerComponents: ControllerComponents) extends BaseController {
 
   import commonActions._
 
