@@ -14,7 +14,7 @@ import com.gu.memsub.{BillingPeriod, NormalisedTelephoneNumber, Product}
 import com.gu.salesforce.{Contact, ContactId}
 import com.gu.stripe.Stripe
 import com.gu.zuora.rest.ZuoraRestService
-import com.gu.zuora.api.{InvoiceTemplate, ZuoraService}
+import com.gu.zuora.api.ZuoraService
 import com.gu.zuora.soap.models.Commands.{Account, PaymentMethod, RatePlan, Subscribe, _}
 import com.gu.zuora.soap.models.Queries
 import com.gu.zuora.soap.models.Queries.{Contact => ZuoraContact}
@@ -29,14 +29,12 @@ import model.error.IdentityService._
 import model.error.SubsError
 import org.joda.time.LocalDate.now
 import org.joda.time.{DateTimeConstants, Days, LocalDate}
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import touchpoint.ZuoraProperties
 import views.support.Pricing._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scalaz.std.option._
 import scalaz.std.scalaFuture._
-import scalaz.syntax.monad._
 import scalaz.syntax.std.option._
 import scalaz.{-\/, EitherT, Monad, NonEmptyList, \/, \/-}
 
@@ -59,7 +57,7 @@ object CheckoutService {
 }
 
 class CheckoutService(
-  identityService: IdentityService,
+  identityService: IdentityService[Future],
   salesforceService: SalesforceService,
   paymentService: PaymentService,
   catalog: Future[Catalog],
@@ -69,7 +67,7 @@ class CheckoutService(
   zuoraProperties: ZuoraProperties,
   promoService: PromoService,
   promoPlans: DiscountRatePlanIds
-) extends ContextLogging {
+)(implicit executionContext: ExecutionContext) extends ContextLogging {
 
   type NonFatalErrors = Seq[SubsError]
   type PostSubscribeResult = (Option[UserIdData], NonFatalErrors)
@@ -469,7 +467,7 @@ class CheckoutService(
       account <- zuoraService.getAccount(subscription.accountId).withContextLogging("zuoraAccount", _.id)
       billto <- zuoraService.getContact(account.billToId).withContextLogging("zuora bill to", _.id)
       soldto <- zuoraService.getContact(account.soldToId).withContextLogging("zuora sold to", _.id)
-      contact <- GetSalesforceContactForSub.sfContactForZuoraAccount(account)(zuoraService, salesforceService.repo, defaultContext).withContextLogging("sfContact", _.salesforceContactId)
+      contact <- GetSalesforceContactForSub.sfContactForZuoraAccount(account)(zuoraService, salesforceService.repo, implicitly).withContextLogging("sfContact", _.salesforceContactId)
     }
       yield (ContactInfo(billto, soldto, contact))
 

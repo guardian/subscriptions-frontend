@@ -1,9 +1,6 @@
 package services
 
 import akka.actor.ActorSystem
-import com.gocardless.GoCardlessClient
-import com.gocardless.GoCardlessClient.Environment
-import com.gocardless.GoCardlessClient.Environment.{LIVE, SANDBOX}
 import com.gu.config.DiscountRatePlanIds
 import com.gu.memsub.promo.Promotion._
 import com.gu.memsub.promo.{DynamoPromoCollection, DynamoTables, PromotionCollection}
@@ -24,9 +21,6 @@ import com.gu.zuora.{rest, soap}
 import configuration.Config
 import forms.SubscriptionsForm
 import monitoring.TouchpointBackendMetrics
-import play.api.Play.current
-import play.api.libs.concurrent.Akka
-import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.ws.WSClient
 import play.api.mvc.RequestHeader
 import services.TouchpointBackends.Resolution
@@ -36,7 +30,7 @@ import touchpoint.{TouchpointBackendConfig, ZuoraProperties}
 import utils.TestUsers._
 
 import scala.concurrent.duration._
-import scala.concurrent.{Await, Future}
+import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.util.{Failure, Try}
 import scalaz.std.scalaFuture._
 
@@ -63,11 +57,12 @@ trait TouchpointBackend {
   implicit def simpleRestClient: SimpleClient[Future]
 }
 
-class TouchpointBackends(actorSystem: ActorSystem, wsClient: WSClient) {
+class TouchpointBackends(actorSystem: ActorSystem, wsClient: WSClient, executionContext: ExecutionContext) {
 
   def logE[A](a: => A): A = Try(a).recoverWith({case e: Throwable => e.printStackTrace; Failure(e)}).get
 
   private implicit val system: ActorSystem = actorSystem
+  private implicit val executionContextImplicit: ExecutionContext = executionContext
 
   lazy val identityService = new IdentityService(new IdentityApiClientImpl(wsClient))
 

@@ -1,12 +1,13 @@
 package actions
 
  import controllers.{Cached, NoCache}
- import play.api.libs.concurrent.Execution.Implicits.defaultContext
  import play.api.mvc._
  import play.filters.csrf.CSRFCheck
 
  import scala.concurrent.{ExecutionContext, Future}
 final class CommonActions(executionContext: ExecutionContext, cSRFCheck: CSRFCheck, parser: BodyParser[AnyContent]) {
+
+  private implicit val executionContextImplicit = executionContext
 
   val StoreAcquisitionDataAction = new ActionBuilder[Request, AnyContent] {
     def invokeBlock[A](request: Request[A], block: (Request[A]) => Future[Result]) = block(request).map(result => {

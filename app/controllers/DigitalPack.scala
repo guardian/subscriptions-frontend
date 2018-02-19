@@ -6,7 +6,7 @@ import com.typesafe.scalalogging.StrictLogging
 import model.DigitalEdition
 import model.DigitalEdition._
 import play.api.mvc._
-import services.{TouchpointBackend, TouchpointBackends}
+import services.TouchpointBackend
 import utils.RequestCountry._
 
 import scala.concurrent.ExecutionContext.Implicits.global

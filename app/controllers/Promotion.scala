@@ -1,8 +1,6 @@
 package controllers
 
 
-import javax.inject.Inject
-
 import actions.CommonActions
 import com.gu.i18n._
 import com.gu.memsub.Subscription.ProductRatePlanId
@@ -18,11 +16,10 @@ import utils.TestUsers.PreSigninTestCookie
 import views.html.{checkout => view}
 import views.support.Pricing._
 import views.support.{BillingPeriod => _}
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-class Promotion(fBackendFactory: TouchpointBackends, commonActions: CommonActions)  extends Controller with LazyLogging {
+class Promotion(fBackendFactory: TouchpointBackends, commonActions: CommonActions)(implicit val executionContext: ExecutionContext) extends Controller with LazyLogging {
 
   import commonActions._
 

@@ -2,13 +2,10 @@ package model
 
 import com.gu.acquisition.model.{OphanIds, ReferrerAcquisitionData}
 import com.gu.acquisition.typeclasses.AcquisitionSubmissionBuilder
-import com.gu.memsub.Benefit.{PaperDay, Weekly}
-import com.gu.memsub.BillingPeriod
+import com.gu.memsub.Benefit.PaperDay
 import com.gu.memsub.BillingPeriod._
 import com.gu.memsub.promo.{PercentDiscount, Promotion}
-import com.gu.stripe.Stripe.Charge
 import com.typesafe.scalalogging.LazyLogging
-import forms.SubscriptionsForm
 import ophan.thrift.event.PaymentProvider.{Gocardless, Stripe}
 import ophan.thrift.event._
 import play.api.libs.json._
@@ -56,8 +53,8 @@ object SubscriptionAcquisitionComponents {
 
     private def printOptionsFromPaperData(p: PaperData): Option[PrintOptions] = {
       // Explicit imports because Product and Benefit have name collisions
+      import com.gu.memsub.Benefit.{Digipack, FridayPaper, MondayPaper, SaturdayPaper, SundayPaper, ThursdayPaper, TuesdayPaper, WednesdayPaper}
       import com.gu.memsub.Product.{Delivery, Voucher, Weekly}
-      import com.gu.memsub.Benefit.{MondayPaper, TuesdayPaper, WednesdayPaper, ThursdayPaper, FridayPaper, SaturdayPaper, SundayPaper, Digipack}
 
       val paperDays = p.plan.charges.benefits.list.collect {
         case p: PaperDay => p
@@ -116,8 +113,8 @@ object SubscriptionAcquisitionComponents {
 
     override def buildAcquisition(components: SubscriptionAcquisitionComponents): Either[String, Acquisition] = {
       import components._
-      import components.subscribeRequest.productData
       import components.subscribeRequest.genericData.{currency, paymentData, personalData, promoCode}
+      import components.subscribeRequest.productData
 
       val plan = productData.fold(_.plan, _.plan)
       val referrerAcquisitionData = acquisitionDataJSON.flatMap(referrerAcquisitionDataFromJSON)

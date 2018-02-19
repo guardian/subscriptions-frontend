@@ -1,9 +1,9 @@
-@import play.api.libs.json.Json
-@import model.JsVars
-@import controllers.CachedAssets.hashedPathFor
-@import configuration.Config
-@import views.support.{UKStripeService, AUStripeService, CountryWithCurrency}
 @import com.gu.i18n.Country.UK
+@import configuration.Config
+@import controllers.CachedAssets.hashedPathFor
+@import model.JsVars
+@import play.api.libs.json.Json
+@import views.support.{AUStripeService, CountryWithCurrency, UKStripeService}
 @(jsVars: JsVars, touchpointBackendResolutionOpt: Option[services.TouchpointBackends.Resolution])
 @countryWithCurrency = @{CountryWithCurrency(jsVars.country.getOrElse(UK), jsVars.currency)}
 

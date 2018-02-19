@@ -1,7 +1,5 @@
 package model.error
 
-import scalaz.NonEmptyList
-
 trait SubsError {
   val message: String
   val request: Option[String]

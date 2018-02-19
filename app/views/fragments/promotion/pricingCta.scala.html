@@ -1,10 +1,10 @@
 @import com.gu.i18n.Currency
+@import com.gu.memsub.BillingPeriod.Month
 @import com.gu.memsub.promo.PromoCode
 @import com.gu.memsub.promo.Promotion.AnyPromotion
 @import com.gu.memsub.subsv2.CatalogPlan
-@import com.gu.memsub.BillingPeriod.Month
-@import views.support.Catalog._
 @import configuration.Config.Zuora.defaultDigitalPackFreeTrialPeriod
+@import views.support.Catalog._
 
 @(currency: Currency, plan: CatalogPlan.Digipack[Month.type], promoCode: PromoCode, promotion: AnyPromotion)
 <div class="pricing-cta">

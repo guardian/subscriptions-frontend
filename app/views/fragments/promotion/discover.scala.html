@@ -1,9 +1,8 @@
-@import com.gu.i18n.Country
-@import com.gu.i18n.Currency
+@import com.gu.i18n.{Country, Currency}
+@import com.gu.memsub.BillingPeriod.Month
 @import com.gu.memsub.promo.PromoCode
 @import com.gu.memsub.promo.Promotion.AnyPromotion
 @import com.gu.memsub.subsv2.CatalogPlan
-@import com.gu.memsub.BillingPeriod.Month
 
 @(currency: Currency, country: Country, plan: CatalogPlan.Digipack[Month.type], promoCode: PromoCode, promotion: AnyPromotion)
 <div>

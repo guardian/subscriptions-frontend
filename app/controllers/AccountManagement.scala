@@ -2,7 +2,7 @@ package controllers
 
 import _root_.services.AuthenticationService._
 import _root_.services.TouchpointBackends.Resolution
-import _root_.services.{FulfilmentLookupService, TouchpointBackend, TouchpointBackends}
+import _root_.services.{LookupSubscriptionFulfilment, TouchpointBackend, TouchpointBackends}
 import actions.CommonActions
 import com.gu.i18n.Country.{UK, US}
 import com.gu.i18n.Currency
@@ -23,8 +23,8 @@ import logging.{Context, ContextLogging}
 import model.ContentSubscriptionPlanOps._
 import model.SubscriptionOps._
 import model.{Renewal, RenewalReads}
+import okhttp3.{Response, Request => OKRequest}
 import org.joda.time.LocalDate.now
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json._
 import play.api.mvc.{AnyContent, _}
 import utils.TestUsers.PreSigninTestCookie
@@ -32,7 +32,7 @@ import views.html.account.thankYouRenew
 import views.support.Dates._
 import views.support.Pricing._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scalaz.std.scalaFuture._
 import scalaz.syntax.std.option._
 import scalaz.{-\/, EitherT, NonEmptyList, OptionT, \/, \/-}
@@ -50,7 +50,7 @@ object SessionSubscription extends StrictLogging {
   def clear(result: Result)(implicit request: Request[AnyContent]): Result =
     result.withSession(request.session - SUBSCRIPTION_SESSION_KEY)
 
-  def subscriptionFromRequest(implicit request: Request[_], tpBackend: TouchpointBackend): Future[Option[Subscription[ContentSubscription]]] = {
+  def subscriptionFromRequest(implicit request: Request[_], tpBackend: TouchpointBackend, executionContext: ExecutionContext): Future[Option[Subscription[ContentSubscription]]] = {
 
     (for {
       subscriptionId <- OptionT(Future.successful(request.session.data.get(SUBSCRIPTION_SESSION_KEY)))
@@ -70,7 +70,7 @@ object SessionSubscription extends StrictLogging {
 
 }
 
-object ManageDelivery extends ContextLogging {
+class ManageDelivery(implicit val executionContext: ExecutionContext) extends ContextLogging {
 
   import play.api.mvc.Results._
 
@@ -138,11 +138,11 @@ object ManageDelivery extends ContextLogging {
     }
   }
 
-  def fulfilmentLookup(implicit request: Request[ReportDeliveryProblem], touchpoint: TouchpointBackends.Resolution): Future[Result] = {
+  def fulfilmentLookup(httpClient: OKRequest => Future[Response])(implicit request: Request[ReportDeliveryProblem], touchpoint: TouchpointBackends.Resolution): Future[Result] = {
     val env = touchpoint.backend.environmentName
     val deliveryProblem = request.body
     logger.info(s"[${env}] Attempting to raise a delivery issue: $deliveryProblem")
-    val futureLookupAttempt = FulfilmentLookupService.lookupSubscription(env, deliveryProblem)
+    val futureLookupAttempt = LookupSubscriptionFulfilment(env, httpClient, deliveryProblem)
     futureLookupAttempt.map { lookupAttempt => lookupAttempt match {
         case \/-(_) =>
           logger.info(s"[${env}] Successfully raised a delivery issue for $deliveryProblem")
@@ -157,8 +157,6 @@ object ManageDelivery extends ContextLogging {
 }
 
 object ManageWeekly extends ContextLogging {
-
-  import play.api.mvc.Results._
 
   // this sequencing concatenates errors if any, otherwise aggregates rights
   def sequence[A](list: List[\/[NonEmptyList[String], A]]): \/[NonEmptyList[String], List[A]] = {
@@ -186,9 +184,16 @@ object ManageWeekly extends ContextLogging {
       (
         (JsPath \ "id").write[String].contramap[ProductRatePlanId](_.get) and
           (JsPath \ "price").write[String]
-        ) (unlift(WeeklyPlanInfo.unapply))
+        ) (unlift(ManageWeekly.WeeklyPlanInfo.unapply))
 
   }
+
+}
+
+class ManageWeekly(implicit val executionContext: ExecutionContext) extends ContextLogging {
+
+  import ManageWeekly._
+  import play.api.mvc.Results._
 
   def apply(
              billingSchedule: Option[BillingSchedule],
@@ -325,11 +330,13 @@ object ManageWeekly extends ContextLogging {
 }
 
 
-class AccountManagement(touchpointBackends: TouchpointBackends, commonActions: CommonActions) extends Controller with ContextLogging {
+class AccountManagement(touchpointBackends: TouchpointBackends, commonActions: CommonActions, httpClient: OKRequest => Future[Response])(implicit executionContext: ExecutionContext) extends Controller with ContextLogging {
 
   import commonActions.NoCacheAction
 
   val accountManagementAction = NoCacheAction
+  val manageWeekly: ManageWeekly = new ManageWeekly()
+  val manageDelivery: ManageDelivery = new ManageDelivery()
 
   def subscriptionFromUserDetails(loginRequestOpt: Option[AccountManagementLoginRequest])(implicit request: Request[AnyContent]): Future[Option[Subscription[ContentSubscription]]] = {
     implicit val resolution: TouchpointBackends.Resolution = touchpointBackends.forRequest(PreSigninTestCookie, request.cookies)
@@ -381,13 +388,13 @@ class AccountManagement(touchpointBackends: TouchpointBackends, commonActions: C
       val paymentMethodIsPaymentCard = maybePaymentMethod.collect { case _:PaymentCard => true }.isDefined
       val maybeFutureManagePage = subscription.planToManage.product match {
         case Product.Delivery => subscription.asDelivery.map { deliverySubscription =>
-          Future.successful(ManageDelivery(errorCodes, pendingHolidays, billingSchedule, deliverySubscription, account, maybeEmail, paymentMethodIsPaymentCard))
+          Future.successful(manageDelivery(errorCodes, pendingHolidays, billingSchedule, deliverySubscription, account, maybeEmail, paymentMethodIsPaymentCard))
         }
         case Product.Voucher => subscription.asVoucher.map { voucherSubscription =>
           Future.successful(Ok(views.html.account.voucher(voucherSubscription, billingSchedule, maybeEmail, paymentMethodIsPaymentCard)))
         }
         case _: Product.Weekly => subscription.asWeekly.map { weeklySubscription =>
-          ManageWeekly(billingSchedule, weeklySubscription, maybeEmail, promoCode, paymentMethodIsPaymentCard)
+          manageWeekly(billingSchedule, weeklySubscription, maybeEmail, promoCode, paymentMethodIsPaymentCard)
         }
         case Product.Digipack => subscription.asDigipack.map { digipackSubscription =>
           Future.successful(Ok(views.html.account.digitalpack(digipackSubscription, billingSchedule, billToContact.country, maybeEmail, paymentMethodIsPaymentCard)))
@@ -424,7 +431,7 @@ class AccountManagement(touchpointBackends: TouchpointBackends, commonActions: C
 
   def processSuspension: Action[AnyContent] = accountManagementAction.async { implicit request =>
     implicit val resolution: Resolution = touchpointBackends.forRequest(PreSigninTestCookie, request.cookies)
-    ManageDelivery.suspend
+    manageDelivery.suspend
   }
 
   def redirect = NoCacheAction { implicit request =>
@@ -433,17 +440,17 @@ class AccountManagement(touchpointBackends: TouchpointBackends, commonActions: C
 
   def processRenewal: Action[AnyContent] = accountManagementAction.async { implicit request =>
     implicit val resolution: TouchpointBackends.Resolution = touchpointBackends.forRequest(PreSigninTestCookie, request.cookies)
-    ManageWeekly.renew
+    manageWeekly.renew
   }
 
   def renewThankYou: Action[AnyContent] = accountManagementAction.async { implicit request =>
     implicit val resolution: TouchpointBackends.Resolution = touchpointBackends.forRequest(PreSigninTestCookie, request.cookies)
-    ManageWeekly.renewThankYou
+    manageWeekly.renewThankYou
   }
 
   def reportDeliveryProblem: Action[ReportDeliveryProblem] = accountManagementAction.async(parse.form(ReportDeliveryProblemForm.report)) { implicit request =>
     implicit val resolution: TouchpointBackends.Resolution = touchpointBackends.forRequest(PreSigninTestCookie, request.cookies)
-    ManageDelivery.fulfilmentLookup
+    manageDelivery.fulfilmentLookup(httpClient)
   }
 
 }

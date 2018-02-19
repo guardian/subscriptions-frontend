@@ -4,8 +4,8 @@
 @import com.gu.memsub.subsv2.CatalogPlan
 @import views.support.AddressValidationRulesOps._
 @import views.support.CountryOps._
-@import views.support.{ContactCentreOps, CountryWithCurrency}
 @import views.support.PlanOps._
+@import views.support.{ContactCentreOps, CountryWithCurrency}
 @(address: Option[Address], namePrefix: String, countriesWithCurrency: List[CountryWithCurrency], plan: CatalogPlan.Paid, usePostcodeLookup: Boolean, determinesPriceBanding: Boolean, defaultCurrency: Currency)
 
 

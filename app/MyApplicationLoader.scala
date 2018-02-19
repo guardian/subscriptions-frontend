@@ -36,7 +36,7 @@ class MyComponents(context: Context)
     with AssetsComponents
 {
 
-  val touchpointBackends = new TouchpointBackends(actorSystem, wsClient)
+  val touchpointBackends = new TouchpointBackends(actorSystem, wsClient, executionContext)
 
   override lazy val httpErrorHandler: ErrorHandler =
     new ErrorHandler(environment, configuration, sourceMapper, Some(router))
@@ -45,6 +45,8 @@ class MyComponents(context: Context)
   val oAuthActions = new OAuthActions(wsClient, commonActions, playBodyParsers.default, googleAuthConfig)
 
   lazy val googleAuthConfig: GoogleAuthConfig = googleAuthConfigFor(config, httpConfiguration = httpConfiguration)
+
+  val httpClient = com.gu.okhttp.RequestRunners.futureRunner
 
   lazy val router: Routes = new Routes(
     httpErrorHandler,
@@ -58,7 +60,7 @@ class MyComponents(context: Context)
     new WeeklyLandingPage(touchpointBackends.Normal, commonActions),
     new OAuth(wsClient = wsClient, commonActions, oAuthActions),
     new CAS(oAuthActions),
-    new AccountManagement(touchpointBackends, commonActions),
+    new AccountManagement(touchpointBackends, commonActions, httpClient),
     new PatternLibrary(commonActions),
     new Testing(touchpointBackends.Test, commonActions, oAuthActions),
     new PromoLandingPage(touchpointBackends.Normal, commonActions, oAuthActions),

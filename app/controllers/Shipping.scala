@@ -1,15 +1,13 @@
 package controllers
-import javax.inject.Inject
-
 import actions.CommonActions
 import com.gu.i18n.CountryGroup.UK
 import com.gu.memsub.subsv2.{Catalog, CatalogPlan}
 import model.Subscriptions._
 import play.api.mvc._
-import services.{TouchpointBackend, TouchpointBackends}
+import services.TouchpointBackend
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class Shipping(touchpointBackend: TouchpointBackend, commonActions: CommonActions)  extends Controller {
 

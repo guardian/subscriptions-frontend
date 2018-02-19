@@ -1,11 +1,11 @@
 package loghandling
 
 import ch.qos.logback.classic.spi.ILoggingEvent
-import ch.qos.logback.classic.{Logger => LogbackLogger, LoggerContext}
+import ch.qos.logback.classic.{LoggerContext, Logger => LogbackLogger}
 import com.amazonaws.auth.AWSCredentialsProvider
 import com.gu.logback.appender.kinesis.KinesisAppender
 import net.logstash.logback.layout.LogstashLayout
-import org.slf4j.{Logger => SLFLogger, LoggerFactory}
+import org.slf4j.{LoggerFactory, Logger => SLFLogger}
 import play.api.{Logger => PlayLogger}
 
 object LogbackConfig {

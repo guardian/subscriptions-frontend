@@ -2,8 +2,8 @@ package views.support
 
 import com.github.nscala_time.time.Imports._
 import configuration.Config.timezone
-import org.joda.time.{Instant, Interval, PeriodType}
 import org.joda.time.format.PeriodFormat
+import org.joda.time.{Instant, Interval, PeriodType}
 import play.twirl.api.Html
 
 object Dates {

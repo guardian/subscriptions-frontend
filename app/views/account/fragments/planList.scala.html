@@ -1,8 +1,8 @@
+@import com.gu.memsub.Benefit.PaperDay
 @import com.gu.memsub.subsv2.SubscriptionPlan
+@import org.joda.time.LocalDate.now
 @import views.support.Dates._
 @import views.support.Pricing._
-@import com.gu.memsub.Benefit.PaperDay
-@import org.joda.time.LocalDate.now
 
 @(plans: List[SubscriptionPlan.ContentSubscription], singularLabel: String, chosenPaperDays: List[PaperDay] = List.empty)
 

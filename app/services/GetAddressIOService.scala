@@ -7,8 +7,7 @@ import com.typesafe.scalalogging.LazyLogging
 import monitoring.Metrics
 import services.GetAddressIOModel.{FindAddressResult, FindAddressResultError}
 
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 object GetAddressIOModel {
   case class FindAddressResult(Latitude: Float, Longitude: Float, Addresses: Seq[String])
@@ -19,7 +18,7 @@ object GetAddressIOMetrics extends Metrics with StatusMetrics {
   override val service: String = "GetAddressIO"
 }
 
-object GetAddressIOService extends WebServiceHelper[FindAddressResult, FindAddressResultError] with LazyLogging {
+class GetAddressIOService()(implicit executionContext: ExecutionContext) extends WebServiceHelper[FindAddressResult, FindAddressResultError] with LazyLogging {
   import configuration.Config
   import play.api.libs.functional.syntax._
   import play.api.libs.json.{JsPath, Reads}

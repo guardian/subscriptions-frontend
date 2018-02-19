@@ -1,21 +1,17 @@
 package controllers
 
-import javax.inject.Inject
-
 import actions.CommonActions
 import com.gu.i18n.{Country, CountryGroup}
 import configuration.Config
-import model.WeeklyRegion
-import play.api.libs.ws.WSClient
 import play.api.mvc._
-import services.{TouchpointBackend, TouchpointBackends}
+import services.TouchpointBackend
+import utils.RequestCountry._
 import views.html.promotion.weeklyLandingPage
 import views.html.weekly.landing_description
 import views.support.PegdownMarkdownRenderer
-import utils.RequestCountry._
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 object WeeklyLandingPage{
   case class Hreflang(href: String, lang: String)

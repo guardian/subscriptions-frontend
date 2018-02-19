@@ -1,14 +1,11 @@
-@import com.gu.i18n.Currency
 @import com.gu.memsub.promo.Promotion.AnyPromotion
-@import com.gu.memsub.subsv2.CatalogPlan
-@import views.support.Pricing._
-@import views.support.Dates._
-
 @import com.gu.memsub.subsv2.Subscription
 @import com.gu.memsub.subsv2.SubscriptionPlan.ContentSubscription
 @import model.SubscriptionOps._
 @import org.joda.time.LocalDate.now
+@import views.support.Dates._
 @import views.support.PlanOps._
+@import views.support.Pricing._
 
 
 @(subscription: Subscription[ContentSubscription], promotion: Option[AnyPromotion] = None)

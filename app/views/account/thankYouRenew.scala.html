@@ -1,9 +1,5 @@
-@import com.gu.memsub.subsv2.SubscriptionPlan
 @import com.gu.memsub.BillingSchedule
-@import views.support.Pricing._
-@import views.support.Dates._
-@import org.joda.time.LocalDate.now
-@import com.gu.memsub.BillingPeriod.OneOffPeriod
+@import com.gu.memsub.subsv2.SubscriptionPlan
 @(plan: SubscriptionPlan.ContentSubscription,
   maybeBillingSchedule: Option[BillingSchedule],
   touchpointBackendResolution: services.TouchpointBackends.Resolution

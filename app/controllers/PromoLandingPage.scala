@@ -13,9 +13,7 @@ import controllers.SessionKeys.PromotionTrackingCode
 import controllers.WeeklyLandingPage.{Hreflang, Hreflangs}
 import filters.HandleXFrameOptionsOverrideHeader
 import play.api.data.{Form, Forms}
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json.Json
-import play.api.libs.ws.WSClient
 import play.api.mvc._
 import play.twirl.api.Html
 import services.TouchpointBackend
@@ -25,16 +23,27 @@ import views.html.promotion._
 import views.html.weekly.landing_description
 import views.support.PegdownMarkdownRenderer
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scalaz.OptionT
 import scalaz.std.scalaFuture._
 
-class PromoLandingPage (tpBackend: TouchpointBackend, commonActions: CommonActions, oAuthActions: OAuthActions) extends Controller {
+class PromoLandingPage(
+  tpBackend: TouchpointBackend,
+  commonActions: CommonActions,
+  oAuthActions: OAuthActions
+)(implicit val executionContext: ExecutionContext) extends Controller {
 
   import commonActions._
   import oAuthActions._
 
-  private val catalogPromoLandingPage: Future[CatalogPromoLandingPage] = tpBackend.catalogService.catalog.map(_.map(c => new CatalogPromoLandingPage(c)).valueOr(e => throw new IllegalStateException(s"$e while getting catalog")))
+  private val eventualCatalogPromoLandingPage: Future[CatalogPromoLandingPage] =
+    tpBackend.catalogService.catalog.map(
+      _.map(c =>
+        new CatalogPromoLandingPage(c)
+      ).valueOr(e =>
+        throw new IllegalStateException(s"$e while getting catalog")
+      )
+    )
 
   class CatalogPromoLandingPage(val catalog: Catalog) {
 
@@ -122,7 +131,10 @@ class PromoLandingPage (tpBackend: TouchpointBackend, commonActions: CommonActio
         }
         val hreflang = Hreflangs(Config.subscriptionsUrl + routes.PromoLandingPage.render(promoCodeStr, Some(country)).url, hreflangs)
 
-        OptionT(catalogPromoLandingPage.map(haha => haha.getLandingPage(promotion, country, hreflang).map(Ok(_)) orElse haha.redirectToBrochurePage(promotion, country)))
+        OptionT(eventualCatalogPromoLandingPage.map(catalogPromoLandingPage =>
+          catalogPromoLandingPage.getLandingPage(promotion, country, hreflang).map(Ok(_))
+            orElse catalogPromoLandingPage.redirectToBrochurePage(promotion, country))(executionContext)
+        )
       }
     } yield landingPage
     maybeLandingPage.run.map(_.getOrElse {
@@ -153,7 +165,7 @@ class PromoLandingPage (tpBackend: TouchpointBackend, commonActions: CommonActio
         }
         val hreflang = Hreflangs(Config.subscriptionsUrl + routes.PromoLandingPage.preview(Some(country)).url, hreflangs)
 
-        OptionT(catalogPromoLandingPage.map(_.getLandingPage(promotion, country, hreflang)(promoCode)))
+        OptionT(eventualCatalogPromoLandingPage.map(_.getLandingPage(promotion, country, hreflang)(promoCode)))
       }
     } yield landingPageHtml
 
@@ -165,9 +177,9 @@ class PromoLandingPage (tpBackend: TouchpointBackend, commonActions: CommonActio
 
     val maybeTermsPage = for {
       promotion <- OptionT(tpBackend.promoService.findPromotionFuture(promoCode))
-      termsPage <- OptionT(catalogPromoLandingPage.map(_.catalog).map { catalog =>
+      termsPage <- OptionT(eventualCatalogPromoLandingPage.map(_.catalog).map({ catalog =>
         Some(Ok(views.html.promotion.termsPage(promoCode, promotion, PegdownMarkdownRenderer, catalog))): Option[Result]
-      })
+      }))
     } yield termsPage
 
     maybeTermsPage.run.map(_.getOrElse {
