@@ -48,24 +48,24 @@ class MyComponents(context: Context)
 
   val httpClient = com.gu.okhttp.RequestRunners.futureRunner
 
-  implicit val cc = controllerComponents
+  val cc = controllerComponents
 
   lazy val router: Routes = new Routes(
     httpErrorHandler,
     new CachedAssets(assets, controllerComponents),
     new Homepage(commonActions, controllerComponents),
-    new Management(actorSystem = actorSystem, touchpointBackends, oAuthActions),
+    new Management(actorSystem = actorSystem, touchpointBackends, oAuthActions, executionContext, controllerComponents),
     new DigitalPack(touchpointBackends.Normal, commonActions, controllerComponents),
-    new Checkout(touchpointBackends, commonActions),
-    new Promotion(touchpointBackends, commonActions),
-    new Shipping(touchpointBackends.Normal, commonActions),
+    new Checkout(touchpointBackends, commonActions, executionContext, controllerComponents),
+    new Promotion(touchpointBackends, commonActions, executionContext, controllerComponents),
+    new Shipping(touchpointBackends.Normal, commonActions, controllerComponents),
     new WeeklyLandingPage(touchpointBackends.Normal, commonActions, controllerComponents),
-    new OAuth(wsClient = wsClient, commonActions, oAuthActions),
-    new CAS(oAuthActions),
+    new OAuth(wsClient = wsClient, commonActions, oAuthActions, executionContext, controllerComponents),
+    new CAS(oAuthActions, executionContext, controllerComponents),
     new AccountManagement(touchpointBackends, commonActions, httpClient, controllerComponents),
     new PatternLibrary(commonActions, controllerComponents),
     new Testing(touchpointBackends.Test, commonActions, oAuthActions, controllerComponents),
-    new PromoLandingPage(touchpointBackends.Normal, commonActions, oAuthActions),
+    new PromoLandingPage(touchpointBackends.Normal, commonActions, oAuthActions, executionContext, controllerComponents),
     new Offers(commonActions, controllerComponents)
   )
 

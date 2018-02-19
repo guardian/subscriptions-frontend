@@ -10,7 +10,7 @@ import play.api.mvc._
 
 import scala.concurrent.ExecutionContext
 
-class OAuth (val wsClient: WSClient, commonActions: CommonActions, oAuthActions: OAuthActions)(implicit executionContext: ExecutionContext, override protected val controllerComponents: ControllerComponents) extends BaseController {
+class OAuth (val wsClient: WSClient, commonActions: CommonActions, oAuthActions: OAuthActions, implicit val executionContext: ExecutionContext, override protected val controllerComponents: ControllerComponents) extends BaseController {
 
   import commonActions._
 

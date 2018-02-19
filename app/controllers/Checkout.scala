@@ -38,7 +38,7 @@ import scala.util.Try
 import scalaz.std.scalaFuture._
 import scalaz.{NonEmptyList, OptionT}
 
-class Checkout(fBackendFactory: TouchpointBackends, commonActions: CommonActions)(implicit executionContext: ExecutionContext, override protected val controllerComponents: ControllerComponents) extends BaseController with LazyLogging {
+class Checkout(fBackendFactory: TouchpointBackends, commonActions: CommonActions, implicit val executionContext: ExecutionContext, override protected val controllerComponents: ControllerComponents) extends BaseController with LazyLogging {
 
   import SessionKeys.{Currency => _, UserId => _, _}
   import commonActions._

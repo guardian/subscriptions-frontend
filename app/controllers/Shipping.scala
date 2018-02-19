@@ -9,7 +9,7 @@ import services.TouchpointBackend
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class Shipping(touchpointBackend: TouchpointBackend, commonActions: CommonActions)(implicit override protected val controllerComponents: ControllerComponents) extends BaseController {
+class Shipping(touchpointBackend: TouchpointBackend, commonActions: CommonActions, override protected val controllerComponents: ControllerComponents) extends BaseController {
 
   import commonActions._
   // no need to support test users here really as plans seldom change

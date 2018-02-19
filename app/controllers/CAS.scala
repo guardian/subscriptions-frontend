@@ -20,7 +20,7 @@ import views.support.TokenPayloadOps._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Success, Try}
 
-class CAS(oAuthActions: OAuthActions)(implicit executionContext: ExecutionContext, override protected val controllerComponents: ControllerComponents) extends BaseController with LazyLogging {
+class CAS(oAuthActions: OAuthActions, implicit val executionContext: ExecutionContext, override protected val controllerComponents: ControllerComponents) extends BaseController with LazyLogging {
 
   import oAuthActions._
 
