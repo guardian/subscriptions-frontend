@@ -50,21 +50,21 @@ class MyComponents(context: Context)
 
   lazy val router: Routes = new Routes(
     httpErrorHandler,
-    new CachedAssets(assets),
-    new Homepage(commonActions),
-    new Management(actorSystem = actorSystem, touchpointBackends, oAuthActions),
-    new DigitalPack(touchpointBackends.Normal, commonActions),
-    new Checkout(touchpointBackends, commonActions),
-    new Promotion(touchpointBackends, commonActions),
-    new Shipping(touchpointBackends.Normal, commonActions),
-    new WeeklyLandingPage(touchpointBackends.Normal, commonActions),
-    new OAuth(wsClient = wsClient, commonActions, oAuthActions),
-    new CAS(oAuthActions),
-    new AccountManagement(touchpointBackends, commonActions, httpClient),
-    new PatternLibrary(commonActions),
-    new Testing(touchpointBackends.Test, commonActions, oAuthActions),
-    new PromoLandingPage(touchpointBackends.Normal, commonActions, oAuthActions),
-    new Offers(commonActions)
+    new CachedAssets(assets, controllerComponents),
+    new Homepage(commonActions, controllerComponents),
+    new Management(actorSystem = actorSystem, touchpointBackends, oAuthActions, executionContext, controllerComponents),
+    new DigitalPack(touchpointBackends.Normal, commonActions, controllerComponents),
+    new Checkout(touchpointBackends, commonActions, executionContext, controllerComponents),
+    new Promotion(touchpointBackends, commonActions, executionContext, controllerComponents),
+    new Shipping(touchpointBackends.Normal, commonActions, controllerComponents),
+    new WeeklyLandingPage(touchpointBackends.Normal, commonActions, controllerComponents),
+    new OAuth(wsClient = wsClient, commonActions, oAuthActions, executionContext, controllerComponents),
+    new CAS(oAuthActions, executionContext, controllerComponents),
+    new AccountManagement(touchpointBackends, commonActions, httpClient, controllerComponents),
+    new PatternLibrary(commonActions, controllerComponents),
+    new Testing(touchpointBackends.Test, commonActions, oAuthActions, controllerComponents),
+    new PromoLandingPage(touchpointBackends.Normal, commonActions, oAuthActions, executionContext, controllerComponents),
+    new Offers(commonActions, controllerComponents)
   )
 
   override lazy val httpFilters: Seq[EssentialFilter] = Seq(

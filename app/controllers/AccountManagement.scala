@@ -330,7 +330,12 @@ class ManageWeekly(implicit val executionContext: ExecutionContext) extends Cont
 }
 
 
-class AccountManagement(touchpointBackends: TouchpointBackends, commonActions: CommonActions, httpClient: OKRequest => Future[Response])(implicit executionContext: ExecutionContext) extends Controller with ContextLogging {
+class AccountManagement(
+  touchpointBackends: TouchpointBackends,
+  commonActions: CommonActions,
+  httpClient: OKRequest => Future[Response],
+  override protected val controllerComponents: ControllerComponents
+)(implicit executionContext: ExecutionContext) extends BaseController with ContextLogging {
 
   import commonActions.NoCacheAction
 

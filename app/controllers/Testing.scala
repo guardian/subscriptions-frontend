@@ -3,7 +3,7 @@ package controllers
 import actions.{CommonActions, OAuthActions}
 import com.gu.memsub.subsv2.CatalogPlan.Paid
 import com.typesafe.scalalogging.LazyLogging
-import play.api.mvc.{Controller, Cookie}
+import play.api.mvc.{BaseController, ControllerComponents, Cookie}
 import services.TouchpointBackend
 import utils.TestUsers.testUsers
 
@@ -18,7 +18,12 @@ object Testing {
   val PreSigninTestCookieName = "pre-signin-test-user"
 }
 
-class Testing (touchpointBackend: TouchpointBackend, commonActions: CommonActions, oAuthActions: OAuthActions)  extends Controller with LazyLogging {
+class Testing (
+  touchpointBackend: TouchpointBackend,
+  commonActions: CommonActions,
+  oAuthActions: OAuthActions,
+  override protected val controllerComponents: ControllerComponents
+) extends BaseController with LazyLogging {
 
   import commonActions._
   import oAuthActions._

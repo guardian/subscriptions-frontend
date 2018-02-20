@@ -18,7 +18,7 @@ import scalaz.syntax.std.boolean._
 import scalaz.syntax.std.option._
 import scalaz.{Semigroup, Validation, ValidationNel}
 
-class Management(actorSystem: ActorSystem, fBackendFactory: TouchpointBackends, oAuthActions: OAuthActions)(implicit val executionContext: ExecutionContext)  extends Controller with LazyLogging {
+class Management(actorSystem: ActorSystem, fBackendFactory: TouchpointBackends, oAuthActions: OAuthActions, implicit val executionContext: ExecutionContext, override protected val controllerComponents: ControllerComponents)  extends BaseController with LazyLogging {
 
   import oAuthActions._
 

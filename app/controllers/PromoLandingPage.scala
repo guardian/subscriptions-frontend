@@ -30,8 +30,10 @@ import scalaz.std.scalaFuture._
 class PromoLandingPage(
   tpBackend: TouchpointBackend,
   commonActions: CommonActions,
-  oAuthActions: OAuthActions
-)(implicit val executionContext: ExecutionContext) extends Controller {
+  oAuthActions: OAuthActions,
+  implicit val executionContext: ExecutionContext,
+  override protected val controllerComponents: ControllerComponents
+) extends BaseController {
 
   import commonActions._
   import oAuthActions._

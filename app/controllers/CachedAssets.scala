@@ -3,7 +3,7 @@ package controllers
 import com.typesafe.scalalogging.LazyLogging
 import play.api.Logger
 import play.api.libs.json.Json
-import play.api.mvc.{Action, Controller}
+import play.api.mvc.{BaseController, ControllerComponents}
 
 import scala.concurrent.ExecutionContext
 
@@ -23,7 +23,7 @@ object CachedAssets extends LazyLogging  {
     */
   def hashedPathFor(path: String): String = "/assets/" + hashedPaths.getOrElse(path, path)
 }
-class CachedAssets(assets: Assets)(implicit executionContext: ExecutionContext) extends Controller with LazyLogging {
+class CachedAssets(assets: Assets, override protected val controllerComponents: ControllerComponents)(implicit executionContext: ExecutionContext) extends BaseController with LazyLogging {
   /**
    * Serves an asset, wrapping it with cache headers if appropriate
    */
