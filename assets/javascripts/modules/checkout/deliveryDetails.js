@@ -41,7 +41,7 @@ define([
         'SW1', 'SW2', 'SW3', 'SW4', 'SW5', 'SW6', 'SW7', 'SW8', 'SW9',
         'TN16',
         'TW1', 'TW2', 'TW3', 'TW4', 'TW5', 'TW6', 'TW7', 'TW8', 'TW9',
-        'UB10', 'UB3', 'UB4', 'UB5', 'UB6',
+        'UB1', 'UB3', 'UB4', 'UB5', 'UB6', 'UB7', 'UB8', 'UB9',
         'W1', 'W2', 'W3', 'W4', 'W5', 'W6', 'W7', 'W8', 'W9',
         'WC1', 'WC2',
         'WD1', 'WD2', 'WD3', 'WD4', 'WD5', 'WD6', 'WD7'
