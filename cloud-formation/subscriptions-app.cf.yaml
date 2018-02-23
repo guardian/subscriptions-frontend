@@ -205,6 +205,7 @@ Resources:
             Resource: arn:aws:sqs:eu-west-1:865473395570:subs-holiday-suspension-email
       ManagedPolicyArns:
       - !Ref 'LoggingPolicy'
+      - 'arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM'
   SubscriptionsAppInstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:
