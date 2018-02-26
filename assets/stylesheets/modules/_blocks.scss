@@ -128,8 +128,9 @@
 .block--weekly {
     @include mq(tablet) {
         background-image: url(/assets/images/backgrounds/bg-guardian-weekly.png);
-        background-position: bottom right;
+        background-position: bottom center;
         background-repeat: no-repeat;
+        background-size: 245px;
     }
 }
 
