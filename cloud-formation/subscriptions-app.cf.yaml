@@ -118,7 +118,7 @@ Resources:
 
           aws --region ${AWS::Region} s3 cp s3://subscriptions-dist/${Stack}/${Stage}/frontend/frontend_1.0-SNAPSHOT_all.deb /tmp
 
-          aws --region ${AWS::Region} s3 cp s3://subscriptions-private/${Stage}/subscriptions-frontend.private.conf /etc/gu
+          aws --region ${AWS::Region} s3 cp s3://gu-reader-revenue-private/${Stack}/frontend/${Stage}/subscriptions-frontend.private.conf /etc/gu
 
           cat <<EOF >>/etc/gu/subscriptions-frontend.private.conf
           param.logstash {
@@ -156,7 +156,8 @@ Resources:
           Statement:
           - Effect: Allow
             Action: s3:GetObject
-            Resource: arn:aws:s3:::subscriptions-private/*
+            Resource: !Sub 'arn:aws:s3:::gu-reader-revenue-private/${Stack}/frontend/${Stage}/*'
+
           - Effect: Allow
             Action: s3:GetObject
             Resource: arn:aws:s3:::membership-private/membership_directory_cert.p12
