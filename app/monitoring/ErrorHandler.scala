@@ -1,5 +1,6 @@
 package monitoring
 
+import com.typesafe.scalalogging.StrictLogging
 import controllers.{Cached, NoCache}
 import play.api._
 import play.api.http.DefaultHttpErrorHandler
@@ -7,7 +8,6 @@ import play.api.mvc.Results._
 import play.api.mvc._
 import play.api.routing.Router
 import play.core.SourceMapper
-
 import scala.concurrent._
 
 class ErrorHandler(
@@ -15,7 +15,7 @@ class ErrorHandler(
   config: Configuration,
   sourceMapper: Option[SourceMapper],
   router: => Option[Router]
-)(implicit executionContext: ExecutionContext) extends DefaultHttpErrorHandler(env, config, sourceMapper, router) {
+)(implicit executionContext: ExecutionContext) extends DefaultHttpErrorHandler(env, config, sourceMapper, router) with StrictLogging {
 
   override def onClientError(request: RequestHeader, statusCode: Int, message: String = ""): Future[Result] = {
     super.onClientError(request, statusCode, message).map(Cached(_))
@@ -29,7 +29,7 @@ class ErrorHandler(
     Future.successful(NoCache(InternalServerError(views.html.error500(exception))))
   }
   override protected def onBadRequest(request: RequestHeader, message: String): Future[Result] = {
-    logServerError(request, new PlayException("Bad request", "A bad request was received."))
+    logger.warn(s"A bad request was received. URI: ${request.uri}")
     Future.successful(NoCache(BadRequest(views.html.error400(request, message))))
   }
 }
