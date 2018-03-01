@@ -5,11 +5,9 @@
 <h4 class="steps__title">You can use the links below to download the apps included in your subscription.</h4>
 
 <div class="app-package">
-    <h5 class="app-package__title">Guardian &amp; Observer Daily Edition (for your tablet)</h5>
+    <h5 class="app-package__title">Guardian &amp; Observer Daily Edition (for your iPad)</h5>
     <div class="badge-group">
-        @for(appLink <- Apps.DailyEdition.links) {
-            @fragments.common.appBadge(appLink)
-        }
+        @fragments.common.appBadge(Apps.DailyEdition.iOSAppLink)
     </div>
 </div>
 
