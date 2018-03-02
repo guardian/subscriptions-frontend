@@ -17,25 +17,11 @@ object Apps {
     "Get it on Google Play",
     "images/logos/google-play-store.png"
   )
-  val amazonAppStoreBadge = AppBadge(
-    "Available at Amazon",
-    "images/logos/amazon-app-store.png"
-  )
 
   object DailyEdition {
-    val links = Seq(
-      AppLink(
-        "https://play.google.com/store/apps/details?id=com.guardian.android.tabletedition.google",
-        googlePlayStoreBadge
-      ),
-      AppLink(
-        "https://itunes.apple.com/gb/app/guardian-observer-daily-edition/id452707806?mt=8&uo=4",
-        appleAppStoreBadge
-      ),
-      AppLink(
-        "http://www.amazon.co.uk/dp/B00H9I8MBK",
-        amazonAppStoreBadge
-      )
+    val iOSAppLink = AppLink(
+      "https://itunes.apple.com/gb/app/guardian-observer-daily-edition/id452707806?mt=8&uo=4",
+      appleAppStoreBadge
     )
   }
 
