@@ -22,13 +22,7 @@ define([
     var IS_HIDDEN = 'is-hidden';
 
     function validatePassword(password) {
-        /**
-         * We have a component which explicitly
-         * does password strength validation.
-         * Why not use that to determine if we shoule submit??
-         * e.g., if zxcvbn says it's not weak?
-         */
-        return password.length >= 6;
+        return password.length >= 6 && password.length <= 72;
     }
 
     function init() {

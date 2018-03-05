@@ -21,14 +21,13 @@
                         name="password"
                         type="password"
                         minlength="6"
-                        maxlength="20"
+                        maxlength="72"
                         value=""
                         required
                         />
                         @fragments.forms.errorMessage("Password too short")
 
                     </div>
-                    @fragments.forms.passwordStrengthIndicator()
                 </div>
                 <div class="grid-item actions">
                     <button class="button button--primary button--large js-checkout-finish-account-submit">Confirm</button>
