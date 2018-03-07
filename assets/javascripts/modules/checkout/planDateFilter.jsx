@@ -11,12 +11,14 @@ define([
         let validDays = {
             voucher: {
                 sixday: (date) => date.day() === 1,
+                saturday: (date) => date.day() === 6,
                 sunday: (date) => date.day() === 0,
                 weekend: (date) => date.day() === 6,
                 allDays: (date) => date.day() === 1
             },
             paper: {
                 sixday: (date) => date.day() !== 0,
+                saturday: (date) => date.day() === 6,
                 sunday: (date) => date.day() === 0,
                 weekend: (date) => date.day() === 6 || date.day() === 0,
                 allDays: () => true
@@ -29,6 +31,8 @@ define([
         switch (true) {
             case /Weekly/i.test(packageName):
                 return filters;
+            case /Saturday/i.test(packageName):
+                return filters.saturday;
             case /Sunday/i.test(packageName):
                 return filters.sunday;
             case /Sixday/i.test(packageName):
