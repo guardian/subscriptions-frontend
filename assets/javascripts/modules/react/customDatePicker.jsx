@@ -15,6 +15,7 @@ export default class CustomDatePick extends React.Component {
         return <DatePicker
             selected={this.state.startDate}
             onChange={this.handleChange}
+            inline
             {...this.props} />
     }
     
