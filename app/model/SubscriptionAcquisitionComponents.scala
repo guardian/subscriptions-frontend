@@ -23,6 +23,7 @@ case class SubscriptionAcquisitionComponents(
 object SubscriptionAcquisitionComponents {
 
   sealed trait When
+  case object Saturday extends When
   case object Sunday extends When
   case object Weekend extends When
   case object Sixday extends When
@@ -61,6 +62,7 @@ object SubscriptionAcquisitionComponents {
       }
 
       val when = Some(paperDays.toList.sortBy(_.dayOfTheWeekIndex)) collect {
+        case List(SaturdayPaper) => Saturday
         case List(SundayPaper) => Sunday
         case List(SaturdayPaper, SundayPaper) => Weekend
         case List(MondayPaper, TuesdayPaper, WednesdayPaper, ThursdayPaper, FridayPaper, SaturdayPaper) => Sixday
@@ -70,6 +72,8 @@ object SubscriptionAcquisitionComponents {
       val hasDigipack = p.plan.charges.benefits.list.toList.contains(Digipack)
 
       val printProduct = Some(when, p.plan.product, hasDigipack) collect {
+        case (Some(Saturday), Delivery, false) => PrintProduct.HomeDeliverySaturday
+        case (Some(Saturday), Delivery, true) => PrintProduct.HomeDeliverySaturdayPlus
         case (Some(Sunday), Delivery, false) => PrintProduct.HomeDeliverySunday
         case (Some(Sunday), Delivery, true) => PrintProduct.HomeDeliverySundayPlus
         case (Some(Weekend), Delivery, false) => PrintProduct.HomeDeliveryWeekend
@@ -79,6 +83,8 @@ object SubscriptionAcquisitionComponents {
         case (Some(Everyday), Delivery, false) => PrintProduct.HomeDeliveryEveryday
         case (Some(Everyday), Delivery, true) => PrintProduct.HomeDeliveryEverydayPlus
 
+        case (Some(Saturday), Voucher, false) => PrintProduct.VoucherSaturday
+        case (Some(Saturday), Voucher, true) => PrintProduct.VoucherSaturdayPlus
         case (Some(Sunday), Voucher, false) => PrintProduct.VoucherSunday
         case (Some(Sunday), Voucher, true) => PrintProduct.VoucherSundayPlus
         case (Some(Weekend), Voucher, false) => PrintProduct.VoucherWeekend
@@ -163,10 +169,9 @@ object SubscriptionAcquisitionComponents {
           paymentProvider = paymentData match {
             case DirectDebitData(_, _, _) => Some(Gocardless)
             case CreditCardData(_) => Some(Stripe)
-            case _ => {
+            case _ =>
               logger.error("No payment provider for acquisition event")
               None
-            }
           },
 
           countryCode = personalData.address.country.map(_.alpha2),
