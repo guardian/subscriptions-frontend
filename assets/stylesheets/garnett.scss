@@ -110,10 +110,6 @@ body {
   visibility: hidden;
 }
 
-.basket-preview__image {
-  display: none;
-}
-
 @include mq($from: tablet) {
   .digipack__shots {
     margin-left: 15%;
