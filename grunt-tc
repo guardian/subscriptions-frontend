@@ -32,12 +32,7 @@ yarn
 #
 ################################################################################
 
-JS_DIR=assets/javascripts
 SCSS_DIR=assets/stylesheets
-
-pushd $JS_DIR
-../../node_modules/bower/bin/bower install
-popd
 
 pushd $SCSS_DIR
 ../../node_modules/bower/bin/bower install

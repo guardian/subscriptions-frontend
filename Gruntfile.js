@@ -56,12 +56,6 @@ module.exports = function(grunt) {
                 dest: '<%= dirs.public.javascripts %>/vendor',
                 expand: true
             },
-            zxcvbn: {
-              src: '<%= dirs.assets.javascripts %>/bower_components/zxcvbn/dist/zxcvbn.js',
-              dest: '<%= dirs.public.javascripts %>/vendor',
-              expand: true,
-              flatten: true
-            },
             images: {
                 cwd: '<%= dirs.assets.images %>',
                 src: ['**'],
@@ -228,7 +222,7 @@ module.exports = function(grunt) {
                     cwd: '<%= dirs.assets.javascripts %>/',
                     src: [
                         'modules/**/*.js',
-                        'utils/**/*.js',                        
+                        'utils/**/*.js',
                         'modules/**/*.es6',
                         'utils/**/*.es6',
                         'modules/**/*.jsx',
@@ -257,7 +251,6 @@ module.exports = function(grunt) {
         grunt.task.run([
             'webpack',
             'copy:jsVendor',
-            'copy:zxcvbn'
         ]);
     });
 

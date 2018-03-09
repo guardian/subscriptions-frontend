@@ -7,7 +7,6 @@ require([
     'modules/profileMenu',
     'modules/userDetails',
     'modules/optionSwitch',
-    'modules/password',
     'modules/inputMask',
     'modules/checkout',
     'modules/reportDeliveryProblem',
@@ -28,7 +27,6 @@ require([
     profileMenu,
     userDetails,
     optionSwitch,
-    password,
     inputMask,
     checkout,
     reportDeliveryProblem,
@@ -51,7 +49,6 @@ require([
     profileMenu.init();
     userDetails.init();
     optionSwitch.init();
-    password.init();
     inputMask.init();
     checkout.init();
     reportDeliveryProblem.init();
