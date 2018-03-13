@@ -46,17 +46,17 @@ object PlanOps {
     def packImage: ResponsiveImageGroup = in.charges.benefits.list.toList match {
       case Digipack :: Nil =>
         ResponsiveImageGroup(
-          availableImages = Seq(ResponsiveImage(controllers.CachedAssets.hashedPathFor("images/digital-pack.png"), 300)),
+          availableImages = Seq(ResponsiveImage(controllers.CachedAssets.hashedPathFor("images/digital-pack-garnett.png"), 300)),
             altText = Some("Guardian apps demoed on Apple and Android devices")
         )
       case Weekly :: Nil =>
         ResponsiveImageGroup(
-          availableImages = ResponsiveImageGenerator("f3f9792bbb2c2f04ef01d0c1022e04eb87a2619a/0_0_4350_3416", Seq(500, 1000)),
+          availableImages = ResponsiveImageGenerator("987daf55251faf1637f92bffa8aa1eeec8de72b5/0_0_1670_1558", Seq(500, 1000), "png"),
           altText = Some("Stack of The Guardian Weekly editions")
         )
       case _ =>
         ResponsiveImageGroup(
-          availableImages = ResponsiveImageGenerator("05129395fe0461071f176f526d7a4ae2b1d9b9bf/0_0_5863_5116", Seq(140, 500, 1000, 2000)),
+          availableImages = ResponsiveImageGenerator("ffef3e22c4546072b1f17b16751a8ad39297a8a2/0_0_1200_1308", Seq(459, 917, 1200)),
           altText = Some("Stack of The Guardian newspapers")
         )
     }
