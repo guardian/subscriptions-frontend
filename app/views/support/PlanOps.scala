@@ -56,7 +56,7 @@ object PlanOps {
         )
       case _ =>
         ResponsiveImageGroup(
-          availableImages = ResponsiveImageGenerator("67db3892d52a59ce6916942a7d2cb0828e5ffc15/0_0_2724_2154", Seq(140, 500, 1000, 2000), "png"),
+          availableImages = ResponsiveImageGenerator("ffef3e22c4546072b1f17b16751a8ad39297a8a2/0_0_1200_1308", Seq(459, 917, 1200)),
           altText = Some("Stack of The Guardian newspapers")
         )
     }
