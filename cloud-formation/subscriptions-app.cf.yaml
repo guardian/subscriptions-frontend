@@ -26,10 +26,6 @@ Parameters:
       Internal Guardian, or '0.0.0.0/0' - the whole internet!)
     Type: String
     Default: 0.0.0.0/0
-  StatusAppSecurityGroup:
-    Description: Security group to add instances to so StatusApp can access management
-      pages - search for 'StatusApp-InstanceSecurityGroup' to find the Security Group
-    Type: AWS::EC2::SecurityGroup::Id
   InstanceType:
     Type: String
     Description: EC2 instance type
@@ -157,7 +153,6 @@ Resources:
           - Effect: Allow
             Action: s3:GetObject
             Resource: !Sub 'arn:aws:s3:::gu-reader-revenue-private/${Stack}/frontend/${Stage}/*'
-
           - Effect: Allow
             Action: s3:GetObject
             Resource: arn:aws:s3:::membership-private/membership_directory_cert.p12
@@ -254,8 +249,7 @@ Resources:
   InstanceSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: Open up SSH access and enable HTTP access on the configured
-        port
+      GroupDescription: Open up SSH access to the office, and enable HTTP access from the Load Balancer on the configured port
       VpcId: !Ref 'VpcId'
       SecurityGroupIngress:
       - IpProtocol: tcp
@@ -265,15 +259,12 @@ Resources:
       - IpProtocol: tcp
         FromPort: '9000'
         ToPort: '9000'
-        CidrIp: 77.91.248.0/21
-      - IpProtocol: tcp
-        FromPort: '9000'
-        ToPort: '9000'
         SourceSecurityGroupId: !Ref 'LoadBalancerSecurityGroup'
+      SecurityGroupEgress:
       - IpProtocol: tcp
-        FromPort: '9000'
-        ToPort: '9000'
-        SourceSecurityGroupId: !Ref 'StatusAppSecurityGroup'
+        FromPort: '443'
+        ToPort: '443'
+        CidrIp: 0.0.0.0/0
   FrontendELBDNSrecord:
     Type: AWS::Route53::RecordSet
     Properties:
