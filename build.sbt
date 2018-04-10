@@ -74,7 +74,8 @@ libraryDependencies ++= Seq(
     "com.gu" %% "acquisition-event-producer-play26" % "3.0.0",
     "com.google.guava" % "guava" % "23.4-jre" % "test",
     "ch.qos.logback" % "logback-classic" % "1.2.3",
-    "com.fasterxml.jackson.core" % "jackson-databind" % "2.8.11.1"
+    "com.fasterxml.jackson.core" % "jackson-databind" % "2.8.11.1",
+    "org.scala-lang" % "scala-compiler" % "2.11.12"
 )
 
 testOptions in Test ++= Seq(
