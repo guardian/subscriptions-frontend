@@ -73,7 +73,8 @@ libraryDependencies ++= Seq(
     "com.fasterxml.jackson.dataformat" % "jackson-dataformat-cbor" % "2.9.2",
     "com.gu" %% "acquisition-event-producer-play26" % "3.0.0",
     "com.google.guava" % "guava" % "23.4-jre" % "test",
-    "ch.qos.logback" % "logback-classic" % "1.2.3"
+    "ch.qos.logback" % "logback-classic" % "1.2.3",
+    "com.fasterxml.jackson.core" % "jackson-databind" % "2.8.11.1"
 )
 
 testOptions in Test ++= Seq(
