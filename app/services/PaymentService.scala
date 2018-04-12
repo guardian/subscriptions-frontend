@@ -39,7 +39,7 @@ class PaymentService(val ukStripeService: StripeService, val auStripeService: St
     override def makeAccount = Account(purchaserIds.contactId, identityIdForAccount(purchaserIds), currency, autopay = true, stripeService.paymentGateway, overrideInvoiceTemplate)
 
     override def makePaymentMethod: Future[CreditCardReferenceTransaction] = {
-      stripeService.Customer.create(description = purchaserIds.description, card = paymentData.stripeToken)
+      stripeService.Customer.create(card = paymentData.stripeToken)
         .map(a => CreditCardReferenceTransaction(
           cardId = a.card.id,
           customerId = a.id,
