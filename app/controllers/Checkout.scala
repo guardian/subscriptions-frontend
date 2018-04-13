@@ -340,7 +340,7 @@ class Checkout(fBackendFactory: TouchpointBackends, commonActions: CommonActions
       val eventualMaybeSubscription = tpBackend.subscriptionService.get[com.gu.memsub.subsv2.SubscriptionPlan.ContentSubscription](Name(subsName))
       eventualMaybeSubscription.map { maybeSub =>
         maybeSub.map { sub =>
-          if (tpBackend.environmentName == "PROD") Tip.verify("Subscription purchased")
+          if (tpBackend.environmentName == "PROD") Tip.verify()
           Ok(view.thankyou(sub, passwordForm, resolution, promotion, startDate, edition, billingCountry))
         }.getOrElse {
           Redirect(routes.Homepage.index()).withNewSession

@@ -53,7 +53,7 @@ libraryDependencies ++= Seq(
     "com.gu" %% "play-googleauth" % "0.7.2",
     "com.gu" %% "identity-test-users" % "0.6",
     "com.gu" %% "content-authorisation-common" % "0.1",
-    "com.gu" %% "tip" % "0.3.3",
+    "com.gu" %% "tip" % "0.1.1",
     "com.github.nscala-time" %% "nscala-time" % "2.16.0",
     "com.getsentry.raven" % "raven-logback" % "8.0.3",
     "com.typesafe.scala-logging" %% "scala-logging" % "3.7.2",
@@ -74,6 +74,7 @@ libraryDependencies ++= Seq(
     "com.gu" %% "acquisition-event-producer-play26" % "3.0.0",
     "com.google.guava" % "guava" % "23.4-jre" % "test",
     "com.fasterxml.jackson.core" % "jackson-databind" % "2.8.11.1",
+    "ch.qos.logback" % "logback-classic" % "1.2.3", //-- added explicitly - snyk report avoid logback vulnerability
     "org.scala-lang" % "scala-compiler" % "2.11.12"
 )
 
