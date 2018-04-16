@@ -72,7 +72,10 @@ libraryDependencies ++= Seq(
     "net.logstash.logback" % "logstash-logback-encoder" % "4.11",
     "com.fasterxml.jackson.dataformat" % "jackson-dataformat-cbor" % "2.9.2",
     "com.gu" %% "acquisition-event-producer-play26" % "3.0.0",
-    "com.google.guava" % "guava" % "23.4-jre" % "test"
+    "com.google.guava" % "guava" % "23.4-jre" % "test",
+    "com.fasterxml.jackson.core" % "jackson-databind" % "2.8.11.1",
+    "ch.qos.logback" % "logback-classic" % "1.2.3", //-- added explicitly - snyk report avoid logback vulnerability
+    "org.scala-lang" % "scala-compiler" % "2.11.12"
 )
 
 testOptions in Test ++= Seq(
