@@ -52,6 +52,7 @@ final class OAuthActions(
     "dig.qa@guardian.co.uk",
     "subscriptions.dev@guardian.co.uk",
     "subscriptions.cas@guardian.co.uk",
-    "ios@guardian.co.uk"
+    "ios@guardian.co.uk",
+    "subscriptions-staff-cas@guardian.co.uk"
   ))
 }
