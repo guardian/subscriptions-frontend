@@ -46,13 +46,6 @@ final class OAuthActions(
   ))
 
   val StaffAuthorisedForCASAction = GoogleAuthenticatedStaffAction andThen requireGroup[GoogleAuthRequest](Set(
-    "customer.operations@guardian.co.uk",
-    "directteam@guardian.co.uk",
-    "userhelp@guardian.co.uk",
-    "dig.qa@guardian.co.uk",
-    "subscriptions.dev@guardian.co.uk",
-    "subscriptions.cas@guardian.co.uk",
-    "ios@guardian.co.uk",
     "subscriptions-staff-cas@guardian.co.uk"
   ))
 }
