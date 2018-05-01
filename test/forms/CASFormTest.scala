@@ -3,7 +3,7 @@ package forms
 import com.gu.cas.{SevenDay, TokenPayload}
 import com.gu.memsub.Subscription.Name
 import model.CASLookup
-import org.joda.time.Weeks
+import org.joda.time.{LocalDate, Weeks}
 import org.specs2.mutable.Specification
 
 class CASFormTest extends Specification {
@@ -23,6 +23,6 @@ class CASFormTest extends Specification {
       "cas.subscriptionCode" -> "SevenDay"
     )
 
-    CASForm.emergencyToken.bind(formData).get must_=== TokenPayload(Weeks.weeks(5), SevenDay)
+    CASForm.emergencyToken.bind(formData).get must_=== TokenPayload(LocalDate.now/*!!*/)(Weeks.weeks(5), SevenDay)
   }
 }
