@@ -24,11 +24,6 @@ object Links {
     "Privacy Policy"
   )
 
-  val whyYourDataMattersToUs = Links(
-    "https://www.theguardian.com/info/video/2014/nov/03/why-your-data-matters-to-us-video",
-    "Why your data matter to us"
-  )
-
 }
 
 object ProfileLinks {
