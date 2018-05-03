@@ -66,7 +66,7 @@ Mappings:
       MinInstances: '1'
       MaxInstances: '2'
       DesiredInstances: '1'
-      SSLCertificateId: '425252d2-fc17-4ad3-8a44-264cb557b2e5'
+      SSLCertificateId: 'b0f14c79-7fbd-444d-a9ff-c5ff06dfec85'
 Resources:
   FrontendAutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
