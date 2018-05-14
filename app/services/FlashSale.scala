@@ -8,7 +8,7 @@ import org.joda.time.DateTime
 object FlashSale {
 
   def inOfferPeriod(promoCodeKey: PromoCodeKey) = {
-    //The offer is valid between 29th Jan 2018 & 25th Feb 2018
+    //The offer is valid between 15th May 2018 & 29th May 2018
     //The current sale is paper & paper + digital only, digital is unaffected
     val included: Map[PromoCodeKey, Boolean] = Map(
       Digital -> false,
@@ -16,8 +16,8 @@ object FlashSale {
       PaperAndDigital -> true
     )
 
-    val startTime = new DateTime(2018, 1, 29, 0, 0)
-    val endTime = new DateTime(2018, 2, 25, 0, 0)
+    val startTime = new DateTime(2018, 5, 15, 0, 0)
+    val endTime = new DateTime(2018, 5, 29, 0, 0)
     val now = new DateTime()
 
     now.isAfter(startTime) &&
@@ -31,8 +31,8 @@ object FlashSale {
   def homePromoCodes(edition: DigitalEdition): Map[PromoCodeKey, String] =
     Map(
       Digital -> getCode(Digital, s"DHOME${edition.id.toUpperCase}1", "DBR80F"),
-      PaperAndDigital -> getCode(PaperAndDigital, s"NHOME${edition.id.toUpperCase}D", "GRB80X"),
-      Paper -> getCode(Paper, s"NHOME${edition.id.toUpperCase}P", "GRB80P"),
+      PaperAndDigital -> getCode(PaperAndDigital, s"NHOME${edition.id.toUpperCase}D", "GST80K"),
+      Paper -> getCode(Paper, s"NHOME${edition.id.toUpperCase}P", "GST80J"),
       GuardianWeekly -> s"WHOME${edition.id.toUpperCase}"
     )
 
@@ -41,8 +41,8 @@ object FlashSale {
   def offersPromoCodes(edition: DigitalEdition): Map[PromoCodeKey, String] =
     Map(
       Digital -> getCode(Digital, s"DOFF${edition.id.toUpperCase}1", "DBR80G"),
-      PaperAndDigital -> getCode(PaperAndDigital, s"NOFF${edition.id.toUpperCase}D", "GRB80X"),
-      Paper -> getCode(Paper, s"NOFF${edition.id.toUpperCase}P", "GRB80P"),
+      PaperAndDigital -> getCode(PaperAndDigital, s"NOFF${edition.id.toUpperCase}D", "GST80I"),
+      Paper -> getCode(Paper, s"NOFF${edition.id.toUpperCase}P", "GST80H"),
       GuardianWeekly -> "WAL41X"
     )
 
