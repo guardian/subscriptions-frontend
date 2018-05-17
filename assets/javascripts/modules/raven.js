@@ -1,17 +1,5 @@
-define(['utils/user', 'raven-js'], function (userUtil, Raven) {
+define(['raven-js'], function (Raven) {
     'use strict';
-
-    function getTags(buildNumber, user) {
-        if (user && user.id) {
-            return {
-                build_number: buildNumber,
-                userIdentityId: user.id
-            }
-        }
-        return {
-            build_number: buildNumber
-        }
-    }
 
     function init(dsn) {
         if (!guardian.isDev) {
@@ -21,10 +9,7 @@ define(['utils/user', 'raven-js'], function (userUtil, Raven) {
                     /sub\.thegulocal\.com/,
                     /localhost/
                 ],
-                tags: getTags(
-                    window.guardian.buildNumber,
-                    userUtil.getUserFromCookie()
-                ),
+                tags: { build_number: window.guardian.buildNumber },
                 ignoreErrors: [
                     /duplicate define: jquery/
                 ],
@@ -41,7 +26,6 @@ define(['utils/user', 'raven-js'], function (userUtil, Raven) {
 
     return {
         init: init,
-        getTags: getTags,
         Raven: Raven
     };
 })
