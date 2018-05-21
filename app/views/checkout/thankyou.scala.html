@@ -24,12 +24,15 @@
         source: 'Subscriptions and Membership',
         type: 'GUARDIAN_DIGIPACK',
         eventName: 'purchase',
-        amount: 0,
+        amount: '@subscription.firstPrice',
         // Google Analytics
         zuoraId: '@subscription.name.get',
-        productSegment: '@{subscription.firstPlan.segment}',
+        productSegment: '@subscription.firstPlan.segment',
         productType: '@subscription.firstProduct.productType',
-        productPurchased: '@{subscription.firstPlan.name}'
+        productPurchased: '@{subscription.firstPlan.name}',
+        promoCode: '@promotion.map(_.description).getOrElse("")',
+        currency: '@subscription.currency',
+        subscriptionId: '@subscription.id.get'
     };
 </script>
 
