@@ -3,7 +3,8 @@ package services
 import com.amazonaws.regions.{Region, Regions}
 import com.gu.identity.play._
 import com.gu.memsub.{Address, NormalisedTelephoneNumber}
-import com.gu.monitoring.{AuthenticationMetrics, CloudWatch, RequestMetrics, StatusMetrics}
+import com.gu.monitoring._
+import com.gu.monitoring.SafeLogger._
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
 import model.PersonalData
@@ -29,7 +30,7 @@ class IdentityService[M[_]](identityApiClient: => IdentityApiClient[M])(implicit
         case Status.OK => true
         case Status.NOT_FOUND => false
         case status => {
-          logger.error(s"ID API failed on email check with HTTP status $status")
+          SafeLogger.error(scrub"ID API failed on email check with HTTP status $status")
           false
         }
       }
@@ -41,7 +42,7 @@ class IdentityService[M[_]](identityApiClient: => IdentityApiClient[M])(implicit
       response => (response.json \ "user").asOpt[IdUser]
     }
     case _ => monad.point {
-      logger.error("ID API only supports forwarded access for Cookies")
+      SafeLogger.error(scrub"ID API only supports forwarded access for Cookies")
       None
     }
   }
@@ -73,7 +74,7 @@ class IdentityService[M[_]](identityApiClient: => IdentityApiClient[M])(implicit
     monad.map(identityApiClient.convertGuest(password, token, marketingOptIn)) { r =>
       if (r.status == Status.OK) {
         CookieBuilder.fromGuestConversion(r.json, Some(Config.Identity.sessionDomain)).fold({ err =>
-          logger.error(s"Error while parsing the identity cookies: $err")
+          SafeLogger.error(scrub"Error while parsing the identity cookies: $err")
           Seq.empty // Worst case the user is not automatically logged in
         }, identity)
       } else {
@@ -263,10 +264,10 @@ class IdentityApiClientImpl(wsClient: WSClient)(implicit executionContext: Execu
     def withWSFailureLogging(request: WSRequest) = {
       eventualResponse.onFailure {
         case e: Throwable =>
-          logger.error("Connection error: " + request.url, e)
+          SafeLogger.error(scrub"Connection error: ${request.url}", e)
       }
       applyOnSpecificErrors(List("Access Denied", "Forbidden")) { r =>
-        logger.error(s"Call to '${request.url}' completed with the following error: ${r.body}")
+        SafeLogger.error(scrub"Call to '${request.url}' completed with the following error: ${r.body}")
       }
       eventualResponse
     }

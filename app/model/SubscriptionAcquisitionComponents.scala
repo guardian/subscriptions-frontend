@@ -5,6 +5,8 @@ import com.gu.acquisition.typeclasses.AcquisitionSubmissionBuilder
 import com.gu.memsub.Benefit.PaperDay
 import com.gu.memsub.BillingPeriod._
 import com.gu.memsub.promo.{PercentDiscount, Promotion}
+import com.gu.monitoring.SafeLogger
+import com.gu.monitoring.SafeLogger._
 import com.typesafe.scalalogging.LazyLogging
 import ophan.thrift.event.PaymentProvider.{Gocardless, Stripe}
 import ophan.thrift.event._
@@ -103,7 +105,7 @@ object SubscriptionAcquisitionComponents {
       } yield PrintOptions(p, d)
 
       if (printOptions.isEmpty) {
-        logger.error("Could not determine PrintOptions from PaperData")
+        SafeLogger.error(scrub"Could not determine PrintOptions from PaperData")
       }
 
       printOptions
@@ -170,7 +172,7 @@ object SubscriptionAcquisitionComponents {
             case DirectDebitData(_, _, _) => Some(Gocardless)
             case CreditCardData(_) => Some(Stripe)
             case _ =>
-              logger.error("No payment provider for acquisition event")
+              SafeLogger.error(scrub"No payment provider for acquisition event")
               None
           },
 

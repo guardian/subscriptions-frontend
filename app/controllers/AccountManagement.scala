@@ -12,6 +12,8 @@ import com.gu.memsub.promo.{NormalisedPromoCode, PromoCode}
 import com.gu.memsub.subsv2.SubscriptionPlan._
 import com.gu.memsub.subsv2.{Catalog, ReaderType, Subscription}
 import com.gu.memsub.{BillingSchedule, PaymentCard, Product}
+import com.gu.monitoring.SafeLogger
+import com.gu.monitoring.SafeLogger._
 import com.gu.subscriptions.suspendresume.SuspensionService
 import com.gu.subscriptions.suspendresume.SuspensionService.{BadZuoraJson, ErrNel, HolidayRefund, PaymentHoliday}
 import com.gu.zuora.rest.ZuoraRestService
@@ -124,8 +126,8 @@ class ManageDelivery(implicit val executionContext: ExecutionContext) extends Co
     */
   private def getAndLogRefundError(r: ErrNel): ErrNel = {
     r.foreach {
-      case e:BadZuoraJson => logger.error(s"Error when adding a new holiday - BadZuoraJson: ${e.got}")
-      case e => logger.error(s"Error when adding a new holiday: ${e.code}")
+      case e:BadZuoraJson => SafeLogger.error(scrub"Error when adding a new holiday - BadZuoraJson: ${e.got}")
+      case e => SafeLogger.error(scrub"Error when adding a new holiday: ${e.code}")
     }
     r
   }
@@ -148,7 +150,7 @@ class ManageDelivery(implicit val executionContext: ExecutionContext) extends Co
           logger.info(s"[${env}] Successfully raised a delivery issue for $deliveryProblem")
           Ok(views.html.account.reportDeliveryProblemSuccess())
         case -\/(message) =>
-          logger.error(s"[${env}] Failed to raise a delivery issue for ${deliveryProblem.subscriptionName}: $message")
+          SafeLogger.error(scrub"[${env}] Failed to raise a delivery issue for ${deliveryProblem.subscriptionName}: $message")
           Ok(views.html.account.reportDeliveryProblemFailure())
       }
     }
