@@ -2,6 +2,8 @@ package controllers
 
 import actions.CommonActions
 import com.gu.i18n.CountryGroup.UK
+import com.gu.monitoring.SafeLogger
+import com.gu.monitoring.SafeLogger._
 import com.typesafe.scalalogging.StrictLogging
 import model.DigitalEdition
 import model.DigitalEdition._
@@ -37,7 +39,7 @@ class DigitalPack(touchpointBackend: TouchpointBackend, commonActions: CommonAct
       val price = plan.charges.price.getPrice(digitalEdition.countryGroup.currency).getOrElse(plan.charges.gbpPrice)
       Ok(views.html.digitalpack.info(digitalEdition, price))
     }.valueOr { err =>
-      logger.error(s"Failed to load the Digital Pack landing page: ${err.list.toList.mkString(", ")}")
+      SafeLogger.error(scrub"Failed to load the Digital Pack landing page: ${err.list.toList.mkString(", ")}")
       InternalServerError("failed to read catalog, see the logs")
     })
   }

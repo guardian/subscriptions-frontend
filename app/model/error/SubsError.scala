@@ -1,5 +1,7 @@
 package model.error
 
+import com.gu.monitoring.SafeLogger._
+
 trait SubsError {
   val message: String
   val request: Option[String]
@@ -8,9 +10,9 @@ trait SubsError {
   def toStringPretty(): String = {
     val line1  = s"\n---------------------------------------"
     val error  = s"\n${this.getClass.getSimpleName}\n"
-    val strMsg = s"\tMessage:  \t ${message}"
-    val strIn  = s"\n\tInput:    \t ${request}"
-    val strOut = s"\n\tOutput:   \t ${response.getOrElse("")}"
+    val strMsg = scrub"\tMessage:  \t ${message}"
+    val strIn  = scrub"\n\tInput:    \t ${request}"
+    val strOut = scrub"\n\tOutput:   \t ${response.getOrElse("")}"
     line1 + error + strMsg + strIn + strOut
   }
 }

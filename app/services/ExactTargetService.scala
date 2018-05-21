@@ -14,6 +14,7 @@ import com.gu.memsub.subsv2.reads.ChargeListReads._
 import com.gu.memsub.subsv2.reads.SubPlanReads._
 import com.gu.memsub.subsv2.{Subscription, SubscriptionPlan => Plan}
 import com.gu.memsub.{Subscription => _, _}
+import com.gu.monitoring.SafeLogger
 import com.gu.salesforce.Contact
 import com.gu.zuora.rest.ZuoraRestService
 import com.gu.zuora.api.ZuoraService
@@ -154,7 +155,7 @@ class ExactTargetService(
     } yield {
       response match {
         case Success(sendMsgResult) => logger.info(s"Successfully enqueued ${subscribeResult.subscriptionName} welcome email for user ${purchaserIds.identityId}.")
-        case Failure(e) => logger.error(s"Failed to enqueue ${subscribeResult.subscriptionName} welcome email for user ${purchaserIds.identityId}.", e)
+        case Failure(e) => SafeLogger.error(scrub"Failed to enqueue ${subscribeResult.subscriptionName} welcome email for user ${purchaserIds.identityId}.", e)
       }
     }
 
@@ -191,7 +192,7 @@ class ExactTargetService(
       })
     }.run.map {
       case \/-(()) => logger.info(s"Successfully enqueued ${subscription.name.get}'s updated billing schedule email.")
-      case -\/(e) => logger.error(s"Failed to enqueue ${subscription.name.get}'s updated billing schedule email. $e")
+      case -\/(e) => SafeLogger.error(scrub"Failed to enqueue ${subscription.name.get}'s updated billing schedule email. $e")
     }
   }
 

@@ -11,6 +11,8 @@ import com.gu.memsub.promo.{NormalisedPromoCode, PromoCode}
 import com.gu.memsub.subsv2.CatalogPlan.ContentSubscription
 import com.gu.memsub.subsv2.{CatalogPlan, PlansWithIntroductory}
 import com.gu.memsub.{Product, SupplierCode}
+import com.gu.monitoring.SafeLogger
+import com.gu.monitoring.SafeLogger._
 import com.gu.tip.Tip
 import com.gu.zuora.soap.models.errors._
 import com.typesafe.scalalogging.LazyLogging
@@ -166,7 +168,7 @@ class Checkout(fBackendFactory: TouchpointBackends, commonActions: CommonActions
         }
       }
     }.valueOr { err =>
-      logger.error(s"failed renderCheckout: ${err.list.toList.mkString(", ")}")
+      SafeLogger.error(scrub"failed renderCheckout: ${err.list.toList.mkString(", ")}")
       Future.successful(InternalServerError("failed to render checkout due to catalog issues"))
     }
     }.flatMap(identity)
@@ -188,7 +190,7 @@ class Checkout(fBackendFactory: TouchpointBackends, commonActions: CommonActions
       val preliminarySubscribeRequest = {
         subsForm.bindFromRequest.valueOr {
           e =>
-            throw new Exception(s"Backend validation failed: identityId=${idUserOpt.map(_.user.id).mkString};" +
+            throw new Exception(scrub"Backend validation failed: identityId=${idUserOpt.map(_.user.id).mkString};" +
               s" JavaScriptEnabled=${request.headers.toMap.contains("X-Requested-With")};" +
               s" ${e.map(err => s"${err.key} ${err.message}").mkString(", ")}")
         }

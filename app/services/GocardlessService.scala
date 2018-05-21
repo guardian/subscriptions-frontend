@@ -4,6 +4,8 @@ import com.gocardless.GoCardlessClient
 import com.gocardless.GoCardlessClient.Environment.{LIVE, SANDBOX}
 import com.gocardless.errors.GoCardlessApiException
 import com.gocardless.resources.BankDetailsLookup.AvailableDebitScheme
+import com.gu.monitoring.SafeLogger
+import com.gu.monitoring.SafeLogger._
 import com.typesafe.scalalogging.LazyLogging
 import model.DirectDebitData
 import touchpoint.GoCardlessToken
@@ -41,7 +43,7 @@ class GoCardlessService(goCardlessToken: GoCardlessToken)(implicit executionCont
       bdl.getAvailableDebitSchemes.contains(AvailableDebitScheme.BACS)
     } recover { case e: GoCardlessApiException =>
       if (e.getCode == 429) {
-        logger.error("Bypassing preliminary bank account check because the GoCardless rate limit has been reached for this endpoint. Someone might be using our website to proxy to GoCardless")
+        SafeLogger.error(scrub"Bypassing preliminary bank account check because the GoCardless rate limit has been reached for this endpoint. Someone might be using our website to proxy to GoCardless")
         true
       } else {
         false

@@ -11,6 +11,8 @@ import com.gu.memsub.services.{GetSalesforceContactForSub, PromoService, Payment
 import com.gu.memsub.subsv2.SubscriptionPlan.WeeklyPlan
 import com.gu.memsub.subsv2.{Catalog, Subscription}
 import com.gu.memsub.{BillingPeriod, NormalisedTelephoneNumber, Product}
+import com.gu.monitoring.SafeLogger
+import com.gu.monitoring.SafeLogger._
 import com.gu.salesforce.{Contact, ContactId}
 import com.gu.stripe.Stripe
 import com.gu.zuora.rest.ZuoraRestService
@@ -221,10 +223,10 @@ class CheckoutService(
         EitherT(identityService.registerGuest(personalData, deliveryAddress)).leftMap(addErrContext("Guest")).map { identitySuccess =>
           val id = identitySuccess.userData.id.id
           EitherT(salesforceService.repo.updateIdentityId(memberId, id)).swap.map(err =>
-            logger.error(s"Error updating salesforce contact ${memberId.salesforceContactId} with identity id $id: ${err.getMessage}")
+            SafeLogger.error(scrub"Error updating salesforce contact ${memberId.salesforceContactId} with identity id $id: ${err.getMessage}")
           )
           EitherT(zuoraRestService.updateAccountIdentityId(AccountId(result.accountId), id)).swap.map(err =>
-            logger.error(s"Error updating Zuora account ${result.accountId} with identity id $id: $err")
+            SafeLogger.error(scrub"Error updating Zuora account ${result.accountId} with identity id $id: $err")
           )
           identitySuccess
         }
@@ -261,7 +263,7 @@ class CheckoutService(
     }).recover {
       case e => {
         val message = s"${userData} could not subscribe during checkout because his details could not be updated in Salesforce"
-        logger.error(s"$message: ${e.toString}")
+        SafeLogger.error(scrub"$message: ${e.toString}")
         \/.left(NonEmptyList(CheckoutSalesforceFailure(
           userData,
           message)))
