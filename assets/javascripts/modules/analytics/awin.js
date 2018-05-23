@@ -11,7 +11,7 @@ define([
         AWIN.Tracking.Sale = {};
 
         /*** Set your transaction parameters ***/
-        var productData = guardian.pageInfo.productData
+        const productData = guardian.pageInfo.productData
         AWIN.Tracking.Sale.amount = productData.amount;
         AWIN.Tracking.Sale.orderRef = productData.subscriptionId;
         AWIN.Tracking.Sale.parts = productData.productSegment + ':' + productData.amount;
