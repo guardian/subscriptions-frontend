@@ -28,7 +28,7 @@
         amount: '@subscription.firstPrice',
         // Google Analytics
         zuoraId: '@subscription.name.get',
-        productSegment: '@subscription.firstPlan.segment',
+        productSegment: '@subscription.firstPlan.commissionGroup',
         productType: '@subscription.firstProduct.productType',
         productPurchased: '@{subscription.firstPlan.name}',
         promoCode: '@promotion.map(_.description).getOrElse("")',

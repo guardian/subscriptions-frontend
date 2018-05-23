@@ -11,6 +11,6 @@
 &amount=@subscription.firstPrice
 &cr=@subscription.currency
 &ref=@subscription.id.get
-&parts=@{subscription.firstPlan.segment}:@subscription.firstPrice
+&parts=@subscription.firstPlan.commissionGroup:@subscription.firstPrice
 &vc=@promotion.map(_.description).getOrElse("")
 &ch=aw&testmode=0" border="0" width="0" height="0">
