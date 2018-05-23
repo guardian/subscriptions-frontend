@@ -19,6 +19,7 @@ define([
         AWIN.Tracking.Sale.currency = productData.currency;
         AWIN.Tracking.Sale.test = '0';
         AWIN.Tracking.Sale.channel = 'aw';
+        window.AWIN = AWIN;
     }
 
     return {
