@@ -11,7 +11,7 @@ define([
         AWIN.Tracking.Sale = {};
 
         /*** Set your transaction parameters ***/
-        const productData = guardian.pageInfo.productData
+        var productData = guardian.pageInfo.productData
         AWIN.Tracking.Sale.amount = productData.amount;
         AWIN.Tracking.Sale.orderRef = productData.subscriptionId;
         AWIN.Tracking.Sale.parts = productData.productSegment + ':' + productData.amount;
@@ -19,6 +19,7 @@ define([
         AWIN.Tracking.Sale.currency = productData.currency;
         AWIN.Tracking.Sale.test = '0';
         AWIN.Tracking.Sale.channel = 'aw';
+        window.AWIN = AWIN;
     }
 
     return {

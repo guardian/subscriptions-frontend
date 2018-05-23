@@ -5,6 +5,7 @@
 @import model.DigitalEdition
 @import model.SubscriptionOps._
 @import views.support.PlanOps._
+
 @(  subscription: Subscription[ContentSubscription],
     guestAccountForm: Option[Form[model.GuestAccountData]] = None,
     touchpointBackendResolution: services.TouchpointBackends.Resolution,
@@ -15,7 +16,7 @@
 )(implicit request: RequestHeader)
 
 @main(s"Confirmation | Subscribe to the ${subscription.firstPlan.title} | The Guardian", bodyClasses=List("is-wide"), touchpointBackendResolutionOpt = Some(touchpointBackendResolution), product = Some(subscription.firstProduct), edition = edition, contactUsCountry = contactUsCountry) {
-
+@fragments.checkout.awinPixel(subscription, promotion)
 <script type="text/javascript">
     guardian.pageInfo.pageType = 'Thankyou';
     guardian.pageInfo.slug="GuardianDigiPack:Order Complete";
