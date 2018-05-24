@@ -109,7 +109,6 @@ Resources:
         Fn::Base64: !Sub |
           #!/bin/bash -ev
           CONF_DIR=/etc/frontend
-          /opt/features/ssh-keys/initialise-keys-and-cron-job.sh -l -b github-team-keys -t Membership-and-Subscriptions || true
           mkdir /etc/gu
 
           aws --region ${AWS::Region} s3 cp s3://subscriptions-dist/${Stack}/${Stage}/frontend/frontend_1.0-SNAPSHOT_all.deb /tmp
@@ -201,7 +200,7 @@ Resources:
             Resource: arn:aws:sqs:eu-west-1:865473395570:subs-holiday-suspension-email
       ManagedPolicyArns:
       - !Ref 'LoggingPolicy'
-      - 'arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM'
+      - !Sub arn:aws:iam::${AWS::AccountId}:policy/guardian-ec2-role-for-ssm
   SubscriptionsAppInstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:
