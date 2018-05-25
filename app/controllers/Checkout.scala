@@ -336,14 +336,16 @@ class Checkout(fBackendFactory: TouchpointBackends, commonActions: CommonActions
         const(None)
       } // Don't display the user registration form if the user is logged in
 
-      val promotion = session.get(AppliedPromoCode).flatMap(code => resolution.backend.promoService.findPromotion(NormalisedPromoCode.safeFromString(code)))
+      val promoCode = session.get(AppliedPromoCode)
+      val promotion = promoCode.flatMap(code => resolution.backend.promoService.findPromotion(NormalisedPromoCode.safeFromString(code)))
+
       val billingCountry = session.get(BillingCountryName).flatMap(CountryGroup.countryByNameOrCode) orElse request.getFastlyCountry
       val edition: model.DigitalEdition = model.DigitalEdition.getForCountry(billingCountry)
       val eventualMaybeSubscription = tpBackend.subscriptionService.get[com.gu.memsub.subsv2.SubscriptionPlan.ContentSubscription](Name(subsName))
       eventualMaybeSubscription.map { maybeSub =>
         maybeSub.map { sub =>
           if (tpBackend.environmentName == "PROD") Tip.verify()
-          Ok(view.thankyou(sub, passwordForm, resolution, promotion, startDate, edition, billingCountry))
+          Ok(view.thankyou(sub, passwordForm, resolution, promoCode, promotion, startDate, edition, billingCountry))
         }.getOrElse {
           Redirect(routes.Homepage.index()).withNewSession
         }

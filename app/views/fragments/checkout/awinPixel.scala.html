@@ -2,9 +2,8 @@
 @import com.gu.memsub.subsv2.SubscriptionPlan.ContentSubscription
 @import model.SubscriptionOps._
 @import views.support.PlanOps._
-@import com.gu.memsub.promo.Promotion.AnyPromotion
 
-@(subscription: Subscription[ContentSubscription], promotion: Option[AnyPromotion] = None)(implicit request: RequestHeader)
+@(subscription: Subscription[ContentSubscription], promoCode: Option[String])(implicit request: RequestHeader)
 
 @getChannel = @{
     request.cookies
@@ -15,5 +14,5 @@
 }
 
 <!-- Image Pixel Tracking - Mandatory -->
-<img src="https://www.awin1.com/sread.img?tt=ns&tv=2&merchant=11152&amount=@subscription.firstPrice&cr=@subscription.currency&ref=@subscription.id.get&parts=@subscription.firstPlan.commissionGroup:@subscription.firstPrice&vc=@promotion.map(_.description).getOrElse("")&ch=@getChannel&testmode=0" border="0" width="0" height="0">
+<img src="https://www.awin1.com/sread.img?tt=ns&tv=2&merchant=11152&amount=@subscription.firstPrice&cr=@subscription.currency&ref=@subscription.id.get&parts=@subscription.firstPlan.commissionGroup:@subscription.firstPrice&vc=@promoCode.getOrElse("")&ch=@getChannel&testmode=0" border="0" width="0" height="0">
 
