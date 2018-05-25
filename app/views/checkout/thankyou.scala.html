@@ -9,6 +9,7 @@
 @(  subscription: Subscription[ContentSubscription],
     guestAccountForm: Option[Form[model.GuestAccountData]] = None,
     touchpointBackendResolution: services.TouchpointBackends.Resolution,
+    promoCode: Option[String],
     promotion: Option[AnyPromotion] = None,
     startDate: String,
     edition: DigitalEdition,
@@ -16,7 +17,7 @@
 )(implicit request: RequestHeader)
 
 @main(s"Confirmation | Subscribe to the ${subscription.firstPlan.title} | The Guardian", bodyClasses=List("is-wide"), touchpointBackendResolutionOpt = Some(touchpointBackendResolution), product = Some(subscription.firstProduct), edition = edition, contactUsCountry = contactUsCountry) {
-@fragments.checkout.awinPixel(subscription, promotion)
+@fragments.checkout.awinPixel(subscription, promoCode)
 <script type="text/javascript">
     guardian.pageInfo.pageType = 'Thankyou';
     guardian.pageInfo.slug="GuardianDigiPack:Order Complete";
@@ -28,10 +29,10 @@
         amount: '@subscription.firstPrice',
         // Google Analytics
         zuoraId: '@subscription.name.get',
-        productSegment: '@subscription.firstPlan.segment',
+        productSegment: '@subscription.firstPlan.commissionGroup',
         productType: '@subscription.firstProduct.productType',
         productPurchased: '@{subscription.firstPlan.name}',
-        promoCode: '@promotion.map(_.description).getOrElse("")',
+        promoCode: '@promoCode.getOrElse("")',
         currency: '@subscription.currency',
         subscriptionId: '@subscription.id.get'
     };

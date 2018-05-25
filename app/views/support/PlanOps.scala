@@ -39,6 +39,15 @@ object PlanOps {
         case _ => ""
       }
     }
+
+    def commissionGroup: String = {
+      in.product match {
+        case Product.Digipack => "Digital"
+        case _: Product.Weekly=> "Weekly"
+        case Product.Voucher | Product.Delivery => "Newspaper"
+        case _ => ""
+      }
+    }
   }
 
   implicit class PrettyPlan[+A <: CatalogPlan.Paid](in: A) {

@@ -2,15 +2,17 @@
 @import com.gu.memsub.subsv2.SubscriptionPlan.ContentSubscription
 @import model.SubscriptionOps._
 @import views.support.PlanOps._
-@import com.gu.memsub.promo.Promotion.AnyPromotion
 
-@(subscription: Subscription[ContentSubscription], promotion: Option[AnyPromotion] = None)
+@(subscription: Subscription[ContentSubscription], promoCode: Option[String])(implicit request: RequestHeader)
+
+@getChannel = @{
+    request.cookies
+        .get("gu_referrer_channel")
+        .map(_.value.split("&"))
+        .map(a => a.length > 1 && a(0) == "afl" && a(1) == "awin")
+        .map( if (_) "aw" else "na")
+}
+
 <!-- Image Pixel Tracking - Mandatory -->
-<img src="https://www.awin1.com/sread.img?tt=ns&tv=2
-&merchant=11152
-&amount=@subscription.firstPrice
-&cr=@subscription.currency
-&ref=@subscription.id.get
-&parts=@{subscription.firstPlan.segment}:@subscription.firstPrice
-&vc=@promotion.map(_.description).getOrElse("")
-&ch=aw&testmode=0" border="0" width="0" height="0">
+<img src="https://www.awin1.com/sread.img?tt=ns&tv=2&merchant=11152&amount=@subscription.firstPrice&cr=@subscription.currency&ref=@subscription.id.get&parts=@subscription.firstPlan.commissionGroup:@subscription.firstPrice&vc=@promoCode.getOrElse("")&ch=@getChannel&testmode=0" border="0" width="0" height="0">
+
