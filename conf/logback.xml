@@ -23,7 +23,18 @@ https://www.playframework.com/documentation/2.4.x/SettingsLogger#Using-a-configu
 
     <logger name="com.google.api.client.http" level="WARN" />
 
+
+    <appender name="Sentry" class="io.sentry.logback.SentryAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+        <filter class="monitoring.PiiFilter">
+            <level>ERROR</level>
+        </filter>
+    </appender>
+
     <root level="INFO">
         <appender-ref ref="LOGFILE"/>
+        <appender-ref ref="Sentry"/>
     </root>
 </configuration>
