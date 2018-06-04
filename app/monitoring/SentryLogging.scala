@@ -13,7 +13,7 @@ import scala.util.{Failure, Success, Try}
 
 object SentryLogging {
 
-  def init() {
+  def init()= {
     Config.sentryDsn match {
       case Failure(ex) =>
         SafeLogger.warn("No Sentry logging configured (OK for dev)", ex)
@@ -29,7 +29,6 @@ object SentryLogging {
           case Failure(e) => SafeLogger.error(scrub"Something went wrong when setting up Sentry logging ${e.getStackTrace}")
         }
     }
-    SafeLogger.error(scrub"*TEST* Leigh-Anne says sorry for the spam. This is going to be the start of a great week!")
   }
 }
 
