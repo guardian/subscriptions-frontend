@@ -42,7 +42,7 @@ require([
     'use strict';
 
     ajax.init({page: {ajaxUrl: ''}});
-    raven.init('https://6dd79da86ec54339b403277d8baac7c8@app.getsentry.com/47380');
+    raven.init('https://df7232e9685946ce965f2098ac3bdab2@sentry.io/1218847');
     analytics.init();
     toggle.init();
     appendAround.init();

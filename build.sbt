@@ -55,7 +55,7 @@ libraryDependencies ++= Seq(
     "com.gu" %% "content-authorisation-common" % "0.4",
     "com.gu" %% "tip" % "0.1.1",
     "com.github.nscala-time" %% "nscala-time" % "2.16.0",
-    "com.getsentry.raven" % "raven-logback" % "8.0.3",
+    "io.sentry" % "sentry-logback" % "1.7.5",
     "com.typesafe.scala-logging" %% "scala-logging" % "3.7.2",
     "org.scalatest" %% "scalatest" % scalatestVersion % "test",
     "org.scalactic" %% "scalactic" % scalatestVersion % "test",
