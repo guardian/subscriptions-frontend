@@ -1,7 +1,6 @@
 package configuration
 
 
-import com.getsentry.raven.dsn.Dsn
 import com.github.nscala_time.time.Imports._
 import com.gu.cas.PrefixedTokens
 import com.gu.config._
@@ -68,7 +67,7 @@ object Config {
 
   val subscriptionsUrl = config.getString("subscriptions.url")
 
-  val sentryDsn = Try(new Dsn(config.getString("sentry.dsn")))
+  val sentryDsn = Try(config.getString("sentry.dsn"))
 
   object Logstash {
     private val param = Try{config.getConfig("param.logstash")}.toOption
