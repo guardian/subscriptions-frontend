@@ -37,10 +37,6 @@ Parameters:
   ImageId:
     Description: AMI ID
     Type: String
-  VulnerabilityScanningSecurityGroup:
-    Description: Security group that grants access to the account's Vulnerability
-      Scanner
-    Type: AWS::EC2::SecurityGroup::Id
 Mappings:
   StageVariables:
     PROD:
@@ -94,7 +90,6 @@ Resources:
       ImageId: !Ref 'ImageId'
       SecurityGroups:
       - !Ref 'InstanceSecurityGroup'
-      - !Ref 'VulnerabilityScanningSecurityGroup'
       InstanceType: !Ref 'InstanceType'
       KeyName: !Ref 'KeyName'
       IamInstanceProfile: !Ref 'SubscriptionsAppInstanceProfile'
