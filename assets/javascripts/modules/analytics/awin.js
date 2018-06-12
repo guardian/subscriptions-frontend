@@ -9,14 +9,12 @@ define([
     const referrerCookieName = 'gu_referrer_channel';
 
     function init() {
-        console.log('Awin.init')
         storeChannel();
 
         if (guardian.pageInfo.pageType !== 'Thankyou') {
             return;
         }
 
-        console.log('Awin on thank you page')
         let AWIN = {};
         AWIN.Tracking = {};
         AWIN.Tracking.Sale = {};
