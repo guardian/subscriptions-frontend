@@ -9,12 +9,14 @@ define([
     const referrerCookieName = 'gu_referrer_channel';
 
     function init() {
+        console.log('Awin.init')
         storeChannel();
 
         if (guardian.pageInfo.pageType !== 'Thankyou') {
             return;
         }
 
+        console.log('Awin on thank you page')
         let AWIN = {};
         AWIN.Tracking = {};
         AWIN.Tracking.Sale = {};
@@ -33,11 +35,15 @@ define([
 
     function getAwinChannel() {
         const channel = cookie.getCookie(referrerCookieName);
+        if (channel === null) {
+            return 'direct'; //No referrer the user came direct to the site
+        }
+
         const values = channel ? channel.split('&') : null;
         if (values && values[0] === 'afl' && values[1] === 'awin'){
             return 'aw';
         }
-        return 'na';
+        return 'na'; //A referrer other than Awin
     }
 
     function storeChannel() {
