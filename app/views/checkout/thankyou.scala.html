@@ -36,6 +36,46 @@
         currency: '@subscription.currency',
         subscriptionId: '@subscription.id.get'
     };
+
+    function getAwinChannelCookie() {
+        var nameEQ = 'gu_referrer_channel=';
+        var ca = document.cookie.split(';');
+        for (var i = 0; i < ca.length; i++) {
+            var c = ca[i];
+            while (c.charAt(0) === ' ') { c = c.substring(1, c.length); }
+            if (c.indexOf(nameEQ) === 0) { return c.substring(nameEQ.length, c.length); }
+        }
+        return null;
+    }
+
+    function getAwinChannel() {
+        const channel = getAwinChannelCookie();
+        if (channel === null) {
+            return 'direct'; //No referrer the user came direct to the site
+        }
+
+        const values = channel ? channel.split('&') : null;
+        if (values && values[0] === 'afl' && values[1] === 'awin'){
+            return 'aw';
+        }
+        return 'na'; //A referrer other than Awin
+    }
+
+    //<![CDATA[ /*** Do not change ***/
+    var AWIN = {};
+    AWIN.Tracking = {};
+    AWIN.Tracking.Sale = {};
+
+    /*** Set your transaction parameters ***/
+    AWIN.Tracking.Sale.amount = guardian.pageInfo.productData.amount;
+    AWIN.Tracking.Sale.orderRef = guardian.pageInfo.productData.subscriptionId;
+    AWIN.Tracking.Sale.parts = guardian.pageInfo.productData.productSegment + ':' + productData.amount;
+    AWIN.Tracking.Sale.voucher = guardian.pageInfo.productData.promoCode;
+    AWIN.Tracking.Sale.currency = guardian.pageInfo.productData.currency;
+    AWIN.Tracking.Sale.test = '0';
+    AWIN.Tracking.Sale.channel = getAwinChannel();
+    //]]>
+
 </script>
 
 <main class="page-container gs-container gs-container--slim">
