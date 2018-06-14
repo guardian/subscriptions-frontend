@@ -37,8 +37,8 @@
         subscriptionId: '@subscription.id.get'
     };
 
-    function getCookie(name) {
-        var nameEQ = name + '=';
+    function getAwinChannelCookie() {
+        var nameEQ = 'gu_referrer_channel=';
         var ca = document.cookie.split(';');
         for (var i = 0; i < ca.length; i++) {
             var c = ca[i];
@@ -49,7 +49,7 @@
     }
 
     function getAwinChannel() {
-        const channel = getCookie('gu_referrer_channel');
+        const channel = getAwinChannelCookie();
         if (channel === null) {
             return 'direct'; //No referrer the user came direct to the site
         }
@@ -67,12 +67,11 @@
     AWIN.Tracking.Sale = {};
 
     /*** Set your transaction parameters ***/
-    var productData = guardian.pageInfo.productData;
-    AWIN.Tracking.Sale.amount = productData.amount;
-    AWIN.Tracking.Sale.orderRef = productData.subscriptionId;
-    AWIN.Tracking.Sale.parts = productData.productSegment + ':' + productData.amount;
-    AWIN.Tracking.Sale.voucher = productData.promoCode;
-    AWIN.Tracking.Sale.currency = productData.currency;
+    AWIN.Tracking.Sale.amount = guardian.pageInfo.productData.amount;
+    AWIN.Tracking.Sale.orderRef = guardian.pageInfo.productData.subscriptionId;
+    AWIN.Tracking.Sale.parts = guardian.pageInfo.productData.productSegment + ':' + productData.amount;
+    AWIN.Tracking.Sale.voucher = guardian.pageInfo.productData.promoCode;
+    AWIN.Tracking.Sale.currency = guardian.pageInfo.productData.currency;
     AWIN.Tracking.Sale.test = '0';
     AWIN.Tracking.Sale.channel = getAwinChannel();
     //]]>
