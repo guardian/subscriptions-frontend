@@ -69,7 +69,7 @@
     /*** Set your transaction parameters ***/
     AWIN.Tracking.Sale.amount = guardian.pageInfo.productData.amount;
     AWIN.Tracking.Sale.orderRef = guardian.pageInfo.productData.subscriptionId;
-    AWIN.Tracking.Sale.parts = guardian.pageInfo.productData.productSegment + ':' + productData.amount;
+    AWIN.Tracking.Sale.parts = guardian.pageInfo.productData.productSegment + ':' + guardian.pageInfo.productData.amount;
     AWIN.Tracking.Sale.voucher = guardian.pageInfo.productData.promoCode;
     AWIN.Tracking.Sale.currency = guardian.pageInfo.productData.currency;
     AWIN.Tracking.Sale.test = '0';
