@@ -11,6 +11,7 @@
         .map(_.value.split("&"))
         .map(a => a.length > 1 && a(0) == "afl" && a(1) == "awin")
         .map( if (_) "aw" else "na")
+        .getOrElse("direct")
 }
 
 <!-- Image Pixel Tracking - Mandatory -->
