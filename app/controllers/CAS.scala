@@ -3,20 +3,18 @@ package controllers
 import actions.OAuthActions
 import com.gu.cas.{TokenPayload, Valid}
 import com.gu.googleauth.UserIdentity
-import com.gu.monitoring.ServiceMetrics
 import com.gu.okhttp.RequestRunners
 import com.gu.subscriptions.CAS.{CASError, CASSuccess}
 import com.gu.subscriptions.{CASApi, CASService}
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
-import configuration.Config.{CAS, appName, stage}
+import configuration.Config.CAS
 import forms.CASForm
 import play.api.libs.json.Json
 import play.api.mvc.Security.AuthenticatedRequest
 import play.api.mvc.{BaseController, ControllerComponents}
 import views.support.CASResultOps._
 import views.support.TokenPayloadOps._
-
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Success, Try}
 
@@ -31,8 +29,7 @@ class CAS(oAuthActions: OAuthActions, implicit val executionContext: ExecutionCo
   }
 
   lazy val casService = {
-    val metrics = new ServiceMetrics(stage, appName, "CAS service")
-    val api = new CASApi(CAS.url, RequestRunners.loggingRunner(metrics))
+    val api = new CASApi(CAS.url, RequestRunners.futureRunner)
     new CASService(api)
   }
 

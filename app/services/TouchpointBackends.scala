@@ -7,8 +7,8 @@ import com.gu.memsub.promo.{DynamoPromoCollection, DynamoTables, PromotionCollec
 import com.gu.memsub.services.{PaymentService => CommonPaymentService, _}
 import com.gu.memsub.subsv2
 import com.gu.memsub.subsv2.Catalog
+import com.gu.memsub.subsv2.services.FetchCatalog
 import com.gu.memsub.subsv2.services.SubscriptionService._
-import com.gu.monitoring.ServiceMetrics
 import com.gu.okhttp.RequestRunners._
 import com.gu.salesforce.SimpleContactRepository
 import com.gu.stripe.StripeService
@@ -20,7 +20,6 @@ import com.gu.zuora.rest.ZuoraRestService
 import com.gu.zuora.{rest, soap}
 import configuration.Config
 import forms.SubscriptionsForm
-import monitoring.TouchpointBackendMetrics
 import play.api.libs.ws.WSClient
 import play.api.mvc.RequestHeader
 import services.TouchpointBackends.Resolution
@@ -28,7 +27,6 @@ import touchpoint.TouchpointBackendConfig.BackendType
 import touchpoint.TouchpointBackendConfig.BackendType.Testing
 import touchpoint.{TouchpointBackendConfig, ZuoraProperties}
 import utils.TestUsers._
-
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.util.{Failure, Try}
@@ -69,15 +67,7 @@ class TouchpointBackends(actorSystem: ActorSystem, wsClient: WSClient, execution
   def apply(backendType: TouchpointBackendConfig.BackendType): TouchpointBackend = {
 
     val config = TouchpointBackendConfig.backendType(backendType, Config.config)
-    val soapServiceMetrics = new ServiceMetrics(Config.stage, Config.appName, "zuora-soap-client")
-    val stripeUKMetrics = new ServiceMetrics(Config.stage, Config.appName, "Stripe UK Membership") with TouchpointBackendMetrics {
-      val backendEnv = config.stripeUK.envName
-    }
-
-    val stripeAUMetrics = new ServiceMetrics(Config.stage, Config.appName, "Stripe AU Membership") with TouchpointBackendMetrics {
-      val backendEnv = config.stripeAU.envName
-    }
-    val soapClient = new soap.ClientWithFeatureSupplier(Set.empty, config.zuoraSoap, loggingRunner(soapServiceMetrics), configurableLoggingRunner(20.seconds, soapServiceMetrics))
+    val soapClient = new soap.ClientWithFeatureSupplier(Set.empty, config.zuoraSoap, futureRunner, configurableFutureRunner(20.seconds))
     val newProductIds = Config.productIds(config.environmentName)
 
     lazy val sfSimpleContactRepo = new SimpleContactRepository(config.salesforce, system.scheduler, Config.appName)
@@ -87,13 +77,13 @@ class TouchpointBackends(actorSystem: ActorSystem, wsClient: WSClient, execution
       lazy val environmentName: String = config.environmentName
       lazy val salesforceService = new SalesforceServiceImp(sfSimpleContactRepo)
       val catalogRestClient: SimpleClient[Future] = new rest.SimpleClient[Future](config.zuoraRest, configurableFutureRunner(60.seconds))
-      lazy val catalogService = new subsv2.services.CatalogService[Future](newProductIds, catalogRestClient, Await.result(_, 10.seconds), backendType.name)
+      lazy val catalogService = new subsv2.services.CatalogService[Future](newProductIds, FetchCatalog.fromZuoraApi(catalogRestClient), Await.result(_, 10.seconds), backendType.name)
       private val slightlyUnsafeCatalog: Future[Catalog] = catalogService.catalog.map(_.valueOr(e => throw new IllegalStateException(s"$e while getting catalog")))
       lazy val zuoraService = new zuora.ZuoraSoapService(soapClient)
       private val map = this.catalogService.catalog.map(_.fold[CatalogMap](error => {println(s"error: ${error.list.toList.mkString}"); Map()}, _.map))
       lazy val subscriptionService = new subsv2.services.SubscriptionService[Future](newProductIds, map, simpleRestClient, zuoraService.getAccountIds)
-      lazy val stripeUKMembershipService = new StripeService(config.stripeUK, loggingRunner(stripeUKMetrics))
-      lazy val stripeAUMembershipService = new StripeService(config.stripeAU, loggingRunner(stripeAUMetrics))
+      lazy val stripeUKMembershipService = new StripeService(config.stripeUK, futureRunner)
+      lazy val stripeAUMembershipService = new StripeService(config.stripeAU, futureRunner)
       lazy val paymentService = new PaymentService(this.stripeUKMembershipService, this.stripeAUMembershipService, this.zuoraProperties.invoiceTemplates.map(it => it.country -> it).toMap)
       lazy val commonPaymentService = slightlyUnsafeCatalog.map(catalog => new CommonPaymentService(zuoraService, catalog.productMap))
       lazy val zuoraProperties: ZuoraProperties = config.zuoraProperties
