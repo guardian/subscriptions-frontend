@@ -6,7 +6,7 @@
 
 @import model.Benefits
 
-@startTrial(edition: DigitalEdition, price: Price) = {
+@startTrial(edition: DigitalEdition, price: Price, startTrial: String) = {
     <div class="pricing-cta">
         <div class="pricing-cta__pricing">
             <h4 class="pricing-cta__pricing__title">Free for 14 days</h4>
@@ -14,7 +14,7 @@
         </div>
         <div class="pricing-cta__action">
             <a class="button button--large button--primary"
-               href="@edition.redirect"
+               href="@edition.redirect(startTrial)"
                data-test-id="digital-pack-@edition.id-trial-header"
             >Start your free trial</a>
         </div>
@@ -38,7 +38,7 @@
     <section class="page-slice">
         <div class="page-slice__content">
             @fragments.page.header(s"Digital Pack", Some("Digital access to our Daily Edition and Guardian App Premium Tier"))
-            @startTrial(edition, price)
+            @startTrial(edition, price, "subscribe_digipack_page_header")
         </div>
     </section>
 
@@ -60,7 +60,7 @@
                 controllers.CachedAssets.hashedPathFor("images/premium-tier-garnett.png"),
                 "more-premium-benefits"
             )
-            @startTrial(edition, price)
+            @startTrial(edition, price, "subscribe_digipack_page_what_do_i_get")
         </div>
     </section>
 
@@ -84,7 +84,7 @@
                     <p>You can download the Digital Pack on up to 10 devices. Share it with your friends and family or give it as a gift</p>
                 </li>
             </ol>
-            @startTrial(edition, price)
+            @startTrial(edition, price, "subscribe_digipack_page_why_subscribe")
         </div>
     </section>
 
@@ -114,7 +114,7 @@
                     </span>
                 </li>
             </ol>
-            @startTrial(edition, price)
+            @startTrial(edition, price, "subscribe_digipack_page_how_do_i_get_it")
         </div>
     </section>
 </main>
