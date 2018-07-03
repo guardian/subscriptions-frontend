@@ -7,16 +7,21 @@ define(['modules/analytics/analyticsEnabled',
 
     var _EVENT_QUEUE = [];
 
+    function queryParam(key){
+        return new RegExp(key + '=([^&]*)').exec(location.search);
+    }
+
     function init() {
 
         var identitySignedIn = user.isLoggedIn();
         var identitySignedOut = !!cookie.getCookie('GU_SO') && !identitySignedIn;
         var ophanBrowserId = cookie.getCookie('bwid');
         var productData = guardian.pageInfo ? guardian.pageInfo.productData : {};
-        var intcmp = new RegExp('INTCMP=([^&]*)').exec(location.search);
+        var intcmp = queryParam('INTCMP');
         var isCustomerAgent = !!guardian.supplierCode;
-        var camCodeBusinessUnit = new RegExp('CMP_BUNIT=([^&]*)').exec(location.search);
-        var camCodeTeam = new RegExp('CMP_TU=([^&]*)').exec(location.search);
+        var camCodeBusinessUnit = queryParam('CMP_BUNIT');
+        var camCodeTeam = queryParam('CMP_TU');
+        var startTrialButton = queryParam('startTrialButton');
         var experience = guardian.experience;
 
         /* Google analytics snippet */
@@ -60,6 +65,10 @@ define(['modules/analytics/analyticsEnabled',
 
         if (intcmp && intcmp[1]) {
             ga('membershipPropertyTracker.set', 'dimension12', intcmp[1]);  // internalCampCode
+        }
+
+        if (startTrialButton && startTrialButton[1]) {
+            ga('membershipPropertyTracker.set', 'dimension22', startTrialButton[1]);  // the referring 'start trial' button
         }
 
         ga('membershipPropertyTracker.set', 'dimension13', isCustomerAgent);  // customerAgent
