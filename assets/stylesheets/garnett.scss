@@ -101,15 +101,6 @@ body {
   }
 }
 
-// Hides the weekly images on the weekly landing page, and changes the colour of the banner.
-.hero-banner {
-  background-color: #efefec;
-}
-
-.hero-banner__image {
-  visibility: hidden;
-}
-
 @include mq($from: tablet) {
   .digipack__shots {
     margin-left: 15%;
