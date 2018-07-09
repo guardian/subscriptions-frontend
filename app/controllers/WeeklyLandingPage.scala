@@ -38,13 +38,7 @@ class WeeklyLandingPage(tpBackend: TouchpointBackend, commonActions: CommonActio
     parsedCountry.fold {
       Future.successful(MovedPermanently(routes.WeeklyLandingPage.withCountry(international).url))
     } { country =>
-      val hreflangs = CountryGroup.countries.map { country =>
-        WeeklyLandingPage.Hreflang(Config.subscriptionsUrl + routes.WeeklyLandingPage.withCountry(country.alpha2).url, s"en-${country.alpha2}")
-      }
-      val hreflang = WeeklyLandingPage.Hreflangs(Config.subscriptionsUrl + routes.WeeklyLandingPage.withCountry(country.alpha2).url, hreflangs)
-      catalog.map { catalog =>
-        Ok(weeklyLandingPage(country, catalog, None, None, description, PegdownMarkdownRenderer, hreflangs = hreflang))
-      }
+      Future.successful(TemporaryRedirect(routes.PromoLandingPage.render("10ANNUAL", Some(country)).url))
     }
   }
 
