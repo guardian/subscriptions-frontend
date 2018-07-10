@@ -147,17 +147,27 @@ object WeeklyPromotion {
         case SixWeeks => s"${currency.identifier}6 for six issues"
         case _ => plan.charges.prettyPricing(currency)
       })
-      checkout = s"checkout/${plan.slug}" ? ("countryGroup" -> CountryGroup.allGroups.find(_.currency == currency).getOrElse(CountryGroup.UK).id)
-      url = promoCode.map(p => checkout & ("promoCode" -> p.get)).getOrElse(checkout)
+
     } yield {
       DiscountedPlan(
         currency = currency,
         pretty = pretty,
         headline = headline,
         period = plan.charges.billingPeriod.adjective.capitalize,
-        url = url,
+        url = getCheckoutUrl(maybePromotion, plan, promoCode, currency),
         discounted = sixOrDiscount)
     }
+  }
+
+  def getCheckoutUrl(maybePromotion: Option[PromoWithWeeklyLandingPage], plan: CatalogPlan.Paid, promoCode: Option[PromoCode], currency: Currency): Uri = {
+
+    val baseUrl = s"checkout/${plan.slug}" ? ("countryGroup" -> CountryGroup.allGroups.find(_.currency == currency).getOrElse(CountryGroup.UK).id)
+    val promotionValidForPlan = maybePromotion.exists(_.appliesTo.productRatePlanIds.contains(plan.id))
+
+    if (promotionValidForPlan && promoCode.isDefined)
+      baseUrl & ("promoCode" -> promoCode.get.get)
+    else
+      baseUrl
   }
 
 }
