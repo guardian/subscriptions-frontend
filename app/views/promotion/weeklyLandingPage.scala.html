@@ -67,11 +67,6 @@
                         <div class="weekly__package js-dropdown js-hide" data-dropdown-menu="@region.title.replaceAll(" ", "")">
                             <div class="weekly__package__info" title="@region.description">
                                 <span class="weekly__package__title">@region.title</span>
-                                @region.discountedPlans.headOption.map { plan =>
-                                    <span class="weekly__package__description weekly__package__supl">
-                                        @plan.headline
-                                    </span>
-                                }
                             </div>
                         </div>
                     } else {
@@ -79,9 +74,6 @@
                             <a href="@plan.url.toString" class="weekly__package" title="@region.description">
                                 <div class="weekly__package__info">
                                     <span class="weekly__package__title" >@region.title</span>
-                                    <span class="weekly__package__description weekly__package__supl">
-                                    @plan.headline
-                                    </span>
                                 </div>
                             </a>
                         }
