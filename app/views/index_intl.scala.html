@@ -3,20 +3,15 @@
 @import views.support.DigitalEdition._
 @(edition: DigitalEdition)
 
-@main(s"${edition.name} | Subscriptions and Membership | The Guardian",
+@main(s"${edition.name} | Subscriptions | The Guardian",
     Some("Subscribe to The Guardian. Support our independent, award-winning journalism."),
     edition = edition,
     contactUsCountry = edition.countryGroup.defaultCountry
 ) {
 
 <main class="page-container gs-container">
-    @fragments.page.header("Subscriptions and Membership", Some("Select your preferred package"))
+    @fragments.page.header("Subscriptions", Some("Select your preferred package"))
     @fragments.productLists.productListInternational(edition, FlashSale.homePromoCodes(edition), includeEditionInUrl = true)
-    <div class="row row--items-1">
-        <div class="row__item">
-            @fragments.promos.members(edition.id, edition.membershipLandingPage)
-        </div>
-    </div>
     <div class="row row--items-1">
         <div class="row__item block block--primary block--two-col">
             <div class="block__icon">
