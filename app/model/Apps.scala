@@ -18,9 +18,11 @@ object Apps {
     "images/logos/google-play-store.png"
   )
 
+  val installTrackingParam = "referrer=utm_source%3Dsubscribe.theguardian.com%26utm_medium%3Dthank_you_page"
+
   object DailyEdition {
     val iOSAppLink = AppLink(
-      "https://itunes.apple.com/gb/app/guardian-observer-daily-edition/id452707806?mt=8&uo=4",
+      s"https://itunes.apple.com/gb/app/guardian-observer-daily-edition/id452707806?mt=8&uo=4&$installTrackingParam",
       appleAppStoreBadge
     )
   }
@@ -28,11 +30,11 @@ object Apps {
   object LiveNews {
     val links = Seq(
       AppLink(
-        "https://play.google.com/store/apps/details?id=com.guardian",
+        s"https://play.google.com/store/apps/details?id=com.guardian&$installTrackingParam",
         googlePlayStoreBadge
       ),
       AppLink(
-        "https://itunes.apple.com/gb/app/the-guardian/id409128287?mt=8&uo=4",
+        s"https://itunes.apple.com/gb/app/the-guardian/id409128287?mt=8&uo=4&$installTrackingParam",
         appleAppStoreBadge
       )
     )
