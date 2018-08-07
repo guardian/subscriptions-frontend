@@ -1,11 +1,15 @@
 @import model.DigitalEdition.UK
 @import services.FlashSale
-@()
+@import controllers.WeeklyLandingPage.Hreflangs
+
+@(maybeHrefLangs: Option[Hreflangs] = None)
 
 @main(
     "Subscriptions | The Guardian",
     Some("Subscribe to The Guardian & The Observer. Support our independent, award-winning journalism."),
-    edition = UK) {
+    edition = UK,
+    hreflangs = maybeHrefLangs
+) {
 
     <main class="page-container gs-container">
         @fragments.page.header("Subscriptions")

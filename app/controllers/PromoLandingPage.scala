@@ -131,7 +131,7 @@ class PromoLandingPage(
         val hreflangs = CountryGroup.countries.map { country =>
           Hreflang(Config.subscriptionsUrl + routes.PromoLandingPage.render(promoCodeStr, Some(country)).url, s"en-${country.alpha2}")
         }
-        val hreflang = Hreflangs(Config.subscriptionsUrl + routes.PromoLandingPage.render(promoCodeStr, Some(country)).url, hreflangs)
+        val hreflang = Hreflangs(Config.subscriptionsUrl + routes.PromoLandingPage.render(promoCodeStr, Some(country)).url, Some(hreflangs))
 
         OptionT(eventualCatalogPromoLandingPage.map(catalogPromoLandingPage =>
           catalogPromoLandingPage.getLandingPage(promotion, country, hreflang).map(Ok(_))
@@ -165,7 +165,7 @@ class PromoLandingPage(
         val hreflangs = CountryGroup.countries.map { country =>
           Hreflang(Config.subscriptionsUrl + routes.PromoLandingPage.preview(Some(country)).url, s"en-${country.alpha2}")
         }
-        val hreflang = Hreflangs(Config.subscriptionsUrl + routes.PromoLandingPage.preview(Some(country)).url, hreflangs)
+        val hreflang = Hreflangs(Config.subscriptionsUrl + routes.PromoLandingPage.preview(Some(country)).url, Some(hreflangs))
 
         OptionT(eventualCatalogPromoLandingPage.map(_.getLandingPage(promotion, country, hreflang)(promoCode)))
       }

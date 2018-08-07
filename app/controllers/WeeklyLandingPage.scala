@@ -15,7 +15,7 @@ import scala.concurrent.Future
 
 object WeeklyLandingPage{
   case class Hreflang(href: String, lang: String)
-  case class Hreflangs(canonical: String, hreflangs: List[Hreflang])
+  case class Hreflangs(canonical: String, hreflangs: Option[List[Hreflang]] = None)
 }
 
 class WeeklyLandingPage(tpBackend: TouchpointBackend, commonActions: CommonActions, override protected val controllerComponents: ControllerComponents) extends BaseController {
