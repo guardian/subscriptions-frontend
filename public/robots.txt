@@ -1,6 +1,11 @@
 User-agent: *
 
-Disallow: /patterns
+Disallow: /checkout
+Disallow: /healthcheck
 Disallow: /manage
+Disallow: /management/manifest
+Disallow: /p/*
+Disallow: /patterns
+Disallow: /test-users
 
 Allow: /

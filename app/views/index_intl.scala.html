@@ -1,12 +1,15 @@
 @import model.DigitalEdition
 @import services.FlashSale
 @import views.support.DigitalEdition._
-@(edition: DigitalEdition)
+@import controllers.WeeklyLandingPage.Hreflangs
+
+@(edition: DigitalEdition, hreflangs: Option[Hreflangs])
 
 @main(s"${edition.name} | Subscriptions | The Guardian",
     Some("Subscribe to The Guardian. Support our independent, award-winning journalism."),
     edition = edition,
-    contactUsCountry = edition.countryGroup.defaultCountry
+    contactUsCountry = edition.countryGroup.defaultCountry,
+    hreflangs = hreflangs
 ) {
 
 <main class="page-container gs-container">
