@@ -28,7 +28,7 @@ class WeeklyLandingPage(tpBackend: TouchpointBackend, commonActions: CommonActio
 
   def index(country: Option[Country]) = NoCacheAction { implicit request =>
     val maybeCountry = country orElse request.getFastlyCountry
-    Redirect(routes.WeeklyLandingPage.withCountry(maybeCountry.map(_.alpha2).getOrElse(international)))
+    Redirect(routes.WeeklyLandingPage.withCountry(maybeCountry.map(_.alpha2).getOrElse(international)).url, request.queryString, TEMPORARY_REDIRECT)
   }
 
   val description = landing_description()
@@ -36,7 +36,7 @@ class WeeklyLandingPage(tpBackend: TouchpointBackend, commonActions: CommonActio
   def withCountry(country: String) = NoCacheAction.async { implicit request =>
     val parsedCountry = if (country == international) Some(Country.UK) else CountryGroup.countryByCode(country)
     parsedCountry.fold {
-      Future.successful(MovedPermanently(routes.WeeklyLandingPage.withCountry(international).url))
+      Future.successful(Redirect(routes.WeeklyLandingPage.withCountry(international).url, request.queryString, PERMANENT_REDIRECT))
     } { country =>
       Future.successful(Redirect(routes.PromoLandingPage.render("10ANNUAL", Some(country)).url, request.queryString, TEMPORARY_REDIRECT))
     }
