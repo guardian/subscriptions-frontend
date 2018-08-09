@@ -75,7 +75,8 @@ libraryDependencies ++= Seq(
     "com.google.guava" % "guava" % "25.0-jre", //-- added explicitly - snyk report avoid logback vulnerability
     "com.fasterxml.jackson.core" % "jackson-databind" % "2.8.11.1",
     "ch.qos.logback" % "logback-classic" % "1.2.3", //-- added explicitly - snyk report avoid logback vulnerability
-    "org.scala-lang" % "scala-compiler" % "2.11.12"
+    "org.scala-lang" % "scala-compiler" % "2.11.12",
+    "org.bouncycastle" % "bcprov-jdk15on" % "1.60" // https://snyk.io/vuln/SNYK-JAVA-ORGBOUNCYCASTLE-32412
 )
 
 testOptions in Test ++= Seq(
