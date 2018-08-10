@@ -10,12 +10,12 @@
         <div class="block__info">
             <ul class="block__list">
             @if(inOfferPeriod(PaperAndDigital)) {
-                <li class="block__list-item"><strong>Subscribe today and save an extra 50% for the first 3 months</strong></li>
-                <li class="block__list-item">Year-round savings on the retail price</li>
+                <li class="block__list-item">Year-round savings of up to 36% off the retail price</li>
+                <li class="block__list-item"><strong>Subscribe before 2 September and save an extra 50% for three months</strong></li>
             } else {
                 <li class="block__list-item">Year-round savings of up to 36% off the retail price</li>
             }
-                <li class="block__list-item">Pick the package you want: Everyday+, Sixday+, Weekend+ and The Observer+</li>
+                <li class="block__list-item">Pick the package you want: Everyday+, Sixday+, Weekend+, Saturday+ and The Observer+</li>
                 <li class="block__list-item">All supplements Monday to Sunday</li>
                 <li class="block__list-item">All the <strong>Digital Pack</strong> benefits</li>
             </ul>
@@ -29,14 +29,16 @@
         <div class="block__info">
             <ul class="block__list">
             @if(inOfferPeriod(Paper)) {
-                <li class="block__list-item"><strong>Subscribe today and save an extra 50% for the first 3 months</strong></li>
-                <li class="block__list-item">Year-round savings on the retail price</li>
+                <li class="block__list-item">Year-round savings of up to 31% off the retail price</li>
+                <li class="block__list-item"><strong>Subscribe before 2 September and save an extra 50% for three months</strong></li>
             } else {
                 <li class="block__list-item">Year-round savings of up to 31% off the retail price</li>
             }
-                <li class="block__list-item">Pick the package you want: Everyday, Sixday, Weekend and The Observer</li>
+                <li class="block__list-item">Pick the package you want: Everyday, Sixday, Weekend, Saturday and The Observer</li>
                 <li class="block__list-item">All supplements Monday to Sunday</li>
+            @if(!inOfferPeriod(Paper)) {
                 <li class="block__list-item">Receive newspaper vouchers to use at over 1,000 retailers across the UK, or home delivery within the M25</li>
+            }
             </ul>
         </div>
         <div class="block__footer">
