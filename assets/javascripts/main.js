@@ -17,6 +17,7 @@ require([
     'modules/renew/loader',
     'modules/mma/loader',
     'modules/animatedDropdown',
+    'modules/index-intl',
     'object-fit-images'
 ], function (
     ajax,
@@ -37,6 +38,7 @@ require([
     renew,
     mma,
     dropdown,
+    indexIntl,
     objectFitImages
 ) {
     'use strict';
@@ -56,6 +58,7 @@ require([
     confirmation.init();
     cas.init();
     dropdown.init();
+    indexIntl.init();
     objectFitImages();
     patterns.init();
     renew.init();
