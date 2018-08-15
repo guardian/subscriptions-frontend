@@ -41,8 +41,8 @@ object FlashSale {
   def offersPromoCodes(edition: DigitalEdition): Map[PromoCodeKey, String] =
     Map(
       Digital -> getCode(Digital, s"DOFF${edition.id.toUpperCase}1", "DPS80P"),
-      PaperAndDigital -> getCode(PaperAndDigital, s"NOFF${edition.id.toUpperCase}D", "GFS80J"),
-      Paper -> getCode(Paper, s"NOFF${edition.id.toUpperCase}P", "GFS80K"),
+      PaperAndDigital -> getCode(PaperAndDigital, s"NOFF${edition.id.toUpperCase}D", "GFS80K"),
+      Paper -> getCode(Paper, s"NOFF${edition.id.toUpperCase}P", "GFS80J"),
       GuardianWeekly -> "WAL41X"
     )
 
