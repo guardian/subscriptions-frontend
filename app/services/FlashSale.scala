@@ -17,7 +17,7 @@ object FlashSale {
     )
 
     val startTime = new DateTime(2018, 8, 20, 0, 0)
-    val endTime = new DateTime(2018, 9, 2, 0, 0)
+    val endTime = new DateTime(2018, 9, 3, 0, 0)
     val now = new DateTime()
 
     now.isAfter(startTime) &&
