@@ -17,6 +17,7 @@ import play.api.libs.json.Json
 import play.api.mvc._
 import play.twirl.api.Html
 import services.TouchpointBackend
+import services.FlashSale._
 import utils.RequestCountry._
 import utils.Tracking.internalCampaignCode
 import views.html.promotion._
@@ -140,7 +141,7 @@ class PromoLandingPage(
       }
     } yield landingPage
     maybeLandingPage.run.map(_.getOrElse {
-      Redirect(routes.Homepage.index().url ? (internalCampaignCode -> s"FROM_P_${promoCode.get}"), request.queryString)
+      Redirect(routes.Homepage.index().url ? (internalCampaignCode -> intcmp(promoCode.get)), request.queryString)
     })
 
   }
