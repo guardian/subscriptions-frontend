@@ -4,10 +4,10 @@ import org.joda.time.DateTime
 import org.specs2.mutable.Specification
 
 object TestPromoCodes {
-  val flashSaleIntcmp: Map[String, String] =
+  val flashSaleIntcmp: Map[String, Intcmp] =
     Map(
-      "promocode1" -> "super_special_value",
-      "promocode2" -> "super_special_value2"
+      "promocode1" -> Intcmp("super_special_value"),
+      "promocode2" -> Intcmp("super_special_value2")
     )
 }
 
@@ -35,17 +35,17 @@ class FlashSaleTest extends Specification {
   "intcmp" should {
 
     "return the default promo code-based value when not in a flash sale period" in {
-      val expected = "FROM_P_promocode1"
+      val expected = Intcmp("FROM_P_promocode1")
       FlashSaleExpired.intcmp("promocode1") shouldEqual (expected)
     }
 
     "return the custom value when in a flash sale period" in {
-      val expected = "super_special_value"
+      val expected = Intcmp("super_special_value")
       FlashSaleEffectiveNow.intcmp("promocode1") shouldEqual (expected)
     }
 
     "return the default in a flash sale period if the promo code doesn't have a custom intcmp value" in {
-      val expected = "FROM_P_ABCD"
+      val expected = Intcmp("FROM_P_ABCD")
       FlashSaleEffectiveNow.intcmp("ABCD") shouldEqual (expected)
     }
   }
