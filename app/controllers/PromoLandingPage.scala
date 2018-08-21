@@ -141,13 +141,13 @@ class PromoLandingPage(
       }
     } yield landingPage
     maybeLandingPage.run.map(_.getOrElse {
-      Redirect(routes.Homepage.index().url ? (internalCampaignCode -> intcmp(promoCode.get)), request.queryString)
+      Redirect(routes.Homepage.index().url ? (internalCampaignCode -> intcmp(promoCode.get).value), request.queryString)
     })
 
   }
 
   def preview(maybeCountry: Option[Country]) = GoogleAuthenticatedStaffAction.async { implicit request =>
-    //User can preview a promotion before assigning it a code.
+    //User can preview a promotion before assigning it a code
     val undefinedPromoCode = PromoCode("PromoCode")
     //This appears in a frame in the promoTool.
     def OkWithPreviewHeaders(html: Html) = Ok(html).withHeaders(HandleXFrameOptionsOverrideHeader.HEADER_KEY -> s"ALLOW-FROM ${Config.previewXFrameOptionsOverride}")
