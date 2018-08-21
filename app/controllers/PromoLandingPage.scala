@@ -141,7 +141,7 @@ class PromoLandingPage(
       }
     } yield landingPage
     maybeLandingPage.run.map(_.getOrElse {
-      Redirect(routes.Homepage.index().url ? (internalCampaignCode -> intcmp(promoCode.get)), request.queryString)
+      Redirect(routes.Homepage.index().url ? (internalCampaignCode -> intcmp(promoCode.get).value), request.queryString)
     })
 
   }
