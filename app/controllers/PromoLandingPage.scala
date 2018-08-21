@@ -147,7 +147,7 @@ class PromoLandingPage(
   }
 
   def preview(maybeCountry: Option[Country]) = GoogleAuthenticatedStaffAction.async { implicit request =>
-    //User can preview a promotion before assigning it a code
+    //User can preview a promotion before assigning it a code.
     val undefinedPromoCode = PromoCode("PromoCode")
     //This appears in a frame in the promoTool.
     def OkWithPreviewHeaders(html: Html) = Ok(html).withHeaders(HandleXFrameOptionsOverrideHeader.HEADER_KEY -> s"ALLOW-FROM ${Config.previewXFrameOptionsOverride}")
