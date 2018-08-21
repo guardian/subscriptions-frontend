@@ -2,26 +2,46 @@ package services
 
 import configuration.Config
 import model.DigitalEdition
-import model.promoCodes.{GuardianWeekly, _}
+import model.promoCodes.{GuardianWeekly, PaperAndDigital, _}
 import org.joda.time.DateTime
 
-object FlashSale {
+object FlashSale extends FlashSale {
 
-  def inOfferPeriod(promoCodeKey: PromoCodeKey) = {
-    //The offer is valid between 20th August 2018 & 2nd September 2018
-    //The current sale is paper & paper + digital only. Digital only is unaffected.
-    val included: Map[PromoCodeKey, Boolean] = Map(
-      Digital -> false,
-      Paper -> true,
-      PaperAndDigital -> true
+  val startTime = new DateTime(2018, 8, 20, 0, 0)
+  val endTime = new DateTime(2018, 9, 3, 0, 0)
+
+  val flashSaleIntcmp: Map[String, Intcmp] =
+    Map(
+      "GFS80H" -> Intcmp("gdnwb_macqn_other_subs_SupporterLandingPagePrintOnlySubscribeLandingPagePrint+digital_"),
+      "GFS80F" -> Intcmp("gdnwb_macqn_other_subs_guardianarticleSubscribeLandingPagePrintOnly_"),
+      "GFS80K" -> Intcmp("gdnwb_macqn_other_subs_SubPromotionsLandingPagePrintOnlySubsPromotionsLandingPagePrint+digital_"),
+      "GFS80J" -> Intcmp("gdnwb_macqn_other_subs_SupporterLandingPagePrint+digitalSubPromotionsLandingPagePrintOnly_")
     )
+}
 
-    val startTime = new DateTime(2018, 8, 20, 0, 0)
-    val endTime = new DateTime(2018, 9, 3, 0, 0)
+trait FlashSale {
+
+  val startTime: DateTime
+  val endTime: DateTime
+
+  val flashSaleIntcmp: Map[String, Intcmp]
+
+  //The offer is valid between 20th August 2018 & 2nd September 2018
+  //The current sale is paper & paper + digital only. Digital only is unaffected.
+  val included: Map[PromoCodeKey, Boolean] = Map(
+    Digital -> false,
+    Paper -> true,
+    PaperAndDigital -> true
+  )
+
+  private def inFlashSaleDateRange: Boolean = {
     val now = new DateTime()
 
-    now.isAfter(startTime) &&
-      now.isBefore(endTime) &&
+    now.isAfter(startTime) && now.isBefore(endTime)
+  }
+
+  def inOfferPeriod(promoCodeKey: PromoCodeKey) = {
+    inFlashSaleDateRange &&
       included(promoCodeKey) ||
       (included(promoCodeKey) && !Config.stageProd) //allow testing on CODE
   }
@@ -51,4 +71,16 @@ object FlashSale {
       offerCode
     else
       defaultCode
+
+  def intcmp(promoCode: String): Intcmp =
+    if(inFlashSaleDateRange)
+      flashSaleIntcmp.getOrElse(promoCode, defaultIntcmp(promoCode))
+    else
+      defaultIntcmp(promoCode)
+
+
+  private def defaultIntcmp(promoCode: String): Intcmp = Intcmp(s"FROM_P_${promoCode}")
+
 }
+
+case class Intcmp(value: String) extends AnyVal
