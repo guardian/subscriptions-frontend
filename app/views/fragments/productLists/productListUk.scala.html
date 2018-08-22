@@ -21,7 +21,12 @@
             </ul>
         </div>
         <div class="block__footer">
-            <a class="button button--large button--primary" href="@routes.PromoLandingPage.render(promoCodes(PaperAndDigital), None).url" data-test-id="subscriptions-uk-paper-digital">Subscribe now</a>
+            @if(inOfferPeriod(PaperAndDigital)) {
+                <a class="button button--large button--primary" href="@routes.PromoLandingPage.render(promoCodes(PaperAndDigital), None).url?INTCMP=@intcmp(promoCodes(PaperAndDigital)).value" data-test-id="subscriptions-uk-paper-digital">Subscribe now</a>
+
+            } else {
+                <a class="button button--large button--primary" href="@routes.PromoLandingPage.render(promoCodes(PaperAndDigital), None).url" data-test-id="subscriptions-uk-paper-digital">Subscribe now</a>
+            }
         </div>
     </div>
     <div class="row__item block block--primary block--paper">
@@ -42,7 +47,12 @@
             </ul>
         </div>
         <div class="block__footer">
-            <a class="button button--large button--primary" href="@routes.PromoLandingPage.render(promoCodes(Paper), None).url" data-test-id="subscriptions-uk-paper">Subscribe now</a>
+            @if(inOfferPeriod(Paper)) {
+                <a class="button button--large button--primary" href="@routes.PromoLandingPage.render(promoCodes(Paper), None).url?INTCMP=@intcmp(promoCodes(Paper)).value" data-test-id="subscriptions-uk-paper">Subscribe now</a>
+
+            } else {
+                <a class="button button--large button--primary" href="@routes.PromoLandingPage.render(promoCodes(Paper), None).url" data-test-id="subscriptions-uk-paper">Subscribe now</a>
+            }
         </div>
     </div>
 </div>
