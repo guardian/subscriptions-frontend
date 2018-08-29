@@ -244,6 +244,86 @@
         </form>
 
     </section>
-
 </main>
+
+    <div id="overlay" style="position:absolute; z-index:1000; top:0; right:0; bottom: 0; left: 0; display: none;">
+        <div style="position:fixed; background-color: black; opacity: 0.7; top:0; right:0; bottom: 0; left: 0;"></div>
+        <div style="
+            background-color: white;
+            left:50%;
+            margin-left:-275px;
+            position: fixed;
+            border:1px solid #000;
+            padding: 20px;
+            top: 100px;
+            width:550px;
+        ">
+            <h1>Please don't go <span id="myName"></span>!</h1>
+            <p>We really value your readership and would love you to become a Digital Subscriber.</p>
+            <p>Here's a 10% discount promo code to show we're serious: <strong>HACKDAY10</strong></p>
+            <button style="float:right" onclick="guardian.exitIntent.leaveCheckout()">Leave checkout &gt;&gt;&gt;</button>
+            <button style="float:right" onclick="guardian.exitIntent.applyPromoCode('HACKDAY10')"><strong>Apply promo code</strong></button>
+        </div>
+    </div>
+
+
+    <script>
+        guardian.exitIntent = (function() {
+            var interceptedTarget = '';
+            var promoCodeSubmitEls = document.getElementsByClassName('js-promo-code-validate');
+            var firstNameField = document.getElementById('first');
+            var promoCodeField = document.getElementById('promo-code');
+            var overlayDiv = document.getElementById('overlay');
+            var myName = document.getElementById('myName');
+
+            function canShowPopup() {
+                return promoCodeSubmitEls.length > 0 && firstNameField &&
+                    firstNameField.value !== '' && promoCodeField &&
+                    promoCodeField.value === '';
+            }
+            function showPopup(e) {
+                if (canShowPopup()) {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    interceptedTarget = e.currentTarget.getAttribute('href');
+                    myName.innerText = firstNameField.value;
+                    overlayDiv.style.display = 'block';
+                    return false;
+                } else {
+                    return true;
+                }
+            }
+
+            /* setTimeout to capture footer HTML rendered after this template */
+            setTimeout(function() {
+                var aNodes = document.querySelectorAll('a[href]');
+                for (var i = 0; i < aNodes.length; i++) {
+                    var a = aNodes[i];
+                    if (!/#|\/checkout|mailto:/.test(a.getAttribute('href')) && !/blank/.test(a.getAttribute('target'))) {
+                        aNodes[i].style.backgroundColor = 'yellow';
+                        aNodes[i].onclick = showPopup;
+                    }
+                }
+            }, 1000);
+
+            return {
+                applyPromoCode: function(promoCode) {
+                    promoCodeField.value = promoCode;
+                    if (promoCodeSubmitEls.length === 1) {
+                        promoCodeSubmitEls[0].dispatchEvent(new MouseEvent('click'));
+                    }
+                    overlayDiv.style.display = 'none';
+                    interceptedTarget = '';
+                },
+                leaveCheckout: function() {
+                    overlayDiv.style.display = 'none';
+                    if (interceptedTarget) {
+                        window.location.href = interceptedTarget;
+                    } else {
+                        alert('Sorry, something has gone wrong.')
+                    }
+                }
+            };
+        }());
+    </script>
 }
