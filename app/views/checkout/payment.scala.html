@@ -258,11 +258,15 @@
             top: 100px;
             width:550px;
         ">
-            <h1>Please don't go <span id="myName"></span>!</h1>
+            <h1>Please don't go, <span id="myName"></span>!</h1>
             <p>We really value your readership and would love you to become a Digital Subscriber.</p>
             <p>Here's a 10% discount promo code to show we're serious: <strong>HACKDAY10</strong></p>
+            <div>
+                <button style="margin:auto; display:block" onclick="guardian.exitIntent.applyPromoCode('HACKDAY10')"><strong>Apply promo code</strong></button>
+            </div>
+            <br/>
+            <button style="float:left" onclick="guardian.exitIntent.dismiss()">Dismiss</button>
             <button style="float:right" onclick="guardian.exitIntent.leaveCheckout()">Leave checkout &gt;&gt;&gt;</button>
-            <button style="float:right" onclick="guardian.exitIntent.applyPromoCode('HACKDAY10')"><strong>Apply promo code</strong></button>
         </div>
     </div>
 
@@ -312,6 +316,10 @@
                     if (promoCodeSubmitEls.length === 1) {
                         promoCodeSubmitEls[0].dispatchEvent(new MouseEvent('click'));
                     }
+                    overlayDiv.style.display = 'none';
+                    interceptedTarget = '';
+                },
+                dismiss: function() {
                     overlayDiv.style.display = 'none';
                     interceptedTarget = '';
                 },
