@@ -9,7 +9,7 @@ define([
         const utmSource = parsedUrl.searchParams.get('utm_source');
         const utmMedium = parsedUrl.searchParams.get('utm_medium');
         if (utmSource && utmMedium){
-            cookie.setCookie('gu_referrer_channel', `${utmSource}&${utmMedium}`);
+            cookie.setCookie('gu_referrer_channel', `${utmSource}&${utmMedium}`, 30);
         }
     }
 
