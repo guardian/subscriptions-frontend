@@ -173,13 +173,13 @@ Resources:
           Statement:
           - Effect: Allow
             Action: sqs:*
-            Resource: arn:aws:sqs:eu-west-1:865473395570:subs-welcome-email
+            Resource: arn:aws:sqs:eu-west-1:865473395570:subs-welcome-email*
       - PolicyName: SQSHolidaySuspensionEmails
         PolicyDocument:
           Statement:
           - Effect: Allow
             Action: sqs:*
-            Resource: arn:aws:sqs:eu-west-1:865473395570:subs-holiday-suspension-email
+            Resource: arn:aws:sqs:eu-west-1:865473395570:subs-holiday-suspension-email*
       ManagedPolicyArns:
       - !Sub arn:aws:iam::${AWS::AccountId}:policy/guardian-ec2-role-for-ssm
   SubscriptionsAppInstanceProfile:
