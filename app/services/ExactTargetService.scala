@@ -15,7 +15,7 @@ import com.gu.memsub.subsv2.reads.SubPlanReads._
 import com.gu.memsub.subsv2.{Subscription, SubscriptionPlan => Plan}
 import com.gu.memsub.{Subscription => _, _}
 import com.gu.monitoring.SafeLogger
-import com.gu.salesforce.Contact
+import com.gu.salesforce.{Contact, SFContactId}
 import com.gu.zuora.rest.ZuoraRestService
 import com.gu.zuora.api.ZuoraService
 import com.gu.zuora.soap.models.Results.SubscribeResult
@@ -151,7 +151,7 @@ class ExactTargetService(
 
     for {
       row <- buildWelcomeEmailDataExtensionRow(subscribeResult, subscriptionData, gracePeriod, validPromotion, purchaserIds)
-      response <- SqsClient.sendDataExtensionToQueue(Config.welcomeEmailQueue, row, purchaserIds.identityIdWithFallback, purchaserIds.contactId.salesforceContactId)
+      response <- SqsClient.sendDataExtensionToQueue(Config.welcomeEmailQueue, row, SFContactId(purchaserIds.contactId.salesforceContactId))
     } yield {
       response match {
         case Success(sendMsgResult) => logger.info(s"Successfully enqueued ${subscribeResult.subscriptionName} welcome email for user ${purchaserIds.identityId}.")
@@ -183,8 +183,8 @@ class ExactTargetService(
     }
 
     def sendToQueue(salesforceContact: Contact, row: HolidaySuspensionBillingScheduleDataExtensionRow) = {
-      SqsClient.sendDataExtensionToQueue(Config.holidaySuspensionEmailQueue, row, salesforceContact.identityId, salesforceContact.salesforceContactId).map {
-        case Success(sendMsgResult) => \/.right(())
+      SqsClient.sendDataExtensionToQueue(Config.holidaySuspensionEmailQueue, row, SFContactId(salesforceContact.salesforceContactId)).map {
+        case Success(_) => \/.right(())
         case Failure(e) => \/.left(s"Details were: ${row.subscriptionName}, ${e.toString}")
       }
     }
@@ -228,7 +228,7 @@ class ExactTargetService(
 
     def sendToQueue(row: GuardianWeeklyRenewalDataExtensionRow): Future[\/[Error, SendMessageResult]] = {
 
-      SqsClient.sendDataExtensionToQueue(Config.holidaySuspensionEmailQueue, row, contact.identityId, contact.salesforceContactId).map {
+      SqsClient.sendDataExtensionToQueue(Config.holidaySuspensionEmailQueue, row, SFContactId(contact.salesforceContactId)).map {
         case Success(sendMsgResult) => \/-(sendMsgResult)
         case Failure(e) => -\/(ExceptionThrown(s"Failed to enqueue ${oldSub.name.get}'s guardian weekly renewal email. Details were: " + row.toString, e))
       }
@@ -260,7 +260,7 @@ object SqsClient extends LazyLogging {
     .withRegion(EU_WEST_1)
     .build()
 
-  def sendDataExtensionToQueue(queueName: String, row: DataExtensionRow, userId: String, sfContactId: String)(implicit executionContext: ExecutionContext): Future[Try[SendMessageResult]] = {
+  def sendDataExtensionToQueue(queueName: String, row: DataExtensionRow, sfContactId: SFContactId)(implicit executionContext: ExecutionContext): Future[Try[SendMessageResult]] = {
     Future {
       val payload = Json.obj(
         "To" -> Json.obj(
@@ -271,8 +271,7 @@ object SqsClient extends LazyLogging {
           )
         ),
         "DataExtensionName" -> row.forExtension.name,
-        "UserId" -> userId,
-        "SfContactId" -> sfContactId
+        "SfContactId" -> sfContactId.get
       ).toString
 
       // FIXME the sendToQueue method is blocking, use an async way if there is one
