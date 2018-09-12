@@ -42,7 +42,7 @@ const handleStripeResponse = (t, url, key) => {
 const getDetails = async (url) => {
     let resp = await fetch(url,
         {
-            method: 'get', credentials: 'include'
+            method: 'get', credentials: 'include', mode: 'cors'
         })
     let json = await resp.json()
     return json
