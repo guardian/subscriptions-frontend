@@ -7,8 +7,8 @@ define([
     var segmentedPageCodes = {
         'digital': {
             'Landing': '8326260',
-            'Checkout': '8326264',
-            'Thankyou': '836984'
+            'Checkout': '14355506',
+            'Thankyou': '1025669'
         },
         'paper-digital': {
             'Landing': '8326267',
