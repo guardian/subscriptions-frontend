@@ -32,7 +32,7 @@ define([
 
         var productSegment = guardian.pageInfo.productData.productSegment;
 
-        var pageCodes = segmentedPageCodes[productSegment];
+        var pageCodes = segmentedPageCodes[productSegment.toLowerCase()];
         if (!pageCodes) { return; }
 
         var pageType = guardian.pageInfo.pageType;
