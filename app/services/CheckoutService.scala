@@ -88,16 +88,19 @@ class CheckoutService(
     allSixWeekAssociations.map { allSixWeekAssociations =>
       val maybeSixWeekAssociation = allSixWeekAssociations.find(_._1.id.get == originalCommand.ratePlans.head.productRatePlanId)
       val updatedCommand = maybeSixWeekAssociation.map { case (sixWeekPlan, recurringPlan) =>
-        val sixWeeksPlanStartDate = originalCommand.contractEffective.plusDays(daysUntilFirstIssue.getDays)
+        // originalCommand.contractAcceptance is same date as originalCommand.contractEffective.plusDays(daysUntilFirstIssue.getDays)
+        val sixWeeksPlanStartDate = originalCommand.contractAcceptance
+        val quarterlyPlanStartDate = sixWeeksPlanStartDate.plusWeeks(6)
         val replacementPlans = NonEmptyList(
           RatePlan(
             sixWeekPlan.id.get,
             Some(ChargeOverride(sixWeekPlan.charges.chargeId.get, triggerDate = Some(sixWeeksPlanStartDate)))
           ),
-          RatePlan(recurringPlan.id.get, None)
+          RatePlan(
+            recurringPlan.id.get,
+            Some(ChargeOverride(recurringPlan.charges.chargeId.get, triggerDate = Some(quarterlyPlanStartDate))))
         )
-        val updatedContractAcceptance = sixWeeksPlanStartDate.plusWeeks(6)
-        originalCommand.copy(ratePlans = replacementPlans, contractAcceptance = updatedContractAcceptance)
+        originalCommand.copy(ratePlans = replacementPlans)
       }
       updatedCommand.getOrElse(originalCommand)
     }
