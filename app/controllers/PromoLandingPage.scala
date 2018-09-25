@@ -3,10 +3,11 @@ import actions.{CommonActions, OAuthActions}
 import com.gu.i18n.CountryGroup.byCountryCode
 import com.gu.i18n.{Country, CountryGroup}
 import com.gu.memsub.Benefit.Digipack
+import com.gu.memsub.Subscription
 import com.gu.memsub.promo.Formatters.PromotionFormatters._
 import com.gu.memsub.promo.Promotion._
 import com.gu.memsub.promo._
-import com.gu.memsub.subsv2.Catalog
+import com.gu.memsub.subsv2.{Catalog, WeeklyPlans}
 import com.netaporter.uri.dsl._
 import configuration.Config
 import controllers.SessionKeys.PromotionTrackingCode
@@ -56,6 +57,11 @@ class PromoLandingPage(
     val paperOnlyPackageRatePlanIds = allPaperPackages.filterNot(_.charges.benefits.list.toList.contains(Digipack)).map(_.id).toSet
     val guardianWeeklyRatePlanIds = catalog.weekly.zoneA.plans.map(_.id).toSet ++ catalog.weekly.zoneC.plans.map(_.id).toSet
 
+
+//    val guardianWeeklyDomesticPlans: WeeklyDomesticPlans = catalog.weekly.domestic
+    println(guardianWeeklyRatePlanIds)
+//    println(guardianWeeklyDomesticPlans)
+
     private def isActive(promotion: AnyPromotion): Boolean = {
       val isTest = tpBackend.environmentName != "PROD"
       isTest || (
@@ -67,6 +73,8 @@ class PromoLandingPage(
     }
 
     private def getDigitalPackLandingPage(promotion: AnyPromotion, country: Country, hreflangs: Hreflangs)(implicit promoCode: PromoCode): Option[Html] = {
+      println("hey it's a digital pack")
+
       promotion.asDigitalPack.filter(p => isActive(asAnyPromotion(p))).map { promotionWithLandingPage =>
         val currency = byCountryCode(country.alpha2).getOrElse(CountryGroup.UK).currency
         digitalpackLandingPage(currency, country, catalog, promoCode, promotionWithLandingPage, PegdownMarkdownRenderer, hreflangs)
@@ -74,12 +82,15 @@ class PromoLandingPage(
     }
 
     private def getNewspaperLandingPage(promotion: AnyPromotion)(implicit promoCode: PromoCode): Option[Html] = {
+      println("hey it's a newspaper")
+
       promotion.asNewspaper.filter(p => isActive(asAnyPromotion(p))).map { promotionWithLandingPage =>
         newspaperLandingPage(catalog, promoCode, promotionWithLandingPage, PegdownMarkdownRenderer)
       }
     }
 
     private def getWeeklyLandingPage(promotion: AnyPromotion, country: Country, hreflangs: Hreflangs)(implicit promoCode: PromoCode): Option[Html] = {
+      println("hey it's a weekly")
       promotion.asWeekly.filter(p => isActive(asAnyPromotion(p))).map { promotionWithLandingPage =>
         val description = promotionWithLandingPage.landingPage.description.map { desc =>
           Html(PegdownMarkdownRenderer.render(desc)
