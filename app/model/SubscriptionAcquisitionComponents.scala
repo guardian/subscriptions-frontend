@@ -1,13 +1,15 @@
 package model
 
-import com.gu.acquisition.model.{OphanIds, ReferrerAcquisitionData}
+import com.gu.acquisition.model.{GAData, OphanIds, ReferrerAcquisitionData}
 import com.gu.acquisition.typeclasses.AcquisitionSubmissionBuilder
 import com.gu.memsub.Benefit.PaperDay
 import com.gu.memsub.BillingPeriod._
 import com.gu.memsub.promo.{PercentDiscount, Promotion}
 import com.gu.monitoring.SafeLogger
 import com.gu.monitoring.SafeLogger._
+import com.netaporter.uri.Uri
 import com.typesafe.scalalogging.LazyLogging
+import configuration.Config
 import ophan.thrift.event.PaymentProvider.{Gocardless, Stripe}
 import ophan.thrift.event._
 import play.api.libs.json._
@@ -15,10 +17,15 @@ import play.api.libs.json._
 import scala.collection.Set
 import scalaz.\/
 
+case class ClientBrowserInfo(
+  userAgent: String,
+  ipAddress: String
+)
 case class SubscriptionAcquisitionComponents(
   subscribeRequest: SubscribeRequest,
   promotion: Option[Promotion.AnyPromotion],
-  acquisitionDataJSON: Option[String]
+  acquisitionDataJSON: Option[String],
+  clientBrowserInfo: ClientBrowserInfo
 )
 
 
@@ -38,6 +45,13 @@ object SubscriptionAcquisitionComponents {
       import components.subscribeRequest.genericData.ophanData._
 
       Right(OphanIds(pageViewId, visitId, browserId))
+    }
+
+    override def buildGAData(components: SubscriptionAcquisitionComponents): Either[String, GAData] = {
+      import components.clientBrowserInfo._
+
+      val host = Uri.parse(Config.subscriptionsUrl).host.getOrElse("subscribe.theguardian.com")
+      Right(GAData(host, Some(ipAddress), Some(userAgent)))
     }
 
     private def referrerAcquisitionDataFromJSON(json: String): Option[ReferrerAcquisitionData] = {
