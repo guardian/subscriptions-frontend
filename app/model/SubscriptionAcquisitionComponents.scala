@@ -18,7 +18,7 @@ import scala.collection.Set
 import scalaz.\/
 
 case class ClientBrowserInfo(
-  userAgent: String,
+  userAgent: Option[String],
   ipAddress: String
 )
 case class SubscriptionAcquisitionComponents(
@@ -51,7 +51,7 @@ object SubscriptionAcquisitionComponents {
       import components.clientBrowserInfo._
 
       val host = Uri.parse(Config.subscriptionsUrl).host.getOrElse("subscribe.theguardian.com")
-      Right(GAData(host, Some(ipAddress), Some(userAgent)))
+      Right(GAData(host, Some(ipAddress), userAgent))
     }
 
     private def referrerAcquisitionDataFromJSON(json: String): Option[ReferrerAcquisitionData] = {

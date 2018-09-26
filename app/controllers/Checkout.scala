@@ -286,7 +286,7 @@ class Checkout(fBackendFactory: TouchpointBackends, commonActions: CommonActions
       }
 
       val promotion = subscribeRequest.genericData.promoCode.map(_.get).flatMap(code => tpBackend.promoService.findPromotion(NormalisedPromoCode.safeFromString(code)))
-      val clientBrowserInfo = ClientBrowserInfo(request.headers.get("user-agent").getOrElse(""), request.remoteAddress)
+      val clientBrowserInfo = ClientBrowserInfo(request.headers.get("user-agent"), request.remoteAddress)
 
       //This service is mocked unless it's running in PROD, change to test acquisition events are working
       AcquisitionService(isTestService = tpBackend.environmentName != "PROD")
