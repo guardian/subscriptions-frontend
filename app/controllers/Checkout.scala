@@ -2,7 +2,7 @@ package controllers
 
 import actions.CommonActions
 import cats.instances.future._
-import com.gu.i18n.CountryGroup.{UK, US}
+import com.gu.i18n.CountryGroup._
 import com.gu.i18n.Currency._
 import com.gu.i18n._
 import com.gu.memsub.Subscription.Name
@@ -132,19 +132,21 @@ class Checkout(fBackendFactory: TouchpointBackends, commonActions: CommonActions
             case Product.WeeklyZoneB | Product.WeeklyZoneC => {
               if (Set(UK, US).contains(determinedCountryGroup)) {
                 getSettings(None, USD)
+
               } else {
                 getSettings(determinedCountryGroup.defaultCountry, determinedCountryGroup.currency)
               }
             }
-            case Product.WeeklyDomestic => {
-              if (Set(UK, US).contains(determinedCountryGroup)) {
+
+            case Product.WeeklyDomestic => { //TODO moving domestic/row zone a/c definitions to one place
+              if (Set(UK, US, Canada, Australia, NewZealand, Europe).contains(determinedCountryGroup)) {
                 getSettings(determinedCountryGroup.defaultCountry, determinedCountryGroup.currency)
               } else {
                 getSettings(UK.defaultCountry, UK.currency)
               }
             }
             case Product.WeeklyRestOfWorld => {
-              if (Set(UK, US).contains(determinedCountryGroup)) {
+              if (Set(UK, US, Canada, Australia, NewZealand, Europe).contains(determinedCountryGroup)) {
                 getSettings(None, USD)
               } else {
                 getSettings(determinedCountryGroup.defaultCountry, determinedCountryGroup.currency)

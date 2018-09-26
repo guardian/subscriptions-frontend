@@ -17,8 +17,6 @@ object Pricing {
   implicit class PlanWithPricing[+A <: PaidChargeList](plan: A) {
     lazy val gbpPrice = plan.price.getPrice(GBP).get
 
-    println("available prices: "+plan.price.prices)
-
     def unsafePrice(currency: Currency) = plan.price.getPrice(currency).getOrElse(
       throw new NoSuchElementException(s"Could not find a price in $currency for charge list")
     )

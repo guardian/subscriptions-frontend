@@ -1,6 +1,5 @@
 package views.support
 
-import com.gu.i18n.CountryGroup._
 import com.gu.i18n.{Country, CountryGroup, Currency}
 import com.gu.memsub.BillingPeriod._
 import com.gu.memsub.promo.Promotion.{CovariantId, PromoWithWeeklyLandingPage}
@@ -22,22 +21,16 @@ object WeeklyPromotion {
   private val allCountries = CountryGroup.allGroups.flatMap(_.countries).toSet
   private val ZONEC = allCountries.diff(UK union US)
 
-  private val domesticCountries = Set(UK, US, CA, AU, NZ, EU).flatten //todo is that the definition?
-
-  private val internationalCountries = allCountries.diff(domesticCountries)
-
   case class DiscountedPlan(currency: Currency, pretty: String, headline: String, period: String, url: Uri, discounted: Boolean)
 
   case class DiscountedRegion(title: String, description: String, countries: Set[Country], discountedPlans: List[DiscountedPlan])
 
   def validRegionsForPromotion(promotion: Option[PromoWithWeeklyLandingPage], promoCode: Option[PromoCode], requestCountry: Country)(implicit catalog: SubsCatalog): Seq[DiscountedRegion] = {
     val promotionCountries = promotion.map(_.appliesTo.countries).getOrElse(allCountries)
-    val regionForZoneCCountry: Seq[DiscountedRegion] = {
 
-      println(s"Hi I am request country! ${requestCountry} am I in zone C ${ZONEC.contains(requestCountry)}" )
-      println(s"Am I in domestic? ${domesticCountries.contains(requestCountry)} Am I in international? ${internationalCountries.contains(requestCountry)}")
+    val regionForZoneCCountry: Seq[DiscountedRegion] = { //todo: a zone C check no longer makes sense in the domestic/row brave new world
 
-      if (ZONEC.contains(requestCountry)) { //todo
+      if (ZONEC.contains(requestCountry)) {
         val currency = CountryGroup.byCountryCode(requestCountry.alpha2).map(_.currency).getOrElse(Currency.USD)
         Seq(DiscountedRegion(
           title = requestCountry.name,
@@ -53,7 +46,7 @@ object WeeklyPromotion {
         title = "Rest of the world",
         description = "Posted to you by air mail",
         countries = ZONEC - requestCountry,
-        discountedPlans = plansForPromotion(promotion, promoCode, PlanPicker.plans(requestCountry),Currency.USD)
+        discountedPlans = plansForPromotion(promotion, promoCode, PlanPicker.restOfWorldPlans, Currency.USD)
       ))
 
     val UKregion: Set[DiscountedRegion] = {
@@ -125,11 +118,6 @@ object WeeklyPromotion {
 
   def plansForPromotion(maybePromotion: Option[PromoWithWeeklyLandingPage], promoCode: Option[PromoCode], catalogPlans: Seq[CatalogPlan.Paid], currency: Currency): List[DiscountedPlan] = {
 
-    println(s"promocode is $promoCode \n ------------------------ \n")
-    println(s"catalog plans $catalogPlans \n ------------------------ \n")
-    println(s"currency $currency \n ------------------------ \n")
-    println(s"maybePromotion $maybePromotion \n ------------------------ \n")
-
     def isSixWeek(catalogPlan: CatalogPlan.Paid): Boolean =
       catalogPlan.charges.billingPeriod match {
         case SixWeeks => true
@@ -176,11 +164,6 @@ object WeeklyPromotion {
 
   def getCheckoutUrl(maybePromotion: Option[PromoWithWeeklyLandingPage], plan: CatalogPlan.Paid, promoCode: Option[PromoCode], currency: Currency): Uri = {
 
-//    println(s"hey it's maybepromotion ${maybePromotion}")
-//    println(s"hey it's plan ${plan}")
-//    println(s"hey it's promocode ${promoCode}")
-//    println(s"hey it's currency ${currency}")
-    println(s"plan slug: ${plan.slug}")
     val baseUrl = s"checkout/${plan.slug}" ? ("countryGroup" -> CountryGroup.allGroups.find(_.currency == currency).getOrElse(CountryGroup.UK).id)
     val promotionValidForPlan = maybePromotion.exists(_.appliesTo.productRatePlanIds.contains(plan.id))
 
@@ -195,23 +178,22 @@ object WeeklyPromotion {
 object PlanPicker {
 
   private val UK = CountryGroup.UK.countries.toSet
-  private val UKdomestic = Set(CountryGroup.C.UK)
-  private val UKoverseas = UK diff UKdomestic
   private val US = CountryGroup.US.countries.toSet
   private val AU = CountryGroup.Australia.countries.toSet
   private val NZ = CountryGroup.NewZealand.countries.toSet
   private val EU = CountryGroup.Europe.countries.toSet
   private val CA = CountryGroup.Canada.countries.toSet
-  private val allCountries: Set[Country] = CountryGroup.allGroups.flatMap(_.countries).toSet
-  private val ZONEA: Set[Country] = UK ++ US
-  private val ZONEC = allCountries.diff(UK union US)
+
+  private val ZONEA = UK ++ US
 
   private val domesticCountries = Set(UK, US, CA, AU, NZ, EU).flatten //todo is that the definition?
 
-  private val internationalCountries = allCountries.diff(domesticCountries) //todo dedupe me
-
   val showUpdatedPrices = true
 
+  def restOfWorldPlans(implicit catalog: SubsCatalog): Seq[CatalogPlan.Paid]={
+    if(showUpdatedPrices) catalog.weekly.restOfWorld.plans
+    else catalog.weekly.zoneC.plans
+  }
   def plans(country: Country)(implicit catalog: SubsCatalog): Seq[CatalogPlan.Paid] = {
     if(showUpdatedPrices) {
       if(domesticCountries.contains(country)) catalog.weekly.domestic.plans

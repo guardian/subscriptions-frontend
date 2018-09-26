@@ -24,6 +24,9 @@ object ContentSubscriptionPlanOps {
   val weeklyZoneCGroups = weeklyZoneBGroups
   val ukAndIsleOfMan = CountryGroup.UK.copy(countries = List(Country.UK, Country("IM", "Isle of Man")))
 
+  val weeklyDomesticZone = List(weeklyUkCountries, CountryGroup.US, CountryGroup.Canada, CountryGroup.Australia, CountryGroup.NewZealand, CountryGroup.Europe)
+  val weeklyRestOfWorldZone = CountryGroup.allGroups.diff(weeklyDomesticZone)
+
   implicit class EnrichedContentSubscriptionPlan[+A <: CatalogPlan.ContentSubscription](in: A) {
 
     case class LocalizationSettings(availableDeliveryCountriesWithCurrency: Option[List[CountryWithCurrency]], availableBillingCountriesWithCurrency: List[CountryWithCurrency])
@@ -42,13 +45,17 @@ object ContentSubscriptionPlanOps {
           val voucherCountries = CountryWithCurrency.fromCountryGroup(ukAndIsleOfMan)
           LocalizationSettings(Some(voucherCountries), voucherCountries)
 
-        case Product.WeeklyZoneA | Product.WeeklyDomestic => LocalizationSettings(Some(CountryWithCurrency.whitelisted(supportedCurrencies, GBP, weeklyZoneAGroups)), allCountriesWithCurrencyOrGBP)
+        case Product.WeeklyDomestic => LocalizationSettings(Some(CountryWithCurrency.whitelisted(supportedCurrencies, GBP, weeklyDomesticZone)), allCountriesWithCurrencyOrGBP)
+
+        case Product.WeeklyZoneA => LocalizationSettings(Some(CountryWithCurrency.whitelisted(supportedCurrencies, GBP, weeklyZoneAGroups)), allCountriesWithCurrencyOrGBP)
 
         case Product.WeeklyZoneB => LocalizationSettings(Some(CountryWithCurrency.whitelisted(supportedCurrencies, USD, weeklyZoneBGroups)), allCountriesWithCurrencyOrGBP)
 
-        case Product.WeeklyZoneC | Product.WeeklyRestOfWorld => LocalizationSettings(Some(CountryWithCurrency.whitelisted(supportedCurrencies, USD, weeklyZoneCGroups)), allCountriesWithCurrencyOrGBP)
+        case Product.WeeklyRestOfWorld => LocalizationSettings(Some(CountryWithCurrency.whitelisted(supportedCurrencies, USD, weeklyRestOfWorldZone)), allCountriesWithCurrencyOrGBP)
+
+        case Product.WeeklyZoneC => LocalizationSettings(Some(CountryWithCurrency.whitelisted(supportedCurrencies, USD, weeklyZoneCGroups)), allCountriesWithCurrencyOrGBP)
       }
-    }
+    } //todo double check localisation settings
 
     def availableForCheckout: Boolean = in.charges.billingPeriod.isRecurring || in.charges.billingPeriod == SixWeeks
     def availableForRenewal: Boolean = in.charges.billingPeriod == Quarter || in.charges.billingPeriod == OneYear || in.charges.billingPeriod == Year
