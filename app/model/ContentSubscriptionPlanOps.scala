@@ -24,8 +24,6 @@ object ContentSubscriptionPlanOps {
   val weeklyZoneCGroups = weeklyZoneBGroups
   val ukAndIsleOfMan = CountryGroup.UK.copy(countries = List(Country.UK, Country("IM", "Isle of Man")))
 
-  val weeklyDomesticZone = List(weeklyUkCountries, CountryGroup.US, CountryGroup.Canada, CountryGroup.Australia, CountryGroup.NewZealand, CountryGroup.Europe)
-  val weeklyRestOfWorldZone = CountryGroup.allGroups.diff(weeklyDomesticZone)
 
   implicit class EnrichedContentSubscriptionPlan[+A <: CatalogPlan.ContentSubscription](in: A) {
 
@@ -45,13 +43,13 @@ object ContentSubscriptionPlanOps {
           val voucherCountries = CountryWithCurrency.fromCountryGroup(ukAndIsleOfMan)
           LocalizationSettings(Some(voucherCountries), voucherCountries)
 
-        case Product.WeeklyDomestic => LocalizationSettings(Some(CountryWithCurrency.whitelisted(supportedCurrencies, GBP, weeklyDomesticZone)), allCountriesWithCurrencyOrGBP)
+        case Product.WeeklyDomestic => LocalizationSettings(Some(CountryWithCurrency.whitelisted(supportedCurrencies, GBP, GuardianWeeklyZones.domesticZoneCountryGroups.toList)), allCountriesWithCurrencyOrGBP)
 
         case Product.WeeklyZoneA => LocalizationSettings(Some(CountryWithCurrency.whitelisted(supportedCurrencies, GBP, weeklyZoneAGroups)), allCountriesWithCurrencyOrGBP)
 
         case Product.WeeklyZoneB => LocalizationSettings(Some(CountryWithCurrency.whitelisted(supportedCurrencies, USD, weeklyZoneBGroups)), allCountriesWithCurrencyOrGBP)
 
-        case Product.WeeklyRestOfWorld => LocalizationSettings(Some(CountryWithCurrency.whitelisted(supportedCurrencies, USD, weeklyRestOfWorldZone)), allCountriesWithCurrencyOrGBP)
+        case Product.WeeklyRestOfWorld => LocalizationSettings(Some(CountryWithCurrency.whitelisted(supportedCurrencies, USD, GuardianWeeklyZones.restOfWorldZoneCountryGroups.toList)), allCountriesWithCurrencyOrGBP)
 
         case Product.WeeklyZoneC => LocalizationSettings(Some(CountryWithCurrency.whitelisted(supportedCurrencies, USD, weeklyZoneCGroups)), allCountriesWithCurrencyOrGBP)
       }

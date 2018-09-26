@@ -23,7 +23,7 @@ object WeeklyPromotion {
 
   case class DiscountedPlan(currency: Currency, pretty: String, headline: String, period: String, url: Uri, discounted: Boolean)
 
-  case class DiscountedRegion(title: String, description: String, countries: Set[Country], discountedPlans: List[DiscountedPlan])
+  case class DiscountedRegion(title: String, description: String, countries: Set[Country], discountedPlans: List[DiscountedPlan]) //todo: is countries used?
 
   def validRegionsForPromotion(promotion: Option[PromoWithWeeklyLandingPage], promoCode: Option[PromoCode], requestCountry: Country)(implicit catalog: SubsCatalog): Seq[DiscountedRegion] = {
     val promotionCountries = promotion.map(_.appliesTo.countries).getOrElse(allCountries)
@@ -177,17 +177,7 @@ object WeeklyPromotion {
 
 object PlanPicker {
 
-  private val UK = CountryGroup.UK.countries.toSet
-  private val US = CountryGroup.US.countries.toSet
-  private val AU = CountryGroup.Australia.countries.toSet
-  private val NZ = CountryGroup.NewZealand.countries.toSet
-  private val EU = CountryGroup.Europe.countries.toSet
-  private val CA = CountryGroup.Canada.countries.toSet
-
-  private val ZONEA = UK ++ US
-
-  private val domesticCountries = Set(UK, US, CA, AU, NZ, EU).flatten //todo is that the definition?
-
+  import model.GuardianWeeklyZones._
   val showUpdatedPrices = true
 
   def restOfWorldPlans(implicit catalog: SubsCatalog): Seq[CatalogPlan.Paid]={
@@ -196,11 +186,11 @@ object PlanPicker {
   }
   def plans(country: Country)(implicit catalog: SubsCatalog): Seq[CatalogPlan.Paid] = {
     if(showUpdatedPrices) {
-      if(domesticCountries.contains(country)) catalog.weekly.domestic.plans
+      if(domesticZoneCountries.contains(country)) catalog.weekly.domestic.plans
       else catalog.weekly.restOfWorld.plans
     }
     else {
-      if(ZONEA.contains(country)) catalog.weekly.zoneA.plans
+      if(zoneACountries.contains(country)) catalog.weekly.zoneA.plans
       else catalog.weekly.zoneC.plans
     }
   }

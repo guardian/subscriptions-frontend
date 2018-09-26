@@ -123,14 +123,14 @@ class Checkout(fBackendFactory: TouchpointBackends, commonActions: CommonActions
             case Product.Delivery => getSettings(UK.defaultCountry, UK.currency)
             case Product.Voucher => getSettings(UK.defaultCountry, UK.currency)
             case Product.WeeklyZoneA => {
-              if (Set(UK, US).contains(determinedCountryGroup)) {
+              if (GuardianWeeklyZones.zoneACountryGroups.contains(determinedCountryGroup)) {
                 getSettings(determinedCountryGroup.defaultCountry, determinedCountryGroup.currency)
               } else {
                 getSettings(UK.defaultCountry, UK.currency)
               }
             }
             case Product.WeeklyZoneB | Product.WeeklyZoneC => {
-              if (Set(UK, US).contains(determinedCountryGroup)) {
+              if (GuardianWeeklyZones.zoneACountryGroups.contains(determinedCountryGroup)) {
                 getSettings(None, USD)
 
               } else {
@@ -139,14 +139,14 @@ class Checkout(fBackendFactory: TouchpointBackends, commonActions: CommonActions
             }
 
             case Product.WeeklyDomestic => { //TODO moving domestic/row zone a/c definitions to one place
-              if (Set(UK, US, Canada, Australia, NewZealand, Europe).contains(determinedCountryGroup)) {
+              if (GuardianWeeklyZones.domesticZoneCountryGroups.contains(determinedCountryGroup)) {
                 getSettings(determinedCountryGroup.defaultCountry, determinedCountryGroup.currency)
               } else {
                 getSettings(UK.defaultCountry, UK.currency)
               }
             }
             case Product.WeeklyRestOfWorld => {
-              if (Set(UK, US, Canada, Australia, NewZealand, Europe).contains(determinedCountryGroup)) {
+              if (GuardianWeeklyZones.domesticZoneCountryGroups.contains(determinedCountryGroup)) {
                 getSettings(None, USD)
               } else {
                 getSettings(determinedCountryGroup.defaultCountry, determinedCountryGroup.currency)
