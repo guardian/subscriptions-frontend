@@ -72,7 +72,9 @@ class Checkout(fBackendFactory: TouchpointBackends, commonActions: CommonActions
 
         val productsWithIntroductoryPlans = List(
           catalog.weekly.zoneA.plansWithAssociations,
-          catalog.weekly.zoneC.plansWithAssociations
+          catalog.weekly.zoneC.plansWithAssociations,
+          catalog.weekly.domestic.plansWithAssociations,
+          catalog.weekly.restOfWorld.plansWithAssociations
         ) ++ testOnlyPlans
 
         val contentSubscriptionPlans = productsWithoutIntroductoryPlans ++ productsWithIntroductoryPlans
@@ -128,6 +130,20 @@ class Checkout(fBackendFactory: TouchpointBackends, commonActions: CommonActions
               }
             }
             case Product.WeeklyZoneB | Product.WeeklyZoneC => {
+              if (Set(UK, US).contains(determinedCountryGroup)) {
+                getSettings(None, USD)
+              } else {
+                getSettings(determinedCountryGroup.defaultCountry, determinedCountryGroup.currency)
+              }
+            }
+            case Product.WeeklyDomestic => {
+              if (Set(UK, US).contains(determinedCountryGroup)) {
+                getSettings(determinedCountryGroup.defaultCountry, determinedCountryGroup.currency)
+              } else {
+                getSettings(UK.defaultCountry, UK.currency)
+              }
+            }
+            case Product.WeeklyRestOfWorld => {
               if (Set(UK, US).contains(determinedCountryGroup)) {
                 getSettings(None, USD)
               } else {

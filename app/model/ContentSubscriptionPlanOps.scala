@@ -42,11 +42,11 @@ object ContentSubscriptionPlanOps {
           val voucherCountries = CountryWithCurrency.fromCountryGroup(ukAndIsleOfMan)
           LocalizationSettings(Some(voucherCountries), voucherCountries)
 
-        case Product.WeeklyZoneA => LocalizationSettings(Some(CountryWithCurrency.whitelisted(supportedCurrencies, GBP, weeklyZoneAGroups)), allCountriesWithCurrencyOrGBP)
+        case Product.WeeklyZoneA | Product.WeeklyDomestic => LocalizationSettings(Some(CountryWithCurrency.whitelisted(supportedCurrencies, GBP, weeklyZoneAGroups)), allCountriesWithCurrencyOrGBP)
 
         case Product.WeeklyZoneB => LocalizationSettings(Some(CountryWithCurrency.whitelisted(supportedCurrencies, USD, weeklyZoneBGroups)), allCountriesWithCurrencyOrGBP)
 
-        case Product.WeeklyZoneC => LocalizationSettings(Some(CountryWithCurrency.whitelisted(supportedCurrencies, USD, weeklyZoneCGroups)), allCountriesWithCurrencyOrGBP)
+        case Product.WeeklyZoneC | Product.WeeklyRestOfWorld => LocalizationSettings(Some(CountryWithCurrency.whitelisted(supportedCurrencies, USD, weeklyZoneCGroups)), allCountriesWithCurrencyOrGBP)
       }
     }
 

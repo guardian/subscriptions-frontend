@@ -180,6 +180,7 @@ object WeeklyPromotion {
 //    println(s"hey it's plan ${plan}")
 //    println(s"hey it's promocode ${promoCode}")
 //    println(s"hey it's currency ${currency}")
+    println(s"plan slug: ${plan.slug}")
     val baseUrl = s"checkout/${plan.slug}" ? ("countryGroup" -> CountryGroup.allGroups.find(_.currency == currency).getOrElse(CountryGroup.UK).id)
     val promotionValidForPlan = maybePromotion.exists(_.appliesTo.productRatePlanIds.contains(plan.id))
 
@@ -209,7 +210,7 @@ object PlanPicker {
 
   private val internationalCountries = allCountries.diff(domesticCountries) //todo dedupe me
 
-  val showUpdatedPrices = false
+  val showUpdatedPrices = true
 
   def plans(country: Country)(implicit catalog: SubsCatalog): Seq[CatalogPlan.Paid] = {
     if(showUpdatedPrices) {
