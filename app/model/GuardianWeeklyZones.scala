@@ -11,6 +11,7 @@ object GuardianWeeklyZones {
   val domesticZoneCountryGroups = Set(
     CountryGroup.UK,
     CountryGroup.US,
+    CountryGroup.Australia,
     CountryGroup.Canada,
     CountryGroup.US,
     CountryGroup.NewZealand,
