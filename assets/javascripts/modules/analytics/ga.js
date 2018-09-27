@@ -47,6 +47,9 @@ define(['modules/analytics/analyticsEnabled',
         ga('membershipPropertyTracker.set', 'dimension2', identitySignedOut.toString());  // deprecated - is logically equivalent to: dimension6 != "" and dimension7 === "false"
         (guardian.ophan) && ga('membershipPropertyTracker.set', 'dimension3', guardian.ophan.pageViewId); // ophanPageview Id
         (ophanBrowserId) && ga('membershipPropertyTracker.set', 'dimension4', ophanBrowserId); // ophanBrowserId
+        // If we have an ophanBrowserId then set it as the GA User Id, this will enable us to join up client side and server side tracking.
+        // See: https://support.google.com/analytics/answer/3123663
+        (ophanBrowserId) && ga('set', 'userId', ophanBrowserId);
         ga('membershipPropertyTracker.set', 'dimension5', 'subscriptions');               // platform
         (identitySignedIn) && ga('membershipPropertyTracker.set', 'dimension6', user.getUserFromCookie().id); // identityId
         ga('membershipPropertyTracker.set', 'dimension7', identitySignedIn.toString());   // isLoggedOn
