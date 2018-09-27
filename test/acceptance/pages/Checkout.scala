@@ -8,6 +8,14 @@ import org.scalatest.selenium.Page
 case class Checkout(testUser: TestUser, endpoint: String = "checkout") extends Page with Browser {
   val url = s"$baseUrl/$endpoint"
 
+  def basketPreviewProductPaymentHasLoaded(): Boolean = pageHasElement(BasketPreviewProductPayment.priceSummary)
+
+  def currencyOverrideHasLoaded(): Boolean = pageHasElement(BasketPreviewProductPayment.currencyOverride)
+
+  def basketPreviewProductPaymentContains(expected: String) = {
+    elementHasText(BasketPreviewProductPayment.priceSummary, expected)
+  }
+
   def fillInPersonalDetails(): Unit = PersonalDetails.fillIn()
 
   def clickPersonalDetailsContinueButton() = PersonalDetails.continue()
@@ -130,5 +138,10 @@ case class Checkout(testUser: TestUser, endpoint: String = "checkout") extends P
 
   private object ReviewSection {
     val submitPaymentButton = cssSelector(".js-checkout-submit")
+  }
+
+  private object BasketPreviewProductPayment {
+    val priceSummary = cssSelector(".basket-preview__product__payment")
+    val currencyOverride = cssSelector(".js-checkout-currency-override")
   }
 }
