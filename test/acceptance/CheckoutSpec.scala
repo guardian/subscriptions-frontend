@@ -114,7 +114,7 @@ class CheckoutSpec extends FeatureSpec with Browser
     }
 
     /*
-          TESTS WITH PRE-INCREASE PRICES
+          TESTS WITH OLD ZONES/RATES
      */
 
     scenario("Weekly quarterly sub purchase (old pricing - ZoneA) from UK for UK delivery", Acceptance) {
@@ -190,7 +190,7 @@ class CheckoutSpec extends FeatureSpec with Browser
     }
 
     /*
-          TESTS WITH POST-INCREASE PRICES
+          TESTS WITH NEW ZONES/RATES
      */
 
     scenario("Weekly quarterly sub purchase (new pricing - domestic) from UK for UK delivery", Acceptance) {
@@ -247,7 +247,7 @@ class CheckoutSpec extends FeatureSpec with Browser
       assert(checkout.currencyOverrideHasLoaded())
     }
 
-    scenario("Weekly quarterly sub purchase (new pricing - restofworld) from ROW for UK delivery", Acceptance) {
+    scenario("Weekly quarterly sub purchase (new pricing - domestic) from ROW for UK delivery", Acceptance) {
       checkDependenciesAreAvailable
       val testUser = new TestUser
       val checkout = Checkout(testUser, "checkout/weeklydomestic-gwoct18-quarterly-domestic?countryGroup=uk")
@@ -264,7 +264,6 @@ class CheckoutSpec extends FeatureSpec with Browser
       And("the 'Pay in GBP' override should NOT load")
       assert(!checkout.currencyOverrideHasLoaded())
     }
-
 
 
     //temporarily ignoring this until user details pre-fill is fixed
