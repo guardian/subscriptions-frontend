@@ -40,7 +40,7 @@ object WeeklyPromotion {
     val restOfWorldRegion = Seq(DiscountedRegion(
       title = "Rest of the world",
       description = "Posted to you by air mail",
-      discountedPlans = plansForPromotion(promotion, promoCode, PlanPicker.restOfWorldPlans, Currency.USD)
+      discountedPlans = plansForPromotion(promotion, promoCode, PlanPicker.restOfWorldOrZoneCPlans(), Currency.USD)
     ))
 
     val UKregion: Set[DiscountedRegion] = {
@@ -95,7 +95,7 @@ object WeeklyPromotion {
     val EUregion = Seq(DiscountedRegion(
       title = "Europe",
       description = "Posted to you by air mail",
-      discountedPlans = plansForPromotion(promotion, promoCode, PlanPicker.plans(CountryGroup.Europe),Currency.EUR)
+      discountedPlans = plansForPromotion(promotion, promoCode, PlanPicker.plansForCountryGroup(CountryGroup.Europe),Currency.EUR)
     ))
 
     val regions: Seq[DiscountedRegion] = separateRegionIfRequestCountryIsRestOfWorld ++ UKregion ++ USregion ++ EUregion ++ AUSregion ++  NZregion ++ CAregion  ++ restOfWorldRegion
@@ -166,17 +166,17 @@ object PlanPicker {
   import model.GuardianWeeklyZones._
   val showUpdatedPrices = true
 
-  def isInRestOfWorldOrZoneC(country: Country) = {
+  def isInRestOfWorldOrZoneC(country: Country, showUpdatedPrices: Boolean = showUpdatedPrices): Boolean = {
     if(showUpdatedPrices) GuardianWeeklyZones.restOfWorldZoneCountries.contains(country)
     else GuardianWeeklyZones.zoneCCountries.contains(country)
   }
 
-  def restOfWorldPlans(implicit catalog: SubsCatalog): Seq[CatalogPlan.Paid] = {
+  def restOfWorldOrZoneCPlans(showUpdatedPrices: Boolean = showUpdatedPrices)(implicit catalog: SubsCatalog): Seq[CatalogPlan.Paid] = {
     if(showUpdatedPrices) catalog.weekly.restOfWorld.plans
     else catalog.weekly.zoneC.plans
   }
 
-  def plans(country: Country)(implicit catalog: SubsCatalog): Seq[CatalogPlan.Paid] = {
+  def plans(country: Country, showUpdatedPrices: Boolean = showUpdatedPrices)(implicit catalog: SubsCatalog): Seq[CatalogPlan.Paid] = {
     if(showUpdatedPrices) {
       if(domesticZoneCountries.contains(country)) catalog.weekly.domestic.plans
       else catalog.weekly.restOfWorld.plans
@@ -187,7 +187,7 @@ object PlanPicker {
     }
   }
 
-  def plans(countryGroup: CountryGroup)(implicit catalog: SubsCatalog): Seq[CatalogPlan.Paid] = {
+  def plansForCountryGroup(countryGroup: CountryGroup, showUpdatedPrices: Boolean = showUpdatedPrices)(implicit catalog: SubsCatalog): Seq[CatalogPlan.Paid] = {
     if(showUpdatedPrices) {
       if(domesticZoneCountryGroups.contains(countryGroup)) catalog.weekly.domestic.plans
       else catalog.weekly.restOfWorld.plans
