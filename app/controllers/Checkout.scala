@@ -138,7 +138,7 @@ class Checkout(fBackendFactory: TouchpointBackends, commonActions: CommonActions
               }
             }
 
-            case Product.WeeklyDomestic => { //TODO moving domestic/row zone a/c definitions to one place
+            case Product.WeeklyDomestic => {
               if (GuardianWeeklyZones.domesticZoneCountryGroups.contains(determinedCountryGroup)) {
                 getSettings(determinedCountryGroup.defaultCountry, determinedCountryGroup.currency)
               } else {
