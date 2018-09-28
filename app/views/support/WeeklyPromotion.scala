@@ -25,7 +25,9 @@ object WeeklyPromotion {
   def validRegionsForPromotion(promotion: Option[PromoWithWeeklyLandingPage], promoCode: Option[PromoCode], requestCountry: Country)(implicit catalog: SubsCatalog): Seq[DiscountedRegion] = {
     val promotionCountries = promotion.map(_.appliesTo.countries).getOrElse(allCountries)
 
-    val separateRegionIfRequestCountryIsRestOfWorld: Seq[DiscountedRegion] = {
+    // If a user does not qualify for domestic delivery (e.g. if the user is based in South Africa),
+    // we want to explicitly call out their (likely) delivery country on the landing page
+    val promotedRegion: Seq[DiscountedRegion] = {
       if (PlanPicker.isInRestOfWorldOrZoneC(requestCountry: Country)) {
         val currency = CountryGroup.byCountryCode(requestCountry.alpha2).map(_.currency).getOrElse(Currency.USD)
         Seq(DiscountedRegion(
@@ -99,7 +101,7 @@ object WeeklyPromotion {
       discountedPlans = plansForPromotion(promotion, promoCode, PlanPicker.plansForCountryGroup(CountryGroup.Europe),Currency.EUR)
     ))
 
-    val regions: Seq[DiscountedRegion] = separateRegionIfRequestCountryIsRestOfWorld ++ UKregion ++ USregion ++ EUregion ++ AUSregion ++  NZregion ++ CAregion  ++ restOfWorldRegion
+    val regions: Seq[DiscountedRegion] = promotedRegion ++ UKregion ++ USregion ++ EUregion ++ AUSregion ++  NZregion ++ CAregion  ++ restOfWorldRegion
     regions.filter(_.discountedPlans.nonEmpty)
   }
 
