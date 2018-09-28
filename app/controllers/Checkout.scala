@@ -1,5 +1,7 @@
 package controllers
 
+import java.util.UUID
+
 import actions.CommonActions
 import cats.instances.future._
 import com.gu.i18n.CountryGroup._
@@ -304,11 +306,17 @@ class Checkout(fBackendFactory: TouchpointBackends, commonActions: CommonActions
       }
 
       val promotion = subscribeRequest.genericData.promoCode.map(_.get).flatMap(code => tpBackend.promoService.findPromotion(NormalisedPromoCode.safeFromString(code)))
+      val clientBrowserInfo = ClientBrowserInfo(
+        request.cookies.get("_ga").map(_.value).getOrElse(UUID.randomUUID().toString), //Get GA client id from cookie
+        request.headers.get("user-agent"),
+        request.remoteAddress
+      )
 
-      OphanService(isTestService = tpBackend.environmentName != "PROD")
-        .submit(SubscriptionAcquisitionComponents(subscribeRequest, promotion, acquisitionData))
+      //This service is mocked unless it's running in PROD, change to test acquisition events are working
+      AcquisitionService(isTestService = tpBackend.environmentName != "PROD")
+        .submit(SubscriptionAcquisitionComponents(subscribeRequest, promotion, acquisitionData, clientBrowserInfo))
         .leftMap(
-          err => logger.warn(s"Error submitting acquisition data to Ophan. $err")
+          err => logger.warn(s"Error submitting acquisition data. $err")
         )
 
       logger.info(s"User successfully became subscriber:\n\tUser: SF=${r.salesforceMember.salesforceContactId}\n\tPlan: ${subscribeRequest.productData.fold(_.plan, _.plan).name}\n\tSubscription: ${r.subscribeResult.subscriptionName}")

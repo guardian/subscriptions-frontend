@@ -2,7 +2,8 @@ package views.support
 
 import com.gu.i18n.{Country, CountryGroup, Currency}
 import com.gu.memsub.BillingPeriod._
-import com.gu.memsub.promo.Promotion.{CovariantId, PromoWithWeeklyLandingPage}
+import com.gu.memsub.promo.CovariantIdObject.CovariantId
+import com.gu.memsub.promo.Promotion.PromoWithWeeklyLandingPage
 import com.gu.memsub.promo.{PromoCode, WeeklyLandingPage}
 import com.gu.memsub.subsv2.{CatalogPlan, Catalog => SubsCatalog}
 import com.netaporter.uri.Uri

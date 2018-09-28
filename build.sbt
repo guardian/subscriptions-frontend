@@ -36,7 +36,7 @@ lazy val root = (project in file(".")).enablePlugins(
       "com.gu.memsub.Subscription.ProductRatePlanId"
   ))
 
-scalaVersion := "2.11.12"
+scalaVersion := "2.12.6"
 scalacOptions ++= Seq("-feature")
 
 val scalatestVersion = "3.0.4"
@@ -47,7 +47,7 @@ libraryDependencies ++= Seq(
     filters,
     jodaForms,
     PlayImport.specs2 % "test",
-    "com.gu" %% "membership-common" % "0.1-SNAPSHOT",
+    "com.gu" %% "membership-common" % "0.523",
     "com.gu.identity" %% "identity-play-auth" % "2.4",
     "com.gu" %% "identity-test-users" % "0.6",
     "com.gu" %% "play-googleauth" % "0.7.6",
@@ -71,7 +71,7 @@ libraryDependencies ++= Seq(
     "com.gu" % "kinesis-logback-appender" % "1.4.2",
     "net.logstash.logback" % "logstash-logback-encoder" % "4.11",
     "com.fasterxml.jackson.dataformat" % "jackson-dataformat-cbor" % "2.9.2",
-    "com.gu" %% "acquisition-event-producer-play26" % "3.0.0",
+    "com.gu" %% "acquisition-event-producer-play26" % "4.0.5",
     "com.google.guava" % "guava" % "25.0-jre", //-- added explicitly - snyk report avoid logback vulnerability
     "com.fasterxml.jackson.core" % "jackson-databind" % "2.8.11.1",
     "ch.qos.logback" % "logback-classic" % "1.2.3", //-- added explicitly - snyk report avoid logback vulnerability
