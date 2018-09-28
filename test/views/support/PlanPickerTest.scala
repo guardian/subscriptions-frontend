@@ -26,6 +26,12 @@ class PlanPickerTest extends Specification with Mockito {
   mockWeeklyPlans.domestic returns mockWeeklyDomesticPlans
   mockWeeklyPlans.restOfWorld returns mockWeeklyRestOfWorldPlans
 
+  mockWeeklyZoneAPlans.plans returns Nil
+  mockWeeklyZoneBPlans.plans returns Nil
+  mockWeeklyZoneCPlans.plans returns Nil
+  mockWeeklyDomesticPlans.plans returns Nil
+  mockWeeklyRestOfWorldPlans.plans returns Nil
+
   mockCatalog.weekly returns mockWeeklyPlans
 
   mockCatalog.weekly.restOfWorld returns mockWeeklyRestOfWorldPlans
@@ -49,14 +55,14 @@ class PlanPickerTest extends Specification with Mockito {
     }
   }
 
-//  "restOfWorldOrZoneCPlans" should {
-//    "return the rest of world plans when updated prices are switched on" in {
-//      PlanPicker.restOfWorldOrZoneCPlans(true) shouldEqual mockWeeklyRestOfWorldPlans
-//    }
-//
-//    "return the zone C plans when updated prices are switched off" in {
-//      PlanPicker.restOfWorldOrZoneCPlans(false) shouldEqual mockWeeklyZoneCPlans
-//    }
-//  }
+  "restOfWorldOrZoneCPlans" should {
+    "return the rest of world plans when updated prices are switched on" in {
+      PlanPicker.restOfWorldOrZoneCPlans(true) shouldEqual mockWeeklyRestOfWorldPlans.plans
+    }
+
+    "return the zone C plans when updated prices are switched off" in {
+      PlanPicker.restOfWorldOrZoneCPlans(false) shouldEqual mockWeeklyZoneCPlans.plans
+    }
+  }
 
 }

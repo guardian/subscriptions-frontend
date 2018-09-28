@@ -1,7 +1,7 @@
 package views.support
 
 import com.gu.i18n.Currency
-import com.gu.i18n.Currency.{CAD, GBP}
+import com.gu.i18n.Currency.GBP
 import com.gu.memsub.Benefit.{Digipack, Weekly}
 import com.gu.memsub.BillingPeriod._
 import com.gu.memsub.promo.PercentDiscount.getDiscountScaledToPeriod
@@ -20,6 +20,7 @@ object Pricing {
     def unsafePrice(currency: Currency) = plan.price.getPrice(currency).getOrElse(
       throw new NoSuchElementException(s"Could not find a price in $currency for charge list")
     )
+
     def prettyPricing(currency: Currency) =
       s"${unsafePrice(currency).pretty} ${plan.billingPeriod.frequencyInMonths}"
 
