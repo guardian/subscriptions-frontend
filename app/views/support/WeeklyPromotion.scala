@@ -7,16 +7,15 @@ import com.gu.memsub.promo.{PromoCode, WeeklyLandingPage}
 import com.gu.memsub.subsv2.{CatalogPlan, Catalog => SubsCatalog}
 import com.netaporter.uri.Uri
 import com.netaporter.uri.dsl._
+import model.GuardianWeeklyZones
 import views.support.Pricing._
 
 object WeeklyPromotion {
   private val UK = CountryGroup.UK.countries.toSet
   private val UKdomestic = Set(CountryGroup.C.UK)
   private val UKoverseas = UK diff UKdomestic
-  private val US = CountryGroup.US.countries.toSet
 
   private val allCountries = CountryGroup.allGroups.flatMap(_.countries).toSet
-  private val ZONEC = allCountries.diff(UK union US)
 
   case class DiscountedPlan(currency: Currency, pretty: String, headline: String, period: String, url: Uri, discounted: Boolean)
 
@@ -25,9 +24,8 @@ object WeeklyPromotion {
   def validRegionsForPromotion(promotion: Option[PromoWithWeeklyLandingPage], promoCode: Option[PromoCode], requestCountry: Country)(implicit catalog: SubsCatalog): Seq[DiscountedRegion] = {
     val promotionCountries = promotion.map(_.appliesTo.countries).getOrElse(allCountries)
 
-    val regionForZoneCCountry: Seq[DiscountedRegion] = { //todo: a zone C check no longer makes sense in the domestic/row brave new world
-
-      if (ZONEC.contains(requestCountry)) {
+    val separateRegionIfRequestCountryIsRestOfWorld: Seq[DiscountedRegion] = {
+      if (PlanPicker.isInRestOfWorldOrZoneC(requestCountry: Country)) {
         val currency = CountryGroup.byCountryCode(requestCountry.alpha2).map(_.currency).getOrElse(Currency.USD)
         Seq(DiscountedRegion(
           title = requestCountry.name,
@@ -38,11 +36,12 @@ object WeeklyPromotion {
         Seq()
       }
     }
-    val rowWithoutCountry: Seq[DiscountedRegion] = Seq(DiscountedRegion(
-        title = "Rest of the world",
-        description = "Posted to you by air mail",
-        discountedPlans = plansForPromotion(promotion, promoCode, PlanPicker.restOfWorldPlans, Currency.USD)
-      ))
+
+    val restOfWorldRegion = Seq(DiscountedRegion(
+      title = "Rest of the world",
+      description = "Posted to you by air mail",
+      discountedPlans = plansForPromotion(promotion, promoCode, PlanPicker.restOfWorldPlans, Currency.USD)
+    ))
 
     val UKregion: Set[DiscountedRegion] = {
       val all = DiscountedRegion(
@@ -99,7 +98,7 @@ object WeeklyPromotion {
       discountedPlans = plansForPromotion(promotion, promoCode, PlanPicker.plans(CountryGroup.Europe),Currency.EUR)
     ))
 
-    val regions: Seq[DiscountedRegion] = regionForZoneCCountry ++ UKregion ++ USregion ++ EUregion ++ AUSregion ++  NZregion ++ CAregion  ++ rowWithoutCountry
+    val regions: Seq[DiscountedRegion] = separateRegionIfRequestCountryIsRestOfWorld ++ UKregion ++ USregion ++ EUregion ++ AUSregion ++  NZregion ++ CAregion  ++ restOfWorldRegion
     regions.filter(_.discountedPlans.nonEmpty)
   }
 
@@ -166,6 +165,11 @@ object PlanPicker {
 
   import model.GuardianWeeklyZones._
   val showUpdatedPrices = true
+
+  def isInRestOfWorldOrZoneC(country: Country) = {
+    if(showUpdatedPrices) GuardianWeeklyZones.restOfWorldZoneCountries.contains(country)
+    else GuardianWeeklyZones.zoneCCountries.contains(country)
+  }
 
   def restOfWorldPlans(implicit catalog: SubsCatalog): Seq[CatalogPlan.Paid] = {
     if(showUpdatedPrices) catalog.weekly.restOfWorld.plans
