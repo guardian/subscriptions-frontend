@@ -167,7 +167,7 @@ object WeeklyPromotion {
 object PlanPicker {
 
   import model.GuardianWeeklyZones._
-  val showUpdatedPrices = true
+  val showUpdatedPrices = false
 
   def isInRestOfWorldOrZoneC(country: Country, showUpdatedPrices: Boolean = showUpdatedPrices): Boolean = {
     if(showUpdatedPrices) GuardianWeeklyZones.restOfWorldZoneCountries.contains(country)
