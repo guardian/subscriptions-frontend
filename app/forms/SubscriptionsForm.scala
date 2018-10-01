@@ -33,9 +33,7 @@ class SubscriptionsForm(catalog: Catalog) {
       catalog.voucher.list.toList ++
       catalog.weekly.zoneA.plans.filter(_.availableForCheckout) ++
       catalog.weekly.zoneB.plans.filter(_.availableForCheckout) ++
-      catalog.weekly.zoneC.plans ++
-      catalog.weekly.domestic.plans ++
-      catalog.weekly.restOfWorld.plans
+      catalog.weekly.zoneC.plans
     override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], CatalogPlan.Paper] =
       data.get(key).map(ProductRatePlanId).flatMap(prpId => validPlans.find(_.id == prpId)).toRight(Seq(FormError(key, "Bad plan")))
     override def unbind(key: String, value: CatalogPlan.Paper): Map[String, String] =

@@ -24,6 +24,8 @@ class WeeklyLandingPage(tpBackend: TouchpointBackend, commonActions: CommonActio
 
   val international = "int"
 
+  val catalog = tpBackend.catalogService.catalog.map(_.valueOr(e => throw new IllegalStateException(s"$e while getting catalog")))
+
   def index(country: Option[Country]) = NoCacheAction { implicit request =>
     val maybeCountry = country orElse request.getFastlyCountry
     Redirect(routes.WeeklyLandingPage.withCountry(maybeCountry.map(_.alpha2).getOrElse(international)).url, request.queryString, TEMPORARY_REDIRECT)

@@ -24,7 +24,6 @@ object ContentSubscriptionPlanOps {
   val weeklyZoneCGroups = weeklyZoneBGroups
   val ukAndIsleOfMan = CountryGroup.UK.copy(countries = List(Country.UK, Country("IM", "Isle of Man")))
 
-
   implicit class EnrichedContentSubscriptionPlan[+A <: CatalogPlan.ContentSubscription](in: A) {
 
     case class LocalizationSettings(availableDeliveryCountriesWithCurrency: Option[List[CountryWithCurrency]], availableBillingCountriesWithCurrency: List[CountryWithCurrency])
@@ -43,13 +42,9 @@ object ContentSubscriptionPlanOps {
           val voucherCountries = CountryWithCurrency.fromCountryGroup(ukAndIsleOfMan)
           LocalizationSettings(Some(voucherCountries), voucherCountries)
 
-        case Product.WeeklyDomestic => LocalizationSettings(Some(CountryWithCurrency.whitelisted(supportedCurrencies, GBP, GuardianWeeklyZones.domesticZoneCountryGroups.toList)), allCountriesWithCurrencyOrGBP)
-
         case Product.WeeklyZoneA => LocalizationSettings(Some(CountryWithCurrency.whitelisted(supportedCurrencies, GBP, weeklyZoneAGroups)), allCountriesWithCurrencyOrGBP)
 
         case Product.WeeklyZoneB => LocalizationSettings(Some(CountryWithCurrency.whitelisted(supportedCurrencies, USD, weeklyZoneBGroups)), allCountriesWithCurrencyOrGBP)
-
-        case Product.WeeklyRestOfWorld => LocalizationSettings(Some(CountryWithCurrency.whitelisted(supportedCurrencies, USD, GuardianWeeklyZones.restOfWorldZoneCountryGroups.toList)), allCountriesWithCurrencyOrGBP)
 
         case Product.WeeklyZoneC => LocalizationSettings(Some(CountryWithCurrency.whitelisted(supportedCurrencies, USD, weeklyZoneCGroups)), allCountriesWithCurrencyOrGBP)
       }
