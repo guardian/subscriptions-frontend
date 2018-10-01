@@ -1,6 +1,8 @@
 import actions.{CommonActions, OAuthActions}
 import com.gu.googleauth.GoogleAuthConfig
 import com.gu.memsub.auth.common.MemSub.Google.googleAuthConfigFor
+import com.gu.monitoring.SafeLogger
+import com.gu.monitoring.SafeLogger._
 import configuration.Config
 import configuration.Config.config
 import controllers._
@@ -22,9 +24,15 @@ class MyApplicationLoader extends ApplicationLoader {
     LoggerConfigurator(context.environment.classLoader).foreach {
       _.configure(context.environment)
     }
-    SentryLogging.init()
-    Logstash.init(Config)
-    new MyComponents(context).application
+    try {
+      SentryLogging.init()
+      Logstash.init(Config)
+      new MyComponents(context).application
+    } catch {
+      case e: Throwable =>
+        SafeLogger.error(scrub"Failed to load application due to $e")
+        throw e
+    }
   }
 }
 
