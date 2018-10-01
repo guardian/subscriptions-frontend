@@ -3,10 +3,11 @@ import actions.{CommonActions, OAuthActions}
 import com.gu.i18n.CountryGroup.byCountryCode
 import com.gu.i18n.{Country, CountryGroup}
 import com.gu.memsub.Benefit.Digipack
+import com.gu.memsub.Subscription
 import com.gu.memsub.promo.Formatters.PromotionFormatters._
 import com.gu.memsub.promo.Promotion._
 import com.gu.memsub.promo._
-import com.gu.memsub.subsv2.Catalog
+import com.gu.memsub.subsv2.{Catalog, WeeklyPlans}
 import com.netaporter.uri.dsl._
 import configuration.Config
 import controllers.SessionKeys.PromotionTrackingCode
