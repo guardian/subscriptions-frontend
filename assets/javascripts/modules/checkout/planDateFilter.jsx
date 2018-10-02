@@ -28,6 +28,7 @@ define([
 
         let filters = validDays[deliveredProduct];
 
+        // This matching is based on the rate plan name
         switch (true) {
             case /Weekly/i.test(packageName) || /GW/i.test(packageName):
                 return filters;
