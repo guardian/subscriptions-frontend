@@ -9,6 +9,7 @@
 @import views.support.Pricing._
 @import views.support.{CountryAndCurrencySettings, ProductPopulationData}
 
+@import com.gu.memsub.Product.WeeklyRestOfWorld
 @(
     personalData: Option[PersonalData],
     productData: ProductPopulationData,
@@ -89,7 +90,7 @@
             <div class="checkout-container__sidebar js-basket">
                 @fragments.checkout.basketPreview(productData.plans.default)
 
-                @if(productData.plans.default.product == WeeklyZoneC) {
+                @if(productData.plans.default.product == WeeklyZoneC || productData.plans.default.product == WeeklyRestOfWorld) {
                     <div class="js-checkout-currency-override">
                         <label class="option">
                             <span class="option__input">
