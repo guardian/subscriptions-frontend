@@ -81,7 +81,14 @@ class CheckoutService(
     case _ => false
   }
 
-  private val allSixWeekAssociations = catalog.map(catalog => List(catalog.weekly.zoneA.associations, catalog.weekly.zoneC.associations).flatten)
+  private val allSixWeekAssociations = catalog.map { catalog =>
+    List(
+      catalog.weekly.zoneA.associations,
+      catalog.weekly.zoneC.associations,
+      catalog.weekly.domestic.associations,
+      catalog.weekly.restOfWorld.associations
+    ).flatten
+  }
 
   // This method is not genericised because the '6' is not stored in the association.
   def processSixWeekIntroductoryPeriod(daysUntilFirstIssue: Days, originalCommand: Subscribe): Future[Subscribe] = {
