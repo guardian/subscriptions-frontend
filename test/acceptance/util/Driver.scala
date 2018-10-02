@@ -16,7 +16,7 @@ object Driver {
 
   def reset() = {
     Driver.manage().deleteAllCookies()
-    Driver.get(Config.baseUrl)
+    Driver.get(s"${Config.baseUrl}/healthcheck")
   }
 
   def cookiesSet: Set[Cookie] = manage().getCookies.asScala.toSet

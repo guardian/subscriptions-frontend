@@ -12,7 +12,7 @@ import scala.util.Try
 object Dependencies {
 
   object SubscriptionFrontend extends Availability {
-    val url = Config.baseUrl
+    val url = s"${Config.baseUrl}/healthcheck"
   }
 
   object IdentityFrontend extends Availability {
