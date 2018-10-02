@@ -1,7 +1,7 @@
 {
     "checkpoints": {
         "PROD": {
-            "url": "https://subscribe.theguardian.com/",
+            "url": "https://subscribe.theguardian.com/management/manifest",
             "overdue": "14M",
             "afterSeen": {
                 "travis": {
