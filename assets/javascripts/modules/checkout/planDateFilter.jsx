@@ -29,7 +29,7 @@ define([
         let filters = validDays[deliveredProduct];
 
         switch (true) {
-            case /Weekly/i.test(packageName):
+            case /Weekly/i.test(packageName) || /GW/i.test(packageName):
                 return filters;
             case /Saturday/i.test(packageName):
                 return filters.saturday;
