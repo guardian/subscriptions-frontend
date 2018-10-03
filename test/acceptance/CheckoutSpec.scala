@@ -117,7 +117,7 @@ class CheckoutSpec extends FeatureSpec with Browser
           TESTS WITH OLD ZONES/RATES
      */
 
-    scenario("Weekly quarterly sub purchase (old pricing - ZoneA) from UK for UK delivery", Acceptance) {
+    scenario("Weekly quarterly sub purchase (old pricing - ZoneA) from UK for UK delivery", Weekly) {
       checkDependenciesAreAvailable
       val testUser = new TestUser
       val checkout = Checkout(testUser, "checkout/weeklyzonea-guardianweeklyquarterly?countryGroup=uk")
