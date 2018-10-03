@@ -174,7 +174,7 @@ object PlanPicker {
 
   def showUpdatedPrices = {
     val now = DateTime.now().withZone(DateTimeZone.UTC)
-    val threshold = DateTime.parse("2018-10-10T08:00:00").withZone(DateTimeZone.UTC)
+    val threshold = DateTime.parse("2018-10-10T09:45:00").withZone(DateTimeZone.UTC)
     now.isAfter(threshold)
   }
 
