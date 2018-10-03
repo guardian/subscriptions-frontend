@@ -229,7 +229,7 @@ class CheckoutSpec extends FeatureSpec with Browser
       assert(!checkout.currencyOverrideHasLoaded())
     }
 
-    scenario("Weekly quarterly sub purchase (new pricing - restofworld) from ROW for ROW delivery", Acceptance) {
+    scenario("Weekly quarterly sub purchase (new pricing - restofworld) for ROW delivery", Acceptance) {
       checkDependenciesAreAvailable
       val testUser = new TestUser
       val checkout = Checkout(testUser, "checkout/weeklyrestofworld-gwoct18-quarterly-row?countryGroup=us")
