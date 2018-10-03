@@ -80,18 +80,33 @@ class PromoLandingPage(
       }
     }
 
-    private def getWeeklyLandingPage(promotion: AnyPromotion, country: Country, hreflangs: Hreflangs)(implicit promoCode: PromoCode): Option[Html] = {
+    private def getWeeklyLandingPage(promotion: AnyPromotion,
+                                     country: Country,
+                                     hreflangs: Hreflangs,
+                                     rawQueryString: String)(implicit promoCode: PromoCode): Option[Html] = {
       promotion.asWeekly.filter(p => isActive(asAnyPromotion(p))).map { promotionWithLandingPage =>
         val description = promotionWithLandingPage.landingPage.description.map { desc =>
           Html(PegdownMarkdownRenderer.render(desc)
           )
         }.getOrElse(landing_description())
-        weeklyLandingPage(country, catalog, Some(promoCode), Some(promotionWithLandingPage), description, PegdownMarkdownRenderer, hreflangs)
+        weeklyLandingPage(country,
+                          catalog,
+                          Some(promoCode),
+                          Some(promotionWithLandingPage),
+                          description,
+                          PegdownMarkdownRenderer,
+                          hreflangs,
+                          rawQueryString)
       }
     }
 
-    def getLandingPage(promotion: AnyPromotion, country: Country, hreflangs: Hreflangs)(implicit promoCode: PromoCode): Option[Html] = {
-      getNewspaperLandingPage(promotion) orElse getDigitalPackLandingPage(promotion, country, hreflangs) orElse getWeeklyLandingPage(promotion, country, hreflangs)
+    def getLandingPage(promotion: AnyPromotion,
+                       country: Country,
+                       hreflangs: Hreflangs,
+                       rawQueryString: String = "")(implicit promoCode: PromoCode): Option[Html] = {
+      getNewspaperLandingPage(promotion) orElse
+        getDigitalPackLandingPage(promotion, country, hreflangs) orElse
+          getWeeklyLandingPage(promotion, country, hreflangs, rawQueryString)
     }
 
     private def getBrochureRouteForPromotion(promotion: AnyPromotion, country: Country): Option[Call] = {
@@ -129,14 +144,14 @@ class PromoLandingPage(
       promotion <- OptionT(tpBackend.promoService.findPromotionFuture(promoCode))
       landingPage <- {
         val country = (maybeCountry orElse request.getFastlyCountry).getOrElse(Country.UK)
-
+        val params = request.rawQueryString
         val hreflangs = CountryGroup.countries.map { country =>
           Hreflang(Config.subscriptionsUrl + routes.PromoLandingPage.render(promoCodeStr, Some(country)).url, s"en-${country.alpha2}")
         }
         val hreflang = Hreflangs(Config.subscriptionsUrl + routes.PromoLandingPage.render(promoCodeStr, Some(country)).url, Some(hreflangs))
 
         OptionT(eventualCatalogPromoLandingPage.map(catalogPromoLandingPage =>
-          catalogPromoLandingPage.getLandingPage(promotion, country, hreflang).map(Ok(_))
+          catalogPromoLandingPage.getLandingPage(promotion, country, hreflang, params).map(Ok(_))
             orElse catalogPromoLandingPage.redirectToBrochurePage(promotion, country))(executionContext)
         )
       }
