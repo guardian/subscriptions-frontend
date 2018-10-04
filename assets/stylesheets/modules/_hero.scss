@@ -31,10 +31,17 @@
     > img {
         max-width: 100%;
         height: 100%;
-        //filter: opacity(100%);
         object-fit: cover;
     }
 }
+
+
+.old-hero-image {
+    > img {
+        filter: opacity(50%);
+    }
+}
+
 
 .hero-banner__inner {
     width: 100%;

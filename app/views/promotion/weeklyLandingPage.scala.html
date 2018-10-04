@@ -8,6 +8,7 @@
 @import model.DigitalEdition
 @import views.support.{CommaSplit, MarkdownRenderer, WeeklyPromotion}
 @import views.support.ImagePicker
+@import views.support.WeeklyPicker
 @(
     country: Country,
     catalog: Catalog,
@@ -23,6 +24,7 @@
     @nonTrackingPromotion = @{anyPromotion.flatMap(p => p.asDiscount orElse p.asFreeTrial orElse p.asIncentive) orElse isSixForSix}
     @title = @{"The Guardian Weekly Subscriptions"}
     @defaultImage = @{ImagePicker.defaultHeaderImage(rawQueryString)}
+    @headerModifierClass = @{if (WeeklyPicker.showUpdatedPrices(WeeklyPicker.newPricingQueryStringPresent(rawQueryString))) "" else "old-hero-image"}
     @discountedRegions = @{WeeklyPromotion.validRegionsForPromotion(promotion, promoCode, country, rawQueryString)(catalog.weekly)}
     @main(
         title = s"$title | The Guardian",
@@ -38,7 +40,7 @@
             guardian.pageInfo.productData.productSegment = 'weekly';
         </script>
 
-        @fragments.heroBanner(promotion.flatMap(_.landingPage.image).getOrElse(defaultImage)){
+        @fragments.heroBanner(promotion.flatMap(_.landingPage.image).getOrElse(defaultImage), headerModifierClass){
             @title
         } {
             @CommaSplit.split(promotion.flatMap(_.landingPage.title).getOrElse("Get the world in perspective, every single week"))
