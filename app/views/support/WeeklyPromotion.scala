@@ -5,10 +5,11 @@ import com.gu.memsub.BillingPeriod._
 import com.gu.memsub.promo.CovariantIdObject.CovariantId
 import com.gu.memsub.promo.Promotion.PromoWithWeeklyLandingPage
 import com.gu.memsub.promo.{PromoCode, WeeklyLandingPage}
-import com.gu.memsub.subsv2.{CatalogPlan, Catalog => SubsCatalog}
+import com.gu.memsub.subsv2.{CatalogPlan, WeeklyPlans}
 import com.netaporter.uri.Uri
 import com.netaporter.uri.dsl._
 import model.GuardianWeeklyZones
+import model.PurchasableWeeklyProducts._
 import views.support.Pricing._
 import org.joda.time.{DateTime, DateTimeZone}
 
@@ -26,18 +27,20 @@ object WeeklyPromotion {
   def validRegionsForPromotion(promotion: Option[PromoWithWeeklyLandingPage],
                                promoCode: Option[PromoCode],
                                requestCountry: Country,
-                               rawQueryString: String = "")(implicit catalog: SubsCatalog): Seq[DiscountedRegion] = {
+                               rawQueryString: String = "")(implicit weeklyPlans: WeeklyPlans): Seq[DiscountedRegion] = {
+
     val promotionCountries = promotion.map(_.appliesTo.countries).getOrElse(allCountries)
     val newPricing = rawQueryString.contains("gwoct18")
+
     // If a user does not qualify for domestic delivery (e.g. if the user is based in South Africa),
     // we want to explicitly call out their (likely) delivery country on the landing page
     val promotedRegion: Seq[DiscountedRegion] = {
-      if (PlanPicker.isInRestOfWorldOrZoneC(requestCountry: Country, forceShowUpdatedPrices = newPricing)) {
+      if (WeeklyPicker.isInRestOfWorldOrZoneC(requestCountry: Country, WeeklyPicker.showUpdatedPrices(newPricing))) {
         val currency = CountryGroup.byCountryCode(requestCountry.alpha2).map(_.currency).getOrElse(Currency.USD)
         Seq(DiscountedRegion(
           title = requestCountry.name,
           description = "Posted to you by air mail",
-          discountedPlans = plansForPromotion(promotion, promoCode, PlanPicker.plans(requestCountry, forceShowUpdatedPrices = newPricing),currency)
+          discountedPlans = plansForPromotion(promotion, promoCode, WeeklyPicker.product(requestCountry, WeeklyPicker.showUpdatedPrices(newPricing)), currency)
         ))
       } else {
         Seq()
@@ -47,24 +50,27 @@ object WeeklyPromotion {
     val restOfWorldRegion = Seq(DiscountedRegion(
       title = "Rest of the world",
       description = "Posted to you by air mail",
-      discountedPlans = plansForPromotion(promotion, promoCode, PlanPicker.restOfWorldOrZoneCPlans(forceShowUpdatedPrices = newPricing), Currency.USD)
+      discountedPlans = plansForPromotion(promotion, promoCode, WeeklyPicker.restOfWorldOrZoneC(WeeklyPicker.showUpdatedPrices(newPricing)), Currency.USD)
     ))
 
     val UKregion: Set[DiscountedRegion] = {
+
+      val productForUK = WeeklyPicker.product(Country.UK, WeeklyPicker.showUpdatedPrices(newPricing))
+
       val all = DiscountedRegion(
         title = "United Kingdom",
         description = "Includes Isle of Man and Channel Islands",
-        discountedPlans = plansForPromotion(promotion, promoCode, PlanPicker.plans(Country.UK, forceShowUpdatedPrices = newPricing),Currency.GBP)
+        discountedPlans = plansForPromotion(promotion, promoCode, productForUK, Currency.GBP)
       )
       val domestic = DiscountedRegion(
         title = "United Kingdom",
         description = "Includes mainland UK only.",
-        discountedPlans = plansForPromotion(promotion, promoCode, PlanPicker.plans(Country.UK, forceShowUpdatedPrices = newPricing),Currency.GBP)
+        discountedPlans = plansForPromotion(promotion, promoCode, productForUK, Currency.GBP)
       )
       val overseas = DiscountedRegion(
         title = "Isle of Man and Channel Islands",
         description = "",
-        discountedPlans = plansForPromotion(promotion, promoCode, PlanPicker.plans(Country.UK, forceShowUpdatedPrices = newPricing),Currency.GBP)
+        discountedPlans = plansForPromotion(promotion, promoCode, productForUK, Currency.GBP)
       )
       val countries = promotionCountries intersect UK
       val includesUKDomestic = (countries intersect UKdomestic).nonEmpty
@@ -82,34 +88,41 @@ object WeeklyPromotion {
     val USregion = Seq(DiscountedRegion(
       title = "United States",
       description = "Includes Alaska and Hawaii",
-      discountedPlans = plansForPromotion(promotion, promoCode, PlanPicker.plans(Country.US, forceShowUpdatedPrices = newPricing),Currency.USD)
+      discountedPlans = plansForPromotion(promotion, promoCode, WeeklyPicker.product(Country.US, WeeklyPicker.showUpdatedPrices(newPricing)), Currency.USD)
     ))
     val AUSregion =  if (CountryGroup.Australia.countries contains requestCountry) Seq() else Seq(DiscountedRegion(
       title = "Australia",
       description = "Posted to you by air mail",
-      discountedPlans = plansForPromotion(promotion, promoCode, PlanPicker.plans(Country.Australia, forceShowUpdatedPrices = newPricing),Currency.AUD)
+      discountedPlans = plansForPromotion(promotion, promoCode, WeeklyPicker.product(Country.Australia, WeeklyPicker.showUpdatedPrices(newPricing)), Currency.AUD)
     ))
     val NZregion =  if (CountryGroup.NewZealand.countries contains requestCountry) Seq() else Seq(DiscountedRegion(
       title = "New Zealand",
       description = "Posted to you by air mail",
-      discountedPlans = plansForPromotion(promotion, promoCode, PlanPicker.plans(Country.NewZealand, forceShowUpdatedPrices = newPricing),Currency.NZD)
+      discountedPlans = plansForPromotion(promotion, promoCode, WeeklyPicker.product(Country.NewZealand, WeeklyPicker.showUpdatedPrices(newPricing)), Currency.NZD)
     ))
     val CAregion =  if (CountryGroup.Canada.countries contains requestCountry) Seq() else Seq(DiscountedRegion(
       title = "Canada",
       description = "Posted to you by air mail",
-      discountedPlans = plansForPromotion(promotion, promoCode, PlanPicker.plans(Country.Canada, forceShowUpdatedPrices = newPricing),Currency.CAD)
+      discountedPlans = plansForPromotion(promotion, promoCode, WeeklyPicker.product(Country.Canada, WeeklyPicker.showUpdatedPrices(newPricing)), Currency.CAD)
     ))
     val EUregion = Seq(DiscountedRegion(
       title = "Europe",
       description = "Posted to you by air mail",
-      discountedPlans = plansForPromotion(promotion, promoCode, PlanPicker.plansForCountryGroup(CountryGroup.Europe, forceShowUpdatedPrices = newPricing),Currency.EUR)
+      discountedPlans = plansForPromotion(promotion, promoCode, WeeklyPicker.productForCountryGroup(CountryGroup.Europe, WeeklyPicker.showUpdatedPrices(newPricing)), Currency.EUR)
     ))
 
     val regions: Seq[DiscountedRegion] = promotedRegion ++ UKregion ++ USregion ++ EUregion ++ AUSregion ++  NZregion ++ CAregion  ++ restOfWorldRegion
     regions.filter(_.discountedPlans.nonEmpty)
   }
 
-  def plansForPromotion(maybePromotion: Option[PromoWithWeeklyLandingPage], promoCode: Option[PromoCode], catalogPlans: Seq[CatalogPlan.Paid], currency: Currency): List[DiscountedPlan] = {
+  def plansForPromotion(
+                         maybePromotion: Option[PromoWithWeeklyLandingPage],
+                         promoCode: Option[PromoCode],
+                         availableWeeklyProduct: PurchasableWeeklyProduct,
+                         currency: Currency
+  )(implicit allWeeklyPlans: WeeklyPlans): List[DiscountedPlan] = {
+
+    val catalogPlans = plansForProduct(availableWeeklyProduct)
 
     def isSixWeek(catalogPlan: CatalogPlan.Paid): Boolean =
       catalogPlan.charges.billingPeriod match {
@@ -168,45 +181,46 @@ object WeeklyPromotion {
 
 }
 
-object PlanPicker {
+object WeeklyPicker {
 
   import model.GuardianWeeklyZones._
 
-  def showUpdatedPrices = {
+  val updateTime = DateTime.parse("2018-10-10T09:45:00").withZone(DateTimeZone.UTC)
+
+  def showUpdatedPrices(forceShowUpdatedPrices: Boolean, timeToUpdate: DateTime = updateTime): Boolean = {
     val now = DateTime.now().withZone(DateTimeZone.UTC)
-    val threshold = DateTime.parse("2018-10-10T09:45:00").withZone(DateTimeZone.UTC)
-    now.isAfter(threshold)
+    now.isAfter(timeToUpdate) || forceShowUpdatedPrices
   }
 
-  def isInRestOfWorldOrZoneC(country: Country, forceShowUpdatedPrices: Boolean = false) = {
-    if(showUpdatedPrices || forceShowUpdatedPrices) GuardianWeeklyZones.restOfWorldZoneCountries.contains(country)
+  def isInRestOfWorldOrZoneC(country: Country, showUpdatedPrices: Boolean): Boolean = {
+    if (showUpdatedPrices) GuardianWeeklyZones.restOfWorldZoneCountries.contains(country)
     else GuardianWeeklyZones.zoneCCountries.contains(country)
   }
 
-  def restOfWorldOrZoneCPlans(forceShowUpdatedPrices: Boolean = false)(implicit catalog: SubsCatalog): Seq[CatalogPlan.Paid] = {
-    if(showUpdatedPrices || forceShowUpdatedPrices) catalog.weekly.restOfWorld.plans
-    else catalog.weekly.zoneC.plans
+  def restOfWorldOrZoneC(showUpdatedPrices: Boolean): PurchasableWeeklyProduct = {
+    if (showUpdatedPrices) WeeklyRestOfWorld
+    else WeeklyZoneC
   }
 
-  def plans(country: Country, forceShowUpdatedPrices: Boolean = false)(implicit catalog: SubsCatalog): Seq[CatalogPlan.Paid] = {
-    if(showUpdatedPrices || forceShowUpdatedPrices) {
-      if(domesticZoneCountries.contains(country)) catalog.weekly.domestic.plans
-      else catalog.weekly.restOfWorld.plans
+  def product(country: Country, showUpdatedPrices: Boolean): PurchasableWeeklyProduct = {
+    if (showUpdatedPrices) {
+      if (domesticZoneCountries.contains(country)) WeeklyDomestic
+      else WeeklyRestOfWorld
     }
     else {
-      if(zoneACountries.contains(country)) catalog.weekly.zoneA.plans
-      else catalog.weekly.zoneC.plans
+      if (zoneACountries.contains(country)) WeeklyZoneA
+      else WeeklyZoneC
     }
   }
 
-  def plansForCountryGroup(countryGroup: CountryGroup, forceShowUpdatedPrices: Boolean = false)(implicit catalog: SubsCatalog): Seq[CatalogPlan.Paid] = {
-    if(showUpdatedPrices || forceShowUpdatedPrices) {
-      if(domesticZoneCountryGroups.contains(countryGroup)) catalog.weekly.domestic.plans
-      else catalog.weekly.restOfWorld.plans
+  def productForCountryGroup(countryGroup: CountryGroup, showUpdatedPrices: Boolean): PurchasableWeeklyProduct = {
+    if (showUpdatedPrices) {
+      if (domesticZoneCountryGroups.contains(countryGroup)) WeeklyDomestic
+      else WeeklyRestOfWorld
     }
     else {
-      if(zoneACountryGroups.contains(countryGroup)) catalog.weekly.zoneA.plans
-      else catalog.weekly.zoneC.plans
+      if (zoneACountryGroups.contains(countryGroup)) WeeklyZoneA
+      else WeeklyZoneC
     }
   }
 
