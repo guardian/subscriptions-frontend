@@ -29,7 +29,7 @@ class WeeklyPromoSpec extends FeatureSpec with Browser
 
   feature("Weekly Promotion Page") {
 
-    scenario("UK user lands on Guardian Weekly promotion page", Acceptance) {
+    scenario("UK user lands on Guardian Weekly promotion page", WeeklyPromoAcceptance) {
       val promoCode = "/p/10ANNUAL"
 
       When("The user is in the UK")
@@ -44,13 +44,54 @@ class WeeklyPromoSpec extends FeatureSpec with Browser
       When("they click for delivery to the UK")
       promoPage.DestinationList.chooseLocalDelivery()
 
-// TODO!
-//      Then("the correct menu should become visible")
-//      assert(promoPage.DestinationList.menuIsOpened("UnitedKingdom"))
+      Then("the correct menu should become visible")
+      assert(promoPage.DestinationList.menuIsVisible("UnitedKingdom"))
+
+      And("the quarterly link should be correct")
+      assert(promoPage.DestinationList.menuContainsLink(
+        "UnitedKingdom",
+        0,
+        "/checkout/weeklyzonea-guardianweeklyquarterly?countryGroup=uk")
+      )
+
+      And("the quarterly title should be correct")
+      assert(promoPage.DestinationList.menuContainsTitle(
+        "UnitedKingdom",
+        0,
+        "Quarterly")
+      )
+
+      And("the quarterly description should be correct")
+      assert(promoPage.DestinationList.menuContainsDescription(
+        "UnitedKingdom",
+        0,
+        "£30 every 3 months")
+      )
+
+      And("the annual link should be correct")
+      assert(promoPage.DestinationList.menuContainsLink(
+        "UnitedKingdom",
+        1,
+        "/checkout/weeklyzonea-guardianweeklyannual?countryGroup=uk&promoCode=10ANNUAL")
+      )
+
+      And("the annual title should be correct")
+      assert(promoPage.DestinationList.menuContainsTitle(
+        "UnitedKingdom",
+        1,
+        "Annual")
+      )
+
+      And("the annual description should be correct")
+      assert(promoPage.DestinationList.menuContainsDescription(
+        "UnitedKingdom",
+        1,
+        "£108 for 1 year, then standard rate (£120 every year)")
+      )
 
     }
 
-    scenario("ZA user lands on GW promo page", Acceptance, Weekly) {
+    scenario("ZA user lands on GW promo page", WeeklyPromoAcceptance) {
       val promoCode = "/p/10ANNUAL"
 
       When("The user is in South Africa")
@@ -65,9 +106,50 @@ class WeeklyPromoSpec extends FeatureSpec with Browser
       When("they click for delivery to South Africa")
       promoPage.DestinationList.chooseLocalDelivery()
 
-// TODO!
-//      Then("the correct menu item should become visible")
-//      assert(promoPage.DestinationList.menuIsOpened("SouthAfrica"))
+      Then("the correct menu should become visible")
+      assert(promoPage.DestinationList.menuIsVisible("SouthAfrica"))
+
+      And("the quarterly link should be correct")
+      assert(promoPage.DestinationList.menuContainsLink(
+        "SouthAfrica",
+        0,
+        "/checkout/weeklyzonec-guardianweeklyquarterly?countryGroup=us")
+      )
+
+      And("the quarterly title should be correct")
+      assert(promoPage.DestinationList.menuContainsTitle(
+        "SouthAfrica",
+        0,
+        "Quarterly")
+      )
+
+      And("the quarterly description should be correct")
+      assert(promoPage.DestinationList.menuContainsDescription(
+        "SouthAfrica",
+        0,
+        "US$65 every 3 months")
+      )
+
+      And("the annual link should be correct")
+      assert(promoPage.DestinationList.menuContainsLink(
+        "SouthAfrica",
+        1,
+        "/checkout/weeklyzonec-guardianweeklyannual?countryGroup=us&promoCode=10ANNUAL")
+      )
+
+      And("the annual title should be correct")
+      assert(promoPage.DestinationList.menuContainsTitle(
+        "SouthAfrica",
+        1,
+        "Annual")
+      )
+
+      And("the annual description should be correct")
+      assert(promoPage.DestinationList.menuContainsDescription(
+        "SouthAfrica",
+        1,
+        "US$234 for 1 year, then standard rate (US$260 every year)")
+      )
 
     }
 

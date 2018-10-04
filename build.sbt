@@ -122,7 +122,6 @@ addCommandAlias("devrun", "run  9200")
 addCommandAlias("prodrun", "run 9200")
 addCommandAlias("fast-test", "testOnly -- -l Acceptance")
 addCommandAlias("acceptance-test", "testOnly acceptance.CheckoutSpec")
-addCommandAlias("test-weekly-promo", "testOnly acceptance.WeeklyPromoSpec")
 addCommandAlias("play-artifact", "riffRaffNotifyTeamcity")
 
 

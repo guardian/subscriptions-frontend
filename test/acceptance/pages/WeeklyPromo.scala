@@ -7,6 +7,8 @@ import org.scalatest.selenium.Page
 
 case class WeeklyPromo(endpoint: String = "/p/10ANNUAL", country: String = "GB", params: Option[String] = None) extends Page with Browser {
 
+  override val timeOutSec: Int = 5
+
   val url = s"$baseUrl/$endpoint?country=$country${params.map{p => s"&$p"}.getOrElse("")}"
 
   private val userDisplayName = cssSelector(".js-user-displayname")
@@ -27,7 +29,6 @@ case class WeeklyPromo(endpoint: String = "/p/10ANNUAL", country: String = "GB",
     }
 
     def firstElementAttribute(name: String): String = nthDestinationElement(1).flatMap{ el =>
-      println(s"### ${el.underlying.getTagName}")
       el.attribute(name)
     }.getOrElse("")
 
@@ -35,18 +36,63 @@ case class WeeklyPromo(endpoint: String = "/p/10ANNUAL", country: String = "GB",
       clickOn(cssSelector(nthDestinationElementSelector(1)))
     }
 
-    def menuIsOpened(name: String): Boolean = {
-      destinationListElement.map{ el =>
-        val dropDownSelector = s"js-dropdown-$name"
-        el.underlying.findElements(By.cssSelector(dropDownSelector))
-      }.exists { listItems =>
-        if (listItems.isEmpty) {
-          false
+    def menuIsVisible(name: String): Boolean = {
+      val hiddenMenuSelector = s".js-dropdown-$name.js-dropdown-menu.animate-hide-hidden"
+      val visibleMenuSelector = s".js-dropdown-$name.js-dropdown-menu"
+
+      !pageHasElement(cssSelector(hiddenMenuSelector)) &&
+      pageHasElement(cssSelector(visibleMenuSelector))
+    }
+
+    def menuContainsLink(name: String, index: Int, url: String): Boolean = {
+      val dropDownSelector = s".js-dropdown-$name"
+      val namedMenu = cssSelector(dropDownSelector).findElement
+
+      namedMenu.exists{ menu =>
+        val elLinkDivs = menu.underlying.findElements(By.tagName("div"))
+        if (elLinkDivs.size() > 0) {
+          val anchors = elLinkDivs.get(0).findElements(By.className("weekly__package"))
+          if (anchors.size() > 0) {
+            val anchor = anchors.get(index)
+            val href = anchor.getAttribute("href")
+            href.endsWith(url)
+          } else {
+            false
+          }
         } else {
-          !listItems.get(0).getCssValue("class").contains("animate-hide-hidden")
+          false
         }
       }
     }
+
+    def menuContainsTitle(name: String, index: Int, text: String): Boolean = {
+      val dropDownSelector = s".js-dropdown-$name"
+      val namedMenu = cssSelector(dropDownSelector).findElement
+
+      namedMenu.exists{ menu =>
+        val elSpans = menu.underlying.findElements(By.className("weekly__package__title"))
+        if (elSpans.size() > 0) {
+          elSpans.get(index).getText.trim.equalsIgnoreCase(text)
+        } else {
+          false
+        }
+      }
+    }
+
+    def menuContainsDescription(name: String, index: Int, text: String): Boolean = {
+      val dropDownSelector = s".js-dropdown-$name"
+      val namedMenu = cssSelector(dropDownSelector).findElement
+
+      namedMenu.exists{ menu =>
+        val elSpans = menu.underlying.findElements(By.className("weekly__package__description"))
+        if (elSpans.size() > 0) {
+          elSpans.get(index).getText.trim.equalsIgnoreCase(text)
+        } else {
+          false
+        }
+      }
+    }
+
   }
 
 }
