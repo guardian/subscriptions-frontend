@@ -23,7 +23,7 @@
     @nonTrackingPromotion = @{anyPromotion.flatMap(p => p.asDiscount orElse p.asFreeTrial orElse p.asIncentive) orElse isSixForSix}
     @title = @{"The Guardian Weekly Subscriptions"}
     @defaultImage = @{ResponsiveImageGroup(None,None,None,ResponsiveImageGenerator("c7c76ffe9b2abe16b5d914dd7a9a23db9b32840b/0_0_14400_1680",Seq(2000)))}
-    @discountedRegions = @{WeeklyPromotion.validRegionsForPromotion(promotion, promoCode, country, rawQueryString)(catalog.weekly)}
+    @discountedRegions = @{WeeklyPromotion.validRegionsForPromotion(promotion, promoCode, country, rawQueryString)(catalog)}
     @main(
         title = s"$title | The Guardian",
         bodyClasses = List("is-wide"),
