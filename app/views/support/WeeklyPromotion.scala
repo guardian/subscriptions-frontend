@@ -2,6 +2,7 @@ package views.support
 
 import com.gu.i18n.{Country, CountryGroup, Currency}
 import com.gu.memsub.BillingPeriod._
+import com.gu.memsub.images.{ResponsiveImageGenerator, ResponsiveImageGroup}
 import com.gu.memsub.promo.CovariantIdObject.CovariantId
 import com.gu.memsub.promo.Promotion.PromoWithWeeklyLandingPage
 import com.gu.memsub.promo.{PromoCode, WeeklyLandingPage}
@@ -30,7 +31,7 @@ object WeeklyPromotion {
                                rawQueryString: String = "")(implicit weeklyPlans: WeeklyPlans): Seq[DiscountedRegion] = {
 
     val promotionCountries = promotion.map(_.appliesTo.countries).getOrElse(allCountries)
-    val newPricing = rawQueryString.contains("gwoct18")
+    val newPricing = WeeklyPicker.newPricingQueryStringPresent(rawQueryString)
 
     // If a user does not qualify for domestic delivery (e.g. if the user is based in South Africa),
     // we want to explicitly call out their (likely) delivery country on the landing page
@@ -187,6 +188,8 @@ object WeeklyPicker {
 
   val updateTime = DateTime.parse("2018-10-10T09:45:00").withZone(DateTimeZone.UTC)
 
+  def newPricingQueryStringPresent(rawQueryString: String) = rawQueryString.contains("gwoct18")
+
   def showUpdatedPrices(forceShowUpdatedPrices: Boolean, timeToUpdate: DateTime = updateTime): Boolean = {
     val now = DateTime.now().withZone(DateTimeZone.UTC)
     now.isAfter(timeToUpdate) || forceShowUpdatedPrices
@@ -222,6 +225,38 @@ object WeeklyPicker {
       if (zoneACountryGroups.contains(countryGroup)) WeeklyZoneA
       else WeeklyZoneC
     }
+  }
+
+}
+
+object ImagePicker {
+
+  private val guardianWeeklyHeaderId = "c7c76ffe9b2abe16b5d914dd7a9a23db9b32840b/0_0_14400_1680"
+  private val guardianWeeklyRedesignHeaderId = "c933375535e24a9fd3c2befac96a5fafaaed6f4f/0_0_9985_1165"
+
+  private val guardianWeeklyPackshotId = "987daf55251faf1637f92bffa8aa1eeec8de72b5/0_0_1670_1558"
+  private val guardianWeeklyRedesignPackshotId = "4e2eaacb68f29b9573c015c248134dc1614d0fa3/0_0_2155_2800"
+
+  def defaultHeaderImage(rawQueryString: String = ""): ResponsiveImageGroup = {
+    WeeklyPicker.showUpdatedPrices(WeeklyPicker.newPricingQueryStringPresent(rawQueryString)) match {
+      case true => ResponsiveImageGroup(None,None,None,ResponsiveImageGenerator(guardianWeeklyRedesignHeaderId,Seq(9985), "png"))
+      case false => ResponsiveImageGroup(None,None,None,ResponsiveImageGenerator(guardianWeeklyHeaderId,Seq(2000), "jpg"))
+    }
+
+  }
+
+  def defaultPackshotImage(rawQueryString: String = ""): ResponsiveImageGroup = {
+    WeeklyPicker.showUpdatedPrices(WeeklyPicker.newPricingQueryStringPresent(rawQueryString)) match {
+      case true => ResponsiveImageGroup(
+        availableImages = ResponsiveImageGenerator(guardianWeeklyRedesignPackshotId, Seq(385), "png"),
+        altText = Some("Stack of The Guardian Weekly editions")
+      )
+      case false => ResponsiveImageGroup(
+        availableImages = ResponsiveImageGenerator(guardianWeeklyPackshotId, Seq(500, 1000), "png"),
+        altText = Some("Stack of The Guardian Weekly editions")
+      )
+    }
+
   }
 
 }

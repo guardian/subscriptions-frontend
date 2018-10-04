@@ -88,7 +88,7 @@
 
                 @* ===== Plan selection ===== *@
             <div class="checkout-container__sidebar js-basket">
-                @fragments.checkout.basketPreview(productData.plans.default)
+                @fragments.checkout.basketPreview(productData.plans.default, request.rawQueryString)
 
                 @if(productData.plans.default.product == WeeklyZoneC || productData.plans.default.product == WeeklyRestOfWorld) {
                     <div class="js-checkout-currency-override">
