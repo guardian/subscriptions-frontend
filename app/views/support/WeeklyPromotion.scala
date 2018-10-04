@@ -8,10 +8,9 @@ import com.gu.memsub.promo.{PromoCode, WeeklyLandingPage}
 import com.gu.memsub.subsv2.{CatalogPlan, WeeklyPlans}
 import com.netaporter.uri.Uri
 import com.netaporter.uri.dsl._
-import model.GuardianWeeklyZones
 import model.PurchasableWeeklyProducts._
+import services.WeeklyPicker
 import views.support.Pricing._
-import org.joda.time.{DateTime, DateTimeZone}
 
 object WeeklyPromotion {
   private val UK = CountryGroup.UK.countries.toSet
@@ -29,8 +28,8 @@ object WeeklyPromotion {
                                requestCountry: Country,
                                rawQueryString: String = "")(implicit weeklyPlans: WeeklyPlans): Seq[DiscountedRegion] = {
 
+    val newPricing = WeeklyPicker.forceShowNewPricing(rawQueryString)
     val promotionCountries = promotion.map(_.appliesTo.countries).getOrElse(allCountries)
-    val newPricing = rawQueryString.contains("gwoct18")
 
     // If a user does not qualify for domestic delivery (e.g. if the user is based in South Africa),
     // we want to explicitly call out their (likely) delivery country on the landing page
@@ -177,51 +176,6 @@ object WeeklyPromotion {
       baseUrl & ("promoCode" -> promoCode.get.get)
     else
       baseUrl
-  }
-
-}
-
-object WeeklyPicker {
-
-  import model.GuardianWeeklyZones._
-
-  val updateTime = DateTime.parse("2018-10-10T09:45:00").withZone(DateTimeZone.UTC)
-
-  def showUpdatedPrices(forceShowUpdatedPrices: Boolean, timeToUpdate: DateTime = updateTime): Boolean = {
-    val now = DateTime.now().withZone(DateTimeZone.UTC)
-    now.isAfter(timeToUpdate) || forceShowUpdatedPrices
-  }
-
-  def isInRestOfWorldOrZoneC(country: Country, showUpdatedPrices: Boolean): Boolean = {
-    if (showUpdatedPrices) GuardianWeeklyZones.restOfWorldZoneCountries.contains(country)
-    else GuardianWeeklyZones.zoneCCountries.contains(country)
-  }
-
-  def restOfWorldOrZoneC(showUpdatedPrices: Boolean): PurchasableWeeklyProduct = {
-    if (showUpdatedPrices) WeeklyRestOfWorld
-    else WeeklyZoneC
-  }
-
-  def product(country: Country, showUpdatedPrices: Boolean): PurchasableWeeklyProduct = {
-    if (showUpdatedPrices) {
-      if (domesticZoneCountries.contains(country)) WeeklyDomestic
-      else WeeklyRestOfWorld
-    }
-    else {
-      if (zoneACountries.contains(country)) WeeklyZoneA
-      else WeeklyZoneC
-    }
-  }
-
-  def productForCountryGroup(countryGroup: CountryGroup, showUpdatedPrices: Boolean): PurchasableWeeklyProduct = {
-    if (showUpdatedPrices) {
-      if (domesticZoneCountryGroups.contains(countryGroup)) WeeklyDomestic
-      else WeeklyRestOfWorld
-    }
-    else {
-      if (zoneACountryGroups.contains(countryGroup)) WeeklyZoneA
-      else WeeklyZoneC
-    }
   }
 
 }
