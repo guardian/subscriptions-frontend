@@ -7,8 +7,8 @@
 @import controllers.WeeklyLandingPage.Hreflangs
 @import model.DigitalEdition
 @import views.support.{CommaSplit, MarkdownRenderer, WeeklyPromotion}
-@import views.support.ImagePicker
-@import views.support.WeeklyPicker
+@import services.ImagePicker
+@import services.WeeklyPicker
 @(
     country: Country,
     catalog: Catalog,
@@ -24,7 +24,7 @@
     @nonTrackingPromotion = @{anyPromotion.flatMap(p => p.asDiscount orElse p.asFreeTrial orElse p.asIncentive) orElse isSixForSix}
     @title = @{"The Guardian Weekly Subscriptions"}
     @defaultImage = @{ImagePicker.defaultHeaderImage(rawQueryString)}
-    @headerModifierClass = @{if (WeeklyPicker.showUpdatedPrices(WeeklyPicker.newPricingQueryStringPresent(rawQueryString))) "" else "old-hero-image"}
+    @headerModifierClass = @{if (WeeklyPicker.showUpdatedPrices(WeeklyPicker.forceShowNewPricing(rawQueryString))) "" else "old-hero-image"}
     @discountedRegions = @{WeeklyPromotion.validRegionsForPromotion(promotion, promoCode, country, rawQueryString)(catalog.weekly)}
     @main(
         title = s"$title | The Guardian",

@@ -1,5 +1,6 @@
 package views.support
 
+import services.ImagePicker
 import com.gu.i18n.Country
 import com.gu.memsub.Benefit._
 import com.gu.memsub.BillingPeriod.SixWeeks
