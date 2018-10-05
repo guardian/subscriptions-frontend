@@ -9,7 +9,7 @@ trait Browser extends WebBrowser {
 
   lazy implicit val driver = Driver()
 
-  private val timeOutSec = 30
+  val timeOutSec = 30
 
   case class MissingPageElementException(q: Query)
     extends Exception(s"Could not find WebElement with locator: ${q.queryString}")
