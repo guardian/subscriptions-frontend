@@ -120,7 +120,7 @@ javaOptions in Universal ++= Seq(
 
 addCommandAlias("devrun", "run  9200")
 addCommandAlias("prodrun", "run 9200")
-addCommandAlias("fast-test", "testOnly -- -l Acceptance -l WeeklyPromoAcceptance")
+addCommandAlias("fast-test", "testOnly -- -l Acceptance -l WeeklyCheckoutAcceptance -l WeeklyPromoAcceptance")
 addCommandAlias("acceptance-test", "testOnly acceptance.CheckoutSpec")
 addCommandAlias("weekly-promo-acceptance-test", "testOnly acceptance.WeeklyPromoSpec")
 addCommandAlias("play-artifact", "riffRaffNotifyTeamcity")
