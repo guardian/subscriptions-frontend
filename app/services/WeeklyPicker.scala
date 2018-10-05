@@ -64,7 +64,7 @@ object ImagePicker {
   def defaultHeaderImage(rawQueryString: String = ""): ResponsiveImageGroup = {
     WeeklyPicker.showUpdatedPrices(WeeklyPicker.forceShowNewPricing(rawQueryString)) match {
       case true => ResponsiveImageGroup(
-        availableImages = ResponsiveImageGenerator(guardianWeeklyRedesignHeaderId,Seq(9985), "png"),
+        availableImages = ResponsiveImageGenerator(guardianWeeklyRedesignHeaderId,Seq(2000), "png"),
         altText = Some("Selection of Guardian Weekly covers")
       )
       case false => ResponsiveImageGroup(
