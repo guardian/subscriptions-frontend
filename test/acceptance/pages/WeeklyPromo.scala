@@ -36,6 +36,10 @@ case class WeeklyPromo(endpoint: String = "/p/10ANNUAL", country: String = "GB",
       clickOn(cssSelector(nthDestinationElementSelector(1)))
     }
 
+    def chooseEuropeDelivery(): Unit = {
+      clickOn(cssSelector(nthDestinationElementSelector(3)))
+    }
+
     def menuIsVisible(name: String): Boolean = {
       val hiddenMenuSelector = s".js-dropdown-$name.js-dropdown-menu.animate-hide-hidden"
       val visibleMenuSelector = s".js-dropdown-$name.js-dropdown-menu"

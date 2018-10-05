@@ -11,7 +11,7 @@ object WeeklyPicker {
 
   def forceShowNewPricing(rawQueryString: String) = rawQueryString.contains("gwoct18")
 
-  val updateTime = DateTime.parse("2018-10-10T09:45:00").withZone(DateTimeZone.UTC)
+  val updateTime = DateTime.parse("2018-10-10T09:45:00Z")
 
   def showUpdatedPrices(forceShowUpdatedPrices: Boolean, timeToUpdate: DateTime = updateTime): Boolean = {
     val now = DateTime.now().withZone(DateTimeZone.UTC)
