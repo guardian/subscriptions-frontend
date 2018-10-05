@@ -2,15 +2,10 @@ package controllers
 
 import actions.CommonActions
 import com.gu.i18n.{Country, CountryGroup}
-import configuration.Config
 import play.api.mvc._
-import services.TouchpointBackend
+import services.{TouchpointBackend, WeeklyPicker}
 import utils.RequestCountry._
-import views.html.promotion.weeklyLandingPage
 import views.html.weekly.landing_description
-import views.support.PegdownMarkdownRenderer
-
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 object WeeklyLandingPage{
@@ -36,7 +31,9 @@ class WeeklyLandingPage(tpBackend: TouchpointBackend, commonActions: CommonActio
     parsedCountry.fold {
       Future.successful(Redirect(routes.WeeklyLandingPage.withCountry(international).url, request.queryString, PERMANENT_REDIRECT))
     } { country =>
-      Future.successful(Redirect(routes.PromoLandingPage.render("10ANNUAL", Some(country)).url, request.queryString, TEMPORARY_REDIRECT))
+      val forceNewPricing = WeeklyPicker.forceShowNewPricing(request.rawQueryString)
+      val defaultPromotion = if (WeeklyPicker.showUpdatedPrices(forceNewPricing)) "WWM99X" else "10ANNUAL"
+      Future.successful(Redirect(routes.PromoLandingPage.render(defaultPromotion, Some(country)).url, request.queryString, TEMPORARY_REDIRECT))
     }
   }
 
