@@ -63,8 +63,14 @@ object ImagePicker {
 
   def defaultHeaderImage(rawQueryString: String = ""): ResponsiveImageGroup = {
     WeeklyPicker.showUpdatedPrices(WeeklyPicker.forceShowNewPricing(rawQueryString)) match {
-      case true => ResponsiveImageGroup(None,None,None,ResponsiveImageGenerator(guardianWeeklyRedesignHeaderId,Seq(9985), "png"))
-      case false => ResponsiveImageGroup(None,None,None,ResponsiveImageGenerator(guardianWeeklyHeaderId,Seq(2000), "jpg"))
+      case true => ResponsiveImageGroup(
+        availableImages = ResponsiveImageGenerator(guardianWeeklyRedesignHeaderId,Seq(9985), "png"),
+        altText = Some("Selection of Guardian Weekly covers")
+      )
+      case false => ResponsiveImageGroup(
+        availableImages = ResponsiveImageGenerator(guardianWeeklyHeaderId,Seq(2000), "jpg"),
+        altText = Some("Selection of Guardian Weekly covers")
+      )
     }
 
   }
@@ -73,11 +79,11 @@ object ImagePicker {
     WeeklyPicker.showUpdatedPrices(WeeklyPicker.forceShowNewPricing(rawQueryString)) match {
       case true => ResponsiveImageGroup(
         availableImages = ResponsiveImageGenerator(guardianWeeklyRedesignPackshotId, Seq(385), "png"),
-        altText = Some("Stack of The Guardian Weekly editions")
+        altText = Some("A Guardian Weekly cover")
       )
       case false => ResponsiveImageGroup(
         availableImages = ResponsiveImageGenerator(guardianWeeklyPackshotId, Seq(500, 1000), "png"),
-        altText = Some("Stack of The Guardian Weekly editions")
+        altText = Some("A Guardian Weekly cover")
       )
     }
 
