@@ -1,5 +1,6 @@
 package views.support
 
+import services.ImagePicker
 import com.gu.i18n.Country
 import com.gu.memsub.Benefit._
 import com.gu.memsub.BillingPeriod.SixWeeks
@@ -52,17 +53,13 @@ object PlanOps {
 
   implicit class PrettyPlan[+A <: CatalogPlan.Paid](in: A) {
 
-    def packImage: ResponsiveImageGroup = in.charges.benefits.list.toList match {
+    def packImage(rawQueryString: String = ""): ResponsiveImageGroup = in.charges.benefits.list.toList match {
       case Digipack :: Nil =>
         ResponsiveImageGroup(
           availableImages = Seq(ResponsiveImage(controllers.CachedAssets.hashedPathFor("images/digital-pack-garnett.png"), 300)),
             altText = Some("Guardian apps demoed on Apple and Android devices")
         )
-      case Weekly :: Nil =>
-        ResponsiveImageGroup(
-          availableImages = ResponsiveImageGenerator("987daf55251faf1637f92bffa8aa1eeec8de72b5/0_0_1670_1558", Seq(500, 1000), "png"),
-          altText = Some("Stack of The Guardian Weekly editions")
-        )
+      case Weekly :: Nil => ImagePicker.defaultPackshotImage(rawQueryString)
       case _ =>
         ResponsiveImageGroup(
           availableImages = ResponsiveImageGenerator("ffef3e22c4546072b1f17b16751a8ad39297a8a2/0_0_1200_1308", Seq(459, 917, 1200)),

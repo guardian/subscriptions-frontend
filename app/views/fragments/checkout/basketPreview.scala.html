@@ -1,16 +1,16 @@
 @import com.gu.memsub.subsv2.CatalogPlan
 @import views.support.PlanOps._
 
-@(plan: CatalogPlan.Paid)
+@(plan: CatalogPlan.Paid, rawQueryString: String = "")
 
 <div class="basket-preview  basket-preview--products">
     <h3 class="basket-preview__title">You've chosen:</h3>
     <div class="basket-preview__image">
         <img
-            src="@plan.packImage.defaultImage"
-            srcset="@plan.packImage.srcset"
+            src="@plan.packImage(rawQueryString).defaultImage"
+            srcset="@plan.packImage(rawQueryString).srcset"
             sizes="(max-width: 980px) 150px, 300px"
-            alt="@plan.packImage.metadataAltText">
+            alt="@plan.packImage(rawQueryString).metadataAltText">
     </div>
     <div class="basket-preview__product">
         <span class="basket-preview__product__title js-option-mirror-package-display">
