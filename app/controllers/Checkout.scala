@@ -3,7 +3,9 @@ package controllers
 import java.util.UUID
 
 import actions.CommonActions
+import cats.data.EitherT
 import cats.instances.future._
+import com.gu.acquisition.model.AcquisitionSubmission
 import com.gu.i18n.CountryGroup._
 import com.gu.i18n.Currency._
 import com.gu.i18n._
@@ -41,6 +43,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 import scalaz.std.scalaFuture._
 import scalaz.{NonEmptyList, OptionT}
+import utils.TestUsers
 
 class Checkout(fBackendFactory: TouchpointBackends, commonActions: CommonActions, implicit val executionContext: ExecutionContext, override protected val controllerComponents: ControllerComponents) extends BaseController with LazyLogging {
 
@@ -229,46 +232,48 @@ class Checkout(fBackendFactory: TouchpointBackends, commonActions: CommonActions
     val checkoutResult = checkoutService.processSubscription(subscribeRequest, idUserOpt, requestData)
 
     def failure(seqErr: NonEmptyList[SubsError]) = {
-      seqErr.head match {
-        case e: CheckoutIdentityFailure =>
-          logger.error(SubsError.header(e))
-          logger.warn(SubsError.toStringPretty(e))
+      Future.successful(
+        seqErr.head match {
+          case e: CheckoutIdentityFailure =>
+            logger.error(SubsError.header(e))
+            logger.warn(SubsError.toStringPretty(e))
 
-          Forbidden(Json.obj("type" -> "CheckoutIdentityFailure",
-            "message" -> "User could not subscribe because Identity Service could not register the user"))
+            Forbidden(Json.obj("type" -> "CheckoutIdentityFailure",
+              "message" -> "User could not subscribe because Identity Service could not register the user"))
 
-        case e: CheckoutStripeError =>
-          logger.warn(SubsError.toStringPretty(e))
+          case e: CheckoutStripeError =>
+            logger.warn(SubsError.toStringPretty(e))
 
-          Forbidden(Json.obj(
-            "type" -> "CheckoutStripeError",
-            "message" -> e.paymentError.getMessage))
+            Forbidden(Json.obj(
+              "type" -> "CheckoutStripeError",
+              "message" -> e.paymentError.getMessage))
 
-        case e: CheckoutZuoraPaymentGatewayError =>
-          logger.warn(SubsError.toStringPretty(e))
-          handlePaymentGatewayError(e.paymentError, e.purchaserIds, subscribeRequest.genericData.personalData.address.countryName)
+          case e: CheckoutZuoraPaymentGatewayError =>
+            logger.warn(SubsError.toStringPretty(e))
+            handlePaymentGatewayError(e.paymentError, e.purchaserIds, subscribeRequest.genericData.personalData.address.countryName)
 
-        case e: CheckoutPaymentTypeFailure =>
-          logger.error(SubsError.header(e))
-          logger.warn(SubsError.toStringPretty(e))
+          case e: CheckoutPaymentTypeFailure =>
+            logger.error(SubsError.header(e))
+            logger.warn(SubsError.toStringPretty(e))
 
-          Forbidden(Json.obj("type" -> "CheckoutPaymentTypeFailure",
-            "message" -> e.msg))
+            Forbidden(Json.obj("type" -> "CheckoutPaymentTypeFailure",
+              "message" -> e.msg))
 
-        case e: CheckoutSalesforceFailure =>
-          logger.error(SubsError.header(e))
-          logger.warn(SubsError.toStringPretty(e))
+          case e: CheckoutSalesforceFailure =>
+            logger.error(SubsError.header(e))
+            logger.warn(SubsError.toStringPretty(e))
 
-          Forbidden(Json.obj("type" -> "CheckoutSalesforceFailure",
-            "message" -> e.msg))
+            Forbidden(Json.obj("type" -> "CheckoutSalesforceFailure",
+              "message" -> e.msg))
 
-        case e: CheckoutGenericFailure =>
-          logger.error(SubsError.header(e))
-          logger.warn(SubsError.toStringPretty(e))
+          case e: CheckoutGenericFailure =>
+            logger.error(SubsError.header(e))
+            logger.warn(SubsError.toStringPretty(e))
 
-          Forbidden(Json.obj("type" -> "CheckoutGenericFailure",
-            "message" -> "User could not subscribe"))
-      }
+            Forbidden(Json.obj("type" -> "CheckoutGenericFailure",
+              "message" -> "User could not subscribe"))
+        }
+      )
     }
 
     def success(r: CheckoutSuccess) = {
@@ -300,30 +305,40 @@ class Checkout(fBackendFactory: TouchpointBackends, commonActions: CommonActions
         _ + _
       }
 
-      val acquisitionData = request.session.get("acquisitionData")
-      if (acquisitionData.isEmpty) {
-        logger.warn(s"No acquisitionData in session")
+      submitAcquisitionEvent(request, subscribeRequest).value.map { _ =>
+        logger.info(s"User successfully became subscriber:\n\tUser: SF=${r.salesforceMember.salesforceContactId}\n\tPlan: ${subscribeRequest.productData.fold(_.plan, _.plan).name}\n\tSubscription: ${r.subscribeResult.subscriptionName}")
+        Ok(Json.obj("redirect" -> routes.Checkout.thankYou().url)).withSession(session)
       }
-
-      val promotion = subscribeRequest.genericData.promoCode.map(_.get).flatMap(code => tpBackend.promoService.findPromotion(NormalisedPromoCode.safeFromString(code)))
-      val clientBrowserInfo = ClientBrowserInfo(
-        request.cookies.get("_ga").map(_.value).getOrElse(UUID.randomUUID().toString), //Get GA client id from cookie
-        request.headers.get("user-agent"),
-        request.remoteAddress
-      )
-
-      //This service is mocked unless it's running in PROD, change to test acquisition events are working
-      AcquisitionService(isTestService = tpBackend.environmentName != "PROD")
-        .submit(SubscriptionAcquisitionComponents(subscribeRequest, promotion, acquisitionData, clientBrowserInfo))
-        .leftMap(
-          err => logger.warn(s"Error submitting acquisition data. $err")
-        )
-
-      logger.info(s"User successfully became subscriber:\n\tUser: SF=${r.salesforceMember.salesforceContactId}\n\tPlan: ${subscribeRequest.productData.fold(_.plan, _.plan).name}\n\tSubscription: ${r.subscribeResult.subscriptionName}")
-      Ok(Json.obj("redirect" -> routes.Checkout.thankYou().url)).withSession(session)
     }
 
-    checkoutResult.map(_.fold(failure, success))
+    def submitAcquisitionEvent(request: Request[AnyContent], subscribeRequest: SubscribeRequest): EitherT[Future, Unit, AcquisitionSubmission] = {
+      val testUser = TestUsers.isTestUser(PreSigninTestCookie, request.cookies)(request)
+      if(testUser.isEmpty) {
+        val acquisitionData = request.session.get("acquisitionData")
+        if (acquisitionData.isEmpty) {
+          logger.warn(s"No acquisitionData in session")
+        }
+
+        val promotion = subscribeRequest.genericData.promoCode.map(_.get).flatMap(code => tpBackend.promoService.findPromotion(NormalisedPromoCode.safeFromString(code)))
+        val clientBrowserInfo = ClientBrowserInfo(
+          request.cookies.get("_ga").map(_.value).getOrElse(UUID.randomUUID().toString), //Get GA client id from cookie
+          request.headers.get("user-agent"),
+          request.remoteAddress
+        )
+
+        //This service is mocked unless it's running in PROD, change to test acquisition events are working
+        AcquisitionService(isTestService = tpBackend.environmentName != "PROD")
+          .submit(SubscriptionAcquisitionComponents(subscribeRequest, promotion, acquisitionData, clientBrowserInfo))
+          .leftMap(
+            err => logger.warn(s"Error submitting acquisition data. $err")
+          )
+      } else {
+        val either: Future[Either[Unit, AcquisitionSubmission]] = Future.successful(Left(Unit))
+        EitherT(either) // Don't submit acquisitions for test users
+      }
+    }
+
+    checkoutResult.flatMap(_.fold(failure, success))
 
     }
 
