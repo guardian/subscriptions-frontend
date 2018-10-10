@@ -89,17 +89,17 @@ object WeeklyPromotion {
       description = "Includes Alaska and Hawaii",
       discountedPlans = plansForPromotion(promotion, promoCode, WeeklyPicker.product(Country.US, WeeklyPicker.showUpdatedPrices(newPricing)), Currency.USD)
     ))
-    val AUSregion =  if (CountryGroup.Australia.countries contains requestCountry) Seq() else Seq(DiscountedRegion(
+    val AUSregion = Seq(DiscountedRegion(
       title = "Australia",
       description = "Posted to you by air mail",
       discountedPlans = plansForPromotion(promotion, promoCode, WeeklyPicker.product(Country.Australia, WeeklyPicker.showUpdatedPrices(newPricing)), Currency.AUD)
     ))
-    val NZregion =  if (CountryGroup.NewZealand.countries contains requestCountry) Seq() else Seq(DiscountedRegion(
+    val NZregion = Seq(DiscountedRegion(
       title = "New Zealand",
       description = "Posted to you by air mail",
       discountedPlans = plansForPromotion(promotion, promoCode, WeeklyPicker.product(Country.NewZealand, WeeklyPicker.showUpdatedPrices(newPricing)), Currency.NZD)
     ))
-    val CAregion =  if (CountryGroup.Canada.countries contains requestCountry) Seq() else Seq(DiscountedRegion(
+    val CAregion = Seq(DiscountedRegion(
       title = "Canada",
       description = "Posted to you by air mail",
       discountedPlans = plansForPromotion(promotion, promoCode, WeeklyPicker.product(Country.Canada, WeeklyPicker.showUpdatedPrices(newPricing)), Currency.CAD)
