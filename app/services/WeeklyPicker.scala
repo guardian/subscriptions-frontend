@@ -56,10 +56,10 @@ object WeeklyPicker {
 object ImagePicker {
 
   private val guardianWeeklyHeaderId = "c7c76ffe9b2abe16b5d914dd7a9a23db9b32840b/0_0_14400_1680"
-  private val guardianWeeklyRedesignHeaderId = "c933375535e24a9fd3c2befac96a5fafaaed6f4f/0_0_9985_1165"
+  private val guardianWeeklyRedesignHeaderId = "48f7c23c2f3ff49d313221472e1006218cb1ee31/0_0_9985_1165"
 
   private val guardianWeeklyPackshotId = "987daf55251faf1637f92bffa8aa1eeec8de72b5/0_0_1670_1558"
-  private val guardianWeeklyRedesignPackshotId = "4e2eaacb68f29b9573c015c248134dc1614d0fa3/0_0_2155_2800"
+  private val guardianWeeklyRedesignPackshotId = "cfcdcca420678e73988d0c89cd214afca40b7c2f/0_0_673_880"
 
   def defaultHeaderImage(rawQueryString: String = ""): ResponsiveImageGroup = {
     WeeklyPicker.showUpdatedPrices(WeeklyPicker.forceShowNewPricing(rawQueryString)) match {
@@ -78,7 +78,7 @@ object ImagePicker {
   def defaultPackshotImage(rawQueryString: String = ""): ResponsiveImageGroup = {
     WeeklyPicker.showUpdatedPrices(WeeklyPicker.forceShowNewPricing(rawQueryString)) match {
       case true => ResponsiveImageGroup(
-        availableImages = ResponsiveImageGenerator(guardianWeeklyRedesignPackshotId, Seq(385), "png"),
+        availableImages = ResponsiveImageGenerator(guardianWeeklyRedesignPackshotId, Seq(382), "png"),
         altText = Some("A Guardian Weekly cover")
       )
       case false => ResponsiveImageGroup(
