@@ -11,9 +11,9 @@ define([
         const utmMedium = parsedUrl.searchParams.get('utm_medium');
         const gclid = parsedUrl.searchParams.get('gclid'); // Google AdWords
         if (utmSource && utmMedium){
-            cookie.setCookie('gu_referrer_channel', `${utmSource}&${utmMedium}`, cookieExpiryDays);
+            cookie.setCookie('gu_referrer_channel', `${utmSource}&${utmMedium}`, cookieExpiryDays, false, true);
         } else if (gclid) {
-            cookie.setCookie('gu_referrer_channel', 'google&adwords', cookieExpiryDays);
+            cookie.setCookie('gu_referrer_channel', 'google&adwords', cookieExpiryDays, false, true);
         }
 
     }
