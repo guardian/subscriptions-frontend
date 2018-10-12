@@ -77,8 +77,8 @@
     "lodash.debounce": "^4.0.8",
     "react": "^16.2.0",
     "react-datepicker": "^1.0.4",
-    "react-dom": "^16.2.0",
-    "react-radio-buttons": "^1.2.0"
+    "react-dom": "^16.2.1",
+    "react-radio-buttons": "^1.2.1"
   },
   "browserslist": [
     "> 1%",
