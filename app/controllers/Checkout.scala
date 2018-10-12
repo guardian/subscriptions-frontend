@@ -321,13 +321,16 @@ class Checkout(fBackendFactory: TouchpointBackends, commonActions: CommonActions
 
         val promotion = subscribeRequest.genericData.promoCode.map(_.get).flatMap(code => tpBackend.promoService.findPromotion(NormalisedPromoCode.safeFromString(code)))
         val clientBrowserInfo = ClientBrowserInfo(
-          request.cookies.get("_ga").map(_.value).getOrElse(UUID.randomUUID().toString), //Get GA client id from cookie
+          request.cookies.get("_ga").map(_.value).getOrElse{ //Get GA client id from cookie
+            logger.warn("GA client Id not found")
+            UUID.randomUUID().toString
+          },
           request.headers.get("user-agent"),
           request.remoteAddress
         )
 
         //This service is mocked unless it's running in PROD, change to test acquisition events are working
-        AcquisitionService(isTestService = tpBackend.environmentName != "PROD")
+        AcquisitionService(isTestService = false)
           .submit(SubscriptionAcquisitionComponents(subscribeRequest, promotion, acquisitionData, clientBrowserInfo))
           .leftMap(
             err => logger.warn(s"Error submitting acquisition data. $err")
