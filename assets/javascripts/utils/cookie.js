@@ -1,7 +1,7 @@
 define(['utils/base64'], function (base64) {
     'use strict';
 
-    function setCookie(name, value, days, isUnSecure) {
+    function setCookie(name, value, days, isUnSecure, trimSubdomain) {
         var date;
         var expires;
         // used for testing purposes, cookies are secure by default
@@ -15,7 +15,15 @@ define(['utils/base64'], function (base64) {
             expires = '';
         }
 
-        document.cookie = [name, '=', value, expires, '; path=/', secureCookieString ].join('');
+        var domain = trimSubdomain ? '; domain=' + getShortDomain() : '';
+
+        document.cookie = [name, '=', value, expires, '; path=/', secureCookieString, domain ].join('');
+    }
+
+    // Trim subdomains for prod, code and dev.
+    function getShortDomain() {
+        const domain = document.domain || '';
+        return domain.replace(/^(sub|subscribe)\./, '.');
     }
 
     function getCookie(name) {
