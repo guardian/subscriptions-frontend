@@ -1,6 +1,5 @@
 package views.support
 
-import services.ImagePicker
 import com.gu.i18n.Country
 import com.gu.memsub.Benefit._
 import com.gu.memsub.BillingPeriod.SixWeeks
@@ -59,7 +58,11 @@ object PlanOps {
           availableImages = Seq(ResponsiveImage(controllers.CachedAssets.hashedPathFor("images/digital-pack-garnett.png"), 300)),
             altText = Some("Guardian apps demoed on Apple and Android devices")
         )
-      case Weekly :: Nil => ImagePicker.defaultPackshotImage(rawQueryString)
+      case Weekly :: Nil =>
+        ResponsiveImageGroup(
+          availableImages = ResponsiveImageGenerator("cfcdcca420678e73988d0c89cd214afca40b7c2f/0_0_673_880", Seq(382), "png"),
+          altText = Some("A Guardian Weekly cover")
+        )
       case _ =>
         ResponsiveImageGroup(
           availableImages = ResponsiveImageGenerator("ffef3e22c4546072b1f17b16751a8ad39297a8a2/0_0_1200_1308", Seq(459, 917, 1200)),
