@@ -31,9 +31,6 @@ class SubscriptionsForm(catalog: Catalog) {
     val validPlans =
       catalog.delivery.list.toList ++
       catalog.voucher.list.toList ++
-      catalog.weekly.zoneA.plans.filter(_.availableForCheckout) ++
-      catalog.weekly.zoneB.plans.filter(_.availableForCheckout) ++
-      catalog.weekly.zoneC.plans ++
       catalog.weekly.domestic.plans ++
       catalog.weekly.restOfWorld.plans
     override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], CatalogPlan.Paper] =
