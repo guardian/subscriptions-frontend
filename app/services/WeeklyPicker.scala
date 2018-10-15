@@ -29,26 +29,14 @@ object WeeklyPicker {
     else WeeklyZoneC
   }
 
-  def product(country: Country, showUpdatedPrices: Boolean): PurchasableWeeklyProduct = {
-    if (showUpdatedPrices) {
-      if (domesticZoneCountries.contains(country)) WeeklyDomestic
-      else WeeklyRestOfWorld
-    }
-    else {
-      if (zoneACountries.contains(country)) WeeklyZoneA
-      else WeeklyZoneC
-    }
+  def product(country: Country): PurchasableWeeklyProduct = {
+    if (domesticZoneCountries.contains(country)) WeeklyDomestic
+    else WeeklyRestOfWorld
   }
 
-  def productForCountryGroup(countryGroup: CountryGroup, showUpdatedPrices: Boolean): PurchasableWeeklyProduct = {
-    if (showUpdatedPrices) {
-      if (domesticZoneCountryGroups.contains(countryGroup)) WeeklyDomestic
-      else WeeklyRestOfWorld
-    }
-    else {
-      if (zoneACountryGroups.contains(countryGroup)) WeeklyZoneA
-      else WeeklyZoneC
-    }
+  def productForCountryGroup(countryGroup: CountryGroup): PurchasableWeeklyProduct = {
+    if (domesticZoneCountryGroups.contains(countryGroup)) WeeklyDomestic
+    else WeeklyRestOfWorld
   }
 
 }

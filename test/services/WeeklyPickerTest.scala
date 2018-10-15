@@ -54,32 +54,20 @@ class WeeklyPickerTest extends Specification with Mockito {
 
   "product" should {
 
-    "select WeeklyDomestic if the country is US and showUpdatedPrices is set to true" in {
-      product(Country.US, true) shouldEqual WeeklyDomestic
+    "select WeeklyDomestic if the country is US" in {
+      product(Country.US) shouldEqual WeeklyDomestic
     }
 
-    "select WeeklyZoneA if the country is US and showUpdatedPrices is set to false" in {
-      product(Country.US, false) shouldEqual WeeklyZoneA
-    }
-
-    "select WeeklyRestOfWorld if the country is Eritrea and showUpdatedPrices is set to true" in {
-      product(Country("ER", "Eritrea"), true) shouldEqual WeeklyRestOfWorld
-    }
-
-    "select WeeklyZoneC if the country is Eritrea and showUpdatedPrices is set to false" in {
-      product(Country("ER", "Eritrea"), false) shouldEqual WeeklyZoneC
+    "select WeeklyRestOfWorld if the country is Eritrea" in {
+      product(Country("ER", "Eritrea")) shouldEqual WeeklyRestOfWorld
     }
 
   }
 
   "productForCountryGroup" should {
 
-    "select WeeklyDomestic if the country group is EU and showUpdatedPrices is set to true" in {
-      productForCountryGroup(CountryGroup.Europe, true) shouldEqual WeeklyDomestic
-    }
-
-    "select WeeklyZoneC if the country group is EU and showUpdatedPrices is set to false" in {
-      productForCountryGroup(CountryGroup.Europe, false) shouldEqual WeeklyZoneC
+    "select WeeklyDomestic if the country group is EU" in {
+      productForCountryGroup(CountryGroup.Europe) shouldEqual WeeklyDomestic
     }
 
   }

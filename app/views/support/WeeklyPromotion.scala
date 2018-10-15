@@ -39,7 +39,7 @@ object WeeklyPromotion {
         Seq(DiscountedRegion(
           title = requestCountry.name,
           description = "Posted to you by air mail",
-          discountedPlans = plansForPromotion(promotion, promoCode, WeeklyPicker.product(requestCountry, WeeklyPicker.showUpdatedPrices(newPricing)), currency)
+          discountedPlans = plansForPromotion(promotion, promoCode, WeeklyPicker.product(requestCountry), currency)
         ))
       } else {
         Seq()
@@ -54,7 +54,7 @@ object WeeklyPromotion {
 
     val UKregion: Set[DiscountedRegion] = {
 
-      val productForUK = WeeklyPicker.product(Country.UK, WeeklyPicker.showUpdatedPrices(newPricing))
+      val productForUK = WeeklyPicker.product(Country.UK)
 
       val all = DiscountedRegion(
         title = "United Kingdom",
@@ -87,27 +87,27 @@ object WeeklyPromotion {
     val USregion = Seq(DiscountedRegion(
       title = "United States",
       description = "Includes Alaska and Hawaii",
-      discountedPlans = plansForPromotion(promotion, promoCode, WeeklyPicker.product(Country.US, WeeklyPicker.showUpdatedPrices(newPricing)), Currency.USD)
+      discountedPlans = plansForPromotion(promotion, promoCode, WeeklyPicker.product(Country.US), Currency.USD)
     ))
     val AUSregion = Seq(DiscountedRegion(
       title = "Australia",
       description = "Posted to you by air mail",
-      discountedPlans = plansForPromotion(promotion, promoCode, WeeklyPicker.product(Country.Australia, WeeklyPicker.showUpdatedPrices(newPricing)), Currency.AUD)
+      discountedPlans = plansForPromotion(promotion, promoCode, WeeklyPicker.product(Country.Australia), Currency.AUD)
     ))
     val NZregion = Seq(DiscountedRegion(
       title = "New Zealand",
       description = "Posted to you by air mail",
-      discountedPlans = plansForPromotion(promotion, promoCode, WeeklyPicker.product(Country.NewZealand, WeeklyPicker.showUpdatedPrices(newPricing)), Currency.NZD)
+      discountedPlans = plansForPromotion(promotion, promoCode, WeeklyPicker.product(Country.NewZealand), Currency.NZD)
     ))
     val CAregion = Seq(DiscountedRegion(
       title = "Canada",
       description = "Posted to you by air mail",
-      discountedPlans = plansForPromotion(promotion, promoCode, WeeklyPicker.product(Country.Canada, WeeklyPicker.showUpdatedPrices(newPricing)), Currency.CAD)
+      discountedPlans = plansForPromotion(promotion, promoCode, WeeklyPicker.product(Country.Canada), Currency.CAD)
     ))
     val EUregion = Seq(DiscountedRegion(
       title = "Europe",
       description = "Posted to you by air mail",
-      discountedPlans = plansForPromotion(promotion, promoCode, WeeklyPicker.productForCountryGroup(CountryGroup.Europe, WeeklyPicker.showUpdatedPrices(newPricing)), Currency.EUR)
+      discountedPlans = plansForPromotion(promotion, promoCode, WeeklyPicker.productForCountryGroup(CountryGroup.Europe), Currency.EUR)
     ))
 
     val regions: Seq[DiscountedRegion] = promotedRegion ++ UKregion ++ USregion ++ EUregion ++ AUSregion ++  NZregion ++ CAregion  ++ restOfWorldRegion
