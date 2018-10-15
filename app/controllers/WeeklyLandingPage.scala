@@ -32,8 +32,7 @@ class WeeklyLandingPage(tpBackend: TouchpointBackend, commonActions: CommonActio
       Future.successful(Redirect(routes.WeeklyLandingPage.withCountry(international).url, request.queryString, PERMANENT_REDIRECT))
     } { country =>
       val forceNewPricing = WeeklyPicker.forceShowNewPricing(request.rawQueryString)
-      val defaultPromotion = if (WeeklyPicker.showUpdatedPrices(forceNewPricing)) "WWM99X" else "10ANNUAL"
-      Future.successful(Redirect(routes.PromoLandingPage.render(defaultPromotion, Some(country)).url, request.queryString, TEMPORARY_REDIRECT))
+      Future.successful(Redirect(routes.PromoLandingPage.render("WWM99X", Some(country)).url, request.queryString, TEMPORARY_REDIRECT))
     }
   }
 

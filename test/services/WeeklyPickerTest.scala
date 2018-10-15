@@ -22,26 +22,6 @@ class WeeklyPickerTest extends Specification with Mockito {
     }
   }
 
-  "showUpdatedPricesShould" should {
-
-    val switchoverTimeInPast = DateTime.parse("2018-09-10T09:45:00").withZone(DateTimeZone.UTC)
-    val switchoverTimeInFuture = DateTime.parse("2038-09-10T09:45:00").withZone(DateTimeZone.UTC)
-
-    "return true if the relevant query string is set, regardless of the time" in {
-      showUpdatedPrices(true, switchoverTimeInPast) shouldEqual true
-      showUpdatedPrices(true, switchoverTimeInFuture) shouldEqual true
-    }
-
-    "return true if the relevant query string is not set, and the switchover time is in the past" in {
-      showUpdatedPrices(false, switchoverTimeInPast) shouldEqual true
-    }
-
-    "return false if the relevant query string is not set, and the switchover time is in the future" in {
-      showUpdatedPrices(false, switchoverTimeInFuture) shouldEqual false
-    }
-
-  }
-
   "product" should {
 
     "select WeeklyDomestic if the country is US" in {

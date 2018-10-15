@@ -8,7 +8,6 @@
 @import controllers.WeeklyLandingPage.Hreflangs
 @import model.DigitalEdition
 @import views.support.{CommaSplit, MarkdownRenderer, WeeklyPromotion}
-@import services.WeeklyPicker
 @(
     country: Country,
     catalog: Catalog,
@@ -27,7 +26,6 @@
         availableImages = ResponsiveImageGenerator("48f7c23c2f3ff49d313221472e1006218cb1ee31/0_0_9985_1165", Seq(2000), "png"),
         altText = Some("Selection of Guardian Weekly covers")
     )}
-    @headerModifierClass = @{if (WeeklyPicker.showUpdatedPrices(WeeklyPicker.forceShowNewPricing(rawQueryString))) "" else "old-hero-image"}
     @discountedRegions = @{WeeklyPromotion.validRegionsForPromotion(promotion, promoCode, country, rawQueryString)(catalog.weekly)}
     @main(
         title = s"$title | The Guardian",
@@ -43,7 +41,7 @@
             guardian.pageInfo.productData.productSegment = 'weekly';
         </script>
 
-        @fragments.heroBanner(promotion.flatMap(_.landingPage.image).getOrElse(defaultImage), headerModifierClass){
+        @fragments.heroBanner(promotion.flatMap(_.landingPage.image).getOrElse(defaultImage)){
             @title
         } {
             @CommaSplit.split(promotion.flatMap(_.landingPage.title).getOrElse("Get the world in perspective, every single week"))
