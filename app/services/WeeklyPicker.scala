@@ -10,8 +10,6 @@ object WeeklyPicker {
 
   import model.GuardianWeeklyZones._
 
-  def forceShowNewPricing(rawQueryString: String) = rawQueryString.contains("gwoct18")
-
   def isInRestOfWorld(country: Country): Boolean = GuardianWeeklyZones.restOfWorldZoneCountries.contains(country)
 
   def product(country: Country): PurchasableWeeklyProduct = {

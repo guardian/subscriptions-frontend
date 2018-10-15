@@ -15,8 +15,7 @@
     promotion: Option[PromoWithWeeklyLandingPage],
     description:Html,
     md: MarkdownRenderer,
-    hreflangs: Hreflangs,
-    rawQueryString: String = ""
+    hreflangs: Hreflangs
 )
     @anyPromotion = @{promotion.map(asAnyPromotion)}
     @isSixForSix = @{anyPromotion.filter(p => (catalog.weekly.plans.flatten.filter(_.charges.billingPeriod == SixWeeks).map(_.id).toSet intersect p.appliesTo.productRatePlanIds).nonEmpty)}
@@ -26,7 +25,7 @@
         availableImages = ResponsiveImageGenerator("48f7c23c2f3ff49d313221472e1006218cb1ee31/0_0_9985_1165", Seq(2000), "png"),
         altText = Some("Selection of Guardian Weekly covers")
     )}
-    @discountedRegions = @{WeeklyPromotion.validRegionsForPromotion(promotion, promoCode, country, rawQueryString)(catalog.weekly)}
+    @discountedRegions = @{WeeklyPromotion.validRegionsForPromotion(promotion, promoCode, country)(catalog.weekly)}
     @main(
         title = s"$title | The Guardian",
         bodyClasses = List("is-wide"),

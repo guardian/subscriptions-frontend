@@ -95,8 +95,7 @@ class PromoLandingPage(
                           Some(promotionWithLandingPage),
                           description,
                           PegdownMarkdownRenderer,
-                          hreflangs,
-                          rawQueryString)
+                          hreflangs)
       }
     }
 

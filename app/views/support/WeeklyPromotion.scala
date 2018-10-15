@@ -25,10 +25,8 @@ object WeeklyPromotion {
 
   def validRegionsForPromotion(promotion: Option[PromoWithWeeklyLandingPage],
                                promoCode: Option[PromoCode],
-                               requestCountry: Country,
-                               rawQueryString: String = "")(implicit weeklyPlans: WeeklyPlans): Seq[DiscountedRegion] = {
+                               requestCountry: Country)(implicit weeklyPlans: WeeklyPlans): Seq[DiscountedRegion] = {
 
-    val newPricing = WeeklyPicker.forceShowNewPricing(rawQueryString)
     val promotionCountries = promotion.map(_.appliesTo.countries).getOrElse(allCountries)
 
     // If a user does not qualify for domestic delivery (e.g. if the user is based in South Africa),
