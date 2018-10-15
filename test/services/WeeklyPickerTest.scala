@@ -4,8 +4,7 @@ import com.gu.i18n.{Country, CountryGroup}
 import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification
 import WeeklyPicker._
-import model.PurchasableWeeklyProducts.{WeeklyDomestic, WeeklyRestOfWorld, WeeklyZoneA, WeeklyZoneC}
-import org.joda.time.{DateTime, DateTimeZone}
+import model.PurchasableWeeklyProducts.{WeeklyDomestic, WeeklyRestOfWorld}
 
 class WeeklyPickerTest extends Specification with Mockito {
 
