@@ -9,26 +9,16 @@ import org.joda.time.{DateTime, DateTimeZone}
 
 class WeeklyPickerTest extends Specification with Mockito {
 
-  val countryInZoneA = Country.US
-  val countryInZoneC = Country.Australia
   val countryinDomesticZone = Country.Australia
   val countryInRestOfWorldZone = Country("ER", "Eritrea")
 
   "isInRestOfWorldOrZoneC" should {
-    "return true for a country that is in both rest of world and zone C" in {
-      isInRestOfWorldOrZoneC(countryInRestOfWorldZone, true) shouldEqual true
-      isInRestOfWorldOrZoneC(countryInRestOfWorldZone, false) shouldEqual true
+    "return true for a country that is in rest of world" in {
+      isInRestOfWorld(countryInRestOfWorldZone) shouldEqual true
     }
 
-    "return for false for Australia when updated prices are shown, and true for old prices" in {
-      //australia is Zone C, but moves to domestic with the price updates
-      isInRestOfWorldOrZoneC(countryinDomesticZone, true) shouldEqual false
-      isInRestOfWorldOrZoneC(countryInZoneC, false) shouldEqual true
-    }
-
-    "return false for countries that are in zone A and the domestic zone regardless of updated price switch" in {
-      isInRestOfWorldOrZoneC(countryInZoneA, true) shouldEqual false
-      isInRestOfWorldOrZoneC(countryInZoneA, false) shouldEqual false
+    "return false for countries that are in the domestic zone" in {
+      isInRestOfWorld(countryinDomesticZone) shouldEqual false
     }
   }
 

@@ -34,7 +34,7 @@ object WeeklyPromotion {
     // If a user does not qualify for domestic delivery (e.g. if the user is based in South Africa),
     // we want to explicitly call out their (likely) delivery country on the landing page
     val promotedRegion: Seq[DiscountedRegion] = {
-      if (WeeklyPicker.isInRestOfWorldOrZoneC(requestCountry: Country, WeeklyPicker.showUpdatedPrices(newPricing))) {
+      if (WeeklyPicker.isInRestOfWorld(requestCountry: Country)) {
         val currency = CountryGroup.byCountryCode(requestCountry.alpha2).map(_.currency).getOrElse(Currency.USD)
         Seq(DiscountedRegion(
           title = requestCountry.name,
@@ -49,7 +49,7 @@ object WeeklyPromotion {
     val restOfWorldRegion = Seq(DiscountedRegion(
       title = "Rest of the world",
       description = "Posted to you by air mail",
-      discountedPlans = plansForPromotion(promotion, promoCode, WeeklyPicker.restOfWorldOrZoneC(WeeklyPicker.showUpdatedPrices(newPricing)), Currency.USD)
+      discountedPlans = plansForPromotion(promotion, promoCode, WeeklyRestOfWorld, Currency.USD)
     ))
 
     val UKregion: Set[DiscountedRegion] = {

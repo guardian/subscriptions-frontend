@@ -19,15 +19,7 @@ object WeeklyPicker {
     now.isAfter(timeToUpdate) || forceShowUpdatedPrices
   }
 
-  def isInRestOfWorldOrZoneC(country: Country, showUpdatedPrices: Boolean): Boolean = {
-    if (showUpdatedPrices) GuardianWeeklyZones.restOfWorldZoneCountries.contains(country)
-    else GuardianWeeklyZones.zoneCCountries.contains(country)
-  }
-
-  def restOfWorldOrZoneC(showUpdatedPrices: Boolean): PurchasableWeeklyProduct = {
-    if (showUpdatedPrices) WeeklyRestOfWorld
-    else WeeklyZoneC
-  }
+  def isInRestOfWorld(country: Country): Boolean = GuardianWeeklyZones.restOfWorldZoneCountries.contains(country)
 
   def product(country: Country): PurchasableWeeklyProduct = {
     if (domesticZoneCountries.contains(country)) WeeklyDomestic
