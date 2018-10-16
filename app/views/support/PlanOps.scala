@@ -52,7 +52,7 @@ object PlanOps {
 
   implicit class PrettyPlan[+A <: CatalogPlan.Paid](in: A) {
 
-    def packImage(rawQueryString: String = ""): ResponsiveImageGroup = in.charges.benefits.list.toList match {
+    def packImage: ResponsiveImageGroup = in.charges.benefits.list.toList match {
       case Digipack :: Nil =>
         ResponsiveImageGroup(
           availableImages = Seq(ResponsiveImage(controllers.CachedAssets.hashedPathFor("images/digital-pack-garnett.png"), 300)),
