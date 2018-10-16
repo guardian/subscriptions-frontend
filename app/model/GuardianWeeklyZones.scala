@@ -1,6 +1,6 @@
 package model
 
-import com.gu.i18n.CountryGroup
+import com.gu.i18n.{Country, CountryGroup}
 import com.gu.memsub.subsv2.{CatalogPlan, WeeklyPlans}
 
 object GuardianWeeklyZones {
@@ -8,19 +8,21 @@ object GuardianWeeklyZones {
 
   val zoneACountryGroups = Set(CountryGroup.UK, CountryGroup.US)
 
-  val domesticZoneCountryGroups = Set(
+  val domesticZoneCountryGroups = Seq(
     CountryGroup.UK,
     CountryGroup.US,
+    CountryGroup.Europe,
     CountryGroup.Australia,
-    CountryGroup.Canada,
-    CountryGroup.US,
     CountryGroup.NewZealand,
-    CountryGroup.Europe
+    CountryGroup.Canada
   )
-  val restOfWorldZoneCountryGroups = CountryGroup.allGroups.toSet.diff(domesticZoneCountryGroups)
+  val restOfWorldZoneCountryGroups = CountryGroup.allGroups.toSet.diff(domesticZoneCountryGroups.toSet)
 
   val domesticZoneCountries = domesticZoneCountryGroups.flatMap(_.countries)
-  val restOfWorldZoneCountries = allCountries.diff(domesticZoneCountries)
+  val restOfWorldZoneCountries = allCountries.diff(domesticZoneCountries.toSet)
+
+  def getDomesticCountryGroup(country: Country): Option[CountryGroup] =
+    domesticZoneCountryGroups.find(countryGroup => countryGroup.countries.contains(country))
 }
 
 object PurchasableWeeklyProducts {
