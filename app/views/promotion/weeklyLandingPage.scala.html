@@ -1,14 +1,13 @@
 @import com.gu.i18n.Country
 @import com.gu.memsub.BillingPeriod.SixWeeks
 @import com.gu.memsub.Product.WeeklyZoneA
+@import com.gu.memsub.images.{ResponsiveImageGenerator, ResponsiveImageGroup}
 @import com.gu.memsub.promo.PromoCode
 @import com.gu.memsub.promo.Promotion.{PromoWithWeeklyLandingPage, asAnyPromotion}
 @import com.gu.memsub.subsv2.Catalog
 @import controllers.WeeklyLandingPage.Hreflangs
 @import model.DigitalEdition
 @import views.support.{CommaSplit, MarkdownRenderer, WeeklyPromotion}
-@import services.ImagePicker
-@import services.WeeklyPicker
 @(
     country: Country,
     catalog: Catalog,
@@ -16,16 +15,17 @@
     promotion: Option[PromoWithWeeklyLandingPage],
     description:Html,
     md: MarkdownRenderer,
-    hreflangs: Hreflangs,
-    rawQueryString: String = ""
+    hreflangs: Hreflangs
 )
     @anyPromotion = @{promotion.map(asAnyPromotion)}
     @isSixForSix = @{anyPromotion.filter(p => (catalog.weekly.plans.flatten.filter(_.charges.billingPeriod == SixWeeks).map(_.id).toSet intersect p.appliesTo.productRatePlanIds).nonEmpty)}
     @nonTrackingPromotion = @{anyPromotion.flatMap(p => p.asDiscount orElse p.asFreeTrial orElse p.asIncentive) orElse isSixForSix}
     @title = @{"The Guardian Weekly Subscriptions"}
-    @defaultImage = @{ImagePicker.defaultHeaderImage(rawQueryString)}
-    @headerModifierClass = @{if (WeeklyPicker.showUpdatedPrices(WeeklyPicker.forceShowNewPricing(rawQueryString))) "" else "old-hero-image"}
-    @discountedRegions = @{WeeklyPromotion.validRegionsForPromotion(promotion, promoCode, country, rawQueryString)(catalog.weekly)}
+    @defaultImage = @{ResponsiveImageGroup(
+        availableImages = ResponsiveImageGenerator("48f7c23c2f3ff49d313221472e1006218cb1ee31/0_0_9985_1165", Seq(2000), "png"),
+        altText = Some("Selection of Guardian Weekly covers")
+    )}
+    @discountedRegions = @{WeeklyPromotion.validRegionsForPromotion(promotion, promoCode, country)(catalog.weekly)}
     @main(
         title = s"$title | The Guardian",
         bodyClasses = List("is-wide"),
@@ -40,7 +40,7 @@
             guardian.pageInfo.productData.productSegment = 'weekly';
         </script>
 
-        @fragments.heroBanner(promotion.flatMap(_.landingPage.image).getOrElse(defaultImage), headerModifierClass){
+        @fragments.heroBanner(promotion.flatMap(_.landingPage.image).getOrElse(defaultImage)){
             @title
         } {
             @CommaSplit.split(promotion.flatMap(_.landingPage.title).getOrElse("Get the world in perspective, every single week"))
