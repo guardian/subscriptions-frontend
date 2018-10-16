@@ -1,10 +1,8 @@
 package services
 
 import com.gu.i18n.{Country, CountryGroup}
-import com.gu.memsub.images.{ResponsiveImageGenerator, ResponsiveImageGroup}
 import model.GuardianWeeklyZones
 import model.PurchasableWeeklyProducts._
-import org.joda.time.{DateTime, DateTimeZone}
 
 object WeeklyPicker {
 
