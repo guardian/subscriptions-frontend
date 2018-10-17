@@ -48,7 +48,7 @@ libraryDependencies ++= Seq(
     jodaForms,
     PlayImport.specs2 % "test",
     "com.gu" %% "membership-common" % "0.525",
-    "com.gu.identity" %% "identity-play-auth" % "2.4",
+    "com.gu.identity" %% "identity-play-auth" % "2.5",
     "com.gu" %% "identity-test-users" % "0.6",
     "com.gu" %% "play-googleauth" % "0.7.6",
     "com.gu" %% "identity-test-users" % "0.6",
@@ -74,6 +74,7 @@ libraryDependencies ++= Seq(
     "com.fasterxml.jackson.dataformat" % "jackson-dataformat-cbor" % "2.9.2",
     "com.google.guava" % "guava" % "25.0-jre", //-- added explicitly - snyk report avoid logback vulnerability
     "com.fasterxml.jackson.core" % "jackson-databind" % "2.9.7", //added explicitly to avoid snyk vulnerability
+    "com.fasterxml.jackson.core" % "jackson-annotations" % "2.9.7", //added explicitly to avoid snyk vulnerability
     "ch.qos.logback" % "logback-classic" % "1.2.3", //-- added explicitly - snyk report avoid logback vulnerability
     "org.scala-lang" % "scala-compiler" % "2.11.12",
     "org.bouncycastle" % "bcprov-jdk15on" % "1.60" // https://snyk.io/vuln/SNYK-JAVA-ORGBOUNCYCASTLE-32412
