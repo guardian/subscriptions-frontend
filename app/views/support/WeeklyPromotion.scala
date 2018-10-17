@@ -96,7 +96,7 @@ object WeeklyPromotion {
     )
   }
 
-  //If the request country belongs to a domestic country group, we still still display that country at the top of the list
+  //If the request country belongs to a domestic country group, we display that country at the top of the list
   //However, if it corresponds to a region that is always displayed then we need to ensure we don't show it twice
   //e.g. if the request country is the US, then it is the prioritised country and we need to not show it again in the
   //list of domestic countries. A rest of world country should always be at the top, and then all the domestic country groups after.
