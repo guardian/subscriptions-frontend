@@ -3,10 +3,18 @@
 @import com.gu.memsub.subsv2.Catalog
 @import views.support.Dates.prettyDate
 @import views.support.MarkdownRenderer
-@(promoCode: PromoCode, promotion: AnyPromotion, md: MarkdownRenderer, catalog: Catalog)
+@import com.gu.i18n.Country
+
+@(promoCode: PromoCode, promotion: AnyPromotion, md: MarkdownRenderer, catalog: Catalog, maybeCountry: Option[Country])
 @title = @{s"Promo code: ${promoCode.get}"}
+@compatibleProductList = @{catalog.allSubs.flatten.filter(plan => promotion.appliesTo.productRatePlanIds.contains(plan.id))}
+@productNameList = @{compatibleProductList.map(_.name).distinct.sorted}
+@product = @{compatibleProductList.headOption.map{ plan => plan.product }.orElse(None)}
+
 @main(
-    title = s"$title | The Guardian"
+    title = s"$title | The Guardian",
+    product = product,
+    contactUsCountry = maybeCountry
 ) {
 
     <main class="page-container gs-container">
@@ -27,7 +35,7 @@
 
             <h4>Applies to products</h4>
             <ul class="promotion-applies-to">
-                @catalog.allSubs.flatten.filter(plan => promotion.appliesTo.productRatePlanIds.contains(plan.id)).map(_.name).distinct.sorted.map { name =>
+                @productNameList.map{ name =>
                     <li>@name</li>
                 }
             </ul>
@@ -52,7 +60,7 @@
         </section>
         <section class="section-slice promotion-terms">
             @fragments.promotion.promotionTermsAndConditions(promotion, md)
-            @fragments.promotion.fullTermsAndConditions(promoCode, catalog, promotion, md)
+            @fragments.promotion.fullTermsAndConditions(promoCode, catalog, promotion, md, maybeCountry)
             @fragments.promotion.copyrightNotice()
         </section>
     </main>
