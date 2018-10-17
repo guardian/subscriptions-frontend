@@ -54,6 +54,7 @@ libraryDependencies ++= Seq(
     "com.gu" %% "identity-test-users" % "0.6",
     "com.gu" %% "content-authorisation-common" % "0.4",
     "com.gu" %% "tip" % "0.1.1",
+    "com.gu" %% "acquisition-event-producer-play26" % "4.0.7",
     "com.github.nscala-time" %% "nscala-time" % "2.16.0",
     "io.sentry" % "sentry-logback" % "1.7.5",
     "com.typesafe.scala-logging" %% "scala-logging" % "3.7.2",
@@ -71,7 +72,6 @@ libraryDependencies ++= Seq(
     "com.gu" % "kinesis-logback-appender" % "1.4.2",
     "net.logstash.logback" % "logstash-logback-encoder" % "4.11",
     "com.fasterxml.jackson.dataformat" % "jackson-dataformat-cbor" % "2.9.2",
-    "com.gu" %% "acquisition-event-producer-play26" % "4.0.5",
     "com.google.guava" % "guava" % "25.0-jre", //-- added explicitly - snyk report avoid logback vulnerability
     "com.fasterxml.jackson.core" % "jackson-databind" % "2.8.11.1",
     "ch.qos.logback" % "logback-classic" % "1.2.3", //-- added explicitly - snyk report avoid logback vulnerability
