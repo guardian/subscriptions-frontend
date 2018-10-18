@@ -45,10 +45,10 @@ object ContactCentreOps {
   def email = "subscriptions@theguardian.com"
 
   def weeklyEmail(contactUsCountry: Option[Country]): String = {
-    if (contactUsCountry exists countriesHandledByAUCallCentre) {
-      "apac.help@theguardian.com"
-    } else {
-      "gwsubs@theguardian.com"
+    contactUsCountry match {
+      case c: Some[Country] if c exists countriesHandledByAUCallCentre => "apac.help@theguardian.com"
+      case c: Some[Country] if c exists countriesHandledByUSCallCentre => "northamerica.help@theguardian.com"
+      case _ => "customer.help@theguardian.com"
     }
   }
 }
