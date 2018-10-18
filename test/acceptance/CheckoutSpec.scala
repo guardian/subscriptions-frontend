@@ -53,7 +53,7 @@ class CheckoutSpec extends FeatureSpec with Browser
 
   feature("Subscription checkout") {
 
-    scenario("Guest user subscribes for the Digital Pack with direct debit", Acceptance) {
+    scenario("Guest user subscribes for the Digital Pack with direct debit", AcceptanceTest) {
       checkDependenciesAreAvailable
       val testUser = new TestUser
 
@@ -117,7 +117,7 @@ class CheckoutSpec extends FeatureSpec with Browser
           TESTS WITH OLD ZONES/RATES
      */
 
-    scenario("Weekly quarterly sub purchase (old pricing - ZoneA) from UK for UK delivery", WeeklyCheckoutAcceptance) {
+    scenario("Weekly quarterly sub purchase (old pricing - ZoneA) from UK for UK delivery", AcceptanceTest) {
       checkDependenciesAreAvailable
       val testUser = new TestUser
       val checkout = Checkout(testUser, "checkout/weeklyzonea-guardianweeklyquarterly?countryGroup=uk")
@@ -135,7 +135,7 @@ class CheckoutSpec extends FeatureSpec with Browser
       assert(!checkout.currencyOverrideHasLoaded())
     }
 
-    scenario("Weekly quarterly sub purchase (old pricing - ZoneC) from EU for EU delivery", WeeklyCheckoutAcceptance) {
+    scenario("Weekly quarterly sub purchase (old pricing - ZoneC) from EU for EU delivery", AcceptanceTest) {
       checkDependenciesAreAvailable
       val testUser = new TestUser
       val checkout = Checkout(testUser, "checkout/weeklyzonec-guardianweeklyquarterly?countryGroup=eu")
@@ -153,7 +153,7 @@ class CheckoutSpec extends FeatureSpec with Browser
       assert(checkout.currencyOverrideHasLoaded())
     }
 
-    scenario("Weekly quarterly sub purchase (old pricing - ZoneC) from ROW for ROW delivery", WeeklyCheckoutAcceptance) {
+    scenario("Weekly quarterly sub purchase (old pricing - ZoneC) from ROW for ROW delivery", AcceptanceTest) {
       checkDependenciesAreAvailable
       val testUser = new TestUser
       val checkout = Checkout(testUser, "checkout/weeklyzonec-guardianweeklyquarterly?countryGroup=us")
@@ -171,7 +171,7 @@ class CheckoutSpec extends FeatureSpec with Browser
       assert(checkout.currencyOverrideHasLoaded())
     }
 
-    scenario("Weekly quarterly sub purchase (old pricing - ZoneA) from ROW for UK delivery", WeeklyCheckoutAcceptance) {
+    scenario("Weekly quarterly sub purchase (old pricing - ZoneA) from ROW for UK delivery", AcceptanceTest) {
       checkDependenciesAreAvailable
       val testUser = new TestUser
       val checkout = Checkout(testUser, "checkout/weeklyzonea-guardianweeklyquarterly?countryGroup=uk")
@@ -193,7 +193,7 @@ class CheckoutSpec extends FeatureSpec with Browser
           TESTS WITH NEW ZONES/RATES
      */
 
-    scenario("Weekly quarterly sub purchase (new pricing - domestic) from UK for UK delivery", WeeklyCheckoutAcceptance) {
+    scenario("Weekly quarterly sub purchase (new pricing - domestic) from UK for UK delivery", AcceptanceTest) {
       checkDependenciesAreAvailable
       val testUser = new TestUser
       val checkout = Checkout(testUser, "checkout/weeklydomestic-gwoct18-quarterly-domestic?countryGroup=uk")
@@ -211,7 +211,7 @@ class CheckoutSpec extends FeatureSpec with Browser
       assert(!checkout.currencyOverrideHasLoaded())
     }
 
-    scenario("Weekly quarterly sub purchase (new pricing - domestic) from EU for EU delivery", WeeklyCheckoutAcceptance) {
+    scenario("Weekly quarterly sub purchase (new pricing - domestic) from EU for EU delivery", AcceptanceTest) {
       checkDependenciesAreAvailable
       val testUser = new TestUser
       val checkout = Checkout(testUser, "checkout/weeklydomestic-gwoct18-quarterly-domestic?countryGroup=eu")
@@ -229,7 +229,7 @@ class CheckoutSpec extends FeatureSpec with Browser
       assert(!checkout.currencyOverrideHasLoaded())
     }
 
-    scenario("Weekly quarterly sub purchase (new pricing - restofworld) for ROW delivery", WeeklyCheckoutAcceptance) {
+    scenario("Weekly quarterly sub purchase (new pricing - restofworld) for ROW delivery", AcceptanceTest) {
       checkDependenciesAreAvailable
       val testUser = new TestUser
       val checkout = Checkout(testUser, "checkout/weeklyrestofworld-gwoct18-quarterly-row?countryGroup=us")
@@ -247,7 +247,7 @@ class CheckoutSpec extends FeatureSpec with Browser
       assert(checkout.currencyOverrideHasLoaded())
     }
 
-    scenario("Weekly quarterly sub purchase (new pricing - domestic) from ROW for UK delivery", WeeklyCheckoutAcceptance) {
+    scenario("Weekly quarterly sub purchase (new pricing - domestic) from ROW for UK delivery", AcceptanceTest) {
       checkDependenciesAreAvailable
       val testUser = new TestUser
       val checkout = Checkout(testUser, "checkout/weeklydomestic-gwoct18-quarterly-domestic?countryGroup=uk")
@@ -267,7 +267,7 @@ class CheckoutSpec extends FeatureSpec with Browser
 
 
     //temporarily ignoring this until user details pre-fill is fixed
-    ignore("Identity user subscribes to the Voucher Everyday package with direct debit", Acceptance) {
+    ignore("Identity user subscribes to the Voucher Everyday package with direct debit", AcceptanceTest) {
       withRegisteredIdentityUserFixture { testUser =>
 
       Given("a registered and signed in Identity user selects the Everyday package")

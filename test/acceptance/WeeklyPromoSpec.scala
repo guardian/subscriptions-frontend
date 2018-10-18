@@ -29,7 +29,7 @@ class WeeklyPromoSpec extends FeatureSpec with Browser
 
   feature("Weekly Promotion Page") {
 
-    scenario("UK user lands on Guardian Weekly promotion page", WeeklyPromoAcceptance) {
+    scenario("UK user lands on Guardian Weekly promotion page", AcceptanceTest) {
       val promoCode = "/p/10ANNUAL"
 
       When("The user is in the UK")
@@ -91,7 +91,7 @@ class WeeklyPromoSpec extends FeatureSpec with Browser
 
     }
 
-    scenario("ZA user lands on GW promo page", WeeklyPromoAcceptance) {
+    scenario("ZA user lands on GW promo page", AcceptanceTest) {
       val promoCode = "/p/10ANNUAL"
 
       When("The user is in South Africa")
@@ -155,7 +155,7 @@ class WeeklyPromoSpec extends FeatureSpec with Browser
 
     // NEW PRICE/PRODUCT TEST
 
-    scenario("UK user lands on Guardian Weekly promotion page AFTER 10:45 on 10/10/18", WeeklyPromoAcceptance) {
+    scenario("UK user lands on Guardian Weekly promotion page AFTER 10:45 on 10/10/18", AcceptanceTest) {
       val promoCode = "/p/10ANNUAL"
       val params = Some("gwoct18")
 
@@ -218,7 +218,7 @@ class WeeklyPromoSpec extends FeatureSpec with Browser
 
     }
 
-    scenario("FR user lands on Guardian Weekly promotion page AFTER 10:45 on 10/10/18", WeeklyPromoAcceptance) {
+    scenario("FR user lands on Guardian Weekly promotion page AFTER 10:45 on 10/10/18", AcceptanceTest) {
       val promoCode = "/p/10ANNUAL"
       val country = "FR"
       val params = Some("gwoct18")
@@ -282,7 +282,7 @@ class WeeklyPromoSpec extends FeatureSpec with Browser
 
     }
 
-    scenario("ZA user lands on GW promo page AFTER 10:45 on 10/10/18", WeeklyPromoAcceptance) {
+    scenario("ZA user lands on GW promo page AFTER 10:45 on 10/10/18", AcceptanceTest) {
       val promoCode = "/p/10ANNUAL"
       val country = "ZA"
       val params = Some("gwoct18")
