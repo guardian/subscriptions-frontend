@@ -8,6 +8,7 @@ import com.gu.memsub.promo.{PromoCode, WeeklyLandingPage}
 import com.gu.memsub.subsv2.{CatalogPlan, WeeklyPlans}
 import com.netaporter.uri.Uri
 import com.netaporter.uri.dsl._
+import model.GuardianWeeklyZones
 import model.PurchasableWeeklyProducts._
 import services.WeeklyPicker
 import views.support.Pricing._
@@ -23,34 +24,12 @@ object WeeklyPromotion {
 
   case class DiscountedRegion(title: String, description: String, discountedPlans: List[DiscountedPlan])
 
-  def validRegionsForPromotion(promotion: Option[PromoWithWeeklyLandingPage],
-                               promoCode: Option[PromoCode],
-                               requestCountry: Country)(implicit weeklyPlans: WeeklyPlans): Seq[DiscountedRegion] = {
+  def domesticRegions(promotion: Option[PromoWithWeeklyLandingPage],
+                               promoCode: Option[PromoCode])(implicit weeklyPlans: WeeklyPlans): Map[CountryGroup, DiscountedRegion] = {
 
     val promotionCountries = promotion.map(_.appliesTo.countries).getOrElse(allCountries)
 
-    // If a user does not qualify for domestic delivery (e.g. if the user is based in South Africa),
-    // we want to explicitly call out their (likely) delivery country on the landing page
-    val promotedRegion: Seq[DiscountedRegion] = {
-      if (WeeklyPicker.isInRestOfWorld(requestCountry: Country)) {
-        val currency = CountryGroup.byCountryCode(requestCountry.alpha2).map(_.currency).getOrElse(Currency.USD)
-        Seq(DiscountedRegion(
-          title = requestCountry.name,
-          description = "Posted to you by air mail",
-          discountedPlans = plansForPromotion(promotion, promoCode, WeeklyPicker.product(requestCountry), currency)
-        ))
-      } else {
-        Seq()
-      }
-    }
-
-    val restOfWorldRegion = Seq(DiscountedRegion(
-      title = "Rest of the world",
-      description = "Posted to you by air mail",
-      discountedPlans = plansForPromotion(promotion, promoCode, WeeklyRestOfWorld, Currency.USD)
-    ))
-
-    val UKregion: Set[DiscountedRegion] = {
+    val UKregion: DiscountedRegion = {
 
       val productForUK = WeeklyPicker.product(Country.UK)
 
@@ -72,43 +51,107 @@ object WeeklyPromotion {
       val countries = promotionCountries intersect UK
       val includesUKDomestic = (countries intersect UKdomestic).nonEmpty
       val includesUKOverseas = (countries intersect UKoverseas).nonEmpty
+
       if(includesUKDomestic && includesUKOverseas){
-        Set(all)
+        all
       } else if (includesUKDomestic) {
-        Set(domestic)
-      } else if (includesUKOverseas) {
-        Set(overseas)
+        domestic
       } else {
-        Set()
+        overseas
       }
     }
-    val USregion = Seq(DiscountedRegion(
+    val USregion = DiscountedRegion(
       title = "United States",
       description = "Includes Alaska and Hawaii",
       discountedPlans = plansForPromotion(promotion, promoCode, WeeklyPicker.product(Country.US), Currency.USD)
-    ))
-    val AUSregion = Seq(DiscountedRegion(
+    )
+    val AUSregion = DiscountedRegion(
       title = "Australia",
       description = "Posted to you by air mail",
       discountedPlans = plansForPromotion(promotion, promoCode, WeeklyPicker.product(Country.Australia), Currency.AUD)
-    ))
-    val NZregion = Seq(DiscountedRegion(
+    )
+    val NZregion = DiscountedRegion(
       title = "New Zealand",
       description = "Posted to you by air mail",
       discountedPlans = plansForPromotion(promotion, promoCode, WeeklyPicker.product(Country.NewZealand), Currency.NZD)
-    ))
-    val CAregion = Seq(DiscountedRegion(
+    )
+    val CAregion = DiscountedRegion(
       title = "Canada",
       description = "Posted to you by air mail",
       discountedPlans = plansForPromotion(promotion, promoCode, WeeklyPicker.product(Country.Canada), Currency.CAD)
-    ))
-    val EUregion = Seq(DiscountedRegion(
+    )
+    val EUregion = DiscountedRegion(
       title = "Europe",
       description = "Posted to you by air mail",
       discountedPlans = plansForPromotion(promotion, promoCode, WeeklyPicker.productForCountryGroup(CountryGroup.Europe), Currency.EUR)
-    ))
+    )
 
-    val regions: Seq[DiscountedRegion] = promotedRegion ++ UKregion ++ USregion ++ EUregion ++ AUSregion ++  NZregion ++ CAregion  ++ restOfWorldRegion
+    Map(
+      CountryGroup.UK -> UKregion,
+      CountryGroup.US -> USregion,
+      CountryGroup.Europe -> EUregion,
+      CountryGroup.Australia -> AUSregion,
+      CountryGroup.NewZealand -> NZregion,
+      CountryGroup.Canada -> CAregion
+    )
+  }
+
+  //If the request country belongs to a domestic country group, we display that country at the top of the list
+  //However, if it corresponds to a region that is always displayed then we need to ensure we don't show it twice
+  //e.g. if the request country is the US, then it is the prioritised country and we need to not show it again in the
+  //list of domestic countries. A rest of world country should always be at the top, and then all the domestic country groups after.
+  def domesticCountryGroupsToDisplay(requestCountry: Country): List[CountryGroup] = {
+    val dedupedRegions = requestCountry match {
+      case Country.UK => GuardianWeeklyZones.domesticZoneCountryGroups.filterNot(_ == CountryGroup.UK)
+      case Country.US => GuardianWeeklyZones.domesticZoneCountryGroups.filterNot(_ == CountryGroup.US)
+      case Country.Australia => GuardianWeeklyZones.domesticZoneCountryGroups.filterNot(_ == CountryGroup.Australia)
+      case Country.NewZealand => GuardianWeeklyZones.domesticZoneCountryGroups.filterNot(_ == CountryGroup.NewZealand)
+      case Country.Canada => GuardianWeeklyZones.domesticZoneCountryGroups.filterNot(_ == CountryGroup.Canada)
+      case _ => GuardianWeeklyZones.domesticZoneCountryGroups
+    }
+
+    dedupedRegions.toList
+  }
+
+  def validRegionsForPromotion(promotion: Option[PromoWithWeeklyLandingPage],
+                               promoCode: Option[PromoCode],
+                               requestCountry: Country)(implicit weeklyPlans: WeeklyPlans): Seq[DiscountedRegion] = {
+
+    val domesticDiscountedRegions: Map[CountryGroup, DiscountedRegion] = domesticRegions(promotion, promoCode)
+
+    // If there is a request country passed by query string, we want it to be at the top.
+    // If the request country is a domestic country then it is still the prioritised country, but we should not duplicate it
+    val prioritisedRegion: DiscountedRegion = {
+      val currency = CountryGroup.byCountryCode(requestCountry.alpha2).map(_.currency).getOrElse(Currency.USD)
+
+      val maybeDomesticDiscountedRegion = for {
+        domesticCountryGroup <- GuardianWeeklyZones.getDomesticCountryGroup(requestCountry)
+        domesticDiscountedRegion <- domesticDiscountedRegions.get(domesticCountryGroup)
+      } yield {
+        domesticDiscountedRegion
+      }
+
+      maybeDomesticDiscountedRegion.getOrElse(
+        DiscountedRegion(
+          title = requestCountry.name,
+          description = "Posted to you by air mail",
+          discountedPlans = plansForPromotion(promotion, promoCode, WeeklyPicker.product(requestCountry), currency)
+        )
+      )
+    }
+
+    val restOfWorldRegion = DiscountedRegion(
+    title = "Rest of the world",
+    description = "Posted to you by air mail",
+    discountedPlans = plansForPromotion(promotion, promoCode, WeeklyRestOfWorld, Currency.USD)
+    )
+
+
+    val domesticDiscountedRegionsDeduped = domesticCountryGroupsToDisplay(requestCountry) map { countryGroup =>
+      domesticDiscountedRegions(countryGroup)
+    }
+
+    val regions: Seq[DiscountedRegion] = prioritisedRegion :: domesticDiscountedRegionsDeduped ++ Seq(restOfWorldRegion)
     regions.filter(_.discountedPlans.nonEmpty)
   }
 
