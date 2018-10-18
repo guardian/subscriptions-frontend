@@ -121,7 +121,7 @@ object WeeklyPromotion {
 
     // If there is a request country passed by query string, we want it to be at the top.
     // If the request country is a domestic country then it is still the prioritised country, but we should not duplicate it
-    val prioritisedRegion: Seq[DiscountedRegion] = {
+    val prioritisedRegion: DiscountedRegion = {
       val currency = CountryGroup.byCountryCode(requestCountry.alpha2).map(_.currency).getOrElse(Currency.USD)
 
       val maybeDomesticDiscountedRegion = for {
@@ -131,29 +131,27 @@ object WeeklyPromotion {
         domesticDiscountedRegion
       }
 
-      Seq(maybeDomesticDiscountedRegion.getOrElse(
-          DiscountedRegion(
-            title = requestCountry.name,
-            description = "Posted to you by air mail",
-            discountedPlans = plansForPromotion(promotion, promoCode, WeeklyPicker.product(requestCountry), currency)
-          )
+      maybeDomesticDiscountedRegion.getOrElse(
+        DiscountedRegion(
+          title = requestCountry.name,
+          description = "Posted to you by air mail",
+          discountedPlans = plansForPromotion(promotion, promoCode, WeeklyPicker.product(requestCountry), currency)
         )
       )
-
     }
 
-    val restOfWorldRegion = Seq(DiscountedRegion(
+    val restOfWorldRegion = DiscountedRegion(
     title = "Rest of the world",
     description = "Posted to you by air mail",
     discountedPlans = plansForPromotion(promotion, promoCode, WeeklyRestOfWorld, Currency.USD)
-    ))
+    )
 
 
     val domesticDiscountedRegionsDeduped = domesticCountryGroupsToDisplay(requestCountry) map { countryGroup =>
       domesticDiscountedRegions(countryGroup)
     }
 
-    val regions: Seq[DiscountedRegion] = prioritisedRegion ++ domesticDiscountedRegionsDeduped ++ restOfWorldRegion
+    val regions: Seq[DiscountedRegion] = prioritisedRegion :: domesticDiscountedRegionsDeduped ++ Seq(restOfWorldRegion)
     regions.filter(_.discountedPlans.nonEmpty)
   }
 
