@@ -5,11 +5,11 @@ import acceptance.util.{Browser, Config, TestUser}
 import org.openqa.selenium.{By, WebElement}
 import org.scalatest.selenium.Page
 
-case class WeeklyPromo(endpoint: String = "/p/10ANNUAL", country: String = "GB", params: Option[String] = None) extends Page with Browser {
+case class WeeklyPromo(endpoint: String = "/p/WWM99X", country: String = "GB") extends Page with Browser {
 
   override val timeOutSec: Int = 5
 
-  val url = s"$baseUrl/$endpoint?country=$country${params.map{p => s"&$p"}.getOrElse("")}"
+  val url = s"$baseUrl/$endpoint?country=$country"
 
   private val userDisplayName = cssSelector(".js-user-displayname")
   private val submitPaymentButton = cssSelector(".js-checkout-submit")
@@ -34,10 +34,6 @@ case class WeeklyPromo(endpoint: String = "/p/10ANNUAL", country: String = "GB",
 
     def chooseLocalDelivery(): Unit = {
       clickOn(cssSelector(nthDestinationElementSelector(1)))
-    }
-
-    def chooseEuropeDelivery(): Unit = {
-      clickOn(cssSelector(nthDestinationElementSelector(3)))
     }
 
     def menuIsVisible(name: String): Boolean = {
