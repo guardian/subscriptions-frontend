@@ -190,13 +190,13 @@ class PromoLandingPage(
     maybeLandingPage.run.map(_.map(OkWithPreviewHeaders).getOrElse(NotFound))
   }
 
-  def terms(promoCodeStr: String): Action[AnyContent] = CachedAction.async { _ =>
+  def terms(promoCodeStr: String, maybeCountry: Option[Country]): Action[AnyContent] = CachedAction.async { _ =>
     val promoCode = PromoCode(promoCodeStr)
 
     val maybeTermsPage = for {
       promotion <- OptionT(tpBackend.promoService.findPromotionFuture(promoCode))
       termsPage <- OptionT(eventualCatalogPromoLandingPage.map(_.catalog).map({ catalog =>
-        Some(Ok(views.html.promotion.termsPage(promoCode, promotion, PegdownMarkdownRenderer, catalog))): Option[Result]
+        Some(Ok(views.html.promotion.termsPage(promoCode, promotion, PegdownMarkdownRenderer, catalog, maybeCountry))): Option[Result]
       }))
     } yield termsPage
 

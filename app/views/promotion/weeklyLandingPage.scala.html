@@ -108,9 +108,8 @@
             <section class="flexwrap promotion-terms">
                 <div class="flexwrap__inner">
                     @nonTrackingPromotion.map { promo =>
-
                         @fragments.promotion.promotionTermsAndConditions(promo, md)
-                    <p>For full promotion terms and conditions visit <a class="u-link" href="/p/@promoCode.map(_.get)/terms">
+                    <p>For full promotion terms and conditions visit <a class="u-link" href="/p/@promoCode.map(_.get)/terms?country=@{country.alpha2}">
                         subscribe.theguardian.com/p/@promoCode.map(_.get)/terms</a></p>
 
                         @fragments.promotion.subscriptionTermsAndConditions(catalog, promo)

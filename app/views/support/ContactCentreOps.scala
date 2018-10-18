@@ -46,7 +46,7 @@ object ContactCentreOps {
 
   def weeklyEmail(contactUsCountry: Option[Country]): String = {
     if (contactUsCountry exists countriesHandledByAUCallCentre) {
-      "gwsubsau@theguardian.com"
+      "apac.help@theguardian.com"
     } else {
       "gwsubs@theguardian.com"
     }

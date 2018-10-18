@@ -3,39 +3,94 @@
 @import com.gu.memsub.promo.Promotion.AnyPromotion
 @import com.gu.memsub.subsv2.Catalog
 @import views.support.MarkdownRenderer
+@import com.gu.i18n.{Country, CountryGroup}
 
-@(promoCode: PromoCode, catalog: Catalog, promotion: AnyPromotion, md: MarkdownRenderer)
+@(promoCode: PromoCode, catalog: Catalog, promotion: AnyPromotion, md: MarkdownRenderer, maybeCountry: Option[Country])
 @isSixForSix = @{(catalog.weekly.plans.flatten.filter(_.charges.billingPeriod == SixWeeks).map(_.id).toSet intersect promotion.appliesTo.productRatePlanIds).nonEmpty}
+
+@uk = @{"**United Kingdom:**"}
+@ukQuarterlyRate = @{"£37.50"}
+@ukAnnualRate = @{"£150"}
+@ukSavePercent = @{"35%"}
+
+@us = @{"**USA:**"}
+@usQuarterlyRate = @{"US$75"}
+@usAnnualRate = @{"US$300"}
+@usSavePercent = @{"31%"}
+
+@ca = @{"**Canada:**"}
+@caQuarterlyRate = @{"CA$80"}
+@caAnnualRate = @{"CA$320"}
+@caSavePercent = @{"16%"}
+
+@au = @{"**Australia:**"}
+@auQuarterlyRate = @{"AU$97.50"}
+@auAnnualRate = @{"AU$390"}
+@auSavePercent = @{"15%"}
+
+@nz = @{"**New Zealand:**"}
+@nzQuarterlyRate = @{"NZ$123"}
+@nzAnnualRate = @{"NZ$490"}
+@nzSavePercent = @{"20%"}
+
+@eu = @{"**Europe:**"}
+@euQuarterlyRate = @{"€61.30"}
+@euAnnualRate = @{"€245"}
+@euSavePercent = @{"26%"}
+
+@row = @{"**Rest of World:**"}
+@rowQuarterlyRateGBP = @{"£60"}
+@rowQuarterlyRateUSD = @{"US$81.30"}
+@rowAnnualRate = @{"£240 or US$325"}
+
+@ukStandardTerms = @{s"$uk Quarterly (13 weeks) subscription rate $ukQuarterlyRate, or annual rate $ukAnnualRate, saving $ukSavePercent off the cover price."}
+@usStandardTerms = @{s"$us Quarterly (13 weeks) subscription rate $usQuarterlyRate, or annual rate $usAnnualRate, saving $usSavePercent off the cover price."}
+@caStandardTerms = @{s"$ca Quarterly (13 weeks) subscription rate $caQuarterlyRate, or annual rate $caAnnualRate, saving $caSavePercent off the cover price."}
+@auStandardTerms = @{s"$au Quarterly (13 weeks) subscription rate $auQuarterlyRate, or annual rate $auAnnualRate, saving $auSavePercent off the cover price."}
+@nzStandardTerms = @{s"$nz Quarterly (13 weeks) subscription rate $nzQuarterlyRate, or annual rate $nzAnnualRate, saving $nzSavePercent off the cover price."}
+@euStandardTerms = @{s"$eu Quarterly (13 weeks) subscription rate $euQuarterlyRate, or annual rate $euAnnualRate, saving $euSavePercent off the cover price. Excluding Cyprus, Malta and Republic of Ireland."}
+@rowStandardTerms = @{s"$row Quarterly (13 weeks) subscription payments of $rowQuarterlyRateGBP or $rowQuarterlyRateUSD, or annual payments of $rowAnnualRate."}
+
+@allStandardTerms = @{
+    ukStandardTerms.concat("\n\n") +
+    usStandardTerms.concat("\n\n") +
+    caStandardTerms.concat("\n\n") +
+    auStandardTerms.concat("\n\n") +
+    nzStandardTerms.concat("\n\n") +
+    euStandardTerms.concat("\n\n") +
+    rowStandardTerms.concat("\n\n")
+}
+
+@ukSixForSixTerms = @{s"$uk Offer is £6 for the first 6 issues followed by quarterly (13 weeks) subscription payments of $ukQuarterlyRate thereafter, saving $ukSavePercent off the cover price."}
+@usSixForSixTerms = @{s"$us Offer is US$$6 for the first 6 issues, followed by quarterly (13 weeks) subscription payments of $usQuarterlyRate thereafter, saving $usSavePercent off the cover price."}
+@caSixForSixTerms = @{s"$ca Offer is CA$$6 for the first 6 issues, followed by quarterly (13 weeks) subscription payments of $caQuarterlyRate thereafter, saving $caSavePercent off the cover price."}
+@auSixForSixTerms = @{s"$au Offer is AU$$6 for the first 6 issues, followed by quarterly (13 weeks) subscription payments of $auQuarterlyRate thereafter, saving $auSavePercent off the cover price."}
+@nzSixForSixTerms = @{s"$nz Offer is NZ$$6 for the first 6 issues, followed by quarterly (13 weeks) subscription payments of $nzQuarterlyRate thereafter, saving $nzSavePercent off the cover price."}
+@euSixForSixTerms = @{s"$eu Offer is €6 for the first 6 issues followed by quarterly (13 weeks) subscription payments of $euQuarterlyRate thereafter, saving $euSavePercent off the cover price. Excluding Cyprus, Malta and Republic of Ireland."}
+@rowSixForSixTerms = @{s"$row Offer is US$$6 the first 6 issues, followed by quarterly (13 weeks) subscription payments of $rowQuarterlyRateUSD thereafter."}
+
+@allSixForSixTerms = @{
+    ukSixForSixTerms.concat("\n\n") +
+    usSixForSixTerms.concat("\n\n") +
+    caSixForSixTerms.concat("\n\n") +
+    auSixForSixTerms.concat("\n\n") +
+    nzSixForSixTerms.concat("\n\n") +
+    euSixForSixTerms.concat("\n\n") +
+    rowSixForSixTerms.concat("\n\n")
+}
+
 @Html(md.render(
     (if (isSixForSix) {
 s"""
 Offer not available to current subscribers of Guardian Weekly. You must be 18+ to be eligible for this offer. Guardian Weekly reserve the right to end this offer at any time.
 
-**United Kingdom:** Offer is £6 for the first 6 issues followed by quarterly (13 weeks) subscription payments of £30 thereafter, saving 20% off the cover price.
-
-**USA and Canada:** Offer is $$6 for the first 6 issues, followed by quarterly (13 weeks) subscription payments of $$60, saving 30% off the cover price ($$US) and 20% ($$CAN).
-
-**Australia and New Zealand:** Offer is $$6 for the first 6 issues, followed by quarterly (13 weeks) subscription payments of $$78AUD (Australia) or $$98NZD (New Zealand) thereafter, saving 18% off the cover price.
-
-**Europe:**  Offer is €6 for the first 6 issues followed by quarterly (13 weeks) subscription payments of €49, saving 30% off the cover price. Excluding Cyprus, Malta and Republic of Ireland.
-
-**Rest of World:** Offer is £6 the first 6 issues, followed by quarterly (13 weeks) subscription payments of £48.
+$allSixForSixTerms
 """
     } else {
 s"""
 You must be 18+ to be eligible for a Guardian Weekly subscription.
 
-**United Kingdom:** Quarterly (13 weeks) subscription rate £30 and annual rate £120, saving 20% off the cover price.
-
-**USA and Canada:** Quarterly (13 weeks) subscription rate $$60 and annual rate $$240, saving 30% off the cover price ($$US) and 20% ($$CAN).
-
-**Australia:** Quarterly (13 weeks) subscription payments of $$78 and annual rate $$312, saving 18% off the cover price.
-
-**New Zealand:** Quarterly (13 weeks) subscription rate of $$98 and annual rate $$392, saving 18% off the cover price.
-
-**Europe:** Quarterly (13 weeks) subscription rate of €49 and annual rate €196, saving 30% off the cover price. Excluding Cyprus, Malta and Republic of Ireland.
-
-**Rest of World:** Quarterly (13 weeks) subscription payments of £48 or US$$65 and annual rates £192 or US $$260.
+$allStandardTerms
 """
     }) +
 """

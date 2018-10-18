@@ -3,8 +3,9 @@
 @import com.gu.memsub.subsv2.Catalog
 @import views.support.LandingPageOps._
 @import views.support.MarkdownRenderer
+@import com.gu.i18n.Country
 
-@(promoCode: PromoCode, catalog: Catalog, promotion: AnyPromotion, md: MarkdownRenderer)
+@(promoCode: PromoCode, catalog: Catalog, promotion: AnyPromotion, md: MarkdownRenderer, maybeCountry: Option[Country])
 @isDigipack = @{(catalog.digipack.plans.map(_.id).toSet intersect promotion.appliesTo.productRatePlanIds).nonEmpty}
 @isGuardianWeekly = @{(catalog.weekly.plans.flatten.map(_.id).toSet intersect promotion.appliesTo.productRatePlanIds).nonEmpty}
 @if(promotion.asIncentive.isDefined) {
@@ -14,7 +15,7 @@
         <p>@fragments.promotion.digitalpackLegalTerms(promoCode, promotion, md)</p>
     } else {
         @if(isGuardianWeekly) {
-            <p>@fragments.promotion.guardianWeeklyLegalTerms(promoCode, catalog, promotion, md)</p>
+            <p>@fragments.promotion.guardianWeeklyLegalTerms(promoCode, catalog, promotion, md, maybeCountry)</p>
         } else {
             <p>@fragments.promotion.newspaperLegalTerms(promoCode, promotion, md)</p>
         }
