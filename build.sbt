@@ -48,12 +48,13 @@ libraryDependencies ++= Seq(
     jodaForms,
     PlayImport.specs2 % "test",
     "com.gu" %% "membership-common" % "0.525",
-    "com.gu.identity" %% "identity-play-auth" % "2.4",
+    "com.gu.identity" %% "identity-play-auth" % "2.5",
     "com.gu" %% "identity-test-users" % "0.6",
     "com.gu" %% "play-googleauth" % "0.7.6",
     "com.gu" %% "identity-test-users" % "0.6",
     "com.gu" %% "content-authorisation-common" % "0.4",
     "com.gu" %% "tip" % "0.1.1",
+    "com.gu" %% "acquisition-event-producer-play26" % "4.0.7",
     "com.github.nscala-time" %% "nscala-time" % "2.16.0",
     "io.sentry" % "sentry-logback" % "1.7.5",
     "com.typesafe.scala-logging" %% "scala-logging" % "3.7.2",
@@ -71,9 +72,9 @@ libraryDependencies ++= Seq(
     "com.gu" % "kinesis-logback-appender" % "1.4.2",
     "net.logstash.logback" % "logstash-logback-encoder" % "4.11",
     "com.fasterxml.jackson.dataformat" % "jackson-dataformat-cbor" % "2.9.2",
-    "com.gu" %% "acquisition-event-producer-play26" % "4.0.5",
     "com.google.guava" % "guava" % "25.0-jre", //-- added explicitly - snyk report avoid logback vulnerability
-    "com.fasterxml.jackson.core" % "jackson-databind" % "2.8.11.1",
+    "com.fasterxml.jackson.core" % "jackson-databind" % "2.9.7", //added explicitly to avoid snyk vulnerability
+    "com.fasterxml.jackson.core" % "jackson-annotations" % "2.9.7", //added explicitly to avoid snyk vulnerability
     "ch.qos.logback" % "logback-classic" % "1.2.3", //-- added explicitly - snyk report avoid logback vulnerability
     "org.scala-lang" % "scala-compiler" % "2.11.12",
     "org.bouncycastle" % "bcprov-jdk15on" % "1.60" // https://snyk.io/vuln/SNYK-JAVA-ORGBOUNCYCASTLE-32412
@@ -120,8 +121,9 @@ javaOptions in Universal ++= Seq(
 
 addCommandAlias("devrun", "run  9200")
 addCommandAlias("prodrun", "run 9200")
-addCommandAlias("fast-test", "testOnly -- -l Acceptance -l WeeklyCheckoutAcceptance -l WeeklyPromoAcceptance")
-addCommandAlias("acceptance-test", "testOnly acceptance.CheckoutSpec")
+addCommandAlias("fast-test", "testOnly -- -l Acceptance -l WeeklyCheckoutAcceptance -l WeeklyPromoAcceptance -l GetAddressIOServiceAcceptance")
+addCommandAlias("acceptance-test", "testOnly acceptance.CheckoutSpec acceptance.GetAddressIOServiceTest")
+addCommandAlias("get-address-io-service-test", "testOnly acceptance.GetAddressIOServiceTest")
 addCommandAlias("weekly-promo-acceptance-test", "testOnly acceptance.WeeklyPromoSpec")
 addCommandAlias("play-artifact", "riffRaffNotifyTeamcity")
 
