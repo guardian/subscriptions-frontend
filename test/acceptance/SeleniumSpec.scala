@@ -335,10 +335,10 @@ class SeleniumSpec extends FeatureSpec with Browser
         go.to(promoPage)
         assert(promoPage.pageHasLoaded())
 
-        Then("Europe should be the first list item")
+        Then("France should be the first list item")
         assert(promoPage.DestinationList.firstElementAttribute("data-dropdown-menu") === "France")
 
-        When("they click for delivery to Europe")
+        When("they click for delivery to France")
         promoPage.DestinationList.chooseLocalDelivery()
 
         Then("the correct menu should become visible")
@@ -346,42 +346,42 @@ class SeleniumSpec extends FeatureSpec with Browser
 
         And("the quarterly link should be correct")
         assert(promoPage.DestinationList.menuContainsLink(
-          "Europe",
+          "France",
           1,
           "/checkout/weeklydomestic-gwoct18-quarterly-domestic?countryGroup=eu")
         )
 
         And("the quarterly title should be correct")
         assert(promoPage.DestinationList.menuContainsTitle(
-          "Europe",
+          "France",
           1,
           "Quarterly")
         )
 
         And("the quarterly description should be correct")
         assert(promoPage.DestinationList.menuContainsDescription(
-          "Europe",
+          "France",
           1,
           "€61.30 every 3 months")
         )
 
         And("the annual link should be correct")
         assert(promoPage.DestinationList.menuContainsLink(
-          "Europe",
+          "France",
           2,
           "/checkout/weeklydomestic-gwoct18-annual-domestic?countryGroup=eu")
         )
 
         And("the annual title should be correct")
         assert(promoPage.DestinationList.menuContainsTitle(
-          "Europe",
+          "France",
           2,
           "Annual")
         )
 
         And("the annual description should be correct")
         assert(promoPage.DestinationList.menuContainsDescription(
-          "Europe",
+          "France",
           2,
           "€245.20 every 12 months")
         )
