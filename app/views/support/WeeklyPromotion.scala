@@ -123,12 +123,11 @@ object WeeklyPromotion {
     // If the request country is a domestic country then it is still the prioritised country, but we should not duplicate it
     val prioritisedRegion: DiscountedRegion = {
       val currency = CountryGroup.byCountryCode(requestCountry.alpha2).map(_.currency).getOrElse(Currency.USD)
-
       val maybeDomesticDiscountedRegion = for {
         domesticCountryGroup <- GuardianWeeklyZones.getDomesticCountryGroup(requestCountry)
         domesticDiscountedRegion <- domesticDiscountedRegions.get(domesticCountryGroup)
       } yield {
-        domesticDiscountedRegion
+        domesticDiscountedRegion.copy(requestCountry.name)
       }
 
       maybeDomesticDiscountedRegion.getOrElse(
