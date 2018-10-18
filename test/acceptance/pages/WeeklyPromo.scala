@@ -5,7 +5,7 @@ import acceptance.util.{Browser, Config, TestUser}
 import org.openqa.selenium.{By, WebElement}
 import org.scalatest.selenium.Page
 
-case class WeeklyPromo(endpoint: String = "/p/10ANNUAL", country: String = "GB", params: Option[String] = None) extends Page with Browser {
+case class WeeklyPromo(endpoint: String = "/p/WWM99X", country: String = "GB", params: Option[String] = None) extends Page with Browser {
 
   override val timeOutSec: Int = 5
 
