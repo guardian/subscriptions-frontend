@@ -265,10 +265,9 @@ class SeleniumSpec extends FeatureSpec with Browser
 
       scenario("UK user lands on Guardian Weekly promotion page", AcceptanceTest) {
         val promoCode = "/p/WWM99X"
-        val params = Some("gwoct18")
 
         When("The user is in the UK")
-        val promoPage = WeeklyPromo(endpoint = promoCode, params = params)
+        val promoPage = WeeklyPromo(endpoint = promoCode)
 
         go.to(promoPage)
         assert(promoPage.pageHasLoaded())
@@ -329,22 +328,21 @@ class SeleniumSpec extends FeatureSpec with Browser
       scenario("FR user lands on Guardian Weekly promotion page", AcceptanceTest) {
         val promoCode = "/p/WWM99X"
         val country = "FR"
-        val params = Some("gwoct18")
 
         When("The user is in FRANCE")
-        val promoPage = WeeklyPromo(endpoint = promoCode, country=country, params = params)
+        val promoPage = WeeklyPromo(endpoint = promoCode, country=country)
 
         go.to(promoPage)
         assert(promoPage.pageHasLoaded())
 
         Then("Europe should be the first list item")
-        assert(promoPage.DestinationList.firstElementAttribute("data-dropdown-menu") === "Europe")
+        assert(promoPage.DestinationList.firstElementAttribute("data-dropdown-menu") === "France")
 
         When("they click for delivery to Europe")
         promoPage.DestinationList.chooseLocalDelivery()
 
         Then("the correct menu should become visible")
-        assert(promoPage.DestinationList.menuIsVisible("Europe"))
+        assert(promoPage.DestinationList.menuIsVisible("France"))
 
         And("the quarterly link should be correct")
         assert(promoPage.DestinationList.menuContainsLink(
@@ -393,10 +391,9 @@ class SeleniumSpec extends FeatureSpec with Browser
       scenario("ZA user lands on GW promo page", AcceptanceTest) {
         val promoCode = "/p/WWM99X"
         val country = "ZA"
-        val params = Some("gwoct18")
 
         When("The user is in South Africa")
-        val promoPage = WeeklyPromo(endpoint = promoCode, country = "ZA", params = params)
+        val promoPage = WeeklyPromo(endpoint = promoCode, country = "ZA")
 
         go.to(promoPage)
         assert(promoPage.pageHasLoaded())
