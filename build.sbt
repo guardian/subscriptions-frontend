@@ -68,7 +68,7 @@ libraryDependencies ++= Seq(
     "org.scalaz" %% "scalaz-core" % "7.2.7",
     "org.pegdown" % "pegdown" % "1.6.0",
     "com.amazonaws" % "aws-java-sdk-sqs" % "1.11.231",
-    "net.databinder.dispatch" %% "dispatch-core" % "0.13.2",
+    "org.dispatchhttp" %% "dispatch-core" % "0.14.0",
     "com.gu" % "kinesis-logback-appender" % "1.4.2",
     "net.logstash.logback" % "logstash-logback-encoder" % "4.11",
     "com.fasterxml.jackson.dataformat" % "jackson-dataformat-cbor" % "2.9.2",
