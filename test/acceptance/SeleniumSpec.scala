@@ -337,11 +337,11 @@ class SeleniumSpec extends FeatureSpec with Browser
         go.to(promoPage)
         assert(promoPage.pageHasLoaded())
 
-        Then("United Kingdom should be the first list item")
-        assert(promoPage.DestinationList.firstElementAttribute("data-dropdown-menu") === "UnitedKingdom")
+        Then("Europe should be the first list item")
+        assert(promoPage.DestinationList.firstElementAttribute("data-dropdown-menu") === "Europe")
 
-        When("they click for delivery to EUROPE")
-        promoPage.DestinationList.chooseEuropeDelivery()
+        When("they click for delivery to Europe")
+        promoPage.DestinationList.chooseLocalDelivery()
 
         Then("the correct menu should become visible")
         assert(promoPage.DestinationList.menuIsVisible("Europe"))
