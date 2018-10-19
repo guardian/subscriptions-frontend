@@ -128,11 +128,9 @@ object PlanOps {
 
     def termsAndConditionsHref: String =
       product match {
-        case Delivery => "https://www.theguardian.com/subscriber-direct/subscription-terms-and-conditions"
-        case Voucher => "https://www.theguardian.com/subscriber-direct/subscription-terms-and-conditions"
         case Product.Digipack => "https://www.theguardian.com/info/2014/aug/06/guardian-observer-digital-subscriptions-terms-conditions"
         case _: Product.Weekly => "https://www.theguardian.com/info/2014/jul/10/guardian-weekly-print-subscription-services-terms-conditions"
-        case _ => "Sensible default" //TODO
+        case _ => "https://www.theguardian.com/subscriber-direct/subscription-terms-and-conditions"
       }
 
     def phone(contactUsCountry: Option[Country]): String = ContactCentreOps.phone(contactUsCountry)
