@@ -126,6 +126,15 @@ object PlanOps {
         case _ => "https://www.theguardian.com/subscriber-direct/subscription-frequently-asked-questions"
       }
 
+    def termsAndConditionsHref: String =
+      product match {
+        case Delivery => "delivery link"
+        case Voucher => "voucher link"
+        case Product.Digipack => "https://www.theguardian.com/info/2014/aug/06/guardian-observer-digital-subscriptions-terms-conditions"
+        case _: Product.Weekly => "https://www.theguardian.com/info/2014/jul/10/guardian-weekly-print-subscription-services-terms-conditions"
+        case _ => "Sensible default"
+      }
+
     def phone(contactUsCountry: Option[Country]): String = ContactCentreOps.phone(contactUsCountry)
 
     def productType: String = product match {
