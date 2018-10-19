@@ -417,7 +417,7 @@ class Checkout(fBackendFactory: TouchpointBackends, commonActions: CommonActions
       // should a client want not to proxy via this server.
       Ok(Json.obj("Addresses" -> result.Addresses))
     } recover {
-      case error if error.getMessage == "Bad Request" =>
+      case error if error.getMessage == "Bad Request" || error.getMessage == "Not Found" =>
         BadRequest //The postcode was invalid
       case error =>
         SafeLogger.error(scrub"Failed to complete postcode lookup via getAddress.io due to: $error")
