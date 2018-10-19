@@ -83,8 +83,6 @@ class CheckoutService(
 
   private val allSixWeekAssociations = catalog.map { catalog =>
     List(
-      catalog.weekly.zoneA.associations,
-      catalog.weekly.zoneC.associations,
       catalog.weekly.domestic.associations,
       catalog.weekly.restOfWorld.associations
     ).flatten
