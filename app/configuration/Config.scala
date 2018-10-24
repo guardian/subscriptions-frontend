@@ -108,6 +108,8 @@ object Config {
 
   val analyticsOnInDev = Try(config.getBoolean("analytics.onInDev")).toOption.getOrElse(false)
 
+  val optimizeEnabled = config.getBoolean("google.optimize.enabled")
+
   val suspendableWeeks = 6
 
   val getAddressIOApiUrl = config.getString("get-address-io-api.url")

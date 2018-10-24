@@ -9,11 +9,13 @@
 
 <script src="https://polyfill.guim.co.uk/v2/polyfill.min.js?features=default-3.6,Element.prototype.dataset,Array.prototype.includes,Array.prototype.find,fetch,Array.prototype.findIndex,&unknown=polyfill"></script>
 
+@optimizePageHidingSnippet()
 
 <script id="gu">
     var guardian = JSON.parse('@Html(Json.stringify(Json.toJson(jsVars)))');
     guardian.analyticsEnabled = true;
     guardian.analyticsEnabledInDev = @Config.analyticsOnInDev;
+    guardian.optimizeEnabled = @Config.optimizeEnabled;
     guardian.buildNumber = '@app.BuildInfo.buildNumber';
     guardian.isDev = @(Config.stage == "DEV");
     guardian.supplierCode = '';

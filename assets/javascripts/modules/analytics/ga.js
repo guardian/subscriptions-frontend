@@ -39,6 +39,10 @@ define(['modules/analytics/analyticsEnabled',
             'cookieDomain': guardian.googleAnalytics.cookieDomain
         });
 
+        if (guardian.optimizeEnabled) {
+            ga('membershipPropertyTracker.require', 'GTM-NZGXNBL');
+        }
+
         ga('membershipPropertyTracker.require', 'linkid');
         ga('membershipPropertyTracker.require', 'linker');
         ga('membershipPropertyTracker.linker:autoLink', ['eventbrite.co.uk'] );
