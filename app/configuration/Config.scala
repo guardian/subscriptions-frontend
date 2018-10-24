@@ -106,7 +106,7 @@ object Config {
 
   val googleAnalyticsTrackingId = config.getString("google.analytics.tracking.id")
 
-  val analyticsOnInDev = config.getBoolean("analytics.onInDev")
+  val analyticsOnInDev = Try(config.getBoolean("analytics.onInDev")).toOption.getOrElse(false)
 
   val suspendableWeeks = 6
 
