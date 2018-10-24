@@ -7,7 +7,7 @@ define([
         window.guardian.analyticsEnabled &&
         !cookie.getCookie('ANALYTICS_OFF_KEY') &&
         !window.guardian.isDev
-    );
+    ) || window.guardian.analyticsEnabledInDev;
 
     return function (cb) {
         return function () {

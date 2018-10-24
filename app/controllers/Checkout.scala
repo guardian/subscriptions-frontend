@@ -306,8 +306,8 @@ class Checkout(fBackendFactory: TouchpointBackends, commonActions: CommonActions
           request.remoteAddress
         )
 
-        //This service is mocked unless it's running in PROD, change to test acquisition events are working
-        AcquisitionService(isTestService = tpBackend.environmentName != "PROD")
+        //This service is mocked unless it's running in PROD or analytics.onInDev=true in application.config
+        AcquisitionService(tpBackend.environmentName)
           .submit(SubscriptionAcquisitionComponents(subscribeRequest, promotion, acquisitionData, clientBrowserInfo))
           .leftMap(
             err => logger.warn(s"Error submitting acquisition data. $err")
