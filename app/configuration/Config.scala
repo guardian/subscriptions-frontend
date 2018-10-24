@@ -106,6 +106,8 @@ object Config {
 
   val googleAnalyticsTrackingId = config.getString("google.analytics.tracking.id")
 
+  val analyticsOnInDev = config.getBoolean("analytics.onInDev")
+
   val suspendableWeeks = 6
 
   val getAddressIOApiUrl = config.getString("get-address-io-api.url")
