@@ -25,7 +25,9 @@ depending on your system.
 
 ## General Setup
 
+1. Get Janus credentials
 1. Go to project root
+1. Install [nvm](https://github.com/creationix/nvm#install-script)
 1. Run `./setup.sh` to install project-specific client-side dependencies.
 1. Add the following to your hosts file in `/etc/hosts`
 
@@ -34,8 +36,6 @@ depending on your system.
    127.0.0.1   profile.thegulocal.com
    ```
 
-1. Run `npm install -g bower`
-   Bower is a command-line utility, a package manager that makes it easy to manage all the application’s front-end dependencies. It works by fetching and installing packages
 1. Change the ownership of the 'gu' directory under 'etc' to current user.
    `$ sudo -i chown -R {username} /etc/gu`
 

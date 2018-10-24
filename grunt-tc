@@ -1,11 +1,10 @@
 #!/bin/bash
-NODE_VERSION="8.9.1"
 
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
 
-nvm install ${NODE_VERSION}
-nvm use ${NODE_VERSION}
+nvm install
+nvm use
 
 set -o xtrace
 set -o nounset

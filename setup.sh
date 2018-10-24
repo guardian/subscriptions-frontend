@@ -30,23 +30,6 @@ create_install_vars() {
   fi
 }
 
-create_aws_credentials() {
-  local path="$HOME/.aws"
-  local filename="credentials"
-
-  if [[ ! -f "$path/$filename" ]]; then
-    if [[ ! -d "$path" ]]; then
-      mkdir "$path"
-    fi
-
-    echo "[nextgen]
-    aws_access_key_id=[YOUR_AWS_ACCESS_KEY]
-    aws_secret_access_key=[YOUR_AWS_SECRET_ACCESS_KEY]
-    region=eu-west-1" > "$path/$filename"
-    EXTRA_STEPS+=("Add your AWS keys to $path/$filename")
-  fi
-}
-
 install_homebrew() {
   if mac && ! installed brew; then
     ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
@@ -65,36 +48,44 @@ install_jdk() {
 
 install_node() {
   if ! installed node || ! installed npm; then
-    if ! installed curl; then
-      sudo apt-get install -y curl
-    fi
+    nvm install
+    nvm use
+  fi
+}
 
-    if linux; then
-      curl -sL https://deb.nodesource.com/setup | sudo bash -
-      sudo apt-get install -y nodejs
-    elif mac && installed brew; then
-      brew install node
-    fi
+install_yarn() {
+  if ! installed yarn; then
+    npm -g install yarn
   fi
 }
 
 install_grunt() {
   if ! installed grunt; then
-    sudo npm -g install grunt-cli
+    npm -g install grunt-cli
   fi
 }
 
-bower_javascripts() {
+install_bower() {
   if ! installed bower; then
-    printf "\nYou need to install bower first:\n"
-    printf "\nnpm install -g bower\n"
-    exit 1
-  else
-    pushd assets/javascripts
-    rm -rf bower_components
-    bower install
+    npm -g install bower
   fi
-  popd
+}
+
+install_chromedriver() {
+  if ! installed chromedriver; then
+    if linux; then
+      EXTRA_STEPS+=("Download Google Chrome driver for the integration tests from https://code.google.com/p/selenium/wiki/ChromeDriver")
+    elif mac; then
+      npm install -g chromedriver
+    fi
+  fi
+}
+
+install_npm_globals() {
+  install_yarn
+  install_grunt
+  install_bower
+  install_chromedriver
 }
 
 bower_stylesheets() {
@@ -111,8 +102,7 @@ bower_stylesheets() {
 }
 
 install_dependencies() {
-  npm install
-  bower_javascripts
+  yarn install
   bower_stylesheets
 }
 
@@ -126,22 +116,12 @@ install_nginx() {
   fi
 }
 
-install_chromedriver() {
-  if ! installed chromedriver; then
-    if linux; then
-      EXTRA_STEPS+=("Download Google Chrome driver for the integration tests from https://code.google.com/p/selenium/wiki/ChromeDriver")
-    elif mac; then
-      brew install chromedriver
-    fi
-  fi
-}
-
 copy_githooks() {
     cp git-hooks/pre-commit .git/hooks/
 }
 
 compile() {
-  grunt compile
+  yarn run compile
 }
 
 report() {
@@ -156,14 +136,12 @@ report() {
 
 main() {
   create_install_vars
-  create_aws_credentials
   install_homebrew
   install_jdk
   install_node
-  install_grunt
+  install_npm_globals
   install_dependencies
   install_nginx
-  install_chromedriver
   copy_githooks
   compile
   report
