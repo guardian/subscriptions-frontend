@@ -248,8 +248,8 @@ class WeeklyRenew extends React.Component {
                         <dd className="mma-section__list--content">
                             <div className="u-note prose">
                                 <p>
-                                    Our <a href={this.props.privacyPolicyHref} target="_blank" rel="noopener noreferrer">{this.props.privacyPolicyTitle}</a> explains in further detail how we use your information and you can find out why your data matters to us <a href={this.props.whyYourDataMattersToUsHref} target="_blank">here</a>.
-                            </p>
+                                    Our <a href={this.props.privacyPolicyHref} target="_blank" rel="noopener noreferrer">{this.props.privacyPolicyTitle}</a> explains in further detail how we use your information and you can find out why your data matters to us <a href={this.props.whyYourDataMattersToUsHref} target="_blank" rel="noopener noreferrer">here</a>.
+                                </p>
                                 <p>
                                     By proceeding you agree to the <a href={this.props.weeklyTermsConditionsHref} target="_blank" rel="noopener noreferrer">{this.props.weeklyTermsConditionsTitle}</a> for the Guardian Weekly print subscription services.
                             </p>
