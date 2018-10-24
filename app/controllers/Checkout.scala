@@ -67,8 +67,6 @@ class Checkout(fBackendFactory: TouchpointBackends, commonActions: CommonActions
 
       val matchingPlanList: Option[PlanList[ContentSubscription]] = {
 
-        val testOnlyPlans = if (tpBackend == fBackendFactory.Test) List(catalog.weekly.zoneB.plansWithAssociations) else List.empty
-
         val productsWithoutIntroductoryPlans = List(
           catalog.delivery.list.toList,
           catalog.voucher.list.toList,
@@ -76,11 +74,9 @@ class Checkout(fBackendFactory: TouchpointBackends, commonActions: CommonActions
         ).map(plans => PlansWithIntroductory(plans, List.empty))
 
         val productsWithIntroductoryPlans = List(
-          catalog.weekly.zoneA.plansWithAssociations,
-          catalog.weekly.zoneC.plansWithAssociations,
           catalog.weekly.domestic.plansWithAssociations,
           catalog.weekly.restOfWorld.plansWithAssociations
-        ) ++ testOnlyPlans
+        )
 
         val contentSubscriptionPlans = productsWithoutIntroductoryPlans ++ productsWithIntroductoryPlans
         contentSubscriptionPlans.flatMap {
@@ -124,25 +120,8 @@ class Checkout(fBackendFactory: TouchpointBackends, commonActions: CommonActions
           }
 
           val countryAndCurrencySettings = planList.default.product match {
-            case Product.Digipack => getSettings(determinedCountryGroup.defaultCountry, determinedCountryGroup.currency)
             case Product.Delivery => getSettings(UK.defaultCountry, UK.currency)
             case Product.Voucher => getSettings(UK.defaultCountry, UK.currency)
-            case Product.WeeklyZoneA => {
-              if (GuardianWeeklyZones.zoneACountryGroups.contains(determinedCountryGroup)) {
-                getSettings(determinedCountryGroup.defaultCountry, determinedCountryGroup.currency)
-              } else {
-                getSettings(UK.defaultCountry, UK.currency)
-              }
-            }
-            case Product.WeeklyZoneB | Product.WeeklyZoneC => {
-              if (GuardianWeeklyZones.zoneACountryGroups.contains(determinedCountryGroup)) {
-                getSettings(None, USD)
-
-              } else {
-                getSettings(determinedCountryGroup.defaultCountry, determinedCountryGroup.currency)
-              }
-            }
-
             case Product.WeeklyDomestic => {
               if (GuardianWeeklyZones.domesticZoneCountryGroups.contains(determinedCountryGroup)) {
                 getSettings(determinedCountryGroup.defaultCountry, determinedCountryGroup.currency)
@@ -157,6 +136,7 @@ class Checkout(fBackendFactory: TouchpointBackends, commonActions: CommonActions
                 getSettings(determinedCountryGroup.defaultCountry, determinedCountryGroup.currency)
               }
             }
+            case _ => getSettings(determinedCountryGroup.defaultCountry, determinedCountryGroup.currency)
           }
 
           val digitalEdition = model.DigitalEdition.getForCountry(countryAndCurrencySettings.defaultCountry)
