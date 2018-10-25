@@ -256,6 +256,7 @@ module.exports = function(grunt) {
 
     grunt.registerTask('compile', function(){
         grunt.task.run([
+            'eslint',
             'clean:assets',
             'clean:dist',
             'build:images',
