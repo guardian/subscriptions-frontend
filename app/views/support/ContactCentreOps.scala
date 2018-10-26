@@ -44,9 +44,11 @@ object ContactCentreOps {
 
   def email = "subscriptions@theguardian.com"
 
+  private val auHelpEmail = "apac.help@theguardian.com"
+
   def weeklyEmail(contactUsCountry: Option[Country]): String = {
     contactUsCountry match {
-      case c: Some[Country] if c exists countriesHandledByAUCallCentre => "apac.help@theguardian.com"
+      case c: Some[Country] if c exists countriesHandledByAUCallCentre => auHelpEmail
       case c: Some[Country] if c exists countriesHandledByUSCallCentre => "northamerica.help@theguardian.com"
       case _ => "customer.help@theguardian.com"
     }
@@ -54,7 +56,7 @@ object ContactCentreOps {
 
   def digiPackEmail(contactUsCountry: Option[Country]): String = {
     contactUsCountry match {
-      case c: Some[Country] if c exists countriesHandledByAUCallCentre => "apac.help@theguardian.com"
+      case c: Some[Country] if c exists countriesHandledByAUCallCentre => auHelpEmail
       case _ => "digitalpack@theguardian.com"
     }
   }
