@@ -115,7 +115,7 @@ object PlanOps {
       product match {
         case Delivery => "homedelivery@theguardian.com"
         case Voucher => "vouchersubs@theguardian.com"
-        case Product.Digipack => "digitalpack@theguardian.com"
+        case Product.Digipack => ContactCentreOps.digiPackEmail(contactUsCountry)
         case _: Product.Weekly => ContactCentreOps.weeklyEmail(contactUsCountry)
         case _ => ContactCentreOps.email
       }

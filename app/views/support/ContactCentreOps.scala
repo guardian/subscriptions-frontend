@@ -51,4 +51,11 @@ object ContactCentreOps {
       case _ => "customer.help@theguardian.com"
     }
   }
+
+  def digiPackEmail(contactUsCountry: Option[Country]): String = {
+    contactUsCountry match {
+      case c: Some[Country] if c exists countriesHandledByAUCallCentre => "apac.help@theguardian.com"
+      case _ => "digitalpack@theguardian.com"
+    }
+  }
 }
