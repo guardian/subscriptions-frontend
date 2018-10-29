@@ -39,17 +39,28 @@ class SeleniumSpec extends FeatureSpec with Browser
 
     val testUser = new TestUser
 
-    // When Users visit 'Identity Register' page
-    val register = new pages.Register(testUser)
-    go.to(register)
-    assert(register.hasLoaded())
+    Given("that a user visits the 'Identity Registration' page")
+    val registerStepOne = new pages.RegisterStepOne(testUser)
+    go.to(registerStepOne)
+    assert(registerStepOne.hasLoaded())
 
-    // And they fill in personal details
-    register.fillInPersonalDetails()
+    When("they fill in the email address field")
+    registerStepOne.fillInEmail()
 
-    // And they submit the form to create Identity account
-    register.createAccount()
-    assert(register.hasCreated())
+    And("they submit the form")
+    registerStepOne.submit()
+
+    Then("they should be redirected to register as an Identity user")
+    val registerStepTwo = new pages.RegisterStepTwo(testUser)
+    assert(registerStepTwo.hasLoaded)
+
+    Given("that the user fills in their personal details correctly")
+    registerStepTwo.fillInPersonalDetails()
+
+    When("they submit the form to create their Identity account")
+    registerStepTwo.submit()
+
+    // They should be a signed-in Identity user
 
     testFun(testUser)
   }
@@ -117,7 +128,7 @@ class SeleniumSpec extends FeatureSpec with Browser
       }
     }
 
-    ignore("Identity user subscribes to the Voucher Everyday package with direct debit", AcceptanceTest) {
+    scenario("Identity user subscribes to the Voucher Everyday package with direct debit", AcceptanceTest) {
       withRegisteredIdentityUserFixture { testUser =>
 
         Given("a registered and signed in Identity user selects the Everyday package")
