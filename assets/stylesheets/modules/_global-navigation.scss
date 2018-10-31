@@ -3,8 +3,9 @@
    ========================================================================== */
 
 .global-nav {
-    @include fs-headline(2);
-    font-weight: guss-font-weight('medium');
+    @include fs-textSans(4);
+    font-size: 1em;
+    font-weight: 600;
     background-color: $c-brand-tint;
 }
 .global-nav__inner {

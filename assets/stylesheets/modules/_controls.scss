@@ -14,7 +14,7 @@
     padding-right: $gs-gutter / 4;
 }
 .control__info {
-    @include fs-bodyHeading(1);
+    @include fs-textSans(4);
     color: white;
     text-overflow: ellipsis;
     white-space: nowrap;
