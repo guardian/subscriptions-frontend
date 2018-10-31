@@ -99,7 +99,8 @@ module.exports = function(grunt) {
             },
             dist: {
                 files: {
-                    '<%= dirs.public.stylesheets %>/main.min.css': '<%= dirs.assets.stylesheets %>/million.scss',
+                    '<%= dirs.public.stylesheets %>/main.min.css': '<%= dirs.assets.stylesheets %>/garnett.scss',
+                    '<%= dirs.public.stylesheets %>/mill.min.css': '<%= dirs.assets.stylesheets %>/million.scss',
                     '<%= dirs.public.stylesheets %>/ie9.min.css': '<%= dirs.assets.stylesheets %>/ie9.scss',
                     '<%= dirs.public.stylesheets %>/ie-old.min.css': '<%= dirs.assets.stylesheets %>/ie-old.scss'
                 }
