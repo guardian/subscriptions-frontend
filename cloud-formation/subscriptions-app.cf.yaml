@@ -180,6 +180,12 @@ Resources:
           - Effect: Allow
             Action: sqs:*
             Resource: arn:aws:sqs:eu-west-1:865473395570:subs-holiday-suspension-email*
+      - PolicyName: InvokeAVLambda
+        PolicyDocument:
+          Statement:
+          - Effect: Allow
+            Action: sts:AssumeRole
+            Resource: arn:aws:iam::021353022223:role/support-invoke-value-calculator
       ManagedPolicyArns:
       - !Sub arn:aws:iam::${AWS::AccountId}:policy/guardian-ec2-role-for-ssm
   SubscriptionsAppInstanceProfile:

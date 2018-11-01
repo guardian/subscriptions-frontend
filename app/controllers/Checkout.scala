@@ -306,7 +306,7 @@ class Checkout(fBackendFactory: TouchpointBackends, commonActions: CommonActions
           request.remoteAddress
         )
 
-        //This service is mocked unless it's running in PROD or analytics.onInDev=true in application.config
+        //This service is mocked in DEV unless analytics.onInDev=true in application.config
         AcquisitionService(tpBackend.environmentName)
           .submit(SubscriptionAcquisitionComponents(subscribeRequest, promotion, acquisitionData, clientBrowserInfo))
           .leftMap(

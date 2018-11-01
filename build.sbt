@@ -54,7 +54,7 @@ libraryDependencies ++= Seq(
     "com.gu" %% "identity-test-users" % "0.6",
     "com.gu" %% "content-authorisation-common" % "0.4",
     "com.gu" %% "tip" % "0.1.1",
-    "com.gu" %% "acquisition-event-producer-play26" % "4.0.8",
+    "com.gu" %% "acquisition-event-producer-play26" % "4.0.11",
     "com.github.nscala-time" %% "nscala-time" % "2.16.0",
     "io.sentry" % "sentry-logback" % "1.7.5",
     "com.typesafe.scala-logging" %% "scala-logging" % "3.7.2",
@@ -93,6 +93,7 @@ resolvers ++= Seq(
     "Guardian Github Snapshots" at "http://guardian.github.com/maven/repo-snapshots",
     "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases",
     Resolver.sonatypeRepo("releases"),
+    Resolver.sonatypeRepo("snapshots"),
     Resolver.bintrayRepo("guardian", "ophan")
 )
 
