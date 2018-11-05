@@ -18,10 +18,11 @@
     guardian.optimizeEnabled = @Config.optimizeEnabled;
     guardian.buildNumber = '@app.BuildInfo.buildNumber';
     guardian.isDev = @(Config.stage == "DEV");
+    guardian.stage = '@Config.stage'
     guardian.supplierCode = '';
     guardian.googleAnalytics = {
         trackingId: '@Config.googleAnalyticsTrackingId',
-        cookieDomain: @if(Config.stage == "PROD") { 'auto' } else { 'none' }
+        cookieDomain: @if(Config.stage == "DEV") { 'none' } else { 'auto' }
     };
     guardian.isModernBrowser = (
         'querySelector' in document
