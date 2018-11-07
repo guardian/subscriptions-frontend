@@ -118,4 +118,19 @@ object Config {
   def fulfilmentLookupApiKey(env: String) = config.getString(s"fulfilment-lookup-api.$env.key")
   def fulfilmentLookupApiUrl(env: String) = config.getString(s"fulfilment-lookup-api.$env.url")
 
+  val compareSavingsWithNewsStandPrices = config.getBoolean("compare.subs.savings.with.newsstand")
+
+  object NewsStandPrices {
+    private val newsStandWeeklyPrices = config.getConfig("newsstand.prices.perWeek")
+
+    def getWeeklyPrice(subscription: String): Float = {
+      val price: Number = try {
+        newsStandWeeklyPrices.getNumber(subscription)
+      } catch {
+        case e: Exception => 0
+      }
+      price.floatValue()
+    }
+  }
+
 }

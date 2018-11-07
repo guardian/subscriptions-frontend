@@ -1,4 +1,6 @@
 @import utils.Prices._
+@import configuration.Config
+
 @(subscription: model.Subscriptions.SubscriptionProduct)
 <section class="section-slice">
     <h2 class="page-heading">@subscription.stepsHeading</h2>
@@ -28,24 +30,34 @@
     <h2 class="page-heading">Choose a package</h2>
 
     @for(option <- subscription.options) {
-        <a href="@option.url" class="package" data-test-id="subscription-package-@option.id">
-            <div class="package__info">
-                <span class="package__title">@option.title</span>
-                <strong class="package__price">
-                    @if(subscription.isDiscounted) { From }
-                    @option.weeklyPrice.pretty per week
-                    @for(saving <- option.weeklySaving) { &mdash; save @saving }
-                </strong>
-                <span class="package__description">@option.description</span>
-                <span class="package__monthly">
+        @defining(Config.NewsStandPrices.getWeeklyPrice(option.title.toLowerCase)) { newsStandWeeklyPrice =>
+            <a href="@option.url" class="package" data-test-id="subscription-package-@option.id">
+                <div class="package__info">
+                    <span class="package__title">@option.title</span>
+                    <strong class="package__price">
+                        @if(subscription.isDiscounted) { From }
+                        @option.weeklyPrice.pretty per week
+                        @if(Config.compareSavingsWithNewsStandPrices && newsStandWeeklyPrice != 0F) {
+                            @defining((100 - ((option.weeklyPrice / newsStandWeeklyPrice) * 100)).formatted("%.0f")) { saving =>
+                                &mdash; save @saving% <br/>on the newsstand price
+                            }
+                        } else {
+                            @for(saving <- option.weeklySaving) {
+                                &mdash; save @saving
+                            }
+                        }
+                    </strong>
+                    <span class="package__description">@option.description</span>
+                    <span class="package__monthly">
                     @if(subscription.isDiscounted) {
                         @option.paymentDetails
                     } else {
                         Monthly price <strong>@option.monthlyPrice.pretty</strong>
                     }
-                </span>
-            </div>
-        </a>
+                    </span>
+                </div>
+            </a>
+        }
     }
 
 </section>
