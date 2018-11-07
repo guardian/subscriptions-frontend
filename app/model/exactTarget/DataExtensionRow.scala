@@ -31,6 +31,7 @@ trait DataExtensionRow {
 object DataExtensionRowHelpers {
   val dd = "Direct Debit"
   val card = "Credit/Debit Card"
+  val paypal = "PayPal"
 
   def formatDate(dateTime: LocalDate) = {
     val day = dateTime.dayOfMonth.get
@@ -165,7 +166,7 @@ object PaperFieldsGenerator {
         "mandate_id" -> mandateId
       )
       case _: PaymentCard => Seq("payment_method" -> card)
-      case _ => Seq()
+      case _: PayPalMethod => Seq("payment_method" -> paypal)
     }
 
     val promotionFields = promotionDescription.map(d => "promotion_details" -> trimPromotionDescription(d))
