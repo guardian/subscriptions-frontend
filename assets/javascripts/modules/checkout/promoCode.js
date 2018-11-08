@@ -109,12 +109,13 @@ define([
                 var $el = $(el),
                     ratePlanId = $el.val(),
                     currency = $el.data('currency'),
+                    newsstandSaving = $el.data('data-option-mirror-plan-newsstand-saving'),
                     labelPrefix = $el.data('option-label-prefix'),
                     $label = $('#label-for-' + ratePlanId + '-' + currency);
 
                 if (adjustedRatePlans[ratePlanId]) {
                     $label.html(labelPrefix + adjustedRatePlans[ratePlanId]);
-                    $el.attr('data-option-mirror-payment', adjustedRatePlans[ratePlanId]);
+                    $el.attr('data-option-mirror-payment', adjustedRatePlans[ratePlanId].concat(newsstandSaving || ''));
                     if ($el.attr('checked')) {
                         bean.fire(el, 'change');
                     }

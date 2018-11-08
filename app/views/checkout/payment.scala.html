@@ -30,8 +30,10 @@
 @andThenNewsStandSaving(currency: Currency) = {
     @defining(Config.NewsStandPrices.getWeeklyRRP(productData.products.name.toLowerCase)) { newsStandWeeklyPrice =>
         @if(Config.compareSavingsWithNewsStandPrices && newsStandWeeklyPrice != 0F) {
-            @defining((100 - ((productData.plans.default.charges.amount(currency) / (newsStandWeeklyPrice * 52 / 12)) * 100)).formatted("%.0f")) { saving =>
-                &mdash; @saving% off the newsstand price
+            @defining(100 - ((productData.plans.default.charges.amount(currency) / (newsStandWeeklyPrice * 52 / 12)) * 100)) { saving =>
+                @if(saving > 0F) {
+                    &mdash; @saving.formatted("%.0f")% off the newsstand price
+                }
             }
         }
     }
@@ -44,8 +46,9 @@
             <input
             type="radio" name="ratePlanId"
             data-option-label-prefix="@plan.prefix"
-            data-option-mirror-payment-default="@plan.charges.prettyPricing(currency) @andThenPricing(currency, associatedPlan) @andThenNewsStandSaving(currency)"
-            data-option-mirror-payment="@plan.charges.prettyPricing(currency) @andThenPricing(currency, associatedPlan) @andThenNewsStandSaving(currency)"
+            data-option-mirror-plan-newsstand-saving="@andThenNewsStandSaving(currency)"
+            data-option-mirror-payment-default="@plan.charges.prettyPricing(currency) @andThenPricing(currency, associatedPlan)"
+            data-option-mirror-payment="@plan.charges.prettyPricing(currency) @andThenPricing(currency, associatedPlan)"
             data-option-mirror-description="@for(s <- plan.subtitle) { (@s) }"
             data-option-mirror-package="@plan.packageName"
             data-name="@plan.name"

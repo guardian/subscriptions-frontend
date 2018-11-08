@@ -11,7 +11,8 @@ define(['$'], function ($) {
     function mirror(input) {
         var selectedPackage = input.getAttribute('data-option-mirror-package'),
             selectedDescription = input.getAttribute('data-option-mirror-description'),
-            selectedPayment = input.getAttribute('data-option-mirror-payment');
+            selectedPayment = input.getAttribute('data-option-mirror-payment'),
+            selectedNewsStandDiscount = input.getAttribute('data-option-mirror-plan-newsstand-saving');
 
         if (selectedPackage && selectedPayment) {
             selectors.$MIRROR_PACKAGE.each(function (el) {
@@ -21,7 +22,7 @@ define(['$'], function ($) {
                 el.textContent = selectedDescription;
             });
             selectors.$MIRROR_PAYMENT.each(function (el) {
-                el.textContent = selectedPayment;
+                el.textContent = selectedPayment.concat(selectedNewsStandDiscount);
             });
         }
     }
