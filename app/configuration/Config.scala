@@ -123,9 +123,9 @@ object Config {
   object NewsStandPrices {
     private val newsStandWeeklyPrices = config.getConfig("newsstand.prices.perWeek")
 
-    def getWeeklyPrice(subscription: String): Float = {
+    def getWeeklyRRP(subscription: String): Float = {
       val price: Number = try {
-        newsStandWeeklyPrices.getNumber(subscription)
+        newsStandWeeklyPrices.getNumber(subscription.replace("+", "plus"))
       } catch {
         case e: Exception => 0
       }

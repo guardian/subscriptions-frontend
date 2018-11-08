@@ -28,7 +28,7 @@
     }
 }
 @andThenNewsStandSaving(currency: Currency) = {
-    @defining(Config.NewsStandPrices.getWeeklyPrice(productData.products.name.toLowerCase)) { newsStandWeeklyPrice =>
+    @defining(Config.NewsStandPrices.getWeeklyRRP(productData.products.name.toLowerCase)) { newsStandWeeklyPrice =>
         @if(Config.compareSavingsWithNewsStandPrices && newsStandWeeklyPrice != 0F) {
             @defining((100 - ((productData.plans.default.charges.amount(currency) / (newsStandWeeklyPrice * 52 / 12)) * 100)).formatted("%.0f")) { saving =>
                 &mdash; @saving% off the newsstand price
