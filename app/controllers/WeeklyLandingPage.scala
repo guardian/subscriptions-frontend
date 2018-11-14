@@ -2,10 +2,12 @@ package controllers
 
 import actions.CommonActions
 import com.gu.i18n.{Country, CountryGroup}
+import com.gu.memsub.promo.PromoCode
 import play.api.mvc._
-import services.{TouchpointBackend, WeeklyPicker}
+import services.TouchpointBackend
 import utils.RequestCountry._
 import views.html.weekly.landing_description
+
 import scala.concurrent.Future
 
 object WeeklyLandingPage{
@@ -19,10 +21,20 @@ class WeeklyLandingPage(tpBackend: TouchpointBackend, commonActions: CommonActio
 
   val international = "int"
 
-  def index(country: Option[Country]) = NoCacheAction { implicit request =>
-    val maybeCountry = country orElse request.getFastlyCountry
-    Redirect(routes.WeeklyLandingPage.withCountry(maybeCountry.map(_.alpha2).getOrElse(international)).url, request.queryString, TEMPORARY_REDIRECT)
+  def index(country: Option[Country], promoCode: Option[PromoCode]) = NoCacheAction { implicit request =>
+    promoCode.fold({
+      val maybeCountry = country orElse request.getFastlyCountry
+      Redirect(routes.WeeklyLandingPage.withCountry(maybeCountry.map(_.alpha2).getOrElse(international)).url, stripQueryStringParameters(request.queryString, "country"), TEMPORARY_REDIRECT)
+    })({
+      p =>
+        val queryString = stripQueryStringParameters(request.queryString, "promoCode", "country")
+        Redirect(routes.PromoLandingPage.render(p.get, country).url, queryString, TEMPORARY_REDIRECT)
+    })
+
   }
+
+  private def stripQueryStringParameters(queryString: Map[String, scala.Seq[String]], params: String*) = queryString.filter(p => !params.contains(p._1))
+
 
   val description = landing_description()
 

@@ -36,7 +36,7 @@ GET         /collection/paper-digital        controllers.Shipping.viewCollection
 GET         /collection/paper                controllers.Shipping.viewCollectionPaper
 GET         /delivery/paper-digital          controllers.Shipping.viewDeliveryPaperDigital
 GET         /delivery/paper                  controllers.Shipping.viewDeliveryPaper
-GET         /weekly                          controllers.WeeklyLandingPage.index(country: Option[Country])
+GET         /weekly                          controllers.WeeklyLandingPage.index(country: Option[Country], promoCode: Option[PromoCode])
 GET         /weekly/:country                 controllers.WeeklyLandingPage.withCountry(country: String)
 
 # Staff signin (note, done by OAuth, in addition to regular signin)
