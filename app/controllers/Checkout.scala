@@ -31,9 +31,12 @@ import org.joda.time.LocalDate
 import play.api.data.Form
 import play.api.libs.json._
 import play.api.mvc._
+import scalaz.std.scalaFuture._
+import scalaz.{NonEmptyList, OptionT}
 import services.AuthenticationService.authenticatedUserFor
 import services._
 import utils.RequestCountry._
+import utils.TestUsers
 import utils.TestUsers.{NameEnteredInForm, PreSigninTestCookie}
 import views.html.{checkout => view}
 import views.support.{PlanList, BillingPeriod => _, _}
@@ -41,9 +44,6 @@ import views.support.{PlanList, BillingPeriod => _, _}
 import scala.Function.const
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
-import scalaz.std.scalaFuture._
-import scalaz.{NonEmptyList, OptionT}
-import utils.TestUsers
 
 class Checkout(fBackendFactory: TouchpointBackends, commonActions: CommonActions, implicit val executionContext: ExecutionContext, override protected val controllerComponents: ControllerComponents) extends BaseController with LazyLogging {
 
@@ -179,7 +179,6 @@ class Checkout(fBackendFactory: TouchpointBackends, commonActions: CommonActions
 
   def handleCheckout = NoCacheAction.async { implicit request =>
 
-    //there's an annoying circular dependency going on here
     val tempData = SubscriptionsForm.subsForm.bindFromRequest().value
     implicit val resolution: TouchpointBackends.Resolution = fBackendFactory.forRequest(NameEnteredInForm, tempData)
     implicit val tpBackend = resolution.backend
