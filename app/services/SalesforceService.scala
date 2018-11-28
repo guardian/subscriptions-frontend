@@ -60,7 +60,7 @@ object SalesforceService {
   def getJSONForRecipientContact(buyerContact: ContactId, deliveryRecipient: DeliveryRecipient): JsObject = Json.obj(
     Keys.ACCOUNT_ID -> buyerContact.salesforceAccountId,
     Keys.EMAIL -> deliveryRecipient.email,
-    Keys.TITLE -> deliveryRecipient.title.mkString,
+    Keys.TITLE -> deliveryRecipient.title.map(_.title).mkString,
     Keys.FIRST_NAME -> deliveryRecipient.first,
     Keys.LAST_NAME -> deliveryRecipient.last,
     Keys.MAILING_STREET -> deliveryRecipient.address.line,
