@@ -71,7 +71,7 @@ define([
             return;
         }
 
-        var $postcodeField = $('[name="delivery.postcode"]', formEls.DELIVERY.$POSTCODE_CONTAINER);
+        var $postcodeField = $('[name="delivery.address.postcode"]', formEls.DELIVERY.$POSTCODE_CONTAINER);
         if ($postcodeField.val().length === 1) {
             toggleError($postcodeField.parent(), true);
             return;

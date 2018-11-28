@@ -1,7 +1,7 @@
 define(['modules/checkout/formElements','$', 'bean'], function (formEls, $, bean) {
     'use strict';
 
-    var BILLING_ADDRESS_AS_DELIVERY_ADDRESS_PICKER = $('.js-checkout-delivery-sames-as-billing')[0];
+    var BILLING_ADDRESS_AS_DELIVERY_ADDRESS_PICKER = $('.js-checkout-delivery-same-as-billing')[0];
     var $BILLING_ADDRESS = formEls.BILLING.$CONTAINER;
 
     var _ON_CHANGE_ACTIONS = [];

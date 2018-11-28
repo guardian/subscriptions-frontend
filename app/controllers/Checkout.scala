@@ -152,7 +152,7 @@ class Checkout(fBackendFactory: TouchpointBackends, commonActions: CommonActions
 
           val resolvedSupplierCode = supplierCode orElse request.session.get(SupplierTrackingCode).map(SupplierCode) // query param wins
           val supplierCodeSessionData = resolvedSupplierCode.map(code => Seq(SupplierTrackingCode -> code.get)).getOrElse(Seq.empty)
-          val productData = ProductPopulationData(user.map(_.address), planList)
+          val productData = ProductPopulationData(user.map(_.correspondenceAddress), planList)
           Ok(views.html.checkout.payment(
             personalData = personalData,
             productData = productData,

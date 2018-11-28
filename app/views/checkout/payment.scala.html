@@ -169,7 +169,7 @@
                             <a href="#yourDetails" class="text-button u-button-reset js-edit-your-details" title="Edit your personal details">Edit</a>
                         </div>
                         <div class="field-panel__fields">
-                            @fragments.checkout.fieldsPersonal(personalData)
+                            @fragments.checkout.fieldsPersonal(personalData, productData.isGuardianWeekly)
                             @defining(if(productData.isDigitalPack) "#billingAddress" else "#deliveryDetails") { goto =>
                                 @continueButton(goto, "js-checkout-your-details-submit")
                             }
@@ -184,7 +184,7 @@
                         <div id="deliveryDetails" class="field-panel is-collapsed js-fieldset-delivery-details">
                             <fieldset>
                                 <legend class="field-panel__legend">
-                                    Delivery address
+                                    <span class="js-delivery-details-legend">Delivery address</span>
                                 </legend>
                                 <div class="field-panel__fields">
                                     @if(productData.isVoucher) {

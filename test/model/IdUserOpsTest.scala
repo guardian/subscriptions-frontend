@@ -51,7 +51,7 @@ class IdUserOpsTest extends Specification {
     }
 
     "pull through delivery details if present and a blank address if not" in {
-      withoutBillingAddress.address.should_===(Address(
+      withoutBillingAddress.correspondenceAddress.should_===(Address(
         deliveryAddress.address1.get,
         deliveryAddress.address2.get,
         deliveryAddress.address3.get,
@@ -60,7 +60,7 @@ class IdUserOpsTest extends Specification {
         deliveryAddress.country.get
       ))
 
-      withBillingAddress.address.should_===(Address(
+      withBillingAddress.correspondenceAddress.should_===(Address(
         "", "", "", "", "", ""
       ))
     }

@@ -18,7 +18,7 @@ object IdUserOps {
         )
     }
 
-    def address: Address = {
+    def correspondenceAddress: Address = {
       val pf = u.privateFields.getOrElse(PrivateFields())
         Address(
           lineOne = pf.address1.getOrElse(""),

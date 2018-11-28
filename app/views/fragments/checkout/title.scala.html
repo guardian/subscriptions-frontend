@@ -1,0 +1,19 @@
+@import com.gu.i18n.Title
+
+@(form: Option[Title], namePrefix: String, renderDisabled: Boolean)
+
+@attrs(field: String) = @{
+    Html(s"id='${(namePrefix + "-" + field).replace('.', '-')}' name='$namePrefix.$field'")
+}
+@labelFor(field: String) = @{
+    Html(s"for='${(namePrefix + "-" + field).replace('.', '-')}'")
+}
+
+<label class="label" @labelFor("title")>Title</label>
+<select class="select select--wide js-input" @attrs("title") value="@form.map(_.title).mkString" @if(renderDisabled){ disabled="disabled" }>
+    <option value=""></option>
+    @for(title <- Title.all){
+        <option value="@title.title" @if(form.map(_.title).mkString == title.title){selected} >@title.title</option>
+    }
+    <option value="">Other</option>
+</select>

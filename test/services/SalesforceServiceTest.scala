@@ -31,7 +31,7 @@ class SalesforceServiceTest extends Specification {
     val data = PersonalData("Joe", "Bloggs", "joebloggs@example,com", receiveGnmMarketing = true, bloggsResidence, Some("1234"), Title.Prof.some)
 
     "Serialise your good old fashioned basic fields" in {
-      SalesforceService.createSalesforceUserData(personalData = data, None) mustEqual Json.obj(
+      SalesforceService.getJSONForBuyerContact(personalData = data, None) mustEqual Json.obj(
         EMAIL -> data.email,
         TITLE -> data.title.map(_.title),
         FIRST_NAME -> data.first,
@@ -47,7 +47,7 @@ class SalesforceServiceTest extends Specification {
 
     "Include your mailing address if you supply one" in {
       val delivery = Address("Flat 456", "123 Delivery Grove", "Deliverytown", "Surrey", "DL1 ABC", "UK")
-      val salesforceInfo = SalesforceService.createSalesforceUserData(data, PaperData(LocalDate.now(), delivery, "Papers please".some, plan).some)
+      val salesforceInfo = SalesforceService.getJSONForBuyerContact(data, PaperData(LocalDate.now(), delivery, "Papers please".some, plan).some)
       (salesforceInfo \ MAILING_STREET).get mustEqual JsString(delivery.line)
       (salesforceInfo \ MAILING_CITY).get mustEqual JsString(delivery.town)
       (salesforceInfo \ MAILING_POSTCODE).get mustEqual JsString(delivery.postCode)

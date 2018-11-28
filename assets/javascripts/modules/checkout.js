@@ -13,6 +13,7 @@ define([
     'modules/checkout/deliveryAsBilling',
     'modules/checkout/ratePlanChoice',
     'modules/checkout/eventTracking',
+    'modules/checkout/gifting',
     'bean'
 ], function (
     optionMirror,
@@ -28,6 +29,7 @@ define([
     deliveryAsBilling,
     ratePlanChoice,
     eventTracking,
+    gifting,
     bean
 ) {
     'use strict';
@@ -62,6 +64,7 @@ define([
                     event.stopPropagation();
                 }
             });
+            gifting.init();
             curl('js!stripeCheckout');
         }
         eventTracking.init();

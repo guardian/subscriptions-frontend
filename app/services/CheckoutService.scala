@@ -121,16 +121,15 @@ class CheckoutService(
     val idMinimalUser = authenticatedUserOpt.map(_.user)
 
     val telephoneNumber = subscriptionData.productData match {
-      case Left(paperData) => NormalisedTelephoneNumber.fromStringAndCountry(personalData.telephoneNumber, paperData.deliveryAddress.country orElse personalData.address.country)
+      case Left(paperData) => NormalisedTelephoneNumber.fromStringAndCountry(personalData.telephoneNumber, paperData.deliveryRecipient.address.country orElse personalData.address.country)
       case _ => NormalisedTelephoneNumber.fromStringAndCountry(personalData.telephoneNumber, personalData.address.country)
     }
 
     val soldToContact = subscriptionData.productData match {
       case Left(paperData) => Some(SoldToContact(
-        name = personalData, // TODO once we have gifting change this to the Giftee's name
-        address = paperData.deliveryAddress,
-        email = personalData.email, // TODO once we have gifting change this to the Giftee's email address
-        phone = telephoneNumber,
+        name = Some(paperData.deliveryRecipient).filter(_.isGiftee).getOrElse(personalData),
+        address = paperData.deliveryRecipient.address,
+        email = Some(paperData.deliveryRecipient).filter(_.isGiftee).map(_.email).getOrElse(personalData.email),
         deliveryInstructions = paperData.sanitizedDeliveryInstructions
       ))
       case _ => None
@@ -144,7 +143,7 @@ class CheckoutService(
       userExists <- EitherT(identityService.doesUserExist(personalData.email).map(\/.right[FatalErrors, Boolean]))
       _ <- Monad[SubNel].whenM(userExists && authenticatedUserOpt.isEmpty)(emailError)
       //update salesforce contact
-      contactId <- EitherT(createOrUpdateUserInSalesforce(subscriptionData, idMinimalUser))
+      contactId <- EitherT(createOrUpdateBuyerAndRecipientInSalesforce(subscriptionData, idMinimalUser))
       //Combine ID + SF ids
       combinedIds = PurchaserIdentifiers(contactId, idMinimalUser)
       //Prepare payment
@@ -211,8 +210,9 @@ class CheckoutService(
       result: SubscribeResult): EitherT[Future, NonEmptyList[SubsError], IdentitySuccess] = {
 
     val personalData = subscribeRequest.genericData.personalData
-    val deliveryAddress = subscribeRequest.productData.left.toOption.map(_.deliveryAddress)
 
+    // Set correspondence to delivery address iff recipient is not a giftee
+    val correspondenceAddress = subscribeRequest.productData.left.toOption.map(_.deliveryRecipient).filterNot(_.isGiftee).map(_.address)
 
     def addErrContext(context: String)(errSeq: NonEmptyList[SubsError]): NonEmptyList[SubsError] =
       errSeq.<::(CheckoutIdentityFailure(
@@ -222,10 +222,10 @@ class CheckoutService(
 
     authenticatedUserOpt match {
       case Some(authenticatedIdUser) =>
-        EitherT(identityService.updateUserDetails(personalData, deliveryAddress)(authenticatedIdUser)).leftMap(addErrContext("Authenticated"))
+        EitherT(identityService.updateUserDetails(personalData, correspondenceAddress)(authenticatedIdUser)).leftMap(addErrContext("Authenticated"))
       case None =>
         logger.info(s"User does not have an Identity account. Creating a guest account")
-        EitherT(identityService.registerGuest(personalData, deliveryAddress)).leftMap(addErrContext("Guest")).map { identitySuccess =>
+        EitherT(identityService.registerGuest(personalData, correspondenceAddress)).leftMap(addErrContext("Guest")).map { identitySuccess =>
           val id = identitySuccess.userData.id.id
           EitherT(salesforceService.repo.updateIdentityId(memberId, id)).swap.map(err =>
             SafeLogger.error(scrub"Error updating salesforce contact ${memberId.salesforceContactId} with identity id $id: ${err.getMessage}")
@@ -256,9 +256,9 @@ class CheckoutService(
         s"ExactTarget failed to send welcome email to subscriber $purchaserIds: ${e.getMessage}")))
     }
 
-  private def createOrUpdateUserInSalesforce(subscribeRequest: SubscribeRequest, userData: Option[IdMinimalUser]): Future[NonEmptyList[SubsError] \/ ContactId] = {
+  private def createOrUpdateBuyerAndRecipientInSalesforce(subscribeRequest: SubscribeRequest, userData: Option[IdMinimalUser]): Future[NonEmptyList[SubsError] \/ ContactId] = {
     (for {
-      memberId <- salesforceService.createOrUpdateUser(
+      memberId <- salesforceService.createOrUpdateBuyerAndRecipient(
         subscribeRequest.genericData.personalData,
         subscribeRequest.productData.left.toOption,
         userData

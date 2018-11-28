@@ -1,0 +1,32 @@
+@(namePrefix: String)
+
+@attrs(field: String) = @{
+    Html(s"id='${(namePrefix + "-" + field).replace('.', '-')}' name='$namePrefix.$field'")
+}
+
+@labelFor(field: String) = @{
+    Html(s"for='${(namePrefix + "-" + field).replace('.', '-')}'")
+}
+
+<div class="js-gift-recipient-details is-hidden">
+    <div class="form-field js-checkout-gift-title">
+    @_root_.views.html.fragments.checkout.title(None, namePrefix, true)
+    </div>
+    <div class="form-field js-checkout-gift-first-name">
+        <label class="label" @labelFor("first")>Recipient's first name</label>
+        <input type="text" class="input-text js-input" @attrs("first")
+        value="" maxlength="50" disabled>
+        @fragments.forms.errorMessage("This field is required")
+    </div>
+    <div class="form-field js-checkout-gift-last-name">
+        <label class="label" @labelFor("last")>Recipient's last name</label>
+        <input type="text" class="input-text js-input" @attrs("last")
+        value="" maxlength="50" disabled>
+        @fragments.forms.errorMessage("This field is required")
+    </div>
+    <div class="form-field js-checkout-gift-email">
+        <label class="label optional-marker" @labelFor("email")>Recipient's email address</label>
+        <input type="text" class="input-text js-input" @attrs("email")
+        value="" maxlength="80" disabled>
+    </div>
+</div>
