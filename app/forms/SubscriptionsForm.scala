@@ -45,7 +45,7 @@ class SubscriptionsForm(catalog: Catalog) {
 
   val paperForm = Form(mapping(
     "startDate" -> jodaLocalDate("EEEE d MMMM y"),
-    "delivery" -> addressDataMapping,
+    "delivery" -> deliveryRecipientMapping,
     "deliveryInstructions" -> optional(text(0, 250)),
     "ratePlanId" -> of[CatalogPlan.Paper]
   )(PaperData.apply)(PaperData.unapply))
@@ -80,7 +80,7 @@ class SubscriptionsForm(catalog: Catalog) {
     } yield (countrySettings)
 
     val deliveryCountrySettings = for {
-      country <- paperData.deliveryAddress.country
+      country <- paperData.deliveryRecipient.address.country
       validDeliveryCountries <- localizationSettings.availableDeliveryCountriesWithCurrency
       countrySettings <- validDeliveryCountries.find(_.country == country)
     } yield (countrySettings)
@@ -157,6 +157,15 @@ object SubscriptionsForm {
     "country" -> countryName
   )(Address.apply)(Address.unapply)
     .verifying("address validation failed", AddressValidation.validateForCountry _)
+
+
+  val deliveryRecipientMapping = mapping(
+    "title"-> of(titleFormatter),
+    "first" -> text(0, nameMaxLength),
+    "last" -> text(0, nameMaxLength),
+    "email" -> email.verifying("This email is too long", _.length < emailMaxLength + 1),
+    "address" -> addressDataMapping
+  )(DeliveryRecipient.apply)(DeliveryRecipient.unapply)
 
   val emailMapping = tuple(
     "email" -> email.verifying("This email is too long", _.length < emailMaxLength + 1),

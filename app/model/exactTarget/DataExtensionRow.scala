@@ -124,7 +124,7 @@ object PaperFieldsGenerator {
                ): Seq[(String, String)] = {
 
     fieldsFor(
-      deliveryAddress = paperData.deliveryAddress,
+      deliveryAddress = paperData.deliveryRecipient.address,
       maybeBillingAddress = Some(personalData.address),
       includesDigipack = paperData.plan.charges.benefits.list.toList.contains(Digipack),
       email = personalData.email,

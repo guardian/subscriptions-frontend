@@ -5,14 +5,14 @@
 @(data: ProductPopulationData, countriesWithCurrency: List[CountryWithCurrency], currency: Currency)
 
 @renderFields(usePostcodeLookup: Boolean, showDeliveryInstructions: Boolean, productName: String, firstPaperLabel: String) = {
-@_root_.views.html.fragments.checkout.address(
-    address = data.deliveryAddress,
-    namePrefix = "delivery",
-    countriesWithCurrency = countriesWithCurrency,
-    plan = data.plans.default,
-    usePostcodeLookup = usePostcodeLookup,
-    determinesPriceBanding = true,
-    defaultCurrency = currency)
+    @_root_.views.html.fragments.checkout.address(
+        address = data.deliveryAddress,
+        namePrefix = "delivery.address",
+        countriesWithCurrency = countriesWithCurrency,
+        plan = data.plans.default,
+        usePostcodeLookup = usePostcodeLookup,
+        determinesPriceBanding = true,
+        defaultCurrency = currency)
 
     <div class="js-checkout-delivery-data" id="deliveryFields">
         @if(showDeliveryInstructions) {
@@ -32,6 +32,7 @@
 }
 
 @if(data.plans.default.isGuardianWeekly) {
+    @_root_.views.html.fragments.checkout.giftRecipientDetails("delivery")
     @renderFields(usePostcodeLookup = false, showDeliveryInstructions = false, productName = "weekly", firstPaperLabel = "Start Issue")
 } else {
     @renderFields(usePostcodeLookup = true, showDeliveryInstructions = true, productName = "paper", firstPaperLabel = "Date of first paper")

@@ -1,30 +1,41 @@
 package services
 
 import com.gu.identity.play.IdMinimalUser
-import com.gu.memsub.NormalisedTelephoneNumber
+import com.gu.memsub.{Address, DeliveryRecipient, NormalisedTelephoneNumber}
 import com.gu.salesforce.ContactDeserializer.Keys
 import com.gu.salesforce._
 import com.typesafe.scalalogging.LazyLogging
 import model.{PaperData, PersonalData}
 import play.api.libs.json.{JsObject, Json}
-
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
 trait SalesforceService extends LazyLogging {
   def repo: SimpleContactRepository
-  def createOrUpdateUser(personalData: PersonalData, paperData: Option[PaperData], userId: Option[IdMinimalUser]): Future[ContactId]
+  def createOrUpdateBuyerAndRecipient(personalData: PersonalData, paperData: Option[PaperData], userId: Option[IdMinimalUser]): Future[ContactId]
   def isAuthenticated: Boolean
 }
 
 class SalesforceServiceImp(val repo: SimpleContactRepository) extends SalesforceService {
-  override def createOrUpdateUser(personalData: PersonalData, paperData: Option[PaperData], userId: Option[IdMinimalUser]): Future[ContactId] =
-    repo.upsert(userId.map(_.id), SalesforceService.createSalesforceUserData(personalData, paperData))
+  override def createOrUpdateBuyerAndRecipient(personalData: PersonalData, paperData: Option[PaperData], userId: Option[IdMinimalUser]): Future[ContactId] = {
+    for {
+      buyerContact <- repo.upsert(userId.map(_.id), SalesforceService.getJSONForBuyerContact(personalData, paperData))
+      sfContact <- { // Only create a Related Contact if the recipient is a Giftee
+        val gifteeRecipient = paperData.map(_.deliveryRecipient).filter(_.isGiftee)
+        gifteeRecipient.map { recipient =>
+          repo.upsert(userId.map(_.id), SalesforceService.getJSONForRecipientContact(buyerContact, recipient))
+        } getOrElse {
+          Future.successful(buyerContact)
+        }
+      }
+    } yield sfContact
+  }
 
   override def isAuthenticated = repo.salesforce.isAuthenticated
 }
 
 object SalesforceService {
-  def createSalesforceUserData(personalData: PersonalData, paperData: Option[PaperData]): JsObject = Json.obj(
+  def getJSONForBuyerContact(personalData: PersonalData, paperData: Option[PaperData]): JsObject = Json.obj(
     Keys.EMAIL -> personalData.email,
     Keys.FIRST_NAME -> personalData.first,
     Keys.LAST_NAME -> personalData.last,
@@ -36,15 +47,28 @@ object SalesforceService {
     Keys.ALLOW_GU_RELATED_MAIL -> personalData.receiveGnmMarketing
   ) ++ personalData.title.fold(Json.obj())(title => Json.obj(
     Keys.TITLE -> title.title
-  )) ++ paperData.map(_.deliveryAddress).fold(Json.obj())(addr => Json.obj(
+  )) ++ paperData.map(_.deliveryRecipient).filterNot(_.isGiftee).map(_.address).fold(Json.obj())(addr => Json.obj(
     Keys.MAILING_STREET -> addr.line,
     Keys.MAILING_CITY -> addr.town,
     Keys.MAILING_POSTCODE -> addr.postCode,
     Keys.MAILING_STATE -> addr.countyOrState,
-    Keys.MAILING_COUNTRY -> addr.country.fold(addr.countryName)(_.name)
+  Keys.MAILING_COUNTRY -> addr.country.fold(addr.countryName)(_.name)
   ) ++ paperData.flatMap(_.sanitizedDeliveryInstructions).fold(Json.obj())(instrs => Json.obj(
     Keys.DELIVERY_INSTRUCTIONS -> instrs
   ))) ++ NormalisedTelephoneNumber.fromStringAndCountry(personalData.telephoneNumber, personalData.address.country).fold(Json.obj())(phone => Json.obj(Keys.TELEPHONE -> phone.format))
+
+  def getJSONForRecipientContact(buyerContact: ContactId, deliveryRecipient: DeliveryRecipient): JsObject = Json.obj(
+    Keys.ACCOUNT_ID -> buyerContact.salesforceAccountId,
+    Keys.EMAIL -> deliveryRecipient.email,
+    Keys.TITLE -> deliveryRecipient.title.mkString,
+    Keys.FIRST_NAME -> deliveryRecipient.first,
+    Keys.LAST_NAME -> deliveryRecipient.last,
+    Keys.MAILING_STREET -> deliveryRecipient.address.line,
+    Keys.MAILING_CITY -> deliveryRecipient.address.town,
+    Keys.MAILING_POSTCODE -> deliveryRecipient.address.postCode,
+    Keys.MAILING_STATE -> deliveryRecipient.address.countyOrState,
+    Keys.MAILING_COUNTRY -> deliveryRecipient.address.country.fold(deliveryRecipient.address.countryName)(_.name)
+  )
 }
 
 case class SalesforceServiceError(s: String) extends Throwable {

@@ -47,7 +47,7 @@ libraryDependencies ++= Seq(
     filters,
     jodaForms,
     PlayImport.specs2 % "test",
-    "com.gu" %% "membership-common" % "0.526",
+    "com.gu" %% "membership-common" % "0.1-SNAPSHOT",
     "com.gu.identity" %% "identity-play-auth" % "2.5",
     "com.gu" %% "identity-test-users" % "0.6",
     "com.gu" %% "play-googleauth" % "0.7.6",

@@ -1,33 +1,27 @@
 @import com.gu.i18n.Title
 @import model.PersonalData
 
-@(form: Option[PersonalData])
+@(form: Option[PersonalData], productSupportsGifting: Boolean)
 
 @signedInAttrs = @{ if (form.isDefined) "required readonly" else "" }
 
 @* ===== Name ===== *@
 <div class="form-field js-checkout-title">
-    <label class="label" for="title">Title</label>
-    <select class="select select--wide js-input" name="personal.title" id="title"
-    value="@form.map(_.title)" >
-            <option value=""></option>
-    @for(title <- Title.all){
-            <option value="@title.title" @if(form.map(_.title).mkString == title.title){selected} >@title.title</option>
-        }
-            <option value="">Other</option>
-    </select>
+    <div class="form-field">
+    @_root_.views.html.fragments.checkout.title(form.flatMap(_.title), "personal", false)
+    </div>
 </div>
 <div class="form-field js-checkout-first">
     <label class="label" for="first">First name</label>
     @* Zuora's PaymentMethod request is the limiting factor for maxlength here *@
     <input type="text" class="input-text js-input" name="personal.first" id="first"
-        value="@form.map(_.first)" maxlength="30" required>
+    value="@form.map(_.first)" maxlength="30" required>
     @fragments.forms.errorMessage("This field is required")
 </div>
 <div class="form-field js-checkout-last">
     <label class="label" for="last">Last name</label>
     <input type="text" class="input-text js-input" name="personal.last" id="last"
-        value="@form.map(_.last)" maxlength="50" required>
+    value="@form.map(_.last)" maxlength="50" required>
     @fragments.forms.errorMessage("This field is required")
 </div>
 
@@ -35,23 +29,34 @@
 <div class="form-field js-checkout-email">
     <label class="label" for="email">Email address</label>
     <input type="email" class="input-text js-input"  name="personal.emailValidation.email" id="email"
-        value="@form.map(_.email)" maxlength="80" @signedInAttrs data-validation-url="@{routes.Checkout.checkIdentity("").path.replaceFirst("\\?.*", "")}">
+    value="@form.map(_.email)" maxlength="80" @signedInAttrs data-validation-url="@{routes.Checkout.checkIdentity("").path.replaceFirst("\\?.*", "")}">
     @fragments.forms.errorMessage("")
 </div>
 <div class="form-field @if(form.isEmpty) {js-checkout-confirm-email}">
-    @if(form.isDefined) {
-        <input type="hidden" name="personal.emailValidation.confirm" id="confirm" value="@form.map(_.email)">
-    } else {
-        <label class="label" for="confirm">Confirm email address</label>
-        <input type="email" class="input-text js-input" name="personal.emailValidation.confirm" id="confirm" value="@form.map(_.email)" required>
+@if(form.isDefined) {
+    <input type="hidden" name="personal.emailValidation.confirm" id="confirm" value="@form.map(_.email)">
+} else {
+    <label class="label" for="confirm">Confirm email address</label>
+    <input type="email" class="input-text js-input" name="personal.emailValidation.confirm" id="confirm" value="@form.map(_.email)" required>
         @fragments.forms.errorMessage("The confirmation email must match your email address")
     }
 </div>
 
 @* ===== Phone ===== *@
-  <div class="form-field js-checkout-phone-number">
+<div class="form-field js-checkout-phone-number">
     <label class="label optional-marker" for="phone-number">Phone Number</label>
     <input type="tel" class="input-text js-input input-text"
     id="phone-number" name="personal.telephoneNumber"
     value="@form.map(_.telephoneNumber)" maxlength="20">
-  </div>
+</div>
+
+@if(productSupportsGifting) {
+    <div class="js-checkout-is-a-gift">
+        <label class="option">
+            <span class="option__input"><input class="js-input" type="checkbox" name="personal.isBuyingAGift" value="true"/></span>
+            <span>I'm buying Guardian Weekly as a gift</span>
+        </label>
+    </div>
+} else {
+    <input type="hidden" name="personal.isBuyingAGift" value="false"/>
+}

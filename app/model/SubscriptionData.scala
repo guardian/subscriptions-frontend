@@ -64,7 +64,7 @@ case class DigipackData(
 
 case class PaperData(
   startDate: LocalDate,
-  deliveryAddress: Address,
+  deliveryRecipient: DeliveryRecipient,
   deliveryInstructions: Option[String],
   plan: CatalogPlan.Paper
 ) {
