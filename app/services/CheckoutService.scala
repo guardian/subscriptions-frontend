@@ -121,7 +121,7 @@ class CheckoutService(
     val idMinimalUser = authenticatedUserOpt.map(_.user)
 
     val telephoneNumber = subscriptionData.productData match {
-      case Left(paperData) => NormalisedTelephoneNumber.fromStringAndCountry(personalData.telephoneNumber, paperData.deliveryRecipient.address.country orElse personalData.address.country)
+      case Left(paperData) => NormalisedTelephoneNumber.fromStringAndCountry(personalData.telephoneNumber, personalData.address.country orElse paperData.deliveryRecipient.address.country)
       case _ => NormalisedTelephoneNumber.fromStringAndCountry(personalData.telephoneNumber, personalData.address.country)
     }
 
@@ -130,7 +130,8 @@ class CheckoutService(
         name = Some(paperData.deliveryRecipient).filter(_.isGiftee).getOrElse(personalData),
         address = paperData.deliveryRecipient.address,
         email = Some(paperData.deliveryRecipient).filter(_.isGiftee).map(_.email).getOrElse(personalData.email),
-        deliveryInstructions = paperData.sanitizedDeliveryInstructions
+        deliveryInstructions = paperData.sanitizedDeliveryInstructions,
+        phone = Some(paperData.deliveryRecipient).filterNot(_.isGiftee).flatMap(_ => telephoneNumber)
       ))
       case _ => None
     }
@@ -370,8 +371,8 @@ class CheckoutService(
     ): Future[\/[String, Any]] = {
 
     def getPayment(contact: Contact, billto: Queries.Contact): PaymentService#AccountAndPayment = {
-      val idMinimalUser = IdMinimalUser(contact.identityId, None)
-      val purchaserIds = PurchaserIdentifiers(contact, Some(idMinimalUser))
+      val idMinimalUser = contact.identityId.map(IdMinimalUser(_, None))
+      val purchaserIds = PurchaserIdentifiers(contact, idMinimalUser)
       renewal.paymentData match {
         case cd: CreditCardData => paymentService.makeZuoraAccountWithCreditCard(cd, subscription.currency, purchaserIds, billto.country)
         case dd: DirectDebitData => paymentService.makeZuoraAccountWithDirectDebit(dd, billto.firstName, billto.lastName, purchaserIds)

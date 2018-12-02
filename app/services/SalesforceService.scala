@@ -1,12 +1,13 @@
 package services
 
 import com.gu.identity.play.IdMinimalUser
-import com.gu.memsub.{Address, DeliveryRecipient, NormalisedTelephoneNumber}
+import com.gu.memsub.{DeliveryRecipient, NormalisedTelephoneNumber}
 import com.gu.salesforce.ContactDeserializer.Keys
 import com.gu.salesforce._
 import com.typesafe.scalalogging.LazyLogging
 import model.{PaperData, PersonalData}
 import play.api.libs.json.{JsObject, Json}
+
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -20,10 +21,11 @@ class SalesforceServiceImp(val repo: SimpleContactRepository) extends Salesforce
   override def createOrUpdateBuyerAndRecipient(personalData: PersonalData, paperData: Option[PaperData], userId: Option[IdMinimalUser]): Future[ContactId] = {
     for {
       buyerContact <- repo.upsert(userId.map(_.id), SalesforceService.getJSONForBuyerContact(personalData, paperData))
-      sfContact <- { // Only create a Related Contact if the recipient is a Giftee
+      sfContact <- { // Only create a Delivery / Recipient (Related) Contact if the recipient is a Giftee
         val gifteeRecipient = paperData.map(_.deliveryRecipient).filter(_.isGiftee)
         gifteeRecipient.map { recipient =>
-          repo.upsert(userId.map(_.id), SalesforceService.getJSONForRecipientContact(buyerContact, recipient))
+          val recordTypeId = repo.recordTypes.getIdForContactRecordType(DeliveryRecipientContact)
+          repo.upsert(userId.map(_.id), SalesforceService.getJSONForRecipientContact(buyerContact, recipient, recordTypeId))
         } getOrElse {
           Future.successful(buyerContact)
         }
@@ -57,8 +59,9 @@ object SalesforceService {
     Keys.DELIVERY_INSTRUCTIONS -> instrs
   ))) ++ NormalisedTelephoneNumber.fromStringAndCountry(personalData.telephoneNumber, personalData.address.country).fold(Json.obj())(phone => Json.obj(Keys.TELEPHONE -> phone.format))
 
-  def getJSONForRecipientContact(buyerContact: ContactId, deliveryRecipient: DeliveryRecipient): JsObject = Json.obj(
+  def getJSONForRecipientContact(buyerContact: ContactId, deliveryRecipient: DeliveryRecipient, recordTypeId: String): JsObject = Json.obj(
     Keys.ACCOUNT_ID -> buyerContact.salesforceAccountId,
+    Keys.RECORD_TYPE_ID -> recordTypeId,
     Keys.EMAIL -> deliveryRecipient.email,
     Keys.TITLE -> deliveryRecipient.title.map(_.title).mkString,
     Keys.FIRST_NAME -> deliveryRecipient.first,
