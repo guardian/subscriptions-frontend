@@ -101,7 +101,7 @@ class CheckoutService(
           ),
           RatePlan(recurringPlan.id.get, None)
         )
-        val updatedContractAcceptance = sixWeeksPlanStartDate.plusWeeks(6)
+        val updatedContractAcceptance = sixWeeksPlanStartDate.plusWeeks(7) // FIXME: edit rate plan charge in Zuora and make this 6 again after 28th December
         originalCommand.copy(ratePlans = replacementPlans, contractAcceptance = updatedContractAcceptance)
       }
       updatedCommand.getOrElse(originalCommand)
