@@ -10,7 +10,7 @@ import reviewDetails from './reviewDetails'
 
 require('react-datepicker/dist/react-datepicker.css');
 
-const MAX_WEEKS_AVAILABLE = 4;
+const MAX_WEEKS_AVAILABLE = 3;
 
 function getFirstSelectableDate(filterFn) {
     const weekly = formElements.$DELIVERED_PRODUCT_TYPE.val() === 'weekly';
