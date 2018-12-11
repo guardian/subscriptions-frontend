@@ -62,6 +62,7 @@ class MyComponents(context: Context)
     new Homepage(commonActions, controllerComponents),
     new Management(actorSystem = actorSystem, touchpointBackends, oAuthActions, executionContext, controllerComponents),
     new DigitalPack(touchpointBackends.Normal, commonActions, controllerComponents),
+    new CheckoutHandler(touchpointBackends, commonActions, executionContext, controllerComponents),
     new Checkout(touchpointBackends, commonActions, executionContext, controllerComponents),
     new Promotion(touchpointBackends, commonActions, executionContext, controllerComponents),
     new Shipping(touchpointBackends.Normal, commonActions, controllerComponents),

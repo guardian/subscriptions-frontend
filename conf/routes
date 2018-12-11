@@ -18,7 +18,7 @@ GET         /digital                         controllers.DigitalPack.redirect
 GET         /:code/digital                   controllers.DigitalPack.landingPage(code: String)
 
 # Checkout AJAX endpoints
-POST        /checkout                        controllers.Checkout.handleCheckout
+POST        /checkout                        controllers.CheckoutHandler.handleCheckout
 GET         /checkout/check-identity         controllers.Checkout.checkIdentity(email: String)
 POST        /checkout/check-account          controllers.Checkout.checkAccount
 POST        /checkout/register-guest-user    controllers.Checkout.convertGuestUser
