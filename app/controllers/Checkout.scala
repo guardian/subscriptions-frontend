@@ -36,7 +36,7 @@ import scalaz.{NonEmptyList, OptionT}
 import services.AuthenticationService.authenticatedUserFor
 import services._
 import utils.RequestCountry._
-import utils.TestUsers
+import utils.{PaymentGatewayError, TestUsers}
 import utils.TestUsers.{NameEnteredInForm, PreSigninTestCookie}
 import views.html.{checkout => view}
 import views.support.{PlanList, BillingPeriod => _, _}
@@ -229,7 +229,7 @@ class Checkout(fBackendFactory: TouchpointBackends, commonActions: CommonActions
 
           case e: CheckoutZuoraPaymentGatewayError =>
             logger.warn(SubsError.toStringPretty(e))
-            handlePaymentGatewayError(e.paymentError, e.purchaserIds, subscribeRequest.genericData.personalData.address.countryName)
+            PaymentGatewayError.process(e.paymentError, e.purchaserIds, subscribeRequest.genericData.personalData.address.countryName)
 
           case e: CheckoutPaymentTypeFailure =>
             logger.error(SubsError.header(e))
@@ -401,25 +401,6 @@ class Checkout(fBackendFactory: TouchpointBackends, commonActions: CommonActions
       case error =>
         SafeLogger.error(scrub"Failed to complete postcode lookup via getAddress.io due to: $error")
         InternalServerError
-    }
-  }
-
-  // PaymentGatewayError should be logged at WARN level
-  private def handlePaymentGatewayError(e: PaymentGatewayError, purchaserIds: PurchaserIdentifiers, country: String) = {
-
-    def handleError(code: String) = {
-      logger.warn(s"User $purchaserIds could not subscribe due to payment gateway failed transaction: \n\terror=${e} \n\tuser=$purchaserIds \n\tcountry=$country")
-      Forbidden(Json.obj("type" -> "PaymentGatewayError", "code" -> code))
-    }
-
-    e.errType match {
-      case Fraudulent => handleError("Fraudulent")
-      case TransactionNotAllowed => handleError("TransactionNotAllowed")
-      case DoNotHonor => handleError("DoNotHonor")
-      case InsufficientFunds => handleError("InsufficientFunds")
-      case RevocationOfAuthorization => handleError("RevocationOfAuthorization")
-      case GenericDecline => handleError("GenericDecline")
-      case _ => handleError("UnknownPaymentError")
     }
   }
 }
