@@ -64,7 +64,7 @@ define(['$'], function ($) {
 
         $SIGN_IN_LINK: $('.js-sign-in-link'),
 
-        BILLING: addressFields('.js-fieldset-billing-address'),
+        BILLING: addressFields('.js-billing-address'),
         DELIVERY: addressFields('.js-fieldset-delivery-details'),
 
         $TITLE: $('.js-checkout-title .js-input'),

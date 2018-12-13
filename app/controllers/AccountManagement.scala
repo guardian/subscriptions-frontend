@@ -63,10 +63,11 @@ object SessionSubscription extends StrictLogging {
       salesForceUser <- OptionT(tpBackend.salesforceService.repo.get(identityUser.user.id).map { d =>
         d.leftMap(e => logger.warn(s"Error looking up SF Contact for logged in user with Identity ID ${identityUser.user.id}: $e")).toOption.flatten
       })
-      zuoraSubscription <- OptionT(tpBackend.subscriptionService.current[ContentSubscription](salesForceUser).map{subs =>
+      /* TODO: If a user has more than one Billing Account, prioritise their non-gift subs, or create an interstitial page where they can choose which sub to manage */
+      zuoraSubscription <- OptionT(tpBackend.subscriptionService.current[ContentSubscription](salesForceUser).map { subs =>
         if (subs.length > 1) logger.warn(s"Logged in user with Identity ID ${identityUser.user.id}: with ${subs.length} subscriptions, only serving first.")
         subs.headOption
-        /*FIXME if they have more than one they can only manage the first*/})
+      })
     } yield zuoraSubscription).run
   }
 

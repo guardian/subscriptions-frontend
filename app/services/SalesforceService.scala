@@ -1,11 +1,11 @@
 package services
 
 import com.gu.identity.play.IdMinimalUser
-import com.gu.memsub.{DeliveryRecipient, NormalisedTelephoneNumber}
+import com.gu.memsub.NormalisedTelephoneNumber
 import com.gu.salesforce.ContactDeserializer.Keys
 import com.gu.salesforce._
 import com.typesafe.scalalogging.LazyLogging
-import model.{PaperData, PersonalData}
+import model.{DeliveryRecipient, PaperData, PersonalData, PurchaserIdentifiers}
 import play.api.libs.json.{JsObject, Json}
 
 import scala.concurrent.Future
@@ -13,24 +13,24 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 trait SalesforceService extends LazyLogging {
   def repo: SimpleContactRepository
-  def createOrUpdateBuyerAndRecipient(personalData: PersonalData, paperData: Option[PaperData], userId: Option[IdMinimalUser]): Future[ContactId]
+  def createOrUpdateBuyerAndRecipient(personalData: PersonalData, paperData: Option[PaperData], userId: Option[IdMinimalUser]): Future[PurchaserIdentifiers]
   def isAuthenticated: Boolean
 }
 
 class SalesforceServiceImp(val repo: SimpleContactRepository) extends SalesforceService {
-  override def createOrUpdateBuyerAndRecipient(personalData: PersonalData, paperData: Option[PaperData], userId: Option[IdMinimalUser]): Future[ContactId] = {
+  override def createOrUpdateBuyerAndRecipient(personalData: PersonalData, paperData: Option[PaperData], userId: Option[IdMinimalUser]): Future[PurchaserIdentifiers] = {
     for {
       buyerContact <- repo.upsert(userId.map(_.id), SalesforceService.getJSONForBuyerContact(personalData, paperData))
-      sfContact <- { // Only create a Delivery / Recipient (Related) Contact if the recipient is a Giftee
+      recipientContact <- { // Only create a Delivery / Recipient (Related) Contact if the recipient is a Giftee
         val gifteeRecipient = paperData.map(_.deliveryRecipient).filter(_.isGiftee)
         gifteeRecipient.map { recipient =>
           val recordTypeId = repo.recordTypes.getIdForContactRecordType(DeliveryRecipientContact)
-          repo.upsert(userId.map(_.id), SalesforceService.getJSONForRecipientContact(buyerContact, recipient, recordTypeId))
+          repo.upsert(None, SalesforceService.getJSONForRecipientContact(buyerContact, recipient, recordTypeId))
         } getOrElse {
           Future.successful(buyerContact)
         }
       }
-    } yield sfContact
+    } yield PurchaserIdentifiers(buyerContact, recipientContact, userId)
   }
 
   override def isAuthenticated = repo.salesforce.isAuthenticated

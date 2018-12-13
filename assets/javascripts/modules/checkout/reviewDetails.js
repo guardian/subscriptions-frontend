@@ -30,14 +30,12 @@ define([
         return textUtils.mergeValues([
             formEls.DELIVERY.$TITLE.val(),
             formEls.DELIVERY.$FIRST_NAME.val(),
-            formEls.DELIVERY.$LAST_NAME.val(),
-            formEls.DELIVERY.$EMAIL.val()
+            formEls.DELIVERY.$LAST_NAME.val()
         ], ' ');
     }
 
     function populateDetails() {
         formEls.$REVIEW_NAME.text(textUtils.mergeValues([
-            formEls.$EMAIL.val(),
             formEls.$TITLE.val(),
             formEls.$FIRST_NAME.val(),
             formEls.$LAST_NAME.val()

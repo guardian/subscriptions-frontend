@@ -18,7 +18,7 @@ class PaymentService(val ukStripeService: StripeService, val auStripeService: St
 
   case class ZuoraAccountDirectDebit(paymentData: DirectDebitData, firstName: String, lastName: String, purchaserIds: PurchaserIdentifiers) extends AccountAndPayment {
 
-    override def makeAccount = Account(purchaserIds.contactId, identityIdForAccount(purchaserIds), GBP, autopay = true, GoCardless)
+    override def makeAccount = Account(purchaserIds.recipientContactId, identityIdForAccount(purchaserIds), GBP, autopay = true, GoCardless)
 
     override def makePaymentMethod =
       Future(BankTransfer(
@@ -36,7 +36,7 @@ class PaymentService(val ukStripeService: StripeService, val auStripeService: St
     private val stripeService = if (transactingCountry.contains(auStripeService.accountCountry)) auStripeService else ukStripeService
     private val overrideInvoiceTemplate = invoiceTemplatesByCountry.get(stripeService.accountCountry)
 
-    override def makeAccount = Account(purchaserIds.contactId, identityIdForAccount(purchaserIds), currency, autopay = true, stripeService.paymentGateway, overrideInvoiceTemplate)
+    override def makeAccount = Account(purchaserIds.recipientContactId, identityIdForAccount(purchaserIds), currency, autopay = true, stripeService.paymentGateway, overrideInvoiceTemplate)
 
     override def makePaymentMethod: Future[CreditCardReferenceTransaction] = {
       stripeService.Customer.create(card = paymentData.stripeToken)

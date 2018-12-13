@@ -161,9 +161,9 @@ object SubscriptionsForm {
 
   val deliveryRecipientMapping = mapping(
     "title"-> of(titleFormatter),
-    "first" -> text(0, nameMaxLength),
-    "last" -> text(0, nameMaxLength),
-    "email" -> email.verifying("This email is too long", _.length < emailMaxLength + 1),
+    "firstName" -> optional(text(0, nameMaxLength)),
+    "lastName" -> optional(text(0, nameMaxLength)),
+    "email" -> optional(email.verifying("This email is too long", _.length < emailMaxLength + 1)),
     "address" -> addressDataMapping
   )(DeliveryRecipient.apply)(DeliveryRecipient.unapply)
 
@@ -181,7 +181,7 @@ object SubscriptionsForm {
     "last" -> text(0, nameMaxLength),
     "emailValidation" -> emailMapping,
     "receiveGnmMarketing" -> booleanCheckbox,
-    "address" -> of[Address](addressWithFallback("delivery")),
+    "address" -> of[Address](addressWithFallback("delivery.address")),
     "telephoneNumber" -> optional(text),
     "title"-> of(titleFormatter)
   )(PersonalData.apply)(PersonalData.unapply)
