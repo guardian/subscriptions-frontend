@@ -36,8 +36,6 @@ define(['modules/checkout/formElements','$', 'bean'], function (formEls, $, bean
                         $CHECKOUT_DELIVERY_SAMES_AS_BILLING.attr('checked');
                         $DELIVERY_DETAILS_LEGEND.text('Delivery address');
                         $GIFT_RECIPIENT_DETAILS.addClass('is-hidden');
-                        //$BILL_MY_DELIVERY_ADDRESS_SECTION.removeClass('is-hidden');
-                        //$BILLING_ADDRESS_SECTION.addClass('is-hidden');
                     }
                     disableOrEnableAllFields($GIFT_RECIPIENT_DETAILS);
                     disableOrEnableAllFields($BILLING_ADDRESS_SECTION);
