@@ -194,7 +194,7 @@ class ExactTargetService(
 
     val enqueueResult = for {
       zuoraAccount <- EitherT(zuoraRestService.getAccount(subscription.accountId))
-      salesforceContact <- EitherT.right(SalesforceContactServiceUsingZuoraRest.getBuyerContactForZuoraRestAccount(zuoraAccount)(zuoraRestService, salesforceService.repo, executionContext))
+      salesforceContact <- EitherT.right(SalesforceContactServiceUsingZuoraRest.getBuyerContactForZuoraAccount(zuoraAccount)(salesforceService.repo, executionContext))
       row = createDataExtensionRow(salesforceContact, zuoraAccount)
       result <- EitherT(sendToQueue(salesforceContact, row))
     } yield result
