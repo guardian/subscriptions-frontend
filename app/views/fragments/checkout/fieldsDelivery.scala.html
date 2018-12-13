@@ -32,9 +32,7 @@
 }
 
 @if(data.plans.default.isGuardianWeekly) {
-    if (!data.plans.default.name.toLowerCase.contains("six")) {
-        @_root_.views.html.fragments.checkout.giftRecipientDetails("delivery")
-    }
+    @_root_.views.html.fragments.checkout.giftRecipientDetails("delivery")
     @renderFields(usePostcodeLookup = false, showDeliveryInstructions = false, productName = "weekly", firstPaperLabel = "Start Issue")
 } else {
     @renderFields(usePostcodeLookup = true, showDeliveryInstructions = true, productName = "paper", firstPaperLabel = "Date of first paper")

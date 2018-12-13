@@ -150,6 +150,7 @@ object PlanOps {
     def isPhysical: Boolean = products.hasPhysicalBenefits
     def isVoucher: Boolean = products.isVoucher
     def isDigitalPack: Boolean = products.isDigitalPack
+    def isSixForSix: Boolean = products.promotionalOnly
   }
 
 }
