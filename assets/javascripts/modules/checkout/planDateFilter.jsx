@@ -23,7 +23,7 @@ define([
                 weekend: (date) => date.day() === 6 || date.day() === 0,
                 allDays: () => true
             },
-            weekly: (date) => date.day() === 5 && !date.isSame('2018-12-28')
+            weekly: (date) => (date.day() === 5) && !date.isSame('2018-12-28', 'day')
         };
 
         let filters = validDays[deliveredProduct];
