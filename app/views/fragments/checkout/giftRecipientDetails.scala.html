@@ -1,0 +1,37 @@
+@(namePrefix: String)
+
+@attrs(field: String) = @{
+    Html(s"id='${(namePrefix + "-" + field).replace('.', '-')}' name='$namePrefix.$field'")
+}
+
+@labelFor(field: String) = @{
+    Html(s"for='${(namePrefix + "-" + field).replace('.', '-')}'")
+}
+
+<div class="js-gift-recipient-details is-hidden">
+    @********************************************************************************************
+    * A decision was ade not to collect the Title for gift recipients, but in the event that    *
+    * decision is reversed, you can just uncomment this section and this field should work fine *
+    *********************************************************************************************
+    <div class="form-field js-checkout-gift-title">
+    @_root_.views.html.fragments.checkout.title(None, namePrefix, true)
+    </div>
+    *@
+    <div class="form-field js-checkout-gift-first-name">
+        <label class="label" @labelFor("firstName")>Recipient's first name</label>
+        <input type="text" class="input-text js-input" @attrs("firstName")
+        value="" maxlength="50" disabled required>
+        @fragments.forms.errorMessage("This field is required")
+    </div>
+    <div class="form-field js-checkout-gift-last-name">
+        <label class="label" @labelFor("lastName")>Recipient's last name</label>
+        <input type="text" class="input-text js-input" @attrs("lastName")
+        value="" maxlength="50" disabled required>
+        @fragments.forms.errorMessage("This field is required")
+    </div>
+    <div class="form-field js-checkout-gift-email">
+        <label class="label optional-marker" @labelFor("email")>Recipient's email address</label>
+        <input type="text" class="input-text js-input" @attrs("email")
+        value="" maxlength="80" disabled>
+    </div>
+</div>

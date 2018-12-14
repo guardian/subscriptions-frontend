@@ -26,6 +26,14 @@ define([
         }
     }
 
+    function getGiftDetails() {
+        return textUtils.mergeValues([
+            formEls.DELIVERY.$TITLE.val(),
+            formEls.DELIVERY.$FIRST_NAME.val(),
+            formEls.DELIVERY.$LAST_NAME.val()
+        ], ' ');
+    }
+
     function populateDetails() {
         formEls.$REVIEW_NAME.text(textUtils.mergeValues([
             formEls.$TITLE.val(),
@@ -50,6 +58,7 @@ define([
         var DELIVERY_COUNTRY_SELECT = formEls.DELIVERY.$COUNTRY_SELECT[0];
 
         formEls.$REVIEW_DELIVERY_ADDRESS.text(textUtils.mergeValues([
+            getGiftDetails(),
             formEls.DELIVERY.$ADDRESS1.val(),
             formEls.DELIVERY.$ADDRESS2.val(),
             formEls.DELIVERY.$TOWN.val(),
@@ -66,7 +75,6 @@ define([
         } else {
             formEls.$REVIEW_PHONE_FIELD.hide();
         }
-
 
         formEls.$REVIEW_ACCOUNT.text(formEls.$ACCOUNT.val());
         formEls.$REVIEW_SORTCODE.text(formEls.$SORTCODE.val());

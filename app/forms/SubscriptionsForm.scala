@@ -45,7 +45,7 @@ class SubscriptionsForm(catalog: Catalog) {
 
   val paperForm = Form(mapping(
     "startDate" -> jodaLocalDate("EEEE d MMMM y"),
-    "delivery" -> addressDataMapping,
+    "delivery" -> deliveryRecipientMapping,
     "deliveryInstructions" -> optional(text(0, 250)),
     "ratePlanId" -> of[CatalogPlan.Paper]
   )(PaperData.apply)(PaperData.unapply))
@@ -80,7 +80,7 @@ class SubscriptionsForm(catalog: Catalog) {
     } yield (countrySettings)
 
     val deliveryCountrySettings = for {
-      country <- paperData.deliveryAddress.country
+      country <- paperData.deliveryRecipient.address.country
       validDeliveryCountries <- localizationSettings.availableDeliveryCountriesWithCurrency
       countrySettings <- validDeliveryCountries.find(_.country == country)
     } yield (countrySettings)
@@ -158,6 +158,15 @@ object SubscriptionsForm {
   )(Address.apply)(Address.unapply)
     .verifying("address validation failed", AddressValidation.validateForCountry _)
 
+
+  val deliveryRecipientMapping = mapping(
+    "title"-> of(titleFormatter),
+    "firstName" -> optional(text(0, nameMaxLength)),
+    "lastName" -> optional(text(0, nameMaxLength)),
+    "email" -> optional(email.verifying("This email is too long", _.length < emailMaxLength + 1)),
+    "address" -> addressDataMapping
+  )(DeliveryRecipient.apply)(DeliveryRecipient.unapply)
+
   val emailMapping = tuple(
     "email" -> email.verifying("This email is too long", _.length < emailMaxLength + 1),
     "confirm" -> email)
@@ -172,7 +181,7 @@ object SubscriptionsForm {
     "last" -> text(0, nameMaxLength),
     "emailValidation" -> emailMapping,
     "receiveGnmMarketing" -> booleanCheckbox,
-    "address" -> of[Address](addressWithFallback("delivery")),
+    "address" -> of[Address](addressWithFallback("delivery.address")),
     "telephoneNumber" -> optional(text),
     "title"-> of(titleFormatter)
   )(PersonalData.apply)(PersonalData.unapply)

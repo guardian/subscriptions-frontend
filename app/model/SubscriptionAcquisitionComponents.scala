@@ -115,7 +115,7 @@ object SubscriptionAcquisitionComponents {
       }
 
       val printOptions = for {
-        d <- p.deliveryAddress.country.map(_.alpha2)
+        d <- p.deliveryRecipient.address.country.map(_.alpha2)
         p <- printProduct
       } yield PrintOptions(p, d)
 

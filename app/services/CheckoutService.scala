@@ -7,9 +7,10 @@ import com.gu.identity.play.{AuthenticatedIdUser, IdMinimalUser}
 import com.gu.memsub.Subscription.{AccountId, ProductRatePlanId}
 import com.gu.memsub.promo.Promotion._
 import com.gu.memsub.promo.{ValidPromotion, _}
-import com.gu.memsub.services.{GetSalesforceContactForSub, PromoService, PaymentService => CommonPaymentService}
+import com.gu.memsub.services.{PromoService, SalesforceContactServiceUsingZuoraRest}
+import com.gu.memsub.subsv2.ReaderType.{Direct, Gift}
 import com.gu.memsub.subsv2.SubscriptionPlan.WeeklyPlan
-import com.gu.memsub.subsv2.{Catalog, Subscription}
+import com.gu.memsub.subsv2.{Catalog, ReaderType, Subscription}
 import com.gu.memsub.{BillingPeriod, NormalisedTelephoneNumber, Product}
 import com.gu.monitoring.SafeLogger
 import com.gu.monitoring.SafeLogger._
@@ -121,17 +122,22 @@ class CheckoutService(
     val idMinimalUser = authenticatedUserOpt.map(_.user)
 
     val telephoneNumber = subscriptionData.productData match {
-      case Left(paperData) => NormalisedTelephoneNumber.fromStringAndCountry(personalData.telephoneNumber, paperData.deliveryAddress.country orElse personalData.address.country)
+      case Left(paperData) => NormalisedTelephoneNumber.fromStringAndCountry(personalData.telephoneNumber, personalData.address.country orElse paperData.deliveryRecipient.address.country)
       case _ => NormalisedTelephoneNumber.fromStringAndCountry(personalData.telephoneNumber, personalData.address.country)
+    }
+
+    val readerType: ReaderType = subscriptionData.productData match {
+      case Left(paperData) if paperData.deliveryRecipient.isGiftee => Gift
+      case _ => Direct  // No gifting support for Digital Pack yet
     }
 
     val soldToContact = subscriptionData.productData match {
       case Left(paperData) => Some(SoldToContact(
-        name = personalData, // TODO once we have gifting change this to the Giftee's name
-        address = paperData.deliveryAddress,
-        email = personalData.email, // TODO once we have gifting change this to the Giftee's email address
-        phone = telephoneNumber,
-        deliveryInstructions = paperData.sanitizedDeliveryInstructions
+        name = if (readerType == Gift) paperData.deliveryRecipient else personalData,
+        address = paperData.deliveryRecipient.address,
+        email = if (readerType == Gift) paperData.deliveryRecipient.email else Some(personalData.email),
+        deliveryInstructions = paperData.sanitizedDeliveryInstructions,
+        phone = if (readerType == Direct) telephoneNumber else None
       ))
       case _ => None
     }
@@ -144,16 +150,14 @@ class CheckoutService(
       userExists <- EitherT(identityService.doesUserExist(personalData.email).map(\/.right[FatalErrors, Boolean]))
       _ <- Monad[SubNel].whenM(userExists && authenticatedUserOpt.isEmpty)(emailError)
       //update salesforce contact
-      contactId <- EitherT(createOrUpdateUserInSalesforce(subscriptionData, idMinimalUser))
-      //Combine ID + SF ids
-      combinedIds = PurchaserIdentifiers(contactId, idMinimalUser)
+      combinedIds <- EitherT(createOrUpdateBuyerAndRecipientInSalesforce(subscriptionData, idMinimalUser))
       //Prepare payment
       payment <- EitherT(createPaymentType(combinedIds, subscriptionData))
       paymentDelay = CheckoutService.paymentDelay(subscriptionData.productData, zuoraProperties)
       paymentMethod <- EitherT(attachPaymentMethodToStripeCustomer(payment, combinedIds))
       //prepare a sub to send to zuora
       fulfilmentDelay = CheckoutService.fulfilmentDelay(subscriptionData.productData)
-      initialSubscribe = createSubscribeRequest(personalData, soldToContact, requestData, plan, combinedIds, paymentMethod, payment.makeAccount, Some(fulfilmentDelay), Some(paymentDelay), telephoneNumber)
+      initialSubscribe = createSubscribeRequest(personalData, soldToContact, requestData, plan, combinedIds, paymentMethod, payment.makeAccount, Some(fulfilmentDelay), Some(paymentDelay), telephoneNumber, readerType)
       withTrial <- EitherT(processSixWeekIntroductoryPeriod(fulfilmentDelay, initialSubscribe).map(\/.right[FatalErrors, Subscribe]))
       //handle promotion
       validPromotion = promoCode.flatMap {
@@ -167,20 +171,18 @@ class CheckoutService(
         }.getOrElse(withTrial)
       }.map(\/.right[FatalErrors, Subscribe]))
       result <- EitherT(createSubscription(withPromo, combinedIds))
-      out <- postSubscribeSteps(authenticatedUserOpt, contactId, result, subscriptionData, validPromotion)
-    } yield CheckoutSuccess(contactId, out._1, result, validPromotion, out._2)).run
+      out <- postSubscribeSteps(authenticatedUserOpt, combinedIds, result, subscriptionData, validPromotion)
+    } yield CheckoutSuccess(combinedIds.buyerContactId, out._1, result, validPromotion, out._2)).run
   }
 
   def postSubscribeSteps(user: Option[AuthenticatedIdUser],
-                         contactId: ContactId,
+                         purchaserIds: PurchaserIdentifiers,
                          result: SubscribeResult,
                          subscriptionData: SubscribeRequest,
                          promotion: Option[ValidPromotion[NewUsers]]): SubNel[PostSubscribeResult] = {
 
-    val purchaserIds = PurchaserIdentifiers(contactId, user.map(_.user))
-
     val res = for {
-      id <- storeIdentityDetails(subscriptionData, user, contactId, result).run
+      id <- storeIdentityDetails(subscriptionData, user, purchaserIds.buyerContactId, result).run
       _ <- sendConsentEmail(subscriptionData)
       email <- sendETDataExtensionRow(result, subscriptionData, gracePeriod(promotion), purchaserIds, promotion)
     } yield (id.toOption.map(_.userData), id.swap.toOption.toSeq.flatMap(_.list.toList) ++ email.swap.toOption.toSeq.flatMap(_.list.toList))
@@ -207,28 +209,29 @@ class CheckoutService(
   private def storeIdentityDetails(
       subscribeRequest: SubscribeRequest,
       authenticatedUserOpt: Option[AuthenticatedIdUser],
-      memberId: ContactId,
+      buyerContactId: ContactId,
       result: SubscribeResult): EitherT[Future, NonEmptyList[SubsError], IdentitySuccess] = {
 
     val personalData = subscribeRequest.genericData.personalData
-    val deliveryAddress = subscribeRequest.productData.left.toOption.map(_.deliveryAddress)
 
+    // Set correspondence to delivery address iff recipient is not a giftee
+    val correspondenceAddress = subscribeRequest.productData.left.toOption.map(_.deliveryRecipient).filterNot(_.isGiftee).map(_.address)
 
     def addErrContext(context: String)(errSeq: NonEmptyList[SubsError]): NonEmptyList[SubsError] =
       errSeq.<::(CheckoutIdentityFailure(
         s"$context user ${authenticatedUserOpt.map(_.user.id)} could not become subscriber",
-        Some(s"SF Account ID = ${memberId.salesforceAccountId}, SF Contact ID = ${memberId.salesforceContactId}")
+        Some(s"SF Account ID = ${buyerContactId.salesforceAccountId}, SF Contact ID = ${buyerContactId.salesforceContactId}")
       ))
 
     authenticatedUserOpt match {
       case Some(authenticatedIdUser) =>
-        EitherT(identityService.updateUserDetails(personalData, deliveryAddress)(authenticatedIdUser)).leftMap(addErrContext("Authenticated"))
+        EitherT(identityService.updateUserDetails(personalData, correspondenceAddress)(authenticatedIdUser)).leftMap(addErrContext("Authenticated"))
       case None =>
         logger.info(s"User does not have an Identity account. Creating a guest account")
-        EitherT(identityService.registerGuest(personalData, deliveryAddress)).leftMap(addErrContext("Guest")).map { identitySuccess =>
+        EitherT(identityService.registerGuest(personalData, correspondenceAddress)).leftMap(addErrContext("Guest")).map { identitySuccess =>
           val id = identitySuccess.userData.id.id
-          EitherT(salesforceService.repo.updateIdentityId(memberId, id)).swap.map(err =>
-            SafeLogger.error(scrub"Error updating salesforce contact ${memberId.salesforceContactId} with identity id $id: ${err.getMessage}")
+          EitherT(salesforceService.repo.updateIdentityId(buyerContactId, id)).swap.map(err =>
+            SafeLogger.error(scrub"Error updating salesforce contact ${buyerContactId.salesforceContactId} with identity id $id: ${err.getMessage}")
           )
           EitherT(zuoraRestService.updateAccountIdentityId(AccountId(result.accountId), id)).swap.map(err =>
             SafeLogger.error(scrub"Error updating Zuora account ${result.accountId} with identity id $id: $err")
@@ -256,15 +259,15 @@ class CheckoutService(
         s"ExactTarget failed to send welcome email to subscriber $purchaserIds: ${e.getMessage}")))
     }
 
-  private def createOrUpdateUserInSalesforce(subscribeRequest: SubscribeRequest, userData: Option[IdMinimalUser]): Future[NonEmptyList[SubsError] \/ ContactId] = {
+  private def createOrUpdateBuyerAndRecipientInSalesforce(subscribeRequest: SubscribeRequest, userData: Option[IdMinimalUser]): Future[NonEmptyList[SubsError] \/ PurchaserIdentifiers] = {
     (for {
-      memberId <- salesforceService.createOrUpdateUser(
+      response <- salesforceService.createOrUpdateBuyerAndRecipient(
         subscribeRequest.genericData.personalData,
         subscribeRequest.productData.left.toOption,
         userData
       )
     } yield {
-      \/.right(memberId)
+      \/.right(response)
     }).recover {
       case e => {
         val message = s"${userData} could not subscribe during checkout because his details could not be updated in Salesforce"
@@ -300,13 +303,13 @@ class CheckoutService(
       acc: Account,
       fufilmentDelay: Option[Days],
       paymentDelay: Option[Days],
-      telephoneNumber: Option[NormalisedTelephoneNumber]
-                                    ): Subscribe = {
+      telephoneNumber: Option[NormalisedTelephoneNumber],
+      readerType: ReaderType
+  ): Subscribe = {
 
     val acquisitionDate = now
     val fulfilmentDate = fufilmentDelay.map(delay => now.plusDays(delay.getDays)).getOrElse(acquisitionDate)
     val firstPaymentDate = paymentDelay.map(delay => now.plusDays(delay.getDays)).getOrElse(fulfilmentDate)
-
     Subscribe(
       account = acc,
       paymentMethod = Some(paymentMethod),
@@ -319,7 +322,8 @@ class CheckoutService(
       contractAcceptance = firstPaymentDate,
       supplierCode = requestData.supplierCode,
       ipCountry = requestData.ipCountry,
-      phone = telephoneNumber
+      phone = telephoneNumber,
+      readerType = readerType
     )
   }
 
@@ -369,9 +373,9 @@ class CheckoutService(
       context: Context
     ): Future[\/[String, Any]] = {
 
-    def getPayment(contact: Contact, billto: Queries.Contact): PaymentService#AccountAndPayment = {
-      val idMinimalUser = IdMinimalUser(contact.identityId, None)
-      val purchaserIds = PurchaserIdentifiers(contact, Some(idMinimalUser))
+    def getPayment(buyerContact: Contact, billto: Queries.Contact): PaymentService#AccountAndPayment = {
+      val idMinimalUser = buyerContact.identityId.map(IdMinimalUser(_, None))
+      val purchaserIds = PurchaserIdentifiers(buyerContact, buyerContact, idMinimalUser)
       renewal.paymentData match {
         case cd: CreditCardData => paymentService.makeZuoraAccountWithCreditCard(cd, subscription.currency, purchaserIds, billto.country)
         case dd: DirectDebitData => paymentService.makeZuoraAccountWithDirectDebit(dd, billto.firstName, billto.lastName, purchaserIds)
@@ -445,7 +449,7 @@ class CheckoutService(
       subscriptionDetails.withContextLogging(s"Subscription price:")
     }
 
-    case class ContactInfo(billto: ZuoraContact, soldto: ZuoraContact, salesforceContact: Contact)
+    case class ContactInfo(billto: ZuoraContact, soldto: ZuoraContact, buyerContact: Contact)
 
     def executeRenewal(contactInfo: ContactInfo, promotion: Option[ValidPromotion[com.gu.memsub.promo.Renewal]]): Future[\/[String, AmendResult]] = {
       val subscriptionPrice = getSubscriptionPrice(promotion)
@@ -453,7 +457,7 @@ class CheckoutService(
         Future.successful(-\/(s"Client and server side prices divergent, we showed ${renewal.displayedPrice} and wanted to charge $subscriptionPrice from ${subscription.name} (${renewal.promoCode})"))
       }
       else {
-        val payment = getPayment(contactInfo.salesforceContact, contactInfo.billto)
+        val payment = getPayment(contactInfo.buyerContact, contactInfo.billto)
         val account = payment.makeAccount
         for {
           paymentMethod <- payment.makePaymentMethod
@@ -462,7 +466,7 @@ class CheckoutService(
           renewCommand <- constructRenewCommand(promotion)
           _ <- ensureEmail(contactInfo.billto, subscription)
           amendResult <- zuoraService.renewSubscription(renewCommand)
-          _ <- exactTargetService.enqueueRenewalEmail(subscription, renewal, subscriptionPrice, contactInfo.salesforceContact, newTermStartDate)
+          _ <- exactTargetService.enqueueRenewalEmail(subscription, renewal, subscriptionPrice, contactInfo.buyerContact, newTermStartDate)
         }
           yield {
             \/-(amendResult)
@@ -474,7 +478,7 @@ class CheckoutService(
       account <- zuoraService.getAccount(subscription.accountId).withContextLogging("zuoraAccount", _.id)
       billto <- zuoraService.getContact(account.billToId).withContextLogging("zuora bill to", _.id)
       soldto <- zuoraService.getContact(account.soldToId).withContextLogging("zuora sold to", _.id)
-      contact <- GetSalesforceContactForSub.sfContactForZuoraAccount(account)(zuoraService, salesforceService.repo, implicitly).withContextLogging("sfContact", _.salesforceContactId)
+      contact <- SalesforceContactServiceUsingZuoraRest.getBuyerContactForSubscription(subscription)(zuoraRestService, salesforceService.repo, implicitly).withContextLogging("sfContact", _.salesforceContactId)
     }
       yield (ContactInfo(billto, soldto, contact))
 

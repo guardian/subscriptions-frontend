@@ -4,13 +4,13 @@ import com.gu.memsub.Product.Delivery
 import com.gu.memsub._
 import com.gu.memsub.Subscription.ProductRatePlanId
 import com.gu.memsub.subsv2.{CatalogPlan, PaperCharges}
-import model.{PaperData, PersonalData}
+import model.{DeliveryRecipient, PaperData, PersonalData}
 import org.specs2.mutable.Specification
 import com.gu.salesforce.ContactDeserializer.Keys._
-import org.joda.time.LocalDate
+import com.gu.salesforce.Contact
+import org.joda.time.{DateTime, LocalDate}
 import scalaz.syntax.std.option._
 import play.api.libs.json.{JsString, Json}
-
 import scalaz.syntax.std.option._
 
 class SalesforceServiceTest extends Specification {
@@ -31,7 +31,7 @@ class SalesforceServiceTest extends Specification {
     val data = PersonalData("Joe", "Bloggs", "joebloggs@example,com", receiveGnmMarketing = true, bloggsResidence, Some("1234"), Title.Prof.some)
 
     "Serialise your good old fashioned basic fields" in {
-      SalesforceService.createSalesforceUserData(personalData = data, None) mustEqual Json.obj(
+      SalesforceService.getJSONForBuyerContact(personalData = data, None) mustEqual Json.obj(
         EMAIL -> data.email,
         TITLE -> data.title.map(_.title),
         FIRST_NAME -> data.first,
@@ -46,14 +46,38 @@ class SalesforceServiceTest extends Specification {
     }
 
     "Include your mailing address if you supply one" in {
-      val delivery = Address("Flat 456", "123 Delivery Grove", "Deliverytown", "Surrey", "DL1 ABC", "UK")
-      val salesforceInfo = SalesforceService.createSalesforceUserData(data, PaperData(LocalDate.now(), delivery, "Papers please".some, plan).some)
-      (salesforceInfo \ MAILING_STREET).get mustEqual JsString(delivery.line)
-      (salesforceInfo \ MAILING_CITY).get mustEqual JsString(delivery.town)
-      (salesforceInfo \ MAILING_POSTCODE).get mustEqual JsString(delivery.postCode)
-      (salesforceInfo \ MAILING_COUNTRY).get mustEqual JsString(delivery.countryName)
-      (salesforceInfo \ MAILING_STATE).get mustEqual JsString(delivery.countyOrState)
+      val delivery = DeliveryRecipient(None, None, None, None, Address("Flat 456", "123 Delivery Grove", "Deliverytown", "Surrey", "DL1 ABC", "UK"))
+      val salesforceInfo = SalesforceService.getJSONForBuyerContact(data, PaperData(LocalDate.now(), delivery, "Papers please".some, plan).some)
+      (salesforceInfo \ MAILING_STREET).get mustEqual JsString(delivery.address.line)
+      (salesforceInfo \ MAILING_CITY).get mustEqual JsString(delivery.address.town)
+      (salesforceInfo \ MAILING_POSTCODE).get mustEqual JsString(delivery.address.postCode)
+      (salesforceInfo \ MAILING_COUNTRY).get mustEqual JsString(delivery.address.countryName)
+      (salesforceInfo \ MAILING_STATE).get mustEqual JsString(delivery.address.countyOrState)
       (salesforceInfo \ DELIVERY_INSTRUCTIONS).get mustEqual JsString("Papers please")
+    }
+
+    "Include your giftee address if you supply one" in {
+      val buyerContact = Contact(
+        None, None, None, None, "Buyer's Lastname", DateTime.now,
+        "buyer_sfContactId", "buyer_sfAccountId", None, None, None, None, None, None
+      )
+      val delivery = DeliveryRecipient(
+        Some(Title.Mx), Some("firstname"), Some("lastname"), Some("email@email.com"),
+        Address("Flat 456", "123 Delivery Grove", "Deliverytown", "Surrey", "DL1 ABC", "UK")
+      )
+      val salesforceInfo = SalesforceService.getJSONForRecipientContact(buyerContact, delivery, "recordTypeId_1")
+      (salesforceInfo \ ACCOUNT_ID).get mustEqual JsString(buyerContact.salesforceAccountId)
+      (salesforceInfo \ RECORD_TYPE_ID).get mustEqual JsString("recordTypeId_1")
+      (salesforceInfo \ EMAIL).get mustEqual JsString(delivery.email.mkString)
+      (salesforceInfo \ TITLE).get mustEqual JsString(delivery.title.map(_.title).mkString)
+      (salesforceInfo \ FIRST_NAME).get mustEqual JsString(delivery.first)
+      (salesforceInfo \ LAST_NAME).get mustEqual JsString(delivery.last)
+      (salesforceInfo \ MAILING_STREET).get mustEqual JsString(delivery.address.line)
+      (salesforceInfo \ MAILING_CITY).get mustEqual JsString(delivery.address.town)
+      (salesforceInfo \ MAILING_POSTCODE).get mustEqual JsString(delivery.address.postCode)
+      (salesforceInfo \ MAILING_COUNTRY).get mustEqual JsString(delivery.address.countryName)
+      (salesforceInfo \ MAILING_STATE).get mustEqual JsString(delivery.address.countyOrState)
+      // (salesforceInfo \ DELIVERY_INSTRUCTIONS).get mustEqual JsString("Papers please") -- not applicable for GW gifting
     }
   }
 }

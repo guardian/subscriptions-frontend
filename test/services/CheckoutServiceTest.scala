@@ -1,12 +1,12 @@
 package services
-import com.gu.i18n.Country
+import com.gu.i18n.{Country, Title}
 import com.gu.memsub.Benefit._
 import com.gu.memsub.Product.{Delivery, ZDigipack}
 import com.gu.memsub.Subscription.{ProductRatePlanChargeId, ProductRatePlanId, SubscriptionRatePlanChargeId}
 import com.gu.memsub._
 import com.gu.memsub.subsv2._
 import com.gu.zuora.api.InvoiceTemplate
-import model.{DigipackData, PaperData}
+import model.{DeliveryRecipient, DigipackData, PaperData}
 import org.joda.time.{Days, LocalDate}
 import org.specs2.mutable.Specification
 import touchpoint.ZuoraProperties
@@ -14,7 +14,7 @@ import touchpoint.ZuoraProperties
 class CheckoutServiceTest extends Specification {
 
   implicit val today = new LocalDate("2016-07-22") // deterministic
-  val address = Address("123 Fake St", "", "Town", "Kent", "123", "Blah")
+  val address = DeliveryRecipient(Some(Title.Mx), Some("firstname"), Some("lastname"), Some("email@email.com"), Address("123 Fake St", "", "Town", "Kent", "123", "Blah"))
   val noPricing = PricingSummary(Map.empty)
 
   val paperPlan = new CatalogPlan[Delivery, PaperCharges, Current](

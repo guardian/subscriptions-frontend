@@ -8,7 +8,7 @@ import com.gu.aws.CredentialsProvider
 import com.gu.memsub.Subscription._
 import com.gu.memsub.promo.Promotion._
 import com.gu.memsub.promo._
-import com.gu.memsub.services.{GetSalesforceContactForSub, PaymentService => CommonPaymentService}
+import com.gu.memsub.services.{SalesforceContactServiceUsingZuoraRest, PaymentService => CommonPaymentService}
 import com.gu.memsub.subsv2.reads.ChargeListReads._
 import com.gu.memsub.subsv2.reads.SubPlanReads._
 import com.gu.memsub.subsv2.{Subscription, SubscriptionPlan => Plan}
@@ -154,7 +154,7 @@ class ExactTargetService(
 
     for {
       row <- buildWelcomeEmailDataExtensionRow(subscribeResult, subscriptionData, gracePeriod, validPromotion, purchaserIds)
-      response <- SqsClient.sendDataExtensionToQueue(Config.welcomeEmailQueue, row, SFContactId(purchaserIds.contactId.salesforceContactId))
+      response <- SqsClient.sendDataExtensionToQueue(Config.welcomeEmailQueue, row, SFContactId(purchaserIds.buyerContactId.salesforceContactId))
     } yield {
       response match {
         case Success(sendMsgResult) => logger.info(s"Successfully enqueued ${subscribeResult.subscriptionName} welcome email for user ${purchaserIds.identityId}.")
@@ -193,8 +193,8 @@ class ExactTargetService(
     }
 
     val enqueueResult = for {
-      salesforceContact <- EitherT.right(GetSalesforceContactForSub(subscription)(zuoraService, salesforceService.repo, executionContext))
       zuoraAccount <- EitherT(zuoraRestService.getAccount(subscription.accountId))
+      salesforceContact <- EitherT.right(SalesforceContactServiceUsingZuoraRest.getBuyerContactForZuoraAccount(zuoraAccount)(salesforceService.repo, executionContext))
       row = createDataExtensionRow(salesforceContact, zuoraAccount)
       result <- EitherT(sendToQueue(salesforceContact, row))
     } yield result

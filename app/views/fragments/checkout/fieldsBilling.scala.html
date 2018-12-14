@@ -12,7 +12,7 @@
   <div class="js-checkout-use-delivery">
     <label class="option">
       <span class="option__input">
-        <input type="checkbox" class="js-input js-checkout-delivery-sames-as-billing" @billingAddress.forall(_.isEmpty).fold("checked", "")>
+        <input type="checkbox" class="js-input js-checkout-delivery-same-as-billing" @billingAddress.forall(_.isEmpty).fold("checked", "")>
       </span>
       <span class="option__label">
         Bill my delivery address

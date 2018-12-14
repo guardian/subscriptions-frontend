@@ -3,7 +3,15 @@ package model
 import com.gu.identity.play.IdMinimalUser
 import com.gu.salesforce.ContactId
 
-case class PurchaserIdentifiers(contactId: ContactId, identityId: Option[IdMinimalUser]) {
-  val description = (Seq(s"SalesforceContactID - ${contactId.salesforceContactId}") ++ identityId.map(id => s"IdentityID - $id")).mkString(" ")
+case class PurchaserIdentifiers(buyerContactId: ContactId, recipientContactId: ContactId, identityId: Option[IdMinimalUser]) {
+  val description = s"""
+      |Salesforce data: Account: ${buyerContactId.salesforceAccountId},
+      |Buyer Contact: ${buyerContactId.salesforceContactId},
+      |Recipient Contact: ${recipientContactId.salesforceContactId},
+      |Identity ID: ${identityId.map(_.id).mkString},
+      |Is gift? ${isGift}
+    """.stripMargin.trim
+  val isGift = buyerContactId.salesforceAccountId == recipientContactId.salesforceAccountId &&
+    buyerContactId.salesforceContactId != recipientContactId.salesforceContactId
   override def toString: String = description
 }

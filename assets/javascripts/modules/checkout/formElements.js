@@ -9,6 +9,10 @@ define(['$'], function ($) {
     var addressFields = function(relativeTo) {
         var $CONTAINER = $(relativeTo);
         var container = $CONTAINER[0];
+        var $TITLE_CONTAINER = $('.js-checkout-gift-title', container);
+        var $FIRST_NAME_CONTAINER = $('.js-checkout-gift-first-name', container);
+        var $LAST_NAME_CONTAINER = $('.js-checkout-gift-last-name', container);
+        var $EMAIL_CONTAINER = $('.js-checkout-gift-email', container);
         var $ADDRESS1_CONTAINER = $('.js-checkout-house', container);
         var $ADDRESS2_CONTAINER = $('.js-checkout-street', container);
         var $TOWN_CONTAINER = $('.js-checkout-town', container);
@@ -20,6 +24,10 @@ define(['$'], function ($) {
 
         return {
             $CONTAINER: $CONTAINER,
+            $TITLE_CONTAINER: $TITLE_CONTAINER,
+            $FIRST_NAME_CONTAINER: $FIRST_NAME_CONTAINER,
+            $LAST_NAME_CONTAINER: $LAST_NAME_CONTAINER,
+            $EMAIL_CONTAINER: $EMAIL_CONTAINER,
             $ADDRESS1_CONTAINER: $ADDRESS1_CONTAINER,
             $ADDRESS2_CONTAINER: $ADDRESS2_CONTAINER,
             $TOWN_CONTAINER: $TOWN_CONTAINER,
@@ -29,6 +37,10 @@ define(['$'], function ($) {
             $ADDRESS_FINDER: $ADDRESS_FINDER,
             $ADDRESS_CHOOSER: $ADDRESS_CHOOSER,
 
+            $TITLE: $('.js-input', $TITLE_CONTAINER[0]),
+            $FIRST_NAME: $('.js-input', $FIRST_NAME_CONTAINER[0]),
+            $LAST_NAME: $('.js-input', $LAST_NAME_CONTAINER[0]),
+            $EMAIL: $('.js-input', $EMAIL_CONTAINER[0]),
             $ADDRESS1: $('.js-input', $ADDRESS1_CONTAINER[0]),
             $ADDRESS2: $('.js-input', $ADDRESS2_CONTAINER[0]),
             $TOWN: $('.js-input', $TOWN_CONTAINER[0]),
@@ -53,7 +65,7 @@ define(['$'], function ($) {
         $SIGN_IN_LINK: $('.js-sign-in-link'),
 
         BILLING: addressFields('.js-billing-address'),
-        DELIVERY: addressFields('.js-checkout-delivery'),
+        DELIVERY: addressFields('.js-fieldset-delivery-details'),
 
         $TITLE: $('.js-checkout-title .js-input'),
         $FIRST_NAME: $('.js-checkout-first .js-input'),

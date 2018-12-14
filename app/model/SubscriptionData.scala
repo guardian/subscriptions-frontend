@@ -43,6 +43,7 @@ case class PersonalData(first: String,
                         telephoneNumber: Option[String] = None,
                         title: Option[Title] = None
                         ) extends FullName {
+
   def fullName = s"$first $last"
 
   private lazy val countryGroup = CountryGroup.byCountryNameOrCode(address.country.fold(UK.alpha2)(c => c.alpha2))
@@ -64,7 +65,7 @@ case class DigipackData(
 
 case class PaperData(
   startDate: LocalDate,
-  deliveryAddress: Address,
+  deliveryRecipient: DeliveryRecipient,
   deliveryInstructions: Option[String],
   plan: CatalogPlan.Paper
 ) {
@@ -81,8 +82,8 @@ object PersonalData {
 
     val personalData = PersonalData(
       title = u.privateFields.flatMap(_.title).flatMap(Title.fromString),
-      first = u.privateFields.flatMap(_.firstName).getOrElse(""),
-      last = u.privateFields.flatMap(_.secondName).getOrElse(""),
+      first = u.privateFields.flatMap(_.firstName).mkString,
+      last = u.privateFields.flatMap(_.secondName).mkString,
       email = u.primaryEmailAddress,
       receiveGnmMarketing = u.statusFields.flatMap(_.receiveGnmMarketing).getOrElse(false),
       address = u.billingAddress,
@@ -95,4 +96,10 @@ object PersonalData {
 
 case class SubscribeRequest(genericData: SubscriptionData, productData: Either[PaperData, DigipackData]) {
   def productRatePlanId = productData.fold(_.plan.id, _.plan.id)
+}
+
+case class DeliveryRecipient(title: Option[Title], firstName: Option[String], lastName: Option[String], email: Option[String], address: Address) extends FullName {
+  val first = firstName.mkString
+  val last = lastName.mkString
+  val isGiftee = (Seq() ++ title.map(_.title) ++ firstName ++ lastName ++ email).exists(_.trim.nonEmpty)
 }
