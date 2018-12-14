@@ -79,10 +79,10 @@ case class Checkout(testUser: TestUser, endpoint: String = "checkout") extends P
   }
 
   private object DeliveryAddress {
-    val address1 = id("delivery-address1")
-    val address2 = id("delivery-address2")
-    val town = id("delivery-town")
-    val postcode = id("delivery-postcode")
+    val address1 = id("delivery-address-address1")
+    val address2 = id("delivery-address-address2")
+    val town = id("delivery-address-town")
+    val postcode = id("delivery-address-postcode")
     val deliveryInstructions = name("deliveryInstructions")
     val continueButton = cssSelector(".js-checkout-delivery-details-submit")
 
