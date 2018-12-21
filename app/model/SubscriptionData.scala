@@ -99,7 +99,9 @@ case class SubscribeRequest(genericData: SubscriptionData, productData: Either[P
 }
 
 case class DeliveryRecipient(title: Option[Title], firstName: Option[String], lastName: Option[String], email: Option[String], address: Address) extends FullName {
-  val first = firstName.mkString
-  val last = lastName.mkString
-  val isGiftee = (Seq() ++ title.map(_.title) ++ firstName ++ lastName ++ email).exists(_.trim.nonEmpty)
+  val first: String = firstName.mkString
+  val last: String = lastName.mkString
+  val isGiftee: Boolean = (Seq() ++ title.map(_.title) ++ firstName ++ lastName ++ email).exists(_.trim.nonEmpty) // TODO make this a field of the case class
+  val gifteeAddress: Option[Address] = if (isGiftee) Some(address) else None
+  val buyersMailingAddress: Option[Address] = if (!isGiftee) Some(address) else None
 }

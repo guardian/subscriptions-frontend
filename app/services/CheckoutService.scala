@@ -121,23 +121,27 @@ class CheckoutService(
 
     val idMinimalUser = authenticatedUserOpt.map(_.user)
 
-    val telephoneNumber = subscriptionData.productData match {
-      case Left(paperData) => NormalisedTelephoneNumber.fromStringAndCountry(personalData.telephoneNumber, personalData.address.country orElse paperData.deliveryRecipient.address.country)
-      case _ => NormalisedTelephoneNumber.fromStringAndCountry(personalData.telephoneNumber, personalData.address.country)
-    }
+    val telephoneNumber = NormalisedTelephoneNumber.fromStringAndCountry(personalData.telephoneNumber, personalData.address.country)
 
     val readerType: ReaderType = subscriptionData.productData match {
       case Left(paperData) if paperData.deliveryRecipient.isGiftee => Gift
       case _ => Direct  // No gifting support for Digital Pack yet
     }
 
-    val soldToContact = subscriptionData.productData match {
-      case Left(paperData) => Some(SoldToContact(
-        name = if (readerType == Gift) paperData.deliveryRecipient else personalData,
+    val soldToContact = (subscriptionData.productData, readerType) match {
+      case (Left(paperData), Gift) => Some(SoldToContact(
+        name = paperData.deliveryRecipient,
         address = paperData.deliveryRecipient.address,
-        email = if (readerType == Gift) paperData.deliveryRecipient.email else Some(personalData.email),
+        email = paperData.deliveryRecipient.email,
         deliveryInstructions = paperData.sanitizedDeliveryInstructions,
-        phone = if (readerType == Direct) telephoneNumber else None
+        phone = None
+      ))
+      case (Left(paperData), Direct) => Some(SoldToContact(
+        name = personalData,
+        address = paperData.deliveryRecipient.address,
+        email = Some(personalData.email),
+        deliveryInstructions = paperData.sanitizedDeliveryInstructions,
+        phone = telephoneNumber
       ))
       case _ => None
     }
@@ -214,8 +218,8 @@ class CheckoutService(
 
     val personalData = subscribeRequest.genericData.personalData
 
-    // Set correspondence to delivery address iff recipient is not a giftee
-    val correspondenceAddress = subscribeRequest.productData.left.toOption.map(_.deliveryRecipient).filterNot(_.isGiftee).map(_.address)
+    // Set correspondence address to the buyer's mailing address if they have provided that data
+    val correspondenceAddress = subscribeRequest.productData.left.toOption.flatMap(_.deliveryRecipient.buyersMailingAddress)
 
     def addErrContext(context: String)(errSeq: NonEmptyList[SubsError]): NonEmptyList[SubsError] =
       errSeq.<::(CheckoutIdentityFailure(
