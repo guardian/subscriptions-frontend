@@ -4,9 +4,7 @@ import _root_.services.AuthenticationService._
 import _root_.services.TouchpointBackends.Resolution
 import _root_.services.{LookupSubscriptionFulfilment, TouchpointBackend, TouchpointBackends}
 import actions.CommonActions
-import com.gu.i18n.Country.{UK, US}
-import com.gu.i18n.Currency
-import com.gu.i18n.Currency.{GBP, USD}
+import com.gu.i18n.{CountryGroup, Currency}
 import com.gu.memsub.Subscription.{Name, ProductRatePlanId}
 import com.gu.memsub.promo.{NormalisedPromoCode, PromoCode}
 import com.gu.memsub.subsv2.SubscriptionPlan._
@@ -217,15 +215,9 @@ class ManageWeekly(implicit val executionContext: ExecutionContext) extends Cont
     def getRenewalPlans(account: ZuoraRestService.AccountSummary, currency: Currency): Future[\/[NonEmptyList[String], List[WeeklyPlanInfo]]] = {
       EitherT(tpBackend.catalogService.catalog).flatMap { catalog =>
 
-        // Identifies customers who have been wrongly migrated in on a price-adjusted Zone B or C rate plan and are
-        // having the paper delivered to the UK or USA, and pay by GBP or USD respectively. These customers should
-        // be offered Zone A rate plans upon renewal.
-        def shouldBeInZoneA = account.soldToContact.country.exists { soldToCountry =>
-          (soldToCountry == UK && currency == GBP) || (soldToCountry == US && currency == USD)
-        }
-
-        val weeklyPlans = if (shouldBeInZoneA) catalog.weekly.zoneA.plans else catalog.weekly.zoneB.plans
-
+        // Only the currency and delivery address country are  used to determine the rate plan
+        val shouldBeDomestic = account.soldToContact.country.flatMap(c => CountryGroup.byCountryCode(c.alpha2)).filterNot(_ == CountryGroup.RestOfTheWorld).map(_.currency).contains(currency)
+        val weeklyPlans = if (shouldBeDomestic) catalog.weekly.domestic.plans else catalog.weekly.restOfWorld.plans
         val renewalPlans = weeklyPlans.filter(_.availableForRenewal)
 
         val renewalPlansInfo: \/[NonEmptyList[String], List[WeeklyPlanInfo]] = sequence(renewalPlans.map { plan =>
