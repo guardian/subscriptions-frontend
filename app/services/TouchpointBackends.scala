@@ -77,7 +77,7 @@ class TouchpointBackends(actorSystem: ActorSystem, wsClient: WSClient, execution
       lazy val environmentName: String = config.environmentName
       lazy val salesforceService = new SalesforceServiceImp(sfSimpleContactRepo)
       val catalogRestClient: SimpleClient[Future] = new rest.SimpleClient[Future](config.zuoraRest, configurableFutureRunner(60.seconds))
-      lazy val catalogService = new subsv2.services.CatalogService[Future](newProductIds, FetchCatalog.fromS3(environmentName), Await.result(_, 10.seconds), backendType.name)
+      lazy val catalogService = new subsv2.services.CatalogService[Future](newProductIds, FetchCatalog.fromZuoraApi(catalogRestClient), Await.result(_, 10.seconds), backendType.name)
       private val slightlyUnsafeCatalog: Future[Catalog] = catalogService.catalog.map(_.valueOr(e => throw new IllegalStateException(s"$e while getting catalog")))
         .recover { case e => throw new IllegalStateException(s"$e while getting catalog") }
       lazy val zuoraService = new zuora.ZuoraSoapService(soapClient)
