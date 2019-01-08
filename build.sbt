@@ -40,6 +40,7 @@ scalaVersion := "2.12.6"
 scalacOptions ++= Seq("-feature")
 
 val scalatestVersion = "3.0.4"
+val jacksonVersion = "2.9.8"
 
 libraryDependencies ++= Seq(
     cache,
@@ -72,8 +73,8 @@ libraryDependencies ++= Seq(
     "net.logstash.logback" % "logstash-logback-encoder" % "4.11",
     "com.fasterxml.jackson.dataformat" % "jackson-dataformat-cbor" % "2.9.2",
     "com.google.guava" % "guava" % "25.0-jre", //-- added explicitly - snyk report avoid logback vulnerability
-    "com.fasterxml.jackson.core" % "jackson-databind" % "2.9.7", //added explicitly to avoid snyk vulnerability
-    "com.fasterxml.jackson.core" % "jackson-annotations" % "2.9.7", //added explicitly to avoid snyk vulnerability
+    "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion, //added explicitly to avoid snyk vulnerability
+    "com.fasterxml.jackson.core" % "jackson-annotations" % jacksonVersion, //added explicitly to avoid snyk vulnerability
     "ch.qos.logback" % "logback-classic" % "1.2.3", //-- added explicitly - snyk report avoid logback vulnerability
     "org.scala-lang" % "scala-compiler" % "2.11.12",
     "org.bouncycastle" % "bcprov-jdk15on" % "1.60" // https://snyk.io/vuln/SNYK-JAVA-ORGBOUNCYCASTLE-32412
