@@ -15,8 +15,13 @@
 
 @manageBaseUrl = {@Config.manageUrl}
 
+
 <div class="js-payment-update" data-sub-id="@{subscription.name.get}" @for(email <- maybeEmail) {data-email="@email"} data-phone="@product.phone(contactUsCountry)" data-product="@product.name">
-    <a href="@manageBaseUrl/@managePaymentPath">
-        <button class="button button--primary button--large">View or update your payment details</button>
-    </a>
+    @if(maybeEmail.isDefined) {
+        <a href="@manageBaseUrl/@managePaymentPath">
+            <button class="button button--primary button--large">View or update your payment details</button>
+        </a>
+    } else {
+        <p>To update your payment details, please contact the call centre. @product.phone(contactUsCountry)</p>
+    }
 </div>
