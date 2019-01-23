@@ -27,7 +27,7 @@ depending on your system.
 
 1. Get Janus credentials
 1. Go to project root
-1. Install [nvm](https://github.com/creationix/nvm#install-script)
+1. Install [nvm](https://github.com/creationix/nvm#install-script), then run `nvm use`.
 1. Run `./setup.sh` to install project-specific client-side dependencies.
 1. Add the following to your hosts file in `/etc/hosts`
 

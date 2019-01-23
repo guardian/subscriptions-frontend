@@ -2,6 +2,21 @@
 @import com.gu.memsub.Product
 @import com.gu.memsub.subsv2.{Subscription, SubscriptionPlan}
 @import views.support.PlanOps._
+@import configuration.Config
 
 @(subscription:Subscription[SubscriptionPlan.ContentSubscription], maybeEmail: Option[String], product: Product, contactUsCountry: Option[Country])
-<div class="js-payment-update" data-sub-id="@{subscription.name.get}" @for(email <- maybeEmail) {data-email="@email"} data-phone="@product.phone(contactUsCountry)" data-product="@product.name"></div>
+
+@managePaymentPath = {@product match {
+    case _: Product.ZDigipack => {payment/digitalpack}
+    case _: Product.Weekly => {payment/guardianweekly}
+    case _: Product.Paper => {payment/paper}
+    case _ => {}
+}}
+
+@manageBaseUrl = {@Config.manageUrl}
+
+<div class="js-payment-update" data-sub-id="@{subscription.name.get}" @for(email <- maybeEmail) {data-email="@email"} data-phone="@product.phone(contactUsCountry)" data-product="@product.name">
+    <a href="@manageBaseUrl/@managePaymentPath">
+        <button class="button button--primary button--large">View or update your payment details</button>
+    </a>
+</div>

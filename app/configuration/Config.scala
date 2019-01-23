@@ -65,6 +65,8 @@ object Config {
     val defaultDigitalPackFreeTrialPeriod = Days.days(stageConfig.getInt("zuora.paymentDelayInDays"))
   }
 
+  val manageUrl = config.getString("manage.url")
+
   val subscriptionsUrl = config.getString("subscriptions.url")
 
   val sentryDsn = Try(config.getString("sentry.dsn"))
