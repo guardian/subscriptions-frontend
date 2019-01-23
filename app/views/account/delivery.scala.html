@@ -137,12 +137,12 @@
                     </form>
                 </section>
             }
-            @if(paymentMethodIsPaymentCard) {
-                <section class="mma-section">
-                    <h3 class="mma-section__header">Update your payment method</h3>
-                    @views.html.account.fragments.paymentUpdate(subscription, maybeEmail, subscription.plans.head.product, Some(Country.UK))
-                </section>
-            }
+            
+            <section class="mma-section">
+                <h3 class="mma-section__header">Update your payment method</h3>
+                @views.html.account.fragments.paymentUpdate(subscription, maybeEmail, subscription.plans.head.product, Some(Country.UK))
+            </section>
+            
         </section>
     </main>
 }
