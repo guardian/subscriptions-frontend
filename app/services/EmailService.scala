@@ -23,8 +23,8 @@ import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
 import logging.{Context, ContextLogging}
 import model.SubscriptionOps._
-import model.email.HolidaySuspensionBillingScheduleEmail.constructSalutation
-import model.email._
+import model.HolidaySuspensionBillingScheduleEmail.constructSalutation
+import model._
 import model.{PurchaserIdentifiers, Renewal, SubscribeRequest}
 import org.joda.time.{Days, LocalDate}
 import play.api.libs.json._

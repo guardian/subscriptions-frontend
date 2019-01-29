@@ -1,4 +1,4 @@
-package model.email
+package model
 
 import java.lang.Math.min
 import java.util.UUID
@@ -11,8 +11,7 @@ import com.gu.memsub.subsv2.{Subscription, SubscriptionPlan => Plan}
 import com.gu.memsub.{Subscription => _, _}
 import com.gu.salesforce.Contact
 import com.typesafe.scalalogging.LazyLogging
-import model.email.EmailHelpers._
-import model.{PaperData, PersonalData}
+import model.EmailHelpers._
 import org.joda.time.Days.daysBetween
 import org.joda.time.{Days, LocalDate}
 import views.support.Dates.prettyDate
