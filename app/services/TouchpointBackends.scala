@@ -49,7 +49,7 @@ trait TouchpointBackend {
   def discountRatePlanIds: DiscountRatePlanIds
   def suspensionService: SuspensionService[Future]
   def subsForm: Future[SubscriptionsForm]
-  def exactTargetService: ExactTargetService
+  def emailService: EmailService
   def checkoutService: CheckoutService
   def goCardlessService: GoCardlessService
   implicit def simpleRestClient: SimpleClient[Future]
@@ -94,8 +94,8 @@ class TouchpointBackends(actorSystem: ActorSystem, wsClient: WSClient, execution
       lazy val discountRatePlanIds: DiscountRatePlanIds = Config.discountRatePlanIds(config.environmentName)
       lazy val suspensionService = new SuspensionService[Future](Config.holidayRatePlanIds(config.environmentName), simpleRestClient)
       lazy val subsForm = slightlyUnsafeCatalog.map(catalog => new forms.SubscriptionsForm(catalog))
-      lazy val exactTargetService: ExactTargetService = new ExactTargetService(this.subscriptionService, this.commonPaymentService, this.zuoraService, this.salesforceService)
-      lazy val checkoutService: CheckoutService = new CheckoutService(identityService, this.salesforceService, this.paymentService, slightlyUnsafeCatalog, this.zuoraService, new ZuoraRestService[Future], this.exactTargetService, this.zuoraProperties, this.promoService, this.discountRatePlanIds)
+      lazy val emailService: EmailService = new EmailService(this.subscriptionService, this.commonPaymentService, this.zuoraService, this.salesforceService)
+      lazy val checkoutService: CheckoutService = new CheckoutService(identityService, this.salesforceService, this.paymentService, slightlyUnsafeCatalog, this.zuoraService, new ZuoraRestService[Future], this.emailService, this.zuoraProperties, this.promoService, this.discountRatePlanIds)
       lazy val goCardlessService: GoCardlessService = new GoCardlessService(config.goCardlessToken)
     }
   }

@@ -66,7 +66,7 @@ class CheckoutService(
   catalog: Future[Catalog],
   zuoraService: ZuoraService,
   zuoraRestService: ZuoraRestService[Future],
-  exactTargetService: ExactTargetService,
+  emailService: EmailService,
   zuoraProperties: ZuoraProperties,
   promoService: PromoService,
   promoPlans: DiscountRatePlanIds
@@ -188,7 +188,7 @@ class CheckoutService(
     val res = for {
       id <- storeIdentityDetails(subscriptionData, user, purchaserIds.buyerContactId, result).run
       _ <- sendConsentEmail(subscriptionData)
-      email <- sendETDataExtensionRow(result, subscriptionData, gracePeriod(promotion), purchaserIds, promotion)
+      email <- enqueueWelcomeEmail(result, subscriptionData, gracePeriod(promotion), purchaserIds, promotion)
     } yield (id.toOption.map(_.userData), id.swap.toOption.toSeq.flatMap(_.list.toList) ++ email.swap.toOption.toSeq.flatMap(_.list.toList))
 
     EitherT(res.map(\/.right[FatalErrors, PostSubscribeResult]))
@@ -245,7 +245,7 @@ class CheckoutService(
     }
   }
 
-  private def sendETDataExtensionRow(
+  private def enqueueWelcomeEmail(
     subscribeResult: SubscribeResult,
     subscriptionData: SubscribeRequest,
     gracePeriodInDays: Days,
@@ -254,13 +254,13 @@ class CheckoutService(
   ): Future[NonEmptyList[SubsError] \/ Unit] =
 
     (for {
-      a <- exactTargetService.enqueueETWelcomeEmail(subscribeResult, subscriptionData, gracePeriodInDays, validPromotion, purchaserIds)
+      a <- emailService.enqueueWelcomeEmail(subscribeResult, subscriptionData, gracePeriodInDays, validPromotion, purchaserIds)
     } yield {
       \/.right(())
     }).recover {
-      case e: Throwable => \/.left(NonEmptyList(CheckoutExactTargetFailure(
+      case e: Throwable => \/.left(NonEmptyList(CheckoutEmailFailure(
         purchaserIds,
-        s"ExactTarget failed to send welcome email to subscriber $purchaserIds: ${e.getMessage}")))
+        s"Failed to send welcome email to subscriber $purchaserIds: ${e.getMessage}")))
     }
 
   private def createOrUpdateBuyerAndRecipientInSalesforce(subscribeRequest: SubscribeRequest, userData: Option[IdMinimalUser]): Future[NonEmptyList[SubsError] \/ PurchaserIdentifiers] = {
@@ -470,7 +470,7 @@ class CheckoutService(
           renewCommand <- constructRenewCommand(promotion)
           _ <- ensureEmail(contactInfo.billto, subscription)
           amendResult <- zuoraService.renewSubscription(renewCommand)
-          _ <- exactTargetService.enqueueRenewalEmail(subscription, renewal, subscriptionPrice, contactInfo.buyerContact, newTermStartDate)
+          _ <- emailService.enqueueRenewalEmail(subscription, renewal, subscriptionPrice, contactInfo.buyerContact, newTermStartDate)
         }
           yield {
             \/-(amendResult)
