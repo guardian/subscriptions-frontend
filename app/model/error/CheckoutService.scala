@@ -71,7 +71,7 @@ object CheckoutService {
     override val response = errorResponse
   }
 
-  case class CheckoutExactTargetFailure(
+  case class CheckoutEmailFailure(
       purchaserIds: PurchaserIdentifiers,
       msg: String,
       requestData: Option[String] = None,

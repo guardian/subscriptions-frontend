@@ -102,7 +102,7 @@ class ManageDelivery(implicit val executionContext: ExecutionContext) extends Co
       suspendableDays = Config.suspendableWeeks * sub.plan.charges.chargedDays.size
       suspendedDays = SuspensionService.holidayToSuspendedDays(pendingHolidays, sub.plan.charges.chargedDays.toList)
     } yield {
-      tpBackend.exactTargetService.enqueueETHolidaySuspensionEmail(sub, sub.plan.name, newBS, pendingHolidays.size, suspendableDays, suspendedDays).onFailure { case e: Throwable =>
+      tpBackend.emailService.enqueueHolidaySuspensionEmail(sub, sub.plan.name, newBS, pendingHolidays.size, suspendableDays, suspendedDays).onFailure { case e: Throwable =>
         error(s"Failed to generate data needed to enqueue ${sub.name.get}'s holiday suspension email. Reason: ${e.getMessage}")(sub)
       }
       Ok(views.html.account.suspensionSuccess(

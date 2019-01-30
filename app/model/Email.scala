@@ -1,4 +1,4 @@
-package model.exactTarget
+package model
 
 import java.lang.Math.min
 import java.util.UUID
@@ -11,8 +11,7 @@ import com.gu.memsub.subsv2.{Subscription, SubscriptionPlan => Plan}
 import com.gu.memsub.{Subscription => _, _}
 import com.gu.salesforce.Contact
 import com.typesafe.scalalogging.LazyLogging
-import model.exactTarget.DataExtensionRowHelpers._
-import model.{PaperData, PersonalData}
+import model.EmailHelpers._
 import org.joda.time.Days.daysBetween
 import org.joda.time.{Days, LocalDate}
 import views.support.Dates.prettyDate
@@ -22,13 +21,13 @@ import scalaz.NonEmptyList
 import scalaz.syntax.nel._
 import scalaz.syntax.std.list._
 
-trait DataExtensionRow {
+trait Email {
   def email: String
   def fields: Seq[(String, String)]
   def forExtension: DataExtension
 }
 
-object DataExtensionRowHelpers {
+object EmailHelpers {
   val dd = "Direct Debit"
   val card = "Credit/Debit Card"
   val paypal = "PayPal"
@@ -58,7 +57,7 @@ object DataExtensionRowHelpers {
   def trimPromotionDescription(p: String): String = p.substring(0, min(p.length, 255))
 }
 
-object DigipackWelcome1DataExtensionRow extends LazyLogging {
+object DigipackWelcome1Email extends LazyLogging {
 
   def apply(
              personalData: PersonalData,
@@ -68,7 +67,7 @@ object DigipackWelcome1DataExtensionRow extends LazyLogging {
              subscriptionDetails: String,
              promotionDescription: Option[String] = None,
              currency:Currency
-           ): DigipackWelcome1DataExtensionRow = {
+           ): DigipackWelcome1Email = {
 
     val paymentDelay = daysBetween(subscription.startDate, subscription.firstPaymentDate).minus(gracePeriod)
 
@@ -86,7 +85,7 @@ object DigipackWelcome1DataExtensionRow extends LazyLogging {
 
     val promotionFields = promotionDescription.map(d => "Promotion description" -> trimPromotionDescription(d))
 
-    DigipackWelcome1DataExtensionRow(
+    DigipackWelcome1Email(
       personalData.email,
       Seq(
         "ZuoraSubscriberId" -> subscription.name.get,
@@ -207,7 +206,7 @@ object PaperFieldsGenerator {
   }
 }
 
-object PaperHomeDeliveryWelcome1DataExtensionRow {
+object PaperHomeDeliveryWelcome1Email {
   def apply(
              paperData: PaperData,
              personalData: PersonalData,
@@ -215,17 +214,17 @@ object PaperHomeDeliveryWelcome1DataExtensionRow {
              paymentMethod: PaymentMethod,
              subscriptionDetails: String,
              promotionDescription: Option[String] = None
-           ): PaperHomeDeliveryWelcome1DataExtensionRow = {
+           ): PaperHomeDeliveryWelcome1Email = {
 
     val commonFields = PaperFieldsGenerator.fieldsFor(paperData, personalData, subscription, paymentMethod, subscriptionDetails, promotionDescription)
     val additionalFields = Seq("delivery_instructions" -> paperData.deliveryInstructions.getOrElse(""))
 
-    PaperHomeDeliveryWelcome1DataExtensionRow(personalData.email, commonFields ++ additionalFields)
+    PaperHomeDeliveryWelcome1Email(personalData.email, commonFields ++ additionalFields)
 
   }
 }
 
-object PaperVoucherWelcome1DataExtensionRow {
+object PaperVoucherWelcome1Email {
   def apply(
              paperData: PaperData,
              personalData: PersonalData,
@@ -233,14 +232,14 @@ object PaperVoucherWelcome1DataExtensionRow {
              paymentMethod: PaymentMethod,
              subscriptionDetails: String,
              promotionDescription: Option[String] = None
-           ): PaperVoucherWelcome1DataExtensionRow = {
+           ): PaperVoucherWelcome1Email = {
 
     val fields = PaperFieldsGenerator.fieldsFor(paperData, personalData, subscription, paymentMethod, subscriptionDetails, promotionDescription)
-    PaperVoucherWelcome1DataExtensionRow(personalData.email, fields)
+    PaperVoucherWelcome1Email(personalData.email, fields)
   }
 }
 
-object GuardianWeeklyWelcome1DataExtensionRow {
+object GuardianWeeklyWelcome1Email {
 
   import model.SubscriptionOps._
 
@@ -251,7 +250,7 @@ object GuardianWeeklyWelcome1DataExtensionRow {
              paymentMethod: PaymentMethod,
              subscriptionDetails: String,
              promotionDescription: Option[String] = None
-           ): GuardianWeeklyWelcome1DataExtensionRow = {
+           ): GuardianWeeklyWelcome1Email = {
 
     val commonFields = PaperFieldsGenerator.fieldsFor(paperData, personalData, subscription, paymentMethod, subscriptionDetails, promotionDescription)
 
@@ -259,11 +258,11 @@ object GuardianWeeklyWelcome1DataExtensionRow {
       Seq("date_of_second_payment" -> formatDate(weeklySub.secondPaymentDate))
     } getOrElse Nil
 
-    GuardianWeeklyWelcome1DataExtensionRow(personalData.email, commonFields ++ additionalFields)
+    GuardianWeeklyWelcome1Email(personalData.email, commonFields ++ additionalFields)
   }
 }
 
-object HolidaySuspensionBillingScheduleDataExtensionRow {
+object HolidaySuspensionBillingScheduleEmail {
 
   def apply(
            email: Option[String],
@@ -275,7 +274,7 @@ object HolidaySuspensionBillingScheduleDataExtensionRow {
            numberOfSuspensionsLinedUp: Int,
            daysUsed: Int,
            daysAllowed: Int
-         ): HolidaySuspensionBillingScheduleDataExtensionRow = {
+         ): HolidaySuspensionBillingScheduleEmail = {
 
     val (thereafterBill, trimmedSchedule) = BillingSchedule.rolledUp(billingSchedule)
     val schedule = trimmedSchedule.toList.toNel.getOrElse(thereafterBill.wrapNel)
@@ -287,7 +286,7 @@ object HolidaySuspensionBillingScheduleDataExtensionRow {
 
     val emailAddress = email.getOrElse("holiday-suspension-bounce@guardian.co.uk")
 
-    HolidaySuspensionBillingScheduleDataExtensionRow(
+    HolidaySuspensionBillingScheduleEmail(
       emailAddress,
       subscriptionName,
       Seq(
@@ -313,7 +312,7 @@ object HolidaySuspensionBillingScheduleDataExtensionRow {
 
 
 
-object GuardianWeeklyRenewalDataExtensionRow {
+object GuardianWeeklyRenewalEmail {
 
   private def extractAddress(contact: Contact) = Address(
     lineOne = contact.mailingStreet.getOrElse(""),
@@ -331,7 +330,7 @@ object GuardianWeeklyRenewalDataExtensionRow {
             paymentMethod: PaymentMethod,
             email: String,
             newTermStartDate: LocalDate
-           ): GuardianWeeklyRenewalDataExtensionRow = {
+           ): GuardianWeeklyRenewalEmail = {
 
 
     val commonFields = PaperFieldsGenerator.fieldsFor(
@@ -351,31 +350,31 @@ object GuardianWeeklyRenewalDataExtensionRow {
       promotionDescription = None
     )
 
-    GuardianWeeklyRenewalDataExtensionRow(email, commonFields)
+    GuardianWeeklyRenewalEmail(email, commonFields)
   }
 
   def constructSalutation(titleOpt: Option[String], firstNameOpt: Option[String], lastNameOpt: Option[String]): String =
     titleOpt.flatMap(title => lastNameOpt.map(lastName => s"$title $lastName")).getOrElse(firstNameOpt.getOrElse("Subscriber"))
 }
 
-case class DigipackWelcome1DataExtensionRow(email: String, fields: Seq[(String, String)]) extends DataExtensionRow {
+case class DigipackWelcome1Email(email: String, fields: Seq[(String, String)]) extends Email {
   override def forExtension = DigipackDataExtension
 }
 
-case class PaperHomeDeliveryWelcome1DataExtensionRow(email: String, fields: Seq[(String, String)]) extends DataExtensionRow {
+case class PaperHomeDeliveryWelcome1Email(email: String, fields: Seq[(String, String)]) extends Email {
   override def forExtension = PaperDeliveryDataExtension
 }
 
-case class PaperVoucherWelcome1DataExtensionRow(email: String, fields: Seq[(String, String)]) extends DataExtensionRow {
+case class PaperVoucherWelcome1Email(email: String, fields: Seq[(String, String)]) extends Email {
   override def forExtension = PaperVoucherDataExtension
 }
-case class GuardianWeeklyWelcome1DataExtensionRow(email: String, fields: Seq[(String, String)]) extends DataExtensionRow {
+case class GuardianWeeklyWelcome1Email(email: String, fields: Seq[(String, String)]) extends Email {
   override def forExtension = GuardianWeeklyWelcome1DataExtension
 }
 
-case class HolidaySuspensionBillingScheduleDataExtensionRow(email: String, subscriptionName: String, fields: Seq[(String, String)]) extends DataExtensionRow {
+case class HolidaySuspensionBillingScheduleEmail(email: String, subscriptionName: String, fields: Seq[(String, String)]) extends Email {
   override def forExtension = HolidaySuspensionBillingScheduleExtension
 }
-case class GuardianWeeklyRenewalDataExtensionRow(email: String, fields: Seq[(String, String)]) extends DataExtensionRow {
+case class GuardianWeeklyRenewalEmail(email: String, fields: Seq[(String, String)]) extends Email {
   override def forExtension = GuardianWeeklyRenewalDataExtension
 }

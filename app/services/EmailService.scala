@@ -23,8 +23,8 @@ import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
 import logging.{Context, ContextLogging}
 import model.SubscriptionOps._
-import model.exactTarget.HolidaySuspensionBillingScheduleDataExtensionRow.constructSalutation
-import model.exactTarget._
+import model.HolidaySuspensionBillingScheduleEmail.constructSalutation
+import model._
 import model.{PurchaserIdentifiers, Renewal, SubscribeRequest}
 import org.joda.time.{Days, LocalDate}
 import play.api.libs.json._
@@ -35,25 +35,24 @@ import views.support.Pricing._
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
+
 /**
-  * Sends welcome email message to Amazon SQS queue which is consumed by membership-workflow.
-  *
-  * Exact Target expects the message to be in the following format:
-  * https://code.exacttarget.com/apis-sdks/rest-api/v1/messaging/messageDefinitionSends.html
+  * Publishes messages to membership-workflow SQS queues
+  * https://github.com/guardian/membership-workflow
   */
-class ExactTargetService(
+class EmailService(
   subscriptionService: subsv2.services.SubscriptionService[Future],
   paymentService: Future[CommonPaymentService],
   zuoraService: ZuoraService,
   salesforceService: SalesforceService
 )(implicit val executionContext: ExecutionContext) extends ContextLogging {
 
-  private def buildWelcomeEmailDataExtensionRow(
+  private def buildEmailSqsMessage(
       subscribeResult: SubscribeResult,
       subscriptionData: SubscribeRequest,
       gracePeriod: Days,
       validPromotion: Option[ValidPromotion[NewUsers]],
-      purchaserIds: PurchaserIdentifiers): Future[DataExtensionRow] = {
+      purchaserIds: PurchaserIdentifiers): Future[Email] = {
 
     val zuoraPaidSubscription: Future[Subscription[Plan.Paid]] =
       subscriptionData.productData.fold(
@@ -97,7 +96,7 @@ class ExactTargetService(
 
       subscriptionData.productData.fold(
         paperData => if (paperData.plan.isHomeDelivery) {
-          PaperHomeDeliveryWelcome1DataExtensionRow(
+          PaperHomeDeliveryWelcome1Email(
             paperData = paperData,
             personalData = personalData,
             subscription = sub,
@@ -106,7 +105,7 @@ class ExactTargetService(
             promotionDescription = promotionDescription
           )
         } else if (paperData.plan.isGuardianWeekly) {
-          GuardianWeeklyWelcome1DataExtensionRow(
+          GuardianWeeklyWelcome1Email(
             paperData = paperData,
             personalData = personalData,
             subscription = sub,
@@ -116,7 +115,7 @@ class ExactTargetService(
           )
         }
         else {
-          PaperVoucherWelcome1DataExtensionRow(
+          PaperVoucherWelcome1Email(
             paperData = paperData,
             personalData = personalData,
             subscription = sub,
@@ -125,7 +124,7 @@ class ExactTargetService(
             promotionDescription = promotionDescription
           )
         },
-        _ => DigipackWelcome1DataExtensionRow(
+        _ => DigipackWelcome1Email(
           personalData = personalData,
           subscription = sub,
           paymentMethod = pm,
@@ -145,7 +144,7 @@ class ExactTargetService(
     }
   }
 
-  def enqueueETWelcomeEmail(
+  def enqueueWelcomeEmail(
       subscribeResult: SubscribeResult,
       subscriptionData: SubscribeRequest,
       gracePeriod: Days,
@@ -153,8 +152,8 @@ class ExactTargetService(
       purchaserIds: PurchaserIdentifiers): Future[Unit] =
 
     for {
-      row <- buildWelcomeEmailDataExtensionRow(subscribeResult, subscriptionData, gracePeriod, validPromotion, purchaserIds)
-      response <- SqsClient.sendDataExtensionToQueue(Config.welcomeEmailQueue, row, SFContactId(purchaserIds.buyerContactId.salesforceContactId))
+      message <- buildEmailSqsMessage(subscribeResult, subscriptionData, gracePeriod, validPromotion, purchaserIds)
+      response <- MembershipWorkflowSqsClient.sendMessage(Config.welcomeEmailQueue, message, SFContactId(purchaserIds.buyerContactId.salesforceContactId))
     } yield {
       response match {
         case Success(sendMsgResult) => logger.info(s"Successfully enqueued ${subscribeResult.subscriptionName} welcome email for user ${purchaserIds.identityId}.")
@@ -162,7 +161,7 @@ class ExactTargetService(
       }
     }
 
-  def enqueueETHolidaySuspensionEmail(
+  def enqueueHolidaySuspensionEmail(
       subscription: Subscription[Plan.Delivery],
       packageName: String,
       billingSchedule: BillingSchedule,
@@ -171,8 +170,8 @@ class ExactTargetService(
       daysAllowed: Int
   )(implicit zuoraRestService: ZuoraRestService[Future]): Future[Unit] = {
 
-    def createDataExtensionRow(salesforceContact: Contact, zuoraAccount: ZuoraRestService.AccountSummary) = {
-      HolidaySuspensionBillingScheduleDataExtensionRow(
+    def buildHolidaySuspensionEmailSqsMessage(salesforceContact: Contact, zuoraAccount: ZuoraRestService.AccountSummary) = {
+      HolidaySuspensionBillingScheduleEmail(
         email = zuoraAccount.billToContact.email,
         saluation = constructSalutation(salesforceContact.title, salesforceContact.firstName, Some(salesforceContact.lastName)),
         subscriptionName = subscription.name.get,
@@ -185,18 +184,18 @@ class ExactTargetService(
       )
     }
 
-    def sendToQueue(salesforceContact: Contact, row: HolidaySuspensionBillingScheduleDataExtensionRow) = {
-      SqsClient.sendDataExtensionToQueue(Config.holidaySuspensionEmailQueue, row, SFContactId(salesforceContact.salesforceContactId)).map {
+    def sendToQueue(salesforceContact: Contact, email: HolidaySuspensionBillingScheduleEmail) = {
+      MembershipWorkflowSqsClient.sendMessage(Config.holidaySuspensionEmailQueue, email, SFContactId(salesforceContact.salesforceContactId)).map {
         case Success(_) => \/.right(())
-        case Failure(e) => \/.left(s"Details were: ${row.subscriptionName}, ${e.toString}")
+        case Failure(e) => \/.left(s"Details were: ${email.subscriptionName}, ${e.toString}")
       }
     }
 
     val enqueueResult = for {
       zuoraAccount <- EitherT(zuoraRestService.getAccount(subscription.accountId))
       salesforceContact <- EitherT.right(SalesforceContactServiceUsingZuoraRest.getBuyerContactForZuoraAccount(zuoraAccount)(salesforceService.repo, executionContext))
-      row = createDataExtensionRow(salesforceContact, zuoraAccount)
-      result <- EitherT(sendToQueue(salesforceContact, row))
+      message = buildHolidaySuspensionEmailSqsMessage(salesforceContact, zuoraAccount)
+      result <- EitherT(sendToQueue(salesforceContact, message))
     } yield result
 
     enqueueResult.run.map {
@@ -229,24 +228,24 @@ class ExactTargetService(
         maybePaymentMethod.toRightDisjunction(SimpleError(s"Failed to enqueue guardian weekly renewal email. No payment method found in account"))
       })
 
-    def sendToQueue(row: GuardianWeeklyRenewalDataExtensionRow): Future[\/[Error, SendMessageResult]] = {
+    def sendToQueue(email: GuardianWeeklyRenewalEmail): Future[\/[Error, SendMessageResult]] = {
 
-      SqsClient.sendDataExtensionToQueue(Config.holidaySuspensionEmailQueue, row, SFContactId(contact.salesforceContactId)).map {
+      MembershipWorkflowSqsClient.sendMessage(Config.holidaySuspensionEmailQueue, email, SFContactId(contact.salesforceContactId)).map {
         case Success(sendMsgResult) => \/-(sendMsgResult)
-        case Failure(e) => -\/(ExceptionThrown(s"Failed to enqueue ${oldSub.name.get}'s guardian weekly renewal email. Details were: " + row.toString, e))
+        case Failure(e) => -\/(ExceptionThrown(s"Failed to enqueue ${oldSub.name.get}'s guardian weekly renewal email. Details were: " + email.toString, e))
       }
     }
 
     val sentMessage = (for {
       paymentMethod <- EitherT(getPaymentMethod(oldSub.accountId))
-      row = GuardianWeeklyRenewalDataExtensionRow(subscriptionName = oldSub.name,
+      email = GuardianWeeklyRenewalEmail(subscriptionName = oldSub.name,
         subscriptionDetails = subscriptionDetails,
         planName = renewal.plan.name,
         contact = contact,
         paymentMethod = paymentMethod,
         email = renewal.email,
         newTermStartDate = newTermStartDate)
-      sendMessage <- EitherT(sendToQueue(row))
+      sendMessage <- EitherT(sendToQueue(email))
     } yield sendMessage).run
 
     sentMessage.map {
@@ -257,23 +256,23 @@ class ExactTargetService(
   }
 }
 
-object SqsClient extends LazyLogging {
+object MembershipWorkflowSqsClient extends LazyLogging {
   private val sqsClient = AmazonSQSClient.builder
     .withCredentials(CredentialsProvider)
     .withRegion(EU_WEST_1)
     .build()
 
-  def sendDataExtensionToQueue(queueName: String, row: DataExtensionRow, sfContactId: SFContactId)(implicit executionContext: ExecutionContext): Future[Try[SendMessageResult]] = {
+  def sendMessage(queueName: String, emailMessage: Email, sfContactId: SFContactId)(implicit executionContext: ExecutionContext): Future[Try[SendMessageResult]] = {
     Future {
       val payload = Json.obj(
         "To" -> Json.obj(
-          "Address" -> row.email,
-          "SubscriberKey" -> row.email,
+          "Address" -> emailMessage.email,
+          "SubscriberKey" -> emailMessage.email,
           "ContactAttributes" -> Json.obj(
-            "SubscriberAttributes" ->  Json.toJsFieldJsValueWrapper(row.fields.toMap)
+            "SubscriberAttributes" ->  Json.toJsFieldJsValueWrapper(emailMessage.fields.toMap)
           )
         ),
-        "DataExtensionName" -> row.forExtension.name,
+        "DataExtensionName" -> emailMessage.forExtension.name,
         "SfContactId" -> sfContactId.get
       ).toString
 
