@@ -49,7 +49,7 @@ POST        /staff/cas/token                 controllers.CAS.generateToken
 GET         /oauth2callback                  controllers.OAuth.oauth2Callback
 
 # Manage my account
-GET         /manage                          controllers.AccountManagement.manage(subscriberId: Option[String], errorCode: Option[String], promoCode: Option[PromoCode])
+GET         /manage                          controllers.AccountManagement.manage(subscriptionId: Option[String], errorCode: Option[String], promoCode: Option[PromoCode])
 POST        /manage                          controllers.AccountManagement.processLogin
 GET         /manage/suspend                  controllers.AccountManagement.redirect
 POST        /manage/suspend                  controllers.AccountManagement.processSuspension

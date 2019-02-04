@@ -4,7 +4,7 @@
 @import model.DigitalEdition.UK
 @import views.support.ContactCentreOps._
 @(
-    subscriberId: Option[String],
+    subscriptionId: Option[String],
     promoCode: Option[PromoCode],
     message: Option[String]= None
 )(implicit request: RequestHeader, flash: Flash, touchpointBackendResolution: services.TouchpointBackends.Resolution)
@@ -60,7 +60,7 @@
                                 <div class="form-field js-subscriber-id">
                                     <label class="label" for="first">Subscription ID</label>
                                     <input type="text" class="input-text js-input" name="subscriptionId" id="first"
-                                    value="@subscriberId" maxlength="30" required>
+                                    value="@subscriptionId" maxlength="30" required>
                                     @_root_.views.html.fragments.forms.errorMessage("This field is required")
                                 </div>
                                 <div class="form-field js-suspend-last">
