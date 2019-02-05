@@ -12,10 +12,9 @@ import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
 import ophan.thrift.event.PaymentProvider.{Gocardless, Stripe}
 import ophan.thrift.event._
-import play.api.libs.json._
+import acquisitions.AcquisitionsHelper.referrerAcquisitionDataFromJSON
 
 import scala.collection.Set
-import scalaz.\/
 
 case class ClientBrowserInfo(
   gaClientId: String,
@@ -55,19 +54,6 @@ object SubscriptionAcquisitionComponents {
       Right(GAData(host, gaClientId, Some(ipAddress), userAgent))
     }
 
-    private def referrerAcquisitionDataFromJSON(json: String): Option[ReferrerAcquisitionData] = {
-      import \/._
-
-      fromTryCatchNonFatal(Json.parse(json))
-        .leftMap(err => s"""Unable to parse "$json" as JSON. $err""")
-        .flatMap { jsValue =>
-          Json.fromJson[ReferrerAcquisitionData](jsValue).fold(
-            errs => left(logger.warn(s"Unable to decode JSON $jsValue to an instance of ReferrerAcquisitionData. ${JsError.toJson(errs)}")),
-            referrerAcquisitionData => right(referrerAcquisitionData)
-          )
-        }
-        .toOption
-    }
 
     private def printOptionsFromPaperData(p: PaperData): Option[PrintOptions] = {
       // Explicit imports because Product and Benefit have name collisions
