@@ -363,7 +363,7 @@ class AccountManagement(
 
   }
 
-  def manage(subscriberId: Option[String] = None, errorCode: Option[String] = None, promoCode: Option[PromoCode] = None): Action[AnyContent] = accountManagementAction.async { implicit request =>
+  def manage(subscriptionId: Option[String] = None, errorCode: Option[String] = None, promoCode: Option[PromoCode] = None): Action[AnyContent] = accountManagementAction.async { implicit request =>
     implicit val resolution: TouchpointBackends.Resolution = touchpointBackends.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
     val eventualMaybeSubscription = SessionSubscription.subscriptionFromRequest
@@ -408,7 +408,7 @@ class AccountManagement(
 
     futureMaybeFutureManagePage.getOrElse {
       // not a valid AS number or some unnamed problem getting the details or no sub details in the session yet
-      Future.successful(Ok(views.html.account.details(subscriberId, promoCode)))
+      Future.successful(Ok(views.html.account.details(subscriptionId, promoCode)))
     }.flatMap(identity)
   }
 

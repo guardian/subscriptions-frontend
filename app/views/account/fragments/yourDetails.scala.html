@@ -6,7 +6,7 @@
 @import scala.collection.immutable.List.empty
 @(chosenPaperDays: List[PaperDay] = empty, maybeContact: Option[SoldToContact] = None, subscription: Subscription[SubscriptionPlan.ContentSubscription])(extra: Html = Html(""))
 <dl class="mma-section__list">
-    <dt class="mma-section__list--title">Subscriber ID</dt>
+    <dt class="mma-section__list--title">Subscription ID</dt>
     <dd class="mma-section__list--content">@{subscription.name.get}</dd>
     @account.fragments.planList(
         plans = subscription.currentPlans,
