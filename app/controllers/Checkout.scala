@@ -56,12 +56,15 @@ class Checkout(fBackendFactory: TouchpointBackends, commonActions: CommonActions
   def getBetterPlans[A <: CatalogPlan.Paid](plan: A, allPlans: List[A]) =
     allPlans.sortBy(_.charges.gbpPrice.amount).dropWhile(_.charges.gbpPrice.amount <= plan.charges.gbpPrice.amount)
 
-  def renderCheckout(countryGroup: String, promoCode: Option[PromoCode], supplierCode: Option[SupplierCode], forThisPlan: String) = NoCacheAction.async { implicit request =>
+  def renderCheckout(countryGroup: String, promoCode: Option[PromoCode], supplierCode: Option[SupplierCode], forThisPlan: String, period: Option[String]) = NoCacheAction.async { implicit request =>
     implicit val resolution: TouchpointBackends.Resolution = fBackendFactory.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
 
     // countryGroup String above basically means now 'countryOrCountryGroup' so we'll use the fromHint API on DetermineCountryGroup
     val determinedCountryGroup = DetermineCountryGroup.fromHint(countryGroup) getOrElse UK
+
+    // In order to run an Optimize test for the new Digital Pack checkout, we need to select the billing period based on a query string instead of the path
+    val planToDisplay: String = if (period.contains("Annual") && forThisPlan == "digitalpack-digitalpackmonthly") "digitalpack-digitalpackannual" else forThisPlan
 
     tpBackend.catalogService.catalog.map { _.map { catalog =>
 
@@ -81,10 +84,10 @@ class Checkout(fBackendFactory: TouchpointBackends, commonActions: CommonActions
         val contentSubscriptionPlans = productsWithoutIntroductoryPlans ++ productsWithIntroductoryPlans
         contentSubscriptionPlans.flatMap {
           case PlansWithIntroductory(plans, associations)
-            if (plans.exists(_.slug == forThisPlan)) => {
+            if (plans.exists(_.slug == planToDisplay)) => {
             val buyablePlans = plans.filter(_.availableForCheckout)
             val plansInPriceOrder = buyablePlans.sortBy(_.charges.gbpPrice.amount)
-            val selectedPlan = plansInPriceOrder.find(_.slug == forThisPlan)
+            val selectedPlan = plansInPriceOrder.find(_.slug == planToDisplay)
             selectedPlan.map(PlanList(associations,_,plansInPriceOrder))
           }
           case _ => None
