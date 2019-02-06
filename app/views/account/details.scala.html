@@ -22,8 +22,8 @@
             <div>
                 <h3>In this area you can:</h3>
                 <p>Review your subscription details and payment schedule.</p>
-                <p>If you get your copy of The Guardian or The Observer delivered, you can suspend delivery while you're away.</p>
-                <p>If you have a fixed-term Guardian Weekly subscription, you can renew it here.</p>
+                <p>Suspend delivery of The Guardian or The Observer while you're away. (To suspend delivery of your Guardian Weekly, please contact Customer Services - see below).</p>
+                <p>Renew your 1 year only Guardian Weekly subscription.</p>
             </div>
 
             <div>
@@ -32,7 +32,7 @@
                     Please log in below using your ​​Subscription ID​, which you can find on any correspondence, and your last name.
                 </p>
             </div>
-
+            https://profile.theguardian.com/signin?returnUrl=https://subscribe.theguardian.com/manage&skipConfirmation=true
             <form class="form js-suspend-form u-cf" action="@routes.AccountManagement.processLogin().url" method="POST" novalidate>
 
                 @helper.CSRF.formField
