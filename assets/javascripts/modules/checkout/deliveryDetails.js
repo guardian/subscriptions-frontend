@@ -134,8 +134,7 @@ define([
             }
 
             bean.on(formEls.$DELIVERY_DETAILS_SUBMIT[0], 'click', handleBillingVisibility);
-
-            if (formEls.DELIVERY.$POSTCODE_CONTAINER.data('validate-for') === 'delivery') {
+            if (formEls.DELIVERY.$POSTCODE_CONTAINER.data('validate-for') === 'delivery.address') {
                 bean.on(formEls.DELIVERY.$POSTCODE_CONTAINER[0], 'change keyup', '.js-input', validatePostCode);
                 bean.fire(formEls.DELIVERY.$POSTCODE_CONTAINER[0], 'change');
             }
