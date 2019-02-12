@@ -2,7 +2,9 @@ import React from 'react'
 import PropTypes from 'prop-types';
 
 function chooseAddress(addressSection, addressStr) {
-    if (!addressSection) { return; }
+    if (!addressSection) {
+        return;
+    }
     var address = addressStr.split(', ');
     if (address.length === 7) {
         addressSection.$ADDRESS1.val((address[0] + ' ' + address[1]).trim());
@@ -12,50 +14,32 @@ function chooseAddress(addressSection, addressStr) {
     }
 }
 
-export default class ChooseAddress extends React.Component {
-    constructor(props) {
-        super(props)
-        this.state = {
-            value: '-1'
+const augmentAddressOptions = (options) =>
+    (options && options.length > 0) ? [
+        {
+            value: '-1',
+            name: 'Please select an address'
+        },
+        ...options
+    ] : [
+        {
+            value: '-1',
+            name: 'No address found'
         }
-        if(props.options){
-            this.options = [
-                {
-                    value: '-1',
-                    name: 'Please select an address'
-                },
-                ... props.options
-            ]
-        } else {
-            this.options = [
+    ];
 
-                {
-                    value: '-1',
-                    name: 'No address found'
-                }
-            ]
-        }
-        
-    }
 
-    handleChange = (e) => {
-        let target = e.target;
-        this.setState({ value: target.value });
-        chooseAddress(this.props.addressSection, target.value);
-        this.forceUpdate();
-    }
+const createAddressOption = (item, key) => <option key={key} value={item.value}>{item.name}</option>;
 
-    render() {
-        let createItem = (item, key) => {
-            return <option key={key} value={item.value}>{item.name}</option>;
-        };
-        return (
-            <select className="select select--wide" onChange={this.handleChange} value={this.state.value}>
-                {this.options.map(createItem)}
-            </select>
-        );
-    }
-}
+const selectAddressOption = (addressSection) => (event) =>  chooseAddress(addressSection, event.target.value);
+
+const ChooseAddress = (props) =>
+    <select className="select select--wide" onChange={selectAddressOption(props.addressSection)} value="-1">
+        {augmentAddressOptions(props.options).map(createAddressOption)}
+    </select>;
+
+export default ChooseAddress;
+
 
 ChooseAddress.propTypes = {
     addressSection: PropTypes.object.isRequired,
@@ -63,4 +47,4 @@ ChooseAddress.propTypes = {
         name: PropTypes.string,
         value: PropTypes.string
     }))
-}
+};
