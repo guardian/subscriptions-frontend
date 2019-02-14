@@ -25,7 +25,8 @@
                 </h3>
                 @views.html.account.fragments.yourDetails(
                     maybeContact = Some(contact),
-                    subscription = subscription
+                    subscription = subscription,
+                    shouldShowPlanName = false
                 )()
             </section>
             @billingSchedule.map { bs =>

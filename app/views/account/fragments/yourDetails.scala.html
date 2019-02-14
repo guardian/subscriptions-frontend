@@ -4,16 +4,18 @@
 @import model.SubscriptionOps._
 
 @import scala.collection.immutable.List.empty
-@(chosenPaperDays: List[PaperDay] = empty, maybeContact: Option[SoldToContact] = None, subscription: Subscription[SubscriptionPlan.ContentSubscription])(extra: Html = Html(""))
+@(chosenPaperDays: List[PaperDay] = empty, maybeContact: Option[SoldToContact] = None, subscription: Subscription[SubscriptionPlan.ContentSubscription], shouldShowPlanName: Boolean = true)(extra: Html = Html(""))
 <dl class="mma-section__list">
     <dt class="mma-section__list--title">Subscription ID</dt>
     <dd class="mma-section__list--content">@{subscription.name.get}</dd>
     @account.fragments.planList(
         plans = subscription.currentPlans,
+        shouldShowPlanName = shouldShowPlanName,
         singularLabel = "Current Plan",
         chosenPaperDays = chosenPaperDays)
     @account.fragments.planList(
         plans = subscription.futurePlans,
+        shouldShowPlanName = shouldShowPlanName,
         singularLabel = "Upcoming Plan",
         chosenPaperDays = chosenPaperDays)
 
