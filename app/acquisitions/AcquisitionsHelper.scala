@@ -67,6 +67,8 @@ object AcquisitionsHelper extends LazyLogging {
             queryParameters = None
           )
       )
+    ).orElse(
+      maybeAcquisitionDataJson.flatMap(referrerAcquisitionDataFromJSON)
     )
   }
 

@@ -33,4 +33,33 @@ class AcquisitionsHelperTest extends FlatSpec with Matchers {
   it should "return None when acquisitionData and Optimize parameter are null" in  {
     AcquisitionsHelper.mergeAcquisitionData(None, None) shouldBe None
   }
+
+  it should "return existing acquisitionData when Optimize parameter is null" in {
+    val json =
+      """
+        |{
+        |    "campaignCode": "gdnwb_copts_merchhgh_subscribe_DPHighSlotROW_component",
+        |    "abTests": [
+        |        {
+        |            "name": "ssrTwo",
+        |            "variant": "notintest"
+        |        },
+        |        {
+        |            "name": "annualContributionsRoundFour",
+        |            "variant": "lower"
+        |        },
+        |        {
+        |            "name": "requiredFields",
+        |            "variant": "variant"
+        |        },
+        |        {
+        |            "name": "optimize$$I-M60BjwTLClJegHgJmklw",
+        |            "variant": "0"
+        |        }
+        |    ]
+        |}
+      """.stripMargin
+    val merged = AcquisitionsHelper.mergeAcquisitionData(Some(json), None)
+    merged.get.abTests.get.size shouldBe 4
+  }
 }
