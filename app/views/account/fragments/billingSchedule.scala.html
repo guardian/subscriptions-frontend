@@ -1,10 +1,11 @@
 @import com.gu.i18n.Currency
 @import com.gu.memsub.BillingSchedule
 @import views.support.BillingScheduleOps._
+@import com.gu.memsub.subsv2.SubscriptionPlan
 @import views.support.Dates._
 @import views.support.FloatOps._
 
-@(billingSchedule: BillingSchedule, currency: Currency)
+@(billingSchedule: BillingSchedule, currency: Currency, currentPlanOverride: Option[SubscriptionPlan.Paid] = None)
 
 <div class="mma-section__schedule">
     @billingSchedule.billsToDisplay.toList.map { bill =>
@@ -15,7 +16,14 @@
                 <span class="mma-section__calendar--sub">@bill.date.shortMonth</span>
             </div>
             <p class="mma-section__calendar--amount @bill.whenDiscounted("mma-section__calendar--amount--discounted")">
-              @currency.glyph@bill.amount.currency
+                @currency.glyph
+                @{
+                    currentPlanOverride
+                        .map(_.charges.price.prices.head.amount)
+                        .filter(_ < bill.amount)
+                        .map(_.currency)
+                        .getOrElse(bill.amount.currency)
+                }
             </p>
         </div>
     }

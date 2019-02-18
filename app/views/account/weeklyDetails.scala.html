@@ -26,15 +26,20 @@
                 @views.html.account.fragments.yourDetails(
                     maybeContact = Some(contact),
                     subscription = subscription,
-                    shouldShowPlanName = false
+                    shouldShowPlanName = false,
+                    shouldShowUpcomingPlan = !subscription.shouldHideUpcomingPlan
                 )()
             </section>
-            @billingSchedule.map { bs =>
+            @billingSchedule.map { billingSchedule =>
                 <section class="mma-section">
                     <h3 class="mma-section__header">
                         Your billing schedule
                     </h3>
-                    @views.html.account.fragments.billingSchedule(bs, subscription.currency)
+                    @views.html.account.fragments.billingSchedule(
+                        billingSchedule = billingSchedule,
+                        currency = subscription.currency,
+                        currentPlanOverride = if(subscription.shouldHideUpcomingPlan) subscription.currentPlans.headOption else None
+                    )
                 </section>
             }
             <section class="mma-section">
