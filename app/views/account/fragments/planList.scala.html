@@ -4,7 +4,7 @@
 @import views.support.Dates._
 @import views.support.Pricing._
 
-@(plans: List[SubscriptionPlan.ContentSubscription], singularLabel: String, chosenPaperDays: List[PaperDay] = List.empty)
+@(plans: List[SubscriptionPlan.ContentSubscription], shouldShowPlanName: Boolean, singularLabel: String, chosenPaperDays: List[PaperDay] = List.empty)
 
 @if(plans.length > 1) {
     <dt class="mma-section__list--title">@{
@@ -17,15 +17,17 @@
 
 <dd class="mma-section__list--content">
 @for(plan <- plans) {
-    <div>
-    @if(plan.name == "Echo-Legacy" || plan.name == "Multi-day") {
-        Multi-day (@{
-        chosenPaperDays.map(_.id.replace("Print ", "")).mkString(", ")
-    })
-    } else {
-        @plan.name
+    @if(shouldShowPlanName) {
+        <div>
+        @if(plan.name == "Echo-Legacy" || plan.name == "Multi-day") {
+            Multi-day (@{
+            chosenPaperDays.map(_.id.replace("Print ", "")).mkString(", ")
+        })
+        } else {
+            @plan.name
+        }
+        </div>
     }
-    </div>
     <div>@plan.charges.prettyPricing(plan.charges.price.currencies.head)</div>
 
     <div>@if(plan.start.isAfter(now)) { Starts: } else { Started: } @prettyDate(plan.start)</div>

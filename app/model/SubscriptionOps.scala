@@ -66,6 +66,14 @@ object SubscriptionOps extends LazyLogging {
     def oneOffPlans = subscription.plans.list.filterNot(p => p.end.isBefore(now) || p.charges.billingPeriod.isRecurring)
     def introductoryPeriodPlan = oneOffPlans.find(_.charges.billingPeriod == SixWeeks)
     def hasIntroductoryPeriod = introductoryPeriodPlan.isDefined
+
+    def shouldHideUpcomingPlan = (currentPlans.headOption, futurePlans.headOption) match {
+      case (Some(currentPlan), Some(futurePlan)) =>
+        // if the product rate plan is different, this is likely a price rise - so only display for the 30 days beforehand
+        currentPlan.productRatePlanId != futurePlan.productRatePlanId && futurePlan.start.isAfter(now.plusDays(30))
+      case _ => false
+    }
+
   }
 
   implicit class EnrichedPaperSubscription[P <: PaperPlan](subscription: Subscription[P]) extends ContextLogging {
