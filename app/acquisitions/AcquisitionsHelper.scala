@@ -62,9 +62,12 @@ object AcquisitionsHelper extends LazyLogging {
             componentId = None,
             componentType = None,
             source = None,
-            abTest = None,
             abTests = Some(Set(abTestFromQueryParam(optimizeExperimentParam))),
-            queryParameters = None
+            queryParameters = None,
+            hostname = None,
+            gaClientId = None,
+            userAgent = None,
+            ipAddress = None
           )
       )
     ).orElse(

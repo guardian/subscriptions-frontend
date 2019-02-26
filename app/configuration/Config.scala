@@ -120,4 +120,6 @@ object Config {
   def fulfilmentLookupApiKey(env: String) = config.getString(s"fulfilment-lookup-api.$env.key")
   def fulfilmentLookupApiUrl(env: String) = config.getString(s"fulfilment-lookup-api.$env.url")
 
+  val kinesisStream = config.getString("kinesis.streamName")
+
 }
