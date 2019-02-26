@@ -48,6 +48,7 @@ Mappings:
       MaxInstances: '6'
       DesiredInstances: '3'
       SSLCertificateId: '89005cdb-ddf9-4893-89da-0e5facb13914'
+      KinesisStreamArn: arn:aws:kinesis:eu-west-1:865473395570:stream/acquisitions-stream-PROD
     CODE:
       DynamoDBTables:
       - arn:aws:dynamodb:*:*:table/MembershipSub-Promotions-DEV
@@ -57,6 +58,7 @@ Mappings:
       MaxInstances: '2'
       DesiredInstances: '1'
       SSLCertificateId: 'b0f14c79-7fbd-444d-a9ff-c5ff06dfec85'
+      KinesisStreamArn: arn:aws:kinesis:eu-west-1:865473395570:stream/acquisitions-stream-CODE
 Resources:
   FrontendAutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
@@ -180,6 +182,12 @@ Resources:
           - Effect: Allow
             Action: sqs:*
             Resource: arn:aws:sqs:eu-west-1:865473395570:subs-holiday-suspension-email*
+      - PolicyName: Kinesis
+        PolicyDocument:
+          Statement:
+          - Effect: Allow
+            Action: kinesis:*
+            Resource: !FindInMap [StageVariables, !Ref Stage, KinesisStreamArn]
       - PolicyName: InvokeAVLambda
         PolicyDocument:
           Statement:
