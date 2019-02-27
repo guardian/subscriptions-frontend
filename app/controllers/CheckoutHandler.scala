@@ -6,6 +6,7 @@ import actions.CommonActions
 import cats.data.EitherT
 import cats.instances.future._
 import com.gu.acquisition.model.AcquisitionSubmission
+import com.gu.acquisition.model.errors.AnalyticsServiceError
 import com.gu.memsub.SupplierCode
 import com.gu.memsub.promo.Promotion._
 import com.gu.memsub.promo.{NormalisedPromoCode, PromoCode}
@@ -18,6 +19,7 @@ import model.error.SubsError
 import org.joda.time.LocalDate
 import play.api.libs.json._
 import play.api.mvc._
+
 import scalaz.NonEmptyList
 import services.AuthenticationService.authenticatedUserFor
 import services._
@@ -142,9 +144,17 @@ class CheckoutHandler(fBackendFactory: TouchpointBackends, commonActions: Common
           _ + _
         }
 
-        submitAcquisitionEvent(request, subscribeRequest).value.map { _ =>
+        def logAndReturnSuccess = {
           logger.info(s"User successfully became subscriber:\n\tUser: SF=${r.salesforceMember.salesforceContactId}\n\tPlan: ${subscribeRequest.productData.fold(_.plan, _.plan).name}\n\tSubscription: ${r.subscribeResult.subscriptionName}")
           Ok(Json.obj("redirect" -> routes.Checkout.thankYou().url)).withSession(session)
+        }
+
+        submitAcquisitionEvent(request, subscribeRequest).value.map { _ =>
+          logAndReturnSuccess
+        }.recoverWith {
+          case exception =>
+            logger.error(s"Failed to submit acquisition event correctly due to $exception")
+            Future.successful(logAndReturnSuccess)
         }
       }
 
