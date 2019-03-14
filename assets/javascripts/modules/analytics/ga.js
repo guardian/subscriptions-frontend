@@ -99,7 +99,6 @@ define(['modules/analytics/analyticsEnabled',
 
         _EVENT_QUEUE.forEach(function (obj) {
             var upgrading = (obj.eventLabel === 'Rate Plan Change' && guardian.pageInfo.productData.initialProduct !== guardian.pageInfo.productData.productPurchasing) ? 1 : 0;
-            var converted = (obj.eventLabel === 'Converted') ? 1 : 0;
             var productName = guardian.pageInfo.productData.productPurchasing || guardian.pageInfo.productData.productPurchased;
             var event = {
                 eventCategory: 'Subscriptions Checkout',
@@ -109,7 +108,6 @@ define(['modules/analytics/analyticsEnabled',
                 dimension13: !!guardian.supplierCode,
                 metric1: upgrading,
                 metric2: obj.elapsedTime,
-                metric10: converted
             };
             if (guardian.pageInfo.productData.promoCode) {
                 event.dimension19 = guardian.pageInfo.productData.promoCode;
