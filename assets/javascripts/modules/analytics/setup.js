@@ -4,7 +4,6 @@ define(['modules/analytics/ga',
         'modules/analytics/krux',
         'modules/analytics/facebook',
         'modules/analytics/appnexus',
-        'modules/analytics/affectv',
         'modules/analytics/awin',
         'modules/analytics/thirdPartyTracking'
 ], function (ga,
@@ -13,7 +12,6 @@ define(['modules/analytics/ga',
              krux,
              facebook,
              appnexus,
-             affectv,
              awin,
              thirdPartyTracking) {
     'use strict';
@@ -28,7 +26,6 @@ define(['modules/analytics/ga',
             krux.init();
             facebook.init();
             appnexus.init();
-            affectv.init();
             awin.init();
         }
     }
