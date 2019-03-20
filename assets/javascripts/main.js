@@ -17,7 +17,8 @@ require([
     'modules/renew/loader',
     'modules/animatedDropdown',
     'modules/index-intl',
-    'object-fit-images'
+    'object-fit-images',
+    'modules/consentBanner'
 ], function (
     ajax,
     raven,
@@ -37,7 +38,8 @@ require([
     renew,
     dropdown,
     indexIntl,
-    objectFitImages
+    objectFitImages,
+    consentBanner
 ) {
     'use strict';
 
@@ -60,4 +62,5 @@ require([
     objectFitImages();
     patterns.init();
     renew.init();
+    consentBanner.init();
 });
