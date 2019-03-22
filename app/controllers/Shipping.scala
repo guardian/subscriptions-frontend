@@ -50,11 +50,11 @@ class Shipping(touchpointBackend: TouchpointBackend, commonActions: CommonAction
   }
 
   def viewDeliveryPaperDigital() = NoCacheAction {
-    Redirect("/collection/paper-digital")
+    Redirect("/")
   }
 
   def viewDeliveryPaper() = NoCacheAction {
-    Redirect("/collection/paper")
+    Redirect("/")
   }
 
 }
