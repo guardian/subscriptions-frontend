@@ -1,6 +1,7 @@
 @import com.gu.memsub.subsv2.Subscription
 @import com.gu.memsub.subsv2.SubscriptionPlan.ContentSubscription
 @import model.SubscriptionOps._
+@import utils.Tracking
 @import views.support.PlanOps._
 
 @(subscription: Subscription[ContentSubscription], promoCode: Option[String])(implicit request: RequestHeader)
@@ -14,6 +15,9 @@
         .getOrElse("direct")
 }
 
-<!-- Image Pixel Tracking - Mandatory -->
-<img src="https://www.awin1.com/sread.img?tt=ns&tv=2&merchant=11152&amount=@subscription.firstPrice&cr=@subscription.currency&ref=@subscription.id.get&parts=@subscription.firstPlan.commissionGroup:@subscription.firstPrice&vc=@promoCode.getOrElse("")&ch=@getChannel&testmode=0" border="0" width="0" height="0">
+@if(Tracking.awinEnabledForUser){
+    <div>@request.cookies.get("GU_TK").map(_.value)</div>
+    <!-- Image Pixel Tracking - Mandatory -->
+    <img src="https://www.awin1.com/sread.img?tt=ns&tv=2&merchant=11152&amount=@subscription.firstPrice&cr=@subscription.currency&ref=@subscription.id.get&parts=@subscription.firstPlan.commissionGroup:@subscription.firstPrice&vc=@promoCode.getOrElse("")&ch=@getChannel&testmode=0" border="0" width="0" height="0">
+}
 
