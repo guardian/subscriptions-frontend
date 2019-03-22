@@ -11,20 +11,6 @@
 
 <section class="section-slice">
 
-    @if(subscription.insideM25) {
-        <h3 class="u-display-only-mobile">Live outside the M25?</h3>
-        <a href="@subscription.altPackagePath" class="button button--large button--secondary button--m25" data-test-id="choose-package-outside-m25">
-            <span class="u-hide-until-tablet">Live outside the M25?</span>
-            Subscribe to <span class="u-hide-until-tablet">our</span> voucher scheme
-        </a>
-    } else {
-        <h3 class="u-display-only-mobile">Do you live inside the M25?</h3>
-        <a href="@subscription.altPackagePath" class="button button--large button--secondary button--m25" data-test-id="choose-package-inside-m25">
-            <span class="u-hide-until-tablet">Do you live inside the M25?</span>
-            Get the paper delivered <span class="u-hide-until-tablet">to your door</span>
-        </a>
-    }
-
     <h2 class="page-heading">Choose a package</h2>
 
     @for(option <- subscription.options) {
