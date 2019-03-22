@@ -49,30 +49,12 @@ class Shipping(touchpointBackend: TouchpointBackend, commonActions: CommonAction
     }
   }
 
-  def viewDeliveryPaperDigital() = NoCacheAction.async {
-    val segment = "paper-digital"
-    catalog.map { catalog =>
-      index(DeliverySubscriptionProduct(
-        title = "Paper + digital home delivery subscription",
-        description =
-          """|If you live within the M25 you can have your papers delivered by 7am Monday - Saturday and 8.30am on Sunday.
-             |Plus you can start using the daily edition and premium live news app immediately.""".stripMargin,
-        altPackagePath = s"/collection/$segment",
-        options = catalog.delivery.list.toList.filter(_.charges.digipack.isDefined).map(planToOptions).sortBy(_.weeklyPrice).reverse
-      ), segment)
-    }
+  def viewDeliveryPaperDigital() = NoCacheAction {
+    Redirect("/")
   }
 
-  def viewDeliveryPaper() = NoCacheAction.async {
-    val segment = "paper"
-    catalog.map { catalog =>
-      index(DeliverySubscriptionProduct(
-        title = "Paper home delivery subscription",
-        description = "If you live within the M25 you can have your papers delivered by 7am Monday - Saturday and 8.30 on Sunday.",
-        altPackagePath = s"/collection/$segment",
-        options = catalog.delivery.list.toList.filter(_.charges.digipack.isEmpty).map(planToOptions).sortBy(_.weeklyPrice).reverse.filterNot(_.title.toLowerCase.trim == "saturday")
-      ), segment)
-    }
+  def viewDeliveryPaper() = NoCacheAction {
+    Redirect("/")
   }
 
 }
