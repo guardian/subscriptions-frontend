@@ -5,6 +5,7 @@
 @import model.DigitalEdition
 @import model.SubscriptionOps._
 @import views.support.PlanOps._
+@import utils.Tracking
 
 @(  subscription: Subscription[ContentSubscription],
     guestAccountForm: Option[Form[model.GuestAccountData]] = None,
@@ -37,6 +38,7 @@
         subscriptionId: '@subscription.id.get'
     };
 
+    @if(Tracking.awinEnabledForUser) {
     //<![CDATA[ /*** Do not change ***/
     (function () {
         var AWIN = {};
@@ -80,6 +82,7 @@
     })()
 
     //]]>
+    }
 
 </script>
 

@@ -4,6 +4,7 @@
 @import model.DigitalEdition
 @import controllers.CachedAssets.hashedPathFor
 @import utils.TestUsers.{NameEnteredInForm, PreSigninTestCookie, SignedInUsername}
+@import utils.Tracking
 @(
     title: String,
     description: Option[String] = None,
@@ -48,7 +49,10 @@
         @fragments.consentBanner()
         @fragments.global.footer(product, edition, contactUsCountry)
         @fragments.footerJavaScript()
-        <!--AWIN affiliate tracking tag - see here: https://drive.google.com/drive/folders/19AOGPkPbbFjqPJTdCcCba3EwpLiSHBwW -->
-         <script src="@hashedPathFor("javascripts/vendor/awin-11152.js")" type="text/javascript" defer="defer"></script>
+        @* Because we don't have a request object here we can't check the value of the cookie so we are just going to have an on/off here for now *@
+        @if(Tracking.awinEnabled) {
+            <!--AWIN affiliate tracking tag - see here: https://drive.google.com/drive/folders/19AOGPkPbbFjqPJTdCcCba3EwpLiSHBwW -->
+             <script src="@hashedPathFor("javascripts/vendor/awin-11152.js")" type="text/javascript" defer="defer"></script>
+        }
     </body>
 </html>
