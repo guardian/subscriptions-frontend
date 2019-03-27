@@ -30,9 +30,8 @@ Parameters:
     Type: String
     Description: EC2 instance type
     AllowedValues:
-    - t2.micro
     - t2.small
-    - t2.medium
+    - t3.small
     ConstraintDescription: must be a valid EC2 instance type.
   ImageId:
     Description: AMI ID
