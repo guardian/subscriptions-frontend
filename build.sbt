@@ -40,7 +40,7 @@ scalaVersion := "2.12.6"
 scalacOptions ++= Seq("-feature")
 
 val scalatestVersion = "3.0.4"
-val jacksonVersion = "2.9.8"
+val jacksonVersion = "2.9.9"
 
 libraryDependencies ++= Seq(
     cache,
@@ -68,7 +68,7 @@ libraryDependencies ++= Seq(
     "com.squareup.okhttp3" % "okhttp" % "3.4.2" % "test",
     "org.scalaz" %% "scalaz-core" % "7.2.7",
     "org.pegdown" % "pegdown" % "1.6.0",
-    "com.amazonaws" % "aws-java-sdk-sqs" % "1.11.231",
+    "com.amazonaws" % "aws-java-sdk-sqs" % "1.11.564",
     "com.gu" % "kinesis-logback-appender" % "1.4.2",
     "net.logstash.logback" % "logstash-logback-encoder" % "4.11",
     "com.fasterxml.jackson.dataformat" % "jackson-dataformat-cbor" % "2.9.2",
