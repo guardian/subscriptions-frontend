@@ -29,12 +29,6 @@ depending on your system.
 1. Go to project root
 1. Install [nvm](https://github.com/creationix/nvm#install-script), then run `nvm use`.
 1. Run `./setup.sh` to install project-specific client-side dependencies.
-1. Add the following to your hosts file in `/etc/hosts`
-
-   ```
-   127.0.0.1   sub.thegulocal.com
-   127.0.0.1   profile.thegulocal.com
-   ```
 
 1. Change the ownership of the 'gu' directory under 'etc' to current user.
    `$ sudo -i chown -R {username} /etc/gu`
