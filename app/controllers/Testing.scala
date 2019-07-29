@@ -5,7 +5,7 @@ import com.gu.memsub.subsv2.CatalogPlan.Paid
 import com.typesafe.scalalogging.LazyLogging
 import play.api.mvc.{BaseController, ControllerComponents, Cookie}
 import services.TouchpointBackend
-import utils.TestUsers.testUsers
+import utils.TestUsersService.testUsers
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

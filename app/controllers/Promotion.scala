@@ -12,7 +12,7 @@ import com.typesafe.scalalogging.LazyLogging
 import play.api.libs.json._
 import play.api.mvc._
 import services._
-import utils.TestUsers.PreSigninTestCookie
+import utils.TestUsersService.PreSigninTestCookie
 import views.html.{checkout => view}
 import views.support.Pricing._
 import views.support.{BillingPeriod => _}
@@ -46,15 +46,40 @@ class Promotion(fBackendFactory: TouchpointBackends, commonActions: CommonAction
 
 
   def validateForProductRatePlan(promoCode: PromoCode, prpId: ProductRatePlanId, country: Country, currency: Option[Currency]) = NoCacheAction.async { implicit request =>
-    implicit val resolution: TouchpointBackends.Resolution = fBackendFactory.forRequest(PreSigninTestCookie, request.cookies)
-    implicit val tpBackend = resolution.backend
-    tpBackend.promoService.findPromotionFuture(promoCode).flatMap { promotion =>
-      promotion.filterNot(_.isTracking).fold {
-        Future.successful(NotFound(Json.obj("errorMessage" -> s"Sorry, we can't find that code.")))
-      } {
-        promo =>
+    fBackendFactory.forRequest(PreSigninTestCookie, request.cookies).flatMap { resolution =>
+      implicit val tpBackend: TouchpointBackend = resolution.backend
+      tpBackend.promoService.findPromotionFuture(promoCode).flatMap { promotion =>
+        promotion.filterNot(_.isTracking).fold {
+          Future.successful(NotFound(Json.obj("errorMessage" -> s"Sorry, we can't find that code.")))
+        } {
+          promo =>
+            getAdjustedRatePlans(promo, country, currency).map { ratePlans =>
+              val result = promo.validateFor(prpId, country)
+
+              def body = Json.obj(
+                "promotion" -> Json.toJson(promo),
+                "adjustedRatePlans" -> Json.toJson(ratePlans),
+                "isValid" -> result.isRight,
+                "errorMessage" -> result.swap.toOption.map(_.msg)
+              )
+
+              result.fold(_ => NotAcceptable(body), _ => Ok(body))
+            }
+        }
+      }
+    }
+  }
+
+
+  def validate(promoCode: PromoCode, country: Country, currency: Option[Currency]) = NoCacheAction.async { implicit request =>
+    fBackendFactory.forRequest(PreSigninTestCookie, request.cookies).flatMap { resolution =>
+      implicit val tpBackend: TouchpointBackend = resolution.backend
+      tpBackend.promoService.findPromotionFuture(promoCode).flatMap { promotion =>
+        promotion.fold {
+          Future.successful(NotFound(Json.obj("errorMessage" -> s"Sorry, we can't find that code.")))
+        } { promo =>
           getAdjustedRatePlans(promo, country, currency).map { ratePlans =>
-            val result = promo.validateFor(prpId, country)
+            val result = promo.validate(country)
 
             def body = Json.obj(
               "promotion" -> Json.toJson(promo),
@@ -63,34 +88,9 @@ class Promotion(fBackendFactory: TouchpointBackends, commonActions: CommonAction
               "errorMessage" -> result.swap.toOption.map(_.msg)
             )
 
-            result.fold(_ => NotAcceptable(body), _ => Ok(body))
+            result.fold(_ => NotAcceptable /*!?! fix this*/ (body), _ => Ok(body))
           }
-      }
-    }
-  }
-
-
-  def validate(promoCode: PromoCode, country: Country, currency: Option[Currency]) = NoCacheAction.async { implicit request =>
-    implicit val resolution: TouchpointBackends.Resolution = fBackendFactory.forRequest(PreSigninTestCookie, request.cookies)
-    implicit val tpBackend = resolution.backend
-
-    tpBackend.promoService.findPromotionFuture(promoCode).flatMap { promotion =>
-      promotion.fold {
-        Future.successful(NotFound(Json.obj("errorMessage" -> s"Sorry, we can't find that code.")))
-      } { promo =>
-        getAdjustedRatePlans(promo, country, currency).map { ratePlans =>
-          val result = promo.validate(country)
-
-          def body = Json.obj(
-            "promotion" -> Json.toJson(promo),
-            "adjustedRatePlans" -> Json.toJson(ratePlans),
-            "isValid" -> result.isRight,
-            "errorMessage" -> result.swap.toOption.map(_.msg)
-          )
-
-          result.fold(_ => NotAcceptable /*!?! fix this*/ (body), _ => Ok(body))
         }
-
       }
     }
   }

@@ -8,9 +8,12 @@ import configuration.Config
 import controllers.Testing
 import model.SubscriptionData
 import play.api.mvc.{Cookies, RequestHeader}
-import services.AuthenticationService.authenticatedUserFor
+import services.AsyncAuthenticationService
+import utils.TestUsersService.{SignedInUsername, TestUserCredentialType}
 
-object TestUsers {
+import scala.concurrent.{ExecutionContext, Future}
+
+object TestUsersService {
 
   val ValidityPeriod = ofDays(2)
 
@@ -19,7 +22,7 @@ object TestUsers {
     recency = ValidityPeriod
   )
 
-  private def isTestUser(username: String): Boolean = TestUsers.testUsers.isValid(username)
+  private def isTestUser(username: String): Boolean = TestUsersService.testUsers.isValid(username)
 
   sealed trait TestUserCredentialType[C] {
     def token(credential: C): Option[String]
@@ -37,13 +40,17 @@ object TestUsers {
   object SignedInUsername extends TestUserCredentialType[IdMinimalUser] {
     def token(idUser: IdMinimalUser) = idUser.displayName.flatMap(_.split(' ').headOption)
   }
+}
 
+class TestUsersService(authenticationService: AsyncAuthenticationService)(implicit ec: ExecutionContext) {
 
-  def isTestUser[C](permittedAltCredentialType: TestUserCredentialType[C], altCredentialSource: C)(implicit request: RequestHeader)
-    : Option[TestUserCredentialType[_]] = {
-
-    authenticatedUserFor(request).map(_.user).fold[Option[TestUserCredentialType[_]]] {
-      permittedAltCredentialType.passes(altCredentialSource)
-    }(SignedInUsername.passes)
+  def isTestUser[C](
+    permittedAltCredentialsType: TestUserCredentialType[C],
+    altCredentialSource: C
+  )(implicit request: RequestHeader): Future[Option[TestUserCredentialType[_]]] = {
+    authenticationService.tryAuthenticatedUserFor(request).map {
+      case None => permittedAltCredentialsType.passes(altCredentialSource)
+      case Some(authenticatedIdUser) => SignedInUsername.passes(authenticatedIdUser.user)
+    }
   }
 }

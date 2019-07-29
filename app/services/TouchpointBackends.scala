@@ -26,11 +26,13 @@ import services.TouchpointBackends.Resolution
 import touchpoint.TouchpointBackendConfig.BackendType
 import touchpoint.TouchpointBackendConfig.BackendType.Testing
 import touchpoint.{TouchpointBackendConfig, ZuoraProperties}
-import utils.TestUsers._
+import utils.TestUsersService._
+
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.util.{Failure, Try}
 import scalaz.std.scalaFuture._
+import utils.TestUsersService
 
 trait TouchpointBackend {
   def environmentName: String
@@ -55,7 +57,12 @@ trait TouchpointBackend {
   implicit def simpleRestClient: SimpleClient[Future]
 }
 
-class TouchpointBackends(actorSystem: ActorSystem, wsClient: WSClient, executionContext: ExecutionContext) {
+class TouchpointBackends(
+    testUsersService: TestUsersService,
+    actorSystem: ActorSystem,
+    wsClient: WSClient,
+    executionContext: ExecutionContext
+) {
 
   def logE[A](a: => A): A = Try(a).recoverWith({case e: Throwable => e.printStackTrace; Failure(e)}).get
 
@@ -107,11 +114,14 @@ class TouchpointBackends(actorSystem: ActorSystem, wsClient: WSClient, execution
    * Alternate credentials are used *only* when the user is not signed in - if you're logged in as
    * a 'normal' non-test user, it doesn't make any difference what pre-signin-test-cookie you have.
    */
-  def forRequest[C](permittedAltCredentialType: TestUserCredentialType[C], altCredentialSource: C)(
-    implicit request: RequestHeader): Resolution = {
-    val validTestUserCredentialOpt = isTestUser(permittedAltCredentialType, altCredentialSource)
-    val backendType = if (validTestUserCredentialOpt.isDefined) BackendType.Testing else BackendType.Default
-    Resolution(if (backendType == Testing) Test else Normal, backendType, validTestUserCredentialOpt)
+  def forRequest[C](
+    permittedAltCredentialType: TestUserCredentialType[C],
+    altCredentialSource: C
+  )(implicit request: RequestHeader): Future[Resolution] = {
+    testUsersService.isTestUser(permittedAltCredentialType, altCredentialSource).map { validTestUserCredentialOpt =>
+      val backendType = if (validTestUserCredentialOpt.isDefined) BackendType.Testing else BackendType.Default
+      Resolution(if (backendType == Testing) Test else Normal, backendType, validTestUserCredentialOpt)
+    }
   }
 }
 object TouchpointBackends {
