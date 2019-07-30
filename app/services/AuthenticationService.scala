@@ -5,7 +5,6 @@ import java.util.concurrent.Executors
 import com.gu.identity.auth.UserCredentials
 import com.gu.identity.model.User
 import com.gu.identity.play.IdentityPlayAuthService
-import com.gu.identity.play.IdentityPlayAuthService.UserCredentialsMissingError
 import com.gu.monitoring.SafeLogger
 import com.gu.monitoring.SafeLogger._
 import org.http4s.Uri
@@ -42,6 +41,7 @@ class AuthenticationService private (identityPlayAuthService: IdentityPlayAuthSe
   // the IO instance returned by getUserFromRequest() is executed synchronously,
   // as changing the result type to Future resulted in a PR with a very complicated diff:
   // https://github.com/guardian/subscriptions-frontend/pull/1265
+  //
   // It was deemed that the risk of a bug being introduced in #1265
   // was greater than the risk of a user getting a slower than normal response
   // (as a result of all threads available to execute this method call being blocked).
@@ -55,9 +55,6 @@ class AuthenticationService private (identityPlayAuthService: IdentityPlayAuthSe
       .attempt
       .unsafeRunTimed(limit = 5.seconds) // fairly arbitrary
       .flatMap {
-        case Left(err: UserCredentialsMissingError) =>
-          SafeLogger.info(s"unable to authenticate user - $err")
-          None
         case Left(err) =>
           SafeLogger.error(scrub"unable to authenticate user", err)
           None
