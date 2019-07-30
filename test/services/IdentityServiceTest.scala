@@ -57,6 +57,7 @@ class IdentityServiceTest extends FreeSpec with Matchers {
     val invalidCookies = AccessCredentials.Cookies("invalid_cookie")
 
     val client = new TestIdentityApiClient {
+      import com.gu.identity.model.play.WritesInstances.userWrites
       override val userLookupByCookies = (cookies: AccessCredentials.Cookies) =>
         {
           val body =

@@ -1,7 +1,7 @@
 package model
 
 import com.gu.memsub.Address
-import com.gu.identity.play.{PublicFields, PrivateFields, IdUser}
+import com.gu.identity.model.{PrivateFields, PublicFields, StatusFields, User => IdUser}
 import org.specs2.mutable.Specification
 import IdUserOps._
 
@@ -12,9 +12,10 @@ class IdUserOpsTest extends Specification {
       IdUser(
         id = "id",
         primaryEmailAddress = "email",
-        publicFields = PublicFields(None),
-        privateFields = Some(fields),
-        statusFields = None)
+        publicFields = PublicFields(),
+        privateFields = fields,
+        statusFields = StatusFields()
+      )
 
     val billingAddress = PrivateFields(
       billingAddress1 = Some("billingAddress1"),

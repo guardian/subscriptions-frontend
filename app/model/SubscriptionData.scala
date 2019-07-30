@@ -1,7 +1,8 @@
 package model
 import com.gu.i18n.Country.UK
 import com.gu.i18n.{CountryGroup, Currency, Title}
-import com.gu.identity.play.IdUser
+import com.gu.identity.model.{User => IdUser}
+import com.gu.memsub.Subscription.ProductRatePlanId
 import com.gu.memsub._
 import com.gu.memsub.promo.PromoCode
 import com.gu.memsub.subsv2._
@@ -31,7 +32,7 @@ case object CreditCard extends PaymentType {
 sealed trait PaymentData
 
 case class DirectDebitData(account: String, sortCodeValue: String, holder: String) extends PaymentData {
-  val sortCode = sortCodeValue.filter(_.isDigit)
+  val sortCode: String = sortCodeValue.filter(_.isDigit)
 }
 case class CreditCardData(stripeToken: String) extends PaymentData
 
@@ -69,23 +70,23 @@ case class PaperData(
   deliveryInstructions: Option[String],
   plan: CatalogPlan.Paper
 ) {
-  val sanitizedDeliveryInstructions = deliveryInstructions.map(instructions => instructions.replaceAll("\"", ""))
+  val sanitizedDeliveryInstructions: Option[String] = deliveryInstructions.map(instructions => instructions.replaceAll("\"", ""))
 }
 
 object PersonalData {
-  def fromIdUser(u: IdUser) = {
+  def fromIdUser(u: IdUser): PersonalData = {
     val phoneNumber: Option[String] = for {
-      identityPhoneNumber <- u.privateFields.flatMap(_.telephoneNumber)
+      identityPhoneNumber <- u.privateFields.telephoneNumber
       countryCode <- identityPhoneNumber.countryCode
       localNumber <- identityPhoneNumber.localNumber
     } yield NormalisedTelephoneNumber(countryCode, localNumber).format
 
     val personalData = PersonalData(
-      title = u.privateFields.flatMap(_.title).flatMap(Title.fromString),
-      first = u.privateFields.flatMap(_.firstName).mkString,
-      last = u.privateFields.flatMap(_.secondName).mkString,
+      title = u.privateFields.title.flatMap(Title.fromString),
+      first = u.privateFields.firstName.mkString,
+      last = u.privateFields.secondName.mkString,
       email = u.primaryEmailAddress,
-      receiveGnmMarketing = u.statusFields.flatMap(_.receiveGnmMarketing).getOrElse(false),
+      receiveGnmMarketing = false,
       address = u.billingAddress,
       telephoneNumber = phoneNumber
     )
@@ -95,7 +96,7 @@ object PersonalData {
 
 
 case class SubscribeRequest(genericData: SubscriptionData, productData: Either[PaperData, DigipackData]) {
-  def productRatePlanId = productData.fold(_.plan.id, _.plan.id)
+  def productRatePlanId: ProductRatePlanId = productData.fold(_.plan.id, _.plan.id)
 }
 
 case class DeliveryRecipient(title: Option[Title], firstName: Option[String], lastName: Option[String], email: Option[String], address: Address) extends FullName {
