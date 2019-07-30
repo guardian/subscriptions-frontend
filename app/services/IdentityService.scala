@@ -1,6 +1,9 @@
 package services
 
+import java.time.{Clock, Duration}
+
 import com.amazonaws.regions.{Region, Regions}
+import com.gu.identity.model.cookies.{CookieDescription, CookieDescriptionList}
 import com.gu.identity.model.play.ReadsInstances
 import com.gu.identity.model.{User => IdUser}
 import com.gu.memsub.{Address, NormalisedTelephoneNumber}
@@ -20,6 +23,51 @@ import services.PersonalDataJsonSerialiser.convertToUser
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.{higherKinds, implicitConversions}
 import scalaz.{Monad, NonEmptyList, \/}
+
+// identity-play-auth (which previously provided CookieBuilder) has been deprecated in favour of identity-auth-play:
+// - old library: https://github.com/guardian/identity-play-auth
+// - new library: https://github.com/guardian/identity/pull/1571
+//
+// As part of this migration, only the key features of identity-play-auth were kept
+// i.e. authenticating a user from a Play RequestHeader
+//
+// Therefore, to preserve the CookieBuilder functionality,
+// the code has been copy and pasted from the old identity-play-auth.
+object CookieBuilder {
+
+  def cookiesFromDescription(
+    cookieDescriptionList: CookieDescriptionList,
+    domain: Option[String] = None
+  )(implicit clock: Clock = Clock.systemUTC()): Seq[Cookie] = {
+
+    val maxAge = Duration.between(clock.instant(), cookieDescriptionList.expiresAt).getSeconds.toInt
+
+    for (cookieDescription <- cookieDescriptionList.values) yield {
+      val isSecure = cookieDescription.key.startsWith("SC_")
+      val maxAgeOpt = if (cookieDescription.sessionCookie.contains(true)) None else Some(maxAge)
+      Cookie(
+        cookieDescription.key,
+        cookieDescription.value,
+        maxAge = maxAgeOpt,
+        secure = true, // as of https://github.com/guardian/identity-frontend/pull/196
+        httpOnly = isSecure, // ideallycd . this would come from the Cookie Description
+        domain = domain)
+    }
+  }
+
+  // These implicits were also in identity-play-auth, but not in the CookieBuilder object.
+  // As they were removed in the migration add them here.
+  // They haven't been added to the identity-model-play library
+  // (which provides Reads/Writes type classes for types in the identity-model-library)
+  // since it is not clear they are used anywhere else.
+  // Can be added in the future if it makes sense.
+  private implicit val readsCookieDescriptionList: Reads[CookieDescription] = Json.reads[CookieDescription]
+  private implicit val readsCookieList: Reads[CookieDescriptionList] = Json.reads[CookieDescriptionList]
+
+  def fromGuestConversion(json: JsValue, domain: Option[String] = None): JsResult[Seq[Cookie]] = {
+    (json \ "cookies").validate[CookieDescriptionList].map(cookiesFromDescription(_, domain))
+  }
+}
 
 class IdentityService[M[_]](identityApiClient: => IdentityApiClient[M])(implicit monad: Monad[M]) extends LazyLogging with ReadsInstances {
 
@@ -74,11 +122,10 @@ class IdentityService[M[_]](identityApiClient: => IdentityApiClient[M])(implicit
   def convertGuest(password: String, token: IdentityToken, marketingOptIn: Boolean): M[Seq[Cookie]] = {
     monad.map(identityApiClient.convertGuest(password, token, marketingOptIn)) { r =>
       if (r.status == Status.OK) {
-//        CookieBuilder.fromGuestConversion(r.json, Some(Config.Identity.sessionDomain)).fold({ err =>
-//          SafeLogger.error(scrub"Error while parsing the identity cookies: $err")
-//          Seq.empty // Worst case the user is not automatically logged in
-//        }, identity)
-        ???  // FIXME
+        CookieBuilder.fromGuestConversion(r.json, Some(Config.Identity.sessionDomain)).fold({ err =>
+          SafeLogger.error(scrub"Error while parsing the identity cookies: $err")
+          Seq.empty // Worst case the user is not automatically logged in
+        }, identity)
       } else {
         throw new IdentityGuestPasswordError(r.body)
       }
@@ -197,11 +244,9 @@ class IdentityApiClientImpl(wsClient: WSClient)(implicit executionContext: Execu
     val endpoint = authoriseCall(wsClient.url(s"$identityEndpoint/user/me").addHttpHeaders(("Referer", s"$identityEndpoint/")))
 
     cookies =>
-//      endpoint.addHttpHeaders(cookies.forwardingHeader).execute()
-//        .withWSFailureLogging(endpoint)
-//        .withCloudwatchMonitoringOfGet
-
-      ??? // FIXME
+      endpoint.addHttpHeaders("X-GU-ID-FOWARDED-SC-GU-U" -> cookies.scGuU).execute()
+        .withWSFailureLogging(endpoint)
+        .withCloudwatchMonitoringOfGet
   }
 
   override val createGuest: (PersonalData, Option[Address]) => Future[WSResponse] = {
@@ -234,10 +279,9 @@ class IdentityApiClientImpl(wsClient: WSClient)(implicit executionContext: Execu
     val updatedFields =
       createOnlyFields.foldLeft(userJson) { (map, field) => map - field }
 
-//    endpoint.addHttpHeaders(authCookies.forwardingHeader).post(updatedFields)
-//      .withWSFailureLogging(endpoint)
-//      .withCloudwatchMonitoringOfPost
-    ??? // FIXME
+    endpoint.addHttpHeaders("X-GU-ID-FOWARDED-SC-GU-U" -> authCookies.scGuU).post(updatedFields)
+      .withWSFailureLogging(endpoint)
+      .withCloudwatchMonitoringOfPost
   }
 
   override val consentEmail: Email => Future[WSResponse] = { email =>
