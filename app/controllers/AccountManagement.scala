@@ -356,24 +356,28 @@ class AccountManagement(
     def subscriptionDetailsMatch(loginRequest: AccountManagementLoginRequest, zuoraSubscription: Subscription[ContentSubscription]): Future[Boolean] = {
       for {
         res <- resolution
-        zuoraAccount <- res.backend.zuoraService.getAccount(zuoraSubscription.accountId)
-        zuoraContact <- res.backend.zuoraService.getContact(zuoraAccount.billToId)
+        tpBackend = res.backend // simplify diff
+        zuoraAccount <- tpBackend.zuoraService.getAccount(zuoraSubscription.accountId)
+        zuoraContact <- tpBackend.zuoraService.getContact(zuoraAccount.billToId)
       } yield detailsMatch(zuoraContact, loginRequest)
     }
 
     loginRequestOpt.map { loginRequest =>
       (for {
         res <- OptionT.pure(resolution)
+        tpBackend = res.backend // simplify diff
         zuoraSubscription <- OptionT(res.backend.subscriptionService.get[ContentSubscription](Name(loginRequest.subscriptionId)))
         result <- OptionT(subscriptionDetailsMatch(loginRequest, zuoraSubscription).map(matches => if (matches) Some(zuoraSubscription) else None))
       } yield result).run
     }.getOrElse(Future.successful(None))
+
   }
 
   def manage(subscriptionId: Option[String] = None, errorCode: Option[String] = None, promoCode: Option[PromoCode] = None): Action[AnyContent] = accountManagementAction.async { implicit request =>
    val resolution = touchpointBackends.forRequest(PreSigninTestCookie, request.cookies)
 
     val eventualMaybeSubscription = resolution.flatMap { res =>
+      // make implicit value available for subscriptionFromRequest
       implicit val backend: TouchpointBackend = res.backend
       sessionSubscription.subscriptionFromRequest
     }
@@ -397,7 +401,8 @@ class AccountManagement(
       maybeEmail <- OptionT(futureSomeMaybeEmail)
       maybePaymentMethod <- OptionT(tpBackend.commonPaymentService.flatMap(_.getPaymentMethod(subscription.accountId).map(Option(_))))
     } yield {
-      implicit val implicitRes: Resolution = res
+      // re-define as implicit so Resolution implicit in scope for methods within this yield.
+      implicit val implicitResolution: Resolution = res
       val paymentMethodIsPaymentCard = maybePaymentMethod.collect { case _:PaymentCard => true }.isDefined
       val maybeFutureManagePage = subscription.planToManage.product match {
         case Product.Delivery => subscription.asDelivery.map { deliverySubscription =>
@@ -471,4 +476,5 @@ class AccountManagement(
       manageDelivery.fulfilmentLookup(httpClient)
     }
   }
+
 }
