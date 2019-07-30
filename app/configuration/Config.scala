@@ -4,7 +4,6 @@ package configuration
 import com.github.nscala_time.time.Imports._
 import com.gu.cas.PrefixedTokens
 import com.gu.config._
-import com.gu.identity.cookie.{PreProductionKeys, ProductionKeys}
 import com.gu.memsub.auth.common.MemSub.Google._
 import com.gu.salesforce.SalesforceConfig
 import com.netaporter.uri.dsl._
@@ -35,8 +34,6 @@ object Config {
 
     val baseUri = idConfig.getString("baseUri")
     val apiToken = idConfig.getString("apiToken")
-
-    val keys = if (idConfig.getBoolean("production.keys")) new ProductionKeys else new PreProductionKeys
 
     val testUsersSecret = idConfig.getString("test.users.secret")
 

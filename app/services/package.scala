@@ -1,4 +1,3 @@
-import com.gu.identity.play.IdMinimalUser
 import forms.FinishAccountForm
 import model.GuestAccountData
 import play.api.data.Form

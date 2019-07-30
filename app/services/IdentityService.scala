@@ -3,7 +3,6 @@ package services
 import com.amazonaws.regions.{Region, Regions}
 import com.gu.identity.model.play.ReadsInstances
 import com.gu.identity.model.{User => IdUser}
-import com.gu.identity.play.{AccessCredentials, CookieBuilder, AuthenticatedIdUser, IdMinimalUser}
 import com.gu.memsub.{Address, NormalisedTelephoneNumber}
 import com.gu.monitoring._
 import com.gu.monitoring.SafeLogger._
@@ -75,10 +74,11 @@ class IdentityService[M[_]](identityApiClient: => IdentityApiClient[M])(implicit
   def convertGuest(password: String, token: IdentityToken, marketingOptIn: Boolean): M[Seq[Cookie]] = {
     monad.map(identityApiClient.convertGuest(password, token, marketingOptIn)) { r =>
       if (r.status == Status.OK) {
-        CookieBuilder.fromGuestConversion(r.json, Some(Config.Identity.sessionDomain)).fold({ err =>
-          SafeLogger.error(scrub"Error while parsing the identity cookies: $err")
-          Seq.empty // Worst case the user is not automatically logged in
-        }, identity)
+//        CookieBuilder.fromGuestConversion(r.json, Some(Config.Identity.sessionDomain)).fold({ err =>
+//          SafeLogger.error(scrub"Error while parsing the identity cookies: $err")
+//          Seq.empty // Worst case the user is not automatically logged in
+//        }, identity)
+        ???  // FIXME
       } else {
         throw new IdentityGuestPasswordError(r.body)
       }
@@ -197,9 +197,11 @@ class IdentityApiClientImpl(wsClient: WSClient)(implicit executionContext: Execu
     val endpoint = authoriseCall(wsClient.url(s"$identityEndpoint/user/me").addHttpHeaders(("Referer", s"$identityEndpoint/")))
 
     cookies =>
-      endpoint.addHttpHeaders(cookies.forwardingHeader).execute()
-        .withWSFailureLogging(endpoint)
-        .withCloudwatchMonitoringOfGet
+//      endpoint.addHttpHeaders(cookies.forwardingHeader).execute()
+//        .withWSFailureLogging(endpoint)
+//        .withCloudwatchMonitoringOfGet
+
+      ??? // FIXME
   }
 
   override val createGuest: (PersonalData, Option[Address]) => Future[WSResponse] = {
@@ -232,9 +234,10 @@ class IdentityApiClientImpl(wsClient: WSClient)(implicit executionContext: Execu
     val updatedFields =
       createOnlyFields.foldLeft(userJson) { (map, field) => map - field }
 
-    endpoint.addHttpHeaders(authCookies.forwardingHeader).post(updatedFields)
-      .withWSFailureLogging(endpoint)
-      .withCloudwatchMonitoringOfPost
+//    endpoint.addHttpHeaders(authCookies.forwardingHeader).post(updatedFields)
+//      .withWSFailureLogging(endpoint)
+//      .withCloudwatchMonitoringOfPost
+    ??? // FIXME
   }
 
   override val consentEmail: Email => Future[WSResponse] = { email =>

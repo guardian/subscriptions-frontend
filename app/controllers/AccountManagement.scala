@@ -1,8 +1,7 @@
 package controllers
 
-import _root_.services.AuthenticationService._
 import _root_.services.TouchpointBackends.Resolution
-import _root_.services.{LookupSubscriptionFulfilment, TouchpointBackend, TouchpointBackends}
+import _root_.services.{AuthenticationService, LookupSubscriptionFulfilment, TouchpointBackend, TouchpointBackends}
 import actions.CommonActions
 import com.gu.i18n.{CountryGroup, Currency}
 import com.gu.memsub.Subscription.{Name, ProductRatePlanId}
@@ -49,6 +48,11 @@ object SessionSubscription extends StrictLogging {
 
   def clear(result: Result)(implicit request: Request[AnyContent]): Result =
     result.withSession(request.session - SUBSCRIPTION_SESSION_KEY)
+}
+
+class SessionSubscription(authenticationService: AuthenticationService) extends StrictLogging {
+
+  import SessionSubscription._
 
   def subscriptionFromRequest(implicit request: Request[_], tpBackend: TouchpointBackend, executionContext: ExecutionContext): Future[Option[Subscription[ContentSubscription]]] = {
 
@@ -56,7 +60,7 @@ object SessionSubscription extends StrictLogging {
       subscriptionId <- OptionT(Future.successful(request.session.data.get(SUBSCRIPTION_SESSION_KEY)))
       zuoraSubscription <- OptionT(tpBackend.subscriptionService.get[ContentSubscription](Name(subscriptionId)))
     } yield zuoraSubscription).orElse(for {
-      identityUser <- OptionT(Future.successful(authenticatedUserFor(request)))
+      identityUser <- OptionT(Future.successful(authenticationService.authenticatedUserFor(request)))
       /* TODO: Use a Zuora-only based lookup from an Identity ID. This needs code pulling up from Members Data API into Membership Common */
       salesForceUser <- OptionT(tpBackend.salesforceService.repo.get(identityUser.user.id).map { d =>
         d.leftMap(e => logger.warn(s"Error looking up SF Contact for logged in user with Identity ID ${identityUser.user.id}: $e")).toOption.flatten
@@ -71,7 +75,7 @@ object SessionSubscription extends StrictLogging {
 
 }
 
-class ManageDelivery(implicit val executionContext: ExecutionContext) extends ContextLogging {
+class ManageDelivery(sessionSubscription: SessionSubscription)(implicit val executionContext: ExecutionContext) extends ContextLogging {
 
   import play.api.mvc.Results._
 
@@ -89,7 +93,7 @@ class ManageDelivery(implicit val executionContext: ExecutionContext) extends Co
 
     (for {
       form <- EitherT(Future.successful(SuspendForm.mappings.bindFromRequest().value \/> "Please check your selections and try again"))
-      maybeDeliverySub <- EitherT(SessionSubscription.subscriptionFromRequest.map(_ \/> "Could not find an active subscription"))
+      maybeDeliverySub <- EitherT(sessionSubscription.subscriptionFromRequest.map(_ \/> "Could not find an active subscription"))
       sub <- EitherT(Future.successful(maybeDeliverySub.asDelivery \/> "Is not a Home Delivery subscription"))
       account <- EitherT(recoverToDisjunction(tpBackend.zuoraService.getAccount(sub.accountId), "Unable to retrieve account details"))
       newHoliday = PaymentHoliday(sub.name, form.startDate, form.endDate)
@@ -191,7 +195,7 @@ object ManageWeekly extends ContextLogging {
 
 }
 
-class ManageWeekly(implicit val executionContext: ExecutionContext) extends ContextLogging {
+class ManageWeekly(sessionSubscription: SessionSubscription)(implicit val executionContext: ExecutionContext) extends ContextLogging {
 
   import ManageWeekly._
   import play.api.mvc.Results._
@@ -277,7 +281,7 @@ class ManageWeekly(implicit val executionContext: ExecutionContext) extends Cont
       InternalServerError(jsonError(fullError))
     }
 
-    SessionSubscription.subscriptionFromRequest flatMap { maybeSub: Option[Subscription[ContentSubscription]] =>
+    sessionSubscription.subscriptionFromRequest flatMap { maybeSub: Option[Subscription[ContentSubscription]] =>
       val response = for {
         sub <- EitherT[Future, String, Subscription[ContentSubscription]](Future.successful(maybeSub.toRightDisjunction("no subscription in request")))
         weeklySub <- EitherT(Future.successful(sub.asWeekly.toRightDisjunction("subscription is not weekly")))
@@ -306,7 +310,7 @@ class ManageWeekly(implicit val executionContext: ExecutionContext) extends Cont
     import model.SubscriptionOps._
 
     val res = for {
-      subscription <- OptionT(SessionSubscription.subscriptionFromRequest)
+      subscription <- OptionT(sessionSubscription.subscriptionFromRequest)
       billingSchedule <- OptionT(tpBackend.commonPaymentService.flatMap(_.billingSchedule(subscription.id, subscription.accountId, numberOfBills = 13).map(Some(_):Option[Option[BillingSchedule]])))
     } yield {
       Ok(thankYouRenew(subscription.nextPlan, billingSchedule, touchpoint))
@@ -327,6 +331,8 @@ class ManageWeekly(implicit val executionContext: ExecutionContext) extends Cont
 
 class AccountManagement(
   touchpointBackends: TouchpointBackends,
+  authenticationService: AuthenticationService,
+  sessionSubscription: SessionSubscription,
   commonActions: CommonActions,
   httpClient: OKRequest => Future[Response],
   override protected val controllerComponents: ControllerComponents
@@ -335,8 +341,8 @@ class AccountManagement(
   import commonActions.NoCacheAction
 
   val accountManagementAction = NoCacheAction
-  val manageWeekly: ManageWeekly = new ManageWeekly()
-  val manageDelivery: ManageDelivery = new ManageDelivery()
+  val manageWeekly: ManageWeekly = new ManageWeekly(sessionSubscription)
+  val manageDelivery: ManageDelivery = new ManageDelivery(sessionSubscription)
 
   def subscriptionFromUserDetails(loginRequestOpt: Option[AccountManagementLoginRequest])(implicit request: Request[AnyContent]): Future[Option[Subscription[ContentSubscription]]] = {
     implicit val resolution: TouchpointBackends.Resolution = touchpointBackends.forRequest(PreSigninTestCookie, request.cookies)
@@ -366,11 +372,11 @@ class AccountManagement(
   def manage(subscriptionId: Option[String] = None, errorCode: Option[String] = None, promoCode: Option[PromoCode] = None): Action[AnyContent] = accountManagementAction.async { implicit request =>
     implicit val resolution: TouchpointBackends.Resolution = touchpointBackends.forRequest(PreSigninTestCookie, request.cookies)
     implicit val tpBackend = resolution.backend
-    val eventualMaybeSubscription = SessionSubscription.subscriptionFromRequest
+    val eventualMaybeSubscription = sessionSubscription.subscriptionFromRequest
     val errorCodes = errorCode.toSeq.flatMap(_.split(',').map(_.trim)).filterNot(_.isEmpty).toSet
 
     val futureMaybeEmail: OptionT[Future, String] = for {
-      authUser <- OptionT(Future.successful(authenticatedUserFor(request)))
+      authUser <- OptionT(Future.successful(authenticationService.authenticatedUserFor(request)))
       idUser <- OptionT(touchpointBackends.identityService.userLookupByCredentials(authUser.credentials))
     } yield idUser.primaryEmailAddress
 

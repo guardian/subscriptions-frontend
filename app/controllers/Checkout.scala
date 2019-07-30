@@ -33,7 +33,6 @@ import play.api.libs.json._
 import play.api.mvc._
 import scalaz.std.scalaFuture._
 import scalaz.{NonEmptyList, OptionT}
-import services.AuthenticationService.authenticatedUserFor
 import services._
 import utils.RequestCountry._
 import utils.{PaymentGatewayError, TestUsers}
@@ -45,7 +44,7 @@ import scala.Function.const
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
-class Checkout(fBackendFactory: TouchpointBackends, commonActions: CommonActions, implicit val executionContext: ExecutionContext, override protected val controllerComponents: ControllerComponents) extends BaseController with LazyLogging {
+class Checkout(fBackendFactory: TouchpointBackends, authenticationService: AuthenticationService, commonActions: CommonActions, implicit val executionContext: ExecutionContext, override protected val controllerComponents: ControllerComponents) extends BaseController with LazyLogging {
 
   import SessionKeys.{Currency => _, UserId => _, _}
   import commonActions._
@@ -92,7 +91,7 @@ class Checkout(fBackendFactory: TouchpointBackends, commonActions: CommonActions
       }
 
       val idUser = (for {
-        authUser <- OptionT(Future.successful(authenticatedUserFor(request)))
+        authUser <- OptionT(Future.successful(authenticationService.authenticatedUserFor(request)))
         idUser <- OptionT(fBackendFactory.identityService.userLookupByCredentials(authUser.credentials))
       } yield idUser).run
 
@@ -200,7 +199,7 @@ class Checkout(fBackendFactory: TouchpointBackends, commonActions: CommonActions
       Future.successful(Redirect(routes.Homepage.index()).withNewSession)
     } { case (subsName, startDate) =>
 
-      val passwordForm = authenticatedUserFor(request).fold {
+      val passwordForm = authenticationService.authenticatedUserFor(request).fold {
         for {
           userId <- session.get(SessionKeys.UserId)
           token <- session.get(IdentityGuestPasswordSettingToken)

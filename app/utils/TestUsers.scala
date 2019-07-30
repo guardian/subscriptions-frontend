@@ -2,13 +2,12 @@ package utils
 
 import java.time.Duration.ofDays
 
-import com.gu.identity.play.IdMinimalUser
 import com.gu.identity.testing.usernames.TestUsernames
 import configuration.Config
 import controllers.Testing
 import model.SubscriptionData
 import play.api.mvc.{Cookies, RequestHeader}
-import services.AuthenticationService.authenticatedUserFor
+import services.{AuthenticationService, IdMinimalUser}
 
 object TestUsers {
 
@@ -37,12 +36,16 @@ object TestUsers {
   object SignedInUsername extends TestUserCredentialType[IdMinimalUser] {
     def token(idUser: IdMinimalUser) = idUser.displayName.flatMap(_.split(' ').headOption)
   }
+}
 
+class TestUsers(authenticationService: AuthenticationService) {
+
+  import TestUsers._
 
   def isTestUser[C](permittedAltCredentialType: TestUserCredentialType[C], altCredentialSource: C)(implicit request: RequestHeader)
-    : Option[TestUserCredentialType[_]] = {
+  : Option[TestUserCredentialType[_]] = {
 
-    authenticatedUserFor(request).map(_.user).fold[Option[TestUserCredentialType[_]]] {
+    authenticationService.authenticatedUserFor(request).map(_.user).fold[Option[TestUserCredentialType[_]]] {
       permittedAltCredentialType.passes(altCredentialSource)
     }(SignedInUsername.passes)
   }

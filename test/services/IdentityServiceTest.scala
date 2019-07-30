@@ -1,7 +1,6 @@
 package services
 
 import cats.Id
-import com.gu.identity.play.AccessCredentials
 import com.gu.memsub.Address
 import model.PersonalData
 import org.scalatest.{FreeSpec, Matchers}

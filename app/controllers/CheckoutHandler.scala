@@ -21,7 +21,6 @@ import play.api.libs.json._
 import play.api.mvc._
 
 import scalaz.NonEmptyList
-import services.AuthenticationService.authenticatedUserFor
 import services._
 import utils.RequestCountry._
 import utils.{PaymentGatewayError, TestUsers}
@@ -30,7 +29,7 @@ import views.support.{BillingPeriod => _}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class CheckoutHandler(fBackendFactory: TouchpointBackends, commonActions: CommonActions, implicit val executionContext: ExecutionContext, override protected val controllerComponents: ControllerComponents) extends BaseController with LazyLogging {
+class CheckoutHandler(fBackendFactory: TouchpointBackends, authenticationService: AuthenticationService, testUsers: TestUsers, commonActions: CommonActions, implicit val executionContext: ExecutionContext, override protected val controllerComponents: ControllerComponents) extends BaseController with LazyLogging {
   import SessionKeys.{Currency => _, UserId => _, _}
   import commonActions._
 
@@ -42,7 +41,7 @@ class CheckoutHandler(fBackendFactory: TouchpointBackends, commonActions: Common
     val tempData = SubscriptionsForm.subsForm.bindFromRequest().value
     implicit val resolution: TouchpointBackends.Resolution = fBackendFactory.forRequest(NameEnteredInForm, tempData)
     implicit val tpBackend: TouchpointBackend = resolution.backend
-    val idUserOpt = authenticatedUserFor(request)
+    val idUserOpt = authenticationService.authenticatedUserFor(request)
 
     val sessionTrackingCode = request.session.get(PromotionTrackingCode)
     val sessionSupplierCode = request.session.get(SupplierTrackingCode)
@@ -159,7 +158,7 @@ class CheckoutHandler(fBackendFactory: TouchpointBackends, commonActions: Common
       }
 
       def submitAcquisitionEvent(request: Request[AnyContent], subscribeRequest: SubscribeRequest): EitherT[Future, Unit, AcquisitionSubmission] = {
-        val testUser = TestUsers.isTestUser(PreSigninTestCookie, request.cookies)(request)
+        val testUser = testUsers.isTestUser(PreSigninTestCookie, request.cookies)(request)
         if(testUser.isEmpty) {
           val acquisitionData = request.session.get("acquisitionData")
           if (acquisitionData.isEmpty) {
