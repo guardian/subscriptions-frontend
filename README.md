@@ -1,8 +1,8 @@
 # Subscriptions frontend
 
-## NGinx
+## Nginx
 
-#### Setup Nginx for `Identity-Platform`
+#### Setup Nginx for identity-platform
 
 Subscriptions depends on Nginx config and SSL certs from Identity, so you'll need to perform the
 [Nginx setup for identity-platform](https://github.com/guardian/identity-platform/blob/master/README.md#setup-nginx-for-local-development)
@@ -10,18 +10,10 @@ first, before you do anything else.
 
    Run: `./nginx/setup.sh` and enter your password where prompted.
 
-#### Run Subscription's Nginx setup script
+#### Setup Nginx for subscriptions-frontend
 
-Run the Subscription-specific [setup.sh](nginx/setup.sh) script from the root
-of the `subscriptions-frontend` project:
-
-```
-./nginx/setup.sh
-```
-
-The script doesn't start Nginx. To manually start it run `sudo nginx` or `sudo systemctl start nginx`
-depending on your system.
-
+1. Install dependencies `brew bundle`
+2. Run `nginx/setup.sh`
 
 ## General Setup
 
