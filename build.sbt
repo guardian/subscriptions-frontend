@@ -1,5 +1,4 @@
 import play.sbt.PlayImport
-import scala.sys.process._
 
 name := "frontend"
 
@@ -74,7 +73,7 @@ libraryDependencies ++= Seq(
     "net.logstash.logback" % "logstash-logback-encoder" % "4.11",
     "com.fasterxml.jackson.dataformat" % "jackson-dataformat-cbor" % "2.9.2",
     "com.google.guava" % "guava" % "25.0-jre", //-- added explicitly - snyk report avoid logback vulnerability
-    "com.fasterxml.jackson.core" % "jackson-databind" % (jacksonVersion+".1"), //added explicitly to avoid snyk vulnerability
+    "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion, //added explicitly to avoid snyk vulnerability
     "com.fasterxml.jackson.core" % "jackson-annotations" % jacksonVersion, //added explicitly to avoid snyk vulnerability
     "com.fasterxml.jackson.datatype" % "jackson-datatype-jdk8" % jacksonVersion, //added explicitly to avoid snyk vulnerability
     "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" % jacksonVersion, //added explicitly to avoid snyk vulnerability
