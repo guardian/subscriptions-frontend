@@ -86,7 +86,7 @@ object PersonalData {
       first = u.privateFields.firstName.mkString,
       last = u.privateFields.secondName.mkString,
       email = u.primaryEmailAddress,
-      receiveGnmMarketing = false,
+      receiveGnmMarketing = false, // Deprecated, unused and not a GDPR compliant consent
       address = u.billingAddress,
       telephoneNumber = phoneNumber
     )
