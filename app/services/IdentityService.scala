@@ -1,7 +1,9 @@
 package services
 
 import com.amazonaws.regions.{Region, Regions}
-import com.gu.identity.play._
+import com.gu.identity.model.play.ReadsInstances
+import com.gu.identity.model.{User => IdUser}
+import com.gu.identity.play.{AccessCredentials, CookieBuilder, AuthenticatedIdUser, IdMinimalUser}
 import com.gu.memsub.{Address, NormalisedTelephoneNumber}
 import com.gu.monitoring._
 import com.gu.monitoring.SafeLogger._
@@ -20,7 +22,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.language.{higherKinds, implicitConversions}
 import scalaz.{Monad, NonEmptyList, \/}
 
-class IdentityService[M[_]](identityApiClient: => IdentityApiClient[M])(implicit monad: Monad[M]) extends LazyLogging {
+class IdentityService[M[_]](identityApiClient: => IdentityApiClient[M])(implicit monad: Monad[M]) extends LazyLogging with ReadsInstances {
 
   import IdentityService._
 
