@@ -73,8 +73,7 @@ object AuthenticationService {
     // Target client not relevant; only applicable to crypto access tokens,
     // which aren't used to authenticate requests for this application
     // (crypto access tokens only used to authenticate requests from native apps).
-    // TODO: the constructor for IdentityPlayAuthService could take an optional targetClient instead.
-    val identityPlayAuthService = IdentityPlayAuthService.unsafeInit(identityApiUri, accessToken, targetClient = "n/a")
+    val identityPlayAuthService = IdentityPlayAuthService.unsafeInit(identityApiUri, accessToken, targetClient = None)
     new AuthenticationService(identityPlayAuthService)
   }
 
