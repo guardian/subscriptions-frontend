@@ -46,7 +46,7 @@ Mappings:
       MinInstances: '3'
       MaxInstances: '6'
       DesiredInstances: '3'
-      SSLCertificateId: '89005cdb-ddf9-4893-89da-0e5facb13914'
+      SSLCertificateId: '39488f8a-17f1-4154-b799-b6a132ef37e7'
       KinesisStreamArn: arn:aws:kinesis:eu-west-1:865473395570:stream/acquisitions-stream-PROD
     CODE:
       DynamoDBTables:
