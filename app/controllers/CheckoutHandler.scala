@@ -29,7 +29,15 @@ import views.support.{BillingPeriod => _}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class CheckoutHandler(fBackendFactory: TouchpointBackends, authenticationService: AuthenticationService, testUsers: TestUsers, commonActions: CommonActions, implicit val executionContext: ExecutionContext, override protected val controllerComponents: ControllerComponents) extends BaseController with LazyLogging {
+class CheckoutHandler(
+    fBackendFactory: TouchpointBackends,
+    authenticationService: AuthenticationService,
+    testUsers: TestUsers,
+    commonActions: CommonActions,
+    implicit val executionContext: ExecutionContext,
+    override protected val controllerComponents: ControllerComponents
+) extends BaseController with LazyLogging {
+
   import SessionKeys.{Currency => _, UserId => _, _}
   import commonActions._
 

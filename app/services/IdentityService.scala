@@ -36,6 +36,7 @@ import scalaz.{Monad, NonEmptyList, \/}
 object CookieBuilder {
 
   def cookiesFromDescription(
+    // Description of the cookies to set, as specified by the identity API.
     cookieDescriptionList: CookieDescriptionList,
     domain: Option[String] = None
   )(implicit clock: Clock = Clock.systemUTC()): Seq[Cookie] = {
@@ -50,7 +51,7 @@ object CookieBuilder {
         cookieDescription.value,
         maxAge = maxAgeOpt,
         secure = true, // as of https://github.com/guardian/identity-frontend/pull/196
-        httpOnly = isSecure, // ideallycd . this would come from the Cookie Description
+        httpOnly = isSecure, // ideally this would come from the Cookie Description
         domain = domain)
     }
   }
