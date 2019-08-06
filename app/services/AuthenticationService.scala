@@ -5,6 +5,7 @@ import java.util.concurrent.Executors
 import com.gu.identity.auth.UserCredentials
 import com.gu.identity.model.User
 import com.gu.identity.play.IdentityPlayAuthService
+import com.gu.identity.play.IdentityPlayAuthService.UserCredentialsMissingError
 import com.gu.monitoring.SafeLogger
 import com.gu.monitoring.SafeLogger._
 import org.http4s.Uri
@@ -56,7 +57,7 @@ class AuthenticationService private (identityPlayAuthService: IdentityPlayAuthSe
       .unsafeRunTimed(limit = 5.seconds) // fairly arbitrary
       .flatMap {
         case Left(err) =>
-          SafeLogger.error(scrub"unable to authenticate user", err)
+          logUserAuthenticationError(err)
           None
         case Right(user) => Some(user)
       }
@@ -84,4 +85,15 @@ object AuthenticationService {
     }
     AuthenticatedIdUser(accessCredentials, IdMinimalUser(user.id, user.publicFields.displayName))
   }
+
+  // Logs failure to authenticate a user.
+  // User shouldn't necessarily be signed in,
+  // in which case, don't log failure to authenticate as an error.
+  // All other failures are considered errors.
+  def logUserAuthenticationError(error: Throwable): Unit =
+    error match {
+      // Utilises the custom error introduced in: https://github.com/guardian/identity/pull/1578
+      case _: UserCredentialsMissingError => SafeLogger.info(s"unable to authorize user - $error")
+      case _ => SafeLogger.error(scrub"unable to authorize user", error)
+    }
 }
