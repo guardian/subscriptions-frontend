@@ -17,7 +17,8 @@ import play.components.HttpConfigurationComponents
 import play.filters.csrf.CSRFComponents
 import play.filters.headers.{SecurityHeadersConfig, SecurityHeadersFilter}
 import router.Routes
-import services.TouchpointBackends
+import services.{AuthenticationService, TouchpointBackends}
+import utils.TestUsers
 
 class MyApplicationLoader extends ApplicationLoader {
   def load(context: Context) = {
@@ -44,7 +45,14 @@ class MyComponents(context: Context)
     with AssetsComponents
 {
 
-  val touchpointBackends = new TouchpointBackends(actorSystem, wsClient, executionContext)
+  val authenticationService: AuthenticationService =
+    AuthenticationService.unsafeInit(Config.Identity.baseUri, Config.Identity.apiToken)
+
+  val testUsers = new TestUsers(authenticationService)
+
+  val sessionSubscription = new SessionSubscription(authenticationService)
+
+  val touchpointBackends = new TouchpointBackends(testUsers, actorSystem, wsClient, executionContext)
 
   override lazy val httpErrorHandler: ErrorHandler =
     new ErrorHandler(environment, configuration, sourceMapper, Some(router))
@@ -62,14 +70,14 @@ class MyComponents(context: Context)
     new Homepage(commonActions, controllerComponents),
     new Management(actorSystem = actorSystem, touchpointBackends, oAuthActions, executionContext, controllerComponents),
     new DigitalPack(touchpointBackends.Normal, commonActions, controllerComponents),
-    new CheckoutHandler(touchpointBackends, commonActions, executionContext, controllerComponents),
-    new Checkout(touchpointBackends, commonActions, executionContext, controllerComponents),
+    new CheckoutHandler(touchpointBackends, authenticationService, testUsers, commonActions, executionContext, controllerComponents),
+    new Checkout(touchpointBackends, authenticationService, commonActions, executionContext, controllerComponents),
     new Promotion(touchpointBackends, commonActions, executionContext, controllerComponents),
     new Shipping(touchpointBackends.Normal, commonActions, controllerComponents),
     new WeeklyLandingPage(touchpointBackends.Normal, commonActions, controllerComponents),
     new OAuth(wsClient = wsClient, commonActions, oAuthActions, executionContext, controllerComponents),
     new CAS(oAuthActions, executionContext, controllerComponents),
-    new AccountManagement(touchpointBackends, commonActions, httpClient, controllerComponents),
+    new AccountManagement(touchpointBackends, authenticationService, sessionSubscription, commonActions, httpClient, controllerComponents),
     new PatternLibrary(commonActions, controllerComponents),
     new Testing(touchpointBackends.Test, commonActions, oAuthActions, controllerComponents),
     new PromoLandingPage(touchpointBackends.Normal, commonActions, oAuthActions, executionContext, controllerComponents),
@@ -81,7 +89,7 @@ class MyComponents(context: Context)
     new CheckCacheHeadersFilter(),
     new SecurityHeadersFilter(SecurityHeadersConfig.fromConfiguration(context.initialConfiguration)),
     csrfFilter,
-    new AddGuIdentityHeaders(),
+    new AddGuIdentityHeaders(authenticationService),
     new AddEC2InstanceHeader(wsClient)
   )
 

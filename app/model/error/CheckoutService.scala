@@ -1,13 +1,12 @@
 package model.error
 
-import com.gu.identity.play.IdMinimalUser
 import com.gu.memsub.promo.{NewUsers, ValidPromotion}
 import com.gu.salesforce.ContactId
 import com.gu.stripe.Stripe
 import com.gu.zuora.soap.models.Results.SubscribeResult
 import com.gu.zuora.soap.models.errors.PaymentGatewayError
 import model.PurchaserIdentifiers
-import services.UserIdData
+import services.{IdMinimalUser, UserIdData}
 
 object CheckoutService {
 

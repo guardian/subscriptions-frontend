@@ -1,6 +1,5 @@
 package services
 
-import com.gu.identity.play.IdMinimalUser
 import com.gu.memsub.NormalisedTelephoneNumber
 import com.gu.salesforce.ContactDeserializer.Keys
 import com.gu.salesforce._

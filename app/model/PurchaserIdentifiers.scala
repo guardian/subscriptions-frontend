@@ -1,7 +1,7 @@
 package model
 
-import com.gu.identity.play.IdMinimalUser
 import com.gu.salesforce.ContactId
+import services.IdMinimalUser
 
 case class PurchaserIdentifiers(buyerContactId: ContactId, recipientContactId: ContactId, identityId: Option[IdMinimalUser]) {
   val description = s"""
