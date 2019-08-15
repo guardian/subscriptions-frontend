@@ -63,7 +63,7 @@ define([
             submitEl.removeAttribute('disabled');
         }
 
-        var stripeKey = deriveStripeKeyFromDeliveryCountry()
+        var stripeKey = deriveStripeKeyFromAddresses()
 
         handler = StripeCheckout.configure(Object.assign({}, guardian.stripeCheckout, {'key' : stripeKey}));
         bean.on(window, 'popstate', handler.close);
@@ -91,9 +91,15 @@ define([
         });
     }
 
-    function deriveStripeKeyFromDeliveryCountry() {
-        var deliveryAddressOption = document.querySelectorAll('#delivery-address-country option:checked')[0];
-        var stripeServiceName = (deliveryAddressOption && deliveryAddressOption.dataset.stripeServiceName) || 'ukPublicKey';
+    function deriveStripeKeyFromAddresses() {
+        var useDeliveryAddressForBillingCheckbox = document.querySelector('.js-checkout-delivery-same-as-billing')
+
+        var billingCountryOption = useDeliveryAddressForBillingCheckbox.checked ?
+            document.querySelectorAll('#delivery-address-country option:checked')[0] :
+            document.querySelectorAll('#personal-address-country option:checked')[0];
+
+        var stripeServiceName = (billingCountryOption && billingCountryOption.dataset.stripeServiceName) || 'ukPublicKey';
+
         return guardian.stripe[stripeServiceName]
     }
 
