@@ -63,23 +63,20 @@ define([
             submitEl.removeAttribute('disabled');
         }
 
-        var deliveryCountryElement = document.querySelector('#delivery-address-country')
-        var deliveryCountry = deliveryCountryElement.options[deliveryCountryElement.selectedIndex].value
+        var stripeKey = deriveStripeKeyFromDeliveryCountry()
 
-        handler = StripeCheckout.configure(stripeConfigWithCorrectKey(guardian.stripeCheckout, guardian.stripe, deliveryCountry));
+        handler = StripeCheckout.configure(Object.assign({}, guardian.stripeCheckout, {'key' : stripeKey}));
         bean.on(window, 'popstate', handler.close);
 
         var successfulCharge = false;
         var ratePlan = document.querySelector('.js-rate-plans input:checked').dataset;
-        var checkedOption = document.querySelectorAll('#personal-address-country option:checked')[0];
-        var stripeServiceName = (checkedOption && checkedOption.dataset.stripeServiceName) || 'ukPublicKey';
 
         handler.open({
             currency: ratePlan.currency,
             description: ratePlan.optionMirrorPackage,
             panelLabel: 'Subscribe',
             email: formElements.$EMAIL.val(),
-            key: guardian.stripe[stripeServiceName],
+            key: stripeKey,
             token: function (token) {
                 successfulCharge = token;
                 stripeCheckout.setPaymentToken(token.id);
@@ -94,10 +91,10 @@ define([
         });
     }
 
-    function stripeConfigWithCorrectKey(stripeCheckout, stripeKeys, country) {
-        var stripeKey = (country === 'AU' ? stripeKeys.auPublicKey : stripeKeys.ukPublicKey)
-
-        return Object.assign({}, stripeCheckout, {'key' : stripeKey})
+    function deriveStripeKeyFromDeliveryCountry() {
+        var deliveryAddressOption = document.querySelectorAll('#delivery-address-country option:checked')[0];
+        var stripeServiceName = (deliveryAddressOption && deliveryAddressOption.dataset.stripeServiceName) || 'ukPublicKey';
+        return guardian.stripe[stripeServiceName]
     }
 
     function send(pageViewId) {
