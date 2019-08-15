@@ -63,7 +63,10 @@ define([
             submitEl.removeAttribute('disabled');
         }
 
-        handler = StripeCheckout.configure(guardian.stripeCheckout);
+        var deliveryCountryElement = document.querySelector('#delivery-address-country')
+        var deliveryCountry = deliveryCountryElement.options[deliveryCountryElement.selectedIndex].value
+
+        handler = StripeCheckout.configure(stripeConfigWithCorrectKey(guardian.stripeCheckout, guardian.stripe, deliveryCountry));
         bean.on(window, 'popstate', handler.close);
 
         var successfulCharge = false;
@@ -89,6 +92,12 @@ define([
                 }
             }
         });
+    }
+
+    function stripeConfigWithCorrectKey(stripeCheckout, stripeKeys, country) {
+        var stripeKey = (country === 'AU' ? stripeKeys.auPublicKey : stripeKeys.ukPublicKey)
+
+        return Object.assign({}, stripeCheckout, {'key' : stripeKey})
     }
 
     function send(pageViewId) {
