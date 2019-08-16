@@ -63,20 +63,20 @@ define([
             submitEl.removeAttribute('disabled');
         }
 
-        handler = StripeCheckout.configure(guardian.stripeCheckout);
+        var stripeKey = deriveStripeKeyFromAddresses()
+
+        handler = StripeCheckout.configure(Object.assign({}, guardian.stripeCheckout, {'key' : stripeKey}));
         bean.on(window, 'popstate', handler.close);
 
         var successfulCharge = false;
         var ratePlan = document.querySelector('.js-rate-plans input:checked').dataset;
-        var checkedOption = document.querySelectorAll('#personal-address-country option:checked')[0];
-        var stripeServiceName = (checkedOption && checkedOption.dataset.stripeServiceName) || 'ukPublicKey';
 
         handler.open({
             currency: ratePlan.currency,
             description: ratePlan.optionMirrorPackage,
             panelLabel: 'Subscribe',
             email: formElements.$EMAIL.val(),
-            key: guardian.stripe[stripeServiceName],
+            key: stripeKey,
             token: function (token) {
                 successfulCharge = token;
                 stripeCheckout.setPaymentToken(token.id);
@@ -89,6 +89,18 @@ define([
                 }
             }
         });
+    }
+
+    function deriveStripeKeyFromAddresses() {
+        var useDeliveryAddressForBillingCheckbox = document.querySelector('.js-checkout-delivery-same-as-billing')
+
+        var billingCountryOption = useDeliveryAddressForBillingCheckbox.checked ?
+            document.querySelectorAll('#delivery-address-country option:checked')[0] :
+            document.querySelectorAll('#personal-address-country option:checked')[0];
+
+        var stripeServiceName = (billingCountryOption && billingCountryOption.dataset.stripeServiceName) || 'ukPublicKey';
+
+        return guardian.stripe[stripeServiceName]
     }
 
     function send(pageViewId) {
