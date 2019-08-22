@@ -92,9 +92,9 @@ define([
     }
 
     function deriveStripeKeyFromAddresses() {
-        var useDeliveryAddressForBillingCheckbox = document.querySelector('.js-checkout-delivery-same-as-billing')
+        var useDeliveryAddressForBillingCheckbox = document.querySelector('.js-checkout-delivery-same-as-billing');
 
-        var billingCountryOption = useDeliveryAddressForBillingCheckbox.checked ?
+        var billingCountryOption = useDeliveryAddressForBillingCheckbox && useDeliveryAddressForBillingCheckbox.checked ?
             document.querySelectorAll('#delivery-address-country option:checked')[0] :
             document.querySelectorAll('#personal-address-country option:checked')[0];
 
