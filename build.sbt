@@ -37,11 +37,11 @@ lazy val root = (project in file(".")).enablePlugins(
       "com.gu.memsub.Subscription.ProductRatePlanId"
   ))
 
-scalaVersion := "2.12.6"
+scalaVersion := "2.12.10"
 scalacOptions ++= Seq("-feature")
 
 val scalatestVersion = "3.0.4"
-val jacksonVersion = "2.9.9"
+val jacksonVersion = "2.10.0"
 
 libraryDependencies ++= Seq(
     cache,
@@ -56,7 +56,7 @@ libraryDependencies ++= Seq(
     "com.gu" %% "identity-test-users" % "0.6",
     "com.gu" %% "content-authorisation-common" % "0.4",
     "com.gu" %% "tip" % "0.1.1",
-    "com.gu" %% "acquisition-event-producer-play26" % "4.0.17",
+    "com.gu" %% "acquisition-event-producer-play26" % "4.0.22",
     "com.github.nscala-time" %% "nscala-time" % "2.16.0",
     "io.sentry" % "sentry-logback" % "1.7.5",
     "com.typesafe.scala-logging" %% "scala-logging" % "3.7.2",
@@ -72,9 +72,9 @@ libraryDependencies ++= Seq(
     "com.amazonaws" % "aws-java-sdk-sqs" % "1.11.564",
     "com.gu" % "kinesis-logback-appender" % "1.4.2",
     "net.logstash.logback" % "logstash-logback-encoder" % "4.11",
-    "com.fasterxml.jackson.dataformat" % "jackson-dataformat-cbor" % "2.9.2",
+    "com.fasterxml.jackson.dataformat" % "jackson-dataformat-cbor" % jacksonVersion,
     "com.google.guava" % "guava" % "25.0-jre", //-- added explicitly - snyk report avoid logback vulnerability
-    "com.fasterxml.jackson.core" % "jackson-databind" % (jacksonVersion+".1"), //added explicitly to avoid snyk vulnerability
+    "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion, //added explicitly to avoid snyk vulnerability
     "com.fasterxml.jackson.core" % "jackson-annotations" % jacksonVersion, //added explicitly to avoid snyk vulnerability
     "com.fasterxml.jackson.datatype" % "jackson-datatype-jdk8" % jacksonVersion, //added explicitly to avoid snyk vulnerability
     "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" % jacksonVersion, //added explicitly to avoid snyk vulnerability
