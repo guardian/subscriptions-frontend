@@ -30,7 +30,7 @@ class Shipping(touchpointBackend: TouchpointBackend, commonActions: CommonAction
     catalog.map { catalog =>
       index(CollectionSubscriptionProduct(
         title = "Paper + digital voucher subscription",
-        description = "Save money on your newspapers and digital content. Plus start using the daily edition and premium live news app immediately.",
+        description = "Save money on your newspapers and digital content. Plus start using The Guardian Daily and premium access to the Live app immediately.",
         altPackagePath = s"/delivery/$segment",
         options = catalog.voucher.list.toList.filter(_.charges.digipack.isDefined).map(planToOptions).sortBy(_.weeklyPrice).reverse
       ), segment)
