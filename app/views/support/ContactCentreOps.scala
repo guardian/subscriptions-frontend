@@ -12,7 +12,7 @@ object ContactCentreOps {
 
   def phone(contactUsCountry: Option[Country] = None): String = {
     if (contactUsCountry exists countriesHandledByUSCallCentre)
-      s"1-844-632-2010 (toll free); ${directLine(contactUsCountry)} (direct line). Lines are open 9:15am-6pm, Monday to Friday (EST/EDT)"
+      s"1-844-632-2010 (toll free); ${directLine(contactUsCountry)} (direct line). Lines are open 9am - 5pm on weekdays (EST)"
     else if (contactUsCountry exists countriesHandledByAUCallCentre)
       s"1800 773 766 (within Australia & toll free); ${directLine(contactUsCountry)} (direct line/outside Australia). Lines are open 9am-5pm, Monday to Friday (AEDT) excluding public holidays"
     else if (contactUsCountry.contains(UK))
