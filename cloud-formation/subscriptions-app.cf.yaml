@@ -227,16 +227,18 @@ Resources:
   LoadBalancerListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
-      DefaultActions:
-          - Type: forward
-            TargetGroupArn:
-              Ref: TargetGroup
-      LoadBalancerArn:
-          Ref: ElasticLoadBalancer
-      Certificates:
-          - CertificateArn: !Ref CertificateArn
-      Port: 443
-      Protocol: HTTPS
+        DefaultActions:
+            - RedirectConfig:
+                  Host: "#{host}"
+                  Path: "/#{path}"
+                  Port: 443
+                  Protocol: "HTTPS"
+                  Query: "#{query}"
+                  StatusCode: HTTP_301
+              Type: redirect
+        LoadBalancerArn: !Ref 'FrontendElasticLoadBalancer'
+        Port: 80
+        Protocol: HTTP
   LoadBalancerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
