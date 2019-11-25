@@ -224,6 +224,19 @@ Resources:
         Enabled: 'true'
         Timeout: '60'
       CrossZone: 'true'
+  LoadBalancerListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+          - Type: forward
+            TargetGroupArn:
+              Ref: TargetGroup
+      LoadBalancerArn:
+          Ref: ElasticLoadBalancer
+      Certificates:
+          - CertificateArn: !Ref CertificateArn
+      Port: 443
+      Protocol: HTTPS
   LoadBalancerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
