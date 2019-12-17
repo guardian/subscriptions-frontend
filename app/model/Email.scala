@@ -72,7 +72,7 @@ object DigipackWelcome1Email extends LazyLogging {
     val paymentDelay = daysBetween(subscription.startDate, subscription.firstPaymentDate).minus(gracePeriod)
 
     val paymentFields = paymentMethod match {
-      case GoCardless(mandateId, accName, accNumber, sortCode) => Seq(
+      case GoCardless(mandateId, accName, accNumber, sortCode, _, _) => Seq(
         "Account number" -> formatAccountNumber(accNumber),
         "Sort Code" -> formatSortCode(sortCode),
         "Account Name" -> accName,
@@ -157,7 +157,7 @@ object PaperFieldsGenerator {
                  promotionDescription: Option[String]
                ): Seq[(String, String)] = {
     val paymentFields = paymentMethod match {
-      case GoCardless(mandateId, accName, accNumber, sortCode) => Seq(
+      case GoCardless(mandateId, accName, accNumber, sortCode, _, _) => Seq(
         "bank_account_no" -> formatAccountNumber(accNumber),
         "bank_sort_code" -> formatSortCode(sortCode),
         "account_holder" -> accName,
