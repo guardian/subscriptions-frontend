@@ -1,7 +1,6 @@
 define(['modules/analytics/ga',
         'modules/analytics/ophan',
         'modules/analytics/remarketing',
-        'modules/analytics/krux',
         'modules/analytics/facebook',
         'modules/analytics/appnexus',
         'modules/analytics/awin',
@@ -9,7 +8,6 @@ define(['modules/analytics/ga',
 ], function (ga,
              ophan,
              remarketing,
-             krux,
              facebook,
              appnexus,
              awin,
@@ -23,7 +21,6 @@ define(['modules/analytics/ga',
 
         if (thirdPartyTracking.thirdPartyTrackingEnabled()){
             remarketing.init();
-            krux.init();
             facebook.init();
             appnexus.init();
             awin.init();
