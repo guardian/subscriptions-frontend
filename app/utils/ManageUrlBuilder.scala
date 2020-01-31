@@ -14,7 +14,7 @@ object ManageUrlBuilder {
   private def productSpecificUrl(baseUrl: String, path: String, product: Product )= {
     product match {
       case Product.Voucher => s"$baseUrl/$path/voucher"
-      case Product.Delivery => s"$baseUrl/$path/delivery"
+      case Product.Delivery => s"$baseUrl/$path/homedelivery"
       case _: Product.ZDigipack => s"$baseUrl/$path/digitalpack"
       case _: Product.Weekly => s"$baseUrl/$path/guardianweekly"
       case _ => ""
