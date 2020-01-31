@@ -4,11 +4,15 @@
 @import com.gu.subscriptions.suspendresume.SuspensionService.HolidayRefund
 @import views.support.ContactCentreOps
 @import views.support.Dates.formattedDateRange
+@import com.gu.memsub.Product
+@import utils.ManageUrlBuilder._
+@import configuration.Config
 
-@(holidayRefunds: Seq[HolidayRefund] = Seq.empty, suspendableDays: Int, suspendedDays: Int)
 
+@(holidayRefunds: Seq[HolidayRefund] = Seq.empty, suspendableDays: Int, suspendedDays: Int, maybeEmail: Option[String], product: Product)
+
+<div class="prose">
 @if(holidayRefunds.nonEmpty) {
-    <div class="prose">
         You have @suspendedDays @if(suspendedDays == 1) { day } else { days } already lined up:
         <dl class="mma-section__list">
             @for((refund, holiday) <- holidayRefunds) {
@@ -22,7 +26,18 @@
             <p class="scheduled-suspensions__help">
                 Please contact Customer Services on: <a href="@ContactCentreOps.hrefTelNumber(UK)">@ContactCentreOps.directLine(UK)</a> or email <a href="@ContactCentreOps.hrefMailto">@ContactCentreOps.email</a> if you wish to cancel or amend any of these.
             </p>
-    </div>
 } else {
-    You have no suspensions currently lined up.
+    <p>You have no suspensions currently lined up.</p>
+}
+@if(maybeEmail.isDefined) {
+    <p>
+        Cant see your delivery holidays? The management of delivery holidays is being moved to a new part of the site, so you may have
+        delivery holidays that are not displayed here. Click on the button below to see them.
+    </p>
+</div>
+<a href="@suspendUrl(Config.manageUrl, product)">
+    <button class="button button--primary button--large">Manage your delivery holidays</button>
+</a>
+} else {
+</div>
 }

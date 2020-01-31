@@ -62,44 +62,14 @@
                 }
             </section>
 
-            @if((suspendableDays - suspendedDays) > 0) {
-                <section class="mma-section">
-                    <form class="form js-suspend-form" action="@routes.AccountManagement.processSuspension().url" method="POST" novalidate>
-                        <fieldset>
-                            <legend class="mma-section__header">
-                                Book a delivery holiday
-                            </legend>
-                            @helper.CSRF.formField
-
-                            <div class="form-field js-suspend-start-date mma-dates__fields">
-                                <ul class="mma-error-list">
-                                @errorCodes.map { code => <li class="form-field__error-message mma-error-list__item">@getMessageFromCode(code)</li> }
-                                </ul>
-                                <div id="dateRangePicker"
-                                firstPaymentDate="@prettyDate(subscription.firstPaymentDate)"
-                                remainingDays="@{
-                                    suspendableDays - suspendedDays
-                                }"
-                                excludeExistingDays="@{
-                                    holidayRefunds.flatMap(x => holidayToDays(x._2.start, x._2.finish)).map(prettyDate).mkString(",")
-                                }"
-                                ratePlanName="@subscription.plan.name"></div>
-                            </div>
-                            <button type="submit" class="js-suspend-submit button button--primary button--large u-margin-bottom mma-dates__button">
-                                Create
-                            </button>
-                        </fieldset>
-                    </form>
-                    <span class="mma-dates__request">
-                        Please give us at least 3 days notice to process the delivery holiday. You can line up to @suspendableWeeks weeks of holidays.
-                        <strong>All dates are inclusive</strong>.
-                    </span>
-                </section>
-            }
+            <section class="mma-section">
+                <h3 class="mma-section__header">Book a delivery holiday</h3>
+                @views.html.account.fragments.manageSuspension(subscription, maybeEmail, subscription.plans.head.product, Some(Country.UK))
+            </section>
 
             <section class="mma-section">
                 <h3 class="mma-section__header">Upcoming delivery holidays</h3>
-                @account.fragments.suspensions(holidayRefunds, suspendableDays, suspendedDays)
+                @account.fragments.suspensions(holidayRefunds, suspendableDays, suspendedDays, maybeEmail, subscription.plans.head.product)
             </section>
             @billingSchedule.map { bs =>
                 <section class="mma-section">
@@ -137,12 +107,12 @@
                     </form>
                 </section>
             }
-            
+
             <section class="mma-section">
                 <h3 class="mma-section__header">Update your payment method</h3>
                 @views.html.account.fragments.paymentUpdate(subscription, maybeEmail, subscription.plans.head.product, Some(Country.UK))
             </section>
-            
+
         </section>
     </main>
 }
