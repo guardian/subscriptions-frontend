@@ -69,7 +69,7 @@
 
             <section class="mma-section">
                 <h3 class="mma-section__header">Upcoming delivery holidays</h3>
-                @account.fragments.suspensions(holidayRefunds, suspendableDays, suspendedDays, maybeEmail, subscription.plans.head.product)
+                @account.fragments.suspensions(holidayRefunds, suspendableDays, suspendedDays, maybeEmail.isDefined, subscription.plans.head.product)
             </section>
             @billingSchedule.map { bs =>
                 <section class="mma-section">

@@ -8,8 +8,7 @@
 @import utils.ManageUrlBuilder._
 @import configuration.Config
 
-
-@(holidayRefunds: Seq[HolidayRefund] = Seq.empty, suspendableDays: Int, suspendedDays: Int, maybeEmail: Option[String], product: Product)
+@(holidayRefunds: Seq[HolidayRefund] = Seq.empty, suspendableDays: Int, suspendedDays: Int, userIsSignedIn: Boolean, product: Product)
 
 <div class="prose">
 @if(holidayRefunds.nonEmpty) {
@@ -29,7 +28,7 @@
 } else {
     <p>You have no suspensions currently lined up.</p>
 }
-@if(maybeEmail.isDefined) {
+@if(userIsSignedIn) {
     <p>
         Can't see your delivery holidays? The management of delivery holidays is being moved to a new part of the site, so you may have
         delivery holidays that are not displayed here. Click on the button below to see them.

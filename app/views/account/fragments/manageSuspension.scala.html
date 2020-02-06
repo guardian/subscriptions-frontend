@@ -7,12 +7,14 @@
 
 @(subscription:Subscription[SubscriptionPlan.ContentSubscription], maybeEmail: Option[String], product: Product, contactUsCountry: Option[Country])
 
-<div class="js-suspend-update" data-sub-id="@{subscription.name.get}" @for(email <- maybeEmail) {data-email="@email"} data-phone="@product.phone(contactUsCountry)" data-product="@product.name">
-    @if(maybeEmail.isDefined) {
-        <a href="@suspendUrl(Config.manageUrl, product)">
-            <button class="button button--primary button--large">Manage your delivery holidays</button>
-        </a>
-    } else {
-        <p>To manage your delivery holidays, please contact the call centre. @product.phone(contactUsCountry)</p>
-    }
-</div>
+@defining(maybeEmail.isDefined) { userIsLoggedIn =>
+    <div class="js-suspend-update" data-sub-id="@{subscription.name.get}" @for(email <- maybeEmail) {data-email="@email"} data-phone="@product.phone(contactUsCountry)" data-product="@product.name">
+        @if(userIsLoggedIn) {
+            <a href="@suspendUrl(Config.manageUrl, product)">
+                <button class="button button--primary button--large">Manage your delivery holidays</button>
+            </a>
+        } else {
+            <p>To manage your delivery holidays, please contact the call centre. @product.phone(contactUsCountry)</p>
+        }
+    </div>
+}
