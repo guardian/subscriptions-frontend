@@ -63,14 +63,10 @@
             </section>
 
             <section class="mma-section">
-                <h3 class="mma-section__header">Book a delivery holiday</h3>
-                @views.html.account.fragments.manageSuspension(subscription, maybeEmail, subscription.plans.head.product, Some(Country.UK))
+                <h3 class="mma-section__header">Book or view delivery holidays</h3>
+                @views.html.account.fragments.manageSuspension(subscription, maybeEmail.isDefined, subscription.plans.head.product, Some(Country.UK))
             </section>
 
-            <section class="mma-section">
-                <h3 class="mma-section__header">Upcoming delivery holidays</h3>
-                @account.fragments.suspensions(holidayRefunds, suspendableDays, suspendedDays, maybeEmail.isDefined, subscription.plans.head.product)
-            </section>
             @billingSchedule.map { bs =>
                 <section class="mma-section">
                     <h3 class="mma-section__header">Your billing schedule</h3>
