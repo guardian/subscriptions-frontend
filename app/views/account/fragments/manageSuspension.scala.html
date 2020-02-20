@@ -1,20 +1,33 @@
 @import com.gu.i18n.Country
+@import com.gu.i18n.Country.UK
 @import com.gu.memsub.Product
 @import com.gu.memsub.subsv2.{Subscription, SubscriptionPlan}
 @import views.support.PlanOps._
+@import views.support.ContactCentreOps
 @import configuration.Config
 @import utils.ManageUrlBuilder._
 
-@(subscription:Subscription[SubscriptionPlan.ContentSubscription], maybeEmail: Option[String], product: Product, contactUsCountry: Option[Country])
+@(subscription:Subscription[SubscriptionPlan.ContentSubscription], userIsSignedIn: Boolean, product: Product, contactUsCountry: Option[Country])
 
-@defining(maybeEmail.isDefined) { userIsLoggedIn =>
-    <div class="js-suspend-update" data-sub-id="@{subscription.name.get}" @for(email <- maybeEmail) {data-email="@email"} data-phone="@product.phone(contactUsCountry)" data-product="@product.name">
-        @if(userIsLoggedIn) {
-            <a href="@suspendUrl(Config.manageUrl, product)">
-                <button class="button button--primary button--large">Manage your delivery holidays</button>
-            </a>
-        } else {
-            <p>To manage your delivery holidays, please contact the call centre. @product.phone(contactUsCountry)</p>
+<div class="js-suspend-update" data-sub-id="@{subscription.name.get}" data-phone="@product.phone(contactUsCountry)" data-product="@product.name">
+
+    <p>
+        Delivery holidays have been moved to a new part of the site.
+        @if(!userIsSignedIn){
+            <br/>
+            This requires you to sign in with your email address associated with your subscription.
         }
-    </div>
-}
+    </p>
+
+    <a href="@suspendUrl(Config.manageUrl, product)">
+        <button class="button button--primary button--large">Manage your delivery holidays</button>
+    </a>
+
+    @if(!userIsSignedIn){
+        <p class="scheduled-suspensions__help">
+            If you have any problems signing in or can't find your subscription in the new site, please contact
+            Customer Services on <a href="@ContactCentreOps.hrefTelNumber(UK)">@ContactCentreOps.directLine(UK)</a>
+            or email <a href="@ContactCentreOps.hdHrefMailto">@ContactCentreOps.hdEmail</a>.
+        </p>
+    }
+</div>

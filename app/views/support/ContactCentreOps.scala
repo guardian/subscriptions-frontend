@@ -40,6 +40,9 @@ object ContactCentreOps {
     s"tel:${directLine(contactUsCountry).replace(" (0) "," ")}"
   }
 
+  def hdEmail = "homedelivery@theguardian.com"
+  def hdHrefMailto = s"mailto:$hdEmail"
+
   def hrefMailto = "mailto:subscriptions@theguardian.com"
 
   def email = "subscriptions@theguardian.com"
