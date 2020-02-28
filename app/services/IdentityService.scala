@@ -171,9 +171,6 @@ object PersonalDataJsonSerialiser {
     val telephoneNumber = NormalisedTelephoneNumber.fromStringAndCountry(personalData.telephoneNumber, personalData.address.country)
     Json.obj(
       primaryEmailAddress -> personalData.email,
-      publicFields -> Json.obj(
-        "displayName" -> s"${personalData.first} ${personalData.last}"
-      ),
       "privateFields" -> Json.obj(
         "firstName" -> personalData.first,
         "secondName" -> personalData.last,

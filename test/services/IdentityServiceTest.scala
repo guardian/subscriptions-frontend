@@ -86,9 +86,6 @@ class IdentityServiceTest extends FreeSpec with Matchers {
   "PersonalData serialization for the Identity service" in {
     val expectedJson = Json.obj(
       "primaryEmailAddress" -> "email@example.com",
-      "publicFields" -> Json.obj(
-        "displayName" -> "FirstName LastName"
-      ),
       "privateFields" -> Json.obj(
         "firstName" -> "FirstName",
         "secondName" -> "LastName",
