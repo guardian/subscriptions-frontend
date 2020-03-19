@@ -11,6 +11,9 @@
 @import views.support.AccountManagementOps._
 @import views.support.ContactCentreOps
 @import views.support.Dates.prettyDate
+@import configuration.Config
+@import utils.ManageUrlBuilder._
+
 @(
     subscription: Subscription[DailyPaper],
     billingAccount: Account,
@@ -79,28 +82,28 @@
                     <legend class="mma-section__header">
                         Report a delivery problem
                     </legend>
-                    <div class="prose">
+                    <div>
                         <p>
-                            Please select the date of your missing paper using the form below.
+                            Delivery problem reporting has moved to a new part of the site.
+                            @if(maybeEmail.isEmpty /* i.e. not signed in with identity */){
+                                <br/>
+                                This requires you to sign in with your email address associated with your subscription.
+                            }
                         </p>
+
+                        <a href="@deliveryProblemsUrl(Config.manageUrl, Product.Delivery)">
+                            <button class="button button--primary button--large">Report Problem</button>
+                        </a>
+
+                        @if(maybeEmail.isEmpty /* i.e. not signed in with identity */){
+                            <p style="margin-top: 20px">
+                                If you have any problems signing in or can't find your subscription in the new site, please contact
+                                Customer Services on <a href="@ContactCentreOps.hrefTelNumber(Country.UK)">@ContactCentreOps.directLine(Country.UK)</a>
+                                or email <a href="@ContactCentreOps.hdHrefMailto">@ContactCentreOps.hdEmail</a>.
+                            </p>
+                        }
+
                     </div>
-                    <form class="form js-report-delivery-problem-form" action="@routes.AccountManagement.reportDeliveryProblem().url" method="POST">
-                        <fieldset>
-                            @helper.CSRF.formField
-                            <div class="form-field">
-                                <input type="hidden" id="subscriptionName" name="subscriptionName" value="@subscription.name.get"/>
-                            </div>
-                            <div class="form-field">
-                                <input type="hidden" id="sfContactId" name="sfContactId" value="@contactId"/>
-                            </div>
-                            <div class="form-field">
-                                <div id="reportProblemDatePicker"></div>
-                            </div>
-                            <button type="submit" class="input-submit button button--primary button--large u-margin-bottom mma-dates__button">
-                                Report Problem
-                            </button>
-                        </fieldset>
-                    </form>
                 </section>
             }
 
