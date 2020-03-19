@@ -11,13 +11,18 @@ object ManageUrlBuilder {
       productSpecificUrl(baseUrl, "suspend", product)
   }
 
-  private def productSpecificUrl(baseUrl: String, path: String, product: Product )= {
-    product match {
-      case Product.Voucher => s"$baseUrl/$path/voucher"
-      case Product.Delivery => s"$baseUrl/$path/homedelivery"
-      case _: Product.ZDigipack => s"$baseUrl/$path/digitalpack"
-      case _: Product.Weekly => s"$baseUrl/$path/guardianweekly"
+  def deliveryProblemsUrl(baseUrl: String, product: Product) = {
+      productSpecificUrl(baseUrl, "delivery", product, "/records")
+  }
+
+  private def productSpecificUrl(baseUrl: String, path: String, product: Product, extraParts: String*)= {
+    val productUrlPart = product match {
+      case Product.Voucher => "voucher"
+      case Product.Delivery => "homedelivery"
+      case _: Product.ZDigipack => "digitalpack"
+      case _: Product.Weekly => "guardianweekly"
       case _ => ""
     }
+    s"$baseUrl/$path/${productUrlPart}${extraParts.mkString("")}"
   }
 }
