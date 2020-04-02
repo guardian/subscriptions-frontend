@@ -45,7 +45,7 @@ object Subscriptions {
     val steps = Seq(
       "Pick the perfect package for you",
       "Confirm your address is within the M25",
-      "Get your papers delivered to your door by 7am Monday - Saturday and 8:30am on Sundays"
+      "Get your papers delivered to your door by 8am Monday - Saturday and 8:30am on Sundays"
     )
   }
 
