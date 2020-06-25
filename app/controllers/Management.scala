@@ -51,6 +51,7 @@ class Management(actorSystem: ActorSystem, fBackendFactory: TouchpointBackends, 
     boolTest(salesforce,"Salesforce") +++
     boolTest(CloudWatchHealth.hasPushedMetricSuccessfully, "CloudWatch") +++
     boolTest(zuoraService.lastPingTimeWithin(2.minutes), "ZuoraPing") +++
+    boolTest(soapClient.isReady, "ZuoraSoapClientAuth") +++
     boolTest(promoCollection.all.nonEmpty, "Promotions") +++
     catalogWorkedOkay
 
