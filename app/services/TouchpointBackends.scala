@@ -17,6 +17,7 @@ import com.gu.subscriptions.suspendresume.SuspensionService
 import com.gu.zuora
 import com.gu.zuora.rest.SimpleClient
 import com.gu.zuora.rest.ZuoraRestService
+import com.gu.zuora.soap.ClientWithFeatureSupplier
 import com.gu.zuora.{rest, soap}
 import configuration.Config
 import forms.SubscriptionsForm
@@ -55,6 +56,7 @@ trait TouchpointBackend {
   def checkoutService: CheckoutService
   def goCardlessService: GoCardlessService
   implicit def simpleRestClient: SimpleClient[Future]
+  def soapClient: ClientWithFeatureSupplier
 }
 
 class TouchpointBackends(testUsers: TestUsers, actorSystem: ActorSystem, wsClient: WSClient, executionContext: ExecutionContext) {
@@ -69,12 +71,12 @@ class TouchpointBackends(testUsers: TestUsers, actorSystem: ActorSystem, wsClien
   def apply(backendType: TouchpointBackendConfig.BackendType): TouchpointBackend = {
 
     val config = TouchpointBackendConfig.backendType(backendType, Config.config)
-    val soapClient = new soap.ClientWithFeatureSupplier(Set.empty, config.zuoraSoap, futureRunner, configurableFutureRunner(20.seconds))
     val newProductIds = Config.productIds(config.environmentName)
 
     lazy val sfSimpleContactRepo = new SimpleContactRepository(config.salesforce, system.scheduler, Config.appName)
 
     new TouchpointBackend {
+      lazy val soapClient = new soap.ClientWithFeatureSupplier(Set.empty, config.zuoraSoap, futureRunner, configurableFutureRunner(20.seconds))
       implicit val simpleRestClient: SimpleClient[Future] = new rest.SimpleClient[Future](config.zuoraRest, futureRunner)
       lazy val environmentName: String = config.environmentName
       lazy val salesforceService = new SalesforceServiceImp(sfSimpleContactRepo)
