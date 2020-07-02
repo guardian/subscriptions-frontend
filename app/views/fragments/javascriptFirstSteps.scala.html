@@ -7,14 +7,15 @@
 @(jsVars: JsVars, touchpointBackendResolutionOpt: Option[services.TouchpointBackends.Resolution])
 @countryWithCurrency = @{CountryWithCurrency(jsVars.country.getOrElse(UK), jsVars.currency)}
 
-<script src="https://polyfill.guim.co.uk/v2/polyfill.min.js?features=default-3.6,Element.prototype.dataset,Array.prototype.includes,Array.prototype.find,fetch,Array.prototype.findIndex,&unknown=polyfill"></script>
+<script src="https://polyfill.guim.co.uk/v2/polyfill.min.js?features=default-3.6,Promise,Element.prototype.dataset,Array.prototype.includes,Array.prototype.find,fetch,Array.prototype.findIndex,&unknown=polyfill"></script>
 
 @optimizePageHidingSnippet()
 
 <script id="gu">
     var guardian = JSON.parse('@Html(Json.stringify(Json.toJson(jsVars)))');
-    guardian.analyticsEnabled = true;
-    guardian.analyticsEnabledInDev = @Config.analyticsOnInDev;
+    guardian.dntEnabled = (navigator.doNotTrack + '') === '1' || (window.doNotTrack + '') === '1'
+    guardian.analyticsEnabled = !guardian.dntEnabled;
+    guardian.analyticsEnabledInDev = !guardian.dntEnabled && @Config.analyticsOnInDev;
     guardian.optimizeEnabled = @Config.optimizeEnabled;
     guardian.buildNumber = '@app.BuildInfo.buildNumber';
     guardian.isDev = @(Config.stage == "DEV");

@@ -12,7 +12,6 @@ define(['modules/analytics/analyticsEnabled',
     }
 
     function init() {
-
         var identitySignedIn = user.isLoggedIn();
         var identitySignedOut = !!cookie.getCookie('GU_SO') && !identitySignedIn;
         var ophanBrowserId = cookie.getCookie('bwid');

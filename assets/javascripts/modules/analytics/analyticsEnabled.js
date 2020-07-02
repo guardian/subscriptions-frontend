@@ -3,16 +3,19 @@ define([
 ], function (cookie) {
     'use strict';
 
-    var analyticsEnabled = (
-        window.guardian.analyticsEnabled &&
-        !cookie.getCookie('ANALYTICS_OFF_KEY') &&
-        !window.guardian.isDev
-    ) || window.guardian.isDev && window.guardian.analyticsEnabledInDev;
+    var analyticsEnabled = window.guardian.isDev ? window.guardian.analyticsEnabledInDev:
+        window.guardian.analyticsEnabled && !cookie.getCookie('ANALYTICS_OFF_KEY');
 
-    return function (cb) {
+    return function (cbEnabled, cbDisabled) {
         return function () {
             if (analyticsEnabled) {
-                return cb();
+                if (typeof cbEnabled === 'function') {
+                    return cbEnabled();
+                }
+            } else {
+                if (typeof cbDisabled === 'function') {
+                    return cbDisabled();
+                }
             }
         };
     };
