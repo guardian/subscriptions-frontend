@@ -4,14 +4,16 @@ define([
 ],function(analyticsEnabled, raven) {
     'use strict';
 
-    var ophanUrl = '//j.ophan.co.uk/membership.js';
+    var ophanUrl = 'https://j.ophan.co.uk/membership.js';
 
     var API = {
-        loaded: Promise.resolve('Ophan is in stub mode'),
+        loaded: Promise.resolve(null),
         init: analyticsEnabled(
             function() {
                 // curl is 'thenable', but not a true Promise, so needs wrapping
-                API.loaded = Promise.resolve(curl(ophanUrl).then(null, raven.Raven.captureException));
+                API.loaded = Promise.resolve(curl(ophanUrl).then(null, function(err) {
+                    raven.Raven.captureException(err);
+                }));
             },
             function() {
                 console.warn('Ophan not loaded due to analytics disabled');
