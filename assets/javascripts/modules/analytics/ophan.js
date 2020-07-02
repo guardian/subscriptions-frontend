@@ -6,16 +6,18 @@ define([
 
     var ophanUrl = '//j.ophan.co.uk/membership.js';
 
-    function init() {
-        return curl(ophanUrl).then(null, function(err) {
-            raven.Raven.captureException(err);
-        });
-    }
-
-    return {
+    var API = {
+        loaded: Promise.resolve('Ophan is in stub mode'),
         init: analyticsEnabled(
-            function() { return Promise.resolve(init()); }, // init is 'thenable', not a true Promise, so needs wrapping
-            function() { return Promise.reject('Ophan not loaded due to analytics disabled') }
+            function() {
+                // curl is 'thenable', but not a true Promise, so needs wrapping
+                API.loaded = Promise.resolve(curl(ophanUrl).then(null, raven.Raven.captureException));
+            },
+            function() {
+                console.warn('Ophan not loaded due to analytics disabled');
+            }
         )
     };
+
+    return API;
 });

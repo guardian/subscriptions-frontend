@@ -7,10 +7,10 @@ define(['modules/analytics/ga',
     'use strict';
 
     function init() {
-        ophan.init()
-            .catch(console.log)
-            // GA prefers Ophan to have bootstrapped and set window.guardian state, so load it after Ophan has loaded
-            .finally(ga.init);
+        ophan.init();
+
+        // GA prefers Ophan to have bootstrapped and set window.guardian state, so load it after Ophan has loaded
+        ophan.loaded.finally(ga.init);
 
         if (thirdPartyTracking.thirdPartyTrackingEnabled()){
             // As this site is mostly deprecated, we've removed all 3rd party trackers.
