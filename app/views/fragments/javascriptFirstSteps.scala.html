@@ -13,8 +13,9 @@
 
 <script id="gu">
     var guardian = JSON.parse('@Html(Json.stringify(Json.toJson(jsVars)))');
-    guardian.analyticsEnabled = true;
-    guardian.analyticsEnabledInDev = @Config.analyticsOnInDev;
+    guardian.dntEnabled = (navigator.doNotTrack + '') === '1' || (window.doNotTrack + '') === '1'
+    guardian.analyticsEnabled = !guardian.dntEnabled;
+    guardian.analyticsEnabledInDev = !guardian.dntEnabled && @Config.analyticsOnInDev;
     guardian.optimizeEnabled = @Config.optimizeEnabled;
     guardian.buildNumber = '@app.BuildInfo.buildNumber';
     guardian.isDev = @(Config.stage == "DEV");
