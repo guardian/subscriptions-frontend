@@ -1,19 +1,25 @@
 define([
+    'modules/analytics/analyticsEnabled',
     'modules/raven'
-],function(raven) {
+],function(analyticsEnabled, raven) {
     'use strict';
 
-    var ophanUrl = '//j.ophan.co.uk/membership.js';
-    var ophan = curl(ophanUrl);
+    var ophanUrl = 'https://j.ophan.co.uk/membership.js';
 
-    function init() {
-        ophan.then(null, function(err) {
-            raven.Raven.captureException(err);
-        });
-    }
-
-    return {
-        init: init,
-        loaded: ophan // curl promise
+    var API = {
+        loaded: Promise.resolve(null),
+        init: analyticsEnabled(
+            function() {
+                // curl is 'thenable', but not a true Promise, so needs wrapping
+                API.loaded = Promise.resolve(curl(ophanUrl).then(null, function(err) {
+                    raven.Raven.captureException(err);
+                }));
+            },
+            function() {
+                console.warn('Ophan not loaded due to analytics disabled');
+            }
+        )
     };
+
+    return API;
 });
