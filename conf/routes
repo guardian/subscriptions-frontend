@@ -61,6 +61,9 @@ POST        /manage/report-problem           controllers.AccountManagement.repor
 # Pattern Library
 GET         /patterns                        controllers.PatternLibrary.patterns
 
+# Geo Country
+GET         /geocountry                      controllers.GeoCountry.getCountry()
+
 # Map static resources from the /public folder to the /assets URL path
 GET         /assets/*file                    controllers.CachedAssets.at(path="/public", file)
 

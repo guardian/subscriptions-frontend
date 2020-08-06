@@ -1,9 +1,10 @@
 define(['modules/analytics/ga',
         'modules/analytics/ophan',
-        'modules/analytics/thirdPartyTracking'
+        // 'modules/analytics/thirdPartyTracking'
 ], function (ga,
              ophan,
-             thirdPartyTracking) {
+            //  thirdPartyTracking
+             ) {
     'use strict';
 
     function init() {
@@ -12,9 +13,9 @@ define(['modules/analytics/ga',
         // GA prefers Ophan to have bootstrapped and set window.guardian state, so load it after Ophan has loaded
         ophan.loaded.finally(ga.init);
 
-        if (thirdPartyTracking.thirdPartyTrackingEnabled()){
+        // thirdPartyTracking.thirdPartyTrackingEnabled().then(thirdPartyTrackingEnabled => {
             // As this site is mostly deprecated, we've removed all 3rd party trackers.
-        }
+        // });
     }
 
     return {
