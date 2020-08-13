@@ -1,25 +1,46 @@
-import { Raven } from 'modules/raven';
 import { onConsentChange } from '@guardian/consent-management-platform';
 
-const OptedIn = 'OptedIn';
-const OptedOut = 'OptedOut';
+const getConsentForVendors = (sourcePointVendorIds) => new Promise((resolve) => {
+    if (!Array.isArray(sourcePointVendorIds)) {
+        return resolve({});
+    }
 
-const getTrackingConsent = () => new Promise((resolve) => {
     onConsentChange(state => {
-            const consentGranted = state.ccpa ? !state.ccpa.doNotSell : state.tcfv2 && Object.values(state.tcfv2.consents).every(Boolean);
-
-            if (consentGranted) {
-                resolve(OptedIn);
+        /**
+         * Loop over sourcePointVendorIds and pull
+         * vendor specific consent from state.
+         */
+        resolve(sourcePointVendorIds.reduce((accumulator, vendorKey) => {
+            const vendorId = sourcePointVendorIds[vendorKey];
+            if (
+                state.tcfv2 &&
+                state.tcfv2.vendorConsents &&
+                state.tcfv2.vendorConsents[vendorId] !== undefined
+            ) {
+                return {
+                    ...accumulator,
+                    [vendorKey]: state.tcfv2.vendorConsents[vendorId],
+                };
             } else {
-                resolve(OptedOut);
+                return {
+                    ...accumulator,
+                    [vendorKey]: false,
+                };
             }
-        });
-    }).catch(err => {
-        Raven.captureException(err);
-        // fallback to OptedOut if there's an issue getting consent state
-        return Promise.resolve(OptedOut);
-    });
+        }, {}));
+    })
+});
 
-const thirdPartyTrackingEnabled = () => getTrackingConsent().then(consentState => consentState === OptedIn);
+const checkAllTCFv2PurposesAreOptedIn = () => new Promise((resolve) => {
+    onConsentChange(state => {
+        resolve(state.tcfv2 && state.tcfv2.consents && Object.values(state.tcfv2.consents).every(Boolean));
+    })
+});
 
-export { thirdPartyTrackingEnabled, OptedIn, OptedOut };
+const checkCCPA = () => new Promise((resolve) => {
+    onConsentChange(state => {
+        resolve(state.ccpa ? !state.ccpa.doNotSell : null);
+    })
+});
+
+export { getConsentForVendors, checkAllTCFv2PurposesAreOptedIn, checkCCPA };

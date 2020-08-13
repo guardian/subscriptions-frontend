@@ -127,6 +127,7 @@ define(['modules/analytics/analyticsEnabled',
 
     return {
         init: analyticsEnabled(init),
-        trackEvent: enqueueEvent
+        trackEvent: enqueueEvent,
+        sourcePointVendorId: '5e542b3a4cd8884eb41b5a72'
     };
 });
