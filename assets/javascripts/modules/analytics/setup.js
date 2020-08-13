@@ -1,11 +1,11 @@
 define([
     'modules/analytics/ga',
     'modules/analytics/ophan',
-    'modules/analytics/thirdPartyTracking'
+    'modules/analytics/cmp'
 ], function (
     ga,
     ophan,
-    thirdPartyTracking
+    cmp
 ) {
     'use strict';
 
@@ -18,21 +18,21 @@ define([
          */
         ophan.loaded.finally(() => {
             Promise.allSettled([
-                thirdPartyTracking.checkCCPA(),
-                thirdPartyTracking.getConsentForVendors([ga.sourcePointVendorId]),
-                thirdPartyTracking.checkAllTCFv2PurposesAreOptedIn()
+                cmp.checkCCPA(),
+                cmp.getConsentForVendors([ga.cmpVendorId]),
+                cmp.checkAllTCFv2PurposesAreOptedIn()
             ]).then(results => {
                 const [ ccpaConsent, vendorConsents, allPurposesAgreed ] = results.map(promise => promise.value);
 
-                if (ccpaConsent || vendorConsents[ga.sourcePointVendorId]) {
+                if (ccpaConsent || vendorConsents[ga.cmpVendorId]) {
                     ga.init();
                 } else {
                     if (ccpaConsent === null) {
-                        console.log(`Either there's insufficient consent for Google Analytics, or the user has ` +
-                            `turned that vendor off in the CMP (${ga.sourcePointVendorId}). ` +
+                        console.log('Either there\'s insufficient consent for Google Analytics, or the user has ' +
+                            `turned that vendor off in the CMP (${ga.cmpVendorId}). ` +
                             `The user has ${allPurposesAgreed ? '' : 'not'} agreed to all purposes.`);
                     } else {
-                        console.log(`Google Analytics (${ga.sourcePointVendorId}) not loaded due to CCPA opt-out`);
+                        console.log(`Google Analytics (${ga.cmpVendorId}) not loaded due to CCPA opt-out`);
                     }
                 }
             });

@@ -1,17 +1,17 @@
 import { onConsentChange } from '@guardian/consent-management-platform';
 
-const getConsentForVendors = (sourcePointVendorIds) => new Promise((resolve) => {
-    if (!Array.isArray(sourcePointVendorIds)) {
+const getConsentForVendors = (cmpVendorIds) => new Promise((resolve) => {
+    if (!Array.isArray(cmpVendorIds)) {
         return resolve({});
     }
 
     onConsentChange(state => {
         /**
-         * Loop over sourcePointVendorIds and pull
+         * Loop over cmpVendorIds and pull
          * vendor specific consent from state.
          */
-        resolve(sourcePointVendorIds.reduce((accumulator, vendorKey) => {
-            const vendorId = sourcePointVendorIds[vendorKey];
+        resolve(cmpVendorIds.reduce((accumulator, vendorKey) => {
+            const vendorId = cmpVendorIds[vendorKey];
             if (
                 state.tcfv2 &&
                 state.tcfv2.vendorConsents &&
