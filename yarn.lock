@@ -182,14 +182,14 @@
   resolved "https://registry.yarnpkg.com/@emotion/weak-memoize/-/weak-memoize-0.2.5.tgz#8eed982e2ee6f7f4e44c253e12962980791efd46"
   integrity sha512-6U71C2Wp7r5XtFtQzYrW5iKFT67OixrSxjI4MptCHzdSVlgabczzqLe0ZSgnub/5Kp4hSbpDB1tMytZY9pwxxA==
 
-"@guardian/consent-management-platform@4.0.0-9":
-  version "4.0.0-9"
-  resolved "https://registry.yarnpkg.com/@guardian/consent-management-platform/-/consent-management-platform-4.0.0-9.tgz#9335485e5b98c7771498dee2bb892a5f94e27b19"
-  integrity sha512-JL2LpgbUcYz488kBAmCAAn0t8NtmT8s4LDXd2sVvRhZAThG4evGyJDD1fI9FhBmwvhAukRaet2SPr52hxt7zUQ==
+"@guardian/consent-management-platform@4.0.0":
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/@guardian/consent-management-platform/-/consent-management-platform-4.0.0.tgz#b4ad18f3a5f310c481ba20f826fd3a8ee794372b"
+  integrity sha512-+UJdm26AnHORwxfJb5StoaFqSN1ADCH0n8Suzc+ItAGnkk2N9EtadbqXyjgI/kKewbVi9eYtTEZoyIZBdDOqIQ==
   dependencies:
-    "@guardian/old-cmp" "npm:@guardian/consent-management-platform@^3.4.9"
+    "@guardian/old-cmp" "npm:@guardian/consent-management-platform@^3.4.10"
 
-"@guardian/old-cmp@npm:@guardian/consent-management-platform@^3.4.9":
+"@guardian/old-cmp@npm:@guardian/consent-management-platform@^3.4.10":
   version "3.4.10"
   resolved "https://registry.yarnpkg.com/@guardian/consent-management-platform/-/consent-management-platform-3.4.10.tgz#604e71d27c6bfa4664c83c55578a8aa73ff09d82"
   integrity sha512-P3dTf9EqYhpH7JQ+Bg9MNoIQ08U4yD5j+s5epO9mNTaIBiX1BeOF3RcI3KNj/dBxSggaut0rBdQ82GN54Bg4jA==
