@@ -23,6 +23,12 @@ define(['modules/analytics/analyticsEnabled',
         var startTrialButton = queryParam('startTrialButton');
         var experience = guardian.experience;
 
+        /**
+         * Instruction for Google Analytics
+         * to leverage the TCFv2 framework
+        */
+        window.gtag_enable_tcf_support = true;
+
         /* Google analytics snippet */
         /*eslint-disable */
         (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
