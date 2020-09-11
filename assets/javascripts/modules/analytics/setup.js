@@ -20,7 +20,7 @@ define([
             if (ccpaConsent || vendorConsents[ga.cmpVendorId]) {
                 ga.init();
                 loadGA.complete = true;
-            } else if (allPurposesAgreed && vendorConsents[ga.cmpVendorId] === null) {
+            } else if (allPurposesAgreed && typeof(vendorConsents[ga.cmpVendorId]) === 'undefined') {
                 console.log('Google Analytics has not been configured as a vendor yet, but all purposes have been ' +
                     'agreed so we\'re loading it.');
                 ga.init();
