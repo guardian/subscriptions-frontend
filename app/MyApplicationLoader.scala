@@ -79,6 +79,7 @@ class MyComponents(context: Context)
     new CAS(oAuthActions, executionContext, controllerComponents),
     new AccountManagement(touchpointBackends, authenticationService, sessionSubscription, commonActions, httpClient, controllerComponents),
     new PatternLibrary(commonActions, controllerComponents),
+    new GeoCountry(commonActions, controllerComponents),
     new Testing(touchpointBackends.Test, commonActions, oAuthActions, controllerComponents),
     new PromoLandingPage(touchpointBackends.Normal, commonActions, oAuthActions, executionContext, controllerComponents),
     new Offers(commonActions, controllerComponents)

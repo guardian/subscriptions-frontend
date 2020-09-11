@@ -73,9 +73,16 @@
     "lint": "grunt validate"
   },
   "dependencies": {
+    "@babel/runtime": "^7.2.0",
+    "@emotion/core": "^10.0.21",
+    "@guardian/consent-management-platform": "^4.3.0",
+		"@guardian/src-button": "^2.0.0",
+		"@guardian/src-foundations": "^2.0.0",
+		"@guardian/src-icons": "^2.0.0",
     "babel-runtime": "^6.26.0",
+    "emotion-theming": "^10.0.27",
     "lodash.debounce": "^4.0.8",
-    "react": "^16.2.0",
+    "react": "^16.10.2",
     "react-datepicker": "^1.0.4",
     "react-dom": "^16.2.0",
     "react-radio-buttons": "^1.2.0"

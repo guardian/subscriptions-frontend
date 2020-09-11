@@ -18,7 +18,7 @@ require([
     'modules/animatedDropdown',
     'modules/index-intl',
     'object-fit-images',
-    'modules/consentBanner'
+    '@guardian/consent-management-platform'
 ], function (
     ajax,
     raven,
@@ -39,9 +39,24 @@ require([
     dropdown,
     indexIntl,
     objectFitImages,
-    consentBanner
+    cmp
 ) {
     'use strict';
+
+    // Get country to initialise CMP library
+    fetch('/geocountry').then(response => {
+        if (response.ok) {
+            return response.text();
+        } else {
+            throw new Error('failed to get geocountry');
+        }
+    }).then(responseCountryCode => {
+        cmp.cmp.init({
+            isInUsa: responseCountryCode === 'US'
+        });
+    }).catch(err => {
+        raven.Raven.captureException(err);
+    });
 
     ajax.init({page: {ajaxUrl: ''}});
     raven.init('https://df7232e9685946ce965f2098ac3bdab2@sentry.io/1218847');
@@ -62,5 +77,4 @@ require([
     objectFitImages();
     patterns.init();
     renew.init();
-    consentBanner.init();
 });

@@ -23,6 +23,12 @@ define(['modules/analytics/analyticsEnabled',
         var startTrialButton = queryParam('startTrialButton');
         var experience = guardian.experience;
 
+        /**
+         * Instruction for Google Analytics
+         * to leverage the TCFv2 framework
+        */
+        window.gtag_enable_tcf_support = true;
+
         /* Google analytics snippet */
         /*eslint-disable */
         (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -127,6 +133,7 @@ define(['modules/analytics/analyticsEnabled',
 
     return {
         init: analyticsEnabled(init),
-        trackEvent: enqueueEvent
+        trackEvent: enqueueEvent,
+        cmpVendorId: '5e542b3a4cd8884eb41b5a72'
     };
 });
