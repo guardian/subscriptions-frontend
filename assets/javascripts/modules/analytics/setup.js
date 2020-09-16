@@ -44,13 +44,10 @@ define([
          * GA and other tags often prefer Ophan to have bootstrapped and set window.guardian state,
          * so load them after Ophan has loaded if thirdPartyTrackingEnabled.
          */
-        ophan.loaded.finally(() => {
-            cmp.registerCallbackOnConsentChange(loadGA)
-        });
+        ophan.loaded.finally(() => cmp.registerCallbackOnConsentChange(loadGA));
     }
 
     return {
-        init: init,
-        createPrivacySettingsLink: cmp.createPrivacySettingsLink
+        init: init
     };
 });
