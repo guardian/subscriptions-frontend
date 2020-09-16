@@ -54,6 +54,7 @@ require([
         cmp.cmp.init({
             isInUsa: responseCountryCode === 'US'
         });
+        analytics.createPrivacySettingsLink();
     }).catch(err => {
         raven.Raven.captureException(err);
     });

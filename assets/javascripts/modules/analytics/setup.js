@@ -45,12 +45,12 @@ define([
          * so load them after Ophan has loaded if thirdPartyTrackingEnabled.
          */
         ophan.loaded.finally(() => {
-            cmp.createPrivacySettingsLink();
             cmp.registerCallbackOnConsentChange(loadGA)
         });
     }
 
     return {
-        init: init
+        init: init,
+        createPrivacySettingsLink: cmp.createPrivacySettingsLink
     };
 });

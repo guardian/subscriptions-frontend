@@ -39,8 +39,10 @@ const registerCallbackOnConsentChange = (fn) => onConsentChange(fn);
 
 const createPrivacySettingsLink = () => {
     const privacySettingsButton = document.querySelector(PRIVACY_SETTINGS_SELECTOR);
-    privacySettingsButton.classList.remove(HIDDEN_CLASS);
-    privacySettingsButton.addEventListener('click', cmp.showPrivacyManager);
+    if (privacySettingsButton) {
+        privacySettingsButton.classList.remove(HIDDEN_CLASS);
+        privacySettingsButton.addEventListener('click', cmp.showPrivacyManager);
+    }
 }
 
 export { getConsentForVendors, checkAllTCFv2PurposesAreOptedIn, checkCCPA, registerCallbackOnConsentChange, createPrivacySettingsLink };
