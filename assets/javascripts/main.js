@@ -43,6 +43,18 @@ require([
 ) {
     'use strict';
 
+    const PRIVACY_SETTINGS_SELECTOR = '.js-privacy-settings-link';
+    const HIDDEN_CLASS = 'is-hidden';
+
+
+    function createPrivacySettingsLink() {
+        const privacySettingsButton = document.querySelector(PRIVACY_SETTINGS_SELECTOR);
+        if (privacySettingsButton) {
+            privacySettingsButton.classList.remove(HIDDEN_CLASS);
+            privacySettingsButton.addEventListener('click', cmp.cmp.showPrivacyManager);
+        }
+    }
+
     // Get country to initialise CMP library
     fetch('/geocountry').then(response => {
         if (response.ok) {
@@ -54,6 +66,7 @@ require([
         cmp.cmp.init({
             isInUsa: responseCountryCode === 'US'
         });
+        createPrivacySettingsLink();
     }).catch(err => {
         raven.Raven.captureException(err);
     });
