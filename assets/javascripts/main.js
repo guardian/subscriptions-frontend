@@ -1,5 +1,6 @@
 require([
     'utils/ajax',
+    'utils/cookie',
     'modules/raven',
     'modules/analytics/setup',
     'modules/toggle',
@@ -21,6 +22,7 @@ require([
     '@guardian/consent-management-platform'
 ], function (
     ajax,
+    cookie,
     raven,
     analytics,
     toggle,
@@ -55,21 +57,24 @@ require([
         }
     }
 
-    // Get country to initialise CMP library
-    fetch('/geocountry').then(response => {
-        if (response.ok) {
-            return response.text();
-        } else {
-            throw new Error('failed to get geocountry');
-        }
-    }).then(responseCountryCode => {
-        cmp.cmp.init({
-            isInUsa: responseCountryCode === 'US'
+    // Don't show CMP for post deploy user
+    if (cookie.getCookie('_post_deploy_user') !== 'true') {
+        // Get country to initialise CMP library
+        fetch('/geocountry').then(response => {
+            if (response.ok) {
+                return response.text();
+            } else {
+                throw new Error('failed to get geocountry');
+            }
+        }).then(responseCountryCode => {
+            cmp.cmp.init({
+                isInUsa: responseCountryCode === 'US'
+            });
+            createPrivacySettingsLink();
+        }).catch(err => {
+            raven.Raven.captureException(err);
         });
-        createPrivacySettingsLink();
-    }).catch(err => {
-        raven.Raven.captureException(err);
-    });
+    }
 
     ajax.init({page: {ajaxUrl: ''}});
     raven.init('https://df7232e9685946ce965f2098ac3bdab2@sentry.io/1218847');
