@@ -1,13 +1,12 @@
 package configuration
 
-
 import com.github.nscala_time.time.Imports._
 import com.gu.cas.PrefixedTokens
 import com.gu.config._
 import com.gu.memsub.auth.common.MemSub.Google._
 import com.gu.salesforce.SalesforceConfig
-import com.netaporter.uri.dsl._
 import com.typesafe.config.ConfigFactory
+import io.lemonlabs.uri.typesafe.dsl._
 import org.joda.time.Days
 import play.api.mvc.{Call, RequestHeader}
 
@@ -51,9 +50,12 @@ object Config {
 
     def idWebAppRegisterUrl(returnTo: Call)(implicit request: RequestHeader) = idWebAppUrl("register", returnTo)
 
-    def idWebAppUrl(idPath: String, returnTo : Call)(implicit request: RequestHeader): String =
-      (webAppUrl / idPath) ? ("returnUrl" -> returnTo.absoluteURL(secure = true)) ? ("skipConfirmation" -> "true")
-
+    def idWebAppUrl(idPath: String, returnTo: Call)(implicit request: RequestHeader): String =
+      (
+        (webAppUrl / idPath) ?
+          ("returnUrl" -> returnTo.absoluteURL(secure = true)) ?
+          ("skipConfirmation" -> "true")
+      ).toString
   }
 
   object Zuora {

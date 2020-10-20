@@ -1,10 +1,9 @@
 package views.support
-import com.netaporter.uri.Uri
-import com.netaporter.uri.dsl._
+
 import controllers.routes
-import model.DigitalEdition._
+import io.lemonlabs.uri.Uri
+import io.lemonlabs.uri.typesafe.dsl._
 import model.{DigitalEdition => DE}
-import utils.Tracking.internalCampaignCode
 
 object DigitalEdition {
 

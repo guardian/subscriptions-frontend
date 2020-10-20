@@ -8,7 +8,7 @@ import com.gu.memsub._
 import com.gu.memsub.images.{ResponsiveImage, ResponsiveImageGenerator, ResponsiveImageGroup}
 import com.gu.memsub.subsv2.CatalogPlan.ContentSubscription
 import com.gu.memsub.subsv2.{CatalogPlan, Plan}
-import com.netaporter.uri.dsl._
+import io.lemonlabs.uri.typesafe.dsl._
 
 import scala.reflect.internal.util.StringOps
 object PlanOps {

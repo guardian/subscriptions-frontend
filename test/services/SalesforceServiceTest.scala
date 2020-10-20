@@ -1,15 +1,15 @@
 package services
+
 import com.gu.i18n.Title
 import com.gu.memsub.Product.Delivery
-import com.gu.memsub._
 import com.gu.memsub.Subscription.ProductRatePlanId
+import com.gu.memsub._
 import com.gu.memsub.subsv2.{CatalogPlan, PaperCharges}
-import model.{DeliveryRecipient, PaperData, PersonalData}
-import org.specs2.mutable.Specification
-import com.gu.salesforce.ContactDeserializer.Keys._
 import com.gu.salesforce.Contact
+import com.gu.salesforce.ContactDeserializer.Keys._
+import model.{DeliveryRecipient, PaperData, PersonalData}
 import org.joda.time.{DateTime, LocalDate}
-import scalaz.syntax.std.option._
+import org.specs2.mutable.Specification
 import play.api.libs.json.{JsString, Json}
 import scalaz.syntax.std.option._
 
@@ -58,8 +58,21 @@ class SalesforceServiceTest extends Specification {
 
     "Include your giftee address if you supply one" in {
       val buyerContact = Contact(
-        None, None, None, None, "Buyer's Lastname", DateTime.now,
-        "buyer_sfContactId", "buyer_sfAccountId", None, None, None, None, None, None
+        identityId = None,
+        regNumber = None,
+        title = None,
+        firstName = None,
+        lastName = "Buyer's Lastname",
+        joinDate = DateTime.now,
+        salesforceContactId = "buyer_sfContactId",
+        salesforceAccountId = "buyer_sfAccountId",
+        mailingStreet = None,
+        mailingCity = None,
+        mailingState = None,
+        mailingPostcode = None,
+        mailingCountry = None,
+        deliveryInstructions = None,
+        recordTypeId = None
       )
       val delivery = DeliveryRecipient(
         Some(Title.Mx), Some("firstname"), Some("lastname"), Some("email@email.com"),

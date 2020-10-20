@@ -1,7 +1,7 @@
 package model
 
 import com.gu.memsub.subsv2.Catalog
-import com.netaporter.uri.Uri
+import io.lemonlabs.uri.Uri
 
 trait WeeklyRegion {
   def title: String
@@ -18,13 +18,13 @@ object WeeklyRegion {
 case class UnitedKingdom(catalog: Catalog) extends WeeklyRegion {
   override val title = "United Kingdom"
   override val description = "Includes Isle of Man and Channel Islands"
-  override val url = Uri.parse(s"checkout/${catalog.weekly.zoneA.quarter.slug}").addParam("countryGroup", "uk")
+  override val url = Uri.parse(s"checkout/${catalog.weekly.zoneA.quarter.slug}").toUrl.addParam("countryGroup", "uk")
 }
 
 case class UnitedStates(catalog: Catalog) extends WeeklyRegion {
   override val title = "United States"
   override val description = "Includes Alaska and Hawaii"
-  override val url = Uri.parse(s"checkout/${catalog.weekly.zoneA.quarter.slug}").addParam("countryGroup", "us")
+  override val url = Uri.parse(s"checkout/${catalog.weekly.zoneA.quarter.slug}").toUrl.addParam("countryGroup", "us")
 }
 
 case class Row(catalog: Catalog) extends WeeklyRegion {

@@ -6,8 +6,8 @@ import com.gu.memsub.promo.CovariantIdObject.CovariantId
 import com.gu.memsub.promo.Promotion.PromoWithWeeklyLandingPage
 import com.gu.memsub.promo.{PromoCode, WeeklyLandingPage}
 import com.gu.memsub.subsv2.{CatalogPlan, WeeklyPlans}
-import com.netaporter.uri.Uri
-import com.netaporter.uri.dsl._
+import io.lemonlabs.uri.Uri
+import io.lemonlabs.uri.typesafe.dsl._
 import model.GuardianWeeklyZones
 import model.PurchasableWeeklyProducts._
 import services.WeeklyPicker

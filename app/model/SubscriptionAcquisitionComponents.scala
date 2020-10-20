@@ -1,5 +1,6 @@
 package model
 
+import acquisitions.AcquisitionsHelper.referrerAcquisitionDataFromJSON
 import com.gu.acquisition.model.{GAData, OphanIds, ReferrerAcquisitionData}
 import com.gu.acquisition.typeclasses.AcquisitionSubmissionBuilder
 import com.gu.memsub.Benefit.PaperDay
@@ -7,12 +8,11 @@ import com.gu.memsub.BillingPeriod._
 import com.gu.memsub.promo.{PercentDiscount, Promotion}
 import com.gu.monitoring.SafeLogger
 import com.gu.monitoring.SafeLogger._
-import com.netaporter.uri.Uri
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
+import io.lemonlabs.uri.Uri
 import ophan.thrift.event.PaymentProvider.{Gocardless, Stripe}
 import ophan.thrift.event._
-import acquisitions.AcquisitionsHelper.referrerAcquisitionDataFromJSON
 
 import scala.collection.Set
 
@@ -50,7 +50,7 @@ object SubscriptionAcquisitionComponents {
     override def buildGAData(components: SubscriptionAcquisitionComponents): Either[String, GAData] = {
       import components.clientBrowserInfo._
 
-      val host = Uri.parse(Config.subscriptionsUrl).host.getOrElse("subscribe.theguardian.com")
+      val host = Uri.parse(Config.subscriptionsUrl).toUrl.hostOption.map(_.value).getOrElse("subscribe.theguardian.com")
       Right(GAData(host, gaClientId, Some(ipAddress), userAgent))
     }
 
