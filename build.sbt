@@ -49,7 +49,7 @@ libraryDependencies ++= Seq(
     filters,
     jodaForms,
     PlayImport.specs2 % "test",
-    "com.gu" %% "membership-common" % "0.553",
+    "com.gu" %% "membership-common" % "0.589",
     "com.gu.identity" %% "identity-auth-play" % "3.195",
     "com.gu" %% "identity-test-users" % "0.6",
     "com.gu" %% "play-googleauth" % "0.7.6",
@@ -94,8 +94,8 @@ javaOptions in Test += "-Dconfig.file=test/acceptance/conf/acceptance-test.conf"
 
 resolvers ++= Seq(
     "Guardian Github Releases" at "https://guardian.github.io/maven/repo-releases",
-    "Guardian Github Snapshots" at "http://guardian.github.com/maven/repo-snapshots",
-    "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases",
+    "Guardian Github Snapshots" at "https://guardian.github.io/maven/repo-snapshots",
+    "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases",
     Resolver.sonatypeRepo("releases"),
     Resolver.sonatypeRepo("snapshots"),
     Resolver.bintrayRepo("guardian", "ophan")
@@ -128,5 +128,3 @@ addCommandAlias("prodrun", "run 9200")
 addCommandAlias("fast-test", "testOnly -- -l AcceptanceTest")
 addCommandAlias("acceptance-test", "testOnly -- -n AcceptanceTest")
 addCommandAlias("play-artifact", "riffRaffNotifyTeamcity")
-
-

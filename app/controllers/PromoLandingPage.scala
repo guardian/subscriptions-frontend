@@ -1,24 +1,26 @@
 package controllers
+
 import actions.{CommonActions, OAuthActions}
 import com.gu.i18n.CountryGroup.byCountryCode
 import com.gu.i18n.{Country, CountryGroup}
 import com.gu.memsub.Benefit.Digipack
-import com.gu.memsub.Subscription
 import com.gu.memsub.promo.Formatters.PromotionFormatters._
 import com.gu.memsub.promo.Promotion._
 import com.gu.memsub.promo._
-import com.gu.memsub.subsv2.{Catalog, WeeklyPlans}
-import com.netaporter.uri.dsl._
+import com.gu.memsub.subsv2.Catalog
 import configuration.Config
 import controllers.SessionKeys.PromotionTrackingCode
 import controllers.WeeklyLandingPage.{Hreflang, Hreflangs}
 import filters.HandleXFrameOptionsOverrideHeader
+import io.lemonlabs.uri.typesafe.dsl._
 import play.api.data.{Form, Forms}
 import play.api.libs.json.Json
 import play.api.mvc._
 import play.twirl.api.Html
-import services.TouchpointBackend
+import scalaz.OptionT
+import scalaz.std.scalaFuture._
 import services.FlashSale._
+import services.TouchpointBackend
 import utils.RequestCountry._
 import utils.Tracking.internalCampaignCode
 import views.html.promotion._
@@ -26,8 +28,6 @@ import views.html.weekly.landing_description
 import views.support.PegdownMarkdownRenderer
 
 import scala.concurrent.{ExecutionContext, Future}
-import scalaz.OptionT
-import scalaz.std.scalaFuture._
 
 class PromoLandingPage(
   tpBackend: TouchpointBackend,
@@ -156,7 +156,10 @@ class PromoLandingPage(
       }
     } yield landingPage
     maybeLandingPage.run.map(_.getOrElse {
-      Redirect(routes.Homepage.index().url ? (internalCampaignCode -> intcmp(promoCode.get).value), request.queryString)
+      Redirect(
+        url = (routes.Homepage.index().url ? (internalCampaignCode -> intcmp(promoCode.get).value)).toString,
+        request.queryString
+      )
     })
 
   }
@@ -201,7 +204,7 @@ class PromoLandingPage(
     } yield termsPage
 
     maybeTermsPage.run.map(_.getOrElse {
-      Redirect(routes.Homepage.index().url ? (internalCampaignCode -> s"FROM_PT_${promoCode.get}"))
+      Redirect((routes.Homepage.index().url ? (internalCampaignCode -> s"FROM_PT_${promoCode.get}")).toString)
     })
 
   }
