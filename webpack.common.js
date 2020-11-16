@@ -34,7 +34,7 @@ const path = require('path');
     },
 
     module: {
-        loaders: [
+        rules: [
             {
                 test: /\.es6$/,
                 exclude: [
@@ -66,7 +66,7 @@ const path = require('path');
         ]
     },
 
-          watch: false,
+    watch: false,
 
     stats: {
         modules: true,
