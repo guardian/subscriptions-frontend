@@ -32,6 +32,12 @@ const checkCCPA = () => new Promise((resolve) => {
     })
 });
 
+const checkAus = () => new Promise((resolve) => {
+    onConsentChange(state => {
+        resolve(state.aus ? state.ccpa.personalisedAdvertising : null);
+    })
+});
+
 const registerCallbackOnConsentChange = (fn) => onConsentChange(fn);
 
-export { getConsentForVendors, checkAllTCFv2PurposesAreOptedIn, checkCCPA, registerCallbackOnConsentChange };
+export { getConsentForVendors, checkAllTCFv2PurposesAreOptedIn, checkCCPA, checkAus, registerCallbackOnConsentChange };

@@ -12,12 +12,13 @@ define([
     function loadGA() {
         Promise.allSettled([
             cmp.checkCCPA(),
+            cmp.checkAus(),
             cmp.getConsentForVendors([ga.cmpVendorId]),
             cmp.checkAllTCFv2PurposesAreOptedIn()
         ]).then(results => {
-            const [ ccpaConsent, vendorConsents, allPurposesAgreed ] = results.map(promise => promise.value);
+            const [ ccpaConsent, ausConsent, vendorConsents, allPurposesAgreed ] = results.map(promise => promise.value);
 
-            if (ccpaConsent || vendorConsents[ga.cmpVendorId]) {
+            if (ccpaConsent || ausConsent || vendorConsents[ga.cmpVendorId]) {
                 ga.init();
                 loadGA.complete = true;
             } else if (allPurposesAgreed && typeof(vendorConsents[ga.cmpVendorId]) === 'undefined') {
