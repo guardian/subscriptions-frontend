@@ -68,7 +68,7 @@ require([
             }
         }).then(responseCountryCode => {
             cmp.cmp.init({
-                isInUsa: responseCountryCode === 'US'
+                country: responseCountryCode
             });
             createPrivacySettingsLink();
         }).catch(err => {

@@ -34,39 +34,30 @@ const path = require('path');
     },
 
     module: {
-        loaders: [
+        rules: [
             {
                 test: /\.es6$/,
-                exclude: /node_modules/,
-                loader: 'babel-loader',
-                query: {
-                    'presets': [
-                        ['env']
-                    ],
-                    cacheDirectory: '',
-                    plugins: ['transform-class-properties','transform-object-rest-spread','transform-flow-strip-types', ['transform-runtime', {
-                        'helpers': false,
-                        'polyfill': false,
-                        'regenerator': true,
-                        'moduleName': 'babel-runtime'
-                    }]]
-
-}
+                exclude: [
+                    {
+                        test: /node_modules/,
+                        exclude: [
+                        /@guardian\/(?!(automat-modules))/,
+                        ],
+                    },
+                ],
+                loader: 'babel-loader'
             },
             {
                 test: /\.jsx?$/,
-                exclude: /node_modules/,
-                loader: 'babel-loader',
-                query: {
-                    presets:  ['env', 'react'],
-                    cacheDirectory: '',
-                    plugins: ['transform-class-properties','transform-object-rest-spread','transform-flow-strip-types', ['transform-runtime', {
-                        'helpers': false,
-                        'polyfill': false,
-                        'regenerator': true,
-                        'moduleName': 'babel-runtime'
-                    }]]
-                }
+                exclude: [
+                    {
+                        test: /node_modules/,
+                        exclude: [
+                        /@guardian\/(?!(automat-modules))/,
+                        ],
+                    },
+                ],
+                loader: 'babel-loader'
             },
             {
                 test: /\.css$/,
@@ -75,7 +66,7 @@ const path = require('path');
         ]
     },
 
-          watch: false,
+    watch: false,
 
     stats: {
         modules: true,
