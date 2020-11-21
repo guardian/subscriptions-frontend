@@ -77,7 +77,7 @@
     "@emotion/core": "^10.0.35",
     "@guardian/consent-management-platform": "^6.7.4",
 		"@guardian/src-button": "^2.0.0",
-		"@guardian/src-foundations": "^2.0.0",
+		"@guardian/src-foundations": "^2.5.0",
 		"@guardian/src-icons": "^2.0.0",
     "emotion-theming": "^10.0.27",
     "lodash.debounce": "^4.0.8",
