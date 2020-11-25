@@ -57,7 +57,7 @@ define(['modules/analytics/analyticsEnabled',
         (guardian.ophan) && ga('membershipPropertyTracker.set', 'dimension3', guardian.ophan.pageViewId); // ophanPageview Id
         (ophanBrowserId) && ga('membershipPropertyTracker.set', 'dimension4', ophanBrowserId); // ophanBrowserId
         ga('membershipPropertyTracker.set', 'dimension5', 'subscriptions');               // platform
-        (identitySignedIn) && ga('membershipPropertyTracker.set', 'dimension6', user.getUserFromCookie().id); // identityId
+        // dimension6 (Identity ID) has been deprecated
         ga('membershipPropertyTracker.set', 'dimension7', identitySignedIn.toString());   // isLoggedOn
 
         if (productData) {
