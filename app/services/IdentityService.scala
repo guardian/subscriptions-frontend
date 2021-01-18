@@ -201,9 +201,8 @@ object PersonalDataJsonSerialiser {
           "postcode" -> addr.postCode,
           "country" -> addr.country.fold(addr.countryName)(_.name)
         )
-      }),
-      "statusFields" ->
-        Json.obj("receiveGnmMarketing" -> personalData.receiveGnmMarketing))
+      })
+     )
   }
 }
 

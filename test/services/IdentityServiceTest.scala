@@ -108,9 +108,7 @@ class IdentityServiceTest extends FreeSpec with Matchers {
         "address4" -> "Deliveryshire",
         "postcode" -> "DL1 VRY",
         "country"  -> "UK"
-      ),
-      "statusFields" ->
-        Json.obj("receiveGnmMarketing" -> true)
+      )
     )
 
     assertResult(expectedJson)(
