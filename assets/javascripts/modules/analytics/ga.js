@@ -58,7 +58,7 @@ define(['modules/analytics/analyticsEnabled',
         ga('membershipPropertyTracker.set', 'dimension5', 'subscriptions');               // platform
         // dimension6 (Identity ID) has been deprecated
         ga('membershipPropertyTracker.set', 'dimension7', identitySignedIn.toString());   // isLoggedOn
-        // dimension8 (stripeId) has been deprecated
+        // dimension8 (stripeId) was never sent by this site
         if (productData) {
             // dimension9 (productData.zuoraId) has been deprecated
             if (productData.productPurchased) {
