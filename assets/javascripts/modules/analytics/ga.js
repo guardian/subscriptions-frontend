@@ -14,7 +14,6 @@ define(['modules/analytics/analyticsEnabled',
     function init() {
         var identitySignedIn = user.isLoggedIn();
         var identitySignedOut = !!cookie.getCookie('GU_SO') && !identitySignedIn;
-        var ophanBrowserId = cookie.getCookie('bwid');
         var productData = guardian.pageInfo ? guardian.pageInfo.productData : {};
         var intcmp = queryParam('INTCMP');
         var isCustomerAgent = !!guardian.supplierCode;
@@ -54,16 +53,14 @@ define(['modules/analytics/analyticsEnabled',
 
         ga('membershipPropertyTracker.set', 'dimension1', identitySignedIn.toString());   // deprecated - now uses dimension7 via util/user
         ga('membershipPropertyTracker.set', 'dimension2', identitySignedOut.toString());  // deprecated - is logically equivalent to: dimension6 != "" and dimension7 === "false"
-        (guardian.ophan) && ga('membershipPropertyTracker.set', 'dimension3', guardian.ophan.pageViewId); // ophanPageview Id
-        (ophanBrowserId) && ga('membershipPropertyTracker.set', 'dimension4', ophanBrowserId); // ophanBrowserId
+        // dimension3 (guardian.ophan.pageViewId) has been deprecated
+        // dimension4 (ophanBrowserId) has been deprecated
         ga('membershipPropertyTracker.set', 'dimension5', 'subscriptions');               // platform
         // dimension6 (Identity ID) has been deprecated
         ga('membershipPropertyTracker.set', 'dimension7', identitySignedIn.toString());   // isLoggedOn
-
+        // dimension8 (stripeId) was never sent by this site
         if (productData) {
-            if (productData.zuoraId) {
-                ga('membershipPropertyTracker.set', 'dimension9', productData.zuoraId);   // zuoraId
-            }
+            // dimension9 (productData.zuoraId) has been deprecated
             if (productData.productPurchased) {
                 ga('membershipPropertyTracker.set', 'dimension11', productData.productType + ' - ' + productData.productPurchased);  // productPurchased
             }
