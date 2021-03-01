@@ -26,13 +26,6 @@ Parameters:
       Internal Guardian, or '0.0.0.0/0' - the whole internet!)
     Type: String
     Default: 0.0.0.0/0
-  InstanceType:
-    Type: String
-    Description: EC2 instance type
-    AllowedValues:
-    - t2.small
-    - t3.small
-    ConstraintDescription: must be a valid EC2 instance type.
   ImageId:
     Description: AMI ID
     Type: String
@@ -91,7 +84,7 @@ Resources:
       ImageId: !Ref 'ImageId'
       SecurityGroups:
       - !Ref 'InstanceSecurityGroup'
-      InstanceType: !Ref 'InstanceType'
+      InstanceType: t4g.small
       KeyName: !Ref 'KeyName'
       IamInstanceProfile: !Ref 'SubscriptionsAppInstanceProfile'
       AssociatePublicIpAddress: true
