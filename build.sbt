@@ -111,6 +111,8 @@ packageDescription := """Subscription Frontend"""
 
 riffRaffPackageType := (packageBin in Debian).value
 
+riffRaffArtifactResources += (file("cloud-formation/subscriptions-app.cf.yaml"), "cfn/cfn.yaml")
+
 routesGenerator := InjectedRoutesGenerator
 
 javaOptions in Universal ++= Seq(
