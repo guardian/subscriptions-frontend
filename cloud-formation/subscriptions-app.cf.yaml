@@ -36,9 +36,9 @@ Mappings:
       - arn:aws:dynamodb:*:*:table/MembershipSub-Promotions-PROD
       - arn:aws:dynamodb:*:*:table/MembershipSub-Promotions-UAT
       SiteDomain: 'subscribe.theguardian.com.origin.subscriptions.guardianapis.com.'
-      MinInstances: '3'
-      MaxInstances: '6'
-      DesiredInstances: '3'
+      MinInstances: '2'
+      MaxInstances: '4'
+      DesiredInstances: '2'
       SSLCertificateId: '39488f8a-17f1-4154-b799-b6a132ef37e7'
       KinesisStreamArn: arn:aws:kinesis:eu-west-1:865473395570:stream/acquisitions-stream-PROD
     CODE:
