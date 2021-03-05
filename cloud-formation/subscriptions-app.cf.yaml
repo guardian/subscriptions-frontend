@@ -84,6 +84,7 @@ Resources:
       ImageId: !Ref 'ImageId'
       SecurityGroups:
       - !Ref 'InstanceSecurityGroup'
+      - !Ref 'WazuhSecurityGroup'
       InstanceType: t4g.small
       KeyName: !Ref 'KeyName'
       IamInstanceProfile: !Ref 'SubscriptionsAppInstanceProfile'
@@ -188,6 +189,21 @@ Resources:
             Resource: arn:aws:iam::021353022223:role/support-invoke-value-calculator
       ManagedPolicyArns:
       - !Sub arn:aws:iam::${AWS::AccountId}:policy/guardian-ec2-role-for-ssm
+  DescribeEC2Policy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: describe-ec2-policy
+      PolicyDocument:
+        Statement:
+        - Effect: Allow
+          Resource: "*"
+          Action:
+          - ec2:DescribeTags
+          - ec2:DescribeInstances
+          - autoscaling:DescribeAutoScalingGroups
+          - autoscaling:DescribeAutoScalingInstances
+      Roles:
+      - !Ref SubscriptionsAppRole
   SubscriptionsAppInstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:
@@ -250,6 +266,15 @@ Resources:
       - IpProtocol: tcp
         FromPort: '443'
         ToPort: '443'
+        CidrIp: 0.0.0.0/0
+  WazuhSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: !Ref 'VpcId'
+      SecurityGroupEgress:
+      - IpProtocol: tcp
+        FromPort: 1514
+        ToPort: 1515
         CidrIp: 0.0.0.0/0
   FrontendELBDNSrecord:
     Type: AWS::Route53::RecordSet
