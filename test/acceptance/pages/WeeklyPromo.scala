@@ -3,7 +3,7 @@ package acceptance.pages
 import acceptance.util.Config.baseUrl
 import acceptance.util.{Browser, Config, TestUser}
 import org.openqa.selenium.{By, WebElement}
-import org.scalatest.selenium.Page
+import org.scalatestplus.selenium.Page
 
 case class WeeklyPromo(endpoint: String = "/p/WWM99X", country: String = "GB") extends Page with Browser {
 

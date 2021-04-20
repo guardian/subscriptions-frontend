@@ -2,7 +2,7 @@ package acceptance.util
 
 import org.openqa.selenium.support.ui.{ExpectedCondition, ExpectedConditions, WebDriverWait}
 import org.openqa.selenium.By
-import org.scalatest.selenium.WebBrowser
+import org.scalatestplus.selenium.WebBrowser
 import scala.util.Try
 
 trait Browser extends WebBrowser {
