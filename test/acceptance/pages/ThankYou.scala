@@ -2,7 +2,7 @@ package acceptance.pages
 
 import acceptance.util.{TestUser, Browser, Config}
 import Config.baseUrl
-import org.scalatestplus.selenium.Page
+import org.scalatest.selenium.Page
 
 case class ThankYou(val testUser: TestUser) extends Page with Browser {
   override val url = s"$baseUrl/checkout/thank-you"

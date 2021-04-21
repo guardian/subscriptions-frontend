@@ -37,10 +37,10 @@ lazy val root = (project in file(".")).enablePlugins(
       "com.gu.memsub.Subscription.ProductRatePlanId"
   ))
 
-scalaVersion := "2.12.13"
+scalaVersion := "2.12.10"
 scalacOptions ++= Seq("-feature")
 
-val scalatestVersion = "3.1.1"
+val scalatestVersion = "3.0.4"
 val jacksonVersion = "2.10.0"
 
 libraryDependencies ++= Seq(
@@ -56,13 +56,13 @@ libraryDependencies ++= Seq(
     "com.gu" %% "identity-test-users" % "0.6",
     "com.gu" %% "content-authorisation-common" % "0.4",
     "com.gu" %% "tip" % "0.1.1",
+    "com.gu" %% "acquisition-event-producer-play26" % "4.0.26",
     "com.github.nscala-time" %% "nscala-time" % "2.16.0",
     "io.sentry" % "sentry-logback" % "1.7.5",
     "com.typesafe.scala-logging" %% "scala-logging" % "3.7.2",
     "org.scalatest" %% "scalatest" % scalatestVersion % "test",
     "org.scalactic" %% "scalactic" % scalatestVersion % "test",
-    "org.scalatestplus" %% "selenium-3-141" % (scalatestVersion + ".0") % "test",
-    "org.seleniumhq.selenium" % "selenium-java" % "3.141.59" % "test",
+    "org.seleniumhq.selenium" % "selenium-java" % "3.7.1" % "test",
     "org.seleniumhq.selenium" % "htmlunit-driver" % "2.28.1" % "test",
     "io.github.bonigarcia" % "webdrivermanager" % "1.7.2" % "test",
     "com.gocardless" % "gocardless-pro" % "2.7.0",
@@ -95,8 +95,10 @@ javaOptions in Test += "-Dconfig.file=test/acceptance/conf/acceptance-test.conf"
 resolvers ++= Seq(
     "Guardian Github Releases" at "https://guardian.github.io/maven/repo-releases",
     "Guardian Github Snapshots" at "https://guardian.github.io/maven/repo-snapshots",
+    "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases",
     Resolver.sonatypeRepo("releases"),
-    Resolver.sonatypeRepo("snapshots")
+    Resolver.sonatypeRepo("snapshots"),
+    Resolver.bintrayRepo("guardian", "ophan")
 )
 
 import com.typesafe.sbt.packager.archetypes.systemloader.ServerLoader.Systemd
