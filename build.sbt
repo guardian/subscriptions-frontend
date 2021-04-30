@@ -95,7 +95,6 @@ javaOptions in Test += "-Dconfig.file=test/acceptance/conf/acceptance-test.conf"
 resolvers ++= Seq(
     "Guardian Github Releases" at "https://guardian.github.io/maven/repo-releases",
     "Guardian Github Snapshots" at "https://guardian.github.io/maven/repo-snapshots",
-    "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases",
     Resolver.sonatypeRepo("releases"),
     Resolver.sonatypeRepo("snapshots"),
     Resolver.bintrayRepo("guardian", "ophan")
