@@ -55,8 +55,6 @@ libraryDependencies ++= Seq(
   "com.squareup.okhttp3" % "okhttp" % "3.9.0",
   "com.typesafe.scala-logging" %% "scala-logging" % "3.9.2",
   "org.typelevel" %% "simulacrum" % "1.0.1",
-  "org.scalatest" %% "scalatest" % "3.1.1" % "test",
-  "org.scalactic" %% "scalactic" % "3.1.1",
   "org.typelevel" %% "cats-core" % "2.1.1",
   "com.amazonaws" % "aws-java-sdk-kinesis" % "1.11.465",
   "com.gu" %% "thrift-serializer" % "4.0.3",
