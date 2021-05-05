@@ -96,8 +96,7 @@ resolvers ++= Seq(
     "Guardian Github Releases" at "https://guardian.github.io/maven/repo-releases",
     "Guardian Github Snapshots" at "https://guardian.github.io/maven/repo-snapshots",
     Resolver.sonatypeRepo("releases"),
-    Resolver.sonatypeRepo("snapshots"),
-    Resolver.bintrayRepo("guardian", "ophan")
+    Resolver.sonatypeRepo("snapshots")
 )
 
 import com.typesafe.sbt.packager.archetypes.systemloader.ServerLoader.Systemd
