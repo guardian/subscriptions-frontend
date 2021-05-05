@@ -37,10 +37,10 @@ lazy val root = (project in file(".")).enablePlugins(
       "com.gu.memsub.Subscription.ProductRatePlanId"
   ))
 
-scalaVersion := "2.12.10"
+scalaVersion := "2.12.13"
 scalacOptions ++= Seq("-feature")
 
-val scalatestVersion = "3.0.4"
+val scalatestVersion = "3.1.1"
 val jacksonVersion = "2.10.0"
 
 libraryDependencies ++= Seq(
@@ -61,7 +61,8 @@ libraryDependencies ++= Seq(
     "com.typesafe.scala-logging" %% "scala-logging" % "3.7.2",
     "org.scalatest" %% "scalatest" % scalatestVersion % "test",
     "org.scalactic" %% "scalactic" % scalatestVersion % "test",
-    "org.seleniumhq.selenium" % "selenium-java" % "3.7.1" % "test",
+    "org.scalatestplus" %% "selenium-3-141" % (scalatestVersion + ".0") % "test",
+    "org.seleniumhq.selenium" % "selenium-java" % "3.141.59" % "test",
     "org.seleniumhq.selenium" % "htmlunit-driver" % "2.28.1" % "test",
     "io.github.bonigarcia" % "webdrivermanager" % "1.7.2" % "test",
     "com.gocardless" % "gocardless-pro" % "2.7.0",

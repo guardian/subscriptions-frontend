@@ -1,6 +1,7 @@
 package acceptance.util
 
-import org.scalatest.selenium.Page
+import org.scalatestplus.selenium.Page
+
 
 trait LoadablePage extends Page {
 

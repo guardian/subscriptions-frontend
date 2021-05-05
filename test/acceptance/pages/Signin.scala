@@ -1,8 +1,8 @@
 package acceptance.pages
 
-import acceptance.util.{Config, TestUser, Browser}
+import acceptance.util.{Browser, Config, TestUser}
 import Config.identityFrontendUrl
-import org.scalatest.selenium.Page
+import org.scalatestplus.selenium.Page
 
 class Signin(testUser: TestUser) extends Page with Browser {
   val url = s"${identityFrontendUrl}/signin"
