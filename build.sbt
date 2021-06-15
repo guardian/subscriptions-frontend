@@ -72,7 +72,6 @@ libraryDependencies ++= Seq(
     "com.gu" %% "play-googleauth" % "0.7.6",
     "com.gu" %% "identity-test-users" % "0.6",
     "com.gu" %% "content-authorisation-common" % "0.4",
-    "com.gu" %% "tip" % "0.1.1",
     "com.github.nscala-time" %% "nscala-time" % "2.16.0",
     "io.sentry" % "sentry-logback" % "1.7.5",
     "com.typesafe.scala-logging" %% "scala-logging" % "3.7.2",
