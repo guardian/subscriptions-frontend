@@ -17,7 +17,6 @@ import com.gu.memsub.subsv2.{CatalogPlan, PlansWithIntroductory}
 import com.gu.memsub.{Product, SupplierCode}
 import com.gu.monitoring.SafeLogger
 import com.gu.monitoring.SafeLogger._
-import com.gu.tip.Tip
 import com.gu.zuora.soap.models.errors._
 import com.typesafe.scalalogging.LazyLogging
 import configuration.Config.Identity.webAppProfileUrl
@@ -217,7 +216,6 @@ class Checkout(fBackendFactory: TouchpointBackends, authenticationService: Authe
       val eventualMaybeSubscription = tpBackend.subscriptionService.get[com.gu.memsub.subsv2.SubscriptionPlan.ContentSubscription](Name(subsName))
       eventualMaybeSubscription.map { maybeSub =>
         maybeSub.map { sub =>
-          if (tpBackend.environmentName == "PROD") Tip.verify()
           Ok(view.thankyou(sub, passwordForm, resolution, promoCode, promotion, startDate, edition, billingCountry))
         }.getOrElse {
           Redirect(routes.Homepage.index()).withNewSession
