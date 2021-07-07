@@ -52,19 +52,5 @@ Then run `yarn watch`, to dynamically recompile assets as they get edited.
 
 ### Unit tests
 
-`sbt fast-test`
-
-This sbt alias executes all tests apart from those tagged as acceptance tests.
-
-### Acceptance tests
-
-1. Run local subscription-frontend: `sbt devrun`
-2. Run local [frontend](https://github.com/guardian/frontend): `./sbt "project identity" idrun`
-3. `sbt acceptance-test`
-
-These are browser driving Selenium tests.
-
-### All tests
-
-Run local frontend and subscription-fronted, and then execute: `sbt test`
+`sbt test`
 
