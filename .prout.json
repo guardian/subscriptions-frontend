@@ -2,14 +2,7 @@
     "checkpoints": {
         "PROD": {
             "url": "https://subscribe.theguardian.com/management/manifest",
-            "overdue": "14M",
-            "afterSeen": {
-                "travis": {
-                    "config": {
-                        "script": "sbt ++$TRAVIS_SCALA_VERSION acceptance-test"
-                    }
-                }
-            }
+            "overdue": "14M"
         }
     },
     "sentry": {

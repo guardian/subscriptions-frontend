@@ -76,12 +76,7 @@ libraryDependencies ++= Seq(
     "io.sentry" % "sentry-logback" % "1.7.5",
     "com.typesafe.scala-logging" %% "scala-logging" % "3.7.2",
     "org.scalatest" %% "scalatest" % scalatestVersion % "test",
-    "org.scalactic" %% "scalactic" % scalatestVersion % "test",
-    "org.seleniumhq.selenium" % "selenium-java" % "3.7.1" % "test",
-    "org.seleniumhq.selenium" % "htmlunit-driver" % "2.28.1" % "test",
-    "io.github.bonigarcia" % "webdrivermanager" % "1.7.2" % "test",
     "com.gocardless" % "gocardless-pro" % "2.7.0",
-    "com.squareup.okhttp3" % "okhttp" % "3.4.2" % "test",
     "org.scalaz" %% "scalaz-core" % "7.2.7",
     "org.pegdown" % "pegdown" % "1.6.0",
     "com.amazonaws" % "aws-java-sdk-sqs" % "1.11.564",
@@ -105,7 +100,7 @@ traceLevel in Test := 0
 
 testResultLogger in Test := new ScalaTestWithExitCode
 
-javaOptions in Test += "-Dconfig.file=test/acceptance/conf/acceptance-test.conf"
+javaOptions in Test += "-Dconfig.file=test/conf/test.conf"
 
 resolvers ++= Seq(
     "Guardian Github Releases" at "https://guardian.github.io/maven/repo-releases",
@@ -141,6 +136,4 @@ javaOptions in Universal ++= Seq(
 
 addCommandAlias("devrun", "run  9200")
 addCommandAlias("prodrun", "run 9200")
-addCommandAlias("fast-test", "testOnly -- -l AcceptanceTest")
-addCommandAlias("acceptance-test", "testOnly -- -n AcceptanceTest")
 addCommandAlias("play-artifact", "riffRaffNotifyTeamcity")
