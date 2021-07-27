@@ -21,14 +21,14 @@ final class OAuthActions(
 
   def loginAction()(implicit request: RequestHeader) = startGoogleLogin()
 
-  val loginTarget = routes.OAuth.loginAction()
+  val loginTarget = routes.OAuth.loginAction
   lazy val groupChecker = Config.googleGroupChecker
   type GoogleAuthRequest[A] = AuthenticatedRequest[A, googleauth.UserIdentity]
 
   val GoogleAuthAction: ActionBuilder[GoogleAuthRequest, AnyContent] = new AuthAction(authConfig, loginTarget, bodyParser)
 
-  override val failureRedirectTarget: Call = routes.Homepage.index()
-  override val defaultRedirectTarget: Call = routes.OAuth.loginAction()
+  override val failureRedirectTarget: Call = routes.Homepage.index
+  override val defaultRedirectTarget: Call = routes.OAuth.loginAction
 
   val GoogleAuthenticatedStaffAction = NoCacheAction andThen GoogleAuthAction
 
