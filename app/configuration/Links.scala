@@ -34,7 +34,7 @@ object ProfileLinks {
   val commentActivity = Links(s"$identityUrl/user/id/", "Comment activity")
   val editProfile = Links(s"$identityUrl/public/edit", "Edit profile")
   val emailPreferences = Links(s"$identityUrl/email-prefs", "Email preferences")
-  val changePassword = Links(s"$identityUrl/password/change", "Change password")
+  val changePassword = Links(s"$identityUrl/reset", "Change password")
   val signOut = Links(s"$identityUrl/signout", "Sign out")
 
   val popupLinks = Seq(commentActivity, editProfile, emailPreferences, changePassword, signOut)
