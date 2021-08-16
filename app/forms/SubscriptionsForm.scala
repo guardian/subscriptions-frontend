@@ -92,7 +92,7 @@ class SubscriptionsForm(catalog: Catalog) {
     }
   }
 
-  def bindFromRequest(implicit r: Request[AnyContent]): Seq[FormError] \/ SubscribeRequest = {
+  def bindFromRequest(implicit r: Request[AnyContent], formBinding: FormBinding): Seq[FormError] \/ SubscribeRequest = {
     (subsForm.bindFromRequest().asEither, digipackForm.bindFromRequest().asEither, paperForm.bindFromRequest().asEither) match {
       case(Right(a), Right(d), Left(_)) => toSubscribeRequest(a,d)
       case(Right(a), Left(_), Right(p)) => toSubscribeRequest(a,p)

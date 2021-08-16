@@ -6,7 +6,7 @@ GET         /robots.txt                      controllers.CachedAssets.at(path="/
 GET         /favicon.ico                     controllers.CachedAssets.busted(path="images/favicons/32x32.ico")
 
 # Editions homepage
-GET         /                                controllers.Homepage.index
+GET         /                                controllers.Homepage.index()
 
 # Health check
 GET         /healthcheck                     controllers.Management.healthcheck
@@ -14,7 +14,7 @@ GET         /healthcheck                     controllers.Management.healthcheck
 GET         /management/manifest             controllers.Management.manifest
 
 # Digital pack
-GET         /digital                         controllers.DigitalPack.redirect
+GET         /digital                         controllers.DigitalPack.redirect()
 GET         /:code/digital                   controllers.DigitalPack.landingPage(code: String)
 
 # Checkout AJAX endpoints
@@ -32,15 +32,15 @@ GET         /checkout                        controllers.Checkout.renderCheckout
 GET         /checkout/:forThisPlan           controllers.Checkout.renderCheckout(countryGroup: String ?= CountryGroup.UK.id, promoCode: Option[PromoCode], supplierCode: Option[SupplierCode], forThisPlan: String)
 
 # collection and delivery
-GET         /collection/paper-digital        controllers.Shipping.viewCollectionPaperDigital
-GET         /collection/paper                controllers.Shipping.viewCollectionPaper
-GET         /delivery/paper-digital          controllers.Shipping.viewDeliveryPaperDigital
-GET         /delivery/paper                  controllers.Shipping.viewDeliveryPaper
+GET         /collection/paper-digital        controllers.Shipping.viewCollectionPaperDigital()
+GET         /collection/paper                controllers.Shipping.viewCollectionPaper()
+GET         /delivery/paper-digital          controllers.Shipping.viewDeliveryPaperDigital()
+GET         /delivery/paper                  controllers.Shipping.viewDeliveryPaper()
 GET         /weekly                          controllers.WeeklyLandingPage.index(country: Option[Country], promoCode: Option[PromoCode])
 GET         /weekly/:country                 controllers.WeeklyLandingPage.withCountry(country: String)
 
 # Staff signin (note, done by OAuth, in addition to regular signin)
-GET         /staff/login                     controllers.OAuth.login
+GET         /staff/login                     controllers.OAuth.login()
 GET         /staff/loginAction               controllers.OAuth.loginAction
 GET         /staff/catalog                   controllers.Management.catalog
 GET         /staff/cas                       controllers.CAS.index
@@ -50,12 +50,12 @@ GET         /oauth2callback                  controllers.OAuth.oauth2Callback
 
 # Manage my account
 GET         /manage                          controllers.AccountManagement.manage(subscriptionId: Option[String], errorCode: Option[String], promoCode: Option[PromoCode])
-POST        /manage                          controllers.AccountManagement.processLogin
+POST        /manage                          controllers.AccountManagement.processLogin()
 GET         /manage/suspend                  controllers.AccountManagement.redirect
 POST        /manage/suspend                  controllers.AccountManagement.processSuspension
 GET         /manage/signout                  controllers.AccountManagement.logout
 POST        /manage/renew                    controllers.AccountManagement.processRenewal
-GET         /manage/renew/thank-you          controllers.AccountManagement.renewThankYou
+GET         /manage/renew/thank-you          controllers.AccountManagement.renewThankYou()
 POST        /manage/report-problem           controllers.AccountManagement.reportDeliveryProblem
 
 # Pattern Library
