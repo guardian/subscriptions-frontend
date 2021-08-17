@@ -24,6 +24,7 @@ import model.SubscriptionOps._
 import model.{Renewal, RenewalReads}
 import okhttp3.{Response, Request => OKRequest}
 import org.joda.time.LocalDate.now
+import play.api.data.FormBinding
 import play.api.libs.json._
 import play.api.mvc.{AnyContent, _}
 import utils.TestUsers.PreSigninTestCookie
@@ -75,7 +76,7 @@ class SessionSubscription(authenticationService: AuthenticationService) extends 
 
 }
 
-class ManageDelivery(sessionSubscription: SessionSubscription)(implicit val executionContext: ExecutionContext) extends ContextLogging {
+class ManageDelivery(sessionSubscription: SessionSubscription)(implicit val executionContext: ExecutionContext, formBinding: FormBinding) extends ContextLogging {
 
   import play.api.mvc.Results._
 
@@ -422,7 +423,7 @@ class AccountManagement(
     SessionSubscription.clear(Redirect(ProfileLinks.signOut.href, SEE_OTHER))
   }
 
-  def processLogin: Action[AnyContent] = accountManagementAction.async { implicit request =>
+  def processLogin(): Action[AnyContent] = accountManagementAction.async { implicit request =>
     val loginRequest = AccountManagementLoginForm.mappings.bindFromRequest().value
     val promoCode = loginRequest.flatMap(_.promoCode).map(NormalisedPromoCode.safeFromString)
     def loginError(errorMessage: String) = Redirect(routes.AccountManagement.manage(None, None, promoCode)).flashing(
@@ -449,7 +450,7 @@ class AccountManagement(
     manageWeekly.renew
   }
 
-  def renewThankYou: Action[AnyContent] = accountManagementAction.async { implicit request =>
+  def renewThankYou(): Action[AnyContent] = accountManagementAction.async { implicit request =>
     implicit val resolution: TouchpointBackends.Resolution = touchpointBackends.forRequest(PreSigninTestCookie, request.cookies)
     manageWeekly.renewThankYou
   }

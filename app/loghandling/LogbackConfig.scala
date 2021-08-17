@@ -66,13 +66,13 @@ object LogbackConfig {
             lb.addAppender(appender)
             lb.info("Kinesis logging - Configured Logback")
           case _ =>
-            PlayLogger.info("Kinesis logging failed - not running using logback")
+            PlayLogger(this.getClass).info("Kinesis logging failed - not running using logback")
         }
       } catch {
-        case ex: Throwable => PlayLogger.info(s"Kinesis logging failed with exception: $ex")
+        case ex: Throwable => PlayLogger(this.getClass).info(s"Kinesis logging failed with exception: $ex")
       }
     } else {
-      PlayLogger.info("Kinesis logging not enabled by default (e.g. DEV mode)")
+      PlayLogger(this.getClass).info("Kinesis logging not enabled by default (e.g. DEV mode)")
     }
   }
 

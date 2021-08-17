@@ -23,7 +23,7 @@ class DigitalPack(touchpointBackend: TouchpointBackend, commonActions: CommonAct
     Redirect(routes.DigitalPack.landingPage(digitalEdition.id).url, queryString, SEE_OTHER)
   }
 
-  def redirect = NoCacheAction { implicit request =>
+  def redirect() = NoCacheAction { implicit request =>
     // Use hint from 'edition' query parameter if present, else use GEO-IP
     request.getQueryString(queryParamHint).flatMap(getById).map(redirectResult) getOrElse {
       val countryGroup = request.getFastlyCountryGroup.getOrElse(UK) // UK fallback for when no GEO-IP (e.g test env)

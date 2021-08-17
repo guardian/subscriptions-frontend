@@ -61,7 +61,6 @@ libraryDependencies ++= Seq(
   "com.fasterxml.jackson.core" % "jackson-databind" % "2.10.5.1"
 )
 libraryDependencies ++= Seq(
-    cache,
     ws,
     filters,
     jodaForms,

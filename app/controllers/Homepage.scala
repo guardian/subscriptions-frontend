@@ -16,7 +16,7 @@ class Homepage(commonActions: CommonActions, override protected val controllerCo
 
   import commonActions._
 
-  def index = NoCacheAction { implicit request =>
+  def index() = NoCacheAction { implicit request =>
     val countryGroup = request.getFastlyCountryGroup.getOrElse(CountryGroup.UK)
     val digitalEdition = getById(countryGroup.id).getOrElse(INT)
     Redirect(routes.Homepage.landingPage(digitalEdition.id).url, request.queryString, SEE_OTHER)

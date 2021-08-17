@@ -15,7 +15,7 @@ class OAuth (val wsClient: WSClient, commonActions: CommonActions, oAuthActions:
   import commonActions._
 
   implicit val iWsClient: WSClient = wsClient
-  def login = NoCacheAction { request =>
+  def login() = NoCacheAction { request =>
     val flashMsgOpt = request.flash.get("error").map(FlashMessage.error)
     Ok(views.html.staff.unauthorised(flashMsgOpt))
   }

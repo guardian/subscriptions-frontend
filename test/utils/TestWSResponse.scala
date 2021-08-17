@@ -5,6 +5,7 @@ import akka.util.ByteString
 import play.api.libs.json.{JsNull, JsValue}
 import play.api.libs.ws.{WSCookie, WSResponse}
 
+import java.net.URI
 import scala.xml.{Elem, XML}
 
 case class TestWSResponse (
@@ -17,6 +18,8 @@ case class TestWSResponse (
     ) extends WSResponse {
 
   def underlying[T]: T = ???
+
+  override def uri: URI = ???
 
   def xml: Elem = XML.loadString(body)
 

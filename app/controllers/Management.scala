@@ -7,7 +7,7 @@ import app.BuildInfo
 import com.github.nscala_time.time.Imports._
 import com.gu.monitoring.CloudWatchHealth
 import com.typesafe.scalalogging.LazyLogging
-import play.api.Logger._
+import play.api.Logger
 import play.api.mvc._
 import services.TouchpointBackends
 import views.support.Catalog._
@@ -59,7 +59,7 @@ class Management(actorSystem: ActorSystem, fBackendFactory: TouchpointBackends, 
     Cached(1) {
       tests.fold(
         errors => {
-          errors.list.toList.foreach(warn(_))
+          errors.list.toList.foreach(Logger(this.getClass).warn(_))
           ServiceUnavailable("Service Unavailable")
         },
         _ => Ok("OK")

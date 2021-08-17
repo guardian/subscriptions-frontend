@@ -17,8 +17,6 @@ object Config {
   val appName = "subscriptions-frontend"
   val config = ConfigFactory.load()
 
-  val playSecret = config.getString("play.crypto.secret")
-
   lazy val googleGroupChecker = googleGroupCheckerFor(config)
 
   val stage = config.getString("stage")

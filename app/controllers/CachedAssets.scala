@@ -30,7 +30,7 @@ class CachedAssets(assets: Assets, override protected val controllerComponents: 
   def at(path: String, file: String, aggressiveCaching: Boolean = false) = Action.async { request =>
     assets.at(path, file, aggressiveCaching).apply(request).recover {
       case e: RuntimeException => {
-        Logger.warn(s"Asset run time exception for path $path $file. Does this file exist?", e)
+        Logger(this.getClass).warn(s"Asset run time exception for path $path $file. Does this file exist?", e)
         Cached(NotFound)
       }
     }.map { result =>
