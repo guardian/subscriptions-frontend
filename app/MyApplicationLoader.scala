@@ -31,7 +31,7 @@ class MyApplicationLoader extends ApplicationLoader {
       new MyComponents(context).application
     } catch {
       case e: Throwable =>
-        SafeLogger.error(scrub"Failed to load application due to $e")
+        SafeLogger.error(scrub"Failed to load application due to", e)
         throw e
     }
   }
