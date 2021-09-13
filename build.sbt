@@ -37,7 +37,7 @@ lazy val root = (project in file(".")).enablePlugins(
       "com.gu.memsub.Subscription.ProductRatePlanId"
   ))
 
-scalaVersion := "2.12.10"
+scalaVersion := "2.12.14"
 scalacOptions ++= Seq("-feature")
 
 val scalatestVersion = "3.0.4"
