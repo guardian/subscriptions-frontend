@@ -30,14 +30,14 @@ object MemSub {
         c.getString("client.id"),
         c.getString("client.secret"),
         c.getString("callback"),
-        GuardianAppsDomain,        // Google App domain to restrict login
+        List(GuardianAppsDomain),        // Google App domain to restrict login
         antiForgeryChecker = AntiForgeryChecker.borrowSettingsFromPlay(httpConfiguration)
       )
     }
 
     def googleGroupCheckerFor(config: Config): GoogleGroupChecker = {
       val con = config.getConfig("google.directory.service_account")
-      new GoogleGroupChecker(directoryServiceAccount = GoogleServiceAccount(
+      new GoogleGroupChecker(googleServiceAccount = GoogleServiceAccount(
         email = con.getString("id"),
         privateKey = ServiceAccount.PrivateKey,
         impersonatedUser = con.getString("email")

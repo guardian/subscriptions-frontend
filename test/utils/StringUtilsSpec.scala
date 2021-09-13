@@ -1,9 +1,9 @@
 package utils
 
-import org.scalatest.FreeSpec
 import StringUtils._
+import org.scalatest.freespec.AnyFreeSpec
 
-class StringUtilsSpec extends FreeSpec {
+class StringUtilsSpec extends AnyFreeSpec {
   "slugify" - {
     "normalize accented characters" in {
       assert(slugify("ÀÁÂÃÄÅÇÈÉÊËÌÍÎÏÑÒÓÔÕÖÙÚÛÜÝß") == "aaaaaaceeeeiiiinooooouuuuy")

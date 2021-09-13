@@ -40,7 +40,7 @@ lazy val root = (project in file(".")).enablePlugins(
 scalaVersion := "2.12.14"
 scalacOptions ++= Seq("-feature")
 
-val scalatestVersion = "3.0.4"
+val scalatestVersion = "3.2.9"
 val jacksonVersion = "2.10.0"
 
 addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full) // for simulacrum
@@ -88,7 +88,6 @@ libraryDependencies ++= Seq(
     "com.fasterxml.jackson.datatype" % "jackson-datatype-jdk8" % jacksonVersion, //added explicitly to avoid snyk vulnerability
     "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" % jacksonVersion, //added explicitly to avoid snyk vulnerability
     "ch.qos.logback" % "logback-classic" % "1.2.3", //-- added explicitly - snyk report avoid logback vulnerability
-    "org.scala-lang" % "scala-compiler" % "2.11.12",
     "org.bouncycastle" % "bcprov-jdk15on" % "1.69" // https://snyk.io/vuln/SNYK-JAVA-ORGBOUNCYCASTLE-1035561
 )
 
