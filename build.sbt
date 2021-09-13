@@ -47,7 +47,7 @@ addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.fu
 
 libraryDependencies ++= Seq(
   "com.gu" %% "ophan-event-model" % "0.0.17" excludeAll ExclusionRule(organization = "com.typesafe.play"),
-  "com.gu" %% "fezziwig" % "1.3",
+  "com.gu" %% "fezziwig" % "1.6",
   "com.typesafe.play" %% "play-json" % "2.7.4",
   "io.circe" %% "circe-core" % "0.12.1",
   "ch.qos.logback" % "logback-classic" % "1.2.3",
@@ -55,7 +55,7 @@ libraryDependencies ++= Seq(
   "com.squareup.okhttp3" % "okhttp" % "3.9.0",
   "com.typesafe.scala-logging" %% "scala-logging" % "3.9.2",
   "org.typelevel" %% "simulacrum" % "1.0.1",
-  "org.typelevel" %% "cats-core" % "2.1.1",
+  "org.typelevel" %% "cats-core" % "2.6.1",
   "com.amazonaws" % "aws-java-sdk-kinesis" % "1.11.465",
   "com.gu" %% "thrift-serializer" % "4.0.3",
   "com.fasterxml.jackson.core" % "jackson-databind" % "2.10.5.1"
@@ -66,11 +66,11 @@ libraryDependencies ++= Seq(
     jodaForms,
     PlayImport.specs2 % "test",
     "com.gu" %% "membership-common" % "0.589",
-    "com.gu.identity" %% "identity-auth-play" % "3.195",
+    "com.gu.identity" %% "identity-auth-play" % "3.248",
     "com.gu" %% "identity-test-users" % "0.6",
-    "com.gu" %% "play-googleauth" % "0.7.6",
+    "com.gu.play-googleauth" %% "play-v28" % "2.1.1",
     "com.gu" %% "identity-test-users" % "0.6",
-    "com.gu" %% "content-authorisation-common" % "0.4",
+    "com.gu" %% "content-authorisation-common" % "0.6",
     "com.github.nscala-time" %% "nscala-time" % "2.16.0",
     "io.sentry" % "sentry-logback" % "1.7.5",
     "com.typesafe.scala-logging" %% "scala-logging" % "3.7.2",
@@ -89,7 +89,7 @@ libraryDependencies ++= Seq(
     "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" % jacksonVersion, //added explicitly to avoid snyk vulnerability
     "ch.qos.logback" % "logback-classic" % "1.2.3", //-- added explicitly - snyk report avoid logback vulnerability
     "org.scala-lang" % "scala-compiler" % "2.11.12",
-    "org.bouncycastle" % "bcprov-jdk15on" % "1.60" // https://snyk.io/vuln/SNYK-JAVA-ORGBOUNCYCASTLE-32412
+    "org.bouncycastle" % "bcprov-jdk15on" % "1.69" // https://snyk.io/vuln/SNYK-JAVA-ORGBOUNCYCASTLE-1035561
 )
 
 testOptions in Test ++= Seq(
