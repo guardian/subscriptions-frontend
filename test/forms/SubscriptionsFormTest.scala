@@ -6,10 +6,10 @@ import com.gu.memsub.promo.PromoCode
 import com.gu.memsub.Address
 import forms.SubscriptionsForm._
 import model._
-import org.scalatest.FreeSpec
+import org.scalatest.freespec.AnyFreeSpec
 import play.api.data.Forms._
 
-class SubscriptionsFormTest extends FreeSpec {
+class SubscriptionsFormTest extends AnyFreeSpec {
   val formData = Map(
     "first" -> "first",
     "last" -> "last",

@@ -8,12 +8,12 @@ object IdUserOps {
 
     def billingAddress: Address = {
       Address(
-        lineOne = u.privateFields.billingAddress1.getOrElse(""),
-        lineTwo = u.privateFields.billingAddress2.getOrElse(""),
-        town = u.privateFields.billingAddress3.getOrElse(""),
-        countyOrState = u.privateFields.billingAddress4.getOrElse(""),
-        postCode = u.privateFields.billingPostcode.getOrElse(""),
-        countryName = u.privateFields.billingCountry.getOrElse("")
+        lineOne = "",
+        lineTwo = "",
+        town = "",
+        countyOrState = "",
+        postCode = "",
+        countryName = ""
       )
     }
 

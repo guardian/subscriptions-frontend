@@ -2,9 +2,10 @@ package utils
 
 import acquisitions.AcquisitionsHelper
 import acquisitions.AcquisitionsHelper._
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class AcquisitionsHelperTest extends FlatSpec with Matchers {
+class AcquisitionsHelperTest extends AnyFlatSpec with Matchers {
 
   val param = ".0ctCmYiGSGqiUFP0eMFobw.1"
 

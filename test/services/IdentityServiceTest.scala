@@ -3,7 +3,8 @@ package services
 import cats.Id
 import com.gu.memsub.Address
 import model.PersonalData
-import org.scalatest.{FreeSpec, Matchers}
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.should.Matchers
 import play.api.http.Status
 import play.api.libs.json._
 import play.api.libs.ws.WSResponse
@@ -11,7 +12,7 @@ import utils.TestIdUser._
 import utils.TestPersonalData.testPersonalData
 import utils.TestWSResponse
 
-class IdentityServiceTest extends FreeSpec with Matchers {
+class IdentityServiceTest extends AnyFreeSpec with Matchers {
   class TestIdentityApiClient extends IdentityApiClient[Id] {
     override def userLookupByCookies: (AccessCredentials.Cookies) => Id[WSResponse] = ???
     override def createGuest: (PersonalData, Option[Address]) => Id[WSResponse] = ???

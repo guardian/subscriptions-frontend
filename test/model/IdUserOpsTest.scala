@@ -17,13 +17,7 @@ class IdUserOpsTest extends Specification {
         statusFields = StatusFields()
       )
 
-    val billingAddress = PrivateFields(
-      billingAddress1 = Some("billingAddress1"),
-      billingAddress2 = Some("billingAddress2"),
-      billingAddress3 = Some("billingAddress3"),
-      billingAddress4 = Some("billingAddress4"),
-      billingCountry = Some("billingCountry"),
-      billingPostcode = Some("billingPostcode"))
+    val billingAddress = PrivateFields()
 
      val deliveryAddress = PrivateFields(
       address1 = Some("address1"),
@@ -38,12 +32,12 @@ class IdUserOpsTest extends Specification {
 
     "pull through billing details if present and a blank address if not" in {
       withBillingAddress.billingAddress.should_===(Address(
-        billingAddress.billingAddress1.get,
-        billingAddress.billingAddress2.get,
-        billingAddress.billingAddress3.get,
-        billingAddress.billingAddress4.get,
-        billingAddress.billingPostcode.get,
-        billingAddress.billingCountry.get
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
       ))
 
       withoutBillingAddress.billingAddress.should_===(Address(
