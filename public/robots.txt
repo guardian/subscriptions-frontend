@@ -7,5 +7,6 @@ Disallow: /management/manifest
 Disallow: /p/*
 Disallow: /patterns
 Disallow: /test-users
+Disallow: /collection/paper-digital
 
 Allow: /
