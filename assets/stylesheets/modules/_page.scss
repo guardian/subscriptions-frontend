@@ -52,10 +52,10 @@
 
 .page-header {
     padding-top: $gs-baseline/2;
-    margin-bottom: $gs-baseline*2;
+    margin-bottom: $gs-baseline;
 
     @include mq(tablet) {
-        margin-bottom: $gs-baseline*4;
+        margin-bottom: $gs-baseline*2;
     }
 }
 .page-header__title {

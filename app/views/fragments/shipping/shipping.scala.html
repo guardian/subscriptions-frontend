@@ -1,5 +1,6 @@
 @import utils.Prices._
 @(subscription: model.Subscriptions.SubscriptionProduct)
+<a class="paper-promo__link" href="@subscription.stepsFooter.url">@subscription.stepsFooter.text</a>
 <section class="section-slice">
     <h2 class="page-heading">@subscription.stepsHeading</h2>
     <ol class="steps">
@@ -7,7 +8,6 @@
         <li class="steps__item">@step</li>
     }
     </ol>
-    <a class="u-link" href="@subscription.stepsFooter.url">@subscription.stepsFooter.text</a>
 </section>
 
 <section class="section-slice">

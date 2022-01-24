@@ -154,6 +154,19 @@
 $step-size: 40px;
 $step-size-tablet: 60px;
 
+.paper-promo__link {
+    color: guss-colour(guardian-brand);
+    display: block;
+    @include font-size(18px, 22px);
+    text-decoration: underline;
+    padding-bottom: $gs-baseline;
+
+    @include mq(tablet) {
+        @include font-size(18px, 22px);
+        max-width: gs-span(10);
+    }
+}
+
 .steps {
     @extend .o-inline-list;
     @include mq(tablet) {
