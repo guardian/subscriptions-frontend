@@ -45,7 +45,9 @@ object Subscriptions {
     override val insideM25 = true
     override val id = Delivery.name
     val stepsHeading = "This is how direct delivery works"
-    val stepsFooter  = SubscriptionProductFooter("Not within the M25? Click here for our voucher scheme", "https://sub.thegulocal.com/p/Waitrose#voucher")
+    val stepsFooter  = SubscriptionProductFooter(
+      "Not within the M25? Click here for our voucher scheme", "https://subscribe.theguardian.com/p/Waitrose#voucher"
+    )
     val steps = Seq(
       "Pick the perfect package for you",
       "Confirm your address is within the M25",
@@ -64,7 +66,9 @@ object Subscriptions {
     override val insideM25 = false
     override val id = Voucher.name
     val stepsHeading = "This is how the voucher scheme works"
-    val stepsFooter  = SubscriptionProductFooter("For Home Delivery within the M25 click here", "https://sub.thegulocal.com/p/Waitrose#delivery")
+    val stepsFooter  = SubscriptionProductFooter(
+      "For Home Delivery within the M25 click here", "https://subscribe.theguardian.com/p/Waitrose#delivery"
+    )
     val steps = Seq(
       "Pick the perfect package for you",
       "We'll post personalised vouchers for the newspapers in your package",
